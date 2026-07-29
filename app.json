@@ -1,0 +1,45 @@
+{
+  "expo": {
+    "name": "NBA GM",
+    "slug": "nba-gm-mobile",
+    "version": "1.0.0",
+    "orientation": "default",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "dark",
+    "backgroundColor": "#020617",
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.thiagonx.nbagm"
+    },
+    "android": {
+      "package": "com.thiagonx.nbagm",
+      "adaptiveIcon": {
+        "backgroundColor": "#020617",
+        "foregroundImage": "./assets/android-icon-foreground.png",
+        "monochromeImage": "./assets/android-icon-monochrome.png"
+      },
+      "predictiveBackGestureEnabled": false
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    },
+    "plugins": [
+      "expo-image",
+      "expo-font",
+      [
+        "expo-splash-screen",
+        {
+          "image": "./assets/splash-icon.png",
+          "imageWidth": 180,
+          "resizeMode": "contain",
+          "backgroundColor": "#020617"
+        }
+      ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "5c43260f-ab77-47d3-b006-58ff8d3740d6"
+      }
+    }
+  }
+}

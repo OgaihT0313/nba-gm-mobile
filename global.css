@@ -1,0 +1,10 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Default accent (neutral blue) before a team is chosen — mirrors the web app's
+   fallback. Overridden per-team at runtime via NativeWind vars(). */
+:root {
+  --accent: #38bdf8;
+  --accent-dark: #0284c7;
+}
