@@ -15,7 +15,7 @@ interface FiredOverlayProps {
 
 const FiredOverlay: React.FC<FiredOverlayProps> = ({ visible, note, seasons, titles, onRestart }) => (
   <Modal visible={visible} animationType="fade" transparent statusBarTranslucent>
-    <View className="flex-1 items-center justify-center px-6 bg-slate-950/95">
+    <View className="flex-1 items-center justify-center px-6 bg-ink/95">
       <View className="w-full max-w-lg items-center gap-5">
         <Text className="text-[10px] font-black uppercase tracking-[3px] text-red-500">Diretoria</Text>
         <Text className="text-5xl font-display uppercase tracking-tighter text-white text-center leading-[52px]">

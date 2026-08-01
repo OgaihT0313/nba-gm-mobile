@@ -1,24 +1,21 @@
 import React, { useMemo } from 'react';
-import { View, Text, ScrollView } from 'react-native';
+import { View, Text } from 'react-native';
 import { Image } from 'expo-image';
+
 import { Player, Team, PlayerSeasonStats } from '../types';
-import { getPlayerImageUrl, getTeamLogoUrl, PLAYER_PLACEHOLDER_SVG } from '../constants';
+import { getPlayerImageUrl, getTeamLogoUrl, PLAYER_PLACEHOLDER_SVG, getTeamNickname, getTeamTricode, attributeColor } from '../constants';
 import { useTheme } from '../src/theme/ThemeProvider';
-import PageHeader from '../components/PageHeader';
-import Card from '../components/Card';
+import { COLORS, INK, RADIUS } from '../src/theme/tokens';
+import Screen, { HeroContent, Body } from '../components/ui/Screen';
+import { Panel, MonoLabel, Eyebrow, HeroTitle, Stat, StatTile } from '../components/ui/kit';
 
-// RN port. The web's editorial hero is a side-by-side 380px band; on a phone it
-// stacks (photo above, name/stat line below). Same heroNameSize logic keeps a
-// long surname on one line instead of fracturing it.
-const fmt = (n: number) => n.toFixed(1);
+// The deep version of the leaders list: the scoring leader gets the hero (this
+// is the app's one editorial moment outside the champion screen), then a top-5
+// board per category. The compact one-per-category block lives in
+// components/LeadersPanel and is what the Classificação tab uses.
+
 const NBA_FALLBACK = 'https://a.espncdn.com/i/teamlogos/nba/500/nba.png';
-
-const heroNameSize = (name: string): string => {
-  const longest = Math.max(...name.split(' ').map((w) => w.length));
-  if (longest >= 11) return 'text-3xl';
-  if (longest >= 9) return 'text-4xl';
-  return 'text-5xl';
-};
+const fmt = (n: number) => n.toFixed(1);
 
 type StatKey = keyof Pick<PlayerSeasonStats, 'ppg' | 'rpg' | 'apg' | 'spg' | 'bpg'>;
 const CATEGORIES: { key: StatKey; label: string; abbr: string }[] = [
@@ -40,7 +37,7 @@ const LeagueLeaders: React.FC<{ players: { [key: string]: Player }; teams: Team[
 
   const withStats = useMemo<Player[]>(
     () => (Object.values(players) as Player[]).filter((p) => !!p.seasonStats && p.seasonStats.gp > 0),
-    [players]
+    [players],
   );
 
   const leaderboards = useMemo(
@@ -48,107 +45,133 @@ const LeagueLeaders: React.FC<{ players: { [key: string]: Player }; teams: Team[
       ...cat,
       top: [...withStats].sort((a, b) => b.seasonStats![cat.key] - a.seasonStats![cat.key]).slice(0, 5),
     })),
-    [withStats]
+    [withStats],
   );
 
   // Pre-season: no games yet → fall back to a ratings list.
   if (withStats.length === 0) {
-    const topByOvr = (Object.values(players) as Player[]).filter((p) => !p.retired && !p.prospect).sort((a, b) => b.ovr - a.ovr).slice(0, 5);
+    const topByOvr = (Object.values(players) as Player[])
+      .filter((p) => !p.retired && !p.prospect)
+      .sort((a, b) => b.ovr - a.ovr)
+      .slice(0, 8);
     return (
-      <ScrollView className="flex-1">
-        <View className="px-4 py-6 gap-4">
-          <PageHeader title="Líderes" />
-          <Text className="text-sm text-slate-500 italic">
+      <Screen heroHeight={132}>
+        <HeroContent>
+          <Eyebrow>Líderes</Eyebrow>
+          <HeroTitle size={28} style={{ marginTop: 9 }}>Antes do apito</HeroTitle>
+        </HeroContent>
+        <Body top={16}>
+          <Text style={{ fontSize: 11.5, lineHeight: 17, color: INK.body, paddingHorizontal: 4 }}>
             As lideranças estatísticas aparecem assim que os primeiros jogos forem simulados. Por enquanto, os mais bem
             avaliados da liga:
           </Text>
           {topByOvr.map((p, i) => (
-            <View key={p.id} className="bg-slate-900/50 p-4 rounded-2xl border border-slate-800 flex-row items-center gap-3">
-              <Text className="text-2xl font-black text-slate-700 italic">#{i + 1}</Text>
-              <View className="flex-1 min-w-0">
-                <Text className="font-bold text-sm text-white" numberOfLines={1}>{p.name}</Text>
-                <Text className="text-[10px] text-slate-500 font-bold uppercase">{p.ovr} OVR</Text>
+            <Panel key={p.id} bar={attributeColor(p.ovr)} padding={11}>
+              <View className="flex-row items-center" style={{ gap: 11 }}>
+                <MonoLabel size={11} color={INK.faint} style={{ width: 18, letterSpacing: 0 }}>{i + 1}</MonoLabel>
+                <Image
+                  source={{ uri: getPlayerImageUrl(p) }}
+                  placeholder={{ uri: PLAYER_PLACEHOLDER_SVG }}
+                  style={{ width: 32, height: 32, borderRadius: RADIUS.pill, backgroundColor: COLORS.line }}
+                  contentFit="cover"
+                />
+                <View style={{ flex: 1 }}>
+                  <Text className="font-bold text-white" style={{ fontSize: 12 }} numberOfLines={1}>{p.name}</Text>
+                  <MonoLabel size={9.5} color={INK.meta} style={{ marginTop: 2, letterSpacing: 0 }}>
+                    {getTeamTricode(teamOf.get(p.id))}
+                  </MonoLabel>
+                </View>
+                <Stat size={17} color={attributeColor(p.ovr)}>{p.ovr}</Stat>
               </View>
-            </View>
+            </Panel>
           ))}
-        </View>
-      </ScrollView>
+        </Body>
+      </Screen>
     );
   }
 
   const scoringLeader = leaderboards[0].top[0];
   const leaderTeam = teamOf.get(scoringLeader.id);
   const ls = scoringLeader.seasonStats!;
-  const [first, ...rest] = scoringLeader.name.split(' ');
+  const parts = scoringLeader.name.split(' ');
+  const first = parts[0];
+  const last = parts.slice(1).join(' ') || parts[0];
 
   return (
-    <ScrollView className="flex-1">
-      <View className="px-4 py-6 gap-6">
-        <PageHeader title="Líderes" />
+    <Screen heroHeight={300}>
+      <HeroContent>
+        <Eyebrow>Cestinha da liga · {ls.gp} jogos</Eyebrow>
 
-        {/* Scoring leader hero */}
-        <View className="bg-slate-900 rounded-hero border border-slate-800 overflow-hidden">
-          <View className="h-44 items-center justify-end bg-slate-800/40">
-            <Image
-              source={{ uri: getPlayerImageUrl(scoringLeader) }}
-              placeholder={{ uri: PLAYER_PLACEHOLDER_SVG }}
-              style={{ width: 170, height: 176 }}
-              contentFit="contain"
-            />
-          </View>
-          <View className="p-5 gap-3">
-            <View className="flex-row items-center gap-2 flex-wrap">
-              <Text className="text-white text-[10px] font-black px-3 py-1 rounded-full uppercase tracking-widest" style={{ backgroundColor: accent.primary }}>
-                Cestinha da Liga
-              </Text>
-              <Text className="text-slate-500 font-bold text-xs uppercase tracking-widest">{ls.gp} jogos</Text>
-            </View>
-            <Text className={`${heroNameSize(scoringLeader.name)} font-black tracking-tighter uppercase italic text-white`}>
-              {first}
-            </Text>
-            <Text className={`${heroNameSize(scoringLeader.name)} font-black tracking-tighter uppercase italic`} style={{ color: accent.primary, marginTop: -8 }}>
-              {rest.join(' ')}
-            </Text>
-            <View className="flex-row items-center gap-3">
-              {leaderTeam ? <Image source={{ uri: getTeamLogoUrl(leaderTeam) }} placeholder={{ uri: NBA_FALLBACK }} style={{ width: 32, height: 32 }} contentFit="contain" /> : null}
-              <Text className="font-bold text-base uppercase italic tracking-tighter text-white flex-1" numberOfLines={1}>{leaderTeam?.name}</Text>
-            </View>
-            <View className="flex-row gap-7 pt-1">
-              {([['PPG', ls.ppg], ['RPG', ls.rpg], ['APG', ls.apg]] as [string, number][]).map(([label, val]) => (
-                <View key={label}>
-                  <Text className="text-3xl font-black text-white">{fmt(val)}</Text>
-                  <Text className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">{label}</Text>
-                </View>
-              ))}
+        {/* The one editorial moment in the app, so the headshot is shown the way
+            it was shot: `contain` on the full 1040x760 bust, not cropped into an
+            avatar circle. The name sits beside it and the photo is allowed to
+            run past the hero band's bottom edge. */}
+        <View className="flex-row items-end" style={{ marginTop: 10 }}>
+          <View style={{ flex: 1, paddingBottom: 12 }}>
+            <HeroTitle size={30} numberOfLines={1} adjustsFontSizeToFit>{first}</HeroTitle>
+            <HeroTitle size={30} numberOfLines={1} adjustsFontSizeToFit style={{ marginTop: 1 }}>{last}</HeroTitle>
+            <View className="flex-row items-center" style={{ gap: 8, marginTop: 9 }}>
+              {leaderTeam ? (
+                <Image source={{ uri: getTeamLogoUrl(leaderTeam) }} placeholder={{ uri: NBA_FALLBACK }} style={{ width: 24, height: 24 }} contentFit="contain" />
+              ) : null}
+              <MonoLabel size={10} color="rgba(255,255,255,0.7)" style={{ letterSpacing: 0.4 }} numberOfLines={1}>
+                {getTeamNickname(leaderTeam)}
+              </MonoLabel>
             </View>
           </View>
+          <Image
+            source={{ uri: getPlayerImageUrl(scoringLeader) }}
+            placeholder={{ uri: PLAYER_PLACEHOLDER_SVG }}
+            style={{ width: 168, height: 174, marginRight: -14, marginBottom: -6 }}
+            contentFit="contain"
+          />
+        </View>
+      </HeroContent>
+
+      <Body top={18}>
+        <View className="flex-row" style={{ gap: 10 }}>
+          <StatTile label="PPG" value={fmt(ls.ppg)} color={accent.primary} bar={accent.primary} />
+          <StatTile label="RPG" value={fmt(ls.rpg)} />
+          <StatTile label="APG" value={fmt(ls.apg)} />
         </View>
 
-        {/* Category leaderboards */}
         {leaderboards.map((board) => (
-          <Card key={board.key} className="gap-3">
-            <View className="flex-row items-baseline justify-between">
-              <Text className="font-black text-sm uppercase tracking-tight text-white">{board.label}</Text>
-              <Text className="text-[10px] font-bold text-slate-600 uppercase tracking-widest">{board.abbr}</Text>
+          <Panel key={board.key} padding={13}>
+            <View className="flex-row items-baseline justify-between" style={{ marginBottom: 11 }}>
+              <MonoLabel>{board.label}</MonoLabel>
+              <MonoLabel size={9} color={INK.faint}>{board.abbr}</MonoLabel>
             </View>
-            {board.top.map((p, i) => {
-              const t = teamOf.get(p.id);
-              return (
-                <View key={p.id} className="flex-row items-center gap-3">
-                  <Text className="text-sm font-black w-4 text-center" style={{ color: i === 0 ? accent.primary : '#475569' }}>{i + 1}</Text>
-                  <Image source={{ uri: getPlayerImageUrl(p) }} placeholder={{ uri: PLAYER_PLACEHOLDER_SVG }} style={{ width: 32, height: 32, borderRadius: 16, backgroundColor: '#1e293b' }} contentFit="cover" />
-                  <View className="flex-1 min-w-0">
-                    <Text className="text-xs font-bold text-white" numberOfLines={1}>{p.name}</Text>
-                    <Text className="text-[9px] text-slate-500 font-bold uppercase tracking-widest" numberOfLines={1}>{t?.name}</Text>
+            <View style={{ gap: 10 }}>
+              {board.top.map((p, i) => {
+                const t = teamOf.get(p.id);
+                return (
+                  <View key={p.id} className="flex-row items-center" style={{ gap: 10 }}>
+                    <MonoLabel size={10} color={i === 0 ? accent.primary : INK.faint} style={{ width: 14, letterSpacing: 0 }}>
+                      {i + 1}
+                    </MonoLabel>
+                    <Image
+                      source={{ uri: getPlayerImageUrl(p) }}
+                      placeholder={{ uri: PLAYER_PLACEHOLDER_SVG }}
+                      style={{ width: 30, height: 30, borderRadius: RADIUS.pill, backgroundColor: COLORS.line }}
+                      contentFit="cover"
+                    />
+                    <View style={{ flex: 1 }} className="flex-row items-baseline">
+                      <Text className="font-bold text-white" style={{ fontSize: 11.5, flexShrink: 1 }} numberOfLines={1}>
+                        {p.name}
+                      </Text>
+                      <MonoLabel size={9} color={INK.meta} style={{ marginLeft: 6, letterSpacing: 0 }}>
+                        {getTeamTricode(t)}
+                      </MonoLabel>
+                    </View>
+                    <Stat size={14} color={i === 0 ? accent.primary : '#fff'}>{fmt(p.seasonStats![board.key])}</Stat>
                   </View>
-                  <Text className="text-base font-black" style={{ color: i === 0 ? accent.primary : '#ffffff' }}>{fmt(p.seasonStats![board.key])}</Text>
-                </View>
-              );
-            })}
-          </Card>
+                );
+              })}
+            </View>
+          </Panel>
         ))}
-      </View>
-    </ScrollView>
+      </Body>
+    </Screen>
   );
 };
 

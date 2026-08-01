@@ -1,60 +1,56 @@
 import React from 'react';
 import { View, Text } from 'react-native';
 import { CupState, Team } from '../types';
-import Card from './Card';
-import Icon from './Icon';
+import { getTeamNickname } from '../constants';
+import { Panel, MonoLabel, Well, Stat } from './ui/kit';
+import { COLORS, INK } from '../src/theme/tokens';
 
-// RN port of the web's "NBA Cup" panel. The web's `grid-cols-1 sm:grid-cols-2`
-// group grid becomes a two-up wrap (phones only ever saw the single column, but
-// the groups are short enough to pair up at 375px).
+// NBA Cup, on the redesign's surface. Gold is reserved for trophies in this
+// system, so the champion line is the one thing here allowed to use it.
 interface CupPanelProps {
   cup?: CupState;
   teams: Team[];
 }
 
 const CupPanel: React.FC<CupPanelProps> = ({ cup, teams }) => {
-  const teamName = (id?: string | null) => teams.find((t) => t.id === id)?.name;
+  const team = (id?: string | null) => teams.find((t) => t.id === id);
+  const name = (id?: string | null) => getTeamNickname(team(id)) || '—';
 
   return (
-    <Card>
-      <View className="flex-row items-center gap-2.5 mb-4">
-        <Icon name="cup" size={20} color="#fbbf24" />
-        <Text className="font-bold text-lg text-white">NBA Cup</Text>
-      </View>
+    <Panel padding={14}>
+      <MonoLabel size={9} style={{ marginBottom: 10 }}>NBA Cup</MonoLabel>
 
       {cup?.championId ? (
-        <View className="gap-2">
-          <Text className="text-sm text-slate-300">
-            Campeão: <Text className="font-black text-amber-400">{teamName(cup.championId)}</Text>
-          </Text>
+        <View style={{ gap: 6 }}>
+          <View className="flex-row items-baseline" style={{ gap: 8 }}>
+            <MonoLabel size={9} color={INK.meta}>Campeão</MonoLabel>
+            <Stat size={15} color={COLORS.gold}>{name(cup.championId)}</Stat>
+          </View>
           {cup.bracket?.final ? (
-            <Text className="text-[10px] text-slate-500 font-mono uppercase tracking-widest">
-              Final: {cup.bracket.final.m.map((t) => t?.name).join(' vs ')} ({cup.bracket.final.s})
-            </Text>
+            <MonoLabel size={9} color={INK.faint} style={{ letterSpacing: 0 }}>
+              Final: {cup.bracket.final.m.map((t) => getTeamNickname(t ?? undefined)).join(' vs ')} ({cup.bracket.final.s})
+            </MonoLabel>
           ) : null}
         </View>
       ) : cup ? (
         <View className="flex-row flex-wrap justify-between">
           {Object.entries(cup.groups).map(([groupId, teamIds]) => (
-            <View
-              key={groupId}
-              className="w-[48%] mb-2 bg-slate-950/50 rounded-xl p-3 border border-slate-800/60"
-            >
-              <Text className="font-bold text-slate-400 uppercase tracking-widest text-[10px] mb-1">
-                {groupId}
-              </Text>
-              {teamIds.map((id) => (
-                <Text key={id} className="text-slate-300 text-[11px]" numberOfLines={1}>
-                  {teamName(id)}
-                </Text>
-              ))}
-            </View>
+            <Well key={groupId} padding={10} style={{ width: '48.5%', marginBottom: 8 }}>
+              <MonoLabel size={8.5} color={INK.meta}>{groupId}</MonoLabel>
+              <View style={{ marginTop: 4, gap: 1 }}>
+                {teamIds.map((id) => (
+                  <Text key={id} style={{ fontSize: 11, color: COLORS.textSoft }} numberOfLines={1}>
+                    {name(id)}
+                  </Text>
+                ))}
+              </View>
+            </Well>
           ))}
         </View>
       ) : (
-        <Text className="text-slate-500 italic text-sm">Aguardando sorteio dos grupos.</Text>
+        <Text style={{ fontSize: 11.5, color: INK.body }}>Aguardando sorteio dos grupos.</Text>
       )}
-    </Card>
+    </Panel>
   );
 };
 

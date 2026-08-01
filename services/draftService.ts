@@ -122,6 +122,7 @@ const SCOUT_STEP = 0.55;
 // A wider band means less film and more disagreement. Correlating it with age
 // is safe (age is public) and reads true — an 19-year-old is a projection, not
 // a known quantity.
+const MAX_UNCERTAINTY = 12; // randInt(3,10) at its top, +2 for a teenager
 const initialUncertainty = (p: Player) => randInt(3, 10) + (p.age <= 19 ? 2 : 0);
 
 // Triangular noise (mean of two uniforms): usually a small miss, occasionally a
@@ -129,8 +130,18 @@ const initialUncertainty = (p: Player) => randInt(3, 10) + (p.age <= 19 ? 2 : 0)
 const evaluationError = (uncertainty: number) =>
     Math.round(((rand(-1, 1) + rand(-1, 1)) / 2) * uncertainty * 1.4);
 
+const ESTIMATE_FLOOR = 55;
+const ESTIMATE_CEIL = 85;
+
 const noisyEstimate = (p: Player, uncertainty: number) =>
-    clamp(p.ovr + evaluationError(uncertainty), 55, 85);
+    clamp(p.ovr + evaluationError(uncertainty), ESTIMATE_FLOOR, ESTIMATE_CEIL);
+
+// The widest a projected band can ever be plotted. The draft screen draws its
+// rail from these rather than from a guessed 60-99: a band is estimate ±
+// uncertainty, so it reaches below the rating floor, and hardcoding the axis
+// produced a card reading "46-66" against a rail labelled "60 … 99".
+export const PROJECTION_FLOOR = ESTIMATE_FLOOR - MAX_UNCERTAINTY;
+export const PROJECTION_CEIL = ESTIMATE_CEIL + MAX_UNCERTAINTY;
 
 // Potential is a tier, so its fog is a chance of being off by one tier either
 // way rather than a numeric band.

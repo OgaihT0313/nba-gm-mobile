@@ -22,7 +22,7 @@ const POTENTIAL_LABEL: { [key: string]: string } = {
 };
 
 const Tile: React.FC<{ label: string; value: React.ReactNode }> = ({ label, value }) => (
-  <View className="flex-1 bg-slate-800/50 p-3 rounded-2xl border border-slate-700/50 items-center">
+  <View className="flex-1 bg-line p-3 rounded-2xl border border-line/50 items-center">
     <Text className="text-[8px] font-bold text-slate-500 uppercase tracking-widest">{label}</Text>
     <Text className="text-xl font-black text-white">{value}</Text>
   </View>
@@ -39,14 +39,14 @@ const PlayerDetailModal: React.FC<{ player: Player; onClose: () => void }> = ({ 
     <Modal visible transparent animationType="slide" onRequestClose={onClose}>
       <Pressable className="flex-1 bg-black/70 justify-end" onPress={onClose}>
         <Pressable
-          className="bg-slate-900 border border-slate-800 rounded-t-3xl max-h-[90%]"
+          className="bg-panel border border-line rounded-t-3xl max-h-[90%]"
           onPress={(e) => e.stopPropagation()}
         >
           {/* Header */}
-          <View className="h-36 bg-slate-800 rounded-t-3xl items-center justify-end overflow-hidden">
+          <View className="h-36 bg-line rounded-t-3xl items-center justify-end overflow-hidden">
             <Pressable
               onPress={onClose}
-              className="absolute top-3 right-3 z-10 w-8 h-8 rounded-full bg-slate-950/70 border border-slate-700 items-center justify-center"
+              className="absolute top-3 right-3 z-10 w-8 h-8 rounded-full bg-ink/70 border border-line items-center justify-center"
             >
               <Text className="text-slate-300 text-lg leading-5">×</Text>
             </Pressable>
@@ -56,7 +56,7 @@ const PlayerDetailModal: React.FC<{ player: Player; onClose: () => void }> = ({ 
               style={{ width: 130, height: 144 }}
               contentFit="contain"
             />
-            <View className="absolute bottom-3 right-4 bg-slate-950/80 px-3 py-1 rounded-full border border-white/10">
+            <View className="absolute bottom-3 right-4 bg-ink/80 px-3 py-1 rounded-full border border-white/10">
               <Text className="text-sm font-black text-sky-400">{player.ovr} OVR</Text>
             </View>
           </View>
@@ -70,7 +70,7 @@ const PlayerDetailModal: React.FC<{ player: Player; onClose: () => void }> = ({ 
               {/* Draft pedigree, kept for anyone drafted in this save: what the
                   board projected next to what the team actually got. */}
               {player.draftInfo ? (
-                <Text className="text-[9px] font-bold text-slate-600 uppercase tracking-widest mt-1">
+                <Text className="text-[9px] font-bold text-slate-500 uppercase tracking-widest mt-1">
                   Pick #{player.draftInfo.pick} · projetado {player.draftInfo.projected} OVR
                 </Text>
               ) : null}
@@ -101,7 +101,7 @@ const PlayerDetailModal: React.FC<{ player: Player; onClose: () => void }> = ({ 
                     <Text className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Moral</Text>
                     <Text className="text-[11px] font-black uppercase" style={{ color }}>{label} · {m}%</Text>
                   </View>
-                  <View className="h-2 bg-slate-800 rounded-full overflow-hidden">
+                  <View className="h-2 bg-line rounded-full overflow-hidden">
                     <View className="h-full rounded-full" style={{ width: `${m}%`, backgroundColor: color }} />
                   </View>
                 </View>
@@ -116,7 +116,7 @@ const PlayerDetailModal: React.FC<{ player: Player; onClose: () => void }> = ({ 
                 </Text>
                 <View className="flex-row flex-wrap gap-2">
                   {([['PTS', player.seasonStats.ppg], ['REB', player.seasonStats.rpg], ['AST', player.seasonStats.apg], ['MIN', player.seasonStats.mpg], ['ROU', player.seasonStats.spg], ['TOC', player.seasonStats.bpg], ['ERR', player.seasonStats.tpg]] as [string, number][]).map(([label, val]) => (
-                    <View key={label} className="w-[22%] bg-slate-800/50 p-2 rounded-xl border border-slate-700/50 items-center">
+                    <View key={label} className="w-[22%] bg-line p-2 rounded-xl border border-line/50 items-center">
                       <Text className="text-sm font-black text-white">{val.toFixed(1)}</Text>
                       <Text className="text-[8px] font-bold text-slate-500 uppercase tracking-widest">{label}</Text>
                     </View>
@@ -142,7 +142,7 @@ const PlayerDetailModal: React.FC<{ player: Player; onClose: () => void }> = ({ 
                   </View>
                   <View className="flex-row flex-wrap gap-2">
                     {([['PTS', avg.ppg], ['REB', avg.rpg], ['AST', avg.apg], ['ROU', avg.spg], ['TOC', avg.bpg]] as [string, number][]).map(([label, val]) => (
-                      <View key={label} className="w-[22%] bg-slate-800/50 p-2 rounded-xl border border-slate-700/50 items-center">
+                      <View key={label} className="w-[22%] bg-line p-2 rounded-xl border border-line/50 items-center">
                         <Text className="text-sm font-black text-white">{val.toFixed(1)}</Text>
                         <Text className="text-[8px] font-bold text-slate-500 uppercase tracking-widest">{label}</Text>
                       </View>
@@ -169,7 +169,7 @@ const PlayerDetailModal: React.FC<{ player: Player; onClose: () => void }> = ({ 
                 return (
                   <View key={key} className="flex-row items-center gap-3">
                     <Text className="text-[10px] font-bold text-slate-400 uppercase w-28">{label}</Text>
-                    <View className="flex-1 h-2 bg-slate-800 rounded-full overflow-hidden">
+                    <View className="flex-1 h-2 bg-line rounded-full overflow-hidden">
                       <View className="h-full rounded-full" style={{ width: `${((value - 55) / 44) * 100}%`, backgroundColor: attributeColor(value) }} />
                     </View>
                     <Text className="text-xs font-black text-white w-7 text-right">{value}</Text>
@@ -196,7 +196,7 @@ const PlayerDetailModal: React.FC<{ player: Player; onClose: () => void }> = ({ 
 
             {/* Contract + potential — meaningless once a player is out of the league */}
             {player.retired ? null : (
-              <View className="flex-row items-center justify-between bg-slate-950/50 border border-slate-800 rounded-2xl p-4">
+              <View className="flex-row items-center justify-between bg-sunken border border-line rounded-2xl p-4">
                 <View>
                   <Text className="text-[9px] font-bold text-slate-500 uppercase tracking-widest">Contrato</Text>
                   <Text className="text-sm font-black text-emerald-400">

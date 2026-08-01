@@ -17,13 +17,13 @@ const AwardHistory: React.FC<{ history: SeasonAwardRecord[]; players: PlayerMap 
   return (
     <View className="gap-3">
       <Text className="text-xs font-black text-slate-500 uppercase tracking-[0.3em]">Histórico de Campeões</Text>
-      <View className="bg-slate-900 rounded-card border border-slate-800 overflow-hidden">
+      <View className="bg-panel rounded-card border border-line overflow-hidden">
         {[...history].reverse().map((rec, i) => {
           const champ = teamsData.find((t) => t.id === rec.championId);
           return (
-            <View key={rec.season} className={`p-4 gap-2 ${i > 0 ? 'border-t border-slate-800' : ''}`}>
+            <View key={rec.season} className={`p-4 gap-2 ${i > 0 ? 'border-t border-line' : ''}`}>
               <View className="flex-row items-center gap-2.5">
-                <Text className="text-xs font-black text-slate-600">T{rec.season}</Text>
+                <Text className="text-xs font-black text-slate-500">T{rec.season}</Text>
                 {champ ? <Image source={{ uri: getTeamLogoUrl(champ) }} placeholder={{ uri: NBA_FALLBACK }} style={{ width: 24, height: 24 }} contentFit="contain" /> : null}
                 <Text className="text-sm font-black text-white uppercase italic tracking-tight flex-1" numberOfLines={1}>{champ?.name || '—'}</Text>
               </View>

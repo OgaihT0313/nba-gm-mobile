@@ -1,20 +1,27 @@
 import React from 'react';
-import { View, Text, Pressable, ScrollView } from 'react-native';
+import { View, Text, Pressable } from 'react-native';
 import { Image } from 'expo-image';
+
 import { Team, Player, Coach } from '../types';
-import { getTeamLogoUrl, getTeamSalary, SALARY_CAP, getTeamAccent, getTeamTitles, coachOf } from '../constants';
-import PlayerCard from '../components/PlayerCard';
-import Card from '../components/Card';
-import Icon from '../components/Icon';
-import StatCard from '../components/StatCard';
+import {
+  getTeamLogoUrl, getTeamSalary, SALARY_CAP, getTeamTitles, coachOf,
+  getTeamNickname, getTeamCity, conferenceLabel, attributeColor,
+} from '../constants';
+import { teamRating } from '../services/formService';
+import { COLORS, INK } from '../src/theme/tokens';
+import Screen, { HeroContent, Body } from '../components/ui/Screen';
+import { Panel, MonoLabel, Eyebrow, HeroTitle, StatTile, SectionLabel } from '../components/ui/kit';
+import RosterRow from '../components/ui/RosterRow';
 import PickAssets from '../components/PickAssets';
 import CoachPanel from '../components/CoachPanel';
 
-const formatMoney = (v: number) => `$${(v / 1_000_000).toFixed(1)}M`;
+const money = (v: number) => `$${(v / 1_000_000).toFixed(1)}M`;
 const NBA_FALLBACK = 'https://a.espncdn.com/i/teamlogos/nba/500/nba.png';
 
-// RN port. Themes itself with the *viewed* team's colors (browsing a rival shows
-// their brand), same as the web.
+// Browsing a rival. Deliberately keeps the USER's accent on the hero band
+// rather than the viewed team's: the chrome belongs to your franchise, and the
+// team you're scouting is identified by its logo and name, not by repainting
+// the whole app in its colors mid-save.
 const TeamDetail: React.FC<{
   team: Team;
   players: { [key: string]: Player };
@@ -28,58 +35,80 @@ const TeamDetail: React.FC<{
   const salary = getTeamSalary(team, players);
   const capSpace = SALARY_CAP - salary;
   const roster = team.roster.map((pId) => players[pId]).filter(Boolean).sort((a, b) => b.ovr - a.ovr);
-  const accent = getTeamAccent(team.id);
   const titles = getTeamTitles(team.id);
   const coach = coachOf(team, coaches);
+  const absences = team.playerAbsences ?? {};
 
   return (
-    <ScrollView className="flex-1">
-      <View className="px-4 py-6 gap-6">
-        <Pressable onPress={onBack}>
-          <Text className="text-xs font-bold text-slate-500 uppercase tracking-widest">← Voltar para Franquias</Text>
+    <Screen heroHeight={186}>
+      <HeroContent>
+        <Pressable onPress={onBack} hitSlop={12} className="active:opacity-60">
+          <Eyebrow size={9.5}>‹ Franquias</Eyebrow>
         </Pressable>
 
-        <Card variant="offseason" padding="lg" accentColor={accent.primary} className="gap-5">
-          <View className="flex-row items-center gap-4">
-            <Image source={{ uri: getTeamLogoUrl(team) }} placeholder={{ uri: NBA_FALLBACK }} style={{ width: 64, height: 64 }} contentFit="contain" />
-            <View className="flex-1 min-w-0">
-              <Text className="text-2xl font-black tracking-tighter uppercase italic text-white" numberOfLines={2}>{team.name}</Text>
-              {titles > 0 ? (
-                <View className="flex-row items-center gap-1 self-start bg-amber-500/10 border border-amber-500/30 rounded-full px-2.5 py-0.5 mt-1">
-                  <Icon name="awards" size={11} color="#fbbf24" />
-                  <Text className="text-amber-400 text-[10px] font-black uppercase tracking-widest">
-                    {titles} {titles === 1 ? 'Título' : 'Títulos'}
-                  </Text>
-                </View>
-              ) : null}
-              <Text className="text-slate-400 text-xs mt-1">
-                {team.conference === 'East' ? 'Leste' : 'Oeste'} · {coach?.name ?? 'Sem técnico'}
-                {typeof team.wins === 'number' ? ` · ${team.wins}-${team.losses}` : ''}
-              </Text>
-            </View>
-          </View>
-          <StatCard
-            label="Cap Space"
-            value={capSpace >= 0 ? formatMoney(capSpace) : `-${formatMoney(Math.abs(capSpace))}`}
-            sub={`${formatMoney(salary)} / ${formatMoney(SALARY_CAP)}`}
-            tone={capSpace >= 0 ? 'positive' : 'warning'}
+        <View className="flex-row items-center" style={{ gap: 13, marginTop: 14 }}>
+          <Image
+            source={{ uri: getTeamLogoUrl(team) }}
+            placeholder={{ uri: NBA_FALLBACK }}
+            style={{ width: 56, height: 56 }}
+            contentFit="contain"
           />
-        </Card>
+          <View style={{ flex: 1 }}>
+            <HeroTitle size={26} numberOfLines={1} adjustsFontSizeToFit>{getTeamNickname(team)}</HeroTitle>
+            <MonoLabel size={10} color="rgba(255,255,255,0.7)" style={{ marginTop: 4, letterSpacing: 0.4 }} numberOfLines={1}>
+              {getTeamCity(team)} · {conferenceLabel(team)} · {titles} {titles === 1 ? 'título' : 'títulos'}
+            </MonoLabel>
+            <MonoLabel size={10} color="rgba(255,255,255,0.55)" style={{ marginTop: 3, letterSpacing: 0.4 }} numberOfLines={1}>
+              {team.wins ?? 0}-{team.losses ?? 0} · {coach?.name ?? 'Sem técnico'}
+            </MonoLabel>
+          </View>
+        </View>
+      </HeroContent>
+
+      <Body top={16}>
+        <View className="flex-row" style={{ gap: 10 }}>
+          <StatTile
+            label="Cap space"
+            value={capSpace >= 0 ? money(capSpace) : `-${money(Math.abs(capSpace))}`}
+            sub={money(salary)}
+            color={capSpace >= 0 ? COLORS.goodSoft : COLORS.warn}
+            bar={capSpace >= 0 ? COLORS.goodSoft : COLORS.warn}
+          />
+          <StatTile label="Elenco" value={roster.length} sub={`${Object.keys(absences).length} fora`} />
+          <StatTile
+            label="Força"
+            value={teamRating(team, players)}
+            color={attributeColor(teamRating(team, players))}
+            bar={COLORS.info}
+          />
+        </View>
 
         <CoachPanel team={team} coaches={coaches} />
 
-        <Card padding="lg">
+        <Panel padding={14}>
           <PickAssets team={team} teams={teams} currentDraft={currentDraft} />
-        </Card>
+        </Panel>
 
-        <View className="gap-2">
-          <Text className="text-xs font-black text-slate-500 uppercase tracking-[0.3em]">Elenco ({roster.length})</Text>
-          {roster.map((player) => (
-            <PlayerCard key={player.id} player={player} />
-          ))}
-        </View>
-      </View>
-    </ScrollView>
+        <SectionLabel>Elenco · {roster.length}</SectionLabel>
+        {roster.map((p) => {
+          const absence = absences[p.id];
+          return (
+            <RosterRow
+              key={p.id}
+              player={p}
+              out={!!absence}
+              badge={absence ? `Fora ${absence.duration}` : p.pos}
+              badgeTone={absence ? 'danger' : 'info'}
+              meta={`${p.age}a · ${money(p.salary)} · ${p.contractYears} ${p.contractYears === 1 ? 'ano' : 'anos'}`}
+            />
+          );
+        })}
+
+        <Text style={{ fontSize: 10.5, lineHeight: 15, color: INK.faint, paddingHorizontal: 4 }}>
+          Use a Central de Trocas para abrir conversa com o {getTeamNickname(team)}.
+        </Text>
+      </Body>
+    </Screen>
   );
 };
 

@@ -21,7 +21,7 @@ interface ScoutAdvisorProps {
 const RecRow: React.FC<{ rec: Recommendation; onPress: () => void }> = ({ rec, onPress }) => (
   <Pressable
     onPress={onPress}
-    className="flex-row items-center gap-2.5 p-2.5 bg-slate-950/50 rounded-xl border border-slate-800 active:border-slate-600"
+    className="flex-row items-center gap-2.5 p-2.5 bg-sunken rounded-xl border border-line active:border-slate-500"
   >
     <Image
       source={{ uri: getPlayerImageUrl(rec.player) }}

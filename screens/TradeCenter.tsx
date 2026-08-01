@@ -1,23 +1,40 @@
 import React, { useState, useMemo, useCallback, useEffect } from 'react';
 import { View, Text, Pressable, ScrollView, Modal, ActivityIndicator } from 'react-native';
 import { Image } from 'expo-image';
+import { LinearGradient } from 'expo-linear-gradient';
+
 import { Team, Player, TradeOffer, DraftPickAsset } from '../types';
-import { getPlayerImageUrl, PLAYER_PLACEHOLDER_SVG, getTeamLogoUrl, getTeamSalary, SALARY_CAP, formatPositions, getPlayerPositions, picksOf } from '../constants';
+import {
+  getPlayerImageUrl, PLAYER_PLACEHOLDER_SVG, getTeamLogoUrl, getTeamSalary, SALARY_CAP,
+  formatPositions, getPlayerPositions, picksOf, getTeamNickname, getTeamTricode, attributeColor,
+} from '../constants';
 import { generateAnalysis } from '../services/geminiService';
-import { evaluateTradeLegality, evaluateTradeValue, TRADE_DEADLINE_GAME, playerValue, picksValue } from '../services/tradeService';
+import {
+  evaluateTradeLegality, evaluateTradeValue, TRADE_DEADLINE_GAME, playerValue, picksValue,
+} from '../services/tradeService';
 import { projectedPickSlot } from '../services/draftService';
-import { PickChip } from '../components/PickAssets';
 import { useTheme } from '../src/theme/ThemeProvider';
+import { COLORS, INK, RADIUS, withAlpha } from '../src/theme/tokens';
+import Screen, { HeroContent, Body } from '../components/ui/Screen';
+import {
+  Panel, Well, MonoLabel, Eyebrow, HeroTitle, Stat, Chip, CtaButton, GhostButton, FilterRow,
+} from '../components/ui/kit';
 import Icon from '../components/Icon';
 import PlayerDetailModal from '../components/PlayerDetailModal';
-import Card from '../components/Card';
 
-// RN port of the Trade Center. Mobile adaptations: the two team panels stack
-// instead of sitting side by side, the <select> becomes a Modal team picker,
-// and the roster renders inline (no nested vertical ScrollView, which fights
-// the page scroll in RN).
-const formatMoney = (v: number) => `$${(v / 1_000_000).toFixed(1)}M`;
-const POSITION_FILTERS = ['TODOS', 'PG', 'SG', 'SF', 'PF', 'C'];
+// Design 2b — the value scale is the hero of this screen. The old version made
+// you build a package blind and only told you afterwards (via a confirm dialog)
+// whether it was any good; here the balance, the salary match and the roster
+// minimum are all live as you build, so nothing is a surprise after the tap.
+//
+// The full rosters moved into a picker sheet for the same reason: what belongs
+// on the screen is the DEAL, not two 15-man lists.
+
+const money = (v: number) => `$${(v / 1_000_000).toFixed(1)}M`;
+const POSITION_FILTERS = [
+  { id: 'TODOS', label: 'Todos' }, { id: 'PG', label: 'PG' }, { id: 'SG', label: 'SG' },
+  { id: 'SF', label: 'SF' }, { id: 'PF', label: 'PF' }, { id: 'C', label: 'C' },
+];
 const NBA_FALLBACK = 'https://a.espncdn.com/i/teamlogos/nba/500/nba.png';
 
 interface TradeCenterProps {
@@ -40,276 +57,136 @@ interface TradeCenterProps {
   onRejectOffer: (offerId: string) => void;
 }
 
-const PlayerSelectItem: React.FC<{ player: Player; onPress: () => void; isSelected: boolean; accent: string }> = ({ player, onPress, isSelected, accent }) => (
-  <Pressable
-    onPress={onPress}
-    className={`flex-row justify-between items-center p-3 mb-2 rounded-xl border ${isSelected ? '' : 'bg-slate-900/50 border-slate-800'}`}
-    style={isSelected ? { backgroundColor: `${accent}33`, borderColor: accent } : undefined}
-  >
-    <View className="flex-row items-center gap-3 flex-1 min-w-0">
-      <Image source={{ uri: getPlayerImageUrl(player) }} placeholder={{ uri: PLAYER_PLACEHOLDER_SVG }} style={{ width: 32, height: 32, borderRadius: 16, backgroundColor: '#1e293b' }} contentFit="cover" />
-      <View className="flex-1 min-w-0">
-        <Text className="font-bold text-xs text-white" numberOfLines={1}>{player.name}</Text>
-        <Text className="text-[8px] font-black text-slate-500 uppercase mt-1">{formatPositions(player)} · {formatMoney(player.salary)}</Text>
-      </View>
+/* -------------------------------------------------------------------------- */
+
+const AssetRow: React.FC<{ label: string; sub: string; ovr?: number; onRemove?: () => void; icon?: React.ReactNode }> = ({
+  label, sub, ovr, onRemove, icon,
+}) => (
+  <Well padding={9} className="flex-row items-center" style={{ gap: 10 }}>
+    {icon}
+    <View style={{ flex: 1 }}>
+      <Text className="font-bold text-white" style={{ fontSize: 12 }} numberOfLines={1}>{label}</Text>
+      <MonoLabel size={9.5} color={INK.meta} style={{ letterSpacing: 0, marginTop: 2 }} numberOfLines={1}>{sub}</MonoLabel>
     </View>
-    <Text className="font-mono-bold text-xs text-accent">{player.ovr}</Text>
-  </Pressable>
+    {ovr !== undefined ? <Stat size={15} color={attributeColor(ovr)}>{ovr}</Stat> : <Stat size={15} color={COLORS.warn}>—</Stat>}
+    {onRemove ? (
+      <Pressable onPress={onRemove} hitSlop={10} className="active:opacity-60">
+        <Text style={{ fontSize: 15, color: 'rgba(255,255,255,0.45)', lineHeight: 18 }}>×</Text>
+      </Pressable>
+    ) : null}
+  </Well>
 );
 
-const TeamPanel: React.FC<{
+/** One side of the package: what's in it, and a way to add more. */
+const PackagePanel: React.FC<{
   title: string;
+  titleColor: string;
   team: Team | null;
-  onOpenPicker?: () => void;
-  assets: string[];
-  incomingAssets: string[];
-  players: { [key: string]: Player };
-  onToggleAsset: (pId: string) => void;
-  locked?: boolean;
-  accent: string;
-  // Pick side of the package. `onToggleProtection` is only passed for the user's
-  // own panel: you can protect a pick you're sending, not one you're asking for.
-  teams: Team[];
-  currentDraft: number;
+  playerIds: string[];
   pickIds: string[];
-  protections: { [pickId: string]: number };
-  onTogglePick: (pickId: string) => void;
-  onToggleProtection?: (pickId: string) => void;
-}> = ({ title, team, onOpenPicker, assets, incomingAssets, players, onToggleAsset, locked, accent, teams, currentDraft, pickIds, protections, onTogglePick, onToggleProtection }) => {
-  const [posFilter, setPosFilter] = useState('TODOS');
-  const teamPicks = useMemo(
-    () => (team ? [...picksOf(team)].sort((a, b) => a.draft - b.draft) : []),
-    [team],
-  );
-  const currentSalary = team ? getTeamSalary(team, players) : 0;
-  const outgoing = assets.reduce((s, id) => s + (players[id]?.salary || 0), 0);
-  const incoming = incomingAssets.reduce((s, id) => s + (players[id]?.salary || 0), 0);
-  const projectedCapSpace = SALARY_CAP - (currentSalary - outgoing + incoming);
-
-  const filteredRoster = team
-    ? team.roster.filter((pId) => {
-        const p = players[pId];
-        return p && (posFilter === 'TODOS' || getPlayerPositions(p).includes(posFilter));
-      })
-    : [];
-
-  return (
-    <View className="bg-slate-950/50 rounded-hero p-4 border border-slate-900 gap-3">
-      <View className="flex-row items-center justify-between">
-        <Text className="text-xs font-black text-slate-500 uppercase tracking-[0.3em]">{title}</Text>
-        {team ? <Image source={{ uri: getTeamLogoUrl(team) }} placeholder={{ uri: NBA_FALLBACK }} style={{ width: 32, height: 32 }} contentFit="contain" /> : null}
-      </View>
-
-      {locked ? (
-        <View className="bg-slate-900 border border-slate-800 rounded-2xl p-3">
-          <Text className="text-sm font-bold text-white">{team?.name}</Text>
-        </View>
-      ) : (
-        <Pressable onPress={onOpenPicker} className="bg-slate-900 border border-slate-800 rounded-2xl p-3 flex-row justify-between items-center">
-          <Text className="text-sm font-bold text-white">{team?.name || 'Selecione um time'}</Text>
-          <Icon name="chevron-down" size={16} color="#64748b" />
-        </Pressable>
-      )}
-
-      {team ? (
-        <>
-          <View className="bg-slate-900/80 rounded-2xl p-3 border border-slate-800 flex-row justify-between items-center">
-            <Text className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Cap projetado</Text>
-            <Text className={`text-xs font-mono-bold ${projectedCapSpace >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
-              {projectedCapSpace >= 0 ? formatMoney(projectedCapSpace) : `-${formatMoney(Math.abs(projectedCapSpace))}`}
-            </Text>
-          </View>
-
-          <View className="bg-slate-900/80 rounded-2xl p-3 border border-slate-800">
-            <Text className="text-[10px] font-bold text-slate-500 uppercase mb-2 tracking-widest">Pacote de Troca</Text>
-            <View className="flex-row flex-wrap gap-2">
-              {assets.length + pickIds.length > 0 ? (
-                <>
-                  {assets.map((pId) => (
-                    <Pressable key={pId} onPress={() => onToggleAsset(pId)} className="px-3 py-1 rounded-full flex-row items-center gap-2" style={{ backgroundColor: accent }}>
-                      <Text className="text-[10px] font-black text-white uppercase">{players[pId]?.name}</Text>
-                      <Text className="text-white/60">×</Text>
-                    </Pressable>
-                  ))}
-                  {pickIds.map((id) => {
-                    const pick = teamPicks.find((p) => p.id === id);
-                    if (!pick) return null;
-                    const slot = projectedPickSlot(pick.originalTeamId, teams);
-                    return (
-                      <Pressable key={id} onPress={() => onTogglePick(id)} className="px-3 py-1 rounded-full flex-row items-center gap-2 border border-white/20" style={{ backgroundColor: `${accent}99` }}>
-                        <Text className="text-[10px] font-black text-white uppercase">
-                          Pick {pick.originalTeamId.toUpperCase()} ~#{slot + 1}
-                          {protections[id] ? ` (top ${protections[id]} prot.)` : ''}
-                        </Text>
-                        <Text className="text-white/60">×</Text>
-                      </Pressable>
-                    );
-                  })}
-                </>
-              ) : <Text className="text-[10px] text-slate-600 italic">Nada selecionado.</Text>}
-            </View>
-          </View>
-
-          {/* Draft capital. Selecting a pick you own is the "sell the future"
-              lever; protecting it caps what the other side is really getting,
-              which the CPU's valuation already knows. */}
-          {teamPicks.length > 0 ? (
-            <View className="bg-slate-900/80 rounded-2xl p-3 border border-slate-800 gap-2">
-              <Text className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Picks ({teamPicks.length})</Text>
-              {teamPicks.map((pick) => {
-                const selected = pickIds.includes(pick.id);
-                return (
-                  <PickChip
-                    key={pick.id}
-                    pick={protections[pick.id] ? { ...pick, protection: protections[pick.id] } : pick}
-                    teams={teams}
-                    ownerTeamId={team.id}
-                    currentDraft={currentDraft}
-                    onPress={() => onTogglePick(pick.id)}
-                    selected={selected}
-                    accent={accent}
-                    right={selected && onToggleProtection ? (
-                      <Pressable
-                        onPress={() => onToggleProtection(pick.id)}
-                        className={`px-2 py-1 rounded-lg border ${protections[pick.id] ? 'bg-amber-500/20 border-amber-500/40' : 'bg-slate-800 border-slate-700'}`}
-                      >
-                        <Text className={`text-[8px] font-black uppercase tracking-widest ${protections[pick.id] ? 'text-amber-400' : 'text-slate-400'}`}>
-                          {protections[pick.id] ? `Top ${protections[pick.id]}` : 'Proteger'}
-                        </Text>
-                      </Pressable>
-                    ) : undefined}
-                  />
-                );
-              })}
-            </View>
-          ) : null}
-
-          <View className="flex-row flex-wrap gap-1">
-            {POSITION_FILTERS.map((pos) => (
-              <Pressable
-                key={pos}
-                onPress={() => setPosFilter(pos)}
-                className={`px-2 py-0.5 rounded-full border ${posFilter === pos ? 'bg-accent border-accent' : 'bg-slate-900/50 border-slate-800'}`}
-              >
-                <Text className={`text-[9px] font-black uppercase tracking-widest ${posFilter === pos ? 'text-white' : 'text-slate-500'}`}>{pos}</Text>
-              </Pressable>
-            ))}
-          </View>
-
-          <View>
-            {filteredRoster.map((pId) => (
-              <PlayerSelectItem key={pId} player={players[pId]} onPress={() => onToggleAsset(pId)} isSelected={assets.includes(pId)} accent={accent} />
-            ))}
-            {filteredRoster.length === 0 ? <Text className="text-[10px] text-slate-600 italic">Nenhum jogador nessa posição.</Text> : null}
-          </View>
-        </>
-      ) : (
-        <View className="py-10 items-center justify-center border-2 border-dashed border-slate-900 rounded-3xl">
-          <Text className="text-slate-700 font-bold uppercase tracking-widest text-xs">Aguardando Seleção</Text>
-        </View>
-      )}
-    </View>
-  );
-};
-
-const OffersInbox: React.FC<{
-  offers: TradeOffer[];
-  teams: Team[];
   players: { [key: string]: Player };
-  currentDraft: number;
-  onAccept: (id: string) => void;
-  onReject: (id: string) => void;
-  onSelectPlayer: (p: Player) => void;
-  accent: string;
-}> = ({ offers, teams, players, currentDraft, onAccept, onReject, onSelectPlayer, accent }) => {
-  if (offers.length === 0) return null;
-  const names = (ids: string[]) => ids.map((id) => players[id]).filter(Boolean);
-
-  // Each player is a tappable chip rather than a comma-joined string: judging an
-  // offer means looking the players up, and this is the only place they appear.
-  const chips = (arr: Player[], tint: string) => (
-    <View className="flex-row flex-wrap gap-1.5">
-      {arr.map((p) => (
-        <Pressable
-          key={p.id}
-          onPress={() => onSelectPlayer(p)}
-          className={`flex-row items-center gap-1.5 px-2 py-1 rounded-lg border ${tint}`}
-        >
-          <Text className="text-slate-100 text-xs font-bold" numberOfLines={1}>{p.name}</Text>
-          <Text className="font-mono-bold text-[10px] text-slate-400">{p.ovr}</Text>
-        </Pressable>
-      ))}
-    </View>
-  );
+  teams: Team[];
+  protections: { [pickId: string]: number };
+  onRemovePlayer: (id: string) => void;
+  onRemovePick: (id: string) => void;
+  onAdd?: () => void;
+  emptyHint: string;
+}> = ({
+  title, titleColor, team, playerIds, pickIds, players, teams, protections,
+  onRemovePlayer, onRemovePick, onAdd, emptyHint,
+}) => {
+  const picks = team ? picksOf(team).filter((p) => pickIds.includes(p.id)) : [];
+  const total = playerIds.reduce((s, id) => s + (players[id]?.salary ?? 0), 0);
 
   return (
-    <View className="gap-3">
-      <View className="flex-row items-center gap-2">
-        <Icon name="offers" size={15} color={accent} />
-        <Text className="text-xs font-black text-slate-500 uppercase tracking-[0.3em]">Ofertas Recebidas ({offers.length})</Text>
+    <Panel padding={13}>
+      <View className="flex-row items-center justify-between" style={{ marginBottom: 10 }}>
+        <MonoLabel color={titleColor}>{title}</MonoLabel>
+        {playerIds.length > 0 ? (
+          <MonoLabel size={9.5} color={INK.meta} style={{ letterSpacing: 0 }}>{money(total)}</MonoLabel>
+        ) : null}
       </View>
-      {offers.map((offer) => {
-        const from = teams.find((t) => t.id === offer.fromTeamId);
-        const give = names(offer.requestIds);
-        const get = names(offer.offerIds);
-        // Picks the CPU is throwing in count toward the verdict, or a pick-heavy
-        // offer would read as "PERDENDO" no matter how good it is.
-        const offeredPicks = from ? picksOf(from).filter((p) => (offer.offerPickIds ?? []).includes(p.id)) : [];
-        const giveVal = give.reduce((s, p) => s + playerValue(p), 0);
-        const getVal = get.reduce((s, p) => s + playerValue(p), 0) + picksValue(offeredPicks, teams, currentDraft);
-        const ratio = giveVal > 0 ? getVal / giveVal : 1;
-        const verdict = ratio >= 1.05 ? { t: 'GANHANDO', c: 'text-emerald-400' } : ratio >= 0.95 ? { t: 'EQUILIBRADA', c: 'text-slate-300' } : { t: 'PERDENDO', c: 'text-red-400' };
-        return (
-          <View key={offer.id} className="bg-slate-900 rounded-2xl border border-slate-800 p-4 gap-3">
-            <View className="flex-row items-center gap-2">
-              {from ? <Image source={{ uri: getTeamLogoUrl(from) }} placeholder={{ uri: NBA_FALLBACK }} style={{ width: 24, height: 24 }} contentFit="contain" /> : null}
-              <Text className="text-sm font-bold text-white flex-1" numberOfLines={1}>O {from?.name} propõe uma troca</Text>
-              <Text className={`text-[10px] font-black uppercase tracking-widest ${verdict.c}`}>{verdict.t}</Text>
-            </View>
-            <View className="gap-2">
-              <View className="bg-red-900/15 border border-red-500/20 rounded-xl p-3 gap-1.5">
-                <Text className="text-[9px] font-black text-red-400 uppercase tracking-widest">Você cede</Text>
-                {chips(give, 'bg-red-950/40 border-red-500/25')}
-              </View>
-              <View className="bg-emerald-900/15 border border-emerald-500/20 rounded-xl p-3 gap-1.5">
-                <Text className="text-[9px] font-black text-emerald-400 uppercase tracking-widest">Você recebe</Text>
-                {get.length > 0 ? chips(get, 'bg-emerald-950/40 border-emerald-500/25') : null}
-                {offeredPicks.map((p) => (
-                  <PickChip key={p.id} pick={p} teams={teams} ownerTeamId={offer.fromTeamId} currentDraft={currentDraft} />
-                ))}
-              </View>
-            </View>
-            <View className="flex-row gap-2">
-              <Pressable onPress={() => onAccept(offer.id)} className="flex-1 bg-emerald-600 py-2.5 rounded-xl items-center">
-                <Text className="text-white font-black text-xs uppercase tracking-wide">Aceitar</Text>
-              </Pressable>
-              <Pressable onPress={() => onReject(offer.id)} className="flex-1 bg-slate-800 border border-slate-700 py-2.5 rounded-xl items-center">
-                <Text className="text-slate-300 font-black text-xs uppercase tracking-wide">Recusar</Text>
-              </Pressable>
-            </View>
-          </View>
-        );
-      })}
-    </View>
+
+      <View style={{ gap: 8 }}>
+        {playerIds.map((id) => {
+          const p = players[id];
+          if (!p) return null;
+          return (
+            <AssetRow
+              key={id}
+              label={p.name}
+              sub={`${formatPositions(p)} · ${money(p.salary)}`}
+              ovr={p.ovr}
+              onRemove={() => onRemovePlayer(id)}
+              icon={
+                <Image
+                  source={{ uri: getPlayerImageUrl(p) }}
+                  placeholder={{ uri: PLAYER_PLACEHOLDER_SVG }}
+                  style={{ width: 30, height: 30, borderRadius: RADIUS.pill, backgroundColor: COLORS.line }}
+                  contentFit="cover"
+                />
+              }
+            />
+          );
+        })}
+
+        {picks.map((pick) => {
+          const slot = projectedPickSlot(pick.originalTeamId, teams);
+          const prot = protections[pick.id];
+          return (
+            <AssetRow
+              key={pick.id}
+              label={`1ª rodada ${pick.originalTeamId.toUpperCase()}`}
+              sub={`Projetada ~#${slot + 1}${prot ? ` · top ${prot} protegida` : ''}`}
+              onRemove={() => onRemovePick(pick.id)}
+              icon={
+                <View
+                  style={{
+                    width: 30, height: 30, borderRadius: RADIUS.control, backgroundColor: COLORS.line,
+                    alignItems: 'center', justifyContent: 'center',
+                  }}
+                >
+                  <MonoLabel size={9} color={COLORS.warn} style={{ letterSpacing: 0 }}>1ª</MonoLabel>
+                </View>
+              }
+            />
+          );
+        })}
+
+        {playerIds.length + picks.length === 0 ? (
+          <Text style={{ fontSize: 11, color: INK.faint, fontStyle: 'italic' }}>{emptyHint}</Text>
+        ) : null}
+      </View>
+
+      {onAdd ? (
+        <GhostButton label="+ Adicionar" onPress={onAdd} padding={9} size={10.5} style={{ marginTop: 10 }} />
+      ) : null}
+    </Panel>
   );
 };
 
-const TradeCenter: React.FC<TradeCenterProps> = ({ teams, players, userTeamId, gamesPlayed, currentDraft, onTradeExecute, offers, onAcceptOffer, onRejectOffer }) => {
+/* -------------------------------------------------------------------------- */
+
+const TradeCenter: React.FC<TradeCenterProps> = ({
+  teams, players, userTeamId, gamesPlayed, currentDraft, onTradeExecute, offers, onAcceptOffer, onRejectOffer,
+}) => {
   const { accent } = useTheme();
   const userTeam = useMemo(() => teams.find((t) => t.id === userTeamId) || null, [teams, userTeamId]);
   const [partnerTeamId, setPartnerTeamId] = useState<string | null>(null);
   const partnerTeam = useMemo(() => teams.find((t) => t.id === partnerTeamId) || null, [teams, partnerTeamId]);
+
   const [userAssets, setUserAssets] = useState<string[]>([]);
   const [partnerAssets, setPartnerAssets] = useState<string[]>([]);
   const [userPickIds, setUserPickIds] = useState<string[]>([]);
   const [partnerPickIds, setPartnerPickIds] = useState<string[]>([]);
   // Protection the user is attaching to their OWN outgoing picks, by pick id.
   const [protections, setProtections] = useState<{ [pickId: string]: number }>({});
+
   const [pickerOpen, setPickerOpen] = useState(false);
+  const [assetSheet, setAssetSheet] = useState<'user' | 'partner' | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [tradeStatus, setTradeStatus] = useState<'idle' | 'accepted' | 'rejected'>('idle');
   const [aiResponse, setAiResponse] = useState('');
-  const [pendingConfirm, setPendingConfirm] = useState(false);
   const [inspecting, setInspecting] = useState<Player | null>(null);
 
   useEffect(() => { setUserAssets([]); setUserPickIds([]); setProtections({}); }, [userTeamId]);
@@ -353,42 +230,50 @@ const TradeCenter: React.FC<TradeCenterProps> = ({ teams, players, userTeamId, g
     };
   }, [userTeam, partnerTeam, userPickIds, partnerPickIds, protections]);
 
+  const hasPackage = userAssets.length + userPickIds.length > 0 && partnerAssets.length + partnerPickIds.length > 0;
+
   const legality = useMemo(() => {
     if (gamesPlayed >= TRADE_DEADLINE_GAME) {
       return { legal: false, reason: 'O prazo de trocas da temporada já passou. Volte na próxima temporada.' };
     }
-    if (!userTeam || !partnerTeam) return null;
-    if (userAssets.length + userPickIds.length === 0 || partnerAssets.length + partnerPickIds.length === 0) return null;
+    if (!userTeam || !partnerTeam || !hasPackage) return null;
     return evaluateTradeLegality(userTeam, userAssets, partnerTeam, partnerAssets, players, gamesPlayed, userPickIds.length, partnerPickIds.length);
-  }, [userTeam, partnerTeam, userAssets, partnerAssets, userPickIds, partnerPickIds, players, gamesPlayed]);
+  }, [userTeam, partnerTeam, userAssets, partnerAssets, userPickIds, partnerPickIds, players, gamesPlayed, hasPackage]);
 
-  // Informational read from the USER's side (distinct from the AI partner's
-  // accept/reject call, which has its own leniency bias).
+  // Informational read from the USER's side (distinct from the partner's
+  // accept/reject call below, which has its own leniency bias).
   const userValueEval = useMemo(() => {
-    if (!userTeam || !partnerTeam) return null;
-    if (userAssets.length + userPickIds.length === 0 || partnerAssets.length + partnerPickIds.length === 0) return null;
+    if (!userTeam || !partnerTeam || !hasPackage) return null;
     return evaluateTradeValue(userTeam, userAssets, partnerAssets, players, {
       teams, currentDraft, givePicks: selectedPicks.give, receivePicks: selectedPicks.receive,
     });
-  }, [userTeam, partnerTeam, userAssets, partnerAssets, userPickIds, partnerPickIds, players, teams, currentDraft, selectedPicks]);
+  }, [userTeam, partnerTeam, userAssets, partnerAssets, players, teams, currentDraft, selectedPicks, hasPackage]);
+
+  // The same call the CPU will actually make when the trade is proposed, run
+  // live so the balance meter is a prediction and not a post-hoc explanation.
+  const partnerEval = useMemo(() => {
+    if (!userTeam || !partnerTeam || !hasPackage) return null;
+    return evaluateTradeValue(partnerTeam, partnerAssets, userAssets, players, {
+      teams, currentDraft, givePicks: selectedPicks.receive, receivePicks: selectedPicks.give,
+    });
+  }, [userTeam, partnerTeam, userAssets, partnerAssets, players, teams, currentDraft, selectedPicks, hasPackage]);
 
   const valuePct = userValueEval && userValueEval.givesValue > 0
     ? Math.round((userValueEval.receivesValue / userValueEval.givesValue - 1) * 100)
     : 0;
-  const valueVerdict = valuePct > 5 ? 'ganhando' : valuePct < -5 ? 'perdendo' : 'equilibrada';
+
+  // The scale reads from the PARTNER's side — left is "they refuse", right is
+  // "you're overpaying" — which is the question you're actually asking it.
+  const markerPos = Math.max(0.03, Math.min(0.97, 0.5 - valuePct / 120));
 
   const executeTrade = useCallback(async () => {
-    if (!userTeam || !partnerTeam || !legality?.legal) return;
+    if (!userTeam || !partnerTeam || !legality?.legal || !partnerEval) return;
     const userPlayerDetails = userAssets.map((pId) => players[pId]);
     const partnerPlayerDetails = partnerAssets.map((pId) => players[pId]);
 
     // Accept/reject is decided deterministically from asset value — the LLM
-    // only narrates afterwards, so the outcome never depends on the model. Note
-    // the sides flip here: the partner gives what the user receives.
-    const valueEval = evaluateTradeValue(partnerTeam, partnerAssets, userAssets, players, {
-      teams, currentDraft, givePicks: selectedPicks.receive, receivePicks: selectedPicks.give,
-    });
-    const accepted = valueEval.accepted;
+    // only narrates afterwards, so the outcome never depends on the model.
+    const accepted = partnerEval.accepted;
 
     setTradeStatus(accepted ? 'accepted' : 'rejected');
     setAiResponse('');
@@ -415,7 +300,7 @@ O ${userTeam.name} oferece: ${offerParts.join(', ')}
 Em troca de: ${askParts.join(', ')}
 Escreva de 2 a 3 frases, em primeira pessoa e no seu personagem de GM, explicando por que você ${accepted ? 'topou' : 'recusou'} essa troca. Não repita a palavra ACEITAR/RECUSAR nem cite números — só a justificativa.`;
 
-    // Deterministic in-world reaction for when Gemini is down/rate-limited.
+    // Deterministic in-world reaction for when the AI proxy is down/rate-limited.
     const localReaction = (() => {
       const situation = partnerTeam.powerRank <= 10 ? 'contender' : partnerTeam.powerRank <= 20 ? 'bubble' : 'rebuild';
       const incoming = userPlayerDetails.map((p) => p.name).join(' e ');
@@ -455,105 +340,468 @@ Escreva de 2 a 3 frases, em primeira pessoa e no seu personagem de GM, explicand
     const result = await generateAnalysis(prompt, localReaction);
     setAiResponse(result.trim());
     setIsLoading(false);
-  }, [userTeam, partnerTeam, userAssets, partnerAssets, userPickIds, partnerPickIds, protections, selectedPicks, teams, currentDraft, players, legality, onTradeExecute]);
+  }, [userTeam, partnerTeam, userAssets, partnerAssets, userPickIds, partnerPickIds, protections, selectedPicks, teams, currentDraft, players, legality, partnerEval, onTradeExecute]);
 
   const canPropose = !!legality?.legal && !isLoading;
+  const outgoingCount = userAssets.length + userPickIds.length;
+  const incomingCount = partnerAssets.length + partnerPickIds.length;
 
   return (
-    <ScrollView className="flex-1">
-      <View className="px-4 py-6 gap-6">
-        <OffersInbox offers={offers} teams={teams} players={players} currentDraft={currentDraft} onAccept={onAcceptOffer} onReject={onRejectOffer} onSelectPlayer={setInspecting} accent={accent.primary} />
-
-        <TeamPanel
-          title="Seu Time" team={userTeam} assets={userAssets} incomingAssets={partnerAssets} players={players}
-          onToggleAsset={(p) => toggleAsset(p, 'user')} locked accent={accent.primary}
-          teams={teams} currentDraft={currentDraft} pickIds={userPickIds} protections={protections}
-          onTogglePick={(id) => togglePick(id, 'user')} onToggleProtection={toggleProtection}
+    <Screen
+      heroHeight={150}
+      footer={
+        <CtaButton
+          label="Propor troca"
+          sub={hasPackage ? `${outgoingCount} saem · ${incomingCount} entram` : 'Monte os dois lados do pacote'}
+          onPress={executeTrade}
+          disabled={!canPropose}
         />
-        <TeamPanel
-          title="Parceiro de Troca" team={partnerTeam} onOpenPicker={() => setPickerOpen(true)} assets={partnerAssets}
-          incomingAssets={userAssets} players={players} onToggleAsset={(p) => toggleAsset(p, 'partner')} accent={accent.primary}
-          teams={teams} currentDraft={currentDraft} pickIds={partnerPickIds} protections={{}}
-          onTogglePick={(id) => togglePick(id, 'partner')}
-        />
-
-        {legality && !legality.legal ? (
-          <View className="bg-red-950/40 border border-red-900 rounded-2xl px-5 py-3">
-            <Text className="text-xs font-bold text-red-400 text-center">{legality.reason}</Text>
+      }
+    >
+      <HeroContent>
+        <Eyebrow>Central de trocas</Eyebrow>
+        <View className="flex-row items-center justify-between" style={{ marginTop: 12 }}>
+          <View className="flex-row items-center" style={{ gap: 10 }}>
+            <Image source={{ uri: getTeamLogoUrl(userTeam ?? undefined) }} style={{ width: 36, height: 36 }} contentFit="contain" />
+            <HeroTitle size={17}>{getTeamTricode(userTeam ?? undefined)}</HeroTitle>
           </View>
+          <HeroTitle size={15} color="rgba(255,255,255,0.4)">⇄</HeroTitle>
+          <Pressable
+            onPress={() => setPickerOpen(true)}
+            className="flex-row items-center active:opacity-70"
+            style={{
+              gap: 9, backgroundColor: 'rgba(0,0,0,0.35)', paddingLeft: 8, paddingRight: 11, paddingVertical: 6,
+              borderRadius: RADIUS.control, borderWidth: 1, borderColor: 'rgba(255,255,255,0.16)',
+            }}
+          >
+            {partnerTeam ? (
+              <Image source={{ uri: getTeamLogoUrl(partnerTeam) }} style={{ width: 26, height: 26 }} contentFit="contain" />
+            ) : null}
+            <Text className="font-extrabold text-white" style={{ fontSize: 12 }}>
+              {partnerTeam ? getTeamNickname(partnerTeam) : 'Escolher time'}
+            </Text>
+            <Icon name="chevron-down" size={13} color="rgba(255,255,255,0.5)" />
+          </Pressable>
+        </View>
+      </HeroContent>
+
+      <Body top={16}>
+        <PackagePanel
+          title="Você envia"
+          titleColor={COLORS.info}
+          team={userTeam}
+          playerIds={userAssets}
+          pickIds={userPickIds}
+          players={players}
+          teams={teams}
+          protections={protections}
+          onRemovePlayer={(id) => toggleAsset(id, 'user')}
+          onRemovePick={(id) => togglePick(id, 'user')}
+          onAdd={() => setAssetSheet('user')}
+          emptyHint="Escolha jogadores ou picks para enviar."
+        />
+
+        <PackagePanel
+          title="Você recebe"
+          titleColor={COLORS.badSoft}
+          team={partnerTeam}
+          playerIds={partnerAssets}
+          pickIds={partnerPickIds}
+          players={players}
+          teams={teams}
+          protections={{}}
+          onRemovePlayer={(id) => toggleAsset(id, 'partner')}
+          onRemovePick={(id) => togglePick(id, 'partner')}
+          onAdd={partnerTeam ? () => setAssetSheet('partner') : undefined}
+          emptyHint={partnerTeam ? 'Escolha o que pedir em troca.' : 'Selecione um parceiro de troca primeiro.'}
+        />
+
+        {/* The balance. */}
+        <Panel padding={14}>
+          <View className="flex-row justify-between items-baseline" style={{ marginBottom: 11 }}>
+            <MonoLabel>Balança de valor</MonoLabel>
+            {partnerEval ? (
+              <MonoLabel size={10} color={partnerEval.accepted ? COLORS.goodSoft : COLORS.badSoft} style={{ letterSpacing: 0.6 }}>
+                {getTeamNickname(partnerTeam ?? undefined)} {partnerEval.accepted ? 'aceitam' : 'recusam'}
+              </MonoLabel>
+            ) : (
+              <MonoLabel size={10} color={INK.faint} style={{ letterSpacing: 0.6 }}>Aguardando pacote</MonoLabel>
+            )}
+          </View>
+
+          <View style={{ height: 9, borderRadius: RADIUS.pill, overflow: 'visible', justifyContent: 'center' }}>
+            <LinearGradient
+              colors={[COLORS.cta, COLORS.warn, COLORS.good]}
+              locations={[0, 0.42, 1]}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 0 }}
+              style={{ height: 9, borderRadius: RADIUS.pill, opacity: hasPackage ? 1 : 0.3 }}
+            />
+            {hasPackage ? (
+              <View
+                style={{
+                  position: 'absolute', left: `${markerPos * 100}%`, width: 4, height: 19, marginLeft: -2,
+                  borderRadius: 2, backgroundColor: '#fff',
+                }}
+              />
+            ) : null}
+          </View>
+          <View className="flex-row justify-between" style={{ marginTop: 8 }}>
+            <MonoLabel size={9.5} color={INK.faint} style={{ letterSpacing: 0 }}>Recusa</MonoLabel>
+            <MonoLabel size={9.5} color={INK.faint} style={{ letterSpacing: 0 }}>Justo</MonoLabel>
+            <MonoLabel size={9.5} color={INK.faint} style={{ letterSpacing: 0 }}>Generoso</MonoLabel>
+          </View>
+
+          {/* Salary match / roster minimum / deadline, as live warnings rather
+              than an error after the tap. */}
+          <View className="flex-row flex-wrap" style={{ gap: 7, marginTop: 12 }}>
+            {legality ? (
+              <Chip tone={legality.legal ? 'good' : 'bad'} size={9.5}>
+                {legality.legal ? 'Salários batem' : legality.reason}
+              </Chip>
+            ) : null}
+            {hasPackage && userValueEval ? (
+              <Chip tone={valuePct > 5 ? 'good' : valuePct < -5 ? 'warn' : 'neutral'} size={9.5}>
+                {valuePct > 5 ? `Você ganha ${valuePct}%` : valuePct < -5 ? `Você perde ${Math.abs(valuePct)}%` : 'Valor equilibrado'}
+              </Chip>
+            ) : null}
+            {userTeam && outgoingCount > 0 ? (
+              <Chip tone="neutral" size={9.5}>
+                Elenco fica com {userTeam.roster.length - userAssets.length + partnerAssets.length}
+              </Chip>
+            ) : null}
+          </View>
+        </Panel>
+
+        {/* Protections, only once there's an outgoing pick to protect. */}
+        {userTeam && userPickIds.length > 0 ? (
+          <Panel padding={13}>
+            <MonoLabel style={{ marginBottom: 9 }}>Proteção das suas picks</MonoLabel>
+            <View style={{ gap: 8 }}>
+              {picksOf(userTeam).filter((p) => userPickIds.includes(p.id)).map((pick) => (
+                <Well key={pick.id} padding={9} className="flex-row items-center justify-between">
+                  <Text className="font-bold text-white" style={{ fontSize: 11.5 }}>
+                    1ª rodada {pick.originalTeamId.toUpperCase()} · draft {pick.draft}
+                  </Text>
+                  <Pressable
+                    onPress={() => toggleProtection(pick.id)}
+                    className="active:opacity-70"
+                    style={{
+                      paddingHorizontal: 9, paddingVertical: 5, borderRadius: 8,
+                      backgroundColor: protections[pick.id] ? withAlpha(COLORS.warn, 0.2) : COLORS.line,
+                    }}
+                  >
+                    <MonoLabel size={8.5} color={protections[pick.id] ? COLORS.warn : COLORS.textDim}>
+                      {protections[pick.id] ? `Top ${protections[pick.id]}` : 'Proteger'}
+                    </MonoLabel>
+                  </Pressable>
+                </Well>
+              ))}
+            </View>
+          </Panel>
         ) : null}
 
-        {!pendingConfirm ? (
-          <Pressable
-            onPress={() => setPendingConfirm(true)}
-            disabled={!canPropose}
-            className={`bg-white py-4 rounded-full items-center ${!canPropose ? 'opacity-20' : ''}`}
-          >
-            <Text className="text-black text-lg font-black">PROPOR TROCA</Text>
-          </Pressable>
-        ) : (
-          <Card hero padding="lg" className="items-center gap-3">
-            <Text className="text-xs font-black text-slate-500 uppercase tracking-[0.3em]">Avaliação da Troca</Text>
-            <Text className={`text-2xl font-black italic uppercase tracking-tighter text-center ${valueVerdict === 'ganhando' ? 'text-emerald-400' : valueVerdict === 'perdendo' ? 'text-red-500' : 'text-slate-300'}`}>
-              {valueVerdict === 'ganhando' ? `VOCÊ ESTÁ GANHANDO (+${valuePct}%)` : valueVerdict === 'perdendo' ? `VOCÊ ESTÁ PERDENDO (${valuePct}%)` : 'TROCA EQUILIBRADA'}
-            </Text>
-            <Text className="text-slate-500 text-xs text-center">
-              Comparação de valor (rating × idade) entre o que você envia e o que recebe. A decisão é sua.
-            </Text>
-            <View className="flex-row gap-3 pt-1">
-              <Pressable onPress={() => setPendingConfirm(false)} className="bg-slate-800 px-6 py-3 rounded-full">
-                <Text className="text-white font-bold">CANCELAR</Text>
-              </Pressable>
-              <Pressable onPress={() => { setPendingConfirm(false); executeTrade(); }} disabled={!canPropose} className={`bg-white px-6 py-3 rounded-full ${!canPropose ? 'opacity-20' : ''}`}>
-                <Text className="text-black font-black">CONFIRMAR</Text>
-              </Pressable>
-            </View>
-          </Card>
-        )}
-
+        {/* GM reaction */}
         {tradeStatus !== 'idle' ? (
-          <Card hero padding="lg" className="items-center gap-3" style={tradeStatus === 'accepted' ? { borderColor: accent.primary } : undefined}>
-            <Text className="text-xs font-black text-slate-500 uppercase tracking-[0.3em]">Resposta do GM</Text>
-            <Text className={`text-3xl font-black italic uppercase tracking-tighter ${tradeStatus === 'accepted' ? 'text-green-500' : 'text-red-500'}`}>
-              {tradeStatus === 'accepted' ? 'ACEITO!' : 'REJEITADO!'}
-            </Text>
+          <Panel bar={tradeStatus === 'accepted' ? COLORS.good : COLORS.cta} padding={16}>
+            <MonoLabel>Resposta do GM</MonoLabel>
+            <HeroTitle size={24} color={tradeStatus === 'accepted' ? COLORS.goodSoft : COLORS.badSoft} style={{ marginTop: 6 }}>
+              {tradeStatus === 'accepted' ? 'Aceito!' : 'Rejeitado!'}
+            </HeroTitle>
             {isLoading ? (
-              <View className="flex-row items-center gap-3 py-2">
+              <View className="flex-row items-center" style={{ gap: 10, marginTop: 10 }}>
                 <ActivityIndicator size="small" color={accent.primary} />
-                <Text className="text-xs font-bold text-slate-500 uppercase tracking-widest">Carregando reação do GM...</Text>
+                <MonoLabel size={9.5} color={INK.meta}>Carregando reação…</MonoLabel>
               </View>
             ) : (
-              <Text className="text-slate-400 italic text-center leading-5">"{aiResponse}"</Text>
+              <Text style={{ fontSize: 12, lineHeight: 18, color: COLORS.textSoft, marginTop: 10 }}>“{aiResponse}”</Text>
             )}
-          </Card>
+          </Panel>
+        ) : null}
+
+        {/* Inbox */}
+        <OffersInbox
+          offers={offers}
+          teams={teams}
+          players={players}
+          currentDraft={currentDraft}
+          onAccept={onAcceptOffer}
+          onReject={onRejectOffer}
+          onSelectPlayer={setInspecting}
+        />
+      </Body>
+
+      {/* Partner picker */}
+      <Sheet visible={pickerOpen} onClose={() => setPickerOpen(false)} title="Escolha o parceiro">
+        {teams.filter((t) => t.id !== userTeamId).map((t) => (
+          <Pressable
+            key={t.id}
+            onPress={() => { setPartnerTeamId(t.id); setPartnerAssets([]); setPartnerPickIds([]); setPickerOpen(false); }}
+            className="flex-row items-center gap-3 p-3 rounded-xl active:opacity-70"
+          >
+            <Image source={{ uri: getTeamLogoUrl(t) }} placeholder={{ uri: NBA_FALLBACK }} style={{ width: 28, height: 28 }} contentFit="contain" />
+            <Text className="text-sm font-bold text-white">{t.name}</Text>
+          </Pressable>
+        ))}
+      </Sheet>
+
+      {/* Asset picker for whichever side was tapped */}
+      <AssetSheet
+        side={assetSheet}
+        onClose={() => setAssetSheet(null)}
+        team={assetSheet === 'user' ? userTeam : partnerTeam}
+        players={players}
+        teams={teams}
+        selectedPlayers={assetSheet === 'user' ? userAssets : partnerAssets}
+        selectedPicks={assetSheet === 'user' ? userPickIds : partnerPickIds}
+        onTogglePlayer={(id) => assetSheet && toggleAsset(id, assetSheet)}
+        onTogglePick={(id) => assetSheet && togglePick(id, assetSheet)}
+        accent={accent.primary}
+      />
+
+      {inspecting ? <PlayerDetailModal player={inspecting} onClose={() => setInspecting(null)} /> : null}
+    </Screen>
+  );
+};
+
+/* -------------------------------------------------------------------------- */
+
+const Sheet: React.FC<{ visible: boolean; onClose: () => void; title: string; children: React.ReactNode }> = ({
+  visible, onClose, title, children,
+}) => (
+  <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
+    <Pressable className="flex-1 bg-black/70 justify-end" onPress={onClose}>
+      <Pressable
+        className="rounded-t-3xl p-4 max-h-[76%]"
+        style={{ backgroundColor: COLORS.navBg, borderTopWidth: 1, borderTopColor: COLORS.navLine }}
+        onPress={(e) => e.stopPropagation()}
+      >
+        <View className="w-10 h-1 rounded-full self-center mb-4" style={{ backgroundColor: COLORS.line }} />
+        <MonoLabel style={{ marginBottom: 10 }}>{title}</MonoLabel>
+        <ScrollView>{children}</ScrollView>
+      </Pressable>
+    </Pressable>
+  </Modal>
+);
+
+const AssetSheet: React.FC<{
+  side: 'user' | 'partner' | null;
+  onClose: () => void;
+  team: Team | null;
+  players: { [key: string]: Player };
+  teams: Team[];
+  selectedPlayers: string[];
+  selectedPicks: string[];
+  onTogglePlayer: (id: string) => void;
+  onTogglePick: (id: string) => void;
+  accent: string;
+}> = ({ side, onClose, team, players, teams, selectedPlayers, selectedPicks, onTogglePlayer, onTogglePick, accent }) => {
+  const [pos, setPos] = useState('TODOS');
+  if (!side || !team) return <Sheet visible={false} onClose={onClose} title="">{null}</Sheet>;
+
+  const roster = team.roster
+    .map((id) => players[id])
+    .filter((p): p is Player => !!p && (pos === 'TODOS' || getPlayerPositions(p).includes(pos)))
+    .sort((a, b) => b.ovr - a.ovr);
+  const picks = [...picksOf(team)].sort((a, b) => a.draft - b.draft);
+
+  return (
+    <Sheet visible onClose={onClose} title={side === 'user' ? 'O que você envia' : `O que pedir ao ${getTeamNickname(team)}`}>
+      <FilterRow items={POSITION_FILTERS} value={pos} onChange={setPos} style={{ marginBottom: 12 }} />
+
+      <View style={{ gap: 8 }}>
+        {roster.map((p) => {
+          const on = selectedPlayers.includes(p.id);
+          return (
+            <Pressable
+              key={p.id}
+              onPress={() => onTogglePlayer(p.id)}
+              className="flex-row items-center active:opacity-75"
+              style={{
+                gap: 10, padding: 10, borderRadius: RADIUS.control,
+                backgroundColor: on ? withAlpha(accent, 0.2) : COLORS.panel,
+                borderWidth: 1, borderColor: on ? accent : COLORS.line,
+              }}
+            >
+              <Image
+                source={{ uri: getPlayerImageUrl(p) }}
+                placeholder={{ uri: PLAYER_PLACEHOLDER_SVG }}
+                style={{ width: 32, height: 32, borderRadius: RADIUS.pill, backgroundColor: COLORS.line }}
+                contentFit="cover"
+              />
+              <View style={{ flex: 1 }}>
+                <Text className="font-bold text-white" style={{ fontSize: 12 }} numberOfLines={1}>{p.name}</Text>
+                <MonoLabel size={9.5} color={INK.meta} style={{ letterSpacing: 0, marginTop: 2 }}>
+                  {formatPositions(p)} · {money(p.salary)}
+                </MonoLabel>
+              </View>
+              <Stat size={15} color={attributeColor(p.ovr)}>{p.ovr}</Stat>
+            </Pressable>
+          );
+        })}
+        {roster.length === 0 ? (
+          <Text style={{ fontSize: 11, color: INK.faint, fontStyle: 'italic' }}>Nenhum jogador nessa posição.</Text>
+        ) : null}
+
+        {picks.length > 0 ? (
+          <>
+            <MonoLabel style={{ marginTop: 10 }}>Escolhas de 1ª rodada</MonoLabel>
+            {picks.map((pick) => {
+              const on = selectedPicks.includes(pick.id);
+              const slot = projectedPickSlot(pick.originalTeamId, teams);
+              return (
+                <Pressable
+                  key={pick.id}
+                  onPress={() => onTogglePick(pick.id)}
+                  className="flex-row items-center active:opacity-75"
+                  style={{
+                    gap: 10, padding: 10, borderRadius: RADIUS.control,
+                    backgroundColor: on ? withAlpha(accent, 0.2) : COLORS.panel,
+                    borderWidth: 1, borderColor: on ? accent : COLORS.line,
+                  }}
+                >
+                  <View
+                    style={{
+                      width: 32, height: 32, borderRadius: RADIUS.control, backgroundColor: COLORS.line,
+                      alignItems: 'center', justifyContent: 'center',
+                    }}
+                  >
+                    <MonoLabel size={9} color={COLORS.warn} style={{ letterSpacing: 0 }}>1ª</MonoLabel>
+                  </View>
+                  <View style={{ flex: 1 }}>
+                    <Text className="font-bold text-white" style={{ fontSize: 12 }}>
+                      1ª rodada {pick.originalTeamId.toUpperCase()}
+                    </Text>
+                    <MonoLabel size={9.5} color={INK.meta} style={{ letterSpacing: 0, marginTop: 2 }}>
+                      Draft {pick.draft} · projetada ~#{slot + 1}
+                    </MonoLabel>
+                  </View>
+                </Pressable>
+              );
+            })}
+          </>
         ) : null}
       </View>
 
-      {/* Partner team picker */}
-      <Modal visible={pickerOpen} transparent animationType="slide" onRequestClose={() => setPickerOpen(false)}>
-        <Pressable className="flex-1 bg-black/70 justify-end" onPress={() => setPickerOpen(false)}>
-          <Pressable className="bg-slate-950 border-t border-slate-800 rounded-t-3xl p-4 max-h-[70%]" onPress={(e) => e.stopPropagation()}>
-            <View className="w-10 h-1 bg-slate-700 rounded-full self-center mb-4" />
-            <Text className="text-xs font-black text-slate-500 uppercase tracking-[0.3em] mb-3">Escolha o parceiro</Text>
-            <ScrollView>
-              {teams.filter((t) => t.id !== userTeamId).map((t) => (
-                <Pressable
-                  key={t.id}
-                  onPress={() => { setPartnerTeamId(t.id); setPartnerAssets([]); setPartnerPickIds([]); setPickerOpen(false); }}
-                  className="flex-row items-center gap-3 p-3 rounded-xl active:bg-slate-900"
-                >
-                  <Image source={{ uri: getTeamLogoUrl(t) }} placeholder={{ uri: NBA_FALLBACK }} style={{ width: 28, height: 28 }} contentFit="contain" />
-                  <Text className="text-sm font-bold text-white">{t.name}</Text>
-                </Pressable>
-              ))}
-            </ScrollView>
-          </Pressable>
-        </Pressable>
-      </Modal>
-
-      {inspecting ? <PlayerDetailModal player={inspecting} onClose={() => setInspecting(null)} /> : null}
-    </ScrollView>
+      <GhostButton label="Pronto" onPress={onClose} style={{ marginTop: 14, marginBottom: 8 }} />
+    </Sheet>
   );
 };
+
+const OffersInbox: React.FC<{
+  offers: TradeOffer[];
+  teams: Team[];
+  players: { [key: string]: Player };
+  currentDraft: number;
+  onAccept: (id: string) => void;
+  onReject: (id: string) => void;
+  onSelectPlayer: (p: Player) => void;
+}> = ({ offers, teams, players, currentDraft, onAccept, onReject, onSelectPlayer }) => {
+  if (offers.length === 0) return null;
+  const named = (ids: string[]) => ids.map((id) => players[id]).filter(Boolean);
+
+  return (
+    <Panel padding={13}>
+      <View className="flex-row items-center justify-between" style={{ marginBottom: 10 }}>
+        <MonoLabel>Ofertas recebidas</MonoLabel>
+        <View style={{ paddingHorizontal: 7, paddingVertical: 2, borderRadius: RADIUS.pill, backgroundColor: COLORS.cta }}>
+          <MonoLabel size={9} color="#fff" style={{ letterSpacing: 0 }}>{offers.length}</MonoLabel>
+        </View>
+      </View>
+
+      <View style={{ gap: 10 }}>
+        {offers.map((offer) => {
+          const from = teams.find((t) => t.id === offer.fromTeamId);
+          const give = named(offer.requestIds);
+          const get = named(offer.offerIds);
+          // Picks the CPU throws in count toward the verdict, or a pick-heavy
+          // offer would read as "perdendo" no matter how good it is.
+          const offeredPicks = from ? picksOf(from).filter((p) => (offer.offerPickIds ?? []).includes(p.id)) : [];
+          const giveVal = give.reduce((s, p) => s + playerValue(p), 0);
+          const getVal = get.reduce((s, p) => s + playerValue(p), 0) + picksValue(offeredPicks, teams, currentDraft);
+          const ratio = giveVal > 0 ? getVal / giveVal : 1;
+          const verdict = ratio >= 1.05
+            ? { t: 'Ganhando', c: COLORS.goodSoft }
+            : ratio >= 0.95
+              ? { t: 'Equilibrada', c: COLORS.textSoft }
+              : { t: 'Perdendo', c: COLORS.badSoft };
+
+          return (
+            <Well key={offer.id} padding={11} style={{ gap: 9 }}>
+              <View className="flex-row items-center" style={{ gap: 9 }}>
+                {from ? (
+                  <Image source={{ uri: getTeamLogoUrl(from) }} placeholder={{ uri: NBA_FALLBACK }} style={{ width: 24, height: 24 }} contentFit="contain" />
+                ) : null}
+                <Text className="font-bold text-white" style={{ fontSize: 11.5, flex: 1 }} numberOfLines={1}>
+                  {getTeamNickname(from)} propõem
+                </Text>
+                <MonoLabel size={9.5} color={verdict.c} style={{ letterSpacing: 0.4 }}>{verdict.t}</MonoLabel>
+              </View>
+
+              <OfferSide label="Você cede" color={COLORS.badSoft} list={give} onSelect={onSelectPlayer} />
+              <OfferSide label="Você recebe" color={COLORS.goodSoft} list={get} onSelect={onSelectPlayer} extra={offeredPicks.length} />
+
+              <View className="flex-row" style={{ gap: 8 }}>
+                <GhostButton label="Recusar" onPress={() => onReject(offer.id)} padding={9} size={10.5} style={{ flex: 1 }} />
+                <Pressable
+                  onPress={() => onAccept(offer.id)}
+                  className="active:opacity-80"
+                  style={{
+                    flex: 1, alignItems: 'center', paddingVertical: 9, borderRadius: 16,
+                    backgroundColor: withAlpha(COLORS.good, 0.18), borderWidth: 1, borderColor: withAlpha(COLORS.good, 0.4),
+                  }}
+                >
+                  <Text className="font-black" style={{ fontSize: 10.5, color: COLORS.goodSoft, textTransform: 'uppercase' }}>
+                    Aceitar
+                  </Text>
+                </Pressable>
+              </View>
+            </Well>
+          );
+        })}
+      </View>
+    </Panel>
+  );
+};
+
+const OfferSide: React.FC<{
+  label: string;
+  color: string;
+  list: Player[];
+  onSelect: (p: Player) => void;
+  extra?: number;
+}> = ({ label, color, list, onSelect, extra }) => (
+  <View style={{ gap: 6 }}>
+    <MonoLabel size={8.5} color={color}>{label}</MonoLabel>
+    <View className="flex-row flex-wrap" style={{ gap: 6 }}>
+      {list.map((p) => (
+        <Pressable
+          key={p.id}
+          onPress={() => onSelect(p)}
+          className="flex-row items-center active:opacity-70"
+          style={{
+            gap: 6, paddingHorizontal: 8, paddingVertical: 5, borderRadius: 9,
+            backgroundColor: COLORS.panel, borderWidth: 1, borderColor: COLORS.line,
+          }}
+        >
+          <Text className="font-bold text-white" style={{ fontSize: 11 }} numberOfLines={1}>{p.name}</Text>
+          <Stat size={10} color={attributeColor(p.ovr)}>{p.ovr}</Stat>
+        </Pressable>
+      ))}
+      {extra ? (
+        <View
+          style={{
+            paddingHorizontal: 8, paddingVertical: 5, borderRadius: 9,
+            backgroundColor: COLORS.panel, borderWidth: 1, borderColor: COLORS.line,
+          }}
+        >
+          <MonoLabel size={9.5} color={COLORS.warn} style={{ letterSpacing: 0 }}>
+            +{extra} {extra === 1 ? 'pick' : 'picks'}
+          </MonoLabel>
+        </View>
+      ) : null}
+    </View>
+  </View>
+);
 
 export default TradeCenter;

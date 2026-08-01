@@ -18,7 +18,7 @@ const PlayerChip: React.FC<{ id: string; players: PlayerMap; leagueTeams: Team[]
   // as AwardCard.
   const t = leagueTeams.find((tm) => tm.roster.includes(id));
   return (
-    <View className="flex-row items-center gap-2.5 bg-slate-950/40 rounded-xl px-3 py-2 mb-2">
+    <View className="flex-row items-center gap-2.5 bg-sunken rounded-xl px-3 py-2 mb-2">
       <Image
         source={{ uri: getPlayerImageUrl(p) }}
         placeholder={{ uri: PLAYER_PLACEHOLDER_SVG }}

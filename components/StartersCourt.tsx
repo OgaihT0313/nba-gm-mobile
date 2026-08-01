@@ -53,7 +53,7 @@ const StartersCourt: React.FC<StartersCourtProps> = ({ team, players, onSetStart
       .sort((a, b) => b.ovr - a.ovr);
 
   return (
-    <View className="bg-slate-900 rounded-card border border-slate-800 p-5 gap-5">
+    <View className="bg-panel rounded-card border border-line p-5 gap-5">
       <View className="flex-row items-center justify-between gap-2">
         <Text className="text-lg font-bold text-white">Titulares</Text>
         <Text className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Toque pra trocar</Text>
@@ -61,12 +61,12 @@ const StartersCourt: React.FC<StartersCourtProps> = ({ team, players, onSetStart
 
       <View className="w-full" style={{ aspectRatio: 4 / 3 }}>
         <Svg viewBox="0 0 400 320" width="100%" height="100%" style={{ position: 'absolute', inset: 0 }}>
-          <Rect x="10" y="10" width="380" height="300" rx="4" fill="none" stroke="#334155" strokeWidth="2" />
-          <Rect x="120" y="190" width="160" height="120" fill="none" stroke="#334155" strokeWidth="2" />
-          <Path d="M 140 190 A 60 60 0 0 0 260 190" fill="none" stroke="#334155" strokeWidth="2" />
-          <Path d="M 40 310 C 40 140, 360 140, 360 310" fill="none" stroke="#334155" strokeWidth="2" />
-          <Circle cx="200" cy="300" r="7" fill="none" stroke="#334155" strokeWidth="2" />
-          <Line x1="168" y1="290" x2="232" y2="290" stroke="#334155" strokeWidth="2" />
+          <Rect x="10" y="10" width="380" height="300" rx="4" fill="none" stroke="#24344f" strokeWidth="2" />
+          <Rect x="120" y="190" width="160" height="120" fill="none" stroke="#24344f" strokeWidth="2" />
+          <Path d="M 140 190 A 60 60 0 0 0 260 190" fill="none" stroke="#24344f" strokeWidth="2" />
+          <Path d="M 40 310 C 40 140, 360 140, 360 310" fill="none" stroke="#24344f" strokeWidth="2" />
+          <Circle cx="200" cy="300" r="7" fill="none" stroke="#24344f" strokeWidth="2" />
+          <Line x1="168" y1="290" x2="232" y2="290" stroke="#24344f" strokeWidth="2" />
         </Svg>
 
         {SLOT_LAYOUT.map(({ pos, top, left }) => {
@@ -80,7 +80,7 @@ const StartersCourt: React.FC<StartersCourtProps> = ({ team, players, onSetStart
               style={{ position: 'absolute', top: top as any, left: left as any, marginLeft: -SLOT / 2, marginTop: -SLOT / 2, alignItems: 'center' }}
             >
               <View
-                className="rounded-full overflow-hidden bg-slate-950"
+                className="rounded-full overflow-hidden bg-ink"
                 style={{
                   width: SLOT,
                   height: SLOT,
@@ -92,11 +92,11 @@ const StartersCourt: React.FC<StartersCourtProps> = ({ team, players, onSetStart
                   <Image source={{ uri: getPlayerImageUrl(player) }} placeholder={{ uri: PLAYER_PLACEHOLDER_SVG }} style={{ width: '100%', height: '100%' }} contentFit="cover" />
                 ) : (
                   <View className="w-full h-full items-center justify-center">
-                    <Text className="text-slate-600 text-[10px] font-black">?</Text>
+                    <Text className="text-slate-500 text-[10px] font-black">?</Text>
                   </View>
                 )}
               </View>
-              <View className="bg-slate-950 border border-slate-700 rounded-full px-1.5" style={{ marginTop: -8 }}>
+              <View className="bg-ink border border-line rounded-full px-1.5" style={{ marginTop: -8 }}>
                 <Text className="text-[9px] font-black text-white">{player ? player.ovr : '-'}</Text>
               </View>
               <Text className="text-[9px] font-black uppercase tracking-widest text-slate-500 mt-0.5">{slot?.bucket ?? ''}</Text>
@@ -116,7 +116,7 @@ const StartersCourt: React.FC<StartersCourtProps> = ({ team, players, onSetStart
       ) : null}
 
       {activePos ? (
-        <View className="bg-slate-950/60 rounded-2xl border border-slate-800 p-4 gap-2">
+        <View className="bg-sunken rounded-2xl border border-line p-4 gap-2">
           <Text className="text-[10px] font-black text-slate-500 uppercase tracking-widest">
             Escolher titular — {(activeBucket && POSITIONS[activeBucket]) || activeBucket}
           </Text>
@@ -126,7 +126,7 @@ const StartersCourt: React.FC<StartersCourtProps> = ({ team, players, onSetStart
               <Pressable
                 key={p.id}
                 onPress={() => { onSetStarter(activePos, p.id); setActivePos(null); }}
-                className={`flex-row items-center justify-between gap-3 p-2 rounded-xl border ${isDesignated ? '' : 'bg-slate-900/50 border-slate-800'}`}
+                className={`flex-row items-center justify-between gap-3 p-2 rounded-xl border ${isDesignated ? '' : 'bg-panel border-line'}`}
                 style={isDesignated ? { backgroundColor: `${accent.primary}33`, borderColor: accent.primary } : undefined}
               >
                 <View className="flex-row items-center gap-2 flex-1 min-w-0">
@@ -138,7 +138,7 @@ const StartersCourt: React.FC<StartersCourtProps> = ({ team, players, onSetStart
             );
           })}
           {candidatesFor(activeBucket || '').length === 0 ? (
-            <Text className="text-slate-600 text-xs italic">Nenhum jogador desse elenco joga nessa posição.</Text>
+            <Text className="text-slate-500 text-xs italic">Nenhum jogador desse elenco joga nessa posição.</Text>
           ) : null}
         </View>
       ) : null}

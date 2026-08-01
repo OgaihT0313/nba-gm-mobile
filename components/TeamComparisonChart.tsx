@@ -59,9 +59,9 @@ const calculateTeamRatings = (team: Team, players: { [key: string]: Player }): T
 const TeamComparisonChart: React.FC<TeamComparisonChartProps> = ({ team1, team2, players }) => {
   if (!team1 || !team2) {
     return (
-      <View className="w-full bg-slate-900/50 p-4 rounded-2xl border border-slate-800/60">
-        <View className="h-32 items-center justify-center border-2 border-dashed border-slate-800 rounded-2xl px-6">
-          <Text className="text-slate-600 font-bold uppercase tracking-widest text-xs text-center">
+      <View className="w-full bg-panel p-4 rounded-2xl border border-line">
+        <View className="h-32 items-center justify-center border-2 border-dashed border-line rounded-2xl px-6">
+          <Text className="text-slate-500 font-bold uppercase tracking-widest text-xs text-center">
             Selecione um rival para comparar os elencos
           </Text>
         </View>
@@ -75,7 +75,7 @@ const TeamComparisonChart: React.FC<TeamComparisonChartProps> = ({ team1, team2,
   const r2 = calculateTeamRatings(team2, players);
 
   return (
-    <View className="w-full bg-slate-900/50 p-4 rounded-2xl border border-slate-800/60 gap-5">
+    <View className="w-full bg-panel p-4 rounded-2xl border border-line gap-5">
       <View className="flex-row items-center justify-center gap-5 flex-wrap">
         <View className="flex-row items-center gap-2">
           <View className="w-3 h-3 rounded-full" style={{ backgroundColor: accent1.primary }} />
@@ -100,7 +100,7 @@ const TeamComparisonChart: React.FC<TeamComparisonChartProps> = ({ team1, team2,
                   <Text className="text-xs font-black" style={{ color: accent1.primary }}>{Math.round(v1)}</Text>
                   <View className="h-2 rounded-full" style={{ width: `${scaleToPct(v1)}%`, backgroundColor: accent1.primary }} />
                 </View>
-                <View className="w-px h-6 bg-slate-800" />
+                <View className="w-px h-6 bg-line" />
                 <View className="flex-1 flex-row items-center justify-start gap-2">
                   <View className="h-2 rounded-full" style={{ width: `${scaleToPct(v2)}%`, backgroundColor: accent2.primary }} />
                   <Text className="text-xs font-black" style={{ color: accent2.primary }}>{Math.round(v2)}</Text>

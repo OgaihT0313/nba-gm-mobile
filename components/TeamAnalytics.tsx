@@ -28,8 +28,8 @@ const TeamAnalytics: React.FC<TeamAnalyticsProps> = ({ team }) => {
     return (
       <View className="gap-4">
         <Text className="text-lg font-bold text-white">Análise Técnica</Text>
-        <View className="bg-slate-950/50 p-8 rounded-hero border border-slate-900 items-center justify-center min-h-[200px]">
-          <Text className="text-slate-600 font-bold uppercase tracking-widest text-[10px] text-center italic">
+        <View className="bg-sunken p-8 rounded-hero border border-line items-center justify-center min-h-[200px]">
+          <Text className="text-slate-500 font-bold uppercase tracking-widest text-[10px] text-center italic">
             Aguardando dados da temporada...
           </Text>
         </View>
@@ -49,7 +49,7 @@ const TeamAnalytics: React.FC<TeamAnalyticsProps> = ({ team }) => {
   return (
     <View className="gap-4">
       <Text className="text-lg font-bold text-white">Análise Técnica</Text>
-      <View className="bg-slate-950/50 p-4 rounded-hero border border-slate-900">
+      <View className="bg-sunken p-4 rounded-hero border border-line">
         <Text className="text-[10px] font-black text-slate-500 uppercase tracking-[0.3em] mb-3 text-center">
           Evolução de Vitórias
         </Text>
@@ -75,7 +75,7 @@ const TeamAnalytics: React.FC<TeamAnalyticsProps> = ({ team }) => {
             <Circle key={i} cx={p.x} cy={p.y} r={3} fill={accent.primary} />
           ))}
         </Svg>
-        <Text className="text-[9px] text-slate-600 text-center mt-1">% de vitórias por jogos disputados</Text>
+        <Text className="text-[9px] text-slate-500 text-center mt-1">% de vitórias por jogos disputados</Text>
       </View>
     </View>
   );

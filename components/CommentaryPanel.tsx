@@ -1,12 +1,11 @@
 import React from 'react';
 import { View, Text, ActivityIndicator } from 'react-native';
-import Card from './Card';
-import Icon from './Icon';
+import { Panel, MonoLabel, Well } from './ui/kit';
+import { COLORS, INK } from '../src/theme/tokens';
 import { useTheme } from '../src/theme/ThemeProvider';
 
-// RN port of the web's "Comentaristas" panel. The web's CSS-spinner div becomes
-// an ActivityIndicator; everything else is the same three states (loading with
-// nothing yet / commentary / not-enough-games).
+// The league commentary, as the redesign's "DA CABINE" block: a mono label over
+// a quoted line in an inset well, no icon and no card title competing with it.
 interface CommentaryPanelProps {
   commentary?: { text: string; gamesPlayed: number };
   isLoading: boolean;
@@ -21,32 +20,31 @@ const CommentaryPanel: React.FC<CommentaryPanelProps> = ({ commentary, isLoading
   const { accent } = useTheme();
 
   return (
-    <Card>
-      <View className="flex-row items-center gap-2.5 mb-4">
-        <Icon name="commentary" size={20} color={accent.primary} />
-        <Text className="font-bold text-lg text-white">Comentaristas</Text>
-      </View>
+    <Panel padding={14}>
+      <MonoLabel size={9} style={{ marginBottom: 10 }}>Da cabine</MonoLabel>
 
       {isLoading && !commentary ? (
-        <View className="flex-row items-center gap-3 py-2">
+        <View className="flex-row items-center" style={{ gap: 10, paddingVertical: 4 }}>
           <ActivityIndicator size="small" color={accent.primary} />
-          <Text className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">
-            Analisando a liga...
-          </Text>
+          <MonoLabel size={9.5} color={INK.meta}>Analisando a liga…</MonoLabel>
         </View>
       ) : commentary ? (
-        <View className="gap-2">
-          <Text className="text-slate-300 text-sm italic leading-5">"{unquote(commentary.text)}"</Text>
-          <Text className="text-[10px] text-slate-600 font-mono uppercase tracking-widest">
-            Análise após {commentary.gamesPlayed} jogos{isLoading ? ' · atualizando...' : ''}
-          </Text>
+        <View style={{ gap: 8 }}>
+          <Well padding={11}>
+            <Text style={{ fontSize: 12, lineHeight: 18, color: COLORS.textSoft }}>
+              “{unquote(commentary.text)}”
+            </Text>
+          </Well>
+          <MonoLabel size={9} color={INK.faint} style={{ letterSpacing: 0 }}>
+            Após {commentary.gamesPlayed} jogos{isLoading ? ' · atualizando…' : ''}
+          </MonoLabel>
         </View>
       ) : (
-        <Text className="text-slate-500 italic text-sm">
+        <Text style={{ fontSize: 11.5, lineHeight: 17, color: INK.body }}>
           A primeira análise chega após {interval} jogos simulados.
         </Text>
       )}
-    </Card>
+    </Panel>
   );
 };
 

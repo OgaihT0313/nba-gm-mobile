@@ -16,6 +16,14 @@ module.exports = {
         accent: 'var(--accent)',
         'accent-dark': 'var(--accent-dark)',
         'accent-secondary': 'var(--accent-secondary)',
+        // "Console MyGM" surface ramp (see src/theme/tokens.ts, which is the
+        // source of truth — these mirror it for the class-based spots).
+        ink: '#06080f',
+        panel: '#0d1526',
+        line: '#1c2942',
+        sunken: '#0a1120',
+        ghost: '#0f172a',
+        cta: '#EF3B24',
       },
       borderRadius: {
         // 3-tier scale ported from the web app's --radius-control/card/hero.

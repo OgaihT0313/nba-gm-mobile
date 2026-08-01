@@ -5,6 +5,8 @@ import { coachOf, getTeamAccent } from '../constants';
 import { coachFit, reputation, generateCandidates } from '../services/coachService';
 import Card from './Card';
 import Icon from './Icon';
+import { MonoLabel } from './ui/kit';
+import { onAccent } from '../src/theme/tokens';
 
 const FIT_META: { min: number; label: string; color: string }[] = [
   { min: 1, label: 'Encaixe perfeito', color: '#34d399' },
@@ -20,7 +22,7 @@ const AttrBar: React.FC<{ label: string; value: number; color: string }> = ({ la
       <Text className="text-[9px] font-bold uppercase tracking-widest text-slate-500">{label}</Text>
       <Text className="text-[10px] font-mono-bold text-white">{value}</Text>
     </View>
-    <View className="h-1.5 rounded-full bg-slate-800 overflow-hidden">
+    <View className="h-1.5 rounded-full bg-line overflow-hidden">
       <View className="h-full rounded-full" style={{ width: `${Math.min(100, value)}%`, backgroundColor: color }} />
     </View>
   </View>
@@ -31,7 +33,7 @@ const CoachCard: React.FC<{ coach: Coach; team: Team; onPress?: () => void; acti
   const meta = fitMeta(fit);
   const accent = getTeamAccent(team.id);
   return (
-    <View className="bg-slate-950/50 rounded-2xl p-4 border border-slate-800 gap-3">
+    <View className="bg-sunken rounded-2xl p-4 border border-line gap-3">
       <View className="flex-row items-start justify-between gap-3">
         <View className="flex-1 min-w-0">
           <Text className="text-base font-black text-white" numberOfLines={1}>{coach.name}</Text>
@@ -48,7 +50,7 @@ const CoachCard: React.FC<{ coach: Coach; team: Team; onPress?: () => void; acti
       </View>
       {onPress ? (
         <Pressable onPress={onPress} className="mt-1 rounded-xl py-2.5 items-center" style={{ backgroundColor: accent.primary }}>
-          <Text className="text-xs font-black uppercase text-slate-950">{actionLabel}</Text>
+          <Text className="text-xs font-black uppercase" style={{ color: onAccent(accent.primary) }}>{actionLabel}</Text>
         </Pressable>
       ) : null}
     </View>
@@ -80,23 +82,23 @@ const CoachPanel: React.FC<CoachPanelProps> = ({ team, coaches, editable, onFire
   return (
     <Card padding="lg" className="gap-4">
       <View className="flex-row items-center gap-2.5">
-        <Icon name="coach" size={20} color="#94a3b8" />
-        <Text className="text-lg font-bold text-white flex-1">Comissão Técnica</Text>
+        <Icon name="coach" size={16} color="#94a3b8" />
+        <MonoLabel>Comissão técnica</MonoLabel>
       </View>
 
       {current ? (
         <CoachCard team={team} coach={current} onPress={editable ? () => setConfirmFire(true) : undefined} actionLabel="Demitir técnico" />
       ) : (
-        <Text className="text-[11px] text-slate-600 italic">Sem técnico no comando.</Text>
+        <Text className="text-[11px] text-slate-500 italic">Sem técnico no comando.</Text>
       )}
 
       {editable && !current ? (
         <Pressable onPress={openHiring} className="rounded-xl py-2.5 items-center" style={{ backgroundColor: accent.primary }}>
-          <Text className="text-xs font-black uppercase text-slate-950">Contratar técnico</Text>
+          <Text className="text-xs font-black uppercase" style={{ color: onAccent(accent.primary) }}>Contratar técnico</Text>
         </Pressable>
       ) : null}
       {editable && current ? (
-        <Pressable onPress={openHiring} className="rounded-xl border border-slate-700 py-2.5 items-center">
+        <Pressable onPress={openHiring} className="rounded-xl border border-line py-2.5 items-center">
           <Text className="text-xs font-black uppercase text-slate-300">Ver candidatos</Text>
         </Pressable>
       ) : null}
@@ -104,7 +106,7 @@ const CoachPanel: React.FC<CoachPanelProps> = ({ team, coaches, editable, onFire
       {/* Fire confirmation */}
       <Modal visible={confirmFire} transparent animationType="fade" onRequestClose={() => setConfirmFire(false)}>
         <Pressable className="flex-1 bg-black/70 items-center justify-center p-4" onPress={() => setConfirmFire(false)}>
-          <Pressable className="bg-slate-900 border border-slate-700 rounded-3xl p-6 w-full max-w-sm gap-4" onPress={(e) => e.stopPropagation()}>
+          <Pressable className="bg-panel border border-line rounded-3xl p-6 w-full max-w-sm gap-4" onPress={(e) => e.stopPropagation()}>
             <Text className="text-xl font-black uppercase italic tracking-tight text-white">Demitir técnico?</Text>
             <Text className="text-sm text-slate-400 leading-5">
               <Text className="font-bold text-white">{current?.name}</Text> deixa o comando do {team.name}. Você pode contratar um substituto na sequência.
@@ -125,7 +127,7 @@ const CoachPanel: React.FC<CoachPanelProps> = ({ team, coaches, editable, onFire
       {/* Hire candidates */}
       <Modal visible={hiring} transparent animationType="slide" onRequestClose={() => setHiring(false)}>
         <Pressable className="flex-1 bg-black/70 justify-end" onPress={() => setHiring(false)}>
-          <Pressable className="bg-slate-950 border-t border-slate-800 rounded-t-3xl p-4 max-h-[80%]" onPress={(e) => e.stopPropagation()}>
+          <Pressable className="bg-ink border-t border-line rounded-t-3xl p-4 max-h-[80%]" onPress={(e) => e.stopPropagation()}>
             <View className="w-10 h-1 bg-slate-700 rounded-full self-center mb-4" />
             <Text className="text-xs font-black text-slate-500 uppercase tracking-[0.3em] mb-3">Candidatos a técnico</Text>
             <ScrollView className="gap-3" contentContainerStyle={{ gap: 12, paddingBottom: 8 }}>

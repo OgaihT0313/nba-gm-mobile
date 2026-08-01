@@ -97,6 +97,34 @@ export const getTeamLogoUrl = (t?: Team) => t?.logoUrl || 'https://a.espncdn.com
 // tight rows), same convention broadcasts/ESPN use for the same reason.
 export const getTeamTricode = (t?: Team) => (t?.id ?? '???').toUpperCase();
 
+// The redesign's heroes set the franchise nickname huge ("THUNDER") with the
+// market underneath it ("OKLAHOMA CITY · OESTE"), so the full data name has to
+// split in two. An explicit market table rather than "everything but the last
+// word": Portland's nickname is two words, and no parsing rule survives both
+// "Trail Blazers" and "76ers" without special cases anyway.
+const TEAM_CITY: { [key: string]: string } = {
+    atl: 'Atlanta', bkn: 'Brooklyn', bos: 'Boston', cha: 'Charlotte', chi: 'Chicago',
+    cle: 'Cleveland', dal: 'Dallas', den: 'Denver', det: 'Detroit', gsw: 'Golden State',
+    hou: 'Houston', ind: 'Indiana', lac: 'Los Angeles', lal: 'Los Angeles', mem: 'Memphis',
+    mia: 'Miami', mil: 'Milwaukee', min: 'Minnesota', nop: 'New Orleans', nyk: 'New York',
+    okc: 'Oklahoma City', orl: 'Orlando', phi: 'Philadelphia', phx: 'Phoenix',
+    por: 'Portland', sac: 'Sacramento', sas: 'San Antonio', tor: 'Toronto', uta: 'Utah',
+    was: 'Washington',
+};
+
+export const getTeamCity = (t?: Team) => (t ? TEAM_CITY[t.id] ?? t.name : '');
+
+/** "Oklahoma City Thunder" → "Thunder". Falls back to the full name. */
+export const getTeamNickname = (t?: Team) => {
+    if (!t) return '';
+    const city = TEAM_CITY[t.id];
+    if (city && t.name.startsWith(city)) return t.name.slice(city.length).trim() || t.name;
+    return t.name;
+};
+
+/** Conference, in the app's language. */
+export const conferenceLabel = (t?: Team) => (t?.conference === 'East' ? 'Leste' : 'Oeste');
+
 export const getTeamSalary = (team: Team, players: { [key: string]: Player }) =>
     team.roster.reduce((total, pId) => total + (players[pId]?.salary || 0), 0);
 

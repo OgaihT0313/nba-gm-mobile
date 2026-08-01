@@ -1,14 +1,13 @@
 import './global.css';
 import React, { useState, useEffect, useCallback } from 'react';
-import { View, Text, Pressable } from 'react-native';
+import { View } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
-import { Image } from 'expo-image';
 import { useFonts, Inter_900Black_Italic } from '@expo-google-fonts/inter';
 import { JetBrainsMono_400Regular, JetBrainsMono_700Bold } from '@expo-google-fonts/jetbrains-mono';
 
 import { Team, Player, Coach, SeasonState, DraftState, Event, LiveTactic, Notification as NotificationType } from './types';
-import { teamsData, playersData, offseasonMoves, getTeamLogoUrl, picksOf } from './constants';
+import { teamsData, playersData, offseasonMoves, picksOf } from './constants';
 import { simulationEngine, ROTATION_MIN, ROTATION_MAX } from './services/simulationService';
 import { buildSeasonOwner, evaluateSeasonOutcome } from './services/ownerService';
 import { generateSchedule } from './services/scheduleService';
@@ -25,10 +24,11 @@ import { initCoaches, ageCoachesAndRetire, buildDevelopmentBonusMap, fireCoach, 
 import { generateAnalysis } from './services/geminiService';
 
 import { ThemeProvider } from './src/theme/ThemeProvider';
-import Logo from './components/Logo';
+import { COLORS } from './src/theme/tokens';
 import BottomNav from './components/BottomNav';
 import Home from './screens/Home';
 import TeamSelect from './screens/TeamSelect';
+import TeamConfirm from './screens/TeamConfirm';
 import SimulationScreen from './screens/SimulationScreen';
 import MyTeamHub from './screens/MyTeamHub';
 import Scout from './screens/Scout';
@@ -50,7 +50,7 @@ import Placeholder from './screens/Placeholder';
 import { IconName } from './components/Icon';
 
 type AppView =
-  | 'team-select' | 'home' | 'teams' | 'team-detail' | 'scout' | 'my-team' | 'draft' | 'free-agency'
+  | 'team-select' | 'team-confirm' | 'home' | 'teams' | 'team-detail' | 'scout' | 'my-team' | 'draft' | 'free-agency'
   | 'simulation' | 'standings' | 'leaders' | 'trade' | 'awards' | 'allstar' | 'playoffs' | 'live-game';
 
 // How often (in simulated games) a fresh league-wide commentary is requested.
@@ -116,6 +116,9 @@ export default function App() {
   const [isSimulating, setIsSimulating] = useState(false);
   const [targetGames, setTargetGames] = useState(0);
   const [selectedTeamId, setSelectedTeamId] = useState<string | null>(null);
+  // The franchise being previewed on the confirmation screen — chosen, but not
+  // committed to yet, so it must not touch `season`.
+  const [pendingTeamId, setPendingTeamId] = useState<string | null>(null);
   const [notifications, setNotifications] = useState<NotificationType[]>([]);
   const [isCommentaryLoading, setIsCommentaryLoading] = useState(false);
 
@@ -785,9 +788,34 @@ export default function App() {
   const renderScreen = () => {
     // Home must be checked before the `!season` catch-all below, or the hero
     // would never render — it's the pre-season entry point.
-    if (view === 'home') return <Home onStart={() => setView('team-select')} />;
+    if (view === 'home') {
+      return <Home onStart={() => setView('team-select')} onContinue={season ? () => setView('simulation') : undefined} season={season} />;
+    }
+    // The confirmation step is the moment the app gains the franchise color —
+    // it must be checked before the `!season` catch-all, since no season exists
+    // yet at that point.
+    if (view === 'team-confirm' && pendingTeamId) {
+      const t = (teamsData as Team[]).find((x) => x.id === pendingTeamId);
+      if (t) {
+        return (
+          <TeamConfirm
+            team={t}
+            players={playersData}
+            teams={teamsData as Team[]}
+            onBack={() => setView('team-select')}
+            onConfirm={() => initSeason(t.id)}
+          />
+        );
+      }
+    }
     if (!season || view === 'team-select') {
-      return <TeamSelect teams={teamsData as Team[]} players={playersData} onSelect={initSeason} />;
+      return (
+        <TeamSelect
+          teams={teamsData as Team[]}
+          players={playersData}
+          onSelect={(id) => { setPendingTeamId(id); setView('team-confirm'); }}
+        />
+      );
     }
     if (view === 'simulation') {
       return (
@@ -877,23 +905,16 @@ export default function App() {
 
   return (
     <SafeAreaProvider>
-      <ThemeProvider teamId={season?.userTeamId ?? null}>
-        <SafeAreaView className="flex-1 bg-slate-950" edges={['top', 'bottom']}>
+      {/* The confirmation screen already themes to the franchise being previewed:
+          per the design, choosing the team is the exact moment the app gains
+          color, so the accent lands one step before the season actually starts. */}
+      <ThemeProvider teamId={season?.userTeamId ?? (view === 'team-confirm' ? pendingTeamId : null)}>
+        {/* Only the bottom edge is inset. The redesign gives every screen a
+            full-bleed hero in the team's colors that has to bleed UNDER the
+            status bar, so the top inset is applied inside <Screen> (as padding
+            over the gradient) rather than as a letterbox around it. */}
+        <SafeAreaView className="flex-1" style={{ backgroundColor: COLORS.bg }} edges={['bottom']}>
           <StatusBar style="light" />
-
-          {/* Header */}
-          <View className="flex-row items-center justify-between px-4 py-3 border-b border-slate-900">
-            <View className="flex-row items-center gap-2.5">
-              <Logo size={26} color="#e2e8f0" />
-              <Text className="text-base font-display uppercase tracking-tight text-white">NBA GM</Text>
-            </View>
-            {userTeam ? (
-              <Pressable className="flex-row items-center gap-2" onPress={() => setView('my-team')}>
-                <Image source={{ uri: getTeamLogoUrl(userTeam) }} style={{ width: 22, height: 22 }} contentFit="contain" />
-                <Text className="text-xs font-bold text-slate-300">{userTeam.name}</Text>
-              </Pressable>
-            ) : null}
-          </View>
 
           {/* Screen. Keyed on `view` so each navigation remounts and fades in —
               the RN stand-in for the web's AnimatePresence page transitions. */}

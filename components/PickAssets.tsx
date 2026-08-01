@@ -35,7 +35,7 @@ export const PickChip: React.FC<{
     <Pressable
       onPress={onPress}
       disabled={!onPress}
-      className={`flex-row items-center gap-2.5 px-3 py-2 rounded-xl border ${selected ? '' : 'bg-slate-950/50 border-slate-800'}`}
+      className={`flex-row items-center gap-2.5 px-3 py-2 rounded-xl border ${selected ? '' : 'bg-sunken border-line'}`}
       style={selected && accent ? { backgroundColor: `${accent}33`, borderColor: accent } : undefined}
     >
       <View className="items-center w-11">
@@ -72,7 +72,7 @@ const PickAssets: React.FC<{
         <Text className="text-[10px] font-mono-bold text-slate-500">{picks.length}</Text>
       </View>
       {picks.length === 0 ? (
-        <Text className="text-[11px] text-slate-600 italic">
+        <Text className="text-[11px] text-slate-500 italic">
           Nenhum pick em mão — todos foram trocados.
         </Text>
       ) : (

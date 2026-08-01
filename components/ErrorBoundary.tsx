@@ -31,7 +31,7 @@ export class ErrorBoundary extends React.Component<Props, State> {
     if (!error) return this.props.children;
 
     return (
-      <View className="flex-1 bg-slate-950 items-center justify-center px-6">
+      <View className="flex-1 bg-ink items-center justify-center px-6">
         <Text className="text-white font-display text-lg uppercase tracking-tight mb-2">
           Algo deu errado
         </Text>

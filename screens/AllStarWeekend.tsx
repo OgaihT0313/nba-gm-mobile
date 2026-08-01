@@ -1,9 +1,12 @@
 import React from 'react';
-import { View, Text, ScrollView } from 'react-native';
+import { View, Text } from 'react-native';
+
 import { AllStarResult, Player, Team } from '../types';
+import { COLORS, INK } from '../src/theme/tokens';
+import Screen, { HeroContent, Body } from '../components/ui/Screen';
+import { Panel, MonoLabel, Eyebrow, HeroTitle, SectionLabel } from '../components/ui/kit';
 import { AwardCard } from '../components/AwardCards';
-import PlayerCard from '../components/PlayerCard';
-import PageHeader from '../components/PageHeader';
+import RosterRow from '../components/ui/RosterRow';
 
 interface AllStarWeekendProps {
   allStar?: AllStarResult;
@@ -12,49 +15,59 @@ interface AllStarWeekendProps {
   allStarGame: number;
 }
 
-const RosterColumn: React.FC<{ title: string; roster: string[]; players: { [key: string]: Player }; color: string }> = ({ title, roster, players, color }) => (
-  <View className="gap-2">
-    <Text className={`text-center text-sm font-black uppercase tracking-widest ${color}`}>{title}</Text>
-    {roster.map((pId) => (players[pId] ? <PlayerCard key={pId} player={players[pId]} /> : null))}
-  </View>
-);
-
 const AllStarWeekend: React.FC<AllStarWeekendProps> = ({ allStar, players, teams, allStarGame }) => {
   if (!allStar) {
     return (
-      <ScrollView className="flex-1">
-        <View className="px-4 py-6 gap-4">
-          <PageHeader title="All-Star Weekend" />
-          <Text className="text-slate-500 italic">
-            O All-Star Weekend acontece no jogo {allStarGame} da temporada regular.
-          </Text>
-        </View>
-      </ScrollView>
+      <Screen heroHeight={132}>
+        <HeroContent>
+          <Eyebrow>Meio da temporada</Eyebrow>
+          <HeroTitle size={28} style={{ marginTop: 9 }}>All-Star Weekend</HeroTitle>
+        </HeroContent>
+        <Body top={16}>
+          <Panel padding={16}>
+            <MonoLabel>Ainda não</MonoLabel>
+            <Text style={{ fontSize: 12, lineHeight: 18, color: INK.body, marginTop: 8 }}>
+              O All-Star Weekend acontece no jogo {allStarGame} da temporada regular.
+            </Text>
+          </Panel>
+        </Body>
+      </Screen>
     );
   }
 
   const winnerLabel = allStar.winner === 'east' ? 'Leste' : 'Oeste';
+  const winnerColor = allStar.winner === 'east' ? COLORS.info : COLORS.badSoft;
+
+  const roster = (ids: string[]) =>
+    ids
+      .map((id) => players[id])
+      .filter(Boolean)
+      .map((p) => <RosterRow key={p.id} player={p} compact meta={`${p.age}a · ${p.pos}`} />);
 
   return (
-    <ScrollView className="flex-1">
-      <View className="px-4 py-6 gap-6">
-        <PageHeader title="All-Star Weekend" />
+    <Screen heroHeight={132}>
+      <HeroContent>
+        <Eyebrow>Meio da temporada</Eyebrow>
+        <HeroTitle size={28} style={{ marginTop: 9 }}>All-Star Weekend</HeroTitle>
+      </HeroContent>
 
-        <View className="bg-slate-900 rounded-card border border-slate-800 p-6 items-center gap-2">
-          <Text className="text-[10px] font-bold text-amber-500 uppercase tracking-widest">All-Star Game</Text>
-          <Text className="text-2xl font-black italic uppercase tracking-tighter text-white text-center">
-            Conferência {winnerLabel} venceu!
-          </Text>
-        </View>
+      <Body top={16}>
+        <Panel bar={winnerColor} padding={16}>
+          <MonoLabel color={COLORS.gold}>All-Star Game</MonoLabel>
+          <HeroTitle size={22} style={{ marginTop: 8 }}>Conferência {winnerLabel} venceu</HeroTitle>
+        </Panel>
 
         <AwardCard title="MVP do All-Star Game" winnerId={allStar.mvpId} players={players} teams={teams} />
-        <AwardCard title="Concurso de Enterradas" winnerId={allStar.dunkWinnerId} players={players} teams={teams} />
-        <AwardCard title="Concurso de 3 Pontos" winnerId={allStar.threePointWinnerId} players={players} teams={teams} />
+        <AwardCard title="Concurso de enterradas" winnerId={allStar.dunkWinnerId} players={players} teams={teams} />
+        <AwardCard title="Concurso de 3 pontos" winnerId={allStar.threePointWinnerId} players={players} teams={teams} />
 
-        <RosterColumn title="Conferência Leste" roster={allStar.eastRoster} players={players} color="text-sky-500" />
-        <RosterColumn title="Conferência Oeste" roster={allStar.westRoster} players={players} color="text-red-500" />
-      </View>
-    </ScrollView>
+        <SectionLabel color={COLORS.info}>Conferência Leste</SectionLabel>
+        {roster(allStar.eastRoster)}
+
+        <SectionLabel color={COLORS.badSoft}>Conferência Oeste</SectionLabel>
+        {roster(allStar.westRoster)}
+      </Body>
+    </Screen>
   );
 };
 

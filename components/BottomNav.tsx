@@ -1,7 +1,28 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, Pressable, Modal } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
 import Icon, { IconName } from './Icon';
 import { useTheme } from '../src/theme/ThemeProvider';
+import { COLORS, onAccent } from '../src/theme/tokens';
+
+// The rounded 20px square behind each tab icon. Active gets the franchise
+// gradient; idle gets the flat navy chip.
+const NavChip: React.FC<{ active: boolean; icon: IconName; accent: { primary: string; secondary: string } }> = ({
+  active,
+  icon,
+  accent,
+}) => {
+  const box = { width: 30, height: 30, borderRadius: 9, alignItems: 'center', justifyContent: 'center' } as const;
+  return active ? (
+    <LinearGradient colors={[accent.primary, accent.secondary]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={box}>
+      <Icon name={icon} size={17} color="#ffffff" strokeWidth={2} />
+    </LinearGradient>
+  ) : (
+    <View style={[box, { backgroundColor: COLORS.navIdleChip }]}>
+      <Icon name={icon} size={17} color={COLORS.navIdle} strokeWidth={1.8} />
+    </View>
+  );
+};
 
 interface NavItem {
   id: string;
@@ -63,10 +84,11 @@ const BottomNav: React.FC<BottomNavProps> = ({ view, onNavigate, hasSeason, faOp
       <Modal visible={moreOpen} transparent animationType="slide" onRequestClose={() => setMoreOpen(false)}>
         <Pressable className="flex-1 bg-black/60 justify-end" onPress={() => setMoreOpen(false)}>
           <Pressable
-            className="bg-slate-950 border-t border-slate-800 rounded-t-3xl p-4 pb-8"
+            className="rounded-t-3xl p-4 pb-8"
+            style={{ backgroundColor: COLORS.navBg, borderTopWidth: 1, borderTopColor: COLORS.navLine }}
             onPress={(e) => e.stopPropagation()}
           >
-            <View className="w-10 h-1 bg-slate-700 rounded-full self-center mb-4" />
+            <View className="w-10 h-1 rounded-full self-center mb-4" style={{ backgroundColor: COLORS.line }} />
             <View className="flex-row flex-wrap justify-between">
               {MORE_ITEMS.map((item) => {
                 const disabled = isDisabled(item.id);
@@ -75,12 +97,18 @@ const BottomNav: React.FC<BottomNavProps> = ({ view, onNavigate, hasSeason, faOp
                   <Pressable
                     key={item.id}
                     onPress={() => navigate(item.id)}
-                    className={`w-[31%] mb-3 items-center justify-center gap-2 py-4 rounded-2xl ${
-                      active ? 'bg-accent' : 'bg-slate-900'
-                    } ${disabled ? 'opacity-30' : ''}`}
+                    className={`w-[31%] mb-3 items-center justify-center gap-2 py-4 rounded-2xl ${disabled ? 'opacity-30' : ''}`}
+                    style={{
+                      backgroundColor: active ? accent.primary : COLORS.panel,
+                      borderWidth: 1,
+                      borderColor: active ? accent.primary : COLORS.line,
+                    }}
                   >
-                    <Icon name={item.icon} size={22} color={active ? '#ffffff' : '#cbd5e1'} />
-                    <Text className={`text-[10px] font-bold uppercase tracking-wide text-center ${active ? 'text-white' : 'text-slate-300'}`}>
+                    <Icon name={item.icon} size={22} color={active ? onAccent(accent.primary) : '#cbd5e1'} />
+                    <Text
+                      className="text-[10px] font-bold uppercase tracking-wide text-center"
+                      style={{ color: active ? onAccent(accent.primary) : '#cbd5e1' }}
+                    >
                       {item.label}
                     </Text>
                   </Pressable>
@@ -91,7 +119,14 @@ const BottomNav: React.FC<BottomNavProps> = ({ view, onNavigate, hasSeason, faOp
         </Pressable>
       </Modal>
 
-      <View className="flex-row bg-slate-950 border-t border-slate-900">
+      {/* The redesign's nav: darker than the page, its own hairline, and the
+          active tab marked by the team's own primary→secondary gradient rather
+          than a tinted icon — the only place in the chrome the franchise color
+          appears once you've scrolled past a screen's hero. */}
+      <View
+        className="flex-row"
+        style={{ backgroundColor: COLORS.navBg, borderTopWidth: 1, borderTopColor: COLORS.navLine, paddingTop: 7, paddingBottom: 9 }}
+      >
         {PRIMARY_ITEMS.map((item) => {
           const disabled = isDisabled(item.id);
           const active = view === item.id;
@@ -99,18 +134,24 @@ const BottomNav: React.FC<BottomNavProps> = ({ view, onNavigate, hasSeason, faOp
             <Pressable
               key={item.id}
               onPress={() => navigate(item.id)}
-              className={`flex-1 items-center justify-center gap-1 py-2.5 ${disabled ? 'opacity-30' : ''}`}
+              className={`flex-1 items-center justify-center gap-1.5 py-1 ${disabled ? 'opacity-30' : ''}`}
             >
-              <Icon name={item.icon} size={21} color={active ? accent.primary : '#64748b'} strokeWidth={active ? 2 : 1.8} />
-              <Text className="text-[9px] font-bold uppercase tracking-wide" style={{ color: active ? accent.primary : '#64748b' }}>
+              <NavChip active={active} icon={item.icon} accent={accent} />
+              <Text
+                className={active ? 'text-[8.5px] font-black' : 'text-[8.5px] font-semibold'}
+                style={{ color: active ? '#fff' : COLORS.navIdle }}
+              >
                 {item.label}
               </Text>
             </Pressable>
           );
         })}
-        <Pressable onPress={() => setMoreOpen(true)} className="flex-1 items-center justify-center gap-1 py-2.5">
-          <Icon name="menu" size={21} color={moreActive ? accent.primary : '#64748b'} />
-          <Text className="text-[9px] font-bold uppercase tracking-wide" style={{ color: moreActive ? accent.primary : '#64748b' }}>
+        <Pressable onPress={() => setMoreOpen(true)} className="flex-1 items-center justify-center gap-1.5 py-1">
+          <NavChip active={moreActive} icon="menu" accent={accent} />
+          <Text
+            className={moreActive ? 'text-[8.5px] font-black' : 'text-[8.5px] font-semibold'}
+            style={{ color: moreActive ? '#fff' : COLORS.navIdle }}
+          >
             Mais
           </Text>
         </Pressable>

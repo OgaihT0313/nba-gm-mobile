@@ -594,9 +594,19 @@ const applyDeciderResult = (playoffState: PlayoffState, teamA: Team, teamB: Team
         newState.finals = series;
         newState.champion = winner;
     } else {
-        const bracket = newState[ref.conf].bracket;
-        bracket[ref.round][ref.index] = series;
-        if (ref.round === 'round3') bracket.winner = winner;
+        // NOTE the two `winner` fields: PlayoffBracketData declares one and so
+        // does PlayoffConference, but only the CONFERENCE one builds the Finals
+        // (see advancePlayoffRound's `newState.east.winner &&
+        // newState.west.winner`). Writing to the bracket's instead type-checks
+        // fine and silently soft-locks the save — the conference never reports
+        // a champion, the Finals are never created, and "Simular rodada"
+        // no-ops forever. Reachable only by winning a live Game 7 in the
+        // conference finals. The conf-finals MVP is left to the catch-up block
+        // in advancePlayoffRound, which has `players` in scope and also repairs
+        // saves already stuck from before this was fixed.
+        const conference = newState[ref.conf];
+        conference.bracket[ref.round][ref.index] = series;
+        if (ref.round === 'round3') conference.winner = winner;
     }
     newState.pendingDecider = undefined;
     return newState;
@@ -1129,6 +1139,19 @@ const advancePlayoffRound = (
         }
         if (bracket.bracket.round2.every((s: PlayoffSeries) => s.w) && !bracket.bracket.round3[0].m[0]) {
             bracket.bracket.round3[0] = { m: [bracket.bracket.round2[0].w, bracket.bracket.round2[1].w], s: '0-0' };
+            somethingSimulated = true;
+        }
+        // Same catch-up, one round further on: a conference final decided by a
+        // live Game 7 leaves the series resolved but the conference champion
+        // unannounced, and the Finals are seeded from THAT. Without this the
+        // bracket dead-ends after the conf finals. Written to be idempotent and
+        // to run on load, so a save already stuck in that state repairs itself
+        // on the next "Simular rodada" rather than staying bricked.
+        if (bracket.bracket.round3.every((s: PlayoffSeries) => s.w) && !bracket.winner) {
+            const confChampion = bracket.bracket.round3[0].w!;
+            bracket.winner = confChampion;
+            const mvpKey = conferenceKey === 'east' ? 'eastConfFinalsMVP' : 'westConfFinalsMVP';
+            if (!newState.awards[mvpKey]) newState.awards[mvpKey] = pickSeriesMVP(confChampion, players);
             somethingSimulated = true;
         }
 

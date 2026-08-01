@@ -1,44 +1,27 @@
 import React from 'react';
-import { View, Text, ScrollView } from 'react-native';
+import { View, Text } from 'react-native';
 import { Image } from 'expo-image';
-import { PlayoffState, PlayoffSeries, Team } from '../types';
-import { getTeamLogoUrl, getTeamTricode } from '../constants';
-import { useTheme } from '../src/theme/ThemeProvider';
-import Icon from './Icon';
 
-// RN port of the bracket. The web laid this out at min-width 1200px inside an
-// overflow-x container; here it's a horizontal ScrollView (same "arraste para o
-// lado" affordance). The web's color-mix() winner highlight becomes an 8-digit
-// alpha hex off the live accent.
+import { PlayoffState, PlayoffSeries, Team } from '../types';
+import { getTeamLogoUrl, getTeamNickname } from '../constants';
+import { useTheme } from '../src/theme/ThemeProvider';
+import { COLORS, INK, RADIUS, withAlpha } from '../src/theme/tokens';
+import { Panel, MonoLabel, Stat, SectionLabel } from './ui/kit';
+
+// Design 3c. The old bracket was the web layout ported literally: a 1200px-wide
+// horizontal scroll with 192px cards, which on a phone meant dragging sideways
+// and reading three-letter tricodes. The redesign turns it into a COLUMN — one
+// series per card, top to bottom, your team always visibly marked — which is
+// what actually fits a 390px screen.
+
 const NBA_FALLBACK = 'https://a.espncdn.com/i/teamlogos/nba/500/nba.png';
 
-const Matchup: React.FC<{ team: Team | null; seed: number | string; score?: string; isTop: boolean; accent: string }> = ({ team, seed, score, isTop, accent }) => {
-  if (!team) return <View className="h-10 bg-slate-900/20 rounded-xl border border-slate-800/50 mb-1" />;
-
-  const scoreParts = score ? score.split('-').map(Number) : [0, 0];
-  const teamScore = isTop ? scoreParts[0] : scoreParts[1];
-  const opponentScore = isTop ? scoreParts[1] : scoreParts[0];
-  const isWinner = !!score && teamScore > opponentScore;
-  const isLoser = !!score && teamScore < opponentScore;
-
-  return (
-    <View
-      className={`flex-row items-center justify-between p-2 rounded-xl border ${isTop ? 'mb-1' : ''} ${isLoser ? 'bg-slate-900/40 border-slate-800/50 opacity-50' : 'bg-slate-900/60 border-slate-800/50'}`}
-      style={isWinner ? { backgroundColor: `${accent}33`, borderColor: `${accent}4d` } : undefined}
-    >
-      <View className="flex-row items-center gap-2 flex-1 min-w-0">
-        <Text className="text-[8px] font-black text-slate-500 w-4">[{seed}]</Text>
-        <Image source={{ uri: getTeamLogoUrl(team) }} placeholder={{ uri: NBA_FALLBACK }} style={{ width: 20, height: 20 }} contentFit="contain" />
-        {/* Tricode, not the full name: this card is only 192px wide, so anything
-            past ~9 chars ("Denver Nuggets") already clipped mid-word — every
-            team.id is already a real 3-letter tricode, same fix broadcasts use. */}
-        <Text className="text-xs font-black text-white uppercase tracking-tight italic flex-1">{getTeamTricode(team)}</Text>
-      </View>
-      {score ? (
-        <Text className="font-mono-bold text-xs" style={{ color: isWinner ? accent : '#64748b' }}>{teamScore}</Text>
-      ) : null}
-    </View>
-  );
+const ROUND_LABEL: Record<string, string> = {
+  playin: 'Play-in',
+  round1: 'Primeira rodada',
+  round2: 'Semifinais de conferência',
+  round3: 'Final de conferência',
+  finals: 'Finais da NBA',
 };
 
 // Seeds 1-6 keep their true regular-season rank; a play-in survivor is
@@ -52,112 +35,201 @@ const seedWithinConference = (conf: PlayoffState['east'], teamId: string): numbe
   return rawIndex !== -1 ? rawIndex + 1 : -1;
 };
 
-const Series: React.FC<{ series: PlayoffSeries; playoffState: PlayoffState; conference: string; round: string; accent: string }> = ({ series, playoffState, conference, round, accent }) => {
-  const [team1, team2] = series.m;
-
-  const getSeed = (teamId?: string) => {
-    if (!teamId) return '?';
-    if (conference === 'east' || conference === 'west') {
-      const conf = conference === 'east' ? playoffState.east : playoffState.west;
-      if (round === 'playin') {
-        const idx = conf.initialSeeds.findIndex((t) => t.id === teamId);
-        return idx !== -1 ? idx + 1 : '?';
-      }
-      const seed = seedWithinConference(conf, teamId);
-      return seed !== -1 ? seed : '?';
-    }
-    const eastSeed = seedWithinConference(playoffState.east, teamId);
-    if (eastSeed !== -1) return eastSeed;
-    const westSeed = seedWithinConference(playoffState.west, teamId);
-    return westSeed !== -1 ? westSeed : '?';
-  };
-
+/** One side of a series. */
+const SeriesSide: React.FC<{
+  team: Team | null;
+  seed: number | string;
+  wins: number;
+  leads: boolean;
+  decided: boolean;
+}> = ({ team, seed, wins, leads, decided }) => {
+  if (!team) {
+    return (
+      <View className="flex-row items-center" style={{ gap: 11, opacity: 0.35 }}>
+        <View style={{ width: 32, height: 32, borderRadius: RADIUS.pill, backgroundColor: COLORS.line }} />
+        <Text style={{ flex: 1, fontSize: 13, color: INK.faint, fontStyle: 'italic' }}>A definir</Text>
+      </View>
+    );
+  }
+  // Once a series is over the loser dims; while it's live neither side does.
+  const dim = decided && !leads;
   return (
-    <View className="w-48 p-3 bg-slate-950/40 rounded-2xl border border-slate-800/50">
-      <Matchup team={team1} seed={getSeed(team1?.id)} score={series.s} isTop accent={accent} />
-      <Matchup team={team2} seed={getSeed(team2?.id)} score={series.s} isTop={false} accent={accent} />
+    <View className="flex-row items-center" style={{ gap: 11 }}>
+      <Image
+        source={{ uri: getTeamLogoUrl(team) }}
+        placeholder={{ uri: NBA_FALLBACK }}
+        style={{ width: 32, height: 32, opacity: dim ? 0.5 : 1 }}
+        contentFit="contain"
+      />
+      <View style={{ flex: 1 }}>
+        <Text
+          className="font-extrabold"
+          style={{ fontSize: 13, color: dim ? 'rgba(255,255,255,0.7)' : '#fff' }}
+          numberOfLines={1}
+        >
+          {getTeamNickname(team)}
+        </Text>
+        <MonoLabel size={9.5} color={dim ? 'rgba(255,255,255,0.35)' : INK.meta} style={{ letterSpacing: 0 }}>
+          {seed}º seed
+        </MonoLabel>
+      </View>
+      <Stat size={26} color={leads ? COLORS.goodSoft : 'rgba(255,255,255,0.5)'}>{wins}</Stat>
     </View>
   );
 };
 
-const Round: React.FC<{ matchups: PlayoffSeries[]; playoffState: PlayoffState; round: string; conference: string; accent: string }> = ({ matchups, playoffState, round, conference, accent }) => (
-  <View className="justify-around gap-6">
-    {matchups.map((series, index) => (
-      <Series key={index} series={series} playoffState={playoffState} round={round} conference={conference} accent={accent} />
-    ))}
-  </View>
-);
+/** A whole series as one card. */
+export const SeriesCard: React.FC<{
+  series: PlayoffSeries;
+  seeds: (teamId?: string) => number | string;
+  userTeamId?: string;
+  /** Set when this exact series is the paused Game 7 the user plays live. */
+  decider?: boolean;
+}> = ({ series, seeds, userTeamId, decider }) => {
+  const { accent } = useTheme();
+  const [a, b] = series.m;
+  const parts = series.s ? series.s.split('-').map(Number) : [0, 0];
+  const [winsA, winsB] = [parts[0] || 0, parts[1] || 0];
+  const decided = !!series.w;
+  const mine = a?.id === userTeamId || b?.id === userTeamId;
+  // A series that hasn't been played is 0-0, where `>=` would call BOTH sides
+  // the leader and paint two green zeros. Nobody leads until someone does.
+  const started = winsA > 0 || winsB > 0;
 
-const ConferenceBracket: React.FC<{ conference: PlayoffState['east']; confKey: 'east' | 'west'; playoffState: PlayoffState; accent: string }> = ({ conference, confKey, playoffState, accent }) => {
-  if (!conference.bracket) return null;
-  const showPlayIn = conference.playIn && conference.bracket.round1.length === 0;
+  return (
+    <Panel highlight={mine ? accent.primary : undefined} padding={14}>
+      <SeriesSide team={a} seed={seeds(a?.id)} wins={winsA} leads={started && winsA >= winsB} decided={decided} />
+      <View style={{ height: 1, backgroundColor: COLORS.line, marginVertical: 11 }} />
+      <SeriesSide team={b} seed={seeds(b?.id)} wins={winsB} leads={started && winsB >= winsA} decided={decided} />
 
-  if (showPlayIn) {
+      {decider ? (
+        <View
+          style={{
+            marginTop: 12, paddingVertical: 9, paddingHorizontal: 11, borderRadius: RADIUS.control,
+            backgroundColor: withAlpha(COLORS.cta, 0.13), borderWidth: 1, borderColor: withAlpha(COLORS.cta, 0.35),
+          }}
+        >
+          <MonoLabel size={10} color={COLORS.badSoft} style={{ textAlign: 'center', letterSpacing: 1.2 }}>
+            Jogo 7 decisivo — você comanda ao vivo
+          </MonoLabel>
+        </View>
+      ) : decided && series.w ? (
+        <MonoLabel size={9.5} color={COLORS.goodSoft} style={{ marginTop: 12, textAlign: 'center', letterSpacing: 1 }}>
+          {getTeamNickname(series.w)} avançam
+        </MonoLabel>
+      ) : null}
+    </Panel>
+  );
+};
+
+/** Every live/finished series in one conference, newest round first. */
+const ConferenceColumn: React.FC<{
+  conference: PlayoffState['east'];
+  label: string;
+  labelColor: string;
+  userTeamId?: string;
+  deciderIndex?: { round: 'round1' | 'round2' | 'round3'; index: number };
+}> = ({ conference, label, labelColor, userTeamId, deciderIndex }) => {
+  const seeds = (teamId?: string) => {
+    if (!teamId) return '?';
+    const s = seedWithinConference(conference, teamId);
+    return s !== -1 ? s : '?';
+  };
+
+  // Play-in comes first and alone: until it resolves there's no round 1 to show.
+  if (conference.playIn && conference.bracket.round1.length === 0) {
+    const playIn = conference.playIn;
+    // Seeds here must come from the RAW standings order, not seedWithinConference:
+    // that function reports the post-play-in seed a team will inherit (the 7v8
+    // winner becomes 7, the final-seed winner becomes 8), so during the play-in
+    // itself it labelled both sides of the 7v8 game "7º seed".
+    const playInSeeds = (teamId?: string) => {
+      if (!teamId) return '?';
+      const i = conference.initialSeeds.findIndex((t) => t.id === teamId);
+      return i !== -1 ? i + 1 : '?';
+    };
     return (
-      <View className="gap-2">
-        <Text className="text-center text-[9px] font-black uppercase tracking-widest text-amber-500 mb-2">Play-In</Text>
-        <Round
-          matchups={[conference.playIn!.sevenEight, conference.playIn!.nineTen, conference.playIn!.finalSeed]}
-          round="playin"
-          conference={confKey}
-          playoffState={playoffState}
-          accent={accent}
-        />
+      <View style={{ gap: 10 }}>
+        <SectionLabel color={labelColor}>{label} · {ROUND_LABEL.playin}</SectionLabel>
+        {[playIn.sevenEight, playIn.nineTen, playIn.finalSeed].map((s, i) => (
+          <SeriesCard key={i} series={s} seeds={playInSeeds} userTeamId={userTeamId} />
+        ))}
       </View>
     );
   }
 
-  // The east half is mirrored so both conferences funnel inward toward the
-  // Finals — round 1 on the outside, conference final adjacent to the middle.
-  // Without this the east reads inside-out (its round 1 touching the Finals).
+  const rounds: { key: 'round3' | 'round2' | 'round1'; list: PlayoffSeries[] }[] = [
+    { key: 'round3', list: conference.bracket.round3 },
+    { key: 'round2', list: conference.bracket.round2 },
+    { key: 'round1', list: conference.bracket.round1 },
+  ];
+
   return (
-    <View className={`gap-6 ${confKey === 'west' ? 'flex-row' : 'flex-row-reverse'}`}>
-      <Round matchups={conference.bracket.round1} round="round1" conference={confKey} playoffState={playoffState} accent={accent} />
-      <Round matchups={conference.bracket.round2} round="round2" conference={confKey} playoffState={playoffState} accent={accent} />
-      <Round matchups={conference.bracket.round3} round="round3" conference={confKey} playoffState={playoffState} accent={accent} />
+    <View style={{ gap: 10 }}>
+      {rounds
+        .filter((r) => r.list.length > 0)
+        .map((r) => (
+          <View key={r.key} style={{ gap: 10 }}>
+            <SectionLabel color={labelColor}>{label} · {ROUND_LABEL[r.key]}</SectionLabel>
+            {r.list.map((s, i) => (
+              <SeriesCard
+                key={i}
+                series={s}
+                seeds={seeds}
+                userTeamId={userTeamId}
+                decider={deciderIndex?.round === r.key && deciderIndex.index === i}
+              />
+            ))}
+          </View>
+        ))}
     </View>
   );
 };
 
-const PlayoffBracket: React.FC<{ playoffState: PlayoffState | null }> = ({ playoffState }) => {
-  const { accent } = useTheme();
+const PlayoffBracket: React.FC<{ playoffState: PlayoffState | null; userTeamId?: string }> = ({
+  playoffState,
+  userTeamId,
+}) => {
   if (!playoffState) return null;
+  const pending = playoffState.pendingDecider;
+
+  // Seeds for the Finals come from whichever conference the team belongs to.
+  const finalsSeeds = (teamId?: string) => {
+    if (!teamId) return '?';
+    const east = seedWithinConference(playoffState.east, teamId);
+    if (east !== -1) return east;
+    const west = seedWithinConference(playoffState.west, teamId);
+    return west !== -1 ? west : '?';
+  };
 
   return (
-    <View>
-      <Text className="text-center text-[10px] font-bold text-slate-600 uppercase tracking-widest mb-2">
-        ← Arraste para o lado para ver o chaveamento completo →
-      </Text>
-      <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ paddingHorizontal: 8, gap: 24, alignItems: 'center' }}>
-        {/* Western */}
-        <View className="gap-4">
-          <Text className="text-center text-xs font-black uppercase tracking-widest text-red-500">Western Conference</Text>
-          <ConferenceBracket conference={playoffState.west} confKey="west" playoffState={playoffState} accent={accent.primary} />
+    <View style={{ gap: 14 }}>
+      {playoffState.finals ? (
+        <View style={{ gap: 10 }}>
+          <SectionLabel color={COLORS.gold}>{ROUND_LABEL.finals}</SectionLabel>
+          <SeriesCard
+            series={playoffState.finals}
+            seeds={finalsSeeds}
+            userTeamId={userTeamId}
+            decider={pending?.scope === 'finals'}
+          />
         </View>
+      ) : null}
 
-        {/* Finals */}
-        <View className="items-center gap-6">
-          <View className="items-center gap-2">
-            <View className="w-16 h-16 bg-amber-500 rounded-full items-center justify-center border-4 border-slate-950">
-              <Icon name="awards" size={28} color="#020617" strokeWidth={2} />
-            </View>
-            <Text className="text-xl font-black italic uppercase tracking-tighter text-white">NBA Finals</Text>
-          </View>
-          {playoffState.finals ? (
-            <Series series={playoffState.finals} round="finals" conference="finals" playoffState={playoffState} accent={accent.primary} />
-          ) : (
-            <View className="w-48 h-24 bg-slate-900/20 rounded-2xl border border-dashed border-slate-800 items-center justify-center">
-              <Text className="text-[10px] font-bold text-slate-600 uppercase tracking-widest">Aguardando Finalistas</Text>
-            </View>
-          )}
-        </View>
-
-        {/* Eastern */}
-        <View className="gap-4">
-          <Text className="text-center text-xs font-black uppercase tracking-widest text-sky-500">Eastern Conference</Text>
-          <ConferenceBracket conference={playoffState.east} confKey="east" playoffState={playoffState} accent={accent.primary} />
-        </View>
-      </ScrollView>
+      <ConferenceColumn
+        conference={playoffState.west}
+        label="Oeste"
+        labelColor={COLORS.badSoft}
+        userTeamId={userTeamId}
+        deciderIndex={pending?.scope === 'conference' && pending.conf === 'west' ? { round: pending.round, index: pending.index } : undefined}
+      />
+      <ConferenceColumn
+        conference={playoffState.east}
+        label="Leste"
+        labelColor={COLORS.info}
+        userTeamId={userTeamId}
+        deciderIndex={pending?.scope === 'conference' && pending.conf === 'east' ? { round: pending.round, index: pending.index } : undefined}
+      />
     </View>
   );
 };
