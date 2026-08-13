@@ -84,22 +84,6 @@ export const teamRating = (team: Team, players: { [key: string]: Player }): numb
   return Math.round(num / den);
 };
 
-export type Difficulty = 'easy' | 'medium' | 'hard';
-
-/**
- * How hard this franchise is to win with, straight off the data's own league
- * ranking — picking the Wizards is not the same job as picking the Thunder,
- * and the picker says so before you commit.
- */
-export const teamDifficulty = (team: Team): Difficulty =>
-  team.powerRank <= 10 ? 'easy' : team.powerRank <= 20 ? 'medium' : 'hard';
-
-export const DIFFICULTY_LABEL: Record<Difficulty, string> = {
-  easy: 'Fácil',
-  medium: 'Médio',
-  hard: 'Difícil',
-};
-
 /**
  * Rough win probability for `team` against `opponent`, as a display-only
  * projection (a logistic on the rotation-strength gap plus home court). It is

@@ -189,12 +189,12 @@ export const hireCoach = (coaches: { [key: string]: Coach }, coach: Coach): { [k
 });
 
 // Offseason pass: every coach ages a year; past 60 there's a rising chance he
-// retires, forcing an automatic replacement (same "informational event, never
-// blocking" treatment as player retirement in careerService.ts — the user can
-// always fire the replacement immediately from the coaching panel if unhappy).
-// Coaches have no persisted history (unlike players, nothing else references
-// one by id once he's off a roster), so a retirement is just a removal + a
-// fresh hire, no career bookkeeping needed.
+// retires, forcing an automatic replacement — an informational event, never
+// blocking (the user can always fire the replacement immediately from the
+// coaching panel if unhappy). Players have no retirement system at all; this
+// is coach-only. Coaches have no persisted history either (nothing else
+// references one by id once he's off a roster), so a retirement is just a
+// removal + a fresh hire, no career bookkeeping needed.
 export const ageCoachesAndRetire = (
     teams: Team[],
     coaches: { [key: string]: Coach },

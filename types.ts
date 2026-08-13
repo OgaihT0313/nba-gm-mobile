@@ -76,14 +76,6 @@ export interface Player {
   ovrLastSeason?: number;
   seasonStats?: PlayerSeasonStats;
   career?: PlayerCareer;
-  // Set when the player hangs it up in the offseason (see rollRetirements in
-  // services/careerService.ts). A retired player is removed from every roster
-  // but deliberately KEPT in SeasonState.players, because award history and
-  // draft/championship records reference players by id and must never dangle.
-  // Everything that treats "not on a roster" as "available" therefore has to
-  // exclude them — getFreeAgents, the Scout list, the leaders fallback.
-  retired?: boolean;
-  retiredSeason?: number; // 1-indexed season after which they retired
   // True only while the player is an UNDRAFTED prospect in the current draft
   // class. Their real ovr/attributes are already in this object (the sim needs
   // them the moment they're picked), so the fog of war is purely a display
@@ -342,6 +334,12 @@ export interface SeasonState {
   // time "Iniciar Nova Temporada" is used — later season transitions have no
   // further real-world data to diff against.
   offseasonMovesApplied?: boolean;
+  // Which historical era (see data/eras/index.ts) seeded this save's starting
+  // roster — display/record-keeping only, undefined for today's live
+  // snapshot (the default, pre-Eras behavior). Everything past initSeason
+  // plays identically regardless of era: this is a fixed starting point, not
+  // a flag the sim branches on.
+  era?: { id: string; label: string; seasonLabel: string };
   // Latest AI-generated league-wide commentary and the gamesPlayed checkpoint
   // it was generated at, so the app knows not to re-request it until the next
   // COMMENTARY_INTERVAL checkpoint (see App.tsx).
@@ -375,19 +373,15 @@ export interface SeasonState {
   // handleStartSeason once rosters are final). Empty during the draft/free-
   // agency offseason phases, when there's no active schedule to speak of.
   schedule: ScheduleGame[];
-  // Player ids who retired in the most recent offseason, so the draft screen
-  // can show the class that just left the league. Replaced (not appended) each
-  // offseason; the permanent record is Player.retired/retiredSeason.
-  lastRetirements?: string[];
   // Pending trade proposals CPU teams have sent the user during the season
   // (generated in simulateDay, shown in the Trade Center). Cleared at the
   // trade deadline and at each season reset.
   tradeOffers?: TradeOffer[];
   // Every coach currently employed by a team, keyed by id — a closed set like
   // `players`, but coaches who leave (fired or retired) are simply dropped;
-  // nothing else references a coach by id once he's off a roster, so unlike a
-  // retired player there's no history to preserve. Built by initCoaches at
-  // initSeason, aged/replaced each offseason (see services/coachService.ts).
+  // nothing else references a coach by id once he's off a roster, so there's no
+  // history to preserve. Built by initCoaches at initSeason, aged/replaced each
+  // offseason (see services/coachService.ts).
   coaches: { [key: string]: Coach };
   // Present only while a Game 7 (or Finals-clinching game) involving the user
   // is being played out live — see PlayoffState.pendingDecider. Cleared once

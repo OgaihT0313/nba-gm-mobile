@@ -51,7 +51,7 @@ const LeagueLeaders: React.FC<{ players: { [key: string]: Player }; teams: Team[
   // Pre-season: no games yet → fall back to a ratings list.
   if (withStats.length === 0) {
     const topByOvr = (Object.values(players) as Player[])
-      .filter((p) => !p.retired && !p.prospect)
+      .filter((p) => !p.prospect)
       .sort((a, b) => b.ovr - a.ovr)
       .slice(0, 8);
     return (

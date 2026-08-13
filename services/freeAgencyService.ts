@@ -33,13 +33,11 @@ export const newContractYears = (p: Player): number => {
 export const getFreeAgents = (teams: Team[], players: PlayerMap): Player[] => {
     const rostered = new Set<string>();
     teams.forEach(t => t.roster.forEach(id => rostered.add(id)));
-    // Retired players are off every roster but are NOT on the market — they stay
-    // in the players map only so historical ids resolve (see Player.retired).
-    // Undrafted prospects are off every roster too, and are not signable either:
-    // they're in the draft pool, and their true rating is still fogged, so they
-    // must never surface in a list sorted by real value (see Player.prospect).
+    // Undrafted prospects are off every roster but are not signable: they're in
+    // the draft pool, and their true rating is still fogged, so they must never
+    // surface in a list sorted by real value (see Player.prospect).
     return Object.values(players)
-        .filter(p => !rostered.has(p.id) && !p.retired && !p.prospect)
+        .filter(p => !rostered.has(p.id) && !p.prospect)
         .sort((a, b) => playerValue(b) - playerValue(a));
 };
 

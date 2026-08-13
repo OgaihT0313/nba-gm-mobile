@@ -8,6 +8,7 @@ import { JetBrainsMono_400Regular, JetBrainsMono_700Bold } from '@expo-google-fo
 
 import { Team, Player, Coach, SeasonState, DraftState, Event, LiveTactic, Notification as NotificationType } from './types';
 import { teamsData, playersData, offseasonMoves, picksOf } from './constants';
+import { eraById } from './data/eras';
 import { simulationEngine, ROTATION_MIN, ROTATION_MAX } from './services/simulationService';
 import { buildSeasonOwner, evaluateSeasonOutcome } from './services/ownerService';
 import { generateSchedule } from './services/scheduleService';
@@ -19,7 +20,7 @@ import {
   scoutProspect, consensusValue, SCOUT_BUDGET,
 } from './services/draftService';
 import { processOffseasonContracts, runCpuFreeAgency, signFreeAgentLegality, newContractYears, evaluateSigningInterest } from './services/freeAgencyService';
-import { accumulateCareers, rollRetirements, championRosterOf } from './services/careerService';
+import { accumulateCareers, championRosterOf } from './services/careerService';
 import { initCoaches, ageCoachesAndRetire, buildDevelopmentBonusMap, fireCoach, hireCoach } from './services/coachService';
 import { generateAnalysis } from './services/geminiService';
 
@@ -27,6 +28,7 @@ import { ThemeProvider } from './src/theme/ThemeProvider';
 import { COLORS } from './src/theme/tokens';
 import BottomNav from './components/BottomNav';
 import Home from './screens/Home';
+import EraSelect from './screens/EraSelect';
 import TeamSelect from './screens/TeamSelect';
 import TeamConfirm from './screens/TeamConfirm';
 import SimulationScreen from './screens/SimulationScreen';
@@ -50,7 +52,7 @@ import Placeholder from './screens/Placeholder';
 import { IconName } from './components/Icon';
 
 type AppView =
-  | 'team-select' | 'team-confirm' | 'home' | 'teams' | 'team-detail' | 'scout' | 'my-team' | 'draft' | 'free-agency'
+  | 'era-select' | 'team-select' | 'team-confirm' | 'home' | 'teams' | 'team-detail' | 'scout' | 'my-team' | 'draft' | 'free-agency'
   | 'simulation' | 'standings' | 'leaders' | 'trade' | 'awards' | 'allstar' | 'playoffs' | 'live-game';
 
 // How often (in simulated games) a fresh league-wide commentary is requested.
@@ -60,7 +62,7 @@ const buildLeagueCommentaryPrompt = (teams: Team[], players: { [key: string]: Pl
   const ranked = [...teams].sort((a, b) => (b.wins || 0) - (a.wins || 0));
   const top3 = ranked.slice(0, 3).map((t) => `${t.name} (${t.wins || 0}-${t.losses || 0})`).join(', ');
   const bottom3 = ranked.slice(-3).map((t) => `${t.name} (${t.wins || 0}-${t.losses || 0})`).join(', ');
-  const topPlayers = (Object.values(players) as Player[]).filter((p) => !p.retired && !p.prospect).sort((a, b) => b.ovr - a.ovr).slice(0, 5).map((p) => `${p.name} (${p.ovr})`).join(', ');
+  const topPlayers = (Object.values(players) as Player[]).filter((p) => !p.prospect).sort((a, b) => b.ovr - a.ovr).slice(0, 5).map((p) => `${p.name} (${p.ovr})`).join(', ');
   const recentEvents = events.slice(0, 5).map((e) => e.message).join(' | ') || 'nada relevante';
 
   return `Você é um comentarista de basquete estilo ESPN cobrindo a NBA em tempo real. A temporada está em ${gamesPlayed} de 82 jogos.
@@ -119,6 +121,10 @@ export default function App() {
   // The franchise being previewed on the confirmation screen — chosen, but not
   // committed to yet, so it must not touch `season`.
   const [pendingTeamId, setPendingTeamId] = useState<string | null>(null);
+  // The era picked before the franchise — null = today's live snapshot (the
+  // default). Same "chosen but not committed" lifecycle as pendingTeamId,
+  // just one screen earlier; only becomes part of `season` inside initSeason.
+  const [pendingEraId, setPendingEraId] = useState<string | null>(null);
   const [notifications, setNotifications] = useState<NotificationType[]>([]);
   const [isCommentaryLoading, setIsCommentaryLoading] = useState(false);
 
@@ -353,9 +359,8 @@ export default function App() {
       // along with everything else buildDraftBoard already carried forward.
       const coaching = ageCoachesAndRetire(board.teams, prev.coaches);
 
-      // Annotated because rollRetirements below reassigns this with Team[]; the
-      // inferred literal type would make wins/losses non-optional and clash.
-      let newTeams: Team[] = coaching.teams.map((t) => ({
+      // Annotated so the inferred literal type doesn't make wins/losses non-optional.
+      const newTeams: Team[] = coaching.teams.map((t) => ({
         ...t,
         wins: 0,
         losses: 0,
@@ -366,20 +371,19 @@ export default function App() {
         playerStatusEffects: undefined,
       }));
 
-      // ...then retire, judged on the NEW age and the post-progression OVR (the
-      // decline a player is actually carrying forward), so it must come after
-      // runPlayerProgression and the ovrLastSeason snapshot above. Retirees come
-      // off rosters here, which is why the real-NBA replay and the contract tick
-      // below both read `rosterPlayers` rather than `updatedPlayers`.
-      const retirement = rollRetirements(updatedPlayers, newTeams, prev.awardHistory.length);
-      const rosterPlayers = retirement.players;
-      newTeams = retirement.teams;
+      // No retirement system: rosters carry every player straight through from
+      // progression into the offseason moves/contracts below.
+      const rosterPlayers = updatedPlayers;
 
-      // Replay real NBA offseason moves once (skips any player the user already moved).
+      // Replay real NBA offseason moves once (skips any player the user already
+      // moved). An era save never has any — real future trades only make sense
+      // to replay for the live current-season data, not a historical snapshot
+      // (see data/eras/index.ts) — so this resolves to an empty list for one.
       const moveEvents: Event[] = [];
+      const activeOffseasonMoves = prev.era ? (eraById(prev.era.id)?.offseasonMoves ?? { moves: [] }) : offseasonMoves;
       if (!prev.offseasonMovesApplied) {
         const sortByOvr = (roster: string[]) => [...roster].sort((a, b) => (rosterPlayers[b]?.ovr || 0) - (rosterPlayers[a]?.ovr || 0));
-        offseasonMoves.moves.forEach((move) => {
+        activeOffseasonMoves.moves.forEach((move) => {
           const fromIdx = newTeams.findIndex((t) => t.id === move.fromTeamId);
           const toIdx = newTeams.findIndex((t) => t.id === move.toTeamId);
           if (fromIdx === -1 || toIdx === -1 || !newTeams[fromIdx].roster.includes(move.playerId)) return;
@@ -397,9 +401,7 @@ export default function App() {
       // OVER the existing players, so an unseeded collision would silently
       // overwrite a real rostered player.
       const { prospects, reports, ids } = generateDraftClass(30, Object.keys(contracts.players));
-      // Undrafted/international fringe talent enters the market alongside the
-      // draft, replacing the players retirement sheds beyond the 30-man class —
-      // without it the free agent pool bleeds dry over a long save.
+      // Undrafted/international fringe talent enters the market alongside the draft.
       const undrafted = generateUndraftedClass(10, [...Object.keys(contracts.players), ...ids]);
       const playersWithProspects = { ...contracts.players, ...prospects, ...undrafted.players };
       // `reports` is the fog of war: prospects carry their real rating in
@@ -424,9 +426,8 @@ export default function App() {
         // fog on those prospects (applyPick returns an updated map).
         players: advanced.players,
         draft: advanced.draft,
-        lastRetirements: retirement.retiredIds,
         coaches: coaching.coaches,
-        events: [...advanced.events, ...contracts.events, ...board.events, ...moveEvents, ...retirement.events, ...coaching.events, ...progressionEvents, ...prev.events].slice(0, 60),
+        events: [...advanced.events, ...contracts.events, ...board.events, ...moveEvents, ...coaching.events, ...progressionEvents, ...prev.events].slice(0, 60),
         playoff: null,
         awards: null,
         offseasonMovesApplied: true,
@@ -742,11 +743,19 @@ export default function App() {
 
   // Ported verbatim from the web App.tsx — builds a fresh season with real
   // schedule, cup groups, and owner mandate from the pure ported services.
+  // `pendingEraId` (set on the EraSelect screen, null = today's live
+  // snapshot) picks which real roster/rating data seeds this save — the ONLY
+  // place an era matters. Everything below this point (and every other
+  // screen/service) is era-agnostic.
   const initSeason = (teamId: string) => {
+    const era = pendingEraId ? eraById(pendingEraId) : undefined;
+    const seedTeams = era ? era.teams : teamsData;
+    const seedPlayers = era ? era.players : playersData;
+
     // Every team starts holding its own first-rounder for the next three drafts
     // (see PICK_WINDOW) — the inventory the trade market runs on.
     const initialTeams: Team[] = initialPickAssets(
-      teamsData.map((t) => ({
+      seedTeams.map((t) => ({
         ...t,
         wins: 0,
         losses: 0,
@@ -763,7 +772,7 @@ export default function App() {
       playoffStage: 'none',
       gamesPlayed: 0,
       teams: teamsWithCoaches,
-      players: { ...playersData },
+      players: { ...seedPlayers },
       events: [],
       playoff: null,
       awards: null,
@@ -771,9 +780,10 @@ export default function App() {
       cup: simulationEngine.initCupGroups(teamsWithCoaches),
       gmLegacy: { seasons: 0, titles: 0 },
       awardHistory: [],
-      owner: buildSeasonOwner(userTeam, teamsWithCoaches, playersData),
+      owner: buildSeasonOwner(userTeam, teamsWithCoaches, seedPlayers),
       schedule: generateSchedule(teamsWithCoaches),
       coaches,
+      era: era ? { id: era.id, label: era.label, seasonLabel: era.seasonLabel } : undefined,
     });
     setView('simulation');
   };
@@ -785,23 +795,40 @@ export default function App() {
   // holds draft #awardHistory.length, by which point the finished season is in.
   const currentDraft = (season?.awardHistory.length ?? 0) + 1;
 
+  // The pending era's own roster/rating data, or today's live snapshot when
+  // none is picked (pendingEraId null) — read by TeamConfirm/TeamSelect below
+  // and by initSeason, so a chosen-but-not-yet-committed era is what the
+  // franchise picker actually shows.
+  const activeEra = pendingEraId ? eraById(pendingEraId) : undefined;
+  const activeTeamsData = activeEra ? activeEra.teams : teamsData;
+  const activePlayersData = activeEra ? activeEra.players : playersData;
+
   const renderScreen = () => {
     // Home must be checked before the `!season` catch-all below, or the hero
     // would never render — it's the pre-season entry point.
     if (view === 'home') {
-      return <Home onStart={() => setView('team-select')} onContinue={season ? () => setView('simulation') : undefined} season={season} />;
+      return <Home onStart={() => setView('era-select')} onContinue={season ? () => setView('simulation') : undefined} season={season} />;
+    }
+    // Era choice — before the franchise picker, same "no season yet" reasoning
+    // as team-confirm below.
+    if (view === 'era-select') {
+      return (
+        <EraSelect
+          onSelect={(eraId) => { setPendingEraId(eraId); setView('team-select'); }}
+        />
+      );
     }
     // The confirmation step is the moment the app gains the franchise color —
     // it must be checked before the `!season` catch-all, since no season exists
     // yet at that point.
     if (view === 'team-confirm' && pendingTeamId) {
-      const t = (teamsData as Team[]).find((x) => x.id === pendingTeamId);
+      const t = (activeTeamsData as Team[]).find((x) => x.id === pendingTeamId);
       if (t) {
         return (
           <TeamConfirm
             team={t}
-            players={playersData}
-            teams={teamsData as Team[]}
+            players={activePlayersData}
+            teams={activeTeamsData as Team[]}
             onBack={() => setView('team-select')}
             onConfirm={() => initSeason(t.id)}
           />
@@ -811,8 +838,8 @@ export default function App() {
     if (!season || view === 'team-select') {
       return (
         <TeamSelect
-          teams={teamsData as Team[]}
-          players={playersData}
+          teams={activeTeamsData as Team[]}
+          players={activePlayersData}
           onSelect={(id) => { setPendingTeamId(id); setView('team-confirm'); }}
         />
       );
@@ -933,7 +960,8 @@ export default function App() {
             titles={season?.gmLegacy.titles ?? 0}
             onRestart={() => {
               setSeason(null);
-              setView('team-select');
+              setPendingEraId(null);
+              setView('era-select');
             }}
           />
 

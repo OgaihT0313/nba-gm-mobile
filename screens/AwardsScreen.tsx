@@ -61,7 +61,7 @@ const AwardsScreen: React.FC<AwardsScreenProps> = ({ season, onGoToPlayoffs, onS
         season.status === 'offseason' ? (
           <CtaButton
             label="Começar próxima temporada"
-            sub="Progressão, aposentadorias e draft"
+            sub="Progressão e draft"
             onPress={onStartNewSeason}
             gold={isChampionScreen}
           />

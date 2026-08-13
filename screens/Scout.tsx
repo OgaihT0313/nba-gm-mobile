@@ -74,10 +74,10 @@ const Scout: React.FC<ScoutProps> = ({ players, teams, userTeamId }) => {
     return map;
   }, [teams]);
 
-  // Retirees linger in the map for history only, and an undrafted prospect's
-  // real rating is still under scouting fog — this screen would hand it over for
-  // free. Both are excluded from the list AND from the headline count.
-  const visible = (p: Player) => !p.retired && !p.prospect;
+  // An undrafted prospect's real rating is still under scouting fog — this
+  // screen would hand it over for free, so it's excluded from the list AND
+  // from the headline count.
+  const visible = (p: Player) => !p.prospect;
 
   const activeCount = useMemo(
     () => (Object.values(players) as Player[]).filter(visible).length,

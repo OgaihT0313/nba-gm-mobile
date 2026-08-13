@@ -6,7 +6,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Team, Player } from '../types';
 import { getTeamLogoUrl, getTeamNickname, conferenceLabel, getTeamAccent, TEAM_TITLES } from '../constants';
-import { teamRating, teamDifficulty, DIFFICULTY_LABEL, Difficulty } from '../services/formService';
+import { teamRating } from '../services/formService';
 import { COLORS, INK, RADIUS, tracking, withAlpha } from '../src/theme/tokens';
 import { MonoLabel, HeroTitle, FilterRow } from '../components/ui/kit';
 
@@ -23,17 +23,10 @@ interface TeamSelectProps {
 
 const NBA_FALLBACK = 'https://a.espncdn.com/i/teamlogos/nba/500/nba.png';
 
-const DIFF_TONE: Record<Difficulty, { bg: string; fg: string }> = {
-  easy: { bg: withAlpha(COLORS.goodSoft, 0.16), fg: COLORS.goodSoft },
-  medium: { bg: withAlpha(COLORS.warn, 0.16), fg: COLORS.warn },
-  hard: { bg: withAlpha(COLORS.cta, 0.16), fg: COLORS.badSoft },
-};
-
 const FILTERS = [
   { id: 'all', label: 'Todas' },
   { id: 'East', label: 'Leste' },
   { id: 'West', label: 'Oeste' },
-  { id: 'easy', label: 'Fáceis' },
 ];
 
 const TeamSelect: React.FC<TeamSelectProps> = ({ teams, players, onSelect }) => {
@@ -43,7 +36,6 @@ const TeamSelect: React.FC<TeamSelectProps> = ({ teams, players, onSelect }) => 
   const rows = useMemo(() => {
     const list = teams.filter((t) => {
       if (filter === 'East' || filter === 'West') return t.conference === filter;
-      if (filter === 'easy') return teamDifficulty(t) === 'easy';
       return true;
     });
     return [...list].sort((a, b) => a.powerRank - b.powerRank);
@@ -56,7 +48,7 @@ const TeamSelect: React.FC<TeamSelectProps> = ({ teams, players, onSelect }) => 
           className="font-mono-bold"
           style={{ fontSize: 9.5, letterSpacing: tracking(9.5, 0.24), color: COLORS.cta, textTransform: 'uppercase' }}
         >
-          Passo 1 de 1
+          Passo 2 de 2
         </Text>
         <HeroTitle size={30} style={{ marginTop: 9 }}>Escolha sua franquia</HeroTitle>
         <FilterRow items={FILTERS} value={filter} onChange={setFilter} style={{ marginTop: 15 }} />
@@ -70,8 +62,6 @@ const TeamSelect: React.FC<TeamSelectProps> = ({ teams, players, onSelect }) => 
         <View className="flex-row flex-wrap justify-between">
           {rows.map((t) => {
             const accent = getTeamAccent(t.id);
-            const diff = teamDifficulty(t);
-            const tone = DIFF_TONE[diff];
             const titles = TEAM_TITLES[t.id] ?? 0;
 
             return (
@@ -111,12 +101,7 @@ const TeamSelect: React.FC<TeamSelectProps> = ({ teams, players, onSelect }) => 
                   <MonoLabel size={9.5} color="rgba(255,255,255,0.42)" style={{ marginTop: 3, letterSpacing: 0 }} numberOfLines={1}>
                     {conferenceLabel(t)} · {titles} {titles === 1 ? 'título' : 'títulos'}
                   </MonoLabel>
-                  <View className="flex-row items-center" style={{ gap: 6, marginTop: 9 }}>
-                    <View style={{ paddingHorizontal: 7, paddingVertical: 2, borderRadius: 6, backgroundColor: tone.bg }}>
-                      <MonoLabel size={8.5} color={tone.fg} style={{ letterSpacing: 0.4 }}>
-                        {DIFFICULTY_LABEL[diff]}
-                      </MonoLabel>
-                    </View>
+                  <View style={{ marginTop: 9 }}>
                     <MonoLabel size={9.5} color={INK.meta} style={{ letterSpacing: 0 }}>
                       OVR {teamRating(t, players)}
                     </MonoLabel>

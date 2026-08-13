@@ -252,15 +252,13 @@ export const generateDraftClass = (
 // Undrafted fringe talent entering the league alongside the draft class:
 // undrafted FAs, two-way bodies, international signings. They go straight into
 // the player pool on no roster, so getFreeAgents surfaces them on the market.
-//
-// This exists for a balance reason, not decoration. Retirement sheds ~35 players
-// an offseason once the league's veterans start aging out (measured over a
-// 15-season projection), while the draft only adds 30. Without this the pool
-// bleeds toward the ~420 rostered baseline and the free agent market dries up
-// entirely by the late seasons — CPU teams could no longer fill roster holes.
 // Slots are deliberately worse than the draft's late first round: these are
-// depth pieces, and the low-OVR ones wash out again via the same age/minutes
-// retirement rule that created the hole.
+// depth pieces, not a second round.
+//
+// NOTE: there is no retirement system, so nobody ever leaves the player pool —
+// every offseason adds these 10 plus the 30-man draft class with zero exits.
+// Fine for a save of a handful of seasons; a very long save will accumulate an
+// ever-growing roster of players no team ever signs.
 export const generateUndraftedClass = (size = 10, takenIds: Iterable<string> = []): { players: { [id: string]: Player }; ids: string[] } => {
     const usedIds = new Set<string>(takenIds);
     const players: { [id: string]: Player } = {};

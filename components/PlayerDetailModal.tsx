@@ -74,13 +74,6 @@ const PlayerDetailModal: React.FC<{ player: Player; onClose: () => void }> = ({ 
                   Pick #{player.draftInfo.pick} · projetado {player.draftInfo.projected} OVR
                 </Text>
               ) : null}
-              {player.retired ? (
-                <View className="mt-2 px-3 py-1 rounded-full bg-amber-500/10 border border-amber-500/30">
-                  <Text className="text-[9px] font-black text-amber-400 uppercase tracking-widest">
-                    Aposentado{player.retiredSeason ? ` · temporada ${player.retiredSeason}` : ''}
-                  </Text>
-                </View>
-              ) : null}
             </View>
 
             {/* Headline ratings */}
@@ -194,21 +187,19 @@ const PlayerDetailModal: React.FC<{ player: Player; onClose: () => void }> = ({ 
               </View>
             </View>
 
-            {/* Contract + potential — meaningless once a player is out of the league */}
-            {player.retired ? null : (
-              <View className="flex-row items-center justify-between bg-sunken border border-line rounded-2xl p-4">
-                <View>
-                  <Text className="text-[9px] font-bold text-slate-500 uppercase tracking-widest">Contrato</Text>
-                  <Text className="text-sm font-black text-emerald-400">
-                    {formatMoney(player.salary)} · {player.contractYears} {player.contractYears === 1 ? 'ano' : 'anos'}
-                  </Text>
-                </View>
-                <View className="items-end">
-                  <Text className="text-[9px] font-bold text-slate-500 uppercase tracking-widest">Potencial</Text>
-                  <Text className="text-sm font-black text-sky-400">{POTENTIAL_LABEL[player.potential] || player.potential}</Text>
-                </View>
+            {/* Contract + potential */}
+            <View className="flex-row items-center justify-between bg-sunken border border-line rounded-2xl p-4">
+              <View>
+                <Text className="text-[9px] font-bold text-slate-500 uppercase tracking-widest">Contrato</Text>
+                <Text className="text-sm font-black text-emerald-400">
+                  {formatMoney(player.salary)} · {player.contractYears} {player.contractYears === 1 ? 'ano' : 'anos'}
+                </Text>
               </View>
-            )}
+              <View className="items-end">
+                <Text className="text-[9px] font-bold text-slate-500 uppercase tracking-widest">Potencial</Text>
+                <Text className="text-sm font-black text-sky-400">{POTENTIAL_LABEL[player.potential] || player.potential}</Text>
+              </View>
+            </View>
           </ScrollView>
         </Pressable>
       </Pressable>

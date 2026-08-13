@@ -8,7 +8,6 @@ import {
   getTeamTricode, formatPositions,
 } from '../constants';
 import { consensusValue, draftVerdict, SCOUT_BUDGET, PROJECTION_FLOOR, PROJECTION_CEIL } from '../services/draftService';
-import { careerAverages, honorsSummary } from '../services/careerService';
 import { useTheme } from '../src/theme/ThemeProvider';
 import { COLORS, INK, RADIUS, withAlpha } from '../src/theme/tokens';
 import Screen, { HeroContent, Body } from '../components/ui/Screen';
@@ -88,7 +87,6 @@ const ProjectionBand: React.FC<{ report: ScoutReport }> = ({ report }) => {
 const Draft: React.FC<DraftProps> = ({ season, onPick, onAutoPick, onFinish, onScout }) => {
   const { accent } = useTheme();
   const [posFilter, setPosFilter] = useState('TODOS');
-  const [showRetirees, setShowRetirees] = useState(false);
   const [focusId, setFocusId] = useState<string | null>(null);
   const { teams, players, userTeamId, draft } = season;
   const userTeam = teams.find((t) => t.id === userTeamId);
@@ -105,17 +103,6 @@ const Draft: React.FC<DraftProps> = ({ season, onPick, onAutoPick, onFinish, onS
             .sort((a, b) => consensusValue(draft.reports[b.id]) - consensusValue(draft.reports[a.id]))
         : [],
     [draft, players],
-  );
-
-  // Biggest names first — a career-defining retirement should lead, not the
-  // fringe guys who washed out.
-  const retirees = useMemo(
-    () =>
-      (season.lastRetirements || [])
-        .map((id) => players[id])
-        .filter(Boolean)
-        .sort((a, b) => (b.career?.peakOvr ?? b.ovr) - (a.career?.peakOvr ?? a.ovr)),
-    [season.lastRetirements, players],
   );
 
   if (!draft || !userTeam) return null;
@@ -328,56 +315,6 @@ const Draft: React.FC<DraftProps> = ({ season, onPick, onAutoPick, onFinish, onS
             </Pressable>
           );
         })}
-          </>
-        ) : null}
-
-        {/* Who left the league this offseason — the other half of the cycle the
-            draft class is replacing. Collapsed so it never buries the board. */}
-        {retirees.length > 0 ? (
-          <>
-            <Pressable
-              onPress={() => setShowRetirees((s) => !s)}
-              className="flex-row items-center justify-between active:opacity-70"
-              style={{ paddingHorizontal: 3, marginTop: 6 }}
-            >
-              <MonoLabel>Aposentadorias · {retirees.length}</MonoLabel>
-              <MonoLabel size={9} color={COLORS.info}>{showRetirees ? 'Ocultar' : 'Ver'}</MonoLabel>
-            </Pressable>
-
-            {showRetirees
-              ? retirees.map((p) => {
-                  const c = p.career;
-                  const avg = c ? careerAverages(c) : null;
-                  const honors = c ? honorsSummary(c) : '';
-                  return (
-                    <Panel key={p.id} bar={COLORS.warn} padding={11}>
-                      <View className="flex-row items-center" style={{ gap: 11 }}>
-                        <Image
-                          source={{ uri: getPlayerImageUrl(p) }}
-                          placeholder={{ uri: PLAYER_PLACEHOLDER_SVG }}
-                          style={{ width: 34, height: 34, borderRadius: RADIUS.pill, backgroundColor: COLORS.line }}
-                          contentFit="cover"
-                        />
-                        <View style={{ flex: 1 }}>
-                          <Text className="font-extrabold text-white" style={{ fontSize: 12.5 }} numberOfLines={1}>{p.name}</Text>
-                          <MonoLabel size={9.5} color={INK.meta} style={{ marginTop: 2, letterSpacing: 0 }} numberOfLines={1}>
-                            {p.age}a · {c?.seasons ?? 0} temp.{avg ? ` · ${avg.ppg.toFixed(1)} PPG` : ''}
-                          </MonoLabel>
-                          {honors ? (
-                            <MonoLabel size={9} color={COLORS.warn} style={{ marginTop: 2, letterSpacing: 0 }} numberOfLines={1}>
-                              {honors}
-                            </MonoLabel>
-                          ) : null}
-                        </View>
-                        <View className="items-end">
-                          <Stat size={17}>{c?.peakOvr ?? p.ovr}</Stat>
-                          <MonoLabel size={8.5} color={INK.faint}>Pico</MonoLabel>
-                        </View>
-                      </View>
-                    </Panel>
-                  );
-                })
-              : null}
           </>
         ) : null}
 
