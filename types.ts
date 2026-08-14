@@ -330,9 +330,10 @@ export interface SeasonState {
   awards: Awards | null;
   userTeamId: string;
   // Whether the real-world offseason trades/signings (data/offseason_moves.json)
-  // have already been replayed into this save. Only applied once, the first
-  // time "Iniciar Nova Temporada" is used — later season transitions have no
-  // further real-world data to diff against.
+  // have already been replayed into this save. Only applies to a LIVE
+  // (non-era) save — only one real transition exists (today's season into
+  // next), so it's a one-shot flag. An era save uses eraChainIndex instead
+  // (see below), which keeps replaying real history every offseason.
   offseasonMovesApplied?: boolean;
   // Which historical era (see data/eras/index.ts) seeded this save's starting
   // roster — display/record-keeping only, undefined for today's live
@@ -340,6 +341,17 @@ export interface SeasonState {
   // plays identically regardless of era: this is a fixed starting point, not
   // a flag the sim branches on.
   era?: { id: string; label: string; seasonLabel: string };
+  // Index into ERAS (data/eras/index.ts) of the real-history transition to
+  // replay on the NEXT "Iniciar Nova Temporada" — set at initSeason to the
+  // starting era's own index, then advanced by one each offseason so the
+  // save walks forward through real trades/signings one real season at a
+  // time (ERAS[i].offseasonMoves is that era's own season -> the next
+  // era's). Reading past the end of ERAS (or a move that no longer matches
+  // current save state, e.g. the user already traded that player away)
+  // resolves to an empty move list, so the chain just goes quietly and
+  // permanently procedural once real data or a matching roster runs out —
+  // no explicit "chain exhausted" state needed. Undefined for a live save.
+  eraChainIndex?: number;
   // Latest AI-generated league-wide commentary and the gamesPlayed checkpoint
   // it was generated at, so the app knows not to re-request it until the next
   // COMMENTARY_INTERVAL checkpoint (see App.tsx).

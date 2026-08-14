@@ -1,5 +1,912 @@
 {
   "fromSeason": "2012-13",
   "toSeason": "2013-14",
-  "moves": []
+  "moves": [
+    {
+      "playerId": "paul_millsap",
+      "playerName": "Paul Millsap",
+      "fromTeamId": "uta",
+      "toTeamId": "atl"
+    },
+    {
+      "playerId": "demarre_carroll",
+      "playerName": "DeMarre Carroll",
+      "fromTeamId": "uta",
+      "toTeamId": "atl"
+    },
+    {
+      "playerId": "gustavo_ayon",
+      "playerName": "Gustavo Ayon",
+      "fromTeamId": "mil",
+      "toTeamId": "atl"
+    },
+    {
+      "playerId": "cartier_martin",
+      "playerName": "Cartier Martin",
+      "fromTeamId": "was",
+      "toTeamId": "atl"
+    },
+    {
+      "playerId": "elton_brand",
+      "playerName": "Elton Brand",
+      "fromTeamId": "dal",
+      "toTeamId": "atl"
+    },
+    {
+      "playerId": "keith_bogans",
+      "playerName": "Keith Bogans",
+      "fromTeamId": "bkn",
+      "toTeamId": "bos"
+    },
+    {
+      "playerId": "jerryd_bayless",
+      "playerName": "Jerryd Bayless",
+      "fromTeamId": "mem",
+      "toTeamId": "bos"
+    },
+    {
+      "playerId": "kris_humphries",
+      "playerName": "Kris Humphries",
+      "fromTeamId": "bkn",
+      "toTeamId": "bos"
+    },
+    {
+      "playerId": "gerald_wallace",
+      "playerName": "Gerald Wallace",
+      "fromTeamId": "bkn",
+      "toTeamId": "bos"
+    },
+    {
+      "playerId": "joel_anthony",
+      "playerName": "Joel Anthony",
+      "fromTeamId": "mia",
+      "toTeamId": "bos"
+    },
+    {
+      "playerId": "jarrett_jack",
+      "playerName": "Jarrett Jack",
+      "fromTeamId": "gsw",
+      "toTeamId": "cle"
+    },
+    {
+      "playerId": "luol_deng",
+      "playerName": "Luol Deng",
+      "fromTeamId": "chi",
+      "toTeamId": "cle"
+    },
+    {
+      "playerId": "spencer_hawes",
+      "playerName": "Spencer Hawes",
+      "fromTeamId": "phi",
+      "toTeamId": "cle"
+    },
+    {
+      "playerId": "tyreke_evans",
+      "playerName": "Tyreke Evans",
+      "fromTeamId": "sac",
+      "toTeamId": "nop"
+    },
+    {
+      "playerId": "anthony_morrow",
+      "playerName": "Anthony Morrow",
+      "fromTeamId": "dal",
+      "toTeamId": "nop"
+    },
+    {
+      "playerId": "luke_babbitt",
+      "playerName": "Luke Babbitt",
+      "fromTeamId": "por",
+      "toTeamId": "nop"
+    },
+    {
+      "playerId": "jrue_holiday",
+      "playerName": "Jrue Holiday",
+      "fromTeamId": "phi",
+      "toTeamId": "nop"
+    },
+    {
+      "playerId": "mike_james",
+      "playerName": "Mike James",
+      "fromTeamId": "dal",
+      "toTeamId": "chi"
+    },
+    {
+      "playerId": "greg_smith",
+      "playerName": "Greg Smith",
+      "fromTeamId": "hou",
+      "toTeamId": "chi"
+    },
+    {
+      "playerId": "ronnie_brewer",
+      "playerName": "Ronnie Brewer",
+      "fromTeamId": "okc",
+      "toTeamId": "chi"
+    },
+    {
+      "playerId": "d_j_augustin",
+      "playerName": "D.J. Augustin",
+      "fromTeamId": "ind",
+      "toTeamId": "chi"
+    },
+    {
+      "playerId": "lou_amundson",
+      "playerName": "Lou Amundson",
+      "fromTeamId": "nop",
+      "toTeamId": "chi"
+    },
+    {
+      "playerId": "jimmer_fredette",
+      "playerName": "Jimmer Fredette",
+      "fromTeamId": "sac",
+      "toTeamId": "chi"
+    },
+    {
+      "playerId": "mike_dunleavy",
+      "playerName": "Mike Dunleavy",
+      "fromTeamId": "mil",
+      "toTeamId": "chi"
+    },
+    {
+      "playerId": "tyson_chandler",
+      "playerName": "Tyson Chandler",
+      "fromTeamId": "nyk",
+      "toTeamId": "dal"
+    },
+    {
+      "playerId": "raymond_felton",
+      "playerName": "Raymond Felton",
+      "fromTeamId": "nyk",
+      "toTeamId": "dal"
+    },
+    {
+      "playerId": "monta_ellis",
+      "playerName": "Monta Ellis",
+      "fromTeamId": "mil",
+      "toTeamId": "dal"
+    },
+    {
+      "playerId": "devin_harris",
+      "playerName": "Devin Harris",
+      "fromTeamId": "atl",
+      "toTeamId": "dal"
+    },
+    {
+      "playerId": "dejuan_blair",
+      "playerName": "DeJuan Blair",
+      "fromTeamId": "sas",
+      "toTeamId": "dal"
+    },
+    {
+      "playerId": "aaron_brooks",
+      "playerName": "Aaron Brooks",
+      "fromTeamId": "hou",
+      "toTeamId": "den"
+    },
+    {
+      "playerId": "darrell_arthur",
+      "playerName": "Darrell Arthur",
+      "fromTeamId": "mem",
+      "toTeamId": "den"
+    },
+    {
+      "playerId": "randy_foye",
+      "playerName": "Randy Foye",
+      "fromTeamId": "uta",
+      "toTeamId": "den"
+    },
+    {
+      "playerId": "jj_hickson",
+      "playerName": "JJ Hickson",
+      "fromTeamId": "por",
+      "toTeamId": "den"
+    },
+    {
+      "playerId": "nate_robinson",
+      "playerName": "Nate Robinson",
+      "fromTeamId": "chi",
+      "toTeamId": "den"
+    },
+    {
+      "playerId": "jan_vesely",
+      "playerName": "Jan Vesely",
+      "fromTeamId": "was",
+      "toTeamId": "den"
+    },
+    {
+      "playerId": "marreese_speights",
+      "playerName": "Marreese Speights",
+      "fromTeamId": "cle",
+      "toTeamId": "gsw"
+    },
+    {
+      "playerId": "jermaine_o_neal",
+      "playerName": "Jermaine O'Neal",
+      "fromTeamId": "phx",
+      "toTeamId": "gsw"
+    },
+    {
+      "playerId": "andre_iguodala",
+      "playerName": "Andre Iguodala",
+      "fromTeamId": "den",
+      "toTeamId": "gsw"
+    },
+    {
+      "playerId": "steve_blake",
+      "playerName": "Steve Blake",
+      "fromTeamId": "lal",
+      "toTeamId": "gsw"
+    },
+    {
+      "playerId": "jordan_crawford",
+      "playerName": "Jordan Crawford",
+      "fromTeamId": "bos",
+      "toTeamId": "gsw"
+    },
+    {
+      "playerId": "jordan_hamilton",
+      "playerName": "Jordan Hamilton",
+      "fromTeamId": "den",
+      "toTeamId": "hou"
+    },
+    {
+      "playerId": "dwight_howard",
+      "playerName": "Dwight Howard",
+      "fromTeamId": "lal",
+      "toTeamId": "hou"
+    },
+    {
+      "playerId": "omri_casspi",
+      "playerName": "Omri Casspi",
+      "fromTeamId": "cle",
+      "toTeamId": "hou"
+    },
+    {
+      "playerId": "glen_davis",
+      "playerName": "Glen Davis",
+      "fromTeamId": "orl",
+      "toTeamId": "lac"
+    },
+    {
+      "playerId": "darren_collison",
+      "playerName": "Darren Collison",
+      "fromTeamId": "dal",
+      "toTeamId": "lac"
+    },
+    {
+      "playerId": "jj_redick",
+      "playerName": "JJ Redick",
+      "fromTeamId": "mil",
+      "toTeamId": "lac"
+    },
+    {
+      "playerId": "hedo_turkoglu",
+      "playerName": "Hedo Turkoglu",
+      "fromTeamId": "orl",
+      "toTeamId": "lac"
+    },
+    {
+      "playerId": "jared_dudley",
+      "playerName": "Jared Dudley",
+      "fromTeamId": "phx",
+      "toTeamId": "lac"
+    },
+    {
+      "playerId": "danny_granger",
+      "playerName": "Danny Granger",
+      "fromTeamId": "ind",
+      "toTeamId": "lac"
+    },
+    {
+      "playerId": "nick_young",
+      "playerName": "Nick Young",
+      "fromTeamId": "phi",
+      "toTeamId": "lal"
+    },
+    {
+      "playerId": "marshon_brooks",
+      "playerName": "MarShon Brooks",
+      "fromTeamId": "bkn",
+      "toTeamId": "lal"
+    },
+    {
+      "playerId": "kent_bazemore",
+      "playerName": "Kent Bazemore",
+      "fromTeamId": "gsw",
+      "toTeamId": "lal"
+    },
+    {
+      "playerId": "xavier_henry",
+      "playerName": "Xavier Henry",
+      "fromTeamId": "nop",
+      "toTeamId": "lal"
+    },
+    {
+      "playerId": "chris_kaman",
+      "playerName": "Chris Kaman",
+      "fromTeamId": "dal",
+      "toTeamId": "lal"
+    },
+    {
+      "playerId": "wesley_johnson",
+      "playerName": "Wesley Johnson",
+      "fromTeamId": "phx",
+      "toTeamId": "lal"
+    },
+    {
+      "playerId": "kendall_marshall",
+      "playerName": "Kendall Marshall",
+      "fromTeamId": "phx",
+      "toTeamId": "lal"
+    },
+    {
+      "playerId": "toney_douglas",
+      "playerName": "Toney Douglas",
+      "fromTeamId": "sac",
+      "toTeamId": "mia"
+    },
+    {
+      "playerId": "michael_beasley",
+      "playerName": "Michael Beasley",
+      "fromTeamId": "phx",
+      "toTeamId": "mia"
+    },
+    {
+      "playerId": "o_j_mayo",
+      "playerName": "O.J. Mayo",
+      "fromTeamId": "dal",
+      "toTeamId": "mil"
+    },
+    {
+      "playerId": "carlos_delfino",
+      "playerName": "Carlos Delfino",
+      "fromTeamId": "hou",
+      "toTeamId": "mil"
+    },
+    {
+      "playerId": "brandon_knight",
+      "playerName": "Brandon Knight",
+      "fromTeamId": "det",
+      "toTeamId": "mil"
+    },
+    {
+      "playerId": "jeff_adrien",
+      "playerName": "Jeff Adrien",
+      "fromTeamId": "cha",
+      "toTeamId": "mil"
+    },
+    {
+      "playerId": "ramon_sessions",
+      "playerName": "Ramon Sessions",
+      "fromTeamId": "cha",
+      "toTeamId": "mil"
+    },
+    {
+      "playerId": "khris_middleton",
+      "playerName": "Khris Middleton",
+      "fromTeamId": "det",
+      "toTeamId": "mil"
+    },
+    {
+      "playerId": "zaza_pachulia",
+      "playerName": "Zaza Pachulia",
+      "fromTeamId": "atl",
+      "toTeamId": "mil"
+    },
+    {
+      "playerId": "luc_mbah_a_moute",
+      "playerName": "Luc Mbah a Moute",
+      "fromTeamId": "mil",
+      "toTeamId": "min"
+    },
+    {
+      "playerId": "corey_brewer",
+      "playerName": "Corey Brewer",
+      "fromTeamId": "den",
+      "toTeamId": "min"
+    },
+    {
+      "playerId": "kevin_martin",
+      "playerName": "Kevin Martin",
+      "fromTeamId": "okc",
+      "toTeamId": "min"
+    },
+    {
+      "playerId": "ronny_turiaf",
+      "playerName": "Ronny Turiaf",
+      "fromTeamId": "lac",
+      "toTeamId": "min"
+    },
+    {
+      "playerId": "kevin_garnett",
+      "playerName": "Kevin Garnett",
+      "fromTeamId": "bos",
+      "toTeamId": "bkn"
+    },
+    {
+      "playerId": "alan_anderson",
+      "playerName": "Alan Anderson",
+      "fromTeamId": "tor",
+      "toTeamId": "bkn"
+    },
+    {
+      "playerId": "marcus_thornton",
+      "playerName": "Marcus Thornton",
+      "fromTeamId": "sac",
+      "toTeamId": "bkn"
+    },
+    {
+      "playerId": "marquis_teague",
+      "playerName": "Marquis Teague",
+      "fromTeamId": "chi",
+      "toTeamId": "bkn"
+    },
+    {
+      "playerId": "shaun_livingston",
+      "playerName": "Shaun Livingston",
+      "fromTeamId": "cle",
+      "toTeamId": "bkn"
+    },
+    {
+      "playerId": "paul_pierce",
+      "playerName": "Paul Pierce",
+      "fromTeamId": "bos",
+      "toTeamId": "bkn"
+    },
+    {
+      "playerId": "andrei_kirilenko",
+      "playerName": "Andrei Kirilenko",
+      "fromTeamId": "min",
+      "toTeamId": "bkn"
+    },
+    {
+      "playerId": "jason_collins",
+      "playerName": "Jason Collins",
+      "fromTeamId": "was",
+      "toTeamId": "bkn"
+    },
+    {
+      "playerId": "samuel_dalembert",
+      "playerName": "Samuel Dalembert",
+      "fromTeamId": "mil",
+      "toTeamId": "nyk"
+    },
+    {
+      "playerId": "lamar_odom",
+      "playerName": "Lamar Odom",
+      "fromTeamId": "lac",
+      "toTeamId": "nyk"
+    },
+    {
+      "playerId": "jose_calderon",
+      "playerName": "Jose Calderon",
+      "fromTeamId": "det",
+      "toTeamId": "nyk"
+    },
+    {
+      "playerId": "wayne_ellington",
+      "playerName": "Wayne Ellington",
+      "fromTeamId": "cle",
+      "toTeamId": "nyk"
+    },
+    {
+      "playerId": "shannon_brown",
+      "playerName": "Shannon Brown",
+      "fromTeamId": "phx",
+      "toTeamId": "nyk"
+    },
+    {
+      "playerId": "cole_aldrich",
+      "playerName": "Cole Aldrich",
+      "fromTeamId": "sac",
+      "toTeamId": "nyk"
+    },
+    {
+      "playerId": "andrea_bargnani",
+      "playerName": "Andrea Bargnani",
+      "fromTeamId": "tor",
+      "toTeamId": "nyk"
+    },
+    {
+      "playerId": "jason_maxiell",
+      "playerName": "Jason Maxiell",
+      "fromTeamId": "det",
+      "toTeamId": "orl"
+    },
+    {
+      "playerId": "luis_scola",
+      "playerName": "Luis Scola",
+      "fromTeamId": "phx",
+      "toTeamId": "ind"
+    },
+    {
+      "playerId": "lavoy_allen",
+      "playerName": "Lavoy Allen",
+      "fromTeamId": "phi",
+      "toTeamId": "ind"
+    },
+    {
+      "playerId": "evan_turner",
+      "playerName": "Evan Turner",
+      "fromTeamId": "phi",
+      "toTeamId": "ind"
+    },
+    {
+      "playerId": "andrew_bynum",
+      "playerName": "Andrew Bynum",
+      "fromTeamId": "phi",
+      "toTeamId": "ind"
+    },
+    {
+      "playerId": "chris_copeland",
+      "playerName": "Chris Copeland",
+      "fromTeamId": "nyk",
+      "toTeamId": "ind"
+    },
+    {
+      "playerId": "c_j_watson",
+      "playerName": "C.J. Watson",
+      "fromTeamId": "bkn",
+      "toTeamId": "ind"
+    },
+    {
+      "playerId": "tony_wroten",
+      "playerName": "Tony Wroten",
+      "fromTeamId": "mem",
+      "toTeamId": "phi"
+    },
+    {
+      "playerId": "james_anderson",
+      "playerName": "James Anderson",
+      "fromTeamId": "hou",
+      "toTeamId": "phi"
+    },
+    {
+      "playerId": "elliot_williams",
+      "playerName": "Elliot Williams",
+      "fromTeamId": "por",
+      "toTeamId": "phi"
+    },
+    {
+      "playerId": "byron_mullens",
+      "playerName": "Byron Mullens",
+      "fromTeamId": "cha",
+      "toTeamId": "phi"
+    },
+    {
+      "playerId": "jarvis_varnado",
+      "playerName": "Jarvis Varnado",
+      "fromTeamId": "mia",
+      "toTeamId": "phi"
+    },
+    {
+      "playerId": "eric_bledsoe",
+      "playerName": "Eric Bledsoe",
+      "fromTeamId": "lac",
+      "toTeamId": "phx"
+    },
+    {
+      "playerId": "ish_smith",
+      "playerName": "Ish Smith",
+      "fromTeamId": "mil",
+      "toTeamId": "phx"
+    },
+    {
+      "playerId": "leandro_barbosa",
+      "playerName": "Leandro Barbosa",
+      "fromTeamId": "was",
+      "toTeamId": "phx"
+    },
+    {
+      "playerId": "gerald_green",
+      "playerName": "Gerald Green",
+      "fromTeamId": "ind",
+      "toTeamId": "phx"
+    },
+    {
+      "playerId": "miles_plumlee",
+      "playerName": "Miles Plumlee",
+      "fromTeamId": "ind",
+      "toTeamId": "phx"
+    },
+    {
+      "playerId": "shavlik_randolph",
+      "playerName": "Shavlik Randolph",
+      "fromTeamId": "bos",
+      "toTeamId": "phx"
+    },
+    {
+      "playerId": "emeka_okafor",
+      "playerName": "Emeka Okafor",
+      "fromTeamId": "was",
+      "toTeamId": "phx"
+    },
+    {
+      "playerId": "dorell_wright",
+      "playerName": "Dorell Wright",
+      "fromTeamId": "phi",
+      "toTeamId": "por"
+    },
+    {
+      "playerId": "earl_watson",
+      "playerName": "Earl Watson",
+      "fromTeamId": "uta",
+      "toTeamId": "por"
+    },
+    {
+      "playerId": "mo_williams",
+      "playerName": "Mo Williams",
+      "fromTeamId": "uta",
+      "toTeamId": "por"
+    },
+    {
+      "playerId": "thomas_robinson",
+      "playerName": "Thomas Robinson",
+      "fromTeamId": "hou",
+      "toTeamId": "por"
+    },
+    {
+      "playerId": "robin_lopez",
+      "playerName": "Robin Lopez",
+      "fromTeamId": "nop",
+      "toTeamId": "por"
+    },
+    {
+      "playerId": "quincy_acy",
+      "playerName": "Quincy Acy",
+      "fromTeamId": "tor",
+      "toTeamId": "sac"
+    },
+    {
+      "playerId": "rudy_gay",
+      "playerName": "Rudy Gay",
+      "fromTeamId": "tor",
+      "toTeamId": "sac"
+    },
+    {
+      "playerId": "jared_cunningham",
+      "playerName": "Jared Cunningham",
+      "fromTeamId": "dal",
+      "toTeamId": "sac"
+    },
+    {
+      "playerId": "derrick_williams",
+      "playerName": "Derrick Williams",
+      "fromTeamId": "min",
+      "toTeamId": "sac"
+    },
+    {
+      "playerId": "carl_landry",
+      "playerName": "Carl Landry",
+      "fromTeamId": "gsw",
+      "toTeamId": "sac"
+    },
+    {
+      "playerId": "reggie_evans",
+      "playerName": "Reggie Evans",
+      "fromTeamId": "bkn",
+      "toTeamId": "sac"
+    },
+    {
+      "playerId": "jason_terry",
+      "playerName": "Jason Terry",
+      "fromTeamId": "bos",
+      "toTeamId": "sac"
+    },
+    {
+      "playerId": "aaron_gray",
+      "playerName": "Aaron Gray",
+      "fromTeamId": "tor",
+      "toTeamId": "sac"
+    },
+    {
+      "playerId": "willie_reed",
+      "playerName": "Willie Reed",
+      "fromTeamId": "mem",
+      "toTeamId": "sac"
+    },
+    {
+      "playerId": "marco_belinelli",
+      "playerName": "Marco Belinelli",
+      "fromTeamId": "chi",
+      "toTeamId": "sas"
+    },
+    {
+      "playerId": "jeff_ayres",
+      "playerName": "Jeff Ayres",
+      "fromTeamId": "ind",
+      "toTeamId": "sas"
+    },
+    {
+      "playerId": "austin_daye",
+      "playerName": "Austin Daye",
+      "fromTeamId": "mem",
+      "toTeamId": "sas"
+    },
+    {
+      "playerId": "caron_butler",
+      "playerName": "Caron Butler",
+      "fromTeamId": "lac",
+      "toTeamId": "okc"
+    },
+    {
+      "playerId": "nando_de_colo",
+      "playerName": "Nando De Colo",
+      "fromTeamId": "sas",
+      "toTeamId": "tor"
+    },
+    {
+      "playerId": "steve_novak",
+      "playerName": "Steve Novak",
+      "fromTeamId": "nyk",
+      "toTeamId": "tor"
+    },
+    {
+      "playerId": "greivis_vasquez",
+      "playerName": "Greivis Vasquez",
+      "fromTeamId": "nop",
+      "toTeamId": "tor"
+    },
+    {
+      "playerId": "john_salmons",
+      "playerName": "John Salmons",
+      "fromTeamId": "sac",
+      "toTeamId": "tor"
+    },
+    {
+      "playerId": "chuck_hayes",
+      "playerName": "Chuck Hayes",
+      "fromTeamId": "sac",
+      "toTeamId": "tor"
+    },
+    {
+      "playerId": "tyler_hansbrough",
+      "playerName": "Tyler Hansbrough",
+      "fromTeamId": "ind",
+      "toTeamId": "tor"
+    },
+    {
+      "playerId": "patrick_patterson",
+      "playerName": "Patrick Patterson",
+      "fromTeamId": "sac",
+      "toTeamId": "tor"
+    },
+    {
+      "playerId": "julyan_stone",
+      "playerName": "Julyan Stone",
+      "fromTeamId": "den",
+      "toTeamId": "tor"
+    },
+    {
+      "playerId": "john_lucas_iii",
+      "playerName": "John Lucas III",
+      "fromTeamId": "tor",
+      "toTeamId": "uta"
+    },
+    {
+      "playerId": "diante_garrett",
+      "playerName": "Diante Garrett",
+      "fromTeamId": "phx",
+      "toTeamId": "uta"
+    },
+    {
+      "playerId": "malcolm_thomas",
+      "playerName": "Malcolm Thomas",
+      "fromTeamId": "chi",
+      "toTeamId": "uta"
+    },
+    {
+      "playerId": "richard_jefferson",
+      "playerName": "Richard Jefferson",
+      "fromTeamId": "gsw",
+      "toTeamId": "uta"
+    },
+    {
+      "playerId": "brandon_rush",
+      "playerName": "Brandon Rush",
+      "fromTeamId": "gsw",
+      "toTeamId": "uta"
+    },
+    {
+      "playerId": "james_johnson",
+      "playerName": "James Johnson",
+      "fromTeamId": "sac",
+      "toTeamId": "mem"
+    },
+    {
+      "playerId": "courtney_lee",
+      "playerName": "Courtney Lee",
+      "fromTeamId": "bos",
+      "toTeamId": "mem"
+    },
+    {
+      "playerId": "mike_miller",
+      "playerName": "Mike Miller",
+      "fromTeamId": "mia",
+      "toTeamId": "mem"
+    },
+    {
+      "playerId": "beno_udrih",
+      "playerName": "Beno Udrih",
+      "fromTeamId": "orl",
+      "toTeamId": "mem"
+    },
+    {
+      "playerId": "kosta_koufos",
+      "playerName": "Kosta Koufos",
+      "fromTeamId": "den",
+      "toTeamId": "mem"
+    },
+    {
+      "playerId": "marcin_gortat",
+      "playerName": "Marcin Gortat",
+      "fromTeamId": "phx",
+      "toTeamId": "was"
+    },
+    {
+      "playerId": "al_harrington",
+      "playerName": "Al Harrington",
+      "fromTeamId": "orl",
+      "toTeamId": "was"
+    },
+    {
+      "playerId": "andre_miller",
+      "playerName": "Andre Miller",
+      "fromTeamId": "den",
+      "toTeamId": "was"
+    },
+    {
+      "playerId": "drew_gooden",
+      "playerName": "Drew Gooden",
+      "fromTeamId": "mil",
+      "toTeamId": "was"
+    },
+    {
+      "playerId": "chauncey_billups",
+      "playerName": "Chauncey Billups",
+      "fromTeamId": "lac",
+      "toTeamId": "det"
+    },
+    {
+      "playerId": "josh_smith",
+      "playerName": "Josh Smith",
+      "fromTeamId": "atl",
+      "toTeamId": "det"
+    },
+    {
+      "playerId": "brandon_jennings",
+      "playerName": "Brandon Jennings",
+      "fromTeamId": "mil",
+      "toTeamId": "det"
+    },
+    {
+      "playerId": "dj_white",
+      "playerName": "DJ White",
+      "fromTeamId": "bos",
+      "toTeamId": "cha"
+    },
+    {
+      "playerId": "gary_neal",
+      "playerName": "Gary Neal",
+      "fromTeamId": "sas",
+      "toTeamId": "cha"
+    },
+    {
+      "playerId": "luke_ridnour",
+      "playerName": "Luke Ridnour",
+      "fromTeamId": "min",
+      "toTeamId": "cha"
+    },
+    {
+      "playerId": "al_jefferson",
+      "playerName": "Al Jefferson",
+      "fromTeamId": "uta",
+      "toTeamId": "cha"
+    },
+    {
+      "playerId": "anthony_tolliver",
+      "playerName": "Anthony Tolliver",
+      "fromTeamId": "atl",
+      "toTeamId": "cha"
+    }
+  ]
 }
