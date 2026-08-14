@@ -16,7 +16,7 @@ import { simulateOneDay, SimEffect, ALL_STAR_GAME } from './services/seasonRunne
 import { MIN_ROSTER_SIZE } from './services/tradeService';
 import {
   buildDraftBoard, initialPickAssets, grantNextWindowPick, PICK_WINDOW,
-  generateDraftClass, generateUndraftedClass, advanceDraftToUser, makeUserPick,
+  generateDraftClass, generateRealDraftClass, generateUndraftedClass, advanceDraftToUser, makeUserPick,
   scoutProspect, consensusValue, SCOUT_BUDGET,
 } from './services/draftService';
 import { processOffseasonContracts, runCpuFreeAgency, signFreeAgentLegality, newContractYears, evaluateSigningInterest } from './services/freeAgencyService';
@@ -414,7 +414,24 @@ export default function App() {
       // ids are name-derived from a small name space, and these maps are merged
       // OVER the existing players, so an unseeded collision would silently
       // overwrite a real rostered player.
-      const { prospects, reports, ids } = generateDraftClass(30, Object.keys(contracts.players));
+      //
+      // A chained era save draws the REAL draft class for this transition
+      // (ERAS[eraChainIndex].realDraftClass — see its own comment in
+      // data/eras/index.ts): who enters the league is real, WHICH team lands
+      // them still comes entirely from this save's own board above. Real
+      // rookie ratings live on the NEXT chronological era's player pool (the
+      // same season that class's rookie year was fetched into), so that's the
+      // source read here. Falls back to the fully-procedural class exactly
+      // like before once the chain has no realDraftClass at this index (a
+      // live save, or an era save that's walked past the last chained draft).
+      const chainEra = prev.era && prev.eraChainIndex !== undefined ? ERAS[prev.eraChainIndex] : undefined;
+      const { prospects, reports, ids } = chainEra?.realDraftClass
+        ? generateRealDraftClass(
+            chainEra.realDraftClass.picks,
+            ERAS[prev.eraChainIndex! + 1]?.players ?? {},
+            Object.keys(contracts.players),
+          )
+        : generateDraftClass(30, Object.keys(contracts.players));
       // Undrafted/international fringe talent enters the market alongside the draft.
       const undrafted = generateUndraftedClass(10, [...Object.keys(contracts.players), ...ids]);
       const playersWithProspects = { ...contracts.players, ...prospects, ...undrafted.players };

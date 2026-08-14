@@ -249,6 +249,47 @@ export const generateDraftClass = (
     return { prospects, reports, ids };
 };
 
+// A chained NBA Era's real draft class (see EraDefinition.realDraftClass,
+// data/eras/index.ts): the real player entering at each slot, wholesale-reused
+// from the rating a later era snapshot already computed for their real rookie
+// season — no separate rating step, this is the exact same pipeline output the
+// live current-season data uses. Only what a fresh draft pick needs is
+// overridden (rookie-scale salary/contract, the prospect flag); name, pos,
+// ratings, attributes, potential, age, and photo all carry over untouched.
+//
+// WHICH team lands each pick still comes entirely from this save's own
+// standings/lottery (buildDraftBoard/runDraftLottery) — this only changes WHO
+// is available to be picked, never the order. A slot whose real player didn't
+// clear the rating pipeline's rookie-year minutes threshold (hurt, stashed
+// overseas, D-League — real playerId is null) falls back to one procedural
+// prospect for that single slot, the same per-item degrade the offseason
+// moves chain already uses. Same fallback if a real playerId collides with an
+// id already in the league (shouldn't happen — a rookie hasn't debuted yet in
+// any earlier real season this save's data covers — but never trust that
+// silently).
+export const generateRealDraftClass = (
+    realPicks: { overallPick: number; playerId: string | null; playerName: string }[],
+    sourcePlayers: { [id: string]: Player },
+    takenIds: Iterable<string> = [],
+): { prospects: { [id: string]: Player }; reports: { [id: string]: ScoutReport }; ids: string[] } => {
+    const usedIds = new Set<string>(takenIds);
+    const prospects: { [id: string]: Player } = {};
+    const reports: { [id: string]: ScoutReport } = {};
+    const ids: string[] = [];
+    for (const realPick of [...realPicks].sort((a, b) => a.overallPick - b.overallPick)) {
+        const slot = realPick.overallPick - 1;
+        const source = realPick.playerId ? sourcePlayers[realPick.playerId] : undefined;
+        const p: Player = source && !usedIds.has(source.id)
+            ? { ...source, salary: rookieSalary(slot), contractYears: 3, prospect: true }
+            : (() => { const fallback = makeProspect(slot, usedIds); fallback.prospect = true; return fallback; })();
+        usedIds.add(p.id);
+        prospects[p.id] = p;
+        reports[p.id] = makeScoutReport(p);
+        ids.push(p.id);
+    }
+    return { prospects, reports, ids };
+};
+
 // Undrafted fringe talent entering the league alongside the draft class:
 // undrafted FAs, two-way bodies, international signings. They go straight into
 // the player pool on no roster, so getFreeAgents surfaces them on the market.
