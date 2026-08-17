@@ -481,6 +481,98 @@ const simulateGame = (teamA: Team, teamB: Team, players: { [key: string]: Player
         : { winner: teamB, loser: teamA, scoreWinner: scoreB, scoreLoser: scoreA };
 };
 
+// --- WATCHABLE GAME EVENTS (3D "Assistir ao Jogo") ---
+// Turns a resolved simulateGame() result into a chronological list of made
+// baskets for the 3D court screen to dramatize. The final score/winner is
+// never re-rolled here — it's the exact same simulateGame() call every other
+// game on the calendar goes through — only WHO scores and WHEN within the 48
+// minutes is synthesized, so what the user watches IS the real result.
+
+export interface GameEvent {
+    team: 'A' | 'B';
+    playerId: string;
+    playerName: string;
+    points: 1 | 2 | 3;
+    clockSeconds: number; // 0..2880 (48 real game-minutes); the watch screen compresses this into its own playback duration
+}
+
+export interface WatchableGame {
+    teamAId: string;
+    teamBId: string;
+    scoreA: number;
+    scoreB: number;
+    winnerId: string;
+    events: GameEvent[]; // both teams interleaved, sorted by clockSeconds ascending
+}
+
+const GAME_SECONDS = 48 * 60; // four real 12-minute quarters
+
+// Breaks one team's final point total into a sequence of made baskets
+// (1s/2s/3s) attributed to players, using the SAME scoring-weight formula
+// recordGameStats uses to split points across the rotation (pow(off-58,1.9)
+// weighted by rotation minutes) — the player who leads the real box score is
+// the player who visibly scores the most on screen, not an independent RNG.
+const generateScoringPlays = (team: Team, players: { [key: string]: Player }, points: number, side: 'A' | 'B'): GameEvent[] => {
+    const { ids, weights } = getRotationWeights(team, players);
+    if (ids.length === 0 || points <= 0) return [];
+
+    const pow = (v: number, e: number) => Math.pow(Math.max(0, v), e);
+    const ptsW = ids.map((pId, i) => pow(players[pId].off - 58, 1.9) * weights[i]);
+    const totalW = ptsW.reduce((a, b) => a + b, 0) || 1;
+    const target = ptsW.map((w) => (w / totalW) * points);
+    const earned = ids.map(() => 0);
+
+    const events: GameEvent[] = [];
+    let remaining = points;
+    while (remaining > 0) {
+        // Whoever is furthest below their target share scores next — spreads
+        // baskets across the rotation instead of one player running the whole
+        // sequence, while still converging on the real weighted split.
+        let idx = 0;
+        let bestDeficit = -Infinity;
+        ids.forEach((_, i) => {
+            const deficit = target[i] - earned[i];
+            if (deficit > bestDeficit) { bestDeficit = deficit; idx = i; }
+        });
+        const basketPts: 1 | 2 | 3 = remaining === 1 ? 1 : remaining === 2 ? 2 : (Math.random() < 0.32 ? 3 : 2);
+        remaining -= basketPts;
+        earned[idx] += basketPts;
+        events.push({ team: side, playerId: ids[idx], playerName: players[ids[idx]].name, points: basketPts, clockSeconds: 0 });
+    }
+    return events;
+};
+
+// Spreads a team's basket sequence evenly across the 48 game-minutes with
+// light jitter, then the caller interleaves both teams by timestamp so
+// baskets don't land in two separate blocks.
+const scheduleAcrossGame = (events: GameEvent[]): GameEvent[] => {
+    const n = events.length;
+    return events.map((e, i) => ({
+        ...e,
+        clockSeconds: Math.max(0, Math.min(GAME_SECONDS - 1, Math.round(((i + Math.random()) / Math.max(1, n)) * GAME_SECONDS))),
+    }));
+};
+
+// Resolves a real game via simulateGame (same call every scheduled game on
+// the calendar uses) and layers a dramatized play-by-play on top for the 3D
+// "Assistir ao Jogo" screen. Whatever the watch screen ends on is exactly
+// what gets written back to the season afterward (see seasonRunner's
+// simulateOneDay `pinnedResult` — it consumes scoreA/scoreB from here so the
+// game is never re-rolled a second time).
+const simulateGameEvents = (
+    teamA: Team, teamB: Team, players: { [key: string]: Player }, homeTeamId?: string, coaches: CoachMap = {},
+): WatchableGame => {
+    const game = simulateGame(teamA, teamB, players, homeTeamId, coaches);
+    const scoreA = game.winner.id === teamA.id ? game.scoreWinner : game.scoreLoser;
+    const scoreB = game.winner.id === teamB.id ? game.scoreWinner : game.scoreLoser;
+
+    const eventsA = scheduleAcrossGame(generateScoringPlays(teamA, players, scoreA, 'A'));
+    const eventsB = scheduleAcrossGame(generateScoringPlays(teamB, players, scoreB, 'B'));
+    const events = [...eventsA, ...eventsB].sort((a, b) => a.clockSeconds - b.clockSeconds);
+
+    return { teamAId: teamA.id, teamBId: teamB.id, scoreA, scoreB, winnerId: game.winner.id, events };
+};
+
 // --- LIVE DECISIVE GAME (Fase F) ---
 // A Game 7 (or Finals-clincher) involving the user is played out quarter by
 // quarter instead of resolved in one simulateGame call, with two levers the
@@ -1522,4 +1614,5 @@ export const simulationEngine = {
     startLiveGame,
     advanceLiveQuarter,
     applyDeciderResult,
+    simulateGameEvents,
 };

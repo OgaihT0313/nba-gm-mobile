@@ -12,7 +12,8 @@ import { ERAS, eraById } from './data/eras';
 import { simulationEngine, ROTATION_MIN, ROTATION_MAX } from './services/simulationService';
 import { buildSeasonOwner, evaluateSeasonOutcome } from './services/ownerService';
 import { generateSchedule } from './services/scheduleService';
-import { simulateOneDay, SimEffect, ALL_STAR_GAME } from './services/seasonRunner';
+import { simulateOneDay, SimEffect, ALL_STAR_GAME, PinnedGameResult } from './services/seasonRunner';
+import { WatchableGame } from './services/simulationService';
 import { MIN_ROSTER_SIZE } from './services/tradeService';
 import {
   buildDraftBoard, initialPickAssets, grantNextWindowPick, PICK_WINDOW,
@@ -32,6 +33,7 @@ import EraSelect from './screens/EraSelect';
 import TeamSelect from './screens/TeamSelect';
 import TeamConfirm from './screens/TeamConfirm';
 import SimulationScreen from './screens/SimulationScreen';
+import WatchGameScreen from './screens/WatchGameScreen';
 import MyTeamHub from './screens/MyTeamHub';
 import Scout from './screens/Scout';
 import AwardsScreen from './screens/AwardsScreen';
@@ -53,7 +55,7 @@ import { IconName } from './components/Icon';
 
 type AppView =
   | 'era-select' | 'team-select' | 'team-confirm' | 'home' | 'teams' | 'team-detail' | 'scout' | 'my-team' | 'draft' | 'free-agency'
-  | 'simulation' | 'standings' | 'leaders' | 'trade' | 'awards' | 'allstar' | 'playoffs' | 'live-game';
+  | 'simulation' | 'standings' | 'leaders' | 'trade' | 'awards' | 'allstar' | 'playoffs' | 'live-game' | 'watch-game';
 
 // How often (in simulated games) a fresh league-wide commentary is requested.
 const COMMENTARY_INTERVAL = 10;
@@ -117,6 +119,13 @@ export default function App() {
   const [season, setSeason] = useState<SeasonState | null>(null);
   const [isSimulating, setIsSimulating] = useState(false);
   const [targetGames, setTargetGames] = useState(0);
+  // The user's next fixture, pre-resolved for the 3D "Assistir ao Jogo"
+  // screen. `home`/`away` are Team OBJECTS (not just ids) captured at the
+  // moment the user tapped "assistir" — the screen needs them immediately
+  // for team colors/names, and re-deriving them from season.teams later
+  // risks drifting if state changes underneath (it doesn't here, but this
+  // keeps the screen decoupled from season shape).
+  const [watchGame, setWatchGame] = useState<{ home: Team; away: Team; game: WatchableGame } | null>(null);
   const [selectedTeamId, setSelectedTeamId] = useState<string | null>(null);
   // The franchise being previewed on the confirmation screen — chosen, but not
   // committed to yet, so it must not touch `season`.
@@ -187,6 +196,44 @@ export default function App() {
     if (!season || season.status !== 'active' || isSimulating || season.gamesPlayed >= target) return;
     setTargetGames(target);
     setIsSimulating(true);
+  };
+
+  // --- WATCH GAME (3D) ---
+  // Resolves the user's next fixture through the real engine RIGHT NOW
+  // (simulateGameEvents calls simulateGame exactly once) and stashes the
+  // result — the watch screen only plays it back, it never re-rolls it, so
+  // whatever the user sees IS what finishWatchGame() commits to the season.
+  const startWatchGame = (opponent: Team, atHome: boolean) => {
+    if (!season || season.status !== 'active' || isSimulating) return;
+    const userTeam = season.teams.find((t) => t.id === season.userTeamId);
+    if (!userTeam) return;
+    const home = atHome ? userTeam : opponent;
+    const away = atHome ? opponent : userTeam;
+    const game = simulationEngine.simulateGameEvents(home, away, season.players, home.id, season.coaches);
+    setWatchGame({ home, away, game });
+    setView('watch-game');
+  };
+
+  // The watched game's score is pinned into simulateOneDay so today's fixture
+  // isn't simulated a second time with a different outcome — everything else
+  // (records, box score, morale, injuries, trade offers, calendar checkpoints)
+  // proceeds exactly like a normal day advance.
+  const finishWatchGame = () => {
+    if (!season || !watchGame) return;
+    const pinned: PinnedGameResult = {
+      homeTeamId: watchGame.home.id,
+      awayTeamId: watchGame.away.id,
+      scoreHome: watchGame.game.scoreA,
+      scoreAway: watchGame.game.scoreB,
+    };
+    const { season: next, effects, fired } = simulateOneDay(season, pinned);
+    effects.forEach(applyEffect);
+    setSeason(next);
+    setWatchGame(null);
+    // A day that ends the season/hits All-Star already routes itself via a
+    // 'view' effect above (awards/allstar) — only fall back to the normal
+    // simulation screen when nothing else claimed the navigation.
+    if (!fired && !effects.some((e) => e.kind === 'view')) setView('simulation');
   };
 
   // Advance one playoff round. Ported from the web: when a champion is crowned
@@ -887,6 +934,17 @@ export default function App() {
           onAdvance={runSimulation}
           isCommentaryLoading={isCommentaryLoading}
           commentaryInterval={COMMENTARY_INTERVAL}
+          onWatchGame={startWatchGame}
+        />
+      );
+    }
+    if (view === 'watch-game' && watchGame) {
+      return (
+        <WatchGameScreen
+          home={watchGame.home}
+          away={watchGame.away}
+          game={watchGame.game}
+          onFinish={finishWatchGame}
         />
       );
     }

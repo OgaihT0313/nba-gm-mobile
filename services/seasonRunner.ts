@@ -28,12 +28,27 @@ export type SimEffect =
     | { kind: 'notification'; message: string; type: string }
     | { kind: 'view'; view: 'allstar' | 'awards' };
 
+// A game result already resolved by the 3D "Assistir ao Jogo" screen
+// (simulationEngine.simulateGameEvents), so the day's simulation doesn't
+// re-roll simulateGame for that one fixture and risk disagreeing with what
+// the user just watched.
+export interface PinnedGameResult {
+    homeTeamId: string;
+    awayTeamId: string;
+    scoreHome: number;
+    scoreAway: number;
+}
+
 /**
  * Simulate a single "day" (all of the day's scheduled games) plus the calendar/
  * event/owner bookkeeping that follows. Pure: takes a season, returns the next
  * season, the effects to replay, and whether the GM was fired this tick.
+ *
+ * `pinnedResult`, when given, must match one of today's fixtures by
+ * home/away team id — that game's score comes from it instead of a fresh
+ * simulateGame() call.
  */
-export function simulateOneDay(season: SeasonState): { season: SeasonState; effects: SimEffect[]; fired: boolean } {
+export function simulateOneDay(season: SeasonState, pinnedResult?: PinnedGameResult): { season: SeasonState; effects: SimEffect[]; fired: boolean } {
     const effects: SimEffect[] = [];
     const notify = (message: string, type: string) => effects.push({ kind: 'notification', message, type });
 
@@ -55,7 +70,14 @@ export function simulateOneDay(season: SeasonState): { season: SeasonState; effe
         const awayTeam = newTeams.find(t => t.id === game.awayTeamId);
         if (!homeTeam || !awayTeam) return;
 
-        const result = simulationEngine.simulateGame(homeTeam, awayTeam, newPlayers, game.homeTeamId, season.coaches);
+        const pinned = pinnedResult && pinnedResult.homeTeamId === game.homeTeamId && pinnedResult.awayTeamId === game.awayTeamId
+            ? pinnedResult
+            : undefined;
+        const result = pinned
+            ? (pinned.scoreHome >= pinned.scoreAway
+                ? { winner: homeTeam, loser: awayTeam, scoreWinner: pinned.scoreHome, scoreLoser: pinned.scoreAway }
+                : { winner: awayTeam, loser: homeTeam, scoreWinner: pinned.scoreAway, scoreLoser: pinned.scoreHome })
+            : simulationEngine.simulateGame(homeTeam, awayTeam, newPlayers, game.homeTeamId, season.coaches);
 
         const winnerIdx = newTeams.findIndex(t => t.id === result.winner.id);
         const loserIdx = newTeams.findIndex(t => t.id === result.loser.id);

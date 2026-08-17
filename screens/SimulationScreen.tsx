@@ -31,6 +31,8 @@ interface SimulationScreenProps {
   onAdvance: (target: number) => void;
   isCommentaryLoading: boolean;
   commentaryInterval: number;
+  /** Opens the 3D "Assistir ao Jogo" screen for the user's next fixture. */
+  onWatchGame?: (opponent: Team, atHome: boolean) => void;
 }
 
 const money = (v: number) => `$${(v / 1_000_000).toFixed(1)}M`;
@@ -45,7 +47,7 @@ const abbreviate = (name: string) => {
 };
 
 const SimulationScreen: React.FC<SimulationScreenProps> = ({
-  season, isSimulating, onAdvance, isCommentaryLoading, commentaryInterval,
+  season, isSimulating, onAdvance, isCommentaryLoading, commentaryInterval, onWatchGame,
 }) => {
   const { accent } = useTheme();
   const userTeam = season.teams.find((t) => t.id === season.userTeamId);
@@ -284,6 +286,16 @@ const SimulationScreen: React.FC<SimulationScreenProps> = ({
             <MonoLabel size={9} color={INK.faint} style={{ marginTop: 9, letterSpacing: 0 }}>
               Projeção pela força das rotações
             </MonoLabel>
+            {onWatchGame ? (
+              <GhostButton
+                label="Assistir ao jogo"
+                onPress={() => onWatchGame(opponent, !!atHome)}
+                disabled={busy}
+                color={accent.primary}
+                padding={11}
+                style={{ marginTop: 11 }}
+              />
+            ) : null}
           </Panel>
         ) : null}
 
