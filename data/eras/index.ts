@@ -1,4 +1,46 @@
 import type { Player, Team, OffseasonMove } from '../../types';
+// --- Kobe Era (2000-01 .. 2009-10) ---
+import threepeat2001Players from './lakers-threepeat-2000-01/players.json';
+import threepeat2001Teams from './lakers-threepeat-2000-01/teams.json';
+import threepeat2001Moves from './lakers-threepeat-2000-01/offseason_moves.json';
+import threepeat2001Draft from './lakers-threepeat-2000-01/draft_class.json';
+import iverson2002Players from './iverson-mvp-2001-02/players.json';
+import iverson2002Teams from './iverson-mvp-2001-02/teams.json';
+import iverson2002Moves from './iverson-mvp-2001-02/offseason_moves.json';
+import iverson2002Draft from './iverson-mvp-2001-02/draft_class.json';
+import lakers2003Players from './lakers-threepeat-2002-03/players.json';
+import lakers2003Teams from './lakers-threepeat-2002-03/teams.json';
+import lakers2003Moves from './lakers-threepeat-2002-03/offseason_moves.json';
+import lakers2003Draft from './lakers-threepeat-2002-03/draft_class.json';
+import pistons2004Players from './pistons-upset-2003-04/players.json';
+import pistons2004Teams from './pistons-upset-2003-04/teams.json';
+import pistons2004Moves from './pistons-upset-2003-04/offseason_moves.json';
+import pistons2004Draft from './pistons-upset-2003-04/draft_class.json';
+import spurs2005Players from './spurs-2004-05/players.json';
+import spurs2005Teams from './spurs-2004-05/teams.json';
+import spurs2005Moves from './spurs-2004-05/offseason_moves.json';
+import spurs2005Draft from './spurs-2004-05/draft_class.json';
+import kobe2006Players from './kobe-81-2005-06/players.json';
+import kobe2006Teams from './kobe-81-2005-06/teams.json';
+import kobe2006Moves from './kobe-81-2005-06/offseason_moves.json';
+import kobe2006Draft from './kobe-81-2005-06/draft_class.json';
+import spursSweep2007Players from './spurs-sweep-2006-07/players.json';
+import spursSweep2007Teams from './spurs-sweep-2006-07/teams.json';
+import spursSweep2007Moves from './spurs-sweep-2006-07/offseason_moves.json';
+import spursSweep2007Draft from './spurs-sweep-2006-07/draft_class.json';
+import celtics2008Players from './celtics-big3-2007-08/players.json';
+import celtics2008Teams from './celtics-big3-2007-08/teams.json';
+import celtics2008Moves from './celtics-big3-2007-08/offseason_moves.json';
+import celtics2008Draft from './celtics-big3-2007-08/draft_class.json';
+import gasol2009Players from './kobe-gasol-2008-09/players.json';
+import gasol2009Teams from './kobe-gasol-2008-09/teams.json';
+import gasol2009Moves from './kobe-gasol-2008-09/offseason_moves.json';
+import gasol2009Draft from './kobe-gasol-2008-09/draft_class.json';
+import rematch2010Players from './lakers-celtics-rematch-2009-10/players.json';
+import rematch2010Teams from './lakers-celtics-rematch-2009-10/teams.json';
+import rematch2010Moves from './lakers-celtics-rematch-2009-10/offseason_moves.json';
+import rematch2010Draft from './lakers-celtics-rematch-2009-10/draft_class.json';
+// --- LeBron/Warriors Era (2010-11 .. 2019-20) ---
 import heatles2011Players from './heatles-2010-11/players.json';
 import heatles2011Teams from './heatles-2010-11/teams.json';
 import heatles2011Moves from './heatles-2010-11/offseason_moves.json';
@@ -56,12 +98,29 @@ import bubble2020Moves from './bubble-2019-20/offseason_moves.json';
 // 2013-14/2014-15 predate full player-tracking defense), so the pipeline's
 // perimeterD/interiorD attributes lean more on steals/blocks/rebound% alone
 // for those years — ratings are still real-stat-driven, just slightly less
-// granular on the defensive breakdown. teams.json names were hand-corrected
-// for franchises that later renamed/relocated (New Jersey Nets → Brooklyn,
-// Charlotte Bobcats → Hornets, New Orleans Hornets → Pelicans) so each era
-// shows the name the team actually played under that season; logos still use
-// the current franchise crest since no historical crest is hosted at the CDN
-// this app pulls from.
+// granular on the defensive breakdown. Seasons before 2007-08 additionally
+// predate the ESPN Fantasy position feed (positions.py's primary source) —
+// those years fall back to Sleeper, then to nba_api's coarse G/F/C code
+// widened to the middle of its family (e.g. every "F" becomes SF), so a 2000s
+// roster has fewer real multi-position combos than a post-2010 one. Seasons
+// at or before 1995-96 are NOT here and never will be with this pipeline: its
+// core rating source (leaguedashplayerstats) returns zero rows that far back,
+// which the pipeline doesn't error on — it silently writes a flat 66/66/66 to
+// every single player. Magic/Bird and prime Jordan are blocked on this until
+// an alternative historical stats source is found (Basketball-Reference
+// already 403s automated requests) — deliberately not attempted here.
+//
+// teams.json names were hand-corrected for franchises that later
+// renamed/relocated (New Jersey Nets → Brooklyn, Seattle SuperSonics →
+// Oklahoma City, Charlotte Hornets → Bobcats → Hornets again in 2014,
+// Charlotte Hornets → New Orleans → Pelicans) so each era shows the name the
+// team actually played under that season; logos still use the current
+// franchise crest since no historical crest is hosted at the CDN this app
+// pulls from. Two seasons (2002-03, 2003-04) genuinely have only 29 teams —
+// Charlotte had no NBA franchise at all between the original Hornets leaving
+// for New Orleans (2002) and the Bobcats' first season (2004) — the app's
+// standings/playoffs/lottery code already works off `teams.length` rather
+// than an assumed 30, so this needed no code change, just verification.
 //
 // Each era is its own static import (Metro can't resolve a JSON path built
 // from a runtime variable), so adding a new era means adding a matching
@@ -107,7 +166,113 @@ export interface EraDefinition {
   realDraftClass?: { draftYear: string; picks: { overallPick: number; playerId: string | null; playerName: string }[] };
 }
 
+// `ERAS` is ONE continuous chronological array spanning both eras below —
+// eraChainIndex (App.tsx) just walks it forward by index, so extending this
+// array (in order) is the entire integration cost of adding a new decade; it
+// never needed to know about `ERA_GROUPS`.
 export const ERAS: EraDefinition[] = [
+  // --- Kobe Era ---
+  {
+    id: 'lakers-threepeat-2000-01',
+    label: 'O MVP do Iverson',
+    seasonLabel: '2000-01',
+    blurb: 'Iverson é MVP e leva o Sixers à final — mas o Lakers de Shaq e Kobe começa o three-peat.',
+    players: threepeat2001Players as unknown as { [key: string]: Player },
+    teams: threepeat2001Teams as unknown as Team[],
+    offseasonMoves: threepeat2001Moves as unknown as EraDefinition['offseasonMoves'],
+    realDraftClass: threepeat2001Draft as unknown as EraDefinition['realDraftClass'],
+  },
+  {
+    id: 'iverson-mvp-2001-02',
+    label: 'Segundo Anel Seguido',
+    seasonLabel: '2001-02',
+    blurb: 'Kidd leva o Nets à primeira final da franquia — e é varrido pelo Lakers, que fecha o bicampeonato.',
+    players: iverson2002Players as unknown as { [key: string]: Player },
+    teams: iverson2002Teams as unknown as Team[],
+    offseasonMoves: iverson2002Moves as unknown as EraDefinition['offseasonMoves'],
+    realDraftClass: iverson2002Draft as unknown as EraDefinition['realDraftClass'],
+  },
+  {
+    id: 'lakers-threepeat-2002-03',
+    label: 'O Three-Peat Termina',
+    seasonLabel: '2002-03',
+    blurb: 'O Lakers cai nas semis do Oeste pro Spurs de Duncan, que fecha o ano com o título contra o Nets.',
+    players: lakers2003Players as unknown as { [key: string]: Player },
+    teams: lakers2003Teams as unknown as Team[],
+    offseasonMoves: lakers2003Moves as unknown as EraDefinition['offseasonMoves'],
+    realDraftClass: lakers2003Draft as unknown as EraDefinition['realDraftClass'],
+  },
+  {
+    id: 'pistons-upset-2003-04',
+    label: 'A Zebra do Pistons',
+    seasonLabel: '2003-04',
+    blurb: 'O "Fab Four" de Shaq, Kobe, Malone e Payton é favorito — e o Pistons de Billups dá a zebra em 5 jogos.',
+    players: pistons2004Players as unknown as { [key: string]: Player },
+    teams: pistons2004Teams as unknown as Team[],
+    offseasonMoves: pistons2004Moves as unknown as EraDefinition['offseasonMoves'],
+    realDraftClass: pistons2004Draft as unknown as EraDefinition['realDraftClass'],
+  },
+  {
+    id: 'spurs-2004-05',
+    label: 'O Segundo Anel do Duncan',
+    seasonLabel: '2004-05',
+    blurb: 'Spurs e Pistons fazem 7 jogos de final — Duncan é MVP das finais de novo e fecha o terceiro título da franquia.',
+    players: spurs2005Players as unknown as { [key: string]: Player },
+    teams: spurs2005Teams as unknown as Team[],
+    offseasonMoves: spurs2005Moves as unknown as EraDefinition['offseasonMoves'],
+    realDraftClass: spurs2005Draft as unknown as EraDefinition['realDraftClass'],
+  },
+  {
+    id: 'kobe-81-2005-06',
+    label: 'Os 81 Pontos do Kobe',
+    seasonLabel: '2005-06',
+    blurb: 'Kobe faz 81 pontos contra o Toronto — e o Heat de Wade vira de 0-2 pra ganhar o primeiro título da franquia.',
+    players: kobe2006Players as unknown as { [key: string]: Player },
+    teams: kobe2006Teams as unknown as Team[],
+    offseasonMoves: kobe2006Moves as unknown as EraDefinition['offseasonMoves'],
+    realDraftClass: kobe2006Draft as unknown as EraDefinition['realDraftClass'],
+  },
+  {
+    id: 'spurs-sweep-2006-07',
+    label: 'A Varrida do Duncan',
+    seasonLabel: '2006-07',
+    blurb: 'Spurs varrem o Cavaliers na primeira final do LeBron — Tony Parker é o MVP da decisão.',
+    players: spursSweep2007Players as unknown as { [key: string]: Player },
+    teams: spursSweep2007Teams as unknown as Team[],
+    offseasonMoves: spursSweep2007Moves as unknown as EraDefinition['offseasonMoves'],
+    realDraftClass: spursSweep2007Draft as unknown as EraDefinition['realDraftClass'],
+  },
+  {
+    id: 'celtics-big3-2007-08',
+    label: 'O Big Three de Boston',
+    seasonLabel: '2007-08',
+    blurb: 'Garnett, Pierce e Allen se juntam em Boston e batem o Lakers do Kobe na final, encerrando 22 anos de jejum.',
+    players: celtics2008Players as unknown as { [key: string]: Player },
+    teams: celtics2008Teams as unknown as Team[],
+    offseasonMoves: celtics2008Moves as unknown as EraDefinition['offseasonMoves'],
+    realDraftClass: celtics2008Draft as unknown as EraDefinition['realDraftClass'],
+  },
+  {
+    id: 'kobe-gasol-2008-09',
+    label: 'O Primeiro Anel Sem o Shaq',
+    seasonLabel: '2008-09',
+    blurb: 'Kobe e Gasol batem o Magic de Dwight Howard na final — o primeiro anel do Kobe como MVP das finais.',
+    players: gasol2009Players as unknown as { [key: string]: Player },
+    teams: gasol2009Teams as unknown as Team[],
+    offseasonMoves: gasol2009Moves as unknown as EraDefinition['offseasonMoves'],
+    realDraftClass: gasol2009Draft as unknown as EraDefinition['realDraftClass'],
+  },
+  {
+    id: 'lakers-celtics-rematch-2009-10',
+    label: 'A Revanche',
+    seasonLabel: '2009-10',
+    blurb: 'Revanche da final de 2008: Lakers e Celtics vão a 7 jogos, e Kobe fecha o segundo anel seguido como MVP.',
+    players: rematch2010Players as unknown as { [key: string]: Player },
+    teams: rematch2010Teams as unknown as Team[],
+    offseasonMoves: rematch2010Moves as unknown as EraDefinition['offseasonMoves'],
+    realDraftClass: rematch2010Draft as unknown as EraDefinition['realDraftClass'],
+  },
+  // --- LeBron/Warriors Era ---
   {
     id: 'heatles-2010-11',
     label: 'Heatles',
@@ -211,3 +376,65 @@ export const ERAS: EraDefinition[] = [
 ];
 
 export const eraById = (id: string): EraDefinition | undefined => ERAS.find((e) => e.id === id);
+
+// --- MyEras-style grouping (added on top of ERAS, additive-only — see the
+// module comment on ERAS above: this never changes how eraChainIndex works,
+// it's purely a display/entry-point layer). Picking a group starts the save
+// at `seasonIds[0]` (its iconic/default season); EraSelect.tsx additionally
+// lets the user expand a group to cherry-pick any of its other seasons
+// instead, so nothing from the flat per-season list is lost.
+export interface EraGroup {
+  id: string;
+  label: string;
+  /** e.g. "2000-01 → 2009-10" */
+  spanLabel: string;
+  blurb: string;
+  /** Key into src/theme/eraVisuals.ts's ERA_VISUALS lookup. */
+  visualId: string;
+  /** EraDefinition ids, in chronological order. First = default/iconic start. */
+  seasonIds: string[];
+}
+
+export const ERA_GROUPS: EraGroup[] = [
+  {
+    id: 'kobe-era',
+    label: 'Kobe Era',
+    spanLabel: '2000-01 → 2009-10',
+    blurb: 'Três anéis do three-peat, o "Fab Four" derrubado pelo Pistons, os 81 pontos e o bicampeonato sem o Shaq.',
+    visualId: 'kobe-era',
+    seasonIds: [
+      'lakers-threepeat-2000-01',
+      'iverson-mvp-2001-02',
+      'lakers-threepeat-2002-03',
+      'pistons-upset-2003-04',
+      'spurs-2004-05',
+      'kobe-81-2005-06',
+      'spurs-sweep-2006-07',
+      'celtics-big3-2007-08',
+      'kobe-gasol-2008-09',
+      'lakers-celtics-rematch-2009-10',
+    ],
+  },
+  {
+    id: 'lebron-warriors-era',
+    label: 'LeBron/Warriors Era',
+    spanLabel: '2010-11 → 2019-20',
+    blurb: 'Heatles, o three-peat que virou bicampeonato, a ascensão da dinastia Warriors e a bolha de Orlando.',
+    visualId: 'lebron-warriors-era',
+    seasonIds: [
+      'heatles-2010-11',
+      'lockout-2011-12',
+      'threepeat-2012-13',
+      'beautiful-game-2013-14',
+      'warriors-2014-15',
+      'lebron-2015-16',
+      'durant-warriors-2016-17',
+      'rockets-2017-18',
+      'raptors-2018-19',
+      'bubble-2019-20',
+    ],
+  },
+];
+
+export const eraGroupForEraId = (eraId: string): EraGroup | undefined =>
+  ERA_GROUPS.find((g) => g.seasonIds.includes(eraId));

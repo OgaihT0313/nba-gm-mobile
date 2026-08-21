@@ -945,6 +945,7 @@ export default function App() {
           away={watchGame.away}
           game={watchGame.game}
           onFinish={finishWatchGame}
+          eraId={season?.era?.id}
         />
       );
     }

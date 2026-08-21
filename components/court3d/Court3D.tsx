@@ -30,11 +30,21 @@ export interface ShotEvent {
   points: 1 | 2 | 3;
 }
 
+/** Per-Era-Group visual touch (see src/theme/eraVisuals.ts) — optional and
+ * narrow on purpose: today just the floor tone. Omitted entirely for a
+ * live/no-era save, which keeps the exact court that already shipped. */
+export interface Court3DVisual {
+  floorColor?: string;
+}
+
 interface Court3DProps {
   home: TeamVisual;
   away: TeamVisual;
   shot?: ShotEvent | null;
+  visual?: Court3DVisual;
 }
+
+const DEFAULT_FLOOR_COLOR = '#b5793f';
 
 const COURT_L = 94;
 const COURT_W = 50;
@@ -312,7 +322,7 @@ function Stands() {
 /* ------------------------------------------------------------------ */
 /* Scene root.                                                        */
 /* ------------------------------------------------------------------ */
-function Scene({ home, away, shot }: Court3DProps) {
+function Scene({ home, away, shot, visual }: Court3DProps) {
   return (
     <>
       <hemisphereLight args={[0x9fb3ff, 0x1a1408, 0.6]} />
@@ -321,7 +331,7 @@ function Scene({ home, away, shot }: Court3DProps) {
 
       <mesh position={[0, -0.5, 0]}>
         <boxGeometry args={[COURT_L, 1, COURT_W]} />
-        <meshStandardMaterial color="#b5793f" roughness={0.5} metalness={0.05} />
+        <meshStandardMaterial color={visual?.floorColor ?? DEFAULT_FLOOR_COLOR} roughness={0.5} metalness={0.05} />
       </mesh>
       <mesh position={[0, -0.9, 0]}>
         <boxGeometry args={[COURT_L + 24, 0.8, COURT_W + 24]} />
@@ -340,7 +350,7 @@ function Scene({ home, away, shot }: Court3DProps) {
   );
 }
 
-export default function Court3D({ home, away, shot }: Court3DProps) {
+export default function Court3D({ home, away, shot, visual }: Court3DProps) {
   const camState = useRef<CameraDragState>({ angle: 0.62, elev: 0.52, dist: 118, dragging: false });
   const last = useRef({ x: 0, y: 0 });
 
@@ -375,7 +385,7 @@ export default function Court3D({ home, away, shot }: Court3DProps) {
         <color attach="background" args={['#05070d']} />
         <fog attach="fog" args={['#05070d', 80, 340]} />
         <CameraRig stateRef={camState} />
-        <Scene home={home} away={away} shot={shot} />
+        <Scene home={home} away={away} shot={shot} visual={visual} />
       </Canvas>
     </View>
   );

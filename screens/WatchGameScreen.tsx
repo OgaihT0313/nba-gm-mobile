@@ -6,6 +6,8 @@ import { useAudioPlayer, type AudioPlayer } from 'expo-audio';
 import { Team } from '../types';
 import { getTeamAccent, getTeamNickname, getTeamTricode } from '../constants';
 import { WatchableGame, GameEvent } from '../services/simulationService';
+import { eraGroupForEraId } from '../data/eras';
+import { getEraVisual } from '../src/theme/eraVisuals';
 import { COLORS, INK } from '../src/theme/tokens';
 import { Panel, MonoLabel, Stat, CtaButton, GhostButton } from '../components/ui/kit';
 import Court3D, { ShotEvent } from '../components/court3d/Court3D';
@@ -36,12 +38,18 @@ interface WatchGameScreenProps {
   away: Team;
   game: WatchableGame;
   onFinish: () => void;
+  /** Which historical era (if any) started this save — see data/eras/index.ts.
+   * Only used to pick Court3D's floor tone (Fase C's per-era visual
+   * identity); undefined for a live/current-season save renders the exact
+   * same court that already ships today. */
+  eraId?: string;
 }
 
-const WatchGameScreen: React.FC<WatchGameScreenProps> = ({ home, away, game, onFinish }) => {
+const WatchGameScreen: React.FC<WatchGameScreenProps> = ({ home, away, game, onFinish, eraId }) => {
   const insets = useSafeAreaInsets();
   const homeAccent = getTeamAccent(home.id);
   const awayAccent = getTeamAccent(away.id);
+  const eraVisual = getEraVisual(eraId ? eraGroupForEraId(eraId)?.visualId : undefined);
 
   const [elapsedMs, setElapsedMs] = useState(0);
   const [speed, setSpeed] = useState(1);
@@ -142,7 +150,12 @@ const WatchGameScreen: React.FC<WatchGameScreenProps> = ({ home, away, game, onF
 
   return (
     <View className="flex-1" style={{ backgroundColor: COLORS.bg }}>
-      <Court3D home={homeAccent} away={awayAccent} shot={shot} />
+      <Court3D
+        home={homeAccent}
+        away={awayAccent}
+        shot={shot}
+        visual={eraVisual ? { floorColor: eraVisual.floorTone } : undefined}
+      />
 
       {/* Scoreboard, floating over the canvas like the prototype's top-left panel. */}
       <View pointerEvents="box-none" style={{ position: 'absolute', top: insets.top + 10, left: 14, right: 14 }}>
