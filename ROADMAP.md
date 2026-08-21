@@ -27,11 +27,12 @@ commitado; o que segue é escopo maior, ainda não iniciado:
 
 ## NBA Eras (MyEras) — pendências
 
-- **Fonte alternativa de rating histórico pré-1996-97**, pra eventualmente
-  destravar Magic/Bird (1983-84) e o auge do Jordan (1991-95) com dado real —
-  hoje o pipeline (`leaguedashplayerstats`) devolve 0 linhas pra essas
-  temporadas. Basketball-Reference já deu 403 num teste anterior; nenhuma
-  fonte substituta identificada ainda.
+- ~~Fonte alternativa de rating histórico pré-1996-97~~ **Resolvido
+  2026-08-20**: `leagueleaders` (outro endpoint do nba_api) tem box score
+  clássico real desde pelo menos 1959-60. Modelo clássico construído e
+  validado (`nba-gm-simulator` commit `ddfb875`), Magic vs. Bird Era (1979-80→
+  1989-90) e Jordan Era (1990-91→1997-98) puxadas e commitadas
+  (`nba-gm-mobile` commit `0e9c315`) — 19 temporadas reais encadeadas.
 - **Filtro de TV / uniformes de época**, além do piso retrô já implementado
   (`src/theme/eraVisuals.ts`) — cosmético, fora do escopo original por
   decisão do usuário.
