@@ -37,11 +37,36 @@ export interface Court3DVisual {
   floorColor?: string;
 }
 
+/** Fixed broadcast-style framings, an idea borrowed (re-implemented, not
+ * copied — the reference was web-only Three.js, see CameraRig below) from a
+ * Gemini-generated prototype the user shared. `iso` is exactly today's
+ * default free-orbit view (angle/elev/dist match the previous hardcoded
+ * camState default 1:1) — picking it is a no-op for anyone not using the new
+ * UI. The other three freeze auto-rotate (a real broadcast camera doesn't
+ * spin) and ease the rig toward a fixed angle/elevation/distance instead. */
+export type CameraView = 'iso' | 'tv' | 'overhead' | 'behind_basket';
+
+interface CameraPreset {
+  angle: number;
+  elev: number;
+  dist: number;
+  autoRotate: boolean;
+}
+
+const CAMERA_PRESETS: Record<CameraView, CameraPreset> = {
+  iso: { angle: 0.62, elev: 0.52, dist: 118, autoRotate: true },
+  tv: { angle: Math.PI / 2, elev: 0.22, dist: 145, autoRotate: false },
+  overhead: { angle: 0.3, elev: 1.48, dist: 95, autoRotate: false },
+  behind_basket: { angle: Math.PI, elev: 0.16, dist: 150, autoRotate: false },
+};
+
 interface Court3DProps {
   home: TeamVisual;
   away: TeamVisual;
   shot?: ShotEvent | null;
   visual?: Court3DVisual;
+  /** Defaults to 'iso' — the same free-orbit view Court3D always had. */
+  cameraView?: CameraView;
 }
 
 const DEFAULT_FLOOR_COLOR = '#b5793f';
@@ -71,11 +96,26 @@ export interface CameraDragState {
   dragging: boolean;
 }
 
-function CameraRig({ stateRef }: { stateRef: React.MutableRefObject<CameraDragState> }) {
+function CameraRig({ stateRef, preset }: { stateRef: React.MutableRefObject<CameraDragState>; preset: CameraPreset }) {
   const target = useMemo(() => new THREE.Vector3(0, 6, 0), []);
   useFrame(({ camera }) => {
     const s = stateRef.current;
-    if (!s.dragging) s.angle += 0.0016;
+    if (!s.dragging) {
+      if (preset.autoRotate) {
+        // Exactly the original 'iso' behavior — free continuous spin, elev/
+        // dist stay wherever a drag last left them. Zero behavior change for
+        // any caller not using the new camera-view picker.
+        s.angle += 0.0016;
+      } else {
+        // A fixed broadcast angle: ease toward it instead of snapping, and
+        // let it keep pulling back even after a manual drag lets go (reads
+        // as "the camera operator recentering"), rather than staying wherever
+        // the user last left it.
+        s.angle = THREE.MathUtils.lerp(s.angle, preset.angle, 0.06);
+        s.elev = THREE.MathUtils.lerp(s.elev, preset.elev, 0.06);
+        s.dist = THREE.MathUtils.lerp(s.dist, preset.dist, 0.06);
+      }
+    }
     camera.position.set(
       target.x + Math.cos(s.angle) * s.dist * Math.cos(s.elev),
       target.y + Math.sin(s.elev) * s.dist,
@@ -350,7 +390,8 @@ function Scene({ home, away, shot, visual }: Court3DProps) {
   );
 }
 
-export default function Court3D({ home, away, shot, visual }: Court3DProps) {
+export default function Court3D({ home, away, shot, visual, cameraView = 'iso' }: Court3DProps) {
+  const preset = CAMERA_PRESETS[cameraView];
   const camState = useRef<CameraDragState>({ angle: 0.62, elev: 0.52, dist: 118, dragging: false });
   const last = useRef({ x: 0, y: 0 });
 
@@ -384,7 +425,7 @@ export default function Court3D({ home, away, shot, visual }: Court3DProps) {
       <Canvas camera={{ fov: 42, near: 0.5, far: 900 }} style={{ flex: 1 }}>
         <color attach="background" args={['#05070d']} />
         <fog attach="fog" args={['#05070d', 80, 340]} />
-        <CameraRig stateRef={camState} />
+        <CameraRig stateRef={camState} preset={preset} />
         <Scene home={home} away={away} shot={shot} visual={visual} />
       </Canvas>
     </View>

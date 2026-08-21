@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { View, Text } from 'react-native';
+import { View, Text, Pressable } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useAudioPlayer, type AudioPlayer } from 'expo-audio';
 
@@ -10,7 +10,20 @@ import { eraGroupForEraId } from '../data/eras';
 import { getEraVisual } from '../src/theme/eraVisuals';
 import { COLORS, INK } from '../src/theme/tokens';
 import { Panel, MonoLabel, Stat, CtaButton, GhostButton } from '../components/ui/kit';
-import Court3D, { ShotEvent } from '../components/court3d/Court3D';
+import Court3D, { ShotEvent, CameraView } from '../components/court3d/Court3D';
+
+const CAMERA_VIEWS: { id: CameraView; label: string }[] = [
+  { id: 'iso', label: 'Livre' },
+  { id: 'tv', label: 'TV' },
+  { id: 'overhead', label: 'Aérea' },
+  { id: 'behind_basket', label: 'Cesta' },
+];
+
+const SHOT_LABEL: { [points in 1 | 2 | 3]: string } = {
+  1: 'LANCE LIVRE!',
+  2: 'CESTA DE 2!',
+  3: 'CESTA DE 3!',
+};
 
 // "Assistir ao Jogo" — the 3D court. Deliberately its own full-bleed layout
 // (not <Screen>, which is a ScrollView built for card stacks) with floating
@@ -57,6 +70,8 @@ const WatchGameScreen: React.FC<WatchGameScreenProps> = ({ home, away, game, onF
   const startRef = useRef<number | null>(null);
   const [shot, setShot] = useState<ShotEvent | null>(null);
   const shotSeq = useRef(0);
+  const [cameraView, setCameraView] = useState<CameraView>('iso');
+  const [shotIndicator, setShotIndicator] = useState<{ text: string; color: string } | null>(null);
 
   // Synthesized placeholder SFX (assets/sfx — see scripts/generate_sfx.js).
   // .seekTo(0) before each play() so a basket landing mid-decay of the
@@ -65,6 +80,8 @@ const WatchGameScreen: React.FC<WatchGameScreenProps> = ({ home, away, game, onF
   const swishSound = useAudioPlayer(require('../assets/sfx/swish.wav'));
   const buzzerSound = useAudioPlayer(require('../assets/sfx/buzzer.wav'));
   const whistleSound = useAudioPlayer(require('../assets/sfx/whistle.wav'));
+  const dribbleSound = useAudioPlayer(require('../assets/sfx/dribble.wav'));
+  const crowdSound = useAudioPlayer(require('../assets/sfx/crowd.wav'));
   const playSound = (player: AudioPlayer) => {
     try {
       player.seekTo(0);
@@ -81,6 +98,16 @@ const WatchGameScreen: React.FC<WatchGameScreenProps> = ({ home, away, game, onF
   }, []);
 
   const done = elapsedMs >= WATCH_MS;
+
+  // Ambient dribble bounce during live possession — idea borrowed from the
+  // Gemini-prototype zip (fills the silence between plays instead of dead
+  // air); a soft loop, not synced to any specific event.
+  useEffect(() => {
+    if (done) return;
+    const id = setInterval(() => playSound(dribbleSound), 1800 / speed);
+    return () => clearInterval(id);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [done, speed]);
 
   useEffect(() => {
     if (done) return;
@@ -109,10 +136,16 @@ const WatchGameScreen: React.FC<WatchGameScreenProps> = ({ home, away, game, onF
       firedRef.current = idx;
       if (lastCrossed) {
         shotSeq.current += 1;
-        setShot({ id: shotSeq.current, side: lastCrossed.team === 'A' ? 'home' : 'away', points: lastCrossed.points });
+        const points = lastCrossed.points;
+        setShot({ id: shotSeq.current, side: lastCrossed.team === 'A' ? 'home' : 'away', points });
+        setShotIndicator({ text: SHOT_LABEL[points], color: COLORS.good });
+        setTimeout(() => setShotIndicator(null), 1100);
         // Roughly synced to the ball's ~0.9s flight in Court3D rather than
         // firing the instant the score updates.
-        setTimeout(() => playSound(swishSound), 650);
+        setTimeout(() => {
+          playSound(swishSound);
+          if (points === 3) playSound(crowdSound);
+        }, 650);
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -155,7 +188,27 @@ const WatchGameScreen: React.FC<WatchGameScreenProps> = ({ home, away, game, onF
         away={awayAccent}
         shot={shot}
         visual={eraVisual ? { floorColor: eraVisual.floorTone } : undefined}
+        cameraView={cameraView}
       />
+
+      {shotIndicator && (
+        <View pointerEvents="none" style={{ position: 'absolute', top: '42%', left: 0, right: 0, alignItems: 'center' }}>
+          <View
+            style={{
+              backgroundColor: 'rgba(10,15,25,0.88)',
+              borderWidth: 1.5,
+              borderColor: shotIndicator.color,
+              borderRadius: 12,
+              paddingVertical: 8,
+              paddingHorizontal: 18,
+            }}
+          >
+            <Text style={{ color: shotIndicator.color, fontSize: 18, fontWeight: '900', letterSpacing: 1 }}>
+              {shotIndicator.text}
+            </Text>
+          </View>
+        </View>
+      )}
 
       {/* Scoreboard, floating over the canvas like the prototype's top-left panel. */}
       <View pointerEvents="box-none" style={{ position: 'absolute', top: insets.top + 10, left: 14, right: 14 }}>
@@ -178,6 +231,30 @@ const WatchGameScreen: React.FC<WatchGameScreenProps> = ({ home, away, game, onF
             </View>
           </View>
         </Panel>
+
+        <View className="flex-row" style={{ marginTop: 8, gap: 6 }}>
+          {CAMERA_VIEWS.map((v) => {
+            const active = v.id === cameraView;
+            return (
+              <Pressable
+                key={v.id}
+                onPress={() => setCameraView(v.id)}
+                className="active:opacity-70"
+                style={{
+                  flex: 1,
+                  paddingVertical: 7,
+                  borderRadius: 999,
+                  alignItems: 'center',
+                  backgroundColor: active ? COLORS.cta : 'rgba(10,15,25,0.75)',
+                  borderWidth: 1,
+                  borderColor: active ? COLORS.cta : 'rgba(255,255,255,0.14)',
+                }}
+              >
+                <MonoLabel size={9} color={active ? '#ffffff' : INK.faint}>{v.label}</MonoLabel>
+              </Pressable>
+            );
+          })}
+        </View>
       </View>
 
       {/* Bottom action: skip while live, confirm+commit once it's over. The

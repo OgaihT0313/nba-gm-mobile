@@ -53,6 +53,22 @@ function bandpass(samples, centerHz, q) {
   return out;
 }
 
+// Simple one-pole lowpass, cutoff swept per-sample via `cutoffAt(i)` — used
+// for the crowd noise bed instead of the fixed-center bandpass above, since a
+// crowd swell reads better as a rumble that opens up and settles than as a
+// single resonant peak.
+function lowpassSwept(samples, cutoffAt) {
+  const out = new Float32Array(samples.length);
+  let y = 0;
+  for (let i = 0; i < samples.length; i++) {
+    const w0 = (2 * Math.PI * cutoffAt(i)) / SAMPLE_RATE;
+    const a = Math.min(1, w0);
+    y += a * (samples[i] - y);
+    out[i] = y;
+  }
+  return out;
+}
+
 // Made basket — filtered noise burst, reads as the net "swish" rather than a
 // tonal chime.
 function genSwish() {
@@ -97,9 +113,54 @@ function genWhistle() {
   return out;
 }
 
+// Ball dribble bounce — a quick low-thump pitch sweep, played on a loop
+// during idle possession to fill the silence between plays. Reference:
+// synthesis idea adapted from a Gemini-generated prototype the user shared
+// (Downloads/nba-gm-mobile.zip, web-only Web Audio original — not portable
+// code, just the frequency/envelope shape) rather than written from scratch.
+function genDribble() {
+  const dur = 0.1;
+  const n = Math.floor(SAMPLE_RATE * dur);
+  const out = new Float32Array(n);
+  for (let i = 0; i < n; i++) {
+    const t = i / SAMPLE_RATE;
+    const freq = 150 - 90 * (t / dur);
+    out[i] = Math.sin(2 * Math.PI * freq * t) * envelope(t, 0.005, dur - 0.005) * 0.4;
+  }
+  return out;
+}
+
+// Crowd cheer swell — filtered noise whose lowpass cutoff and gain both rise
+// then settle, reading as an arena eruption rather than flat hiss. Played
+// alongside the swish on a made three-pointer. Same Gemini-prototype-derived
+// synthesis idea as genDribble() above, reimplemented with this file's own
+// lowpassSwept() helper instead of Web Audio's BiquadFilterNode.
+function genCrowd() {
+  const dur = 1.1;
+  const n = Math.floor(SAMPLE_RATE * dur);
+  const raw = new Float32Array(n);
+  for (let i = 0; i < n; i++) raw[i] = noise() * 0.8;
+  const cutoffAt = (i) => {
+    const t = i / SAMPLE_RATE;
+    const rise = Math.min(1, t / 0.35);
+    const settle = t > 0.35 ? Math.max(0.4, 1 - (t - 0.35) / dur) : 1;
+    return 500 + 900 * rise * settle;
+  };
+  const shaped = lowpassSwept(raw, cutoffAt);
+  const out = new Float32Array(n);
+  for (let i = 0; i < n; i++) {
+    const t = i / SAMPLE_RATE;
+    const env = t < 0.3 ? t / 0.3 : Math.max(0, 1 - (t - 0.3) / (dur - 0.3));
+    out[i] = shaped[i] * env * 0.8;
+  }
+  return out;
+}
+
 const outDir = path.join(__dirname, '..', 'assets', 'sfx');
 fs.mkdirSync(outDir, { recursive: true });
 writeWav(path.join(outDir, 'swish.wav'), genSwish());
 writeWav(path.join(outDir, 'buzzer.wav'), genBuzzer());
 writeWav(path.join(outDir, 'whistle.wav'), genWhistle());
-console.log('Generated swish.wav, buzzer.wav, whistle.wav in', outDir);
+writeWav(path.join(outDir, 'dribble.wav'), genDribble());
+writeWav(path.join(outDir, 'crowd.wav'), genCrowd());
+console.log('Generated swish.wav, buzzer.wav, whistle.wav, dribble.wav, crowd.wav in', outDir);
