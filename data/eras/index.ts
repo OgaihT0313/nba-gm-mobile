@@ -1,4 +1,82 @@
 import type { Player, Team, OffseasonMove } from '../../types';
+// --- Magic vs. Bird Era (1979-80 .. 1989-90) ---
+import showtime1980Players from './showtime-begins-1979-80/players.json';
+import showtime1980Teams from './showtime-begins-1979-80/teams.json';
+import showtime1980Moves from './showtime-begins-1979-80/offseason_moves.json';
+import showtime1980Draft from './showtime-begins-1979-80/draft_class.json';
+import celticsRing1981Players from './celtics-first-ring-1980-81/players.json';
+import celticsRing1981Teams from './celtics-first-ring-1980-81/teams.json';
+import celticsRing1981Moves from './celtics-first-ring-1980-81/offseason_moves.json';
+import celticsRing1981Draft from './celtics-first-ring-1980-81/draft_class.json';
+import lakersRepeat1982Players from './lakers-repeat-1981-82/players.json';
+import lakersRepeat1982Teams from './lakers-repeat-1981-82/teams.json';
+import lakersRepeat1982Moves from './lakers-repeat-1981-82/offseason_moves.json';
+import lakersRepeat1982Draft from './lakers-repeat-1981-82/draft_class.json';
+import sixers1983Players from './sixers-fo-fo-fo-1982-83/players.json';
+import sixers1983Teams from './sixers-fo-fo-fo-1982-83/teams.json';
+import sixers1983Moves from './sixers-fo-fo-fo-1982-83/offseason_moves.json';
+import sixers1983Draft from './sixers-fo-fo-fo-1982-83/draft_class.json';
+import birdMvp1984Players from './bird-mvp-finals-1983-84/players.json';
+import birdMvp1984Teams from './bird-mvp-finals-1983-84/teams.json';
+import birdMvp1984Moves from './bird-mvp-finals-1983-84/offseason_moves.json';
+import birdMvp1984Draft from './bird-mvp-finals-1983-84/draft_class.json';
+import lakersRevenge1985Players from './lakers-revenge-1984-85/players.json';
+import lakersRevenge1985Teams from './lakers-revenge-1984-85/teams.json';
+import lakersRevenge1985Moves from './lakers-revenge-1984-85/offseason_moves.json';
+import lakersRevenge1985Draft from './lakers-revenge-1984-85/draft_class.json';
+import celtics1986Players from './celtics-greatest-team-1985-86/players.json';
+import celtics1986Teams from './celtics-greatest-team-1985-86/teams.json';
+import celtics1986Moves from './celtics-greatest-team-1985-86/offseason_moves.json';
+import celtics1986Draft from './celtics-greatest-team-1985-86/draft_class.json';
+import magicSkyhook1987Players from './magic-junior-skyhook-1986-87/players.json';
+import magicSkyhook1987Teams from './magic-junior-skyhook-1986-87/teams.json';
+import magicSkyhook1987Moves from './magic-junior-skyhook-1986-87/offseason_moves.json';
+import magicSkyhook1987Draft from './magic-junior-skyhook-1986-87/draft_class.json';
+import lakersBack2back1988Players from './lakers-back-to-back-1987-88/players.json';
+import lakersBack2back1988Teams from './lakers-back-to-back-1987-88/teams.json';
+import lakersBack2back1988Moves from './lakers-back-to-back-1987-88/offseason_moves.json';
+import lakersBack2back1988Draft from './lakers-back-to-back-1987-88/draft_class.json';
+import badBoys1989Players from './bad-boys-sweep-1988-89/players.json';
+import badBoys1989Teams from './bad-boys-sweep-1988-89/teams.json';
+import badBoys1989Moves from './bad-boys-sweep-1988-89/offseason_moves.json';
+import badBoys1989Draft from './bad-boys-sweep-1988-89/draft_class.json';
+import pistons1990Players from './pistons-repeat-1989-90/players.json';
+import pistons1990Teams from './pistons-repeat-1989-90/teams.json';
+import pistons1990Moves from './pistons-repeat-1989-90/offseason_moves.json';
+import pistons1990Draft from './pistons-repeat-1989-90/draft_class.json';
+// --- Jordan Era (1990-91 .. 1997-98) ---
+import jordanRing1991Players from './jordan-first-ring-1990-91/players.json';
+import jordanRing1991Teams from './jordan-first-ring-1990-91/teams.json';
+import jordanRing1991Moves from './jordan-first-ring-1990-91/offseason_moves.json';
+import jordanRing1991Draft from './jordan-first-ring-1990-91/draft_class.json';
+import bulls1992Players from './bulls-second-ring-1991-92/players.json';
+import bulls1992Teams from './bulls-second-ring-1991-92/teams.json';
+import bulls1992Moves from './bulls-second-ring-1991-92/offseason_moves.json';
+import bulls1992Draft from './bulls-second-ring-1991-92/draft_class.json';
+import bullsThreepeat1993Players from './bulls-threepeat-1992-93/players.json';
+import bullsThreepeat1993Teams from './bulls-threepeat-1992-93/teams.json';
+import bullsThreepeat1993Moves from './bulls-threepeat-1992-93/offseason_moves.json';
+import bullsThreepeat1993Draft from './bulls-threepeat-1992-93/draft_class.json';
+import jordanBaseball1994Players from './jordan-baseball-1993-94/players.json';
+import jordanBaseball1994Teams from './jordan-baseball-1993-94/teams.json';
+import jordanBaseball1994Moves from './jordan-baseball-1993-94/offseason_moves.json';
+import jordanBaseball1994Draft from './jordan-baseball-1993-94/draft_class.json';
+import jordanBack1995Players from './jordan-im-back-1994-95/players.json';
+import jordanBack1995Teams from './jordan-im-back-1994-95/teams.json';
+import jordanBack1995Moves from './jordan-im-back-1994-95/offseason_moves.json';
+import jordanBack1995Draft from './jordan-im-back-1994-95/draft_class.json';
+import bulls72101996Players from './bulls-72-10-1995-96/players.json';
+import bulls72101996Teams from './bulls-72-10-1995-96/teams.json';
+import bulls72101996Moves from './bulls-72-10-1995-96/offseason_moves.json';
+import bulls72101996Draft from './bulls-72-10-1995-96/draft_class.json';
+import bullsFifth1997Players from './bulls-fifth-ring-1996-97/players.json';
+import bullsFifth1997Teams from './bulls-fifth-ring-1996-97/teams.json';
+import bullsFifth1997Moves from './bulls-fifth-ring-1996-97/offseason_moves.json';
+import bullsFifth1997Draft from './bulls-fifth-ring-1996-97/draft_class.json';
+import lastDance1998Players from './last-dance-1997-98/players.json';
+import lastDance1998Teams from './last-dance-1997-98/teams.json';
+import lastDance1998Moves from './last-dance-1997-98/offseason_moves.json';
+// No draft_class.json for this one — no further chained season was pulled.
 // --- Kobe Era (2000-01 .. 2009-10) ---
 import threepeat2001Players from './lakers-threepeat-2000-01/players.json';
 import threepeat2001Teams from './lakers-threepeat-2000-01/teams.json';
@@ -85,7 +163,8 @@ import bubble2020Moves from './bubble-2019-20/offseason_moves.json';
 // is a self-contained real roster/rating snapshot generated by
 // nba-gm-simulator/pipeline/fetch_data.py --season <X> --skip-offseason-moves
 // --out data/eras/<id> — the SAME pipeline/rating model the live current-season
-// data uses, just pointed at a past season instead of today's.
+// data uses, just pointed at a past season instead of today's, with one
+// exception: seasons at or before 1995-96 use `--classic` (see below).
 //
 // This is a SNAPSHOT, not a time machine: picking an era only changes what
 // initSeason (App.tsx) seeds SeasonState.players/teams with. From team
@@ -102,25 +181,35 @@ import bubble2020Moves from './bubble-2019-20/offseason_moves.json';
 // predate the ESPN Fantasy position feed (positions.py's primary source) —
 // those years fall back to Sleeper, then to nba_api's coarse G/F/C code
 // widened to the middle of its family (e.g. every "F" becomes SF), so a 2000s
-// roster has fewer real multi-position combos than a post-2010 one. Seasons
-// at or before 1995-96 are NOT here and never will be with this pipeline: its
-// core rating source (leaguedashplayerstats) returns zero rows that far back,
-// which the pipeline doesn't error on — it silently writes a flat 66/66/66 to
-// every single player. Magic/Bird and prime Jordan are blocked on this until
-// an alternative historical stats source is found (Basketball-Reference
-// already 403s automated requests) — deliberately not attempted here.
+// (or older) roster has fewer real multi-position combos than a post-2010 one.
+//
+// Seasons at or before 1995-96 (Magic vs. Bird Era, and most of Jordan Era)
+// were pulled with `--classic`: the modern rating pipeline's whole data
+// source (leaguedashplayerstats/leaguedashteamstats) returns zero rows that
+// far back — not documented anywhere, discovered live — so these use
+// `leagueleaders` (real classic box-score coverage back to at least 1959-60)
+// and a reweighted attribute model (fetch_data.py's build_attributes(classic=
+// True)) instead: ts/efg derived by formula, no PIE/AST%/REB%/hustle/tracking
+// signals (none exist this far back), each composite reweighted onto what's
+// left rather than diluting on a flat zero. Validated against known history
+// before shipping (Bird #1 OVR in his real 1984-85 MVP season, rookie Jordan
+// debuting with real, plausible attributes). 1996-97/1997-98 (the tail of
+// Jordan Era) are back on the modern (non-classic) pipeline — this is exactly
+// where leaguedashplayerstats starts returning real data again.
 //
 // teams.json names were hand-corrected for franchises that later
 // renamed/relocated (New Jersey Nets → Brooklyn, Seattle SuperSonics →
 // Oklahoma City, Charlotte Hornets → Bobcats → Hornets again in 2014,
-// Charlotte Hornets → New Orleans → Pelicans) so each era shows the name the
-// team actually played under that season; logos still use the current
-// franchise crest since no historical crest is hosted at the CDN this app
-// pulls from. Two seasons (2002-03, 2003-04) genuinely have only 29 teams —
-// Charlotte had no NBA franchise at all between the original Hornets leaving
-// for New Orleans (2002) and the Bobcats' first season (2004) — the app's
-// standings/playoffs/lottery code already works off `teams.length` rather
-// than an assumed 30, so this needed no code change, just verification.
+// Charlotte Hornets → New Orleans → Pelicans, San Diego → Los Angeles
+// Clippers, Kansas City → Sacramento Kings, Washington Bullets → Wizards) so
+// each era shows the name the team actually played under that season; logos
+// still use the current franchise crest since no historical crest is hosted
+// at the CDN this app pulls from. Several classic-era seasons genuinely have
+// fewer than 30 teams (22 in 1979-80, growing to 29 by 1995-96 as Dallas/
+// Charlotte/Miami/Minnesota/Orlando/Toronto/Vancouver joined as expansion
+// franchises) — the app's standings/playoffs/lottery code already works off
+// `teams.length` rather than an assumed 30, so this needed no code change,
+// just verification (same as the already-known 29-team 2002-03/2003-04 gap).
 //
 // Each era is its own static import (Metro can't resolve a JSON path built
 // from a runtime variable), so adding a new era means adding a matching
@@ -142,11 +231,13 @@ export interface EraDefinition {
   // walks the ERAS array forward one entry per in-save offseason
   // (SeasonState.eraChainIndex), so an era save keeps replaying real history
   // year over year instead of being a single disconnected snapshot. The last
-  // chronological entry (bubble-2019-20) has an empty list — no further
-  // chained season was pulled — which is also what any entry naturally
-  // degrades to once the user's own moves have diverged the save from real
-  // history (each move is skipped individually if it no longer matches
-  // current save state).
+  // chronological entry of each real chain (last-dance-1997-98, bubble-2019-20)
+  // has an empty list — no further chained season was pulled — which is also
+  // what any entry naturally degrades to once the user's own moves have
+  // diverged the save from real history (each move is skipped individually if
+  // it no longer matches current save state). last-dance-1997-98 does NOT
+  // bridge into lakers-threepeat-2000-01 even though both live in this same
+  // array — 1998-99/1999-2000 were never pulled, a real 2-season gap.
   offseasonMoves: { fromSeason: string; toSeason: string; moves: OffseasonMove[] };
   // The REAL draft class entering the league at this era's chained
   // transition — generated by pipeline/sync_era_draft.py, which pulls the
@@ -160,17 +251,212 @@ export interface EraDefinition {
   // per-item fallback the offseason-moves chain already uses. Deliberately
   // carries no team info — WHICH team lands each pick stays driven by this
   // save's own standings/lottery, not real history's; only WHO enters the
-  // league and their real rating is replayed. Undefined for bubble-2019-20
-  // (no further chained season was pulled) — the chain naturally goes fully
-  // procedural once this runs out, same as offseasonMoves.
+  // league and their real rating is replayed. Undefined for the last entry of
+  // each real chain — the chain naturally goes fully procedural once this
+  // runs out, same as offseasonMoves.
   realDraftClass?: { draftYear: string; picks: { overallPick: number; playerId: string | null; playerName: string }[] };
 }
 
-// `ERAS` is ONE continuous chronological array spanning both eras below —
+// `ERAS` is ONE continuous chronological array spanning all four eras below —
 // eraChainIndex (App.tsx) just walks it forward by index, so extending this
 // array (in order) is the entire integration cost of adding a new decade; it
-// never needed to know about `ERA_GROUPS`.
+// never needed to know about `ERA_GROUPS`. The one deliberate break in real
+// continuity is documented on `offseasonMoves`/`realDraftClass` above
+// (last-dance-1997-98 → lakers-threepeat-2000-01, a real 2-season gap).
 export const ERAS: EraDefinition[] = [
+  // --- Magic vs. Bird Era ---
+  {
+    id: 'showtime-begins-1979-80',
+    label: 'Nasce o Showtime',
+    seasonLabel: '1979-80',
+    blurb: 'Magic e Bird estreiam na liga — Magic fecha o ano jogando de pivô no Jogo 6 da final (42 pontos) pra dar o título ao Lakers.',
+    players: showtime1980Players as unknown as { [key: string]: Player },
+    teams: showtime1980Teams as unknown as Team[],
+    offseasonMoves: showtime1980Moves as unknown as EraDefinition['offseasonMoves'],
+    realDraftClass: showtime1980Draft as unknown as EraDefinition['realDraftClass'],
+  },
+  {
+    id: 'celtics-first-ring-1980-81',
+    label: 'O Primeiro Anel do Bird',
+    seasonLabel: '1980-81',
+    blurb: 'Celtics batem o Rockets na final e dão o primeiro anel ao Bird, ainda no seu segundo ano de NBA.',
+    players: celticsRing1981Players as unknown as { [key: string]: Player },
+    teams: celticsRing1981Teams as unknown as Team[],
+    offseasonMoves: celticsRing1981Moves as unknown as EraDefinition['offseasonMoves'],
+    realDraftClass: celticsRing1981Draft as unknown as EraDefinition['realDraftClass'],
+  },
+  {
+    id: 'lakers-repeat-1981-82',
+    label: 'Bicampeão do Magic',
+    seasonLabel: '1981-82',
+    blurb: 'Lakers batem o 76ers de novo na final — Magic Johnson é o MVP das finais aos 22 anos.',
+    players: lakersRepeat1982Players as unknown as { [key: string]: Player },
+    teams: lakersRepeat1982Teams as unknown as Team[],
+    offseasonMoves: lakersRepeat1982Moves as unknown as EraDefinition['offseasonMoves'],
+    realDraftClass: lakersRepeat1982Draft as unknown as EraDefinition['realDraftClass'],
+  },
+  {
+    id: 'sixers-fo-fo-fo-1982-83',
+    label: 'Fo-Fi-Fo do Moses',
+    seasonLabel: '1982-83',
+    blurb: 'Moses Malone erra a previsão por 1 jogo (fo-fi-fo, não fo-fo-fo) mas o 76ers vence o título varrendo o Lakers na final.',
+    players: sixers1983Players as unknown as { [key: string]: Player },
+    teams: sixers1983Teams as unknown as Team[],
+    offseasonMoves: sixers1983Moves as unknown as EraDefinition['offseasonMoves'],
+    realDraftClass: sixers1983Draft as unknown as EraDefinition['realDraftClass'],
+  },
+  {
+    id: 'bird-mvp-finals-1983-84',
+    label: 'Bird Contra o Magic',
+    seasonLabel: '1983-84',
+    blurb: 'Primeira final direta entre Magic e Bird — Celtics vence em 7 jogos e Bird é o MVP da temporada e das finais.',
+    players: birdMvp1984Players as unknown as { [key: string]: Player },
+    teams: birdMvp1984Teams as unknown as Team[],
+    offseasonMoves: birdMvp1984Moves as unknown as EraDefinition['offseasonMoves'],
+    realDraftClass: birdMvp1984Draft as unknown as EraDefinition['realDraftClass'],
+  },
+  {
+    id: 'lakers-revenge-1984-85',
+    label: 'A Vingança do Lakers',
+    seasonLabel: '1984-85',
+    blurb: 'Lakers vinga a derrota do ano anterior e bate o Celtics — Kareem, aos 38 anos, é o MVP das finais. Estreia também um novato chamado Michael Jordan.',
+    players: lakersRevenge1985Players as unknown as { [key: string]: Player },
+    teams: lakersRevenge1985Teams as unknown as Team[],
+    offseasonMoves: lakersRevenge1985Moves as unknown as EraDefinition['offseasonMoves'],
+    realDraftClass: lakersRevenge1985Draft as unknown as EraDefinition['realDraftClass'],
+  },
+  {
+    id: 'celtics-greatest-team-1985-86',
+    label: 'O Time Perfeito de 86',
+    seasonLabel: '1985-86',
+    blurb: 'Considerado um dos melhores times da história, o Celtics de Bird (67 vitórias) atropela o Rockets na final.',
+    players: celtics1986Players as unknown as { [key: string]: Player },
+    teams: celtics1986Teams as unknown as Team[],
+    offseasonMoves: celtics1986Moves as unknown as EraDefinition['offseasonMoves'],
+    realDraftClass: celtics1986Draft as unknown as EraDefinition['realDraftClass'],
+  },
+  {
+    id: 'magic-junior-skyhook-1986-87',
+    label: 'O Gancho Mágico',
+    seasonLabel: '1986-87',
+    blurb: 'Magic acerta o "junior, junior skyhook" no fim do Jogo 4 e o Lakers bate o Celtics de novo — Magic é MVP da temporada e das finais.',
+    players: magicSkyhook1987Players as unknown as { [key: string]: Player },
+    teams: magicSkyhook1987Teams as unknown as Team[],
+    offseasonMoves: magicSkyhook1987Moves as unknown as EraDefinition['offseasonMoves'],
+    realDraftClass: magicSkyhook1987Draft as unknown as EraDefinition['realDraftClass'],
+  },
+  {
+    id: 'lakers-back-to-back-1987-88',
+    label: 'Bicampeão Depois de Quase 20 Anos',
+    seasonLabel: '1987-88',
+    blurb: 'Lakers vence o Pistons dos "Bad Boys" em 7 jogos e se torna o primeiro time a ser bicampeão desde 1969.',
+    players: lakersBack2back1988Players as unknown as { [key: string]: Player },
+    teams: lakersBack2back1988Teams as unknown as Team[],
+    offseasonMoves: lakersBack2back1988Moves as unknown as EraDefinition['offseasonMoves'],
+    realDraftClass: lakersBack2back1988Draft as unknown as EraDefinition['realDraftClass'],
+  },
+  {
+    id: 'bad-boys-sweep-1988-89',
+    label: 'Os Bad Boys Chegam',
+    seasonLabel: '1988-89',
+    blurb: 'Pistons varrem o Lakers na final e conquistam o primeiro título dos "Bad Boys". Charlotte e Miami estreiam como franquias de expansão.',
+    players: badBoys1989Players as unknown as { [key: string]: Player },
+    teams: badBoys1989Teams as unknown as Team[],
+    offseasonMoves: badBoys1989Moves as unknown as EraDefinition['offseasonMoves'],
+    realDraftClass: badBoys1989Draft as unknown as EraDefinition['realDraftClass'],
+  },
+  {
+    id: 'pistons-repeat-1989-90',
+    label: 'Bicampeonato dos Bad Boys',
+    seasonLabel: '1989-90',
+    blurb: 'Pistons bate o Portland e fecha o bicampeonato. Minnesota e Orlando estreiam como franquias de expansão.',
+    players: pistons1990Players as unknown as { [key: string]: Player },
+    teams: pistons1990Teams as unknown as Team[],
+    offseasonMoves: pistons1990Moves as unknown as EraDefinition['offseasonMoves'],
+    realDraftClass: pistons1990Draft as unknown as EraDefinition['realDraftClass'],
+  },
+  // --- Jordan Era ---
+  {
+    id: 'jordan-first-ring-1990-91',
+    label: 'O Primeiro Anel do Jordan',
+    seasonLabel: '1990-91',
+    blurb: 'Bulls batem o Lakers do Magic na final — o primeiro dos seis títulos e do primeiro MVP das finais do Michael Jordan.',
+    players: jordanRing1991Players as unknown as { [key: string]: Player },
+    teams: jordanRing1991Teams as unknown as Team[],
+    offseasonMoves: jordanRing1991Moves as unknown as EraDefinition['offseasonMoves'],
+    realDraftClass: jordanRing1991Draft as unknown as EraDefinition['realDraftClass'],
+  },
+  {
+    id: 'bulls-second-ring-1991-92',
+    label: 'O Segundo Anel',
+    seasonLabel: '1991-92',
+    blurb: 'Bulls batem o Portland na final — inclui o histórico primeiro tempo de 6 bolas de 3 do Jordan contra o Trail Blazers.',
+    players: bulls1992Players as unknown as { [key: string]: Player },
+    teams: bulls1992Teams as unknown as Team[],
+    offseasonMoves: bulls1992Moves as unknown as EraDefinition['offseasonMoves'],
+    realDraftClass: bulls1992Draft as unknown as EraDefinition['realDraftClass'],
+  },
+  {
+    id: 'bulls-threepeat-1992-93',
+    label: 'O Primeiro Three-Peat',
+    seasonLabel: '1992-93',
+    blurb: 'Bulls batem o Phoenix de Charles Barkley na final e fecham o primeiro three-peat da era Jordan.',
+    players: bullsThreepeat1993Players as unknown as { [key: string]: Player },
+    teams: bullsThreepeat1993Teams as unknown as Team[],
+    offseasonMoves: bullsThreepeat1993Moves as unknown as EraDefinition['offseasonMoves'],
+    realDraftClass: bullsThreepeat1993Draft as unknown as EraDefinition['realDraftClass'],
+  },
+  {
+    id: 'jordan-baseball-1993-94',
+    label: 'Jordan Vira Jogador de Beisebol',
+    seasonLabel: '1993-94',
+    blurb: 'Sem o Jordan (aposentado pro beisebol), o Rockets de Hakeem Olajuwon bate o Knicks numa final de 7 jogos.',
+    players: jordanBaseball1994Players as unknown as { [key: string]: Player },
+    teams: jordanBaseball1994Teams as unknown as Team[],
+    offseasonMoves: jordanBaseball1994Moves as unknown as EraDefinition['offseasonMoves'],
+    realDraftClass: jordanBaseball1994Draft as unknown as EraDefinition['realDraftClass'],
+  },
+  {
+    id: 'jordan-im-back-1994-95',
+    label: '"I\'m Back"',
+    seasonLabel: '1994-95',
+    blurb: 'Jordan volta à NBA em março com o famoso comunicado de duas palavras. O Rockets de Hakeem repete o título varrendo o Magic de Shaq e Penny.',
+    players: jordanBack1995Players as unknown as { [key: string]: Player },
+    teams: jordanBack1995Teams as unknown as Team[],
+    offseasonMoves: jordanBack1995Moves as unknown as EraDefinition['offseasonMoves'],
+    realDraftClass: jordanBack1995Draft as unknown as EraDefinition['realDraftClass'],
+  },
+  {
+    id: 'bulls-72-10-1995-96',
+    label: '72-10',
+    seasonLabel: '1995-96',
+    blurb: 'De volta a tempo inteiro, Jordan lidera o Bulls à melhor campanha da história (72-10) e ao quarto título, batendo o Seattle na final.',
+    players: bulls72101996Players as unknown as { [key: string]: Player },
+    teams: bulls72101996Teams as unknown as Team[],
+    offseasonMoves: bulls72101996Moves as unknown as EraDefinition['offseasonMoves'],
+    realDraftClass: bulls72101996Draft as unknown as EraDefinition['realDraftClass'],
+  },
+  {
+    id: 'bulls-fifth-ring-1996-97',
+    label: 'O Jogo da Gripe',
+    seasonLabel: '1996-97',
+    blurb: 'Bulls batem o Utah Jazz de Stockton e Malone — inclui o lendário "jogo da gripe" do Jordan no Jogo 5.',
+    players: bullsFifth1997Players as unknown as { [key: string]: Player },
+    teams: bullsFifth1997Teams as unknown as Team[],
+    offseasonMoves: bullsFifth1997Moves as unknown as EraDefinition['offseasonMoves'],
+    realDraftClass: bullsFifth1997Draft as unknown as EraDefinition['realDraftClass'],
+  },
+  {
+    id: 'last-dance-1997-98',
+    label: 'A Última Dança',
+    seasonLabel: '1997-98',
+    blurb: 'Bulls bate o Jazz de novo na revanche — Jordan fecha com "The Shot" sobre Bryon Russell no Jogo 6, o sexto e último anel daquele elenco.',
+    players: lastDance1998Players as unknown as { [key: string]: Player },
+    teams: lastDance1998Teams as unknown as Team[],
+    offseasonMoves: lastDance1998Moves as unknown as EraDefinition['offseasonMoves'],
+    // No draft_class.json for this era — no further chained season was pulled
+    // (a real 2-season gap to 2000-01, see the EraDefinition doc comment).
+  },
   // --- Kobe Era ---
   {
     id: 'lakers-threepeat-2000-01',
@@ -396,6 +682,43 @@ export interface EraGroup {
 }
 
 export const ERA_GROUPS: EraGroup[] = [
+  {
+    id: 'magic-bird-era',
+    label: 'Magic vs. Bird Era',
+    spanLabel: '1979-80 → 1989-90',
+    blurb: 'Os rookies que salvaram a NBA, cinco títulos do Lakers "Showtime", três do Celtics de Bird e a chegada dos "Bad Boys".',
+    visualId: 'magic-bird-era',
+    seasonIds: [
+      'showtime-begins-1979-80',
+      'celtics-first-ring-1980-81',
+      'lakers-repeat-1981-82',
+      'sixers-fo-fo-fo-1982-83',
+      'bird-mvp-finals-1983-84',
+      'lakers-revenge-1984-85',
+      'celtics-greatest-team-1985-86',
+      'magic-junior-skyhook-1986-87',
+      'lakers-back-to-back-1987-88',
+      'bad-boys-sweep-1988-89',
+      'pistons-repeat-1989-90',
+    ],
+  },
+  {
+    id: 'jordan-era',
+    label: 'Jordan Era',
+    spanLabel: '1990-91 → 1997-98',
+    blurb: 'Os seis anéis do Bulls, os dois three-peats, a aposentadoria pro beisebol, o "I\'m Back" e o 72-10.',
+    visualId: 'jordan-era',
+    seasonIds: [
+      'jordan-first-ring-1990-91',
+      'bulls-second-ring-1991-92',
+      'bulls-threepeat-1992-93',
+      'jordan-baseball-1993-94',
+      'jordan-im-back-1994-95',
+      'bulls-72-10-1995-96',
+      'bulls-fifth-ring-1996-97',
+      'last-dance-1997-98',
+    ],
+  },
   {
     id: 'kobe-era',
     label: 'Kobe Era',

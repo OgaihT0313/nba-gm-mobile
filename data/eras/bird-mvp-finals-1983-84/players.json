@@ -1,0 +1,8688 @@
+{
+  "rickey_brown": {
+    "id": "rickey_brown",
+    "name": "Rickey Brown",
+    "pos": "C",
+    "positions": [
+      "C"
+    ],
+    "ovr": 70,
+    "off": 70,
+    "def": 70,
+    "attributes": {
+      "shooting": 72,
+      "finishing": 73,
+      "playmaking": 63,
+      "perimeterD": 66,
+      "interiorD": 71,
+      "rebounding": 77,
+      "athleticism": 72
+    },
+    "espnId": null,
+    "nbaId": 76283,
+    "photoUrl": "https://cdn.nba.com/headshots/nba/latest/1040x760/76283.png",
+    "age": 25,
+    "number": 31,
+    "potential": "C",
+    "salary": 4330000,
+    "contractYears": 1
+  },
+  "charlie_criss": {
+    "id": "charlie_criss",
+    "name": "Charlie Criss",
+    "pos": "SG",
+    "positions": [
+      "SG"
+    ],
+    "ovr": 68,
+    "off": 70,
+    "def": 65,
+    "attributes": {
+      "shooting": 68,
+      "finishing": 67,
+      "playmaking": 80,
+      "perimeterD": 71,
+      "interiorD": 62,
+      "rebounding": 65,
+      "athleticism": 68
+    },
+    "espnId": null,
+    "nbaId": 76471,
+    "photoUrl": "https://cdn.nba.com/headshots/nba/latest/1040x760/76471.png",
+    "age": 35,
+    "number": 14,
+    "potential": "D",
+    "salary": 2835000,
+    "contractYears": 1
+  },
+  "johnny_davis": {
+    "id": "johnny_davis",
+    "name": "Johnny Davis",
+    "pos": "PG",
+    "positions": [
+      "PG",
+      "SG"
+    ],
+    "ovr": 76,
+    "off": 76,
+    "def": 65,
+    "attributes": {
+      "shooting": 74,
+      "finishing": 74,
+      "playmaking": 82,
+      "perimeterD": 71,
+      "interiorD": 61,
+      "rebounding": 62,
+      "athleticism": 72
+    },
+    "espnId": null,
+    "nbaId": 76526,
+    "photoUrl": "https://cdn.nba.com/headshots/nba/latest/1040x760/76526.png",
+    "age": 28,
+    "number": 16,
+    "potential": "C",
+    "salary": 11599000,
+    "contractYears": 1
+  },
+  "mike_glenn": {
+    "id": "mike_glenn",
+    "name": "Mike Glenn",
+    "pos": "SG",
+    "positions": [
+      "SG"
+    ],
+    "ovr": 79,
+    "off": 80,
+    "def": 66,
+    "attributes": {
+      "shooting": 80,
+      "finishing": 80,
+      "playmaking": 80,
+      "perimeterD": 71,
+      "interiorD": 62,
+      "rebounding": 62,
+      "athleticism": 66
+    },
+    "espnId": null,
+    "nbaId": 76822,
+    "photoUrl": "https://cdn.nba.com/headshots/nba/latest/1040x760/76822.png",
+    "age": 28,
+    "number": 34,
+    "potential": "C",
+    "salary": 16238000,
+    "contractYears": 5
+  },
+  "scott_hastings": {
+    "id": "scott_hastings",
+    "name": "Scott Hastings",
+    "pos": "SF",
+    "positions": [
+      "SF"
+    ],
+    "ovr": 74,
+    "off": 73,
+    "def": 76,
+    "attributes": {
+      "shooting": 76,
+      "finishing": 79,
+      "playmaking": 63,
+      "perimeterD": 73,
+      "interiorD": 75,
+      "rebounding": 83,
+      "athleticism": 81
+    },
+    "espnId": null,
+    "nbaId": 76968,
+    "photoUrl": "https://cdn.nba.com/headshots/nba/latest/1040x760/76968.png",
+    "age": 24,
+    "number": 44,
+    "potential": "C",
+    "salary": 7299000,
+    "contractYears": 2
+  },
+  "armond_hill": {
+    "id": "armond_hill",
+    "name": "Armond Hill",
+    "pos": "SG",
+    "positions": [
+      "SG"
+    ],
+    "ovr": 67,
+    "off": 71,
+    "def": 66,
+    "attributes": {
+      "shooting": 70,
+      "finishing": 68,
+      "playmaking": 75,
+      "perimeterD": 71,
+      "interiorD": 63,
+      "rebounding": 63,
+      "athleticism": 71
+    },
+    "espnId": null,
+    "nbaId": 77024,
+    "photoUrl": "https://cdn.nba.com/headshots/nba/latest/1040x760/77024.png",
+    "age": 31,
+    "number": 24,
+    "potential": "D",
+    "salary": 3260000,
+    "contractYears": 3
+  },
+  "eddie_johnson": {
+    "id": "eddie_johnson",
+    "name": "Eddie Johnson",
+    "pos": "SG",
+    "positions": [
+      "SG"
+    ],
+    "ovr": 80,
+    "off": 82,
+    "def": 66,
+    "attributes": {
+      "shooting": 89,
+      "finishing": 72,
+      "playmaking": 83,
+      "perimeterD": 71,
+      "interiorD": 62,
+      "rebounding": 63,
+      "athleticism": 70
+    },
+    "espnId": null,
+    "nbaId": 77144,
+    "photoUrl": "https://cdn.nba.com/headshots/nba/latest/1040x760/77144.png",
+    "age": 29,
+    "number": 3,
+    "potential": "C",
+    "salary": 17784000,
+    "contractYears": 5
+  },
+  "mark_landsberger": {
+    "id": "mark_landsberger",
+    "name": "Mark Landsberger",
+    "pos": "SF",
+    "positions": [
+      "SF"
+    ],
+    "ovr": 66,
+    "off": 66,
+    "def": 66,
+    "attributes": {
+      "shooting": 66,
+      "finishing": 66,
+      "playmaking": 66,
+      "perimeterD": 66,
+      "interiorD": 66,
+      "rebounding": 66,
+      "athleticism": 66
+    },
+    "espnId": null,
+    "nbaId": 77334,
+    "photoUrl": "https://cdn.nba.com/headshots/nba/latest/1040x760/77334.png",
+    "age": 29,
+    "number": 54,
+    "potential": "C",
+    "salary": 3309000,
+    "contractYears": 1
+  },
+  "billy_paultz": {
+    "id": "billy_paultz",
+    "name": "Billy Paultz",
+    "pos": "C",
+    "positions": [
+      "C"
+    ],
+    "ovr": 66,
+    "off": 67,
+    "def": 68,
+    "attributes": {
+      "shooting": 70,
+      "finishing": 70,
+      "playmaking": 64,
+      "perimeterD": 64,
+      "interiorD": 67,
+      "rebounding": 78,
+      "athleticism": 69
+    },
+    "espnId": null,
+    "nbaId": 77817,
+    "photoUrl": "https://cdn.nba.com/headshots/nba/latest/1040x760/77817.png",
+    "age": 35,
+    "number": 5,
+    "potential": "D",
+    "salary": 2151000,
+    "contractYears": 1
+  },
+  "john_pinone": {
+    "id": "john_pinone",
+    "name": "John Pinone",
+    "pos": "SF",
+    "positions": [
+      "SF"
+    ],
+    "ovr": 66,
+    "off": 66,
+    "def": 66,
+    "attributes": {
+      "shooting": 66,
+      "finishing": 66,
+      "playmaking": 66,
+      "perimeterD": 66,
+      "interiorD": 66,
+      "rebounding": 66,
+      "athleticism": 66
+    },
+    "espnId": null,
+    "nbaId": 77861,
+    "photoUrl": "https://cdn.nba.com/headshots/nba/latest/1040x760/77861.png",
+    "age": 23,
+    "number": 33,
+    "potential": "B",
+    "salary": 2648000,
+    "contractYears": 2
+  },
+  "doc_rivers": {
+    "id": "doc_rivers",
+    "name": "Doc Rivers",
+    "pos": "SG",
+    "positions": [
+      "SG"
+    ],
+    "ovr": 83,
+    "off": 79,
+    "def": 78,
+    "attributes": {
+      "shooting": 75,
+      "finishing": 84,
+      "playmaking": 78,
+      "perimeterD": 92,
+      "interiorD": 68,
+      "rebounding": 68,
+      "athleticism": 91
+    },
+    "espnId": null,
+    "nbaId": 470,
+    "photoUrl": "https://cdn.nba.com/headshots/nba/latest/1040x760/470.png",
+    "age": 22,
+    "number": 25,
+    "potential": "A",
+    "salary": 13609000,
+    "contractYears": 1
+  },
+  "tree_rollins": {
+    "id": "tree_rollins",
+    "name": "Tree Rollins",
+    "pos": "C",
+    "positions": [
+      "C"
+    ],
+    "ovr": 83,
+    "off": 73,
+    "def": 81,
+    "attributes": {
+      "shooting": 75,
+      "finishing": 82,
+      "playmaking": 61,
+      "perimeterD": 62,
+      "interiorD": 99,
+      "rebounding": 86,
+      "athleticism": 85
+    },
+    "espnId": null,
+    "nbaId": 78014,
+    "photoUrl": "https://cdn.nba.com/headshots/nba/latest/1040x760/78014.png",
+    "age": 29,
+    "number": 30,
+    "potential": "C",
+    "salary": 24744000,
+    "contractYears": 5
+  },
+  "dan_roundfield": {
+    "id": "dan_roundfield",
+    "name": "Dan Roundfield",
+    "pos": "SF",
+    "positions": [
+      "SF"
+    ],
+    "ovr": 82,
+    "off": 73,
+    "def": 75,
+    "attributes": {
+      "shooting": 72,
+      "finishing": 82,
+      "playmaking": 66,
+      "perimeterD": 67,
+      "interiorD": 74,
+      "rebounding": 89,
+      "athleticism": 79
+    },
+    "espnId": null,
+    "nbaId": 78025,
+    "photoUrl": "https://cdn.nba.com/headshots/nba/latest/1040x760/78025.png",
+    "age": 31,
+    "number": 32,
+    "potential": "D",
+    "salary": 19060000,
+    "contractYears": 1
+  },
+  "dominique_wilkins": {
+    "id": "dominique_wilkins",
+    "name": "Dominique Wilkins",
+    "pos": "SF",
+    "positions": [
+      "SF"
+    ],
+    "ovr": 79,
+    "off": 71,
+    "def": 77,
+    "attributes": {
+      "shooting": 72,
+      "finishing": 78,
+      "playmaking": 62,
+      "perimeterD": 76,
+      "interiorD": 75,
+      "rebounding": 80,
+      "athleticism": 79
+    },
+    "espnId": null,
+    "nbaId": 1122,
+    "photoUrl": "https://cdn.nba.com/headshots/nba/latest/1040x760/1122.png",
+    "age": 24,
+    "number": 21,
+    "potential": "C",
+    "salary": 12990000,
+    "contractYears": 4
+  },
+  "sly_williams": {
+    "id": "sly_williams",
+    "name": "Sly Williams",
+    "pos": "SF",
+    "positions": [
+      "SF"
+    ],
+    "ovr": 70,
+    "off": 67,
+    "def": 72,
+    "attributes": {
+      "shooting": 68,
+      "finishing": 67,
+      "playmaking": 65,
+      "perimeterD": 78,
+      "interiorD": 63,
+      "rebounding": 74,
+      "athleticism": 75
+    },
+    "espnId": null,
+    "nbaId": 78570,
+    "photoUrl": "https://cdn.nba.com/headshots/nba/latest/1040x760/78570.png",
+    "age": 26,
+    "number": 35,
+    "potential": "C",
+    "salary": 5413000,
+    "contractYears": 3
+  },
+  "randy_wittman": {
+    "id": "randy_wittman",
+    "name": "Randy Wittman",
+    "pos": "SG",
+    "positions": [
+      "SG"
+    ],
+    "ovr": 68,
+    "off": 73,
+    "def": 62,
+    "attributes": {
+      "shooting": 75,
+      "finishing": 72,
+      "playmaking": 71,
+      "perimeterD": 63,
+      "interiorD": 61,
+      "rebounding": 63,
+      "athleticism": 66
+    },
+    "espnId": null,
+    "nbaId": 1456,
+    "photoUrl": "https://cdn.nba.com/headshots/nba/latest/1040x760/1456.png",
+    "age": 24,
+    "number": 10,
+    "potential": "C",
+    "salary": 3489000,
+    "contractYears": 4
+  },
+  "danny_ainge": {
+    "id": "danny_ainge",
+    "name": "Danny Ainge",
+    "pos": "SG",
+    "positions": [
+      "SG"
+    ],
+    "ovr": 73,
+    "off": 75,
+    "def": 67,
+    "attributes": {
+      "shooting": 77,
+      "finishing": 70,
+      "playmaking": 78,
+      "perimeterD": 73,
+      "interiorD": 62,
+      "rebounding": 66,
+      "athleticism": 68
+    },
+    "espnId": null,
+    "nbaId": 76017,
+    "photoUrl": "https://cdn.nba.com/headshots/nba/latest/1040x760/76017.png",
+    "age": 25,
+    "number": 44,
+    "potential": "C",
+    "salary": 6557000,
+    "contractYears": 2
+  },
+  "larry_bird": {
+    "id": "larry_bird",
+    "name": "Larry Bird",
+    "pos": "SF",
+    "positions": [
+      "SF"
+    ],
+    "ovr": 90,
+    "off": 80,
+    "def": 79,
+    "attributes": {
+      "shooting": 81,
+      "finishing": 77,
+      "playmaking": 81,
+      "perimeterD": 81,
+      "interiorD": 71,
+      "rebounding": 86,
+      "athleticism": 77
+    },
+    "espnId": null,
+    "nbaId": 1449,
+    "photoUrl": "https://cdn.nba.com/headshots/nba/latest/1040x760/1449.png",
+    "age": 27,
+    "number": 33,
+    "potential": "C",
+    "salary": 43301000,
+    "contractYears": 1
+  },
+  "quinn_buckner": {
+    "id": "quinn_buckner",
+    "name": "Quinn Buckner",
+    "pos": "SG",
+    "positions": [
+      "SG"
+    ],
+    "ovr": 75,
+    "off": 72,
+    "def": 74,
+    "attributes": {
+      "shooting": 70,
+      "finishing": 69,
+      "playmaking": 79,
+      "perimeterD": 90,
+      "interiorD": 62,
+      "rebounding": 67,
+      "athleticism": 73
+    },
+    "espnId": null,
+    "nbaId": 76296,
+    "photoUrl": "https://cdn.nba.com/headshots/nba/latest/1040x760/76296.png",
+    "age": 29,
+    "number": 28,
+    "potential": "C",
+    "salary": 10052000,
+    "contractYears": 1
+  },
+  "m_l_carr": {
+    "id": "m_l_carr",
+    "name": "M.L. Carr",
+    "pos": "SF",
+    "positions": [
+      "SF"
+    ],
+    "ovr": 66,
+    "off": 66,
+    "def": 66,
+    "attributes": {
+      "shooting": 66,
+      "finishing": 66,
+      "playmaking": 66,
+      "perimeterD": 66,
+      "interiorD": 66,
+      "rebounding": 66,
+      "athleticism": 66
+    },
+    "espnId": null,
+    "nbaId": 76351,
+    "photoUrl": "https://cdn.nba.com/headshots/nba/latest/1040x760/76351.png",
+    "age": 33,
+    "number": 30,
+    "potential": "D",
+    "salary": 2813000,
+    "contractYears": 2
+  },
+  "carlos_clark": {
+    "id": "carlos_clark",
+    "name": "Carlos Clark",
+    "pos": "SG",
+    "positions": [
+      "SG"
+    ],
+    "ovr": 66,
+    "off": 66,
+    "def": 66,
+    "attributes": {
+      "shooting": 66,
+      "finishing": 66,
+      "playmaking": 66,
+      "perimeterD": 66,
+      "interiorD": 66,
+      "rebounding": 66,
+      "athleticism": 66
+    },
+    "espnId": null,
+    "nbaId": 76398,
+    "photoUrl": "https://cdn.nba.com/headshots/nba/latest/1040x760/76398.png",
+    "age": 23,
+    "number": 40,
+    "potential": "B",
+    "salary": 2648000,
+    "contractYears": 5
+  },
+  "gerald_henderson": {
+    "id": "gerald_henderson",
+    "name": "Gerald Henderson",
+    "pos": "SG",
+    "positions": [
+      "SG",
+      "PG"
+    ],
+    "ovr": 83,
+    "off": 84,
+    "def": 72,
+    "attributes": {
+      "shooting": 91,
+      "finishing": 80,
+      "playmaking": 77,
+      "perimeterD": 86,
+      "interiorD": 63,
+      "rebounding": 63,
+      "athleticism": 74
+    },
+    "espnId": null,
+    "nbaId": 76993,
+    "photoUrl": "https://cdn.nba.com/headshots/nba/latest/1040x760/76993.png",
+    "age": 28,
+    "number": 43,
+    "potential": "C",
+    "salary": 24744000,
+    "contractYears": 3
+  },
+  "dennis_johnson": {
+    "id": "dennis_johnson",
+    "name": "Dennis Johnson",
+    "pos": "SG",
+    "positions": [
+      "SG"
+    ],
+    "ovr": 75,
+    "off": 74,
+    "def": 71,
+    "attributes": {
+      "shooting": 71,
+      "finishing": 75,
+      "playmaking": 76,
+      "perimeterD": 74,
+      "interiorD": 71,
+      "rebounding": 67,
+      "athleticism": 77
+    },
+    "espnId": null,
+    "nbaId": 77141,
+    "photoUrl": "https://cdn.nba.com/headshots/nba/latest/1040x760/77141.png",
+    "age": 29,
+    "number": 3,
+    "potential": "C",
+    "salary": 10052000,
+    "contractYears": 5
+  },
+  "greg_kite": {
+    "id": "greg_kite",
+    "name": "Greg Kite",
+    "pos": "C",
+    "positions": [
+      "C"
+    ],
+    "ovr": 66,
+    "off": 66,
+    "def": 66,
+    "attributes": {
+      "shooting": 66,
+      "finishing": 66,
+      "playmaking": 66,
+      "perimeterD": 66,
+      "interiorD": 66,
+      "rebounding": 66,
+      "athleticism": 66
+    },
+    "espnId": null,
+    "nbaId": 1123,
+    "photoUrl": "https://cdn.nba.com/headshots/nba/latest/1040x760/1123.png",
+    "age": 22,
+    "number": 50,
+    "potential": "B",
+    "salary": 1820000,
+    "contractYears": 3
+  },
+  "cedric_maxwell": {
+    "id": "cedric_maxwell",
+    "name": "Cedric Maxwell",
+    "pos": "SF",
+    "positions": [
+      "SF"
+    ],
+    "ovr": 81,
+    "off": 79,
+    "def": 69,
+    "attributes": {
+      "shooting": 78,
+      "finishing": 93,
+      "playmaking": 67,
+      "perimeterD": 68,
+      "interiorD": 65,
+      "rebounding": 78,
+      "athleticism": 84
+    },
+    "espnId": null,
+    "nbaId": 77487,
+    "photoUrl": "https://cdn.nba.com/headshots/nba/latest/1040x760/77487.png",
+    "age": 28,
+    "number": 31,
+    "potential": "C",
+    "salary": 20104000,
+    "contractYears": 4
+  },
+  "kevin_mchale": {
+    "id": "kevin_mchale",
+    "name": "Kevin McHale",
+    "pos": "SF",
+    "positions": [
+      "SF"
+    ],
+    "ovr": 86,
+    "off": 77,
+    "def": 74,
+    "attributes": {
+      "shooting": 80,
+      "finishing": 88,
+      "playmaking": 62,
+      "perimeterD": 60,
+      "interiorD": 84,
+      "rebounding": 84,
+      "athleticism": 80
+    },
+    "espnId": null,
+    "nbaId": 1450,
+    "photoUrl": "https://cdn.nba.com/headshots/nba/latest/1040x760/1450.png",
+    "age": 26,
+    "number": 32,
+    "potential": "C",
+    "salary": 32167000,
+    "contractYears": 5
+  },
+  "robert_parish": {
+    "id": "robert_parish",
+    "name": "Robert Parish",
+    "pos": "C",
+    "positions": [
+      "C"
+    ],
+    "ovr": 86,
+    "off": 76,
+    "def": 77,
+    "attributes": {
+      "shooting": 79,
+      "finishing": 84,
+      "playmaking": 63,
+      "perimeterD": 64,
+      "interiorD": 80,
+      "rebounding": 92,
+      "athleticism": 76
+    },
+    "espnId": null,
+    "nbaId": 305,
+    "photoUrl": "https://cdn.nba.com/headshots/nba/latest/1040x760/305.png",
+    "age": 30,
+    "number": 0,
+    "potential": "D",
+    "salary": 32167000,
+    "contractYears": 2
+  },
+  "scott_wedman": {
+    "id": "scott_wedman",
+    "name": "Scott Wedman",
+    "pos": "SF",
+    "positions": [
+      "SF"
+    ],
+    "ovr": 68,
+    "off": 70,
+    "def": 68,
+    "attributes": {
+      "shooting": 71,
+      "finishing": 68,
+      "playmaking": 69,
+      "perimeterD": 69,
+      "interiorD": 64,
+      "rebounding": 71,
+      "athleticism": 65
+    },
+    "espnId": null,
+    "nbaId": 78482,
+    "photoUrl": "https://cdn.nba.com/headshots/nba/latest/1040x760/78482.png",
+    "age": 31,
+    "number": 20,
+    "potential": "D",
+    "salary": 3707000,
+    "contractYears": 4
+  },
+  "john_bagley": {
+    "id": "john_bagley",
+    "name": "John Bagley",
+    "pos": "SG",
+    "positions": [
+      "SG"
+    ],
+    "ovr": 75,
+    "off": 75,
+    "def": 70,
+    "attributes": {
+      "shooting": 72,
+      "finishing": 72,
+      "playmaking": 82,
+      "perimeterD": 80,
+      "interiorD": 61,
+      "rebounding": 65,
+      "athleticism": 76
+    },
+    "espnId": null,
+    "nbaId": 76082,
+    "photoUrl": "https://cdn.nba.com/headshots/nba/latest/1040x760/76082.png",
+    "age": 24,
+    "number": 5,
+    "potential": "C",
+    "salary": 8042000,
+    "contractYears": 1
+  },
+  "jeff_cook": {
+    "id": "jeff_cook",
+    "name": "Jeff Cook",
+    "pos": "SF",
+    "positions": [
+      "SF"
+    ],
+    "ovr": 76,
+    "off": 75,
+    "def": 76,
+    "attributes": {
+      "shooting": 77,
+      "finishing": 78,
+      "playmaking": 68,
+      "perimeterD": 74,
+      "interiorD": 72,
+      "rebounding": 86,
+      "athleticism": 78
+    },
+    "espnId": null,
+    "nbaId": 76436,
+    "photoUrl": "https://cdn.nba.com/headshots/nba/latest/1040x760/76436.png",
+    "age": 27,
+    "number": 45,
+    "potential": "C",
+    "salary": 11599000,
+    "contractYears": 5
+  },
+  "jeffrey_crompton": {
+    "id": "jeffrey_crompton",
+    "name": "Jeffrey Crompton",
+    "pos": "C",
+    "positions": [
+      "C"
+    ],
+    "ovr": 66,
+    "off": 66,
+    "def": 66,
+    "attributes": {
+      "shooting": 66,
+      "finishing": 66,
+      "playmaking": 66,
+      "perimeterD": 66,
+      "interiorD": 66,
+      "rebounding": 66,
+      "athleticism": 66
+    },
+    "espnId": null,
+    "nbaId": 76474,
+    "photoUrl": "https://cdn.nba.com/headshots/nba/latest/1040x760/76474.png",
+    "age": 28,
+    "number": 41,
+    "potential": "C",
+    "salary": 3309000,
+    "contractYears": 5
+  },
+  "world_free": {
+    "id": "world_free",
+    "name": "World Free",
+    "pos": "SG",
+    "positions": [
+      "SG"
+    ],
+    "ovr": 83,
+    "off": 79,
+    "def": 69,
+    "attributes": {
+      "shooting": 88,
+      "finishing": 75,
+      "playmaking": 71,
+      "perimeterD": 76,
+      "interiorD": 62,
+      "rebounding": 66,
+      "athleticism": 75
+    },
+    "espnId": null,
+    "nbaId": 76753,
+    "photoUrl": "https://cdn.nba.com/headshots/nba/latest/1040x760/76753.png",
+    "age": 30,
+    "number": 21,
+    "potential": "D",
+    "salary": 24744000,
+    "contractYears": 4
+  },
+  "john_garris": {
+    "id": "john_garris",
+    "name": "John Garris",
+    "pos": "SF",
+    "positions": [
+      "SF"
+    ],
+    "ovr": 66,
+    "off": 66,
+    "def": 66,
+    "attributes": {
+      "shooting": 66,
+      "finishing": 66,
+      "playmaking": 66,
+      "perimeterD": 66,
+      "interiorD": 66,
+      "rebounding": 66,
+      "athleticism": 66
+    },
+    "espnId": null,
+    "nbaId": 76791,
+    "photoUrl": "https://cdn.nba.com/headshots/nba/latest/1040x760/76791.png",
+    "age": 25,
+    "number": 55,
+    "potential": "C",
+    "salary": 2648000,
+    "contractYears": 1
+  },
+  "stewart_granger": {
+    "id": "stewart_granger",
+    "name": "Stewart Granger",
+    "pos": "SG",
+    "positions": [
+      "SG"
+    ],
+    "ovr": 71,
+    "off": 74,
+    "def": 65,
+    "attributes": {
+      "shooting": 74,
+      "finishing": 70,
+      "playmaking": 78,
+      "perimeterD": 70,
+      "interiorD": 62,
+      "rebounding": 63,
+      "athleticism": 72
+    },
+    "espnId": null,
+    "nbaId": 76847,
+    "photoUrl": "https://cdn.nba.com/headshots/nba/latest/1040x760/76847.png",
+    "age": 22,
+    "number": 10,
+    "potential": "B",
+    "salary": 3487000,
+    "contractYears": 4
+  },
+  "roy_hinson": {
+    "id": "roy_hinson",
+    "name": "Roy Hinson",
+    "pos": "C",
+    "positions": [
+      "C"
+    ],
+    "ovr": 79,
+    "off": 72,
+    "def": 82,
+    "attributes": {
+      "shooting": 75,
+      "finishing": 79,
+      "playmaking": 62,
+      "perimeterD": 63,
+      "interiorD": 99,
+      "rebounding": 89,
+      "athleticism": 83
+    },
+    "espnId": null,
+    "nbaId": 77030,
+    "photoUrl": "https://cdn.nba.com/headshots/nba/latest/1040x760/77030.png",
+    "age": 23,
+    "number": 32,
+    "potential": "A",
+    "salary": 12990000,
+    "contractYears": 2
+  },
+  "phil_hubbard": {
+    "id": "phil_hubbard",
+    "name": "Phil Hubbard",
+    "pos": "SF",
+    "positions": [
+      "SF"
+    ],
+    "ovr": 81,
+    "off": 75,
+    "def": 73,
+    "attributes": {
+      "shooting": 77,
+      "finishing": 85,
+      "playmaking": 63,
+      "perimeterD": 76,
+      "interiorD": 62,
+      "rebounding": 82,
+      "athleticism": 80
+    },
+    "espnId": null,
+    "nbaId": 77071,
+    "photoUrl": "https://cdn.nba.com/headshots/nba/latest/1040x760/77071.png",
+    "age": 27,
+    "number": 35,
+    "potential": "C",
+    "salary": 20104000,
+    "contractYears": 1
+  },
+  "geoff_huston": {
+    "id": "geoff_huston",
+    "name": "Geoff Huston",
+    "pos": "SG",
+    "positions": [
+      "SG"
+    ],
+    "ovr": 77,
+    "off": 79,
+    "def": 62,
+    "attributes": {
+      "shooting": 75,
+      "finishing": 76,
+      "playmaking": 88,
+      "perimeterD": 64,
+      "interiorD": 60,
+      "rebounding": 61,
+      "athleticism": 68
+    },
+    "espnId": null,
+    "nbaId": 77087,
+    "photoUrl": "https://cdn.nba.com/headshots/nba/latest/1040x760/77087.png",
+    "age": 26,
+    "number": 20,
+    "potential": "C",
+    "salary": 13145000,
+    "contractYears": 1
+  },
+  "ben_poquette": {
+    "id": "ben_poquette",
+    "name": "Ben Poquette",
+    "pos": "SF",
+    "positions": [
+      "SF"
+    ],
+    "ovr": 72,
+    "off": 72,
+    "def": 74,
+    "attributes": {
+      "shooting": 74,
+      "finishing": 71,
+      "playmaking": 69,
+      "perimeterD": 67,
+      "interiorD": 78,
+      "rebounding": 80,
+      "athleticism": 73
+    },
+    "espnId": null,
+    "nbaId": 77873,
+    "photoUrl": "https://cdn.nba.com/headshots/nba/latest/1040x760/77873.png",
+    "age": 29,
+    "number": 50,
+    "potential": "C",
+    "salary": 7268000,
+    "contractYears": 4
+  },
+  "cliff_t_robinson": {
+    "id": "cliff_t_robinson",
+    "name": "Cliff T. Robinson",
+    "pos": "C",
+    "positions": [
+      "C"
+    ],
+    "ovr": 79,
+    "off": 72,
+    "def": 72,
+    "attributes": {
+      "shooting": 76,
+      "finishing": 73,
+      "playmaking": 67,
+      "perimeterD": 65,
+      "interiorD": 67,
+      "rebounding": 90,
+      "athleticism": 72
+    },
+    "espnId": null,
+    "nbaId": 77986,
+    "photoUrl": "https://cdn.nba.com/headshots/nba/latest/1040x760/77986.png",
+    "age": 24,
+    "number": 11,
+    "potential": "C",
+    "salary": 12990000,
+    "contractYears": 4
+  },
+  "lonnie_shelton": {
+    "id": "lonnie_shelton",
+    "name": "Lonnie Shelton",
+    "pos": "SF",
+    "positions": [
+      "SF"
+    ],
+    "ovr": 75,
+    "off": 73,
+    "def": 74,
+    "attributes": {
+      "shooting": 76,
+      "finishing": 73,
+      "playmaking": 68,
+      "perimeterD": 74,
+      "interiorD": 73,
+      "rebounding": 77,
+      "athleticism": 72
+    },
+    "espnId": null,
+    "nbaId": 78133,
+    "photoUrl": "https://cdn.nba.com/headshots/nba/latest/1040x760/78133.png",
+    "age": 28,
+    "number": 8,
+    "potential": "C",
+    "salary": 10052000,
+    "contractYears": 4
+  },
+  "paul_thompson": {
+    "id": "paul_thompson",
+    "name": "Paul Thompson",
+    "pos": "SG",
+    "positions": [
+      "SG"
+    ],
+    "ovr": 76,
+    "off": 73,
+    "def": 75,
+    "attributes": {
+      "shooting": 76,
+      "finishing": 73,
+      "playmaking": 70,
+      "perimeterD": 77,
+      "interiorD": 71,
+      "rebounding": 77,
+      "athleticism": 75
+    },
+    "espnId": null,
+    "nbaId": 78332,
+    "photoUrl": "https://cdn.nba.com/headshots/nba/latest/1040x760/78332.png",
+    "age": 23,
+    "number": 33,
+    "potential": "B",
+    "salary": 9279000,
+    "contractYears": 1
+  },
+  "wallace_bryant": {
+    "id": "wallace_bryant",
+    "name": "Wallace Bryant",
+    "pos": "C",
+    "positions": [
+      "C"
+    ],
+    "ovr": 69,
+    "off": 66,
+    "def": 72,
+    "attributes": {
+      "shooting": 68,
+      "finishing": 66,
+      "playmaking": 64,
+      "perimeterD": 68,
+      "interiorD": 73,
+      "rebounding": 79,
+      "athleticism": 72
+    },
+    "espnId": null,
+    "nbaId": 76291,
+    "photoUrl": "https://cdn.nba.com/headshots/nba/latest/1040x760/76291.png",
+    "age": 24,
+    "number": 54,
+    "potential": "C",
+    "salary": 3909000,
+    "contractYears": 3
+  },
+  "dave_corzine": {
+    "id": "dave_corzine",
+    "name": "Dave Corzine",
+    "pos": "C",
+    "positions": [
+      "C"
+    ],
+    "ovr": 78,
+    "off": 75,
+    "def": 75,
+    "attributes": {
+      "shooting": 80,
+      "finishing": 76,
+      "playmaking": 68,
+      "perimeterD": 66,
+      "interiorD": 82,
+      "rebounding": 81,
+      "athleticism": 78
+    },
+    "espnId": null,
+    "nbaId": 76453,
+    "photoUrl": "https://cdn.nba.com/headshots/nba/latest/1040x760/76453.png",
+    "age": 28,
+    "number": 40,
+    "potential": "C",
+    "salary": 14691000,
+    "contractYears": 3
+  },
+  "quintin_dailey": {
+    "id": "quintin_dailey",
+    "name": "Quintin Dailey",
+    "pos": "SG",
+    "positions": [
+      "SG"
+    ],
+    "ovr": 78,
+    "off": 72,
+    "def": 70,
+    "attributes": {
+      "shooting": 71,
+      "finishing": 77,
+      "playmaking": 70,
+      "perimeterD": 79,
+      "interiorD": 62,
+      "rebounding": 66,
+      "athleticism": 77
+    },
+    "espnId": null,
+    "nbaId": 76497,
+    "photoUrl": "https://cdn.nba.com/headshots/nba/latest/1040x760/76497.png",
+    "age": 23,
+    "number": 44,
+    "potential": "A",
+    "salary": 11753000,
+    "contractYears": 3
+  },
+  "sidney_green": {
+    "id": "sidney_green",
+    "name": "Sidney Green",
+    "pos": "SF",
+    "positions": [
+      "SF"
+    ],
+    "ovr": 72,
+    "off": 69,
+    "def": 73,
+    "attributes": {
+      "shooting": 72,
+      "finishing": 72,
+      "playmaking": 62,
+      "perimeterD": 68,
+      "interiorD": 71,
+      "rebounding": 82,
+      "athleticism": 75
+    },
+    "espnId": null,
+    "nbaId": 76876,
+    "photoUrl": "https://cdn.nba.com/headshots/nba/latest/1040x760/76876.png",
+    "age": 23,
+    "number": 21,
+    "potential": "B",
+    "salary": 5815000,
+    "contractYears": 1
+  },
+  "david_greenwood": {
+    "id": "david_greenwood",
+    "name": "David Greenwood",
+    "pos": "SF",
+    "positions": [
+      "SF"
+    ],
+    "ovr": 79,
+    "off": 74,
+    "def": 75,
+    "attributes": {
+      "shooting": 76,
+      "finishing": 80,
+      "playmaking": 64,
+      "perimeterD": 67,
+      "interiorD": 73,
+      "rebounding": 90,
+      "athleticism": 78
+    },
+    "espnId": null,
+    "nbaId": 76881,
+    "photoUrl": "https://cdn.nba.com/headshots/nba/latest/1040x760/76881.png",
+    "age": 27,
+    "number": 34,
+    "potential": "C",
+    "salary": 16238000,
+    "contractYears": 4
+  },
+  "rod_higgins": {
+    "id": "rod_higgins",
+    "name": "Rod Higgins",
+    "pos": "SF",
+    "positions": [
+      "SF"
+    ],
+    "ovr": 70,
+    "off": 71,
+    "def": 70,
+    "attributes": {
+      "shooting": 68,
+      "finishing": 75,
+      "playmaking": 70,
+      "perimeterD": 71,
+      "interiorD": 69,
+      "rebounding": 71,
+      "athleticism": 77
+    },
+    "espnId": null,
+    "nbaId": 77019,
+    "photoUrl": "https://cdn.nba.com/headshots/nba/latest/1040x760/77019.png",
+    "age": 24,
+    "number": 22,
+    "potential": "C",
+    "salary": 4330000,
+    "contractYears": 4
+  },
+  "steve_johnson": {
+    "id": "steve_johnson",
+    "name": "Steve Johnson",
+    "pos": "C",
+    "positions": [
+      "C"
+    ],
+    "ovr": 86,
+    "off": 77,
+    "def": 79,
+    "attributes": {
+      "shooting": 76,
+      "finishing": 92,
+      "playmaking": 62,
+      "perimeterD": 68,
+      "interiorD": 83,
+      "rebounding": 91,
+      "athleticism": 86
+    },
+    "espnId": null,
+    "nbaId": 77134,
+    "photoUrl": "https://cdn.nba.com/headshots/nba/latest/1040x760/77134.png",
+    "age": 26,
+    "number": 32,
+    "potential": "C",
+    "salary": 32167000,
+    "contractYears": 3
+  },
+  "ronnie_lester": {
+    "id": "ronnie_lester",
+    "name": "Ronnie Lester",
+    "pos": "SG",
+    "positions": [
+      "SG"
+    ],
+    "ovr": 78,
+    "off": 78,
+    "def": 69,
+    "attributes": {
+      "shooting": 75,
+      "finishing": 74,
+      "playmaking": 86,
+      "perimeterD": 77,
+      "interiorD": 65,
+      "rebounding": 63,
+      "athleticism": 79
+    },
+    "espnId": null,
+    "nbaId": 77373,
+    "photoUrl": "https://cdn.nba.com/headshots/nba/latest/1040x760/77373.png",
+    "age": 25,
+    "number": 12,
+    "potential": "C",
+    "salary": 11753000,
+    "contractYears": 5
+  },
+  "jawann_oldham": {
+    "id": "jawann_oldham",
+    "name": "Jawann Oldham",
+    "pos": "C",
+    "positions": [
+      "C"
+    ],
+    "ovr": 77,
+    "off": 71,
+    "def": 78,
+    "attributes": {
+      "shooting": 73,
+      "finishing": 76,
+      "playmaking": 62,
+      "perimeterD": 64,
+      "interiorD": 91,
+      "rebounding": 83,
+      "athleticism": 79
+    },
+    "espnId": null,
+    "nbaId": 77757,
+    "photoUrl": "https://cdn.nba.com/headshots/nba/latest/1040x760/77757.png",
+    "age": 26,
+    "number": 33,
+    "potential": "C",
+    "salary": 13145000,
+    "contractYears": 4
+  },
+  "ennis_whatley": {
+    "id": "ennis_whatley",
+    "name": "Ennis Whatley",
+    "pos": "SG",
+    "positions": [
+      "SG"
+    ],
+    "ovr": 82,
+    "off": 81,
+    "def": 73,
+    "attributes": {
+      "shooting": 75,
+      "finishing": 77,
+      "playmaking": 93,
+      "perimeterD": 86,
+      "interiorD": 64,
+      "rebounding": 65,
+      "athleticism": 80
+    },
+    "espnId": null,
+    "nbaId": 941,
+    "photoUrl": "https://cdn.nba.com/headshots/nba/latest/1040x760/941.png",
+    "age": 21,
+    "number": 3,
+    "potential": "A",
+    "salary": 12333000,
+    "contractYears": 3
+  },
+  "mitchell_wiggins": {
+    "id": "mitchell_wiggins",
+    "name": "Mitchell Wiggins",
+    "pos": "SG",
+    "positions": [
+      "SG"
+    ],
+    "ovr": 77,
+    "off": 74,
+    "def": 73,
+    "attributes": {
+      "shooting": 76,
+      "finishing": 74,
+      "playmaking": 70,
+      "perimeterD": 82,
+      "interiorD": 63,
+      "rebounding": 74,
+      "athleticism": 77
+    },
+    "espnId": null,
+    "nbaId": 78523,
+    "photoUrl": "https://cdn.nba.com/headshots/nba/latest/1040x760/78523.png",
+    "age": 24,
+    "number": 15,
+    "potential": "C",
+    "salary": 10516000,
+    "contractYears": 4
+  },
+  "orlando_woolridge": {
+    "id": "orlando_woolridge",
+    "name": "Orlando Woolridge",
+    "pos": "SF",
+    "positions": [
+      "SF"
+    ],
+    "ovr": 79,
+    "off": 75,
+    "def": 71,
+    "attributes": {
+      "shooting": 78,
+      "finishing": 84,
+      "playmaking": 63,
+      "perimeterD": 69,
+      "interiorD": 72,
+      "rebounding": 72,
+      "athleticism": 78
+    },
+    "espnId": null,
+    "nbaId": 78615,
+    "photoUrl": "https://cdn.nba.com/headshots/nba/latest/1040x760/78615.png",
+    "age": 24,
+    "number": 0,
+    "potential": "C",
+    "salary": 12990000,
+    "contractYears": 5
+  },
+  "mark_aguirre": {
+    "id": "mark_aguirre",
+    "name": "Mark Aguirre",
+    "pos": "SF",
+    "positions": [
+      "SF"
+    ],
+    "ovr": 87,
+    "off": 79,
+    "def": 69,
+    "attributes": {
+      "shooting": 81,
+      "finishing": 83,
+      "playmaking": 72,
+      "perimeterD": 69,
+      "interiorD": 64,
+      "rebounding": 75,
+      "athleticism": 74
+    },
+    "espnId": null,
+    "nbaId": 76016,
+    "photoUrl": "https://cdn.nba.com/headshots/nba/latest/1040x760/76016.png",
+    "age": 24,
+    "number": 24,
+    "potential": "C",
+    "salary": 27960000,
+    "contractYears": 1
+  },
+  "rolando_blackman": {
+    "id": "rolando_blackman",
+    "name": "Rolando Blackman",
+    "pos": "SG",
+    "positions": [
+      "SG"
+    ],
+    "ovr": 83,
+    "off": 78,
+    "def": 66,
+    "attributes": {
+      "shooting": 77,
+      "finishing": 85,
+      "playmaking": 72,
+      "perimeterD": 64,
+      "interiorD": 66,
+      "rebounding": 69,
+      "athleticism": 74
+    },
+    "espnId": null,
+    "nbaId": 76176,
+    "photoUrl": "https://cdn.nba.com/headshots/nba/latest/1040x760/76176.png",
+    "age": 25,
+    "number": 22,
+    "potential": "C",
+    "salary": 19795000,
+    "contractYears": 2
+  },
+  "pat_cummings": {
+    "id": "pat_cummings",
+    "name": "Pat Cummings",
+    "pos": "C",
+    "positions": [
+      "C"
+    ],
+    "ovr": 77,
+    "off": 73,
+    "def": 71,
+    "attributes": {
+      "shooting": 76,
+      "finishing": 75,
+      "playmaking": 66,
+      "perimeterD": 68,
+      "interiorD": 65,
+      "rebounding": 86,
+      "athleticism": 70
+    },
+    "espnId": null,
+    "nbaId": 76483,
+    "photoUrl": "https://cdn.nba.com/headshots/nba/latest/1040x760/76483.png",
+    "age": 27,
+    "number": 42,
+    "potential": "C",
+    "salary": 13145000,
+    "contractYears": 4
+  },
+  "brad_davis": {
+    "id": "brad_davis",
+    "name": "Brad Davis",
+    "pos": "SG",
+    "positions": [
+      "SG"
+    ],
+    "ovr": 83,
+    "off": 83,
+    "def": 67,
+    "attributes": {
+      "shooting": 77,
+      "finishing": 84,
+      "playmaking": 91,
+      "perimeterD": 74,
+      "interiorD": 62,
+      "rebounding": 62,
+      "athleticism": 75
+    },
+    "espnId": null,
+    "nbaId": 76516,
+    "photoUrl": "https://cdn.nba.com/headshots/nba/latest/1040x760/76516.png",
+    "age": 28,
+    "number": 15,
+    "potential": "C",
+    "salary": 24744000,
+    "contractYears": 1
+  },
+  "dale_ellis": {
+    "id": "dale_ellis",
+    "name": "Dale Ellis",
+    "pos": "SG",
+    "positions": [
+      "SG"
+    ],
+    "ovr": 77,
+    "off": 74,
+    "def": 73,
+    "attributes": {
+      "shooting": 84,
+      "finishing": 72,
+      "playmaking": 64,
+      "perimeterD": 75,
+      "interiorD": 64,
+      "rebounding": 83,
+      "athleticism": 73
+    },
+    "espnId": null,
+    "nbaId": 107,
+    "photoUrl": "https://cdn.nba.com/headshots/nba/latest/1040x760/107.png",
+    "age": 23,
+    "number": 14,
+    "potential": "B",
+    "salary": 10516000,
+    "contractYears": 2
+  },
+  "bill_garnett": {
+    "id": "bill_garnett",
+    "name": "Bill Garnett",
+    "pos": "SF",
+    "positions": [
+      "SF"
+    ],
+    "ovr": 79,
+    "off": 77,
+    "def": 77,
+    "attributes": {
+      "shooting": 75,
+      "finishing": 85,
+      "playmaking": 72,
+      "perimeterD": 70,
+      "interiorD": 82,
+      "rebounding": 82,
+      "athleticism": 88
+    },
+    "espnId": null,
+    "nbaId": 76785,
+    "photoUrl": "https://cdn.nba.com/headshots/nba/latest/1040x760/76785.png",
+    "age": 24,
+    "number": 20,
+    "potential": "C",
+    "salary": 12990000,
+    "contractYears": 1
+  },
+  "derek_harper": {
+    "id": "derek_harper",
+    "name": "Derek Harper",
+    "pos": "SG",
+    "positions": [
+      "SG"
+    ],
+    "ovr": 73,
+    "off": 73,
+    "def": 74,
+    "attributes": {
+      "shooting": 69,
+      "finishing": 71,
+      "playmaking": 79,
+      "perimeterD": 86,
+      "interiorD": 66,
+      "rebounding": 66,
+      "athleticism": 76
+    },
+    "espnId": null,
+    "nbaId": 157,
+    "photoUrl": "https://cdn.nba.com/headshots/nba/latest/1040x760/157.png",
+    "age": 22,
+    "number": 12,
+    "potential": "B",
+    "salary": 4508000,
+    "contractYears": 5
+  },
+  "kurt_nimphius": {
+    "id": "kurt_nimphius",
+    "name": "Kurt Nimphius",
+    "pos": "C",
+    "positions": [
+      "C"
+    ],
+    "ovr": 81,
+    "off": 76,
+    "def": 78,
+    "attributes": {
+      "shooting": 75,
+      "finishing": 81,
+      "playmaking": 71,
+      "perimeterD": 63,
+      "interiorD": 92,
+      "rebounding": 83,
+      "athleticism": 80
+    },
+    "espnId": null,
+    "nbaId": 77719,
+    "photoUrl": "https://cdn.nba.com/headshots/nba/latest/1040x760/77719.png",
+    "age": 26,
+    "number": 40,
+    "potential": "C",
+    "salary": 20104000,
+    "contractYears": 5
+  },
+  "roger_phegley": {
+    "id": "roger_phegley",
+    "name": "Roger Phegley",
+    "pos": "SG",
+    "positions": [
+      "SG"
+    ],
+    "ovr": 66,
+    "off": 66,
+    "def": 66,
+    "attributes": {
+      "shooting": 66,
+      "finishing": 66,
+      "playmaking": 66,
+      "perimeterD": 66,
+      "interiorD": 66,
+      "rebounding": 66,
+      "athleticism": 66
+    },
+    "espnId": null,
+    "nbaId": 77848,
+    "photoUrl": "https://cdn.nba.com/headshots/nba/latest/1040x760/77848.png",
+    "age": 27,
+    "number": 21,
+    "potential": "C",
+    "salary": 3309000,
+    "contractYears": 2
+  },
+  "jim_spanarkel": {
+    "id": "jim_spanarkel",
+    "name": "Jim Spanarkel",
+    "pos": "SG",
+    "positions": [
+      "SG"
+    ],
+    "ovr": 66,
+    "off": 66,
+    "def": 66,
+    "attributes": {
+      "shooting": 66,
+      "finishing": 66,
+      "playmaking": 66,
+      "perimeterD": 66,
+      "interiorD": 66,
+      "rebounding": 66,
+      "athleticism": 66
+    },
+    "espnId": null,
+    "nbaId": 78222,
+    "photoUrl": "https://cdn.nba.com/headshots/nba/latest/1040x760/78222.png",
+    "age": 27,
+    "number": 34,
+    "potential": "C",
+    "salary": 3309000,
+    "contractYears": 4
+  },
+  "elston_turner": {
+    "id": "elston_turner",
+    "name": "Elston Turner",
+    "pos": "SG",
+    "positions": [
+      "SG"
+    ],
+    "ovr": 68,
+    "off": 68,
+    "def": 70,
+    "attributes": {
+      "shooting": 68,
+      "finishing": 64,
+      "playmaking": 72,
+      "perimeterD": 76,
+      "interiorD": 62,
+      "rebounding": 73,
+      "athleticism": 70
+    },
+    "espnId": null,
+    "nbaId": 78378,
+    "photoUrl": "https://cdn.nba.com/headshots/nba/latest/1040x760/78378.png",
+    "age": 25,
+    "number": 33,
+    "potential": "C",
+    "salary": 3489000,
+    "contractYears": 1
+  },
+  "jay_vincent": {
+    "id": "jay_vincent",
+    "name": "Jay Vincent",
+    "pos": "SF",
+    "positions": [
+      "SF"
+    ],
+    "ovr": 73,
+    "off": 72,
+    "def": 67,
+    "attributes": {
+      "shooting": 75,
+      "finishing": 74,
+      "playmaking": 67,
+      "perimeterD": 65,
+      "interiorD": 64,
+      "rebounding": 76,
+      "athleticism": 74
+    },
+    "espnId": null,
+    "nbaId": 78418,
+    "photoUrl": "https://cdn.nba.com/headshots/nba/latest/1040x760/78418.png",
+    "age": 25,
+    "number": 31,
+    "potential": "C",
+    "salary": 6557000,
+    "contractYears": 1
+  },
+  "mark_west": {
+    "id": "mark_west",
+    "name": "Mark West",
+    "pos": "C",
+    "positions": [
+      "C"
+    ],
+    "ovr": 66,
+    "off": 66,
+    "def": 66,
+    "attributes": {
+      "shooting": 66,
+      "finishing": 66,
+      "playmaking": 66,
+      "perimeterD": 66,
+      "interiorD": 66,
+      "rebounding": 66,
+      "athleticism": 66
+    },
+    "espnId": null,
+    "nbaId": 770,
+    "photoUrl": "https://cdn.nba.com/headshots/nba/latest/1040x760/770.png",
+    "age": 23,
+    "number": 45,
+    "potential": "B",
+    "salary": 2648000,
+    "contractYears": 4
+  },
+  "richard_anderson": {
+    "id": "richard_anderson",
+    "name": "Richard Anderson",
+    "pos": "SF",
+    "positions": [
+      "SF"
+    ],
+    "ovr": 80,
+    "off": 72,
+    "def": 76,
+    "attributes": {
+      "shooting": 72,
+      "finishing": 69,
+      "playmaking": 76,
+      "perimeterD": 73,
+      "interiorD": 70,
+      "rebounding": 91,
+      "athleticism": 74
+    },
+    "espnId": null,
+    "nbaId": 76045,
+    "photoUrl": "https://cdn.nba.com/headshots/nba/latest/1040x760/76045.png",
+    "age": 23,
+    "number": 35,
+    "potential": "A",
+    "salary": 14228000,
+    "contractYears": 4
+  },
+  "howard_carter": {
+    "id": "howard_carter",
+    "name": "Howard Carter",
+    "pos": "SG",
+    "positions": [
+      "SG"
+    ],
+    "ovr": 71,
+    "off": 72,
+    "def": 67,
+    "attributes": {
+      "shooting": 74,
+      "finishing": 70,
+      "playmaking": 71,
+      "perimeterD": 68,
+      "interiorD": 64,
+      "rebounding": 69,
+      "athleticism": 69
+    },
+    "espnId": null,
+    "nbaId": 76358,
+    "photoUrl": "https://cdn.nba.com/headshots/nba/latest/1040x760/76358.png",
+    "age": 22,
+    "number": 32,
+    "potential": "B",
+    "salary": 3487000,
+    "contractYears": 3
+  },
+  "kenny_dennard": {
+    "id": "kenny_dennard",
+    "name": "Kenny Dennard",
+    "pos": "SF",
+    "positions": [
+      "SF"
+    ],
+    "ovr": 66,
+    "off": 66,
+    "def": 66,
+    "attributes": {
+      "shooting": 66,
+      "finishing": 66,
+      "playmaking": 66,
+      "perimeterD": 66,
+      "interiorD": 66,
+      "rebounding": 66,
+      "athleticism": 66
+    },
+    "espnId": null,
+    "nbaId": 76556,
+    "photoUrl": "https://cdn.nba.com/headshots/nba/latest/1040x760/76556.png",
+    "age": 25,
+    "number": 33,
+    "potential": "C",
+    "salary": 2648000,
+    "contractYears": 2
+  },
+  "t_r_dunn": {
+    "id": "t_r_dunn",
+    "name": "T.R. Dunn",
+    "pos": "SG",
+    "positions": [
+      "SG"
+    ],
+    "ovr": 78,
+    "off": 76,
+    "def": 80,
+    "attributes": {
+      "shooting": 75,
+      "finishing": 79,
+      "playmaking": 75,
+      "perimeterD": 91,
+      "interiorD": 66,
+      "rebounding": 81,
+      "athleticism": 81
+    },
+    "espnId": null,
+    "nbaId": 76618,
+    "photoUrl": "https://cdn.nba.com/headshots/nba/latest/1040x760/76618.png",
+    "age": 29,
+    "number": 23,
+    "potential": "C",
+    "salary": 14691000,
+    "contractYears": 1
+  },
+  "keith_edmonson": {
+    "id": "keith_edmonson",
+    "name": "Keith Edmonson",
+    "pos": "SG",
+    "positions": [
+      "SG"
+    ],
+    "ovr": 74,
+    "off": 71,
+    "def": 70,
+    "attributes": {
+      "shooting": 73,
+      "finishing": 75,
+      "playmaking": 64,
+      "perimeterD": 73,
+      "interiorD": 66,
+      "rebounding": 71,
+      "athleticism": 74
+    },
+    "espnId": null,
+    "nbaId": 76638,
+    "photoUrl": "https://cdn.nba.com/headshots/nba/latest/1040x760/76638.png",
+    "age": 23,
+    "number": 10,
+    "potential": "B",
+    "salary": 7299000,
+    "contractYears": 5
+  },
+  "alex_english": {
+    "id": "alex_english",
+    "name": "Alex English",
+    "pos": "SF",
+    "positions": [
+      "SF"
+    ],
+    "ovr": 88,
+    "off": 79,
+    "def": 74,
+    "attributes": {
+      "shooting": 79,
+      "finishing": 80,
+      "playmaking": 77,
+      "perimeterD": 70,
+      "interiorD": 77,
+      "rebounding": 76,
+      "athleticism": 74
+    },
+    "espnId": null,
+    "nbaId": 76673,
+    "photoUrl": "https://cdn.nba.com/headshots/nba/latest/1040x760/76673.png",
+    "age": 30,
+    "number": 2,
+    "potential": "D",
+    "salary": 37734000,
+    "contractYears": 3
+  },
+  "mike_evans": {
+    "id": "mike_evans",
+    "name": "Mike Evans",
+    "pos": "SG",
+    "positions": [
+      "SG"
+    ],
+    "ovr": 79,
+    "off": 83,
+    "def": 67,
+    "attributes": {
+      "shooting": 93,
+      "finishing": 70,
+      "playmaking": 83,
+      "perimeterD": 74,
+      "interiorD": 61,
+      "rebounding": 63,
+      "athleticism": 70
+    },
+    "espnId": null,
+    "nbaId": 76686,
+    "photoUrl": "https://cdn.nba.com/headshots/nba/latest/1040x760/76686.png",
+    "age": 29,
+    "number": 5,
+    "potential": "C",
+    "salary": 16238000,
+    "contractYears": 4
+  },
+  "bill_hanzlik": {
+    "id": "bill_hanzlik",
+    "name": "Bill Hanzlik",
+    "pos": "SF",
+    "positions": [
+      "SF"
+    ],
+    "ovr": 80,
+    "off": 80,
+    "def": 73,
+    "attributes": {
+      "shooting": 77,
+      "finishing": 83,
+      "playmaking": 82,
+      "perimeterD": 80,
+      "interiorD": 66,
+      "rebounding": 72,
+      "athleticism": 89
+    },
+    "espnId": null,
+    "nbaId": 76944,
+    "photoUrl": "https://cdn.nba.com/headshots/nba/latest/1040x760/76944.png",
+    "age": 26,
+    "number": 24,
+    "potential": "C",
+    "salary": 17784000,
+    "contractYears": 4
+  },
+  "dan_issel": {
+    "id": "dan_issel",
+    "name": "Dan Issel",
+    "pos": "C",
+    "positions": [
+      "C"
+    ],
+    "ovr": 86,
+    "off": 75,
+    "def": 73,
+    "attributes": {
+      "shooting": 78,
+      "finishing": 80,
+      "playmaking": 70,
+      "perimeterD": 70,
+      "interiorD": 71,
+      "rebounding": 84,
+      "athleticism": 74
+    },
+    "espnId": null,
+    "nbaId": 77097,
+    "photoUrl": "https://cdn.nba.com/headshots/nba/latest/1040x760/77097.png",
+    "age": 35,
+    "number": 44,
+    "potential": "D",
+    "salary": 20908000,
+    "contractYears": 3
+  },
+  "anthony_roberts": {
+    "id": "anthony_roberts",
+    "name": "Anthony Roberts",
+    "pos": "SF",
+    "positions": [
+      "SF"
+    ],
+    "ovr": 69,
+    "off": 66,
+    "def": 69,
+    "attributes": {
+      "shooting": 69,
+      "finishing": 64,
+      "playmaking": 65,
+      "perimeterD": 67,
+      "interiorD": 64,
+      "rebounding": 78,
+      "athleticism": 67
+    },
+    "espnId": null,
+    "nbaId": 77975,
+    "photoUrl": "https://cdn.nba.com/headshots/nba/latest/1040x760/77975.png",
+    "age": 29,
+    "number": 30,
+    "potential": "C",
+    "salary": 4887000,
+    "contractYears": 3
+  },
+  "dan_schayes": {
+    "id": "dan_schayes",
+    "name": "Dan Schayes",
+    "pos": "C",
+    "positions": [
+      "C"
+    ],
+    "ovr": 84,
+    "off": 77,
+    "def": 78,
+    "attributes": {
+      "shooting": 77,
+      "finishing": 88,
+      "playmaking": 65,
+      "perimeterD": 66,
+      "interiorD": 81,
+      "rebounding": 92,
+      "athleticism": 89
+    },
+    "espnId": null,
+    "nbaId": 7,
+    "photoUrl": "https://cdn.nba.com/headshots/nba/latest/1040x760/7.png",
+    "age": 25,
+    "number": 34,
+    "potential": "C",
+    "salary": 21651000,
+    "contractYears": 3
+  },
+  "kiki_vandeweghe": {
+    "id": "kiki_vandeweghe",
+    "name": "Kiki Vandeweghe",
+    "pos": "SF",
+    "positions": [
+      "SF"
+    ],
+    "ovr": 90,
+    "off": 83,
+    "def": 67,
+    "attributes": {
+      "shooting": 89,
+      "finishing": 86,
+      "playmaking": 71,
+      "perimeterD": 64,
+      "interiorD": 69,
+      "rebounding": 70,
+      "athleticism": 75
+    },
+    "espnId": null,
+    "nbaId": 78404,
+    "photoUrl": "https://cdn.nba.com/headshots/nba/latest/1040x760/78404.png",
+    "age": 25,
+    "number": 55,
+    "potential": "C",
+    "salary": 34641000,
+    "contractYears": 5
+  },
+  "rob_williams": {
+    "id": "rob_williams",
+    "name": "Rob Williams",
+    "pos": "SG",
+    "positions": [
+      "SG"
+    ],
+    "ovr": 83,
+    "off": 84,
+    "def": 69,
+    "attributes": {
+      "shooting": 85,
+      "finishing": 75,
+      "playmaking": 90,
+      "perimeterD": 79,
+      "interiorD": 61,
+      "rebounding": 66,
+      "athleticism": 76
+    },
+    "espnId": null,
+    "nbaId": 78565,
+    "photoUrl": "https://cdn.nba.com/headshots/nba/latest/1040x760/78565.png",
+    "age": 23,
+    "number": 21,
+    "potential": "A",
+    "salary": 19795000,
+    "contractYears": 4
+  },
+  "mike_bratz": {
+    "id": "mike_bratz",
+    "name": "Mike Bratz",
+    "pos": "SG",
+    "positions": [
+      "SG"
+    ],
+    "ovr": 79,
+    "off": 77,
+    "def": 73,
+    "attributes": {
+      "shooting": 81,
+      "finishing": 68,
+      "playmaking": 82,
+      "perimeterD": 87,
+      "interiorD": 62,
+      "rebounding": 66,
+      "athleticism": 74
+    },
+    "espnId": null,
+    "nbaId": 76242,
+    "photoUrl": "https://cdn.nba.com/headshots/nba/latest/1040x760/76242.png",
+    "age": 28,
+    "number": 23,
+    "potential": "C",
+    "salary": 16238000,
+    "contractYears": 2
+  },
+  "joe_barry_carroll": {
+    "id": "joe_barry_carroll",
+    "name": "Joe Barry Carroll",
+    "pos": "C",
+    "positions": [
+      "C"
+    ],
+    "ovr": 82,
+    "off": 73,
+    "def": 79,
+    "attributes": {
+      "shooting": 75,
+      "finishing": 77,
+      "playmaking": 65,
+      "perimeterD": 73,
+      "interiorD": 84,
+      "rebounding": 82,
+      "athleticism": 80
+    },
+    "espnId": null,
+    "nbaId": 76353,
+    "photoUrl": "https://cdn.nba.com/headshots/nba/latest/1040x760/76353.png",
+    "age": 25,
+    "number": 2,
+    "potential": "C",
+    "salary": 17939000,
+    "contractYears": 2
+  },
+  "don_collins": {
+    "id": "don_collins",
+    "name": "Don Collins",
+    "pos": "SG",
+    "positions": [
+      "SG"
+    ],
+    "ovr": 74,
+    "off": 72,
+    "def": 72,
+    "attributes": {
+      "shooting": 75,
+      "finishing": 74,
+      "playmaking": 65,
+      "perimeterD": 78,
+      "interiorD": 67,
+      "rebounding": 71,
+      "athleticism": 73
+    },
+    "espnId": null,
+    "nbaId": 76418,
+    "photoUrl": "https://cdn.nba.com/headshots/nba/latest/1040x760/76418.png",
+    "age": 25,
+    "number": 18,
+    "potential": "C",
+    "salary": 7299000,
+    "contractYears": 1
+  },
+  "lester_conner": {
+    "id": "lester_conner",
+    "name": "Lester Conner",
+    "pos": "SG",
+    "positions": [
+      "SG"
+    ],
+    "ovr": 81,
+    "off": 80,
+    "def": 75,
+    "attributes": {
+      "shooting": 76,
+      "finishing": 80,
+      "playmaking": 84,
+      "perimeterD": 90,
+      "interiorD": 62,
+      "rebounding": 69,
+      "athleticism": 80
+    },
+    "espnId": null,
+    "nbaId": 76431,
+    "photoUrl": "https://cdn.nba.com/headshots/nba/latest/1040x760/76431.png",
+    "age": 24,
+    "number": 15,
+    "potential": "C",
+    "salary": 16083000,
+    "contractYears": 2
+  },
+  "russell_cross": {
+    "id": "russell_cross",
+    "name": "Russell Cross",
+    "pos": "C",
+    "positions": [
+      "C"
+    ],
+    "ovr": 66,
+    "off": 66,
+    "def": 66,
+    "attributes": {
+      "shooting": 66,
+      "finishing": 66,
+      "playmaking": 66,
+      "perimeterD": 66,
+      "interiorD": 66,
+      "rebounding": 66,
+      "athleticism": 66
+    },
+    "espnId": null,
+    "nbaId": 76478,
+    "photoUrl": "https://cdn.nba.com/headshots/nba/latest/1040x760/76478.png",
+    "age": 22,
+    "number": 40,
+    "potential": "B",
+    "salary": 1820000,
+    "contractYears": 4
+  },
+  "chris_engler": {
+    "id": "chris_engler",
+    "name": "Chris Engler",
+    "pos": "C",
+    "positions": [
+      "C"
+    ],
+    "ovr": 66,
+    "off": 66,
+    "def": 66,
+    "attributes": {
+      "shooting": 66,
+      "finishing": 66,
+      "playmaking": 66,
+      "perimeterD": 66,
+      "interiorD": 66,
+      "rebounding": 66,
+      "athleticism": 66
+    },
+    "espnId": null,
+    "nbaId": 76670,
+    "photoUrl": "https://cdn.nba.com/headshots/nba/latest/1040x760/76670.png",
+    "age": 25,
+    "number": 55,
+    "potential": "C",
+    "salary": 2648000,
+    "contractYears": 5
+  },
+  "sleepy_floyd": {
+    "id": "sleepy_floyd",
+    "name": "Sleepy Floyd",
+    "pos": "SG",
+    "positions": [
+      "SG"
+    ],
+    "ovr": 76,
+    "off": 74,
+    "def": 71,
+    "attributes": {
+      "shooting": 73,
+      "finishing": 77,
+      "playmaking": 71,
+      "perimeterD": 77,
+      "interiorD": 66,
+      "rebounding": 67,
+      "athleticism": 78
+    },
+    "espnId": null,
+    "nbaId": 76726,
+    "photoUrl": "https://cdn.nba.com/headshots/nba/latest/1040x760/76726.png",
+    "age": 24,
+    "number": 21,
+    "potential": "C",
+    "salary": 9279000,
+    "contractYears": 4
+  },
+  "mickey_johnson": {
+    "id": "mickey_johnson",
+    "name": "Mickey Johnson",
+    "pos": "SF",
+    "positions": [
+      "SF"
+    ],
+    "ovr": 80,
+    "off": 73,
+    "def": 77,
+    "attributes": {
+      "shooting": 72,
+      "finishing": 77,
+      "playmaking": 69,
+      "perimeterD": 81,
+      "interiorD": 67,
+      "rebounding": 86,
+      "athleticism": 81
+    },
+    "espnId": null,
+    "nbaId": 77168,
+    "photoUrl": "https://cdn.nba.com/headshots/nba/latest/1040x760/77168.png",
+    "age": 31,
+    "number": 43,
+    "potential": "D",
+    "salary": 15117000,
+    "contractYears": 1
+  },
+  "pace_mannion": {
+    "id": "pace_mannion",
+    "name": "Pace Mannion",
+    "pos": "SG",
+    "positions": [
+      "SG"
+    ],
+    "ovr": 66,
+    "off": 66,
+    "def": 66,
+    "attributes": {
+      "shooting": 66,
+      "finishing": 66,
+      "playmaking": 66,
+      "perimeterD": 66,
+      "interiorD": 66,
+      "rebounding": 66,
+      "athleticism": 66
+    },
+    "espnId": null,
+    "nbaId": 77456,
+    "photoUrl": "https://cdn.nba.com/headshots/nba/latest/1040x760/77456.png",
+    "age": 23,
+    "number": 20,
+    "potential": "B",
+    "salary": 2648000,
+    "contractYears": 4
+  },
+  "purvis_short": {
+    "id": "purvis_short",
+    "name": "Purvis Short",
+    "pos": "SF",
+    "positions": [
+      "SF"
+    ],
+    "ovr": 81,
+    "off": 78,
+    "def": 70,
+    "attributes": {
+      "shooting": 87,
+      "finishing": 76,
+      "playmaking": 68,
+      "perimeterD": 74,
+      "interiorD": 62,
+      "rebounding": 73,
+      "athleticism": 73
+    },
+    "espnId": null,
+    "nbaId": 78139,
+    "photoUrl": "https://cdn.nba.com/headshots/nba/latest/1040x760/78139.png",
+    "age": 26,
+    "number": 45,
+    "potential": "C",
+    "salary": 20104000,
+    "contractYears": 1
+  },
+  "larry_smith": {
+    "id": "larry_smith",
+    "name": "Larry Smith",
+    "pos": "SF",
+    "positions": [
+      "SF"
+    ],
+    "ovr": 80,
+    "off": 75,
+    "def": 74,
+    "attributes": {
+      "shooting": 76,
+      "finishing": 87,
+      "playmaking": 61,
+      "perimeterD": 70,
+      "interiorD": 65,
+      "rebounding": 94,
+      "athleticism": 76
+    },
+    "espnId": null,
+    "nbaId": 78195,
+    "photoUrl": "https://cdn.nba.com/headshots/nba/latest/1040x760/78195.png",
+    "age": 26,
+    "number": 13,
+    "potential": "C",
+    "salary": 17784000,
+    "contractYears": 1
+  },
+  "darren_tillis": {
+    "id": "darren_tillis",
+    "name": "Darren Tillis",
+    "pos": "C",
+    "positions": [
+      "C"
+    ],
+    "ovr": 72,
+    "off": 67,
+    "def": 75,
+    "attributes": {
+      "shooting": 70,
+      "finishing": 68,
+      "playmaking": 63,
+      "perimeterD": 64,
+      "interiorD": 85,
+      "rebounding": 78,
+      "athleticism": 74
+    },
+    "espnId": null,
+    "nbaId": 78343,
+    "photoUrl": "https://cdn.nba.com/headshots/nba/latest/1040x760/78343.png",
+    "age": 24,
+    "number": 22,
+    "potential": "C",
+    "salary": 5815000,
+    "contractYears": 5
+  },
+  "james_bailey": {
+    "id": "james_bailey",
+    "name": "James Bailey",
+    "pos": "SF",
+    "positions": [
+      "SF"
+    ],
+    "ovr": 80,
+    "off": 73,
+    "def": 75,
+    "attributes": {
+      "shooting": 75,
+      "finishing": 79,
+      "playmaking": 65,
+      "perimeterD": 69,
+      "interiorD": 76,
+      "rebounding": 84,
+      "athleticism": 78
+    },
+    "espnId": null,
+    "nbaId": 76085,
+    "photoUrl": "https://cdn.nba.com/headshots/nba/latest/1040x760/76085.png",
+    "age": 27,
+    "number": 2,
+    "potential": "C",
+    "salary": 17784000,
+    "contractYears": 5
+  },
+  "craig_ehlo": {
+    "id": "craig_ehlo",
+    "name": "Craig Ehlo",
+    "pos": "SG",
+    "positions": [
+      "SG"
+    ],
+    "ovr": 66,
+    "off": 66,
+    "def": 66,
+    "attributes": {
+      "shooting": 66,
+      "finishing": 66,
+      "playmaking": 66,
+      "perimeterD": 66,
+      "interiorD": 66,
+      "rebounding": 66,
+      "athleticism": 66
+    },
+    "espnId": null,
+    "nbaId": 378,
+    "photoUrl": "https://cdn.nba.com/headshots/nba/latest/1040x760/378.png",
+    "age": 22,
+    "number": 3,
+    "potential": "B",
+    "salary": 1820000,
+    "contractYears": 1
+  },
+  "phil_ford": {
+    "id": "phil_ford",
+    "name": "Phil Ford",
+    "pos": "SG",
+    "positions": [
+      "SG"
+    ],
+    "ovr": 78,
+    "off": 80,
+    "def": 65,
+    "attributes": {
+      "shooting": 76,
+      "finishing": 77,
+      "playmaking": 89,
+      "perimeterD": 70,
+      "interiorD": 62,
+      "rebounding": 62,
+      "athleticism": 70
+    },
+    "espnId": null,
+    "nbaId": 76736,
+    "photoUrl": "https://cdn.nba.com/headshots/nba/latest/1040x760/76736.png",
+    "age": 28,
+    "number": 1,
+    "potential": "C",
+    "salary": 14691000,
+    "contractYears": 1
+  },
+  "elvin_hayes": {
+    "id": "elvin_hayes",
+    "name": "Elvin Hayes",
+    "pos": "SF",
+    "positions": [
+      "SF"
+    ],
+    "ovr": 69,
+    "off": 66,
+    "def": 68,
+    "attributes": {
+      "shooting": 70,
+      "finishing": 69,
+      "playmaking": 66,
+      "perimeterD": 63,
+      "interiorD": 71,
+      "rebounding": 81,
+      "athleticism": 70
+    },
+    "espnId": null,
+    "nbaId": 76979,
+    "photoUrl": "https://cdn.nba.com/headshots/nba/latest/1040x760/76979.png",
+    "age": 38,
+    "number": 44,
+    "potential": "D",
+    "salary": 3176000,
+    "contractYears": 4
+  },
+  "caldwell_jones": {
+    "id": "caldwell_jones",
+    "name": "Caldwell Jones",
+    "pos": "C",
+    "positions": [
+      "C"
+    ],
+    "ovr": 76,
+    "off": 76,
+    "def": 73,
+    "attributes": {
+      "shooting": 80,
+      "finishing": 79,
+      "playmaking": 66,
+      "perimeterD": 64,
+      "interiorD": 76,
+      "rebounding": 83,
+      "athleticism": 73
+    },
+    "espnId": null,
+    "nbaId": 77175,
+    "photoUrl": "https://cdn.nba.com/headshots/nba/latest/1040x760/77175.png",
+    "age": 33,
+    "number": 27,
+    "potential": "D",
+    "salary": 9859000,
+    "contractYears": 2
+  },
+  "major_jones": {
+    "id": "major_jones",
+    "name": "Major Jones",
+    "pos": "SF",
+    "positions": [
+      "SF"
+    ],
+    "ovr": 66,
+    "off": 66,
+    "def": 66,
+    "attributes": {
+      "shooting": 66,
+      "finishing": 66,
+      "playmaking": 66,
+      "perimeterD": 66,
+      "interiorD": 66,
+      "rebounding": 66,
+      "athleticism": 66
+    },
+    "espnId": null,
+    "nbaId": 77189,
+    "photoUrl": "https://cdn.nba.com/headshots/nba/latest/1040x760/77189.png",
+    "age": 30,
+    "number": 11,
+    "potential": "D",
+    "salary": 3309000,
+    "contractYears": 2
+  },
+  "allen_leavell": {
+    "id": "allen_leavell",
+    "name": "Allen Leavell",
+    "pos": "SG",
+    "positions": [
+      "SG"
+    ],
+    "ovr": 84,
+    "off": 80,
+    "def": 71,
+    "attributes": {
+      "shooting": 75,
+      "finishing": 79,
+      "playmaking": 88,
+      "perimeterD": 84,
+      "interiorD": 63,
+      "rebounding": 61,
+      "athleticism": 79
+    },
+    "espnId": null,
+    "nbaId": 77353,
+    "photoUrl": "https://cdn.nba.com/headshots/nba/latest/1040x760/77353.png",
+    "age": 27,
+    "number": 30,
+    "potential": "C",
+    "salary": 27063000,
+    "contractYears": 3
+  },
+  "lewis_lloyd": {
+    "id": "lewis_lloyd",
+    "name": "Lewis Lloyd",
+    "pos": "SG",
+    "positions": [
+      "SG"
+    ],
+    "ovr": 81,
+    "off": 76,
+    "def": 72,
+    "attributes": {
+      "shooting": 78,
+      "finishing": 79,
+      "playmaking": 72,
+      "perimeterD": 76,
+      "interiorD": 69,
+      "rebounding": 69,
+      "athleticism": 74
+    },
+    "espnId": null,
+    "nbaId": 77395,
+    "photoUrl": "https://cdn.nba.com/headshots/nba/latest/1040x760/77395.png",
+    "age": 25,
+    "number": 32,
+    "potential": "C",
+    "salary": 16083000,
+    "contractYears": 2
+  },
+  "rodney_mccray": {
+    "id": "rodney_mccray",
+    "name": "Rodney McCray",
+    "pos": "SF",
+    "positions": [
+      "SF"
+    ],
+    "ovr": 78,
+    "off": 76,
+    "def": 73,
+    "attributes": {
+      "shooting": 77,
+      "finishing": 81,
+      "playmaking": 70,
+      "perimeterD": 68,
+      "interiorD": 73,
+      "rebounding": 82,
+      "athleticism": 79
+    },
+    "espnId": null,
+    "nbaId": 1622,
+    "photoUrl": "https://cdn.nba.com/headshots/nba/latest/1040x760/1622.png",
+    "age": 22,
+    "number": 22,
+    "potential": "A",
+    "salary": 8080000,
+    "contractYears": 4
+  },
+  "robert_reid": {
+    "id": "robert_reid",
+    "name": "Robert Reid",
+    "pos": "SF",
+    "positions": [
+      "SF"
+    ],
+    "ovr": 79,
+    "off": 75,
+    "def": 75,
+    "attributes": {
+      "shooting": 75,
+      "finishing": 71,
+      "playmaking": 78,
+      "perimeterD": 80,
+      "interiorD": 68,
+      "rebounding": 76,
+      "athleticism": 70
+    },
+    "espnId": null,
+    "nbaId": 77936,
+    "photoUrl": "https://cdn.nba.com/headshots/nba/latest/1040x760/77936.png",
+    "age": 28,
+    "number": 33,
+    "potential": "C",
+    "salary": 16238000,
+    "contractYears": 4
+  },
+  "ralph_sampson": {
+    "id": "ralph_sampson",
+    "name": "Ralph Sampson",
+    "pos": "C",
+    "positions": [
+      "C"
+    ],
+    "ovr": 91,
+    "off": 74,
+    "def": 85,
+    "attributes": {
+      "shooting": 76,
+      "finishing": 82,
+      "playmaking": 63,
+      "perimeterD": 68,
+      "interiorD": 97,
+      "rebounding": 97,
+      "athleticism": 84
+    },
+    "espnId": null,
+    "nbaId": 78055,
+    "photoUrl": "https://cdn.nba.com/headshots/nba/latest/1040x760/78055.png",
+    "age": 23,
+    "number": 50,
+    "potential": "A",
+    "salary": 36620000,
+    "contractYears": 2
+  },
+  "terry_teagle": {
+    "id": "terry_teagle",
+    "name": "Terry Teagle",
+    "pos": "SG",
+    "positions": [
+      "SG"
+    ],
+    "ovr": 66,
+    "off": 66,
+    "def": 66,
+    "attributes": {
+      "shooting": 66,
+      "finishing": 66,
+      "playmaking": 66,
+      "perimeterD": 66,
+      "interiorD": 66,
+      "rebounding": 66,
+      "athleticism": 66
+    },
+    "espnId": null,
+    "nbaId": 78304,
+    "photoUrl": "https://cdn.nba.com/headshots/nba/latest/1040x760/78304.png",
+    "age": 24,
+    "number": 20,
+    "potential": "C",
+    "salary": 2648000,
+    "contractYears": 5
+  },
+  "wally_walker": {
+    "id": "wally_walker",
+    "name": "Wally Walker",
+    "pos": "SF",
+    "positions": [
+      "SF"
+    ],
+    "ovr": 70,
+    "off": 70,
+    "def": 67,
+    "attributes": {
+      "shooting": 72,
+      "finishing": 70,
+      "playmaking": 69,
+      "perimeterD": 68,
+      "interiorD": 64,
+      "rebounding": 70,
+      "athleticism": 66
+    },
+    "espnId": null,
+    "nbaId": 78442,
+    "photoUrl": "https://cdn.nba.com/headshots/nba/latest/1040x760/78442.png",
+    "age": 29,
+    "number": 42,
+    "potential": "C",
+    "salary": 5413000,
+    "contractYears": 1
+  },
+  "michael_brooks": {
+    "id": "michael_brooks",
+    "name": "Michael Brooks",
+    "pos": "SF",
+    "positions": [
+      "SF"
+    ],
+    "ovr": 77,
+    "off": 72,
+    "def": 74,
+    "attributes": {
+      "shooting": 72,
+      "finishing": 78,
+      "playmaking": 66,
+      "perimeterD": 74,
+      "interiorD": 65,
+      "rebounding": 86,
+      "athleticism": 76
+    },
+    "espnId": null,
+    "nbaId": 76266,
+    "photoUrl": "https://cdn.nba.com/headshots/nba/latest/1040x760/76266.png",
+    "age": 25,
+    "number": 7,
+    "potential": "C",
+    "salary": 10516000,
+    "contractYears": 4
+  },
+  "terry_cummings": {
+    "id": "terry_cummings",
+    "name": "Terry Cummings",
+    "pos": "SF",
+    "positions": [
+      "SF"
+    ],
+    "ovr": 83,
+    "off": 73,
+    "def": 76,
+    "attributes": {
+      "shooting": 75,
+      "finishing": 80,
+      "playmaking": 62,
+      "perimeterD": 72,
+      "interiorD": 70,
+      "rebounding": 89,
+      "athleticism": 78
+    },
+    "espnId": null,
+    "nbaId": 187,
+    "photoUrl": "https://cdn.nba.com/headshots/nba/latest/1040x760/187.png",
+    "age": 23,
+    "number": 34,
+    "potential": "A",
+    "salary": 19795000,
+    "contractYears": 3
+  },
+  "james_donaldson": {
+    "id": "james_donaldson",
+    "name": "James Donaldson",
+    "pos": "C",
+    "positions": [
+      "C"
+    ],
+    "ovr": 86,
+    "off": 79,
+    "def": 77,
+    "attributes": {
+      "shooting": 81,
+      "finishing": 95,
+      "playmaking": 61,
+      "perimeterD": 62,
+      "interiorD": 88,
+      "rebounding": 86,
+      "athleticism": 86
+    },
+    "espnId": null,
+    "nbaId": 76583,
+    "photoUrl": "https://cdn.nba.com/headshots/nba/latest/1040x760/76583.png",
+    "age": 26,
+    "number": 40,
+    "potential": "C",
+    "salary": 32167000,
+    "contractYears": 3
+  },
+  "craig_hodges": {
+    "id": "craig_hodges",
+    "name": "Craig Hodges",
+    "pos": "SG",
+    "positions": [
+      "SG"
+    ],
+    "ovr": 68,
+    "off": 71,
+    "def": 66,
+    "attributes": {
+      "shooting": 74,
+      "finishing": 69,
+      "playmaking": 69,
+      "perimeterD": 75,
+      "interiorD": 60,
+      "rebounding": 60,
+      "athleticism": 68
+    },
+    "espnId": null,
+    "nbaId": 77034,
+    "photoUrl": "https://cdn.nba.com/headshots/nba/latest/1040x760/77034.png",
+    "age": 24,
+    "number": 24,
+    "potential": "C",
+    "salary": 3489000,
+    "contractYears": 1
+  },
+  "willie_jones": {
+    "id": "willie_jones",
+    "name": "Willie Jones",
+    "pos": "SF",
+    "positions": [
+      "SF"
+    ],
+    "ovr": 66,
+    "off": 66,
+    "def": 66,
+    "attributes": {
+      "shooting": 66,
+      "finishing": 66,
+      "playmaking": 66,
+      "perimeterD": 66,
+      "interiorD": 66,
+      "rebounding": 66,
+      "athleticism": 66
+    },
+    "espnId": null,
+    "nbaId": 77203,
+    "photoUrl": "https://cdn.nba.com/headshots/nba/latest/1040x760/77203.png",
+    "age": 24,
+    "number": 22,
+    "potential": "C",
+    "salary": 2648000,
+    "contractYears": 5
+  },
+  "greg_kelser": {
+    "id": "greg_kelser",
+    "name": "Greg Kelser",
+    "pos": "SF",
+    "positions": [
+      "SF"
+    ],
+    "ovr": 82,
+    "off": 76,
+    "def": 75,
+    "attributes": {
+      "shooting": 78,
+      "finishing": 89,
+      "playmaking": 62,
+      "perimeterD": 75,
+      "interiorD": 69,
+      "rebounding": 84,
+      "athleticism": 86
+    },
+    "espnId": null,
+    "nbaId": 77239,
+    "photoUrl": "https://cdn.nba.com/headshots/nba/latest/1040x760/77239.png",
+    "age": 26,
+    "number": 20,
+    "potential": "C",
+    "salary": 22424000,
+    "contractYears": 1
+  },
+  "kevin_loder": {
+    "id": "kevin_loder",
+    "name": "Kevin Loder",
+    "pos": "SF",
+    "positions": [
+      "SF"
+    ],
+    "ovr": 69,
+    "off": 70,
+    "def": 68,
+    "attributes": {
+      "shooting": 71,
+      "finishing": 69,
+      "playmaking": 68,
+      "perimeterD": 66,
+      "interiorD": 71,
+      "rebounding": 68,
+      "athleticism": 70
+    },
+    "espnId": null,
+    "nbaId": 77401,
+    "photoUrl": "https://cdn.nba.com/headshots/nba/latest/1040x760/77401.png",
+    "age": 25,
+    "number": 9,
+    "potential": "C",
+    "salary": 3909000,
+    "contractYears": 2
+  },
+  "hank_mcdowell": {
+    "id": "hank_mcdowell",
+    "name": "Hank McDowell",
+    "pos": "SF",
+    "positions": [
+      "SF"
+    ],
+    "ovr": 68,
+    "off": 68,
+    "def": 68,
+    "attributes": {
+      "shooting": 70,
+      "finishing": 69,
+      "playmaking": 65,
+      "perimeterD": 66,
+      "interiorD": 63,
+      "rebounding": 79,
+      "athleticism": 69
+    },
+    "espnId": null,
+    "nbaId": 77527,
+    "photoUrl": "https://cdn.nba.com/headshots/nba/latest/1040x760/77527.png",
+    "age": 24,
+    "number": 8,
+    "potential": "C",
+    "salary": 3489000,
+    "contractYears": 5
+  },
+  "billy_mckinney": {
+    "id": "billy_mckinney",
+    "name": "Billy McKinney",
+    "pos": "SG",
+    "positions": [
+      "SG"
+    ],
+    "ovr": 72,
+    "off": 73,
+    "def": 65,
+    "attributes": {
+      "shooting": 71,
+      "finishing": 68,
+      "playmaking": 80,
+      "perimeterD": 69,
+      "interiorD": 62,
+      "rebounding": 63,
+      "athleticism": 66
+    },
+    "espnId": null,
+    "nbaId": 77547,
+    "photoUrl": "https://cdn.nba.com/headshots/nba/latest/1040x760/77547.png",
+    "age": 29,
+    "number": 1,
+    "potential": "C",
+    "salary": 7268000,
+    "contractYears": 2
+  },
+  "norm_nixon": {
+    "id": "norm_nixon",
+    "name": "Norm Nixon",
+    "pos": "SG",
+    "positions": [
+      "SG"
+    ],
+    "ovr": 84,
+    "off": 82,
+    "def": 65,
+    "attributes": {
+      "shooting": 77,
+      "finishing": 72,
+      "playmaking": 99,
+      "perimeterD": 71,
+      "interiorD": 61,
+      "rebounding": 62,
+      "athleticism": 68
+    },
+    "espnId": null,
+    "nbaId": 77721,
+    "photoUrl": "https://cdn.nba.com/headshots/nba/latest/1040x760/77721.png",
+    "age": 28,
+    "number": 10,
+    "potential": "C",
+    "salary": 27063000,
+    "contractYears": 2
+  },
+  "ricky_pierce": {
+    "id": "ricky_pierce",
+    "name": "Ricky Pierce",
+    "pos": "SG",
+    "positions": [
+      "SG"
+    ],
+    "ovr": 73,
+    "off": 71,
+    "def": 66,
+    "attributes": {
+      "shooting": 74,
+      "finishing": 76,
+      "playmaking": 63,
+      "perimeterD": 65,
+      "interiorD": 65,
+      "rebounding": 68,
+      "athleticism": 72
+    },
+    "espnId": null,
+    "nbaId": 894,
+    "photoUrl": "https://cdn.nba.com/headshots/nba/latest/1040x760/894.png",
+    "age": 24,
+    "number": 25,
+    "potential": "C",
+    "salary": 6557000,
+    "contractYears": 4
+  },
+  "derek_smith": {
+    "id": "derek_smith",
+    "name": "Derek Smith",
+    "pos": "SG",
+    "positions": [
+      "SG"
+    ],
+    "ovr": 78,
+    "off": 77,
+    "def": 68,
+    "attributes": {
+      "shooting": 78,
+      "finishing": 86,
+      "playmaking": 66,
+      "perimeterD": 68,
+      "interiorD": 68,
+      "rebounding": 70,
+      "athleticism": 77
+    },
+    "espnId": null,
+    "nbaId": 78183,
+    "photoUrl": "https://cdn.nba.com/headshots/nba/latest/1040x760/78183.png",
+    "age": 22,
+    "number": 18,
+    "potential": "A",
+    "salary": 8080000,
+    "contractYears": 2
+  },
+  "linton_townes": {
+    "id": "linton_townes",
+    "name": "Linton Townes",
+    "pos": "SF",
+    "positions": [
+      "SF"
+    ],
+    "ovr": 66,
+    "off": 66,
+    "def": 66,
+    "attributes": {
+      "shooting": 66,
+      "finishing": 66,
+      "playmaking": 66,
+      "perimeterD": 66,
+      "interiorD": 66,
+      "rebounding": 66,
+      "athleticism": 66
+    },
+    "espnId": null,
+    "nbaId": 78364,
+    "photoUrl": "https://cdn.nba.com/headshots/nba/latest/1040x760/78364.png",
+    "age": 24,
+    "number": 9,
+    "potential": "C",
+    "salary": 2648000,
+    "contractYears": 1
+  },
+  "bill_walton": {
+    "id": "bill_walton",
+    "name": "Bill Walton",
+    "pos": "C",
+    "positions": [
+      "C"
+    ],
+    "ovr": 87,
+    "off": 76,
+    "def": 83,
+    "attributes": {
+      "shooting": 75,
+      "finishing": 84,
+      "playmaking": 71,
+      "perimeterD": 71,
+      "interiorD": 90,
+      "rebounding": 94,
+      "athleticism": 79
+    },
+    "espnId": null,
+    "nbaId": 78450,
+    "photoUrl": "https://cdn.nba.com/headshots/nba/latest/1040x760/78450.png",
+    "age": 31,
+    "number": 32,
+    "potential": "D",
+    "salary": 29708000,
+    "contractYears": 1
+  },
+  "rory_white": {
+    "id": "rory_white",
+    "name": "Rory White",
+    "pos": "SF",
+    "positions": [
+      "SF"
+    ],
+    "ovr": 70,
+    "off": 68,
+    "def": 70,
+    "attributes": {
+      "shooting": 70,
+      "finishing": 71,
+      "playmaking": 64,
+      "perimeterD": 72,
+      "interiorD": 65,
+      "rebounding": 75,
+      "athleticism": 70
+    },
+    "espnId": null,
+    "nbaId": 78512,
+    "photoUrl": "https://cdn.nba.com/headshots/nba/latest/1040x760/78512.png",
+    "age": 24,
+    "number": 12,
+    "potential": "C",
+    "salary": 4330000,
+    "contractYears": 5
+  },
+  "jerome_whitehead": {
+    "id": "jerome_whitehead",
+    "name": "Jerome Whitehead",
+    "pos": "C",
+    "positions": [
+      "C"
+    ],
+    "ovr": 75,
+    "off": 71,
+    "def": 69,
+    "attributes": {
+      "shooting": 75,
+      "finishing": 76,
+      "playmaking": 62,
+      "perimeterD": 64,
+      "interiorD": 66,
+      "rebounding": 83,
+      "athleticism": 72
+    },
+    "espnId": null,
+    "nbaId": 78516,
+    "photoUrl": "https://cdn.nba.com/headshots/nba/latest/1040x760/78516.png",
+    "age": 27,
+    "number": 33,
+    "potential": "C",
+    "salary": 10052000,
+    "contractYears": 1
+  },
+  "kareem_abdul_jabbar": {
+    "id": "kareem_abdul_jabbar",
+    "name": "Kareem Abdul-Jabbar",
+    "pos": "C",
+    "positions": [
+      "C"
+    ],
+    "ovr": 87,
+    "off": 76,
+    "def": 75,
+    "attributes": {
+      "shooting": 79,
+      "finishing": 87,
+      "playmaking": 67,
+      "perimeterD": 65,
+      "interiorD": 87,
+      "rebounding": 82,
+      "athleticism": 76
+    },
+    "espnId": null,
+    "nbaId": 76003,
+    "photoUrl": "https://cdn.nba.com/headshots/nba/latest/1040x760/76003.png",
+    "age": 37,
+    "number": 33,
+    "potential": "D",
+    "salary": 22718000,
+    "contractYears": 1
+  },
+  "michael_cooper": {
+    "id": "michael_cooper",
+    "name": "Michael Cooper",
+    "pos": "SG",
+    "positions": [
+      "SG"
+    ],
+    "ovr": 88,
+    "off": 89,
+    "def": 75,
+    "attributes": {
+      "shooting": 95,
+      "finishing": 80,
+      "playmaking": 90,
+      "perimeterD": 81,
+      "interiorD": 74,
+      "rebounding": 67,
+      "athleticism": 79
+    },
+    "espnId": null,
+    "nbaId": 76444,
+    "photoUrl": "https://cdn.nba.com/headshots/nba/latest/1040x760/76444.png",
+    "age": 28,
+    "number": 21,
+    "potential": "C",
+    "salary": 37734000,
+    "contractYears": 2
+  },
+  "calvin_garrett": {
+    "id": "calvin_garrett",
+    "name": "Calvin Garrett",
+    "pos": "SF",
+    "positions": [
+      "SF"
+    ],
+    "ovr": 71,
+    "off": 72,
+    "def": 66,
+    "attributes": {
+      "shooting": 75,
+      "finishing": 74,
+      "playmaking": 66,
+      "perimeterD": 67,
+      "interiorD": 63,
+      "rebounding": 70,
+      "athleticism": 69
+    },
+    "espnId": null,
+    "nbaId": 76786,
+    "photoUrl": "https://cdn.nba.com/headshots/nba/latest/1040x760/76786.png",
+    "age": 27,
+    "number": 0,
+    "potential": "C",
+    "salary": 6341000,
+    "contractYears": 5
+  },
+  "magic_johnson": {
+    "id": "magic_johnson",
+    "name": "Magic Johnson",
+    "pos": "SG",
+    "positions": [
+      "SG"
+    ],
+    "ovr": 92,
+    "off": 87,
+    "def": 79,
+    "attributes": {
+      "shooting": 79,
+      "finishing": 90,
+      "playmaking": 95,
+      "perimeterD": 88,
+      "interiorD": 70,
+      "rebounding": 77,
+      "athleticism": 85
+    },
+    "espnId": null,
+    "nbaId": 77142,
+    "photoUrl": "https://cdn.nba.com/headshots/nba/latest/1040x760/77142.png",
+    "age": 24,
+    "number": 32,
+    "potential": "C",
+    "salary": 38600000,
+    "contractYears": 2
+  },
+  "eddie_jordan": {
+    "id": "eddie_jordan",
+    "name": "Eddie Jordan",
+    "pos": "SG",
+    "positions": [
+      "SG"
+    ],
+    "ovr": 71,
+    "off": 68,
+    "def": 72,
+    "attributes": {
+      "shooting": 65,
+      "finishing": 64,
+      "playmaking": 75,
+      "perimeterD": 85,
+      "interiorD": 62,
+      "rebounding": 64,
+      "athleticism": 75
+    },
+    "espnId": null,
+    "nbaId": 77205,
+    "photoUrl": "https://cdn.nba.com/headshots/nba/latest/1040x760/77205.png",
+    "age": 29,
+    "number": 15,
+    "potential": "C",
+    "salary": 6341000,
+    "contractYears": 5
+  },
+  "mitch_kupchak": {
+    "id": "mitch_kupchak",
+    "name": "Mitch Kupchak",
+    "pos": "SF",
+    "positions": [
+      "SF"
+    ],
+    "ovr": 66,
+    "off": 66,
+    "def": 66,
+    "attributes": {
+      "shooting": 66,
+      "finishing": 66,
+      "playmaking": 66,
+      "perimeterD": 66,
+      "interiorD": 66,
+      "rebounding": 66,
+      "athleticism": 66
+    },
+    "espnId": null,
+    "nbaId": 77324,
+    "photoUrl": "https://cdn.nba.com/headshots/nba/latest/1040x760/77324.png",
+    "age": 30,
+    "number": 25,
+    "potential": "D",
+    "salary": 3309000,
+    "contractYears": 4
+  },
+  "bob_mcadoo": {
+    "id": "bob_mcadoo",
+    "name": "Bob McAdoo",
+    "pos": "C",
+    "positions": [
+      "C"
+    ],
+    "ovr": 79,
+    "off": 72,
+    "def": 75,
+    "attributes": {
+      "shooting": 75,
+      "finishing": 77,
+      "playmaking": 62,
+      "perimeterD": 70,
+      "interiorD": 77,
+      "rebounding": 79,
+      "athleticism": 76
+    },
+    "espnId": null,
+    "nbaId": 77498,
+    "photoUrl": "https://cdn.nba.com/headshots/nba/latest/1040x760/77498.png",
+    "age": 32,
+    "number": 11,
+    "potential": "D",
+    "salary": 13802000,
+    "contractYears": 5
+  },
+  "mike_mcgee": {
+    "id": "mike_mcgee",
+    "name": "Mike McGee",
+    "pos": "SF",
+    "positions": [
+      "SF"
+    ],
+    "ovr": 79,
+    "off": 75,
+    "def": 69,
+    "attributes": {
+      "shooting": 75,
+      "finishing": 85,
+      "playmaking": 64,
+      "perimeterD": 73,
+      "interiorD": 62,
+      "rebounding": 73,
+      "athleticism": 70
+    },
+    "espnId": null,
+    "nbaId": 77530,
+    "photoUrl": "https://cdn.nba.com/headshots/nba/latest/1040x760/77530.png",
+    "age": 24,
+    "number": 40,
+    "potential": "C",
+    "salary": 12990000,
+    "contractYears": 4
+  },
+  "swen_nater": {
+    "id": "swen_nater",
+    "name": "Swen Nater",
+    "pos": "C",
+    "positions": [
+      "C"
+    ],
+    "ovr": 73,
+    "off": 69,
+    "def": 71,
+    "attributes": {
+      "shooting": 72,
+      "finishing": 75,
+      "playmaking": 62,
+      "perimeterD": 69,
+      "interiorD": 65,
+      "rebounding": 85,
+      "athleticism": 70
+    },
+    "espnId": null,
+    "nbaId": 77689,
+    "photoUrl": "https://cdn.nba.com/headshots/nba/latest/1040x760/77689.png",
+    "age": 34,
+    "number": 41,
+    "potential": "D",
+    "salary": 6967000,
+    "contractYears": 5
+  },
+  "kurt_rambis": {
+    "id": "kurt_rambis",
+    "name": "Kurt Rambis",
+    "pos": "SF",
+    "positions": [
+      "SF"
+    ],
+    "ovr": 81,
+    "off": 76,
+    "def": 78,
+    "attributes": {
+      "shooting": 76,
+      "finishing": 90,
+      "playmaking": 63,
+      "perimeterD": 75,
+      "interiorD": 69,
+      "rebounding": 94,
+      "athleticism": 84
+    },
+    "espnId": null,
+    "nbaId": 77905,
+    "photoUrl": "https://cdn.nba.com/headshots/nba/latest/1040x760/77905.png",
+    "age": 26,
+    "number": 31,
+    "potential": "C",
+    "salary": 20104000,
+    "contractYears": 3
+  },
+  "byron_scott": {
+    "id": "byron_scott",
+    "name": "Byron Scott",
+    "pos": "SG",
+    "positions": [
+      "SG"
+    ],
+    "ovr": 78,
+    "off": 75,
+    "def": 72,
+    "attributes": {
+      "shooting": 78,
+      "finishing": 74,
+      "playmaking": 72,
+      "perimeterD": 82,
+      "interiorD": 66,
+      "rebounding": 66,
+      "athleticism": 74
+    },
+    "espnId": null,
+    "nbaId": 2,
+    "photoUrl": "https://cdn.nba.com/headshots/nba/latest/1040x760/2.png",
+    "age": 23,
+    "number": 4,
+    "potential": "A",
+    "salary": 11753000,
+    "contractYears": 1
+  },
+  "larry_spriggs": {
+    "id": "larry_spriggs",
+    "name": "Larry Spriggs",
+    "pos": "SF",
+    "positions": [
+      "SF"
+    ],
+    "ovr": 66,
+    "off": 66,
+    "def": 66,
+    "attributes": {
+      "shooting": 66,
+      "finishing": 66,
+      "playmaking": 66,
+      "perimeterD": 66,
+      "interiorD": 66,
+      "rebounding": 66,
+      "athleticism": 66
+    },
+    "espnId": null,
+    "nbaId": 78233,
+    "photoUrl": "https://cdn.nba.com/headshots/nba/latest/1040x760/78233.png",
+    "age": 24,
+    "number": 35,
+    "potential": "C",
+    "salary": 2648000,
+    "contractYears": 3
+  },
+  "jamaal_wilkes": {
+    "id": "jamaal_wilkes",
+    "name": "Jamaal Wilkes",
+    "pos": "SF",
+    "positions": [
+      "SF"
+    ],
+    "ovr": 78,
+    "off": 76,
+    "def": 70,
+    "attributes": {
+      "shooting": 78,
+      "finishing": 79,
+      "playmaking": 71,
+      "perimeterD": 70,
+      "interiorD": 68,
+      "rebounding": 71,
+      "athleticism": 71
+    },
+    "espnId": null,
+    "nbaId": 78532,
+    "photoUrl": "https://cdn.nba.com/headshots/nba/latest/1040x760/78532.png",
+    "age": 31,
+    "number": 52,
+    "potential": "D",
+    "salary": 12488000,
+    "contractYears": 3
+  },
+  "james_worthy": {
+    "id": "james_worthy",
+    "name": "James Worthy",
+    "pos": "SF",
+    "positions": [
+      "SF"
+    ],
+    "ovr": 82,
+    "off": 76,
+    "def": 75,
+    "attributes": {
+      "shooting": 77,
+      "finishing": 84,
+      "playmaking": 68,
+      "perimeterD": 72,
+      "interiorD": 74,
+      "rebounding": 81,
+      "athleticism": 77
+    },
+    "espnId": null,
+    "nbaId": 1460,
+    "photoUrl": "https://cdn.nba.com/headshots/nba/latest/1040x760/1460.png",
+    "age": 23,
+    "number": 42,
+    "potential": "A",
+    "salary": 17939000,
+    "contractYears": 4
+  },
+  "nate_archibald": {
+    "id": "nate_archibald",
+    "name": "Nate Archibald",
+    "pos": "SG",
+    "positions": [
+      "SG"
+    ],
+    "ovr": 72,
+    "off": 76,
+    "def": 64,
+    "attributes": {
+      "shooting": 74,
+      "finishing": 79,
+      "playmaking": 79,
+      "perimeterD": 72,
+      "interiorD": 60,
+      "rebounding": 62,
+      "athleticism": 71
+    },
+    "espnId": null,
+    "nbaId": 76054,
+    "photoUrl": "https://cdn.nba.com/headshots/nba/latest/1040x760/76054.png",
+    "age": 35,
+    "number": 7,
+    "potential": "D",
+    "salary": 4724000,
+    "contractYears": 1
+  },
+  "randy_breuer": {
+    "id": "randy_breuer",
+    "name": "Randy Breuer",
+    "pos": "C",
+    "positions": [
+      "C"
+    ],
+    "ovr": 66,
+    "off": 66,
+    "def": 66,
+    "attributes": {
+      "shooting": 66,
+      "finishing": 66,
+      "playmaking": 66,
+      "perimeterD": 66,
+      "interiorD": 66,
+      "rebounding": 66,
+      "athleticism": 66
+    },
+    "espnId": null,
+    "nbaId": 76247,
+    "photoUrl": "https://cdn.nba.com/headshots/nba/latest/1040x760/76247.png",
+    "age": 23,
+    "number": 45,
+    "potential": "B",
+    "salary": 2648000,
+    "contractYears": 4
+  },
+  "junior_bridgeman": {
+    "id": "junior_bridgeman",
+    "name": "Junior Bridgeman",
+    "pos": "SF",
+    "positions": [
+      "SF"
+    ],
+    "ovr": 75,
+    "off": 74,
+    "def": 66,
+    "attributes": {
+      "shooting": 75,
+      "finishing": 73,
+      "playmaking": 74,
+      "perimeterD": 66,
+      "interiorD": 63,
+      "rebounding": 71,
+      "athleticism": 68
+    },
+    "espnId": null,
+    "nbaId": 76252,
+    "photoUrl": "https://cdn.nba.com/headshots/nba/latest/1040x760/76252.png",
+    "age": 30,
+    "number": 2,
+    "potential": "D",
+    "salary": 10052000,
+    "contractYears": 4
+  },
+  "harvey_catchings": {
+    "id": "harvey_catchings",
+    "name": "Harvey Catchings",
+    "pos": "C",
+    "positions": [
+      "C"
+    ],
+    "ovr": 71,
+    "off": 68,
+    "def": 80,
+    "attributes": {
+      "shooting": 71,
+      "finishing": 68,
+      "playmaking": 63,
+      "perimeterD": 66,
+      "interiorD": 93,
+      "rebounding": 83,
+      "athleticism": 77
+    },
+    "espnId": null,
+    "nbaId": 76365,
+    "photoUrl": "https://cdn.nba.com/headshots/nba/latest/1040x760/76365.png",
+    "age": 32,
+    "number": 42,
+    "potential": "D",
+    "salary": 5389000,
+    "contractYears": 2
+  },
+  "mike_dunleavy": {
+    "id": "mike_dunleavy",
+    "name": "Mike Dunleavy",
+    "pos": "SG",
+    "positions": [
+      "SG",
+      "PG",
+      "SF"
+    ],
+    "ovr": 85,
+    "off": 86,
+    "def": 65,
+    "attributes": {
+      "shooting": 93,
+      "finishing": 82,
+      "playmaking": 80,
+      "perimeterD": 70,
+      "interiorD": 62,
+      "rebounding": 63,
+      "athleticism": 71
+    },
+    "espnId": null,
+    "nbaId": 76616,
+    "photoUrl": "https://cdn.nba.com/headshots/nba/latest/1040x760/76616.png",
+    "age": 30,
+    "number": 0,
+    "potential": "D",
+    "salary": 29383000,
+    "contractYears": 1
+  },
+  "kevin_grevey": {
+    "id": "kevin_grevey",
+    "name": "Kevin Grevey",
+    "pos": "SG",
+    "positions": [
+      "SG"
+    ],
+    "ovr": 73,
+    "off": 74,
+    "def": 66,
+    "attributes": {
+      "shooting": 80,
+      "finishing": 70,
+      "playmaking": 70,
+      "perimeterD": 69,
+      "interiorD": 63,
+      "rebounding": 65,
+      "athleticism": 67
+    },
+    "espnId": null,
+    "nbaId": 76887,
+    "photoUrl": "https://cdn.nba.com/headshots/nba/latest/1040x760/76887.png",
+    "age": 31,
+    "number": 35,
+    "potential": "D",
+    "salary": 6967000,
+    "contractYears": 3
+  },
+  "marques_johnson": {
+    "id": "marques_johnson",
+    "name": "Marques Johnson",
+    "pos": "SF",
+    "positions": [
+      "SF"
+    ],
+    "ovr": 82,
+    "off": 75,
+    "def": 74,
+    "attributes": {
+      "shooting": 74,
+      "finishing": 78,
+      "playmaking": 74,
+      "perimeterD": 78,
+      "interiorD": 68,
+      "rebounding": 77,
+      "athleticism": 74
+    },
+    "espnId": null,
+    "nbaId": 77160,
+    "photoUrl": "https://cdn.nba.com/headshots/nba/latest/1040x760/77160.png",
+    "age": 28,
+    "number": 8,
+    "potential": "C",
+    "salary": 22424000,
+    "contractYears": 5
+  },
+  "bob_lanier": {
+    "id": "bob_lanier",
+    "name": "Bob Lanier",
+    "pos": "C",
+    "positions": [
+      "C"
+    ],
+    "ovr": 83,
+    "off": 77,
+    "def": 73,
+    "attributes": {
+      "shooting": 77,
+      "finishing": 89,
+      "playmaking": 69,
+      "perimeterD": 70,
+      "interiorD": 73,
+      "rebounding": 83,
+      "athleticism": 76
+    },
+    "espnId": null,
+    "nbaId": 600005,
+    "photoUrl": "https://cdn.nba.com/headshots/nba/latest/1040x760/600005.png",
+    "age": 35,
+    "number": 16,
+    "potential": "D",
+    "salary": 16083000,
+    "contractYears": 1
+  },
+  "alton_lister": {
+    "id": "alton_lister",
+    "name": "Alton Lister",
+    "pos": "C",
+    "positions": [
+      "C"
+    ],
+    "ovr": 83,
+    "off": 73,
+    "def": 83,
+    "attributes": {
+      "shooting": 75,
+      "finishing": 80,
+      "playmaking": 64,
+      "perimeterD": 65,
+      "interiorD": 96,
+      "rebounding": 92,
+      "athleticism": 83
+    },
+    "espnId": null,
+    "nbaId": 175,
+    "photoUrl": "https://cdn.nba.com/headshots/nba/latest/1040x760/175.png",
+    "age": 25,
+    "number": 53,
+    "potential": "C",
+    "salary": 19795000,
+    "contractYears": 4
+  },
+  "paul_mokeski": {
+    "id": "paul_mokeski",
+    "name": "Paul Mokeski",
+    "pos": "C",
+    "positions": [
+      "C"
+    ],
+    "ovr": 71,
+    "off": 71,
+    "def": 69,
+    "attributes": {
+      "shooting": 73,
+      "finishing": 74,
+      "playmaking": 65,
+      "perimeterD": 62,
+      "interiorD": 74,
+      "rebounding": 75,
+      "athleticism": 73
+    },
+    "espnId": null,
+    "nbaId": 77623,
+    "photoUrl": "https://cdn.nba.com/headshots/nba/latest/1040x760/77623.png",
+    "age": 27,
+    "number": 44,
+    "potential": "C",
+    "salary": 6341000,
+    "contractYears": 4
+  },
+  "sidney_moncrief": {
+    "id": "sidney_moncrief",
+    "name": "Sidney Moncrief",
+    "pos": "SG",
+    "positions": [
+      "SG"
+    ],
+    "ovr": 85,
+    "off": 80,
+    "def": 71,
+    "attributes": {
+      "shooting": 81,
+      "finishing": 86,
+      "playmaking": 74,
+      "perimeterD": 74,
+      "interiorD": 64,
+      "rebounding": 76,
+      "athleticism": 83
+    },
+    "espnId": null,
+    "nbaId": 77626,
+    "photoUrl": "https://cdn.nba.com/headshots/nba/latest/1040x760/77626.png",
+    "age": 26,
+    "number": 4,
+    "potential": "C",
+    "salary": 29383000,
+    "contractYears": 3
+  },
+  "paul_pressey": {
+    "id": "paul_pressey",
+    "name": "Paul Pressey",
+    "pos": "SG",
+    "positions": [
+      "SG"
+    ],
+    "ovr": 81,
+    "off": 78,
+    "def": 77,
+    "attributes": {
+      "shooting": 75,
+      "finishing": 83,
+      "playmaking": 76,
+      "perimeterD": 82,
+      "interiorD": 74,
+      "rebounding": 75,
+      "athleticism": 82
+    },
+    "espnId": null,
+    "nbaId": 77879,
+    "photoUrl": "https://cdn.nba.com/headshots/nba/latest/1040x760/77879.png",
+    "age": 25,
+    "number": 25,
+    "potential": "C",
+    "salary": 16083000,
+    "contractYears": 1
+  },
+  "lorenzo_romar": {
+    "id": "lorenzo_romar",
+    "name": "Lorenzo Romar",
+    "pos": "SG",
+    "positions": [
+      "SG"
+    ],
+    "ovr": 78,
+    "off": 74,
+    "def": 71,
+    "attributes": {
+      "shooting": 69,
+      "finishing": 72,
+      "playmaking": 84,
+      "perimeterD": 82,
+      "interiorD": 64,
+      "rebounding": 65,
+      "athleticism": 74
+    },
+    "espnId": null,
+    "nbaId": 78015,
+    "photoUrl": "https://cdn.nba.com/headshots/nba/latest/1040x760/78015.png",
+    "age": 25,
+    "number": 5,
+    "potential": "C",
+    "salary": 11753000,
+    "contractYears": 3
+  },
+  "otis_birdsong": {
+    "id": "otis_birdsong",
+    "name": "Otis Birdsong",
+    "pos": "SG",
+    "positions": [
+      "SG"
+    ],
+    "ovr": 80,
+    "off": 76,
+    "def": 69,
+    "attributes": {
+      "shooting": 75,
+      "finishing": 79,
+      "playmaking": 74,
+      "perimeterD": 76,
+      "interiorD": 64,
+      "rebounding": 64,
+      "athleticism": 73
+    },
+    "espnId": null,
+    "nbaId": 76170,
+    "photoUrl": "https://cdn.nba.com/headshots/nba/latest/1040x760/76170.png",
+    "age": 28,
+    "number": 10,
+    "potential": "C",
+    "salary": 17784000,
+    "contractYears": 3
+  },
+  "darwin_cook": {
+    "id": "darwin_cook",
+    "name": "Darwin Cook",
+    "pos": "SG",
+    "positions": [
+      "SG"
+    ],
+    "ovr": 85,
+    "off": 77,
+    "def": 80,
+    "attributes": {
+      "shooting": 76,
+      "finishing": 70,
+      "playmaking": 85,
+      "perimeterD": 99,
+      "interiorD": 70,
+      "rebounding": 64,
+      "athleticism": 80
+    },
+    "espnId": null,
+    "nbaId": 76435,
+    "photoUrl": "https://cdn.nba.com/headshots/nba/latest/1040x760/76435.png",
+    "age": 25,
+    "number": 12,
+    "potential": "C",
+    "salary": 23506000,
+    "contractYears": 5
+  },
+  "darryl_dawkins": {
+    "id": "darryl_dawkins",
+    "name": "Darryl Dawkins",
+    "pos": "C",
+    "positions": [
+      "C"
+    ],
+    "ovr": 89,
+    "off": 80,
+    "def": 78,
+    "attributes": {
+      "shooting": 82,
+      "finishing": 95,
+      "playmaking": 62,
+      "perimeterD": 68,
+      "interiorD": 88,
+      "rebounding": 82,
+      "athleticism": 88
+    },
+    "espnId": null,
+    "nbaId": 76539,
+    "photoUrl": "https://cdn.nba.com/headshots/nba/latest/1040x760/76539.png",
+    "age": 27,
+    "number": 53,
+    "potential": "C",
+    "salary": 40518000,
+    "contractYears": 5
+  },
+  "mike_gminski": {
+    "id": "mike_gminski",
+    "name": "Mike Gminski",
+    "pos": "C",
+    "positions": [
+      "C"
+    ],
+    "ovr": 80,
+    "off": 75,
+    "def": 77,
+    "attributes": {
+      "shooting": 77,
+      "finishing": 83,
+      "playmaking": 64,
+      "perimeterD": 66,
+      "interiorD": 81,
+      "rebounding": 88,
+      "athleticism": 81
+    },
+    "espnId": null,
+    "nbaId": 76826,
+    "photoUrl": "https://cdn.nba.com/headshots/nba/latest/1040x760/76826.png",
+    "age": 24,
+    "number": 42,
+    "potential": "C",
+    "salary": 14228000,
+    "contractYears": 5
+  },
+  "reggie_johnson": {
+    "id": "reggie_johnson",
+    "name": "Reggie Johnson",
+    "pos": "SF",
+    "positions": [
+      "SF"
+    ],
+    "ovr": 73,
+    "off": 71,
+    "def": 70,
+    "attributes": {
+      "shooting": 72,
+      "finishing": 77,
+      "playmaking": 64,
+      "perimeterD": 69,
+      "interiorD": 69,
+      "rebounding": 72,
+      "athleticism": 76
+    },
+    "espnId": null,
+    "nbaId": 77163,
+    "photoUrl": "https://cdn.nba.com/headshots/nba/latest/1040x760/77163.png",
+    "age": 27,
+    "number": 33,
+    "potential": "C",
+    "salary": 8196000,
+    "contractYears": 1
+  },
+  "mark_jones": {
+    "id": "mark_jones",
+    "name": "Mark Jones",
+    "pos": "SG",
+    "positions": [
+      "SG"
+    ],
+    "ovr": 66,
+    "off": 66,
+    "def": 66,
+    "attributes": {
+      "shooting": 66,
+      "finishing": 66,
+      "playmaking": 66,
+      "perimeterD": 66,
+      "interiorD": 66,
+      "rebounding": 66,
+      "athleticism": 66
+    },
+    "espnId": null,
+    "nbaId": 2891,
+    "photoUrl": "https://cdn.nba.com/headshots/nba/latest/1040x760/2891.png",
+    "age": 9,
+    "number": 11,
+    "potential": "B",
+    "salary": 1820000,
+    "contractYears": 3
+  },
+  "albert_king": {
+    "id": "albert_king",
+    "name": "Albert King",
+    "pos": "SF",
+    "positions": [
+      "SF"
+    ],
+    "ovr": 79,
+    "off": 73,
+    "def": 75,
+    "attributes": {
+      "shooting": 74,
+      "finishing": 78,
+      "playmaking": 68,
+      "perimeterD": 79,
+      "interiorD": 68,
+      "rebounding": 77,
+      "athleticism": 77
+    },
+    "espnId": null,
+    "nbaId": 77263,
+    "photoUrl": "https://cdn.nba.com/headshots/nba/latest/1040x760/77263.png",
+    "age": 24,
+    "number": 55,
+    "potential": "C",
+    "salary": 12990000,
+    "contractYears": 2
+  },
+  "mike_o_koren": {
+    "id": "mike_o_koren",
+    "name": "Mike O'Koren",
+    "pos": "SF",
+    "positions": [
+      "SF"
+    ],
+    "ovr": 70,
+    "off": 71,
+    "def": 68,
+    "attributes": {
+      "shooting": 71,
+      "finishing": 74,
+      "playmaking": 68,
+      "perimeterD": 69,
+      "interiorD": 65,
+      "rebounding": 72,
+      "athleticism": 70
+    },
+    "espnId": null,
+    "nbaId": 77754,
+    "photoUrl": "https://cdn.nba.com/headshots/nba/latest/1040x760/77754.png",
+    "age": 26,
+    "number": 31,
+    "potential": "C",
+    "salary": 5413000,
+    "contractYears": 3
+  },
+  "kelvin_ransey": {
+    "id": "kelvin_ransey",
+    "name": "Kelvin Ransey",
+    "pos": "SG",
+    "positions": [
+      "SG"
+    ],
+    "ovr": 82,
+    "off": 80,
+    "def": 70,
+    "attributes": {
+      "shooting": 75,
+      "finishing": 71,
+      "playmaking": 95,
+      "perimeterD": 81,
+      "interiorD": 62,
+      "rebounding": 62,
+      "athleticism": 74
+    },
+    "espnId": null,
+    "nbaId": 77911,
+    "photoUrl": "https://cdn.nba.com/headshots/nba/latest/1040x760/77911.png",
+    "age": 26,
+    "number": 14,
+    "potential": "C",
+    "salary": 22424000,
+    "contractYears": 3
+  },
+  "micheal_ray_richardson": {
+    "id": "micheal_ray_richardson",
+    "name": "Micheal Ray Richardson",
+    "pos": "SG",
+    "positions": [
+      "SG"
+    ],
+    "ovr": 85,
+    "off": 76,
+    "def": 81,
+    "attributes": {
+      "shooting": 76,
+      "finishing": 72,
+      "playmaking": 79,
+      "perimeterD": 99,
+      "interiorD": 68,
+      "rebounding": 71,
+      "athleticism": 78
+    },
+    "espnId": null,
+    "nbaId": 77952,
+    "photoUrl": "https://cdn.nba.com/headshots/nba/latest/1040x760/77952.png",
+    "age": 29,
+    "number": 20,
+    "potential": "C",
+    "salary": 29383000,
+    "contractYears": 4
+  },
+  "foots_walker": {
+    "id": "foots_walker",
+    "name": "Foots Walker",
+    "pos": "SG",
+    "positions": [
+      "SG"
+    ],
+    "ovr": 70,
+    "off": 72,
+    "def": 70,
+    "attributes": {
+      "shooting": 73,
+      "finishing": 65,
+      "playmaking": 79,
+      "perimeterD": 77,
+      "interiorD": 65,
+      "rebounding": 65,
+      "athleticism": 71
+    },
+    "espnId": null,
+    "nbaId": 78436,
+    "photoUrl": "https://cdn.nba.com/headshots/nba/latest/1040x760/78436.png",
+    "age": 33,
+    "number": 1,
+    "potential": "D",
+    "salary": 4601000,
+    "contractYears": 4
+  },
+  "buck_williams": {
+    "id": "buck_williams",
+    "name": "Buck Williams",
+    "pos": "SF",
+    "positions": [
+      "SF"
+    ],
+    "ovr": 84,
+    "off": 74,
+    "def": 80,
+    "attributes": {
+      "shooting": 73,
+      "finishing": 89,
+      "playmaking": 62,
+      "perimeterD": 69,
+      "interiorD": 81,
+      "rebounding": 97,
+      "athleticism": 86
+    },
+    "espnId": null,
+    "nbaId": 433,
+    "photoUrl": "https://cdn.nba.com/headshots/nba/latest/1040x760/433.png",
+    "age": 24,
+    "number": 52,
+    "potential": "C",
+    "salary": 21651000,
+    "contractYears": 2
+  },
+  "bill_willoughby": {
+    "id": "bill_willoughby",
+    "name": "Bill Willoughby",
+    "pos": "SF",
+    "positions": [
+      "SF"
+    ],
+    "ovr": 72,
+    "off": 70,
+    "def": 71,
+    "attributes": {
+      "shooting": 72,
+      "finishing": 73,
+      "playmaking": 66,
+      "perimeterD": 67,
+      "interiorD": 71,
+      "rebounding": 78,
+      "athleticism": 71
+    },
+    "espnId": null,
+    "nbaId": 78577,
+    "photoUrl": "https://cdn.nba.com/headshots/nba/latest/1040x760/78577.png",
+    "age": 27,
+    "number": 34,
+    "potential": "C",
+    "salary": 7268000,
+    "contractYears": 5
+  },
+  "bill_cartwright": {
+    "id": "bill_cartwright",
+    "name": "Bill Cartwright",
+    "pos": "C",
+    "positions": [
+      "C"
+    ],
+    "ovr": 88,
+    "off": 79,
+    "def": 75,
+    "attributes": {
+      "shooting": 80,
+      "finishing": 95,
+      "playmaking": 62,
+      "perimeterD": 63,
+      "interiorD": 79,
+      "rebounding": 87,
+      "athleticism": 87
+    },
+    "espnId": null,
+    "nbaId": 76362,
+    "photoUrl": "https://cdn.nba.com/headshots/nba/latest/1040x760/76362.png",
+    "age": 26,
+    "number": 25,
+    "potential": "C",
+    "salary": 37734000,
+    "contractYears": 4
+  },
+  "len_elmore": {
+    "id": "len_elmore",
+    "name": "Len Elmore",
+    "pos": "C",
+    "positions": [
+      "C"
+    ],
+    "ovr": 67,
+    "off": 67,
+    "def": 74,
+    "attributes": {
+      "shooting": 71,
+      "finishing": 67,
+      "playmaking": 63,
+      "perimeterD": 71,
+      "interiorD": 75,
+      "rebounding": 76,
+      "athleticism": 72
+    },
+    "espnId": null,
+    "nbaId": 600010,
+    "photoUrl": "https://cdn.nba.com/headshots/nba/latest/1040x760/600010.png",
+    "age": 32,
+    "number": 44,
+    "potential": "D",
+    "salary": 3260000,
+    "contractYears": 4
+  },
+  "eric_fernsten": {
+    "id": "eric_fernsten",
+    "name": "Eric Fernsten",
+    "pos": "C",
+    "positions": [
+      "C"
+    ],
+    "ovr": 76,
+    "off": 74,
+    "def": 73,
+    "attributes": {
+      "shooting": 75,
+      "finishing": 86,
+      "playmaking": 62,
+      "perimeterD": 73,
+      "interiorD": 69,
+      "rebounding": 77,
+      "athleticism": 81
+    },
+    "espnId": null,
+    "nbaId": 76707,
+    "photoUrl": "https://cdn.nba.com/headshots/nba/latest/1040x760/76707.png",
+    "age": 30,
+    "number": 45,
+    "potential": "D",
+    "salary": 11599000,
+    "contractYears": 1
+  },
+  "ernie_grunfeld": {
+    "id": "ernie_grunfeld",
+    "name": "Ernie Grunfeld",
+    "pos": "SG",
+    "positions": [
+      "SG"
+    ],
+    "ovr": 71,
+    "off": 72,
+    "def": 69,
+    "attributes": {
+      "shooting": 74,
+      "finishing": 71,
+      "playmaking": 70,
+      "perimeterD": 74,
+      "interiorD": 64,
+      "rebounding": 67,
+      "athleticism": 70
+    },
+    "espnId": null,
+    "nbaId": 76899,
+    "photoUrl": "https://cdn.nba.com/headshots/nba/latest/1040x760/76899.png",
+    "age": 29,
+    "number": 18,
+    "potential": "C",
+    "salary": 6341000,
+    "contractYears": 4
+  },
+  "bernard_king": {
+    "id": "bernard_king",
+    "name": "Bernard King",
+    "pos": "SF",
+    "positions": [
+      "SF"
+    ],
+    "ovr": 87,
+    "off": 77,
+    "def": 68,
+    "attributes": {
+      "shooting": 78,
+      "finishing": 89,
+      "playmaking": 65,
+      "perimeterD": 70,
+      "interiorD": 63,
+      "rebounding": 72,
+      "athleticism": 76
+    },
+    "espnId": null,
+    "nbaId": 77264,
+    "photoUrl": "https://cdn.nba.com/headshots/nba/latest/1040x760/77264.png",
+    "age": 27,
+    "number": 30,
+    "potential": "C",
+    "salary": 34950000,
+    "contractYears": 5
+  },
+  "rudy_macklin": {
+    "id": "rudy_macklin",
+    "name": "Rudy Macklin",
+    "pos": "SF",
+    "positions": [
+      "SF"
+    ],
+    "ovr": 66,
+    "off": 66,
+    "def": 66,
+    "attributes": {
+      "shooting": 66,
+      "finishing": 66,
+      "playmaking": 66,
+      "perimeterD": 66,
+      "interiorD": 66,
+      "rebounding": 66,
+      "athleticism": 66
+    },
+    "espnId": null,
+    "nbaId": 77435,
+    "photoUrl": "https://cdn.nba.com/headshots/nba/latest/1040x760/77435.png",
+    "age": 26,
+    "number": 41,
+    "potential": "C",
+    "salary": 3309000,
+    "contractYears": 5
+  },
+  "louis_orr": {
+    "id": "louis_orr",
+    "name": "Louis Orr",
+    "pos": "SF",
+    "positions": [
+      "SF"
+    ],
+    "ovr": 74,
+    "off": 72,
+    "def": 72,
+    "attributes": {
+      "shooting": 77,
+      "finishing": 77,
+      "playmaking": 62,
+      "perimeterD": 77,
+      "interiorD": 65,
+      "rebounding": 72,
+      "athleticism": 77
+    },
+    "espnId": null,
+    "nbaId": 77770,
+    "photoUrl": "https://cdn.nba.com/headshots/nba/latest/1040x760/77770.png",
+    "age": 26,
+    "number": 55,
+    "potential": "C",
+    "salary": 9124000,
+    "contractYears": 2
+  },
+  "truck_robinson": {
+    "id": "truck_robinson",
+    "name": "Truck Robinson",
+    "pos": "SF",
+    "positions": [
+      "SF"
+    ],
+    "ovr": 73,
+    "off": 72,
+    "def": 71,
+    "attributes": {
+      "shooting": 75,
+      "finishing": 79,
+      "playmaking": 62,
+      "perimeterD": 65,
+      "interiorD": 66,
+      "rebounding": 86,
+      "athleticism": 72
+    },
+    "espnId": null,
+    "nbaId": 77993,
+    "photoUrl": "https://cdn.nba.com/headshots/nba/latest/1040x760/77993.png",
+    "age": 32,
+    "number": 21,
+    "potential": "D",
+    "salary": 6967000,
+    "contractYears": 4
+  },
+  "rory_sparrow": {
+    "id": "rory_sparrow",
+    "name": "Rory Sparrow",
+    "pos": "SG",
+    "positions": [
+      "SG"
+    ],
+    "ovr": 78,
+    "off": 80,
+    "def": 68,
+    "attributes": {
+      "shooting": 79,
+      "finishing": 72,
+      "playmaking": 88,
+      "perimeterD": 77,
+      "interiorD": 62,
+      "rebounding": 63,
+      "athleticism": 70
+    },
+    "espnId": null,
+    "nbaId": 600009,
+    "photoUrl": "https://cdn.nba.com/headshots/nba/latest/1040x760/600009.png",
+    "age": 26,
+    "number": 2,
+    "potential": "C",
+    "salary": 14691000,
+    "contractYears": 1
+  },
+  "trent_tucker": {
+    "id": "trent_tucker",
+    "name": "Trent Tucker",
+    "pos": "SG",
+    "positions": [
+      "SG"
+    ],
+    "ovr": 77,
+    "off": 79,
+    "def": 72,
+    "attributes": {
+      "shooting": 82,
+      "finishing": 74,
+      "playmaking": 79,
+      "perimeterD": 83,
+      "interiorD": 63,
+      "rebounding": 67,
+      "athleticism": 71
+    },
+    "espnId": null,
+    "nbaId": 78375,
+    "photoUrl": "https://cdn.nba.com/headshots/nba/latest/1040x760/78375.png",
+    "age": 24,
+    "number": 6,
+    "potential": "C",
+    "salary": 10516000,
+    "contractYears": 5
+  },
+  "darrell_walker": {
+    "id": "darrell_walker",
+    "name": "Darrell Walker",
+    "pos": "SG",
+    "positions": [
+      "SG"
+    ],
+    "ovr": 85,
+    "off": 76,
+    "def": 79,
+    "attributes": {
+      "shooting": 75,
+      "finishing": 76,
+      "playmaking": 79,
+      "perimeterD": 96,
+      "interiorD": 66,
+      "rebounding": 70,
+      "athleticism": 89
+    },
+    "espnId": null,
+    "nbaId": 78437,
+    "photoUrl": "https://cdn.nba.com/headshots/nba/latest/1040x760/78437.png",
+    "age": 23,
+    "number": 4,
+    "potential": "A",
+    "salary": 23506000,
+    "contractYears": 3
+  },
+  "marvin_webster": {
+    "id": "marvin_webster",
+    "name": "Marvin Webster",
+    "pos": "C",
+    "positions": [
+      "C"
+    ],
+    "ovr": 79,
+    "off": 72,
+    "def": 84,
+    "attributes": {
+      "shooting": 73,
+      "finishing": 80,
+      "playmaking": 62,
+      "perimeterD": 68,
+      "interiorD": 97,
+      "rebounding": 90,
+      "athleticism": 86
+    },
+    "espnId": null,
+    "nbaId": 78481,
+    "photoUrl": "https://cdn.nba.com/headshots/nba/latest/1040x760/78481.png",
+    "age": 32,
+    "number": 40,
+    "potential": "D",
+    "salary": 13802000,
+    "contractYears": 2
+  },
+  "ray_williams": {
+    "id": "ray_williams",
+    "name": "Ray Williams",
+    "pos": "SG",
+    "positions": [
+      "SG"
+    ],
+    "ovr": 88,
+    "off": 83,
+    "def": 78,
+    "attributes": {
+      "shooting": 89,
+      "finishing": 74,
+      "playmaking": 83,
+      "perimeterD": 96,
+      "interiorD": 66,
+      "rebounding": 68,
+      "athleticism": 80
+    },
+    "espnId": null,
+    "nbaId": 78571,
+    "photoUrl": "https://cdn.nba.com/headshots/nba/latest/1040x760/78571.png",
+    "age": 29,
+    "number": 13,
+    "potential": "C",
+    "salary": 37734000,
+    "contractYears": 3
+  },
+  "butch_carter": {
+    "id": "butch_carter",
+    "name": "Butch Carter",
+    "pos": "SG",
+    "positions": [
+      "SG"
+    ],
+    "ovr": 81,
+    "off": 78,
+    "def": 74,
+    "attributes": {
+      "shooting": 85,
+      "finishing": 74,
+      "playmaking": 71,
+      "perimeterD": 90,
+      "interiorD": 63,
+      "rebounding": 64,
+      "athleticism": 75
+    },
+    "espnId": null,
+    "nbaId": 76355,
+    "photoUrl": "https://cdn.nba.com/headshots/nba/latest/1040x760/76355.png",
+    "age": 26,
+    "number": 12,
+    "potential": "C",
+    "salary": 20104000,
+    "contractYears": 3
+  },
+  "leroy_combs": {
+    "id": "leroy_combs",
+    "name": "Leroy Combs",
+    "pos": "SF",
+    "positions": [
+      "SF"
+    ],
+    "ovr": 66,
+    "off": 66,
+    "def": 66,
+    "attributes": {
+      "shooting": 66,
+      "finishing": 66,
+      "playmaking": 66,
+      "perimeterD": 66,
+      "interiorD": 66,
+      "rebounding": 66,
+      "athleticism": 66
+    },
+    "espnId": null,
+    "nbaId": 76425,
+    "photoUrl": "https://cdn.nba.com/headshots/nba/latest/1040x760/76425.png",
+    "age": 23,
+    "number": 34,
+    "potential": "B",
+    "salary": 2648000,
+    "contractYears": 2
+  },
+  "tracy_jackson": {
+    "id": "tracy_jackson",
+    "name": "Tracy Jackson",
+    "pos": "SG",
+    "positions": [
+      "SG"
+    ],
+    "ovr": 66,
+    "off": 66,
+    "def": 66,
+    "attributes": {
+      "shooting": 66,
+      "finishing": 66,
+      "playmaking": 66,
+      "perimeterD": 66,
+      "interiorD": 66,
+      "rebounding": 66,
+      "athleticism": 66
+    },
+    "espnId": null,
+    "nbaId": 77110,
+    "photoUrl": "https://cdn.nba.com/headshots/nba/latest/1040x760/77110.png",
+    "age": 25,
+    "number": 7,
+    "potential": "C",
+    "salary": 2648000,
+    "contractYears": 5
+  },
+  "george_johnson": {
+    "id": "george_johnson",
+    "name": "George Johnson",
+    "pos": "SF",
+    "positions": [
+      "SF"
+    ],
+    "ovr": 81,
+    "off": 74,
+    "def": 76,
+    "attributes": {
+      "shooting": 78,
+      "finishing": 75,
+      "playmaking": 69,
+      "perimeterD": 76,
+      "interiorD": 72,
+      "rebounding": 82,
+      "athleticism": 77
+    },
+    "espnId": null,
+    "nbaId": 77148,
+    "photoUrl": "https://cdn.nba.com/headshots/nba/latest/1040x760/77148.png",
+    "age": 27,
+    "number": 0,
+    "potential": "C",
+    "salary": 20104000,
+    "contractYears": 4
+  },
+  "clark_kellogg": {
+    "id": "clark_kellogg",
+    "name": "Clark Kellogg",
+    "pos": "SF",
+    "positions": [
+      "SF"
+    ],
+    "ovr": 85,
+    "off": 77,
+    "def": 77,
+    "attributes": {
+      "shooting": 82,
+      "finishing": 80,
+      "playmaking": 68,
+      "perimeterD": 80,
+      "interiorD": 65,
+      "rebounding": 88,
+      "athleticism": 76
+    },
+    "espnId": null,
+    "nbaId": 77236,
+    "photoUrl": "https://cdn.nba.com/headshots/nba/latest/1040x760/77236.png",
+    "age": 22,
+    "number": 33,
+    "potential": "A",
+    "salary": 16161000,
+    "contractYears": 4
+  },
+  "bruce_kuczenski": {
+    "id": "bruce_kuczenski",
+    "name": "Bruce Kuczenski",
+    "pos": "SF",
+    "positions": [
+      "SF"
+    ],
+    "ovr": 66,
+    "off": 66,
+    "def": 66,
+    "attributes": {
+      "shooting": 66,
+      "finishing": 66,
+      "playmaking": 66,
+      "perimeterD": 66,
+      "interiorD": 66,
+      "rebounding": 66,
+      "athleticism": 66
+    },
+    "espnId": null,
+    "nbaId": 77318,
+    "photoUrl": "https://cdn.nba.com/headshots/nba/latest/1040x760/77318.png",
+    "age": 23,
+    "number": 7,
+    "potential": "B",
+    "salary": 2648000,
+    "contractYears": 2
+  },
+  "sidney_lowe": {
+    "id": "sidney_lowe",
+    "name": "Sidney Lowe",
+    "pos": "SG",
+    "positions": [
+      "SG"
+    ],
+    "ovr": 79,
+    "off": 76,
+    "def": 76,
+    "attributes": {
+      "shooting": 70,
+      "finishing": 76,
+      "playmaking": 85,
+      "perimeterD": 94,
+      "interiorD": 62,
+      "rebounding": 66,
+      "athleticism": 85
+    },
+    "espnId": null,
+    "nbaId": 77415,
+    "photoUrl": "https://cdn.nba.com/headshots/nba/latest/1040x760/77415.png",
+    "age": 24,
+    "number": 35,
+    "potential": "C",
+    "salary": 12990000,
+    "contractYears": 5
+  },
+  "kevin_mckenna": {
+    "id": "kevin_mckenna",
+    "name": "Kevin McKenna",
+    "pos": "SF",
+    "positions": [
+      "SF"
+    ],
+    "ovr": 74,
+    "off": 71,
+    "def": 71,
+    "attributes": {
+      "shooting": 72,
+      "finishing": 68,
+      "playmaking": 74,
+      "perimeterD": 80,
+      "interiorD": 63,
+      "rebounding": 67,
+      "athleticism": 73
+    },
+    "espnId": null,
+    "nbaId": 77541,
+    "photoUrl": "https://cdn.nba.com/headshots/nba/latest/1040x760/77541.png",
+    "age": 25,
+    "number": 21,
+    "potential": "C",
+    "salary": 7299000,
+    "contractYears": 3
+  },
+  "jerry_sichting": {
+    "id": "jerry_sichting",
+    "name": "Jerry Sichting",
+    "pos": "SG",
+    "positions": [
+      "SG"
+    ],
+    "ovr": 81,
+    "off": 83,
+    "def": 67,
+    "attributes": {
+      "shooting": 83,
+      "finishing": 78,
+      "playmaking": 88,
+      "perimeterD": 74,
+      "interiorD": 62,
+      "rebounding": 62,
+      "athleticism": 69
+    },
+    "espnId": null,
+    "nbaId": 78146,
+    "photoUrl": "https://cdn.nba.com/headshots/nba/latest/1040x760/78146.png",
+    "age": 27,
+    "number": 14,
+    "potential": "C",
+    "salary": 20104000,
+    "contractYears": 4
+  },
+  "brook_steppe": {
+    "id": "brook_steppe",
+    "name": "Brook Steppe",
+    "pos": "SG",
+    "positions": [
+      "SG"
+    ],
+    "ovr": 75,
+    "off": 73,
+    "def": 70,
+    "attributes": {
+      "shooting": 74,
+      "finishing": 79,
+      "playmaking": 67,
+      "perimeterD": 74,
+      "interiorD": 64,
+      "rebounding": 71,
+      "athleticism": 78
+    },
+    "espnId": null,
+    "nbaId": 78250,
+    "photoUrl": "https://cdn.nba.com/headshots/nba/latest/1040x760/78250.png",
+    "age": 24,
+    "number": 11,
+    "potential": "C",
+    "salary": 8042000,
+    "contractYears": 4
+  },
+  "steve_stipanovich": {
+    "id": "steve_stipanovich",
+    "name": "Steve Stipanovich",
+    "pos": "C",
+    "positions": [
+      "C"
+    ],
+    "ovr": 77,
+    "off": 73,
+    "def": 75,
+    "attributes": {
+      "shooting": 75,
+      "finishing": 77,
+      "playmaking": 67,
+      "perimeterD": 71,
+      "interiorD": 74,
+      "rebounding": 82,
+      "athleticism": 77
+    },
+    "espnId": null,
+    "nbaId": 78257,
+    "photoUrl": "https://cdn.nba.com/headshots/nba/latest/1040x760/78257.png",
+    "age": 23,
+    "number": 40,
+    "potential": "B",
+    "salary": 10516000,
+    "contractYears": 1
+  },
+  "jim_thomas": {
+    "id": "jim_thomas",
+    "name": "Jim Thomas",
+    "pos": "SG",
+    "positions": [
+      "SG"
+    ],
+    "ovr": 74,
+    "off": 73,
+    "def": 72,
+    "attributes": {
+      "shooting": 72,
+      "finishing": 74,
+      "playmaking": 74,
+      "perimeterD": 81,
+      "interiorD": 63,
+      "rebounding": 70,
+      "athleticism": 75
+    },
+    "espnId": null,
+    "nbaId": 78320,
+    "photoUrl": "https://cdn.nba.com/headshots/nba/latest/1040x760/78320.png",
+    "age": 23,
+    "number": 16,
+    "potential": "B",
+    "salary": 7299000,
+    "contractYears": 1
+  },
+  "granville_waiters": {
+    "id": "granville_waiters",
+    "name": "Granville Waiters",
+    "pos": "C",
+    "positions": [
+      "C"
+    ],
+    "ovr": 75,
+    "off": 71,
+    "def": 77,
+    "attributes": {
+      "shooting": 73,
+      "finishing": 75,
+      "playmaking": 65,
+      "perimeterD": 66,
+      "interiorD": 90,
+      "rebounding": 77,
+      "athleticism": 77
+    },
+    "espnId": null,
+    "nbaId": 78430,
+    "photoUrl": "https://cdn.nba.com/headshots/nba/latest/1040x760/78430.png",
+    "age": 23,
+    "number": 31,
+    "potential": "B",
+    "salary": 8042000,
+    "contractYears": 5
+  },
+  "herb_williams": {
+    "id": "herb_williams",
+    "name": "Herb Williams",
+    "pos": "C",
+    "positions": [
+      "C"
+    ],
+    "ovr": 81,
+    "off": 73,
+    "def": 78,
+    "attributes": {
+      "shooting": 73,
+      "finishing": 78,
+      "playmaking": 69,
+      "perimeterD": 68,
+      "interiorD": 84,
+      "rebounding": 84,
+      "athleticism": 80
+    },
+    "espnId": null,
+    "nbaId": 1006,
+    "photoUrl": "https://cdn.nba.com/headshots/nba/latest/1040x760/1006.png",
+    "age": 26,
+    "number": 32,
+    "potential": "C",
+    "salary": 20104000,
+    "contractYears": 3
+  },
+  "maurice_cheeks": {
+    "id": "maurice_cheeks",
+    "name": "Maurice Cheeks",
+    "pos": "SG",
+    "positions": [
+      "SG"
+    ],
+    "ovr": 87,
+    "off": 85,
+    "def": 76,
+    "attributes": {
+      "shooting": 85,
+      "finishing": 85,
+      "playmaking": 85,
+      "perimeterD": 94,
+      "interiorD": 64,
+      "rebounding": 64,
+      "athleticism": 80
+    },
+    "espnId": null,
+    "nbaId": 76385,
+    "photoUrl": "https://cdn.nba.com/headshots/nba/latest/1040x760/76385.png",
+    "age": 27,
+    "number": 10,
+    "potential": "C",
+    "salary": 34950000,
+    "contractYears": 4
+  },
+  "franklin_edwards": {
+    "id": "franklin_edwards",
+    "name": "Franklin Edwards",
+    "pos": "SG",
+    "positions": [
+      "SG"
+    ],
+    "ovr": 68,
+    "off": 69,
+    "def": 69,
+    "attributes": {
+      "shooting": 70,
+      "finishing": 65,
+      "playmaking": 73,
+      "perimeterD": 75,
+      "interiorD": 65,
+      "rebounding": 65,
+      "athleticism": 70
+    },
+    "espnId": null,
+    "nbaId": 76641,
+    "photoUrl": "https://cdn.nba.com/headshots/nba/latest/1040x760/76641.png",
+    "age": 25,
+    "number": 14,
+    "potential": "C",
+    "salary": 3489000,
+    "contractYears": 2
+  },
+  "julius_erving": {
+    "id": "julius_erving",
+    "name": "Julius Erving",
+    "pos": "SF",
+    "positions": [
+      "SF"
+    ],
+    "ovr": 88,
+    "off": 78,
+    "def": 83,
+    "attributes": {
+      "shooting": 82,
+      "finishing": 82,
+      "playmaking": 72,
+      "perimeterD": 84,
+      "interiorD": 86,
+      "rebounding": 80,
+      "athleticism": 82
+    },
+    "espnId": null,
+    "nbaId": 76681,
+    "photoUrl": "https://cdn.nba.com/headshots/nba/latest/1040x760/76681.png",
+    "age": 34,
+    "number": 6,
+    "potential": "D",
+    "salary": 32074000,
+    "contractYears": 1
+  },
+  "marc_iavaroni": {
+    "id": "marc_iavaroni",
+    "name": "Marc Iavaroni",
+    "pos": "SF",
+    "positions": [
+      "SF"
+    ],
+    "ovr": 72,
+    "off": 73,
+    "def": 74,
+    "attributes": {
+      "shooting": 75,
+      "finishing": 78,
+      "playmaking": 64,
+      "perimeterD": 67,
+      "interiorD": 78,
+      "rebounding": 79,
+      "athleticism": 80
+    },
+    "espnId": null,
+    "nbaId": 77092,
+    "photoUrl": "https://cdn.nba.com/headshots/nba/latest/1040x760/77092.png",
+    "age": 27,
+    "number": 8,
+    "potential": "C",
+    "salary": 7268000,
+    "contractYears": 2
+  },
+  "clemon_johnson": {
+    "id": "clemon_johnson",
+    "name": "Clemon Johnson",
+    "pos": "C",
+    "positions": [
+      "C"
+    ],
+    "ovr": 72,
+    "off": 70,
+    "def": 75,
+    "attributes": {
+      "shooting": 74,
+      "finishing": 75,
+      "playmaking": 61,
+      "perimeterD": 65,
+      "interiorD": 79,
+      "rebounding": 84,
+      "athleticism": 75
+    },
+    "espnId": null,
+    "nbaId": 77136,
+    "photoUrl": "https://cdn.nba.com/headshots/nba/latest/1040x760/77136.png",
+    "age": 27,
+    "number": 45,
+    "potential": "C",
+    "salary": 7268000,
+    "contractYears": 2
+  },
+  "charles_jones": {
+    "id": "charles_jones",
+    "name": "Charles Jones",
+    "pos": "C",
+    "positions": [
+      "C"
+    ],
+    "ovr": 66,
+    "off": 66,
+    "def": 66,
+    "attributes": {
+      "shooting": 66,
+      "finishing": 66,
+      "playmaking": 66,
+      "perimeterD": 66,
+      "interiorD": 66,
+      "rebounding": 66,
+      "athleticism": 66
+    },
+    "espnId": null,
+    "nbaId": 279,
+    "photoUrl": "https://cdn.nba.com/headshots/nba/latest/1040x760/279.png",
+    "age": 27,
+    "number": 23,
+    "potential": "C",
+    "salary": 3309000,
+    "contractYears": 4
+  },
+  "bobby_jones": {
+    "id": "bobby_jones",
+    "name": "Bobby Jones",
+    "pos": "SF",
+    "positions": [
+      "SF"
+    ],
+    "ovr": 86,
+    "off": 80,
+    "def": 86,
+    "attributes": {
+      "shooting": 78,
+      "finishing": 87,
+      "playmaking": 74,
+      "perimeterD": 89,
+      "interiorD": 89,
+      "rebounding": 77,
+      "athleticism": 89
+    },
+    "espnId": null,
+    "nbaId": 77193,
+    "photoUrl": "https://cdn.nba.com/headshots/nba/latest/1040x760/77193.png",
+    "age": 32,
+    "number": 0,
+    "potential": "D",
+    "salary": 27342000,
+    "contractYears": 5
+  },
+  "moses_malone": {
+    "id": "moses_malone",
+    "name": "Moses Malone",
+    "pos": "C",
+    "positions": [
+      "C"
+    ],
+    "ovr": 90,
+    "off": 74,
+    "def": 81,
+    "attributes": {
+      "shooting": 75,
+      "finishing": 88,
+      "playmaking": 60,
+      "perimeterD": 69,
+      "interiorD": 81,
+      "rebounding": 99,
+      "athleticism": 89
+    },
+    "espnId": null,
+    "nbaId": 77449,
+    "photoUrl": "https://cdn.nba.com/headshots/nba/latest/1040x760/77449.png",
+    "age": 29,
+    "number": 2,
+    "potential": "C",
+    "salary": 43301000,
+    "contractYears": 3
+  },
+  "wes_matthews": {
+    "id": "wes_matthews",
+    "name": "Wes Matthews",
+    "pos": "SG",
+    "positions": [
+      "SG"
+    ],
+    "ovr": 76,
+    "off": 76,
+    "def": 69,
+    "attributes": {
+      "shooting": 70,
+      "finishing": 75,
+      "playmaking": 84,
+      "perimeterD": 77,
+      "interiorD": 64,
+      "rebounding": 62,
+      "athleticism": 74
+    },
+    "espnId": null,
+    "nbaId": 77484,
+    "photoUrl": "https://cdn.nba.com/headshots/nba/latest/1040x760/77484.png",
+    "age": 24,
+    "number": 1,
+    "potential": "C",
+    "salary": 9279000,
+    "contractYears": 2
+  },
+  "leo_rautins": {
+    "id": "leo_rautins",
+    "name": "Leo Rautins",
+    "pos": "SF",
+    "positions": [
+      "SF"
+    ],
+    "ovr": 66,
+    "off": 66,
+    "def": 66,
+    "attributes": {
+      "shooting": 66,
+      "finishing": 66,
+      "playmaking": 66,
+      "perimeterD": 66,
+      "interiorD": 66,
+      "rebounding": 66,
+      "athleticism": 66
+    },
+    "espnId": null,
+    "nbaId": 77916,
+    "photoUrl": "https://cdn.nba.com/headshots/nba/latest/1040x760/77916.png",
+    "age": 24,
+    "number": 11,
+    "potential": "C",
+    "salary": 2648000,
+    "contractYears": 3
+  },
+  "clint_richardson": {
+    "id": "clint_richardson",
+    "name": "Clint Richardson",
+    "pos": "SG",
+    "positions": [
+      "SG"
+    ],
+    "ovr": 71,
+    "off": 73,
+    "def": 69,
+    "attributes": {
+      "shooting": 74,
+      "finishing": 73,
+      "playmaking": 72,
+      "perimeterD": 71,
+      "interiorD": 67,
+      "rebounding": 67,
+      "athleticism": 72
+    },
+    "espnId": null,
+    "nbaId": 77950,
+    "photoUrl": "https://cdn.nba.com/headshots/nba/latest/1040x760/77950.png",
+    "age": 27,
+    "number": 4,
+    "potential": "C",
+    "salary": 6341000,
+    "contractYears": 3
+  },
+  "sedale_threatt": {
+    "id": "sedale_threatt",
+    "name": "Sedale Threatt",
+    "pos": "SG",
+    "positions": [
+      "SG"
+    ],
+    "ovr": 65,
+    "off": 68,
+    "def": 66,
+    "attributes": {
+      "shooting": 69,
+      "finishing": 67,
+      "playmaking": 68,
+      "perimeterD": 68,
+      "interiorD": 64,
+      "rebounding": 65,
+      "athleticism": 68
+    },
+    "espnId": null,
+    "nbaId": 9,
+    "photoUrl": "https://cdn.nba.com/headshots/nba/latest/1040x760/9.png",
+    "age": 22,
+    "number": 9,
+    "potential": "B",
+    "salary": 1531000,
+    "contractYears": 4
+  },
+  "andrew_toney": {
+    "id": "andrew_toney",
+    "name": "Andrew Toney",
+    "pos": "SG",
+    "positions": [
+      "SG"
+    ],
+    "ovr": 84,
+    "off": 82,
+    "def": 66,
+    "attributes": {
+      "shooting": 86,
+      "finishing": 85,
+      "playmaking": 74,
+      "perimeterD": 69,
+      "interiorD": 64,
+      "rebounding": 63,
+      "athleticism": 77
+    },
+    "espnId": null,
+    "nbaId": 78351,
+    "photoUrl": "https://cdn.nba.com/headshots/nba/latest/1040x760/78351.png",
+    "age": 26,
+    "number": 22,
+    "potential": "C",
+    "salary": 27063000,
+    "contractYears": 5
+  },
+  "samuel_williams": {
+    "id": "samuel_williams",
+    "name": "Samuel Williams",
+    "pos": "SF",
+    "positions": [
+      "SF"
+    ],
+    "ovr": 82,
+    "off": 71,
+    "def": 88,
+    "attributes": {
+      "shooting": 74,
+      "finishing": 77,
+      "playmaking": 62,
+      "perimeterD": 81,
+      "interiorD": 97,
+      "rebounding": 85,
+      "athleticism": 85
+    },
+    "espnId": null,
+    "nbaId": 78569,
+    "photoUrl": "https://cdn.nba.com/headshots/nba/latest/1040x760/78569.png",
+    "age": 25,
+    "number": 0,
+    "potential": "C",
+    "salary": 17939000,
+    "contractYears": 5
+  },
+  "alvan_adams": {
+    "id": "alvan_adams",
+    "name": "Alvan Adams",
+    "pos": "C",
+    "positions": [
+      "C"
+    ],
+    "ovr": 83,
+    "off": 76,
+    "def": 79,
+    "attributes": {
+      "shooting": 76,
+      "finishing": 74,
+      "playmaking": 78,
+      "perimeterD": 83,
+      "interiorD": 71,
+      "rebounding": 82,
+      "athleticism": 76
+    },
+    "espnId": null,
+    "nbaId": 76011,
+    "photoUrl": "https://cdn.nba.com/headshots/nba/latest/1040x760/76011.png",
+    "age": 29,
+    "number": 33,
+    "potential": "C",
+    "salary": 24744000,
+    "contractYears": 3
+  },
+  "walter_davis": {
+    "id": "walter_davis",
+    "name": "Walter Davis",
+    "pos": "SG",
+    "positions": [
+      "SG"
+    ],
+    "ovr": 83,
+    "off": 79,
+    "def": 69,
+    "attributes": {
+      "shooting": 79,
+      "finishing": 77,
+      "playmaking": 80,
+      "perimeterD": 78,
+      "interiorD": 62,
+      "rebounding": 63,
+      "athleticism": 70
+    },
+    "espnId": null,
+    "nbaId": 1453,
+    "photoUrl": "https://cdn.nba.com/headshots/nba/latest/1040x760/1453.png",
+    "age": 29,
+    "number": 6,
+    "potential": "C",
+    "salary": 24744000,
+    "contractYears": 3
+  },
+  "james_edwards": {
+    "id": "james_edwards",
+    "name": "James Edwards",
+    "pos": "C",
+    "positions": [
+      "C"
+    ],
+    "ovr": 81,
+    "off": 77,
+    "def": 67,
+    "attributes": {
+      "shooting": 77,
+      "finishing": 83,
+      "playmaking": 70,
+      "perimeterD": 60,
+      "interiorD": 68,
+      "rebounding": 77,
+      "athleticism": 71
+    },
+    "espnId": null,
+    "nbaId": 229,
+    "photoUrl": "https://cdn.nba.com/headshots/nba/latest/1040x760/229.png",
+    "age": 28,
+    "number": 53,
+    "potential": "C",
+    "salary": 20104000,
+    "contractYears": 5
+  },
+  "rod_foster": {
+    "id": "rod_foster",
+    "name": "Rod Foster",
+    "pos": "SG",
+    "positions": [
+      "SG"
+    ],
+    "ovr": 75,
+    "off": 76,
+    "def": 68,
+    "attributes": {
+      "shooting": 81,
+      "finishing": 72,
+      "playmaking": 74,
+      "perimeterD": 75,
+      "interiorD": 63,
+      "rebounding": 64,
+      "athleticism": 74
+    },
+    "espnId": null,
+    "nbaId": 76742,
+    "photoUrl": "https://cdn.nba.com/headshots/nba/latest/1040x760/76742.png",
+    "age": 23,
+    "number": 10,
+    "potential": "B",
+    "salary": 8042000,
+    "contractYears": 3
+  },
+  "johnny_high": {
+    "id": "johnny_high",
+    "name": "Johnny High",
+    "pos": "SG",
+    "positions": [
+      "SG"
+    ],
+    "ovr": 74,
+    "off": 70,
+    "def": 82,
+    "attributes": {
+      "shooting": 67,
+      "finishing": 72,
+      "playmaking": 71,
+      "perimeterD": 98,
+      "interiorD": 71,
+      "rebounding": 70,
+      "athleticism": 91
+    },
+    "espnId": null,
+    "nbaId": 77022,
+    "photoUrl": "https://cdn.nba.com/headshots/nba/latest/1040x760/77022.png",
+    "age": 27,
+    "number": 11,
+    "potential": "C",
+    "salary": 9124000,
+    "contractYears": 2
+  },
+  "maurice_lucas": {
+    "id": "maurice_lucas",
+    "name": "Maurice Lucas",
+    "pos": "SF",
+    "positions": [
+      "SF"
+    ],
+    "ovr": 84,
+    "off": 75,
+    "def": 74,
+    "attributes": {
+      "shooting": 75,
+      "finishing": 82,
+      "playmaking": 69,
+      "perimeterD": 67,
+      "interiorD": 68,
+      "rebounding": 94,
+      "athleticism": 75
+    },
+    "espnId": null,
+    "nbaId": 77420,
+    "photoUrl": "https://cdn.nba.com/headshots/nba/latest/1040x760/77420.png",
+    "age": 32,
+    "number": 20,
+    "potential": "D",
+    "salary": 23004000,
+    "contractYears": 1
+  },
+  "kyle_macy": {
+    "id": "kyle_macy",
+    "name": "Kyle Macy",
+    "pos": "SG",
+    "positions": [
+      "SG"
+    ],
+    "ovr": 81,
+    "off": 84,
+    "def": 70,
+    "attributes": {
+      "shooting": 90,
+      "finishing": 75,
+      "playmaking": 84,
+      "perimeterD": 83,
+      "interiorD": 61,
+      "rebounding": 63,
+      "athleticism": 71
+    },
+    "espnId": null,
+    "nbaId": 77438,
+    "photoUrl": "https://cdn.nba.com/headshots/nba/latest/1040x760/77438.png",
+    "age": 27,
+    "number": 4,
+    "potential": "C",
+    "salary": 20104000,
+    "contractYears": 5
+  },
+  "larry_nance": {
+    "id": "larry_nance",
+    "name": "Larry Nance",
+    "pos": "PF",
+    "positions": [
+      "PF",
+      "C"
+    ],
+    "ovr": 88,
+    "off": 77,
+    "def": 80,
+    "attributes": {
+      "shooting": 76,
+      "finishing": 88,
+      "playmaking": 68,
+      "perimeterD": 70,
+      "interiorD": 90,
+      "rebounding": 84,
+      "athleticism": 82
+    },
+    "espnId": null,
+    "nbaId": 77685,
+    "photoUrl": "https://cdn.nba.com/headshots/nba/latest/1040x760/77685.png",
+    "age": 25,
+    "number": 22,
+    "potential": "C",
+    "salary": 30187000,
+    "contractYears": 2
+  },
+  "charlie_pittman": {
+    "id": "charlie_pittman",
+    "name": "Charlie Pittman",
+    "pos": "SF",
+    "positions": [
+      "SF"
+    ],
+    "ovr": 78,
+    "off": 77,
+    "def": 69,
+    "attributes": {
+      "shooting": 76,
+      "finishing": 88,
+      "playmaking": 66,
+      "perimeterD": 63,
+      "interiorD": 70,
+      "rebounding": 79,
+      "athleticism": 77
+    },
+    "espnId": null,
+    "nbaId": 77864,
+    "photoUrl": "https://cdn.nba.com/headshots/nba/latest/1040x760/77864.png",
+    "age": 26,
+    "number": 32,
+    "potential": "C",
+    "salary": 14691000,
+    "contractYears": 1
+  },
+  "rick_robey": {
+    "id": "rick_robey",
+    "name": "Rick Robey",
+    "pos": "C",
+    "positions": [
+      "C"
+    ],
+    "ovr": 77,
+    "off": 75,
+    "def": 71,
+    "attributes": {
+      "shooting": 77,
+      "finishing": 80,
+      "playmaking": 66,
+      "perimeterD": 67,
+      "interiorD": 68,
+      "rebounding": 80,
+      "athleticism": 72
+    },
+    "espnId": null,
+    "nbaId": 77984,
+    "photoUrl": "https://cdn.nba.com/headshots/nba/latest/1040x760/77984.png",
+    "age": 28,
+    "number": 8,
+    "potential": "C",
+    "salary": 13145000,
+    "contractYears": 4
+  },
+  "mike_sanders": {
+    "id": "mike_sanders",
+    "name": "Mike Sanders",
+    "pos": "SF",
+    "positions": [
+      "SF"
+    ],
+    "ovr": 70,
+    "off": 70,
+    "def": 72,
+    "attributes": {
+      "shooting": 72,
+      "finishing": 71,
+      "playmaking": 66,
+      "perimeterD": 73,
+      "interiorD": 69,
+      "rebounding": 73,
+      "athleticism": 71
+    },
+    "espnId": null,
+    "nbaId": 78059,
+    "photoUrl": "https://cdn.nba.com/headshots/nba/latest/1040x760/78059.png",
+    "age": 24,
+    "number": 7,
+    "potential": "C",
+    "salary": 4330000,
+    "contractYears": 1
+  },
+  "alvin_scott": {
+    "id": "alvin_scott",
+    "name": "Alvin Scott",
+    "pos": "SF",
+    "positions": [
+      "SF"
+    ],
+    "ovr": 70,
+    "off": 72,
+    "def": 69,
+    "attributes": {
+      "shooting": 73,
+      "finishing": 76,
+      "playmaking": 66,
+      "perimeterD": 67,
+      "interiorD": 71,
+      "rebounding": 69,
+      "athleticism": 77
+    },
+    "espnId": null,
+    "nbaId": 78095,
+    "photoUrl": "https://cdn.nba.com/headshots/nba/latest/1040x760/78095.png",
+    "age": 28,
+    "number": 14,
+    "potential": "C",
+    "salary": 5413000,
+    "contractYears": 1
+  },
+  "paul_westphal": {
+    "id": "paul_westphal",
+    "name": "Paul Westphal",
+    "pos": "SG",
+    "positions": [
+      "SG"
+    ],
+    "ovr": 76,
+    "off": 77,
+    "def": 69,
+    "attributes": {
+      "shooting": 77,
+      "finishing": 77,
+      "playmaking": 77,
+      "perimeterD": 78,
+      "interiorD": 64,
+      "rebounding": 61,
+      "athleticism": 76
+    },
+    "espnId": null,
+    "nbaId": 78500,
+    "photoUrl": "https://cdn.nba.com/headshots/nba/latest/1040x760/78500.png",
+    "age": 33,
+    "number": 44,
+    "potential": "D",
+    "salary": 9859000,
+    "contractYears": 2
+  },
+  "kenny_carr": {
+    "id": "kenny_carr",
+    "name": "Kenny Carr",
+    "pos": "SF",
+    "positions": [
+      "SF"
+    ],
+    "ovr": 84,
+    "off": 76,
+    "def": 73,
+    "attributes": {
+      "shooting": 76,
+      "finishing": 88,
+      "playmaking": 65,
+      "perimeterD": 69,
+      "interiorD": 67,
+      "rebounding": 87,
+      "athleticism": 76
+    },
+    "espnId": null,
+    "nbaId": 76350,
+    "photoUrl": "https://cdn.nba.com/headshots/nba/latest/1040x760/76350.png",
+    "age": 28,
+    "number": 34,
+    "potential": "C",
+    "salary": 27063000,
+    "contractYears": 3
+  },
+  "wayne_cooper": {
+    "id": "wayne_cooper",
+    "name": "Wayne Cooper",
+    "pos": "C",
+    "positions": [
+      "C"
+    ],
+    "ovr": 83,
+    "off": 71,
+    "def": 80,
+    "attributes": {
+      "shooting": 74,
+      "finishing": 76,
+      "playmaking": 63,
+      "perimeterD": 62,
+      "interiorD": 92,
+      "rebounding": 91,
+      "athleticism": 81
+    },
+    "espnId": null,
+    "nbaId": 76441,
+    "photoUrl": "https://cdn.nba.com/headshots/nba/latest/1040x760/76441.png",
+    "age": 27,
+    "number": 42,
+    "potential": "C",
+    "salary": 24744000,
+    "contractYears": 1
+  },
+  "clyde_drexler": {
+    "id": "clyde_drexler",
+    "name": "Clyde Drexler",
+    "pos": "SG",
+    "positions": [
+      "SG"
+    ],
+    "ovr": 82,
+    "off": 74,
+    "def": 82,
+    "attributes": {
+      "shooting": 75,
+      "finishing": 74,
+      "playmaking": 71,
+      "perimeterD": 97,
+      "interiorD": 70,
+      "rebounding": 76,
+      "athleticism": 82
+    },
+    "espnId": null,
+    "nbaId": 17,
+    "photoUrl": "https://cdn.nba.com/headshots/nba/latest/1040x760/17.png",
+    "age": 22,
+    "number": 22,
+    "potential": "A",
+    "salary": 12333000,
+    "contractYears": 5
+  },
+  "jeff_lamp": {
+    "id": "jeff_lamp",
+    "name": "Jeff Lamp",
+    "pos": "SG",
+    "positions": [
+      "SG"
+    ],
+    "ovr": 71,
+    "off": 70,
+    "def": 67,
+    "attributes": {
+      "shooting": 72,
+      "finishing": 72,
+      "playmaking": 66,
+      "perimeterD": 70,
+      "interiorD": 64,
+      "rebounding": 66,
+      "athleticism": 69
+    },
+    "espnId": null,
+    "nbaId": 77332,
+    "photoUrl": "https://cdn.nba.com/headshots/nba/latest/1040x760/77332.png",
+    "age": 25,
+    "number": 3,
+    "potential": "C",
+    "salary": 5072000,
+    "contractYears": 2
+  },
+  "lafayette_lever": {
+    "id": "lafayette_lever",
+    "name": "Lafayette Lever",
+    "pos": "SG",
+    "positions": [
+      "SG"
+    ],
+    "ovr": 83,
+    "off": 78,
+    "def": 78,
+    "attributes": {
+      "shooting": 74,
+      "finishing": 74,
+      "playmaking": 87,
+      "perimeterD": 93,
+      "interiorD": 68,
+      "rebounding": 68,
+      "athleticism": 81
+    },
+    "espnId": null,
+    "nbaId": 77376,
+    "photoUrl": "https://cdn.nba.com/headshots/nba/latest/1040x760/77376.png",
+    "age": 23,
+    "number": 12,
+    "potential": "A",
+    "salary": 19795000,
+    "contractYears": 2
+  },
+  "calvin_natt": {
+    "id": "calvin_natt",
+    "name": "Calvin Natt",
+    "pos": "SF",
+    "positions": [
+      "SF"
+    ],
+    "ovr": 83,
+    "off": 78,
+    "def": 69,
+    "attributes": {
+      "shooting": 77,
+      "finishing": 90,
+      "playmaking": 67,
+      "perimeterD": 68,
+      "interiorD": 64,
+      "rebounding": 77,
+      "athleticism": 76
+    },
+    "espnId": null,
+    "nbaId": 77691,
+    "photoUrl": "https://cdn.nba.com/headshots/nba/latest/1040x760/77691.png",
+    "age": 27,
+    "number": 33,
+    "potential": "C",
+    "salary": 24744000,
+    "contractYears": 2
+  },
+  "audie_norris": {
+    "id": "audie_norris",
+    "name": "Audie Norris",
+    "pos": "C",
+    "positions": [
+      "C"
+    ],
+    "ovr": 74,
+    "off": 74,
+    "def": 72,
+    "attributes": {
+      "shooting": 74,
+      "finishing": 84,
+      "playmaking": 64,
+      "perimeterD": 68,
+      "interiorD": 73,
+      "rebounding": 79,
+      "athleticism": 83
+    },
+    "espnId": null,
+    "nbaId": 77731,
+    "photoUrl": "https://cdn.nba.com/headshots/nba/latest/1040x760/77731.png",
+    "age": 23,
+    "number": 24,
+    "potential": "B",
+    "salary": 7299000,
+    "contractYears": 1
+  },
+  "jim_paxson": {
+    "id": "jim_paxson",
+    "name": "Jim Paxson",
+    "pos": "SG",
+    "positions": [
+      "SG"
+    ],
+    "ovr": 84,
+    "off": 80,
+    "def": 69,
+    "attributes": {
+      "shooting": 85,
+      "finishing": 80,
+      "playmaking": 73,
+      "perimeterD": 80,
+      "interiorD": 62,
+      "rebounding": 62,
+      "athleticism": 75
+    },
+    "espnId": null,
+    "nbaId": 77819,
+    "photoUrl": "https://cdn.nba.com/headshots/nba/latest/1040x760/77819.png",
+    "age": 26,
+    "number": 0,
+    "potential": "C",
+    "salary": 27063000,
+    "contractYears": 4
+  },
+  "tom_piotrowski": {
+    "id": "tom_piotrowski",
+    "name": "Tom Piotrowski",
+    "pos": "C",
+    "positions": [
+      "C"
+    ],
+    "ovr": 66,
+    "off": 66,
+    "def": 66,
+    "attributes": {
+      "shooting": 66,
+      "finishing": 66,
+      "playmaking": 66,
+      "perimeterD": 66,
+      "interiorD": 66,
+      "rebounding": 66,
+      "athleticism": 66
+    },
+    "espnId": null,
+    "nbaId": 77863,
+    "photoUrl": "https://cdn.nba.com/headshots/nba/latest/1040x760/77863.png",
+    "age": 23,
+    "number": 54,
+    "potential": "B",
+    "salary": 2648000,
+    "contractYears": 5
+  },
+  "mychal_thompson": {
+    "id": "mychal_thompson",
+    "name": "Mychal Thompson",
+    "pos": "C",
+    "positions": [
+      "C"
+    ],
+    "ovr": 85,
+    "off": 77,
+    "def": 79,
+    "attributes": {
+      "shooting": 75,
+      "finishing": 85,
+      "playmaking": 72,
+      "perimeterD": 72,
+      "interiorD": 80,
+      "rebounding": 87,
+      "athleticism": 82
+    },
+    "espnId": null,
+    "nbaId": 78331,
+    "photoUrl": "https://cdn.nba.com/headshots/nba/latest/1040x760/78331.png",
+    "age": 29,
+    "number": 43,
+    "potential": "C",
+    "salary": 29383000,
+    "contractYears": 4
+  },
+  "darnell_valentine": {
+    "id": "darnell_valentine",
+    "name": "Darnell Valentine",
+    "pos": "SG",
+    "positions": [
+      "SG"
+    ],
+    "ovr": 81,
+    "off": 80,
+    "def": 72,
+    "attributes": {
+      "shooting": 75,
+      "finishing": 78,
+      "playmaking": 87,
+      "perimeterD": 86,
+      "interiorD": 62,
+      "rebounding": 62,
+      "athleticism": 81
+    },
+    "espnId": null,
+    "nbaId": 78395,
+    "photoUrl": "https://cdn.nba.com/headshots/nba/latest/1040x760/78395.png",
+    "age": 25,
+    "number": 14,
+    "potential": "C",
+    "salary": 16083000,
+    "contractYears": 3
+  },
+  "peter_verhoeven": {
+    "id": "peter_verhoeven",
+    "name": "Peter Verhoeven",
+    "pos": "SF",
+    "positions": [
+      "SF"
+    ],
+    "ovr": 66,
+    "off": 66,
+    "def": 66,
+    "attributes": {
+      "shooting": 66,
+      "finishing": 66,
+      "playmaking": 66,
+      "perimeterD": 66,
+      "interiorD": 66,
+      "rebounding": 66,
+      "athleticism": 66
+    },
+    "espnId": null,
+    "nbaId": 78414,
+    "photoUrl": "https://cdn.nba.com/headshots/nba/latest/1040x760/78414.png",
+    "age": 25,
+    "number": 31,
+    "potential": "C",
+    "salary": 2648000,
+    "contractYears": 5
+  },
+  "don_buse": {
+    "id": "don_buse",
+    "name": "Don Buse",
+    "pos": "SG",
+    "positions": [
+      "SG"
+    ],
+    "ovr": 81,
+    "off": 82,
+    "def": 74,
+    "attributes": {
+      "shooting": 83,
+      "finishing": 69,
+      "playmaking": 92,
+      "perimeterD": 91,
+      "interiorD": 61,
+      "rebounding": 64,
+      "athleticism": 72
+    },
+    "espnId": null,
+    "nbaId": 76317,
+    "photoUrl": "https://cdn.nba.com/headshots/nba/latest/1040x760/76317.png",
+    "age": 33,
+    "number": 10,
+    "potential": "D",
+    "salary": 17088000,
+    "contractYears": 1
+  },
+  "larry_drew": {
+    "id": "larry_drew",
+    "name": "Larry Drew",
+    "pos": "SG",
+    "positions": [
+      "SG"
+    ],
+    "ovr": 85,
+    "off": 81,
+    "def": 70,
+    "attributes": {
+      "shooting": 78,
+      "finishing": 75,
+      "playmaking": 90,
+      "perimeterD": 83,
+      "interiorD": 62,
+      "rebounding": 61,
+      "athleticism": 76
+    },
+    "espnId": null,
+    "nbaId": 76599,
+    "photoUrl": "https://cdn.nba.com/headshots/nba/latest/1040x760/76599.png",
+    "age": 26,
+    "number": 22,
+    "potential": "C",
+    "salary": 29383000,
+    "contractYears": 5
+  },
+  "eddie_johnson_698": {
+    "id": "eddie_johnson_698",
+    "name": "Eddie Johnson",
+    "pos": "SF",
+    "positions": [
+      "SF"
+    ],
+    "ovr": 82,
+    "off": 79,
+    "def": 68,
+    "attributes": {
+      "shooting": 87,
+      "finishing": 75,
+      "playmaking": 71,
+      "perimeterD": 68,
+      "interiorD": 64,
+      "rebounding": 74,
+      "athleticism": 69
+    },
+    "espnId": null,
+    "nbaId": 698,
+    "photoUrl": "https://cdn.nba.com/headshots/nba/latest/1040x760/698.png",
+    "age": 25,
+    "number": 0,
+    "potential": "C",
+    "salary": 17939000,
+    "contractYears": 3
+  },
+  "billy_knight": {
+    "id": "billy_knight",
+    "name": "Billy Knight",
+    "pos": "SF",
+    "positions": [
+      "SF"
+    ],
+    "ovr": 78,
+    "off": 77,
+    "def": 67,
+    "attributes": {
+      "shooting": 81,
+      "finishing": 81,
+      "playmaking": 68,
+      "perimeterD": 70,
+      "interiorD": 62,
+      "rebounding": 71,
+      "athleticism": 73
+    },
+    "espnId": null,
+    "nbaId": 77290,
+    "photoUrl": "https://cdn.nba.com/headshots/nba/latest/1040x760/77290.png",
+    "age": 32,
+    "number": 25,
+    "potential": "D",
+    "salary": 12488000,
+    "contractYears": 1
+  },
+  "joe_meriweather": {
+    "id": "joe_meriweather",
+    "name": "Joe Meriweather",
+    "pos": "C",
+    "positions": [
+      "C"
+    ],
+    "ovr": 78,
+    "off": 74,
+    "def": 76,
+    "attributes": {
+      "shooting": 78,
+      "finishing": 83,
+      "playmaking": 61,
+      "perimeterD": 67,
+      "interiorD": 80,
+      "rebounding": 84,
+      "athleticism": 77
+    },
+    "espnId": null,
+    "nbaId": 77582,
+    "photoUrl": "https://cdn.nba.com/headshots/nba/latest/1040x760/77582.png",
+    "age": 30,
+    "number": 50,
+    "potential": "D",
+    "salary": 14691000,
+    "contractYears": 2
+  },
+  "larry_micheaux": {
+    "id": "larry_micheaux",
+    "name": "Larry Micheaux",
+    "pos": "SF",
+    "positions": [
+      "SF"
+    ],
+    "ovr": 66,
+    "off": 66,
+    "def": 66,
+    "attributes": {
+      "shooting": 66,
+      "finishing": 66,
+      "playmaking": 66,
+      "perimeterD": 66,
+      "interiorD": 66,
+      "rebounding": 66,
+      "athleticism": 66
+    },
+    "espnId": null,
+    "nbaId": 77588,
+    "photoUrl": "https://cdn.nba.com/headshots/nba/latest/1040x760/77588.png",
+    "age": 24,
+    "number": 40,
+    "potential": "C",
+    "salary": 2648000,
+    "contractYears": 2
+  },
+  "ed_nealy": {
+    "id": "ed_nealy",
+    "name": "Ed Nealy",
+    "pos": "SF",
+    "positions": [
+      "SF"
+    ],
+    "ovr": 73,
+    "off": 74,
+    "def": 72,
+    "attributes": {
+      "shooting": 74,
+      "finishing": 80,
+      "playmaking": 67,
+      "perimeterD": 75,
+      "interiorD": 65,
+      "rebounding": 79,
+      "athleticism": 77
+    },
+    "espnId": null,
+    "nbaId": 77697,
+    "photoUrl": "https://cdn.nba.com/headshots/nba/latest/1040x760/77697.png",
+    "age": 24,
+    "number": 20,
+    "potential": "C",
+    "salary": 6557000,
+    "contractYears": 5
+  },
+  "mark_olberding": {
+    "id": "mark_olberding",
+    "name": "Mark Olberding",
+    "pos": "SF",
+    "positions": [
+      "SF"
+    ],
+    "ovr": 80,
+    "off": 78,
+    "def": 70,
+    "attributes": {
+      "shooting": 78,
+      "finishing": 88,
+      "playmaking": 69,
+      "perimeterD": 67,
+      "interiorD": 66,
+      "rebounding": 80,
+      "athleticism": 83
+    },
+    "espnId": null,
+    "nbaId": 77756,
+    "photoUrl": "https://cdn.nba.com/headshots/nba/latest/1040x760/77756.png",
+    "age": 28,
+    "number": 53,
+    "potential": "C",
+    "salary": 17784000,
+    "contractYears": 2
+  },
+  "dave_robisch": {
+    "id": "dave_robisch",
+    "name": "Dave Robisch",
+    "pos": "C",
+    "positions": [
+      "C"
+    ],
+    "ovr": 64,
+    "off": 67,
+    "def": 64,
+    "attributes": {
+      "shooting": 70,
+      "finishing": 65,
+      "playmaking": 68,
+      "perimeterD": 62,
+      "interiorD": 64,
+      "rebounding": 71,
+      "athleticism": 66
+    },
+    "espnId": null,
+    "nbaId": 77998,
+    "photoUrl": "https://cdn.nba.com/headshots/nba/latest/1040x760/77998.png",
+    "age": 34,
+    "number": 35,
+    "potential": "D",
+    "salary": 2156000,
+    "contractYears": 5
+  },
+  "dane_suttle": {
+    "id": "dane_suttle",
+    "name": "Dane Suttle",
+    "pos": "SG",
+    "positions": [
+      "SG"
+    ],
+    "ovr": 73,
+    "off": 71,
+    "def": 68,
+    "attributes": {
+      "shooting": 72,
+      "finishing": 73,
+      "playmaking": 69,
+      "perimeterD": 74,
+      "interiorD": 62,
+      "rebounding": 66,
+      "athleticism": 70
+    },
+    "espnId": null,
+    "nbaId": 78281,
+    "photoUrl": "https://cdn.nba.com/headshots/nba/latest/1040x760/78281.png",
+    "age": 22,
+    "number": 2,
+    "potential": "B",
+    "salary": 4508000,
+    "contractYears": 3
+  },
+  "reggie_theus": {
+    "id": "reggie_theus",
+    "name": "Reggie Theus",
+    "pos": "SG",
+    "positions": [
+      "SG"
+    ],
+    "ovr": 81,
+    "off": 77,
+    "def": 68,
+    "attributes": {
+      "shooting": 70,
+      "finishing": 75,
+      "playmaking": 87,
+      "perimeterD": 73,
+      "interiorD": 64,
+      "rebounding": 65,
+      "athleticism": 79
+    },
+    "espnId": null,
+    "nbaId": 78310,
+    "photoUrl": "https://cdn.nba.com/headshots/nba/latest/1040x760/78310.png",
+    "age": 26,
+    "number": 24,
+    "potential": "C",
+    "salary": 20104000,
+    "contractYears": 3
+  },
+  "lasalle_thompson": {
+    "id": "lasalle_thompson",
+    "name": "LaSalle Thompson",
+    "pos": "C",
+    "positions": [
+      "C"
+    ],
+    "ovr": 89,
+    "off": 74,
+    "def": 89,
+    "attributes": {
+      "shooting": 77,
+      "finishing": 83,
+      "playmaking": 62,
+      "perimeterD": 75,
+      "interiorD": 98,
+      "rebounding": 99,
+      "athleticism": 87
+    },
+    "espnId": null,
+    "nbaId": 78,
+    "photoUrl": "https://cdn.nba.com/headshots/nba/latest/1040x760/78.png",
+    "age": 23,
+    "number": 41,
+    "potential": "A",
+    "salary": 32414000,
+    "contractYears": 2
+  },
+  "mike_woodson": {
+    "id": "mike_woodson",
+    "name": "Mike Woodson",
+    "pos": "SG",
+    "positions": [
+      "SG"
+    ],
+    "ovr": 80,
+    "off": 76,
+    "def": 72,
+    "attributes": {
+      "shooting": 78,
+      "finishing": 79,
+      "playmaking": 71,
+      "perimeterD": 80,
+      "interiorD": 68,
+      "rebounding": 66,
+      "athleticism": 79
+    },
+    "espnId": null,
+    "nbaId": 78614,
+    "photoUrl": "https://cdn.nba.com/headshots/nba/latest/1040x760/78614.png",
+    "age": 26,
+    "number": 42,
+    "potential": "C",
+    "salary": 17784000,
+    "contractYears": 3
+  },
+  "gene_banks": {
+    "id": "gene_banks",
+    "name": "Gene Banks",
+    "pos": "SF",
+    "positions": [
+      "SF"
+    ],
+    "ovr": 84,
+    "off": 79,
+    "def": 74,
+    "attributes": {
+      "shooting": 79,
+      "finishing": 87,
+      "playmaking": 72,
+      "perimeterD": 77,
+      "interiorD": 64,
+      "rebounding": 83,
+      "athleticism": 77
+    },
+    "espnId": null,
+    "nbaId": 76093,
+    "photoUrl": "https://cdn.nba.com/headshots/nba/latest/1040x760/76093.png",
+    "age": 25,
+    "number": 20,
+    "potential": "C",
+    "salary": 21651000,
+    "contractYears": 2
+  },
+  "dave_batton": {
+    "id": "dave_batton",
+    "name": "Dave Batton",
+    "pos": "C",
+    "positions": [
+      "C"
+    ],
+    "ovr": 66,
+    "off": 66,
+    "def": 66,
+    "attributes": {
+      "shooting": 66,
+      "finishing": 66,
+      "playmaking": 66,
+      "perimeterD": 66,
+      "interiorD": 66,
+      "rebounding": 66,
+      "athleticism": 66
+    },
+    "espnId": null,
+    "nbaId": 76124,
+    "photoUrl": "https://cdn.nba.com/headshots/nba/latest/1040x760/76124.png",
+    "age": 28,
+    "number": 45,
+    "potential": "C",
+    "salary": 3309000,
+    "contractYears": 3
+  },
+  "ron_brewer": {
+    "id": "ron_brewer",
+    "name": "Ron Brewer",
+    "pos": "SG",
+    "positions": [
+      "SG"
+    ],
+    "ovr": 69,
+    "off": 70,
+    "def": 67,
+    "attributes": {
+      "shooting": 75,
+      "finishing": 69,
+      "playmaking": 66,
+      "perimeterD": 67,
+      "interiorD": 71,
+      "rebounding": 62,
+      "athleticism": 69
+    },
+    "espnId": null,
+    "nbaId": 76249,
+    "photoUrl": "https://cdn.nba.com/headshots/nba/latest/1040x760/76249.png",
+    "age": 28,
+    "number": 10,
+    "potential": "C",
+    "salary": 4887000,
+    "contractYears": 2
+  },
+  "george_gervin": {
+    "id": "george_gervin",
+    "name": "George Gervin",
+    "pos": "SG",
+    "positions": [
+      "SG"
+    ],
+    "ovr": 85,
+    "off": 79,
+    "def": 70,
+    "attributes": {
+      "shooting": 87,
+      "finishing": 79,
+      "playmaking": 67,
+      "perimeterD": 71,
+      "interiorD": 69,
+      "rebounding": 69,
+      "athleticism": 73
+    },
+    "espnId": null,
+    "nbaId": 76804,
+    "photoUrl": "https://cdn.nba.com/headshots/nba/latest/1040x760/76804.png",
+    "age": 32,
+    "number": 44,
+    "potential": "D",
+    "salary": 24975000,
+    "contractYears": 5
+  },
+  "artis_gilmore": {
+    "id": "artis_gilmore",
+    "name": "Artis Gilmore",
+    "pos": "C",
+    "positions": [
+      "C"
+    ],
+    "ovr": 91,
+    "off": 78,
+    "def": 80,
+    "attributes": {
+      "shooting": 78,
+      "finishing": 99,
+      "playmaking": 60,
+      "perimeterD": 63,
+      "interiorD": 92,
+      "rebounding": 96,
+      "athleticism": 89
+    },
+    "espnId": null,
+    "nbaId": 600014,
+    "photoUrl": "https://cdn.nba.com/headshots/nba/latest/1040x760/600014.png",
+    "age": 35,
+    "number": 53,
+    "potential": "D",
+    "salary": 29754000,
+    "contractYears": 5
+  },
+  "edgar_jones": {
+    "id": "edgar_jones",
+    "name": "Edgar Jones",
+    "pos": "SF",
+    "positions": [
+      "SF"
+    ],
+    "ovr": 85,
+    "off": 75,
+    "def": 83,
+    "attributes": {
+      "shooting": 80,
+      "finishing": 81,
+      "playmaking": 63,
+      "perimeterD": 74,
+      "interiorD": 90,
+      "rebounding": 86,
+      "athleticism": 84
+    },
+    "espnId": null,
+    "nbaId": 77184,
+    "photoUrl": "https://cdn.nba.com/headshots/nba/latest/1040x760/77184.png",
+    "age": 28,
+    "number": 42,
+    "potential": "C",
+    "salary": 29383000,
+    "contractYears": 1
+  },
+  "steve_lingenfelter": {
+    "id": "steve_lingenfelter",
+    "name": "Steve Lingenfelter",
+    "pos": "SF",
+    "positions": [
+      "SF"
+    ],
+    "ovr": 66,
+    "off": 66,
+    "def": 66,
+    "attributes": {
+      "shooting": 66,
+      "finishing": 66,
+      "playmaking": 66,
+      "perimeterD": 66,
+      "interiorD": 66,
+      "rebounding": 66,
+      "athleticism": 66
+    },
+    "espnId": null,
+    "nbaId": 77389,
+    "photoUrl": "https://cdn.nba.com/headshots/nba/latest/1040x760/77389.png",
+    "age": 26,
+    "number": 25,
+    "potential": "C",
+    "salary": 3309000,
+    "contractYears": 4
+  },
+  "darrell_lockhart": {
+    "id": "darrell_lockhart",
+    "name": "Darrell Lockhart",
+    "pos": "SF",
+    "positions": [
+      "SF"
+    ],
+    "ovr": 66,
+    "off": 66,
+    "def": 66,
+    "attributes": {
+      "shooting": 66,
+      "finishing": 66,
+      "playmaking": 66,
+      "perimeterD": 66,
+      "interiorD": 66,
+      "rebounding": 66,
+      "athleticism": 66
+    },
+    "espnId": null,
+    "nbaId": 77399,
+    "photoUrl": "https://cdn.nba.com/headshots/nba/latest/1040x760/77399.png",
+    "age": 23,
+    "number": 32,
+    "potential": "B",
+    "salary": 2648000,
+    "contractYears": 1
+  },
+  "john_lucas": {
+    "id": "john_lucas",
+    "name": "John Lucas",
+    "pos": "PG",
+    "positions": [
+      "PG",
+      "SG"
+    ],
+    "ovr": 89,
+    "off": 85,
+    "def": 71,
+    "attributes": {
+      "shooting": 83,
+      "finishing": 74,
+      "playmaking": 99,
+      "perimeterD": 83,
+      "interiorD": 61,
+      "rebounding": 65,
+      "athleticism": 73
+    },
+    "espnId": null,
+    "nbaId": 77419,
+    "photoUrl": "https://cdn.nba.com/headshots/nba/latest/1040x760/77419.png",
+    "age": 30,
+    "number": 15,
+    "potential": "D",
+    "salary": 40518000,
+    "contractYears": 2
+  },
+  "mark_mcnamara": {
+    "id": "mark_mcnamara",
+    "name": "Mark McNamara",
+    "pos": "C",
+    "positions": [
+      "C"
+    ],
+    "ovr": 79,
+    "off": 76,
+    "def": 70,
+    "attributes": {
+      "shooting": 75,
+      "finishing": 92,
+      "playmaking": 61,
+      "perimeterD": 62,
+      "interiorD": 66,
+      "rebounding": 88,
+      "athleticism": 79
+    },
+    "espnId": null,
+    "nbaId": 77558,
+    "photoUrl": "https://cdn.nba.com/headshots/nba/latest/1040x760/77558.png",
+    "age": 25,
+    "number": 31,
+    "potential": "C",
+    "salary": 12990000,
+    "contractYears": 2
+  },
+  "bob_miller": {
+    "id": "bob_miller",
+    "name": "Bob Miller",
+    "pos": "SF",
+    "positions": [
+      "SF"
+    ],
+    "ovr": 66,
+    "off": 66,
+    "def": 66,
+    "attributes": {
+      "shooting": 66,
+      "finishing": 66,
+      "playmaking": 66,
+      "perimeterD": 66,
+      "interiorD": 66,
+      "rebounding": 66,
+      "athleticism": 66
+    },
+    "espnId": null,
+    "nbaId": 77603,
+    "photoUrl": "https://cdn.nba.com/headshots/nba/latest/1040x760/77603.png",
+    "age": 27,
+    "number": 41,
+    "potential": "C",
+    "salary": 3309000,
+    "contractYears": 4
+  },
+  "mike_mitchell": {
+    "id": "mike_mitchell",
+    "name": "Mike Mitchell",
+    "pos": "SF",
+    "positions": [
+      "SF"
+    ],
+    "ovr": 81,
+    "off": 74,
+    "def": 72,
+    "attributes": {
+      "shooting": 82,
+      "finishing": 75,
+      "playmaking": 61,
+      "perimeterD": 66,
+      "interiorD": 73,
+      "rebounding": 79,
+      "athleticism": 71
+    },
+    "espnId": null,
+    "nbaId": 77615,
+    "photoUrl": "https://cdn.nba.com/headshots/nba/latest/1040x760/77615.png",
+    "age": 28,
+    "number": 34,
+    "potential": "C",
+    "salary": 20104000,
+    "contractYears": 1
+  },
+  "johnny_moore": {
+    "id": "johnny_moore",
+    "name": "Johnny Moore",
+    "pos": "SG",
+    "positions": [
+      "SG"
+    ],
+    "ovr": 92,
+    "off": 88,
+    "def": 79,
+    "attributes": {
+      "shooting": 93,
+      "finishing": 72,
+      "playmaking": 99,
+      "perimeterD": 97,
+      "interiorD": 66,
+      "rebounding": 67,
+      "athleticism": 79
+    },
+    "espnId": null,
+    "nbaId": 77633,
+    "photoUrl": "https://cdn.nba.com/headshots/nba/latest/1040x760/77633.png",
+    "age": 26,
+    "number": 0,
+    "potential": "C",
+    "salary": 48250000,
+    "contractYears": 5
+  },
+  "john_paxson": {
+    "id": "john_paxson",
+    "name": "John Paxson",
+    "pos": "SG",
+    "positions": [
+      "SG"
+    ],
+    "ovr": 66,
+    "off": 66,
+    "def": 66,
+    "attributes": {
+      "shooting": 66,
+      "finishing": 66,
+      "playmaking": 66,
+      "perimeterD": 66,
+      "interiorD": 66,
+      "rebounding": 66,
+      "athleticism": 66
+    },
+    "espnId": null,
+    "nbaId": 77820,
+    "photoUrl": "https://cdn.nba.com/headshots/nba/latest/1040x760/77820.png",
+    "age": 23,
+    "number": 4,
+    "potential": "B",
+    "salary": 2648000,
+    "contractYears": 3
+  },
+  "fred_roberts": {
+    "id": "fred_roberts",
+    "name": "Fred Roberts",
+    "pos": "SF",
+    "positions": [
+      "SF"
+    ],
+    "ovr": 80,
+    "off": 78,
+    "def": 74,
+    "attributes": {
+      "shooting": 80,
+      "finishing": 86,
+      "playmaking": 66,
+      "perimeterD": 73,
+      "interiorD": 72,
+      "rebounding": 79,
+      "athleticism": 82
+    },
+    "espnId": null,
+    "nbaId": 122,
+    "photoUrl": "https://cdn.nba.com/headshots/nba/latest/1040x760/122.png",
+    "age": 23,
+    "number": 11,
+    "potential": "A",
+    "salary": 14228000,
+    "contractYears": 5
+  },
+  "brant_weidner": {
+    "id": "brant_weidner",
+    "name": "Brant Weidner",
+    "pos": "SF",
+    "positions": [
+      "SF"
+    ],
+    "ovr": 66,
+    "off": 66,
+    "def": 66,
+    "attributes": {
+      "shooting": 66,
+      "finishing": 66,
+      "playmaking": 66,
+      "perimeterD": 66,
+      "interiorD": 66,
+      "rebounding": 66,
+      "athleticism": 66
+    },
+    "espnId": null,
+    "nbaId": 78484,
+    "photoUrl": "https://cdn.nba.com/headshots/nba/latest/1040x760/78484.png",
+    "age": 23,
+    "number": 25,
+    "potential": "B",
+    "salary": 2648000,
+    "contractYears": 5
+  },
+  "kevin_williams": {
+    "id": "kevin_williams",
+    "name": "Kevin Williams",
+    "pos": "SG",
+    "positions": [
+      "SG"
+    ],
+    "ovr": 72,
+    "off": 73,
+    "def": 69,
+    "attributes": {
+      "shooting": 70,
+      "finishing": 73,
+      "playmaking": 76,
+      "perimeterD": 72,
+      "interiorD": 68,
+      "rebounding": 64,
+      "athleticism": 77
+    },
+    "espnId": null,
+    "nbaId": 78556,
+    "photoUrl": "https://cdn.nba.com/headshots/nba/latest/1040x760/78556.png",
+    "age": 22,
+    "number": 12,
+    "potential": "B",
+    "salary": 3998000,
+    "contractYears": 3
+  },
+  "charles_bradley": {
+    "id": "charles_bradley",
+    "name": "Charles Bradley",
+    "pos": "SG",
+    "positions": [
+      "SG"
+    ],
+    "ovr": 66,
+    "off": 66,
+    "def": 66,
+    "attributes": {
+      "shooting": 66,
+      "finishing": 66,
+      "playmaking": 66,
+      "perimeterD": 66,
+      "interiorD": 66,
+      "rebounding": 66,
+      "athleticism": 66
+    },
+    "espnId": null,
+    "nbaId": 76230,
+    "photoUrl": "https://cdn.nba.com/headshots/nba/latest/1040x760/76230.png",
+    "age": 25,
+    "number": 30,
+    "potential": "C",
+    "salary": 2648000,
+    "contractYears": 5
+  },
+  "fred_brown": {
+    "id": "fred_brown",
+    "name": "Fred Brown",
+    "pos": "SG",
+    "positions": [
+      "SG"
+    ],
+    "ovr": 79,
+    "off": 78,
+    "def": 66,
+    "attributes": {
+      "shooting": 80,
+      "finishing": 75,
+      "playmaking": 82,
+      "perimeterD": 77,
+      "interiorD": 61,
+      "rebounding": 61,
+      "athleticism": 66
+    },
+    "espnId": null,
+    "nbaId": 76272,
+    "photoUrl": "https://cdn.nba.com/headshots/nba/latest/1040x760/76272.png",
+    "age": 35,
+    "number": 32,
+    "potential": "D",
+    "salary": 10555000,
+    "contractYears": 5
+  },
+  "tom_chambers": {
+    "id": "tom_chambers",
+    "name": "Tom Chambers",
+    "pos": "SF",
+    "positions": [
+      "SF"
+    ],
+    "ovr": 80,
+    "off": 73,
+    "def": 70,
+    "attributes": {
+      "shooting": 73,
+      "finishing": 82,
+      "playmaking": 63,
+      "perimeterD": 64,
+      "interiorD": 70,
+      "rebounding": 81,
+      "athleticism": 77
+    },
+    "espnId": null,
+    "nbaId": 1472,
+    "photoUrl": "https://cdn.nba.com/headshots/nba/latest/1040x760/1472.png",
+    "age": 25,
+    "number": 24,
+    "potential": "C",
+    "salary": 14228000,
+    "contractYears": 2
+  },
+  "steve_hawes": {
+    "id": "steve_hawes",
+    "name": "Steve Hawes",
+    "pos": "C",
+    "positions": [
+      "C"
+    ],
+    "ovr": 69,
+    "off": 73,
+    "def": 67,
+    "attributes": {
+      "shooting": 75,
+      "finishing": 75,
+      "playmaking": 71,
+      "perimeterD": 65,
+      "interiorD": 67,
+      "rebounding": 75,
+      "athleticism": 69
+    },
+    "espnId": null,
+    "nbaId": 76971,
+    "photoUrl": "https://cdn.nba.com/headshots/nba/latest/1040x760/76971.png",
+    "age": 34,
+    "number": 10,
+    "potential": "D",
+    "salary": 4154000,
+    "contractYears": 5
+  },
+  "steve_hayes": {
+    "id": "steve_hayes",
+    "name": "Steve Hayes",
+    "pos": "C",
+    "positions": [
+      "C"
+    ],
+    "ovr": 66,
+    "off": 66,
+    "def": 66,
+    "attributes": {
+      "shooting": 66,
+      "finishing": 66,
+      "playmaking": 66,
+      "perimeterD": 66,
+      "interiorD": 66,
+      "rebounding": 66,
+      "athleticism": 66
+    },
+    "espnId": null,
+    "nbaId": 76980,
+    "photoUrl": "https://cdn.nba.com/headshots/nba/latest/1040x760/76980.png",
+    "age": 28,
+    "number": 41,
+    "potential": "C",
+    "salary": 3309000,
+    "contractYears": 2
+  },
+  "clay_johnson": {
+    "id": "clay_johnson",
+    "name": "Clay Johnson",
+    "pos": "SG",
+    "positions": [
+      "SG"
+    ],
+    "ovr": 66,
+    "off": 66,
+    "def": 66,
+    "attributes": {
+      "shooting": 66,
+      "finishing": 66,
+      "playmaking": 66,
+      "perimeterD": 66,
+      "interiorD": 66,
+      "rebounding": 66,
+      "athleticism": 66
+    },
+    "espnId": null,
+    "nbaId": 77135,
+    "photoUrl": "https://cdn.nba.com/headshots/nba/latest/1040x760/77135.png",
+    "age": 27,
+    "number": 34,
+    "potential": "C",
+    "salary": 3309000,
+    "contractYears": 4
+  },
+  "reggie_king": {
+    "id": "reggie_king",
+    "name": "Reggie King",
+    "pos": "SF",
+    "positions": [
+      "SF"
+    ],
+    "ovr": 77,
+    "off": 77,
+    "def": 71,
+    "attributes": {
+      "shooting": 75,
+      "finishing": 86,
+      "playmaking": 70,
+      "perimeterD": 68,
+      "interiorD": 66,
+      "rebounding": 82,
+      "athleticism": 78
+    },
+    "espnId": null,
+    "nbaId": 77273,
+    "photoUrl": "https://cdn.nba.com/headshots/nba/latest/1040x760/77273.png",
+    "age": 27,
+    "number": 51,
+    "potential": "C",
+    "salary": 13145000,
+    "contractYears": 5
+  },
+  "scooter_mccray": {
+    "id": "scooter_mccray",
+    "name": "Scooter McCray",
+    "pos": "SF",
+    "positions": [
+      "SF"
+    ],
+    "ovr": 68,
+    "off": 69,
+    "def": 71,
+    "attributes": {
+      "shooting": 70,
+      "finishing": 69,
+      "playmaking": 68,
+      "perimeterD": 66,
+      "interiorD": 73,
+      "rebounding": 76,
+      "athleticism": 75
+    },
+    "espnId": null,
+    "nbaId": 77518,
+    "photoUrl": "https://cdn.nba.com/headshots/nba/latest/1040x760/77518.png",
+    "age": 24,
+    "number": 21,
+    "potential": "C",
+    "salary": 3489000,
+    "contractYears": 4
+  },
+  "jack_sikma": {
+    "id": "jack_sikma",
+    "name": "Jack Sikma",
+    "pos": "C",
+    "positions": [
+      "C"
+    ],
+    "ovr": 88,
+    "off": 77,
+    "def": 78,
+    "attributes": {
+      "shooting": 78,
+      "finishing": 82,
+      "playmaking": 72,
+      "perimeterD": 72,
+      "interiorD": 75,
+      "rebounding": 92,
+      "athleticism": 80
+    },
+    "espnId": null,
+    "nbaId": 78149,
+    "photoUrl": "https://cdn.nba.com/headshots/nba/latest/1040x760/78149.png",
+    "age": 28,
+    "number": 43,
+    "potential": "C",
+    "salary": 37734000,
+    "contractYears": 1
+  },
+  "jon_sundvold": {
+    "id": "jon_sundvold",
+    "name": "Jon Sundvold",
+    "pos": "SG",
+    "positions": [
+      "SG"
+    ],
+    "ovr": 75,
+    "off": 77,
+    "def": 63,
+    "attributes": {
+      "shooting": 77,
+      "finishing": 69,
+      "playmaking": 86,
+      "perimeterD": 66,
+      "interiorD": 61,
+      "rebounding": 62,
+      "athleticism": 67
+    },
+    "espnId": null,
+    "nbaId": 78279,
+    "photoUrl": "https://cdn.nba.com/headshots/nba/latest/1040x760/78279.png",
+    "age": 22,
+    "number": 20,
+    "potential": "B",
+    "salary": 5529000,
+    "contractYears": 2
+  },
+  "david_thompson": {
+    "id": "david_thompson",
+    "name": "David Thompson",
+    "pos": "SG",
+    "positions": [
+      "SG"
+    ],
+    "ovr": 85,
+    "off": 75,
+    "def": 73,
+    "attributes": {
+      "shooting": 78,
+      "finishing": 86,
+      "playmaking": 61,
+      "perimeterD": 70,
+      "interiorD": 78,
+      "rebounding": 70,
+      "athleticism": 80
+    },
+    "espnId": null,
+    "nbaId": 78326,
+    "photoUrl": "https://cdn.nba.com/headshots/nba/latest/1040x760/78326.png",
+    "age": 29,
+    "number": 44,
+    "potential": "C",
+    "salary": 29383000,
+    "contractYears": 3
+  },
+  "danny_vranes": {
+    "id": "danny_vranes",
+    "name": "Danny Vranes",
+    "pos": "SF",
+    "positions": [
+      "SF"
+    ],
+    "ovr": 77,
+    "off": 76,
+    "def": 72,
+    "attributes": {
+      "shooting": 75,
+      "finishing": 86,
+      "playmaking": 66,
+      "perimeterD": 67,
+      "interiorD": 72,
+      "rebounding": 78,
+      "athleticism": 81
+    },
+    "espnId": null,
+    "nbaId": 78423,
+    "photoUrl": "https://cdn.nba.com/headshots/nba/latest/1040x760/78423.png",
+    "age": 25,
+    "number": 23,
+    "potential": "C",
+    "salary": 10516000,
+    "contractYears": 2
+  },
+  "gus_williams": {
+    "id": "gus_williams",
+    "name": "Gus Williams",
+    "pos": "SG",
+    "positions": [
+      "SG"
+    ],
+    "ovr": 88,
+    "off": 79,
+    "def": 75,
+    "attributes": {
+      "shooting": 72,
+      "finishing": 75,
+      "playmaking": 91,
+      "perimeterD": 93,
+      "interiorD": 64,
+      "rebounding": 63,
+      "athleticism": 78
+    },
+    "espnId": null,
+    "nbaId": 78549,
+    "photoUrl": "https://cdn.nba.com/headshots/nba/latest/1040x760/78549.png",
+    "age": 30,
+    "number": 1,
+    "potential": "D",
+    "salary": 37734000,
+    "contractYears": 4
+  },
+  "al_wood": {
+    "id": "al_wood",
+    "name": "Al Wood",
+    "pos": "SG",
+    "positions": [
+      "SG"
+    ],
+    "ovr": 77,
+    "off": 74,
+    "def": 69,
+    "attributes": {
+      "shooting": 75,
+      "finishing": 78,
+      "playmaking": 69,
+      "perimeterD": 70,
+      "interiorD": 67,
+      "rebounding": 69,
+      "athleticism": 73
+    },
+    "espnId": null,
+    "nbaId": 78610,
+    "photoUrl": "https://cdn.nba.com/headshots/nba/latest/1040x760/78610.png",
+    "age": 26,
+    "number": 4,
+    "potential": "C",
+    "salary": 13145000,
+    "contractYears": 3
+  },
+  "mitchell_anderson": {
+    "id": "mitchell_anderson",
+    "name": "Mitchell Anderson",
+    "pos": "SF",
+    "positions": [
+      "SF"
+    ],
+    "ovr": 66,
+    "off": 66,
+    "def": 66,
+    "attributes": {
+      "shooting": 66,
+      "finishing": 66,
+      "playmaking": 66,
+      "perimeterD": 66,
+      "interiorD": 66,
+      "rebounding": 66,
+      "athleticism": 66
+    },
+    "espnId": null,
+    "nbaId": 76043,
+    "photoUrl": "https://cdn.nba.com/headshots/nba/latest/1040x760/76043.png",
+    "age": 23,
+    "number": 11,
+    "potential": "B",
+    "salary": 2648000,
+    "contractYears": 2
+  },
+  "thurl_bailey": {
+    "id": "thurl_bailey",
+    "name": "Thurl Bailey",
+    "pos": "SF",
+    "positions": [
+      "SF"
+    ],
+    "ovr": 79,
+    "off": 74,
+    "def": 78,
+    "attributes": {
+      "shooting": 77,
+      "finishing": 77,
+      "playmaking": 67,
+      "perimeterD": 64,
+      "interiorD": 90,
+      "rebounding": 82,
+      "athleticism": 77
+    },
+    "espnId": null,
+    "nbaId": 1847,
+    "photoUrl": "https://cdn.nba.com/headshots/nba/latest/1040x760/1847.png",
+    "age": 23,
+    "number": 41,
+    "potential": "A",
+    "salary": 12990000,
+    "contractYears": 1
+  },
+  "tom_boswell": {
+    "id": "tom_boswell",
+    "name": "Tom Boswell",
+    "pos": "SF",
+    "positions": [
+      "SF"
+    ],
+    "ovr": 66,
+    "off": 66,
+    "def": 66,
+    "attributes": {
+      "shooting": 66,
+      "finishing": 66,
+      "playmaking": 66,
+      "perimeterD": 66,
+      "interiorD": 66,
+      "rebounding": 66,
+      "athleticism": 66
+    },
+    "espnId": null,
+    "nbaId": 76213,
+    "photoUrl": "https://cdn.nba.com/headshots/nba/latest/1040x760/76213.png",
+    "age": 30,
+    "number": 33,
+    "potential": "D",
+    "salary": 3309000,
+    "contractYears": 5
+  },
+  "adrian_dantley": {
+    "id": "adrian_dantley",
+    "name": "Adrian Dantley",
+    "pos": "SF",
+    "positions": [
+      "SF"
+    ],
+    "ovr": 91,
+    "off": 82,
+    "def": 66,
+    "attributes": {
+      "shooting": 82,
+      "finishing": 95,
+      "playmaking": 70,
+      "perimeterD": 65,
+      "interiorD": 61,
+      "rebounding": 73,
+      "athleticism": 82
+    },
+    "espnId": null,
+    "nbaId": 76504,
+    "photoUrl": "https://cdn.nba.com/headshots/nba/latest/1040x760/76504.png",
+    "age": 29,
+    "number": 4,
+    "potential": "C",
+    "salary": 45776000,
+    "contractYears": 5
+  },
+  "john_drew": {
+    "id": "john_drew",
+    "name": "John Drew",
+    "pos": "SF",
+    "positions": [
+      "SF"
+    ],
+    "ovr": 86,
+    "off": 76,
+    "def": 74,
+    "attributes": {
+      "shooting": 79,
+      "finishing": 82,
+      "playmaking": 65,
+      "perimeterD": 82,
+      "interiorD": 61,
+      "rebounding": 79,
+      "athleticism": 80
+    },
+    "espnId": null,
+    "nbaId": 76598,
+    "photoUrl": "https://cdn.nba.com/headshots/nba/latest/1040x760/76598.png",
+    "age": 29,
+    "number": 22,
+    "potential": "C",
+    "salary": 32167000,
+    "contractYears": 3
+  },
+  "mark_eaton": {
+    "id": "mark_eaton",
+    "name": "Mark Eaton",
+    "pos": "C",
+    "positions": [
+      "C"
+    ],
+    "ovr": 83,
+    "off": 72,
+    "def": 81,
+    "attributes": {
+      "shooting": 73,
+      "finishing": 75,
+      "playmaking": 66,
+      "perimeterD": 60,
+      "interiorD": 99,
+      "rebounding": 88,
+      "athleticism": 84
+    },
+    "espnId": null,
+    "nbaId": 76631,
+    "photoUrl": "https://cdn.nba.com/headshots/nba/latest/1040x760/76631.png",
+    "age": 27,
+    "number": 53,
+    "potential": "C",
+    "salary": 24744000,
+    "contractYears": 5
+  },
+  "jerry_eaves": {
+    "id": "jerry_eaves",
+    "name": "Jerry Eaves",
+    "pos": "SG",
+    "positions": [
+      "SG"
+    ],
+    "ovr": 73,
+    "off": 74,
+    "def": 66,
+    "attributes": {
+      "shooting": 70,
+      "finishing": 75,
+      "playmaking": 78,
+      "perimeterD": 70,
+      "interiorD": 63,
+      "rebounding": 65,
+      "athleticism": 75
+    },
+    "espnId": null,
+    "nbaId": 76632,
+    "photoUrl": "https://cdn.nba.com/headshots/nba/latest/1040x760/76632.png",
+    "age": 25,
+    "number": 31,
+    "potential": "C",
+    "salary": 6557000,
+    "contractYears": 5
+  },
+  "rickey_green": {
+    "id": "rickey_green",
+    "name": "Rickey Green",
+    "pos": "SG",
+    "positions": [
+      "SG"
+    ],
+    "ovr": 90,
+    "off": 82,
+    "def": 77,
+    "attributes": {
+      "shooting": 75,
+      "finishing": 76,
+      "playmaking": 97,
+      "perimeterD": 99,
+      "interiorD": 62,
+      "rebounding": 64,
+      "athleticism": 77
+    },
+    "espnId": null,
+    "nbaId": 76874,
+    "photoUrl": "https://cdn.nba.com/headshots/nba/latest/1040x760/76874.png",
+    "age": 29,
+    "number": 14,
+    "potential": "C",
+    "salary": 43301000,
+    "contractYears": 3
+  },
+  "darrell_griffith": {
+    "id": "darrell_griffith",
+    "name": "Darrell Griffith",
+    "pos": "SG",
+    "positions": [
+      "SG"
+    ],
+    "ovr": 84,
+    "off": 80,
+    "def": 71,
+    "attributes": {
+      "shooting": 93,
+      "finishing": 73,
+      "playmaking": 70,
+      "perimeterD": 78,
+      "interiorD": 64,
+      "rebounding": 70,
+      "athleticism": 70
+    },
+    "espnId": null,
+    "nbaId": 76890,
+    "photoUrl": "https://cdn.nba.com/headshots/nba/latest/1040x760/76890.png",
+    "age": 26,
+    "number": 35,
+    "potential": "C",
+    "salary": 27063000,
+    "contractYears": 3
+  },
+  "bob_hansen": {
+    "id": "bob_hansen",
+    "name": "Bob Hansen",
+    "pos": "SG",
+    "positions": [
+      "SG"
+    ],
+    "ovr": 66,
+    "off": 66,
+    "def": 66,
+    "attributes": {
+      "shooting": 66,
+      "finishing": 66,
+      "playmaking": 66,
+      "perimeterD": 66,
+      "interiorD": 66,
+      "rebounding": 66,
+      "athleticism": 66
+    },
+    "espnId": null,
+    "nbaId": 76942,
+    "photoUrl": "https://cdn.nba.com/headshots/nba/latest/1040x760/76942.png",
+    "age": 23,
+    "number": 20,
+    "potential": "B",
+    "salary": 2648000,
+    "contractYears": 4
+  },
+  "rich_kelley": {
+    "id": "rich_kelley",
+    "name": "Rich Kelley",
+    "pos": "C",
+    "positions": [
+      "C"
+    ],
+    "ovr": 79,
+    "off": 78,
+    "def": 76,
+    "attributes": {
+      "shooting": 78,
+      "finishing": 88,
+      "playmaking": 69,
+      "perimeterD": 72,
+      "interiorD": 69,
+      "rebounding": 91,
+      "athleticism": 83
+    },
+    "espnId": null,
+    "nbaId": 77235,
+    "photoUrl": "https://cdn.nba.com/headshots/nba/latest/1040x760/77235.png",
+    "age": 31,
+    "number": 44,
+    "potential": "D",
+    "salary": 13802000,
+    "contractYears": 3
+  },
+  "jeff_wilkins": {
+    "id": "jeff_wilkins",
+    "name": "Jeff Wilkins",
+    "pos": "C",
+    "positions": [
+      "C"
+    ],
+    "ovr": 76,
+    "off": 72,
+    "def": 72,
+    "attributes": {
+      "shooting": 75,
+      "finishing": 78,
+      "playmaking": 62,
+      "perimeterD": 62,
+      "interiorD": 72,
+      "rebounding": 86,
+      "athleticism": 74
+    },
+    "espnId": null,
+    "nbaId": 78537,
+    "photoUrl": "https://cdn.nba.com/headshots/nba/latest/1040x760/78537.png",
+    "age": 29,
+    "number": 45,
+    "potential": "C",
+    "salary": 11599000,
+    "contractYears": 1
+  },
+  "greg_ballard": {
+    "id": "greg_ballard",
+    "name": "Greg Ballard",
+    "pos": "SF",
+    "positions": [
+      "SF"
+    ],
+    "ovr": 77,
+    "off": 75,
+    "def": 72,
+    "attributes": {
+      "shooting": 75,
+      "finishing": 74,
+      "playmaking": 75,
+      "perimeterD": 73,
+      "interiorD": 66,
+      "rebounding": 77,
+      "athleticism": 70
+    },
+    "espnId": null,
+    "nbaId": 76091,
+    "photoUrl": "https://cdn.nba.com/headshots/nba/latest/1040x760/76091.png",
+    "age": 29,
+    "number": 42,
+    "potential": "C",
+    "salary": 13145000,
+    "contractYears": 4
+  },
+  "charlie_davis": {
+    "id": "charlie_davis",
+    "name": "Charlie Davis",
+    "pos": "SF",
+    "positions": [
+      "SF"
+    ],
+    "ovr": 71,
+    "off": 68,
+    "def": 70,
+    "attributes": {
+      "shooting": 69,
+      "finishing": 69,
+      "playmaking": 65,
+      "perimeterD": 69,
+      "interiorD": 69,
+      "rebounding": 75,
+      "athleticism": 69
+    },
+    "espnId": null,
+    "nbaId": 76518,
+    "photoUrl": "https://cdn.nba.com/headshots/nba/latest/1040x760/76518.png",
+    "age": 25,
+    "number": 23,
+    "potential": "C",
+    "salary": 5072000,
+    "contractYears": 2
+  },
+  "darren_daye": {
+    "id": "darren_daye",
+    "name": "Darren Daye",
+    "pos": "SF",
+    "positions": [
+      "SF"
+    ],
+    "ovr": 72,
+    "off": 73,
+    "def": 70,
+    "attributes": {
+      "shooting": 71,
+      "finishing": 73,
+      "playmaking": 76,
+      "perimeterD": 71,
+      "interiorD": 65,
+      "rebounding": 74,
+      "athleticism": 74
+    },
+    "espnId": null,
+    "nbaId": 76543,
+    "photoUrl": "https://cdn.nba.com/headshots/nba/latest/1040x760/76543.png",
+    "age": 23,
+    "number": 25,
+    "potential": "B",
+    "salary": 5815000,
+    "contractYears": 1
+  },
+  "mike_gibson": {
+    "id": "mike_gibson",
+    "name": "Mike Gibson",
+    "pos": "SF",
+    "positions": [
+      "SF"
+    ],
+    "ovr": 66,
+    "off": 66,
+    "def": 66,
+    "attributes": {
+      "shooting": 66,
+      "finishing": 66,
+      "playmaking": 66,
+      "perimeterD": 66,
+      "interiorD": 66,
+      "rebounding": 66,
+      "athleticism": 66
+    },
+    "espnId": null,
+    "nbaId": 76810,
+    "photoUrl": "https://cdn.nba.com/headshots/nba/latest/1040x760/76810.png",
+    "age": 23,
+    "number": 30,
+    "potential": "B",
+    "salary": 2648000,
+    "contractYears": 1
+  },
+  "frank_johnson": {
+    "id": "frank_johnson",
+    "name": "Frank Johnson",
+    "pos": "SG",
+    "positions": [
+      "SG"
+    ],
+    "ovr": 79,
+    "off": 80,
+    "def": 66,
+    "attributes": {
+      "shooting": 78,
+      "finishing": 75,
+      "playmaking": 89,
+      "perimeterD": 74,
+      "interiorD": 61,
+      "rebounding": 62,
+      "athleticism": 73
+    },
+    "espnId": null,
+    "nbaId": 77146,
+    "photoUrl": "https://cdn.nba.com/headshots/nba/latest/1040x760/77146.png",
+    "age": 25,
+    "number": 15,
+    "potential": "C",
+    "salary": 12990000,
+    "contractYears": 1
+  },
+  "joe_kopicki": {
+    "id": "joe_kopicki",
+    "name": "Joe Kopicki",
+    "pos": "SF",
+    "positions": [
+      "SF"
+    ],
+    "ovr": 74,
+    "off": 73,
+    "def": 69,
+    "attributes": {
+      "shooting": 73,
+      "finishing": 80,
+      "playmaking": 67,
+      "perimeterD": 66,
+      "interiorD": 64,
+      "rebounding": 79,
+      "athleticism": 78
+    },
+    "espnId": null,
+    "nbaId": 77300,
+    "photoUrl": "https://cdn.nba.com/headshots/nba/latest/1040x760/77300.png",
+    "age": 24,
+    "number": 31,
+    "potential": "C",
+    "salary": 7299000,
+    "contractYears": 1
+  },
+  "rick_mahorn": {
+    "id": "rick_mahorn",
+    "name": "Rick Mahorn",
+    "pos": "SF",
+    "positions": [
+      "SF"
+    ],
+    "ovr": 78,
+    "off": 73,
+    "def": 77,
+    "attributes": {
+      "shooting": 75,
+      "finishing": 80,
+      "playmaking": 64,
+      "perimeterD": 66,
+      "interiorD": 83,
+      "rebounding": 88,
+      "athleticism": 78
+    },
+    "espnId": null,
+    "nbaId": 328,
+    "photoUrl": "https://cdn.nba.com/headshots/nba/latest/1040x760/328.png",
+    "age": 25,
+    "number": 44,
+    "potential": "C",
+    "salary": 11753000,
+    "contractYears": 5
+  },
+  "jeff_malone": {
+    "id": "jeff_malone",
+    "name": "Jeff Malone",
+    "pos": "SG",
+    "positions": [
+      "SG"
+    ],
+    "ovr": 73,
+    "off": 77,
+    "def": 62,
+    "attributes": {
+      "shooting": 89,
+      "finishing": 70,
+      "playmaking": 69,
+      "perimeterD": 60,
+      "interiorD": 63,
+      "rebounding": 64,
+      "athleticism": 68
+    },
+    "espnId": null,
+    "nbaId": 117,
+    "photoUrl": "https://cdn.nba.com/headshots/nba/latest/1040x760/117.png",
+    "age": 23,
+    "number": 24,
+    "potential": "B",
+    "salary": 6557000,
+    "contractYears": 2
+  },
+  "tom_mcmillen": {
+    "id": "tom_mcmillen",
+    "name": "Tom McMillen",
+    "pos": "SF",
+    "positions": [
+      "SF"
+    ],
+    "ovr": 74,
+    "off": 74,
+    "def": 66,
+    "attributes": {
+      "shooting": 77,
+      "finishing": 80,
+      "playmaking": 65,
+      "perimeterD": 60,
+      "interiorD": 67,
+      "rebounding": 73,
+      "athleticism": 70
+    },
+    "espnId": null,
+    "nbaId": 77553,
+    "photoUrl": "https://cdn.nba.com/headshots/nba/latest/1040x760/77553.png",
+    "age": 32,
+    "number": 54,
+    "potential": "D",
+    "salary": 7756000,
+    "contractYears": 3
+  },
+  "jeff_ruland": {
+    "id": "jeff_ruland",
+    "name": "Jeff Ruland",
+    "pos": "C",
+    "positions": [
+      "C"
+    ],
+    "ovr": 90,
+    "off": 80,
+    "def": 75,
+    "attributes": {
+      "shooting": 78,
+      "finishing": 96,
+      "playmaking": 68,
+      "perimeterD": 66,
+      "interiorD": 72,
+      "rebounding": 92,
+      "athleticism": 85
+    },
+    "espnId": null,
+    "nbaId": 78041,
+    "photoUrl": "https://cdn.nba.com/headshots/nba/latest/1040x760/78041.png",
+    "age": 25,
+    "number": 43,
+    "potential": "C",
+    "salary": 34641000,
+    "contractYears": 3
+  },
+  "dewayne_scales": {
+    "id": "dewayne_scales",
+    "name": "Dewayne Scales",
+    "pos": "SF",
+    "positions": [
+      "SF"
+    ],
+    "ovr": 66,
+    "off": 66,
+    "def": 66,
+    "attributes": {
+      "shooting": 66,
+      "finishing": 66,
+      "playmaking": 66,
+      "perimeterD": 66,
+      "interiorD": 66,
+      "rebounding": 66,
+      "athleticism": 66
+    },
+    "espnId": null,
+    "nbaId": 78068,
+    "photoUrl": "https://cdn.nba.com/headshots/nba/latest/1040x760/78068.png",
+    "age": 25,
+    "number": 32,
+    "potential": "C",
+    "salary": 2648000,
+    "contractYears": 5
+  },
+  "ricky_sobers": {
+    "id": "ricky_sobers",
+    "name": "Ricky Sobers",
+    "pos": "SG",
+    "positions": [
+      "SG"
+    ],
+    "ovr": 77,
+    "off": 77,
+    "def": 69,
+    "attributes": {
+      "shooting": 82,
+      "finishing": 72,
+      "playmaking": 76,
+      "perimeterD": 79,
+      "interiorD": 63,
+      "rebounding": 62,
+      "athleticism": 71
+    },
+    "espnId": null,
+    "nbaId": 78215,
+    "photoUrl": "https://cdn.nba.com/headshots/nba/latest/1040x760/78215.png",
+    "age": 31,
+    "number": 14,
+    "potential": "D",
+    "salary": 11173000,
+    "contractYears": 4
+  },
+  "bryan_warrick": {
+    "id": "bryan_warrick",
+    "name": "Bryan Warrick",
+    "pos": "SG",
+    "positions": [
+      "SG"
+    ],
+    "ovr": 66,
+    "off": 66,
+    "def": 66,
+    "attributes": {
+      "shooting": 66,
+      "finishing": 66,
+      "playmaking": 66,
+      "perimeterD": 66,
+      "interiorD": 66,
+      "rebounding": 66,
+      "athleticism": 66
+    },
+    "espnId": null,
+    "nbaId": 78462,
+    "photoUrl": "https://cdn.nba.com/headshots/nba/latest/1040x760/78462.png",
+    "age": 24,
+    "number": 13,
+    "potential": "C",
+    "salary": 2648000,
+    "contractYears": 4
+  },
+  "mike_wilson": {
+    "id": "mike_wilson",
+    "name": "Mike Wilson",
+    "pos": "SG",
+    "positions": [
+      "SG"
+    ],
+    "ovr": 66,
+    "off": 66,
+    "def": 66,
+    "attributes": {
+      "shooting": 66,
+      "finishing": 66,
+      "playmaking": 66,
+      "perimeterD": 66,
+      "interiorD": 66,
+      "rebounding": 66,
+      "athleticism": 66
+    },
+    "espnId": null,
+    "nbaId": 78581,
+    "photoUrl": "https://cdn.nba.com/headshots/nba/latest/1040x760/78581.png",
+    "age": 24,
+    "number": 2,
+    "potential": "C",
+    "salary": 2648000,
+    "contractYears": 3
+  },
+  "ken_austin": {
+    "id": "ken_austin",
+    "name": "Ken Austin",
+    "pos": "SF",
+    "positions": [
+      "SF"
+    ],
+    "ovr": 66,
+    "off": 66,
+    "def": 66,
+    "attributes": {
+      "shooting": 66,
+      "finishing": 66,
+      "playmaking": 66,
+      "perimeterD": 66,
+      "interiorD": 66,
+      "rebounding": 66,
+      "athleticism": 66
+    },
+    "espnId": null,
+    "nbaId": 76074,
+    "photoUrl": "https://cdn.nba.com/headshots/nba/latest/1040x760/76074.png",
+    "age": 22,
+    "number": 34,
+    "potential": "B",
+    "salary": 1820000,
+    "contractYears": 4
+  },
+  "kent_benson": {
+    "id": "kent_benson",
+    "name": "Kent Benson",
+    "pos": "C",
+    "positions": [
+      "C"
+    ],
+    "ovr": 82,
+    "off": 77,
+    "def": 78,
+    "attributes": {
+      "shooting": 79,
+      "finishing": 81,
+      "playmaking": 70,
+      "perimeterD": 77,
+      "interiorD": 75,
+      "rebounding": 84,
+      "athleticism": 75
+    },
+    "espnId": null,
+    "nbaId": 76154,
+    "photoUrl": "https://cdn.nba.com/headshots/nba/latest/1040x760/76154.png",
+    "age": 29,
+    "number": 54,
+    "potential": "C",
+    "salary": 22424000,
+    "contractYears": 1
+  },
+  "earl_cureton": {
+    "id": "earl_cureton",
+    "name": "Earl Cureton",
+    "pos": "SF",
+    "positions": [
+      "SF"
+    ],
+    "ovr": 72,
+    "off": 69,
+    "def": 74,
+    "attributes": {
+      "shooting": 71,
+      "finishing": 73,
+      "playmaking": 63,
+      "perimeterD": 68,
+      "interiorD": 74,
+      "rebounding": 85,
+      "athleticism": 74
+    },
+    "espnId": null,
+    "nbaId": 940,
+    "photoUrl": "https://cdn.nba.com/headshots/nba/latest/1040x760/940.png",
+    "age": 26,
+    "number": 23,
+    "potential": "C",
+    "salary": 7268000,
+    "contractYears": 3
+  },
+  "lionel_hollins": {
+    "id": "lionel_hollins",
+    "name": "Lionel Hollins",
+    "pos": "SG",
+    "positions": [
+      "SG"
+    ],
+    "ovr": 66,
+    "off": 66,
+    "def": 66,
+    "attributes": {
+      "shooting": 66,
+      "finishing": 66,
+      "playmaking": 66,
+      "perimeterD": 66,
+      "interiorD": 66,
+      "rebounding": 66,
+      "athleticism": 66
+    },
+    "espnId": null,
+    "nbaId": 77043,
+    "photoUrl": "https://cdn.nba.com/headshots/nba/latest/1040x760/77043.png",
+    "age": 30,
+    "number": 9,
+    "potential": "D",
+    "salary": 3309000,
+    "contractYears": 1
+  },
+  "vinnie_johnson": {
+    "id": "vinnie_johnson",
+    "name": "Vinnie Johnson",
+    "pos": "SG",
+    "positions": [
+      "SG"
+    ],
+    "ovr": 79,
+    "off": 77,
+    "def": 67,
+    "attributes": {
+      "shooting": 76,
+      "finishing": 76,
+      "playmaking": 78,
+      "perimeterD": 66,
+      "interiorD": 65,
+      "rebounding": 71,
+      "athleticism": 73
+    },
+    "espnId": null,
+    "nbaId": 77167,
+    "photoUrl": "https://cdn.nba.com/headshots/nba/latest/1040x760/77167.png",
+    "age": 27,
+    "number": 15,
+    "potential": "C",
+    "salary": 16238000,
+    "contractYears": 4
+  },
+  "bill_laimbeer": {
+    "id": "bill_laimbeer",
+    "name": "Bill Laimbeer",
+    "pos": "C",
+    "positions": [
+      "C"
+    ],
+    "ovr": 88,
+    "off": 75,
+    "def": 76,
+    "attributes": {
+      "shooting": 76,
+      "finishing": 83,
+      "playmaking": 65,
+      "perimeterD": 63,
+      "interiorD": 75,
+      "rebounding": 98,
+      "athleticism": 76
+    },
+    "espnId": null,
+    "nbaId": 100263,
+    "photoUrl": "https://cdn.nba.com/headshots/nba/latest/1040x760/100263.png",
+    "age": 27,
+    "number": 40,
+    "potential": "C",
+    "salary": 37734000,
+    "contractYears": 3
+  },
+  "cliff_levingston": {
+    "id": "cliff_levingston",
+    "name": "Cliff Levingston",
+    "pos": "SF",
+    "positions": [
+      "SF"
+    ],
+    "ovr": 83,
+    "off": 76,
+    "def": 79,
+    "attributes": {
+      "shooting": 75,
+      "finishing": 85,
+      "playmaking": 68,
+      "perimeterD": 68,
+      "interiorD": 82,
+      "rebounding": 93,
+      "athleticism": 83
+    },
+    "espnId": null,
+    "nbaId": 77377,
+    "photoUrl": "https://cdn.nba.com/headshots/nba/latest/1040x760/77377.png",
+    "age": 23,
+    "number": 53,
+    "potential": "A",
+    "salary": 19795000,
+    "contractYears": 3
+  },
+  "john_long": {
+    "id": "john_long",
+    "name": "John Long",
+    "pos": "SG",
+    "positions": [
+      "SG"
+    ],
+    "ovr": 77,
+    "off": 74,
+    "def": 70,
+    "attributes": {
+      "shooting": 78,
+      "finishing": 74,
+      "playmaking": 70,
+      "perimeterD": 75,
+      "interiorD": 64,
+      "rebounding": 69,
+      "athleticism": 72
+    },
+    "espnId": null,
+    "nbaId": 1381,
+    "photoUrl": "https://cdn.nba.com/headshots/nba/latest/1040x760/1381.png",
+    "age": 27,
+    "number": 25,
+    "potential": "C",
+    "salary": 13145000,
+    "contractYears": 5
+  },
+  "walker_russell": {
+    "id": "walker_russell",
+    "name": "Walker Russell",
+    "pos": "SG",
+    "positions": [
+      "SG"
+    ],
+    "ovr": 66,
+    "off": 66,
+    "def": 66,
+    "attributes": {
+      "shooting": 66,
+      "finishing": 66,
+      "playmaking": 66,
+      "perimeterD": 66,
+      "interiorD": 66,
+      "rebounding": 66,
+      "athleticism": 66
+    },
+    "espnId": null,
+    "nbaId": 78048,
+    "photoUrl": "https://cdn.nba.com/headshots/nba/latest/1040x760/78048.png",
+    "age": 23,
+    "number": 0,
+    "potential": "B",
+    "salary": 2648000,
+    "contractYears": 5
+  },
+  "david_thirdkill": {
+    "id": "david_thirdkill",
+    "name": "David Thirdkill",
+    "pos": "SF",
+    "positions": [
+      "SF"
+    ],
+    "ovr": 66,
+    "off": 66,
+    "def": 66,
+    "attributes": {
+      "shooting": 66,
+      "finishing": 66,
+      "playmaking": 66,
+      "perimeterD": 66,
+      "interiorD": 66,
+      "rebounding": 66,
+      "athleticism": 66
+    },
+    "espnId": null,
+    "nbaId": 78314,
+    "photoUrl": "https://cdn.nba.com/headshots/nba/latest/1040x760/78314.png",
+    "age": 24,
+    "number": 22,
+    "potential": "C",
+    "salary": 2648000,
+    "contractYears": 5
+  },
+  "isiah_thomas": {
+    "id": "isiah_thomas",
+    "name": "Isiah Thomas",
+    "pos": "SG",
+    "positions": [
+      "SG"
+    ],
+    "ovr": 93,
+    "off": 87,
+    "def": 77,
+    "attributes": {
+      "shooting": 88,
+      "finishing": 77,
+      "playmaking": 96,
+      "perimeterD": 93,
+      "interiorD": 65,
+      "rebounding": 67,
+      "athleticism": 83
+    },
+    "espnId": null,
+    "nbaId": 78318,
+    "photoUrl": "https://cdn.nba.com/headshots/nba/latest/1040x760/78318.png",
+    "age": 23,
+    "number": 11,
+    "potential": "A",
+    "salary": 40579000,
+    "contractYears": 3
+  },
+  "ray_tolbert": {
+    "id": "ray_tolbert",
+    "name": "Ray Tolbert",
+    "pos": "SF",
+    "positions": [
+      "SF"
+    ],
+    "ovr": 66,
+    "off": 66,
+    "def": 66,
+    "attributes": {
+      "shooting": 66,
+      "finishing": 66,
+      "playmaking": 66,
+      "perimeterD": 66,
+      "interiorD": 66,
+      "rebounding": 66,
+      "athleticism": 66
+    },
+    "espnId": null,
+    "nbaId": 78348,
+    "photoUrl": "https://cdn.nba.com/headshots/nba/latest/1040x760/78348.png",
+    "age": 25,
+    "number": 24,
+    "potential": "C",
+    "salary": 2648000,
+    "contractYears": 2
+  },
+  "kelly_tripucka": {
+    "id": "kelly_tripucka",
+    "name": "Kelly Tripucka",
+    "pos": "SF",
+    "positions": [
+      "SF"
+    ],
+    "ovr": 79,
+    "off": 73,
+    "def": 67,
+    "attributes": {
+      "shooting": 73,
+      "finishing": 78,
+      "playmaking": 69,
+      "perimeterD": 68,
+      "interiorD": 63,
+      "rebounding": 70,
+      "athleticism": 76
+    },
+    "espnId": null,
+    "nbaId": 78369,
+    "photoUrl": "https://cdn.nba.com/headshots/nba/latest/1040x760/78369.png",
+    "age": 25,
+    "number": 7,
+    "potential": "C",
+    "salary": 12990000,
+    "contractYears": 2
+  },
+  "terry_tyler": {
+    "id": "terry_tyler",
+    "name": "Terry Tyler",
+    "pos": "SF",
+    "positions": [
+      "SF"
+    ],
+    "ovr": 76,
+    "off": 70,
+    "def": 77,
+    "attributes": {
+      "shooting": 73,
+      "finishing": 71,
+      "playmaking": 64,
+      "perimeterD": 76,
+      "interiorD": 78,
+      "rebounding": 77,
+      "athleticism": 75
+    },
+    "espnId": null,
+    "nbaId": 78390,
+    "photoUrl": "https://cdn.nba.com/headshots/nba/latest/1040x760/78390.png",
+    "age": 27,
+    "number": 41,
+    "potential": "C",
+    "salary": 11599000,
+    "contractYears": 3
+  }
+}

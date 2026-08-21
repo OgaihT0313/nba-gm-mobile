@@ -19,6 +19,16 @@ export interface EraVisual {
 }
 
 export const ERA_VISUALS: { [visualId: string]: EraVisual } = {
+  'magic-bird-era': {
+    accentPrimary: '#007A33', // Celtics green — the rivalry's other half of Lakers purple (used by Kobe Era below)
+    accentSecondary: '#BA9653', // Celtics gold
+    floorTone: '#8a5a2e', // the oldest/darkest retro wood of the four eras
+  },
+  'jordan-era': {
+    accentPrimary: '#CE1141', // Bulls red
+    accentSecondary: '#000000', // Bulls black
+    floorTone: '#93602c', // between Magic vs. Bird's and Kobe Era's tones, chronologically
+  },
   'kobe-era': {
     accentPrimary: '#552583', // Lakers purple — the decade's defining color
     accentSecondary: '#FDB927', // Lakers gold
