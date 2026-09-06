@@ -15,6 +15,7 @@ import Screen, { HeroContent, Body } from '../components/ui/Screen';
 import {
   Panel, MonoLabel, Eyebrow, HeroTitle, Stat, Meter, Chip, CtaButton, GhostButton, SectionLabel,
 } from '../components/ui/kit';
+import { currentEra } from '../data/eras';
 import CommentaryPanel from '../components/CommentaryPanel';
 import CupPanel from '../components/CupPanel';
 import StandingsTable from '../components/StandingsTable';
@@ -55,6 +56,24 @@ const SimulationScreen: React.FC<SimulationScreenProps> = ({
   const remaining = Math.max(0, 82 - gp);
   const over = season.status !== 'active';
   const seasonNumber = season.gmLegacy.seasons + 1;
+  // Derived from eraChainIndex, so it tracks where the save is now rather than
+  // where it started — undefined for a live save, which keeps the eyebrow as
+  // it always was.
+  const era = currentEra(season.eraChainIndex);
+  // Did this save just cross into a new era? Derived by comparing the current
+  // chain position against the previous one, so it needs no stored flag and
+  // can't be flushed the way a feed event can (the offseason pushes several
+  // hundred events through a 60-slot buffer, so anything announced there is
+  // long gone by the time the player lands here). Shown only before the first
+  // game of the season, i.e. exactly when the player arrives from the
+  // offseason.
+  const previousEra = currentEra(season.eraChainIndex !== undefined ? season.eraChainIndex - 1 : undefined);
+  // seasonNumber > 1 matters: a save STARTED on the first season of a group
+  // (e.g. 1998-99, the first Kobe Era entry) would otherwise compare against
+  // the group before it and claim the player crossed an era they never played.
+  const justCrossedEra =
+    seasonNumber > 1 && season.gamesPlayed === 0
+    && !!era && !!previousEra && era.groupId !== previousEra.groupId;
 
   const salary = userTeam ? getTeamSalary(userTeam, season.players) : 0;
   // The salary model is synthetic and runs hot: 29 of the 30 teams sit above
@@ -123,7 +142,7 @@ const SimulationScreen: React.FC<SimulationScreenProps> = ({
       {/* ---------------------------------------------------------------- hero */}
       <HeroContent>
         <View className="flex-row items-center justify-between">
-          <Eyebrow>GM · Temporada {seasonNumber}</Eyebrow>
+          <Eyebrow>GM · Temporada {seasonNumber}{era ? ` · ${era.label}` : ''}</Eyebrow>
           <View
             className="flex-row items-center"
             style={{ gap: 6, backgroundColor: 'rgba(0,0,0,0.3)', paddingHorizontal: 9, paddingVertical: 4, borderRadius: RADIUS.pill }}
@@ -187,6 +206,19 @@ const SimulationScreen: React.FC<SimulationScreenProps> = ({
 
       {/* ---------------------------------------------------------------- body */}
       <Body top={20}>
+        {justCrossedEra && era ? (
+          <Panel bar={COLORS.cta} padding={14} style={{ marginBottom: 10 }}>
+            <MonoLabel>Nova era</MonoLabel>
+            <Text className="font-bold text-white" style={{ fontSize: 15, marginTop: 6 }}>
+              Começa a {era.label}
+            </Text>
+            <Text style={{ fontSize: 11.5, lineHeight: 16, color: INK.body, marginTop: 5 }}>
+              {era.seasonLabel
+                ? `Sua carreira atravessou da ${previousEra?.label} para a ${era.label}. A liga entra em ${era.seasonLabel}, com os elencos reais daquela temporada.`
+                : `A história real acaba aqui. Daqui pra frente é a ${era.label}, e a liga segue só pelo que você fizer dela.`}
+            </Text>
+          </Panel>
+        ) : null}
         {/* Star + cap: the two constraints every decision on every other screen
             runs into. */}
         <View className="flex-row" style={{ gap: 10 }}>

@@ -8,7 +8,7 @@ import { JetBrainsMono_400Regular, JetBrainsMono_700Bold } from '@expo-google-fo
 
 import { Team, Player, Coach, SeasonState, DraftState, Event, LiveTactic, Notification as NotificationType, OffseasonMove } from './types';
 import { teamsData, playersData, offseasonMoves, picksOf } from './constants';
-import { ERAS, eraById } from './data/eras';
+import { ERAS, eraById, currentEra } from './data/eras';
 import { simulationEngine, ROTATION_MIN, ROTATION_MAX } from './services/simulationService';
 import { buildSeasonOwner, evaluateSeasonOutcome } from './services/ownerService';
 import { generateSchedule } from './services/scheduleService';
@@ -435,6 +435,7 @@ export default function App() {
       // list, so the chain quietly and permanently goes procedural once real
       // data runs out — no separate "chain exhausted" state needed.
       const moveEvents: Event[] = [];
+      const eraEvents: Event[] = [];
       const sortByOvr = (roster: string[]) => [...roster].sort((a, b) => (rosterPlayers[b]?.ovr || 0) - (rosterPlayers[a]?.ovr || 0));
       const applyMoves = (moves: OffseasonMove[]) => {
         moves.forEach((move) => {
@@ -452,6 +453,21 @@ export default function App() {
       if (prev.era) {
         applyMoves(prev.eraChainIndex !== undefined ? (ERAS[prev.eraChainIndex]?.offseasonMoves.moves ?? []) : []);
         nextEraChainIndex = prev.eraChainIndex !== undefined ? prev.eraChainIndex + 1 : undefined;
+        // Crossing an era boundary is the one moment the save's identity
+        // changes on its own, so it gets announced like any other league news.
+        // Compared by group id, not index, so it fires once per era — not once
+        // per season — and fires exactly once more when real history runs out
+        // and the chain goes procedural (see currentEra in data/eras).
+        const fromEra = currentEra(prev.eraChainIndex);
+        const toEra = currentEra(nextEraChainIndex);
+        if (fromEra && toEra && fromEra.groupId !== toEra.groupId) {
+          eraEvents.push({
+            message: toEra.seasonLabel
+              ? `✨ NOVA ERA: começa a ${toEra.label} — sua carreira atravessa para ${toEra.seasonLabel}.`
+              : `✨ NOVA ERA: a história real acaba aqui. Daqui pra frente é a ${toEra.label}, e a liga segue só pelo que você fizer dela.`,
+            type: 'era',
+          });
+        }
       } else if (!prev.offseasonMovesApplied) {
         applyMoves(offseasonMoves.moves);
       }
@@ -505,7 +521,15 @@ export default function App() {
         players: advanced.players,
         draft: advanced.draft,
         coaches: coaching.coaches,
-        events: [...advanced.events, ...contracts.events, ...board.events, ...moveEvents, ...coaching.events, ...progressionEvents, ...prev.events].slice(0, 60),
+        // Order matters: this array is the feed's display order and is capped
+        // at 60, and the draft-pick + expiring-contract batches alone overflow
+        // that cap on their own. Anything listed after them was silently
+        // truncated and never reached the player — which is what used to
+        // happen to the real-NBA offseason moves (the whole point of the era
+        // chain) and would happen to the era-change announcement too. So the
+        // one-off narrative news goes first, and the routine bulk chatter
+        // fills whatever is left.
+        events: [...eraEvents, ...moveEvents, ...advanced.events, ...contracts.events, ...board.events, ...coaching.events, ...progressionEvents, ...prev.events].slice(0, 60),
         playoff: null,
         awards: null,
         offseasonMovesApplied: true,
@@ -939,13 +963,18 @@ export default function App() {
       );
     }
     if (view === 'watch-game' && watchGame) {
+      // The era the save is in NOW, not the one it started as — so the floor
+      // tone ages with the save instead of staying frozen a decade back.
+      // Undefined past the end of the chain, which is exactly what makes
+      // Court3D fall through to its own modern default.
+      const watchEraId = season?.era ? ERAS[season.eraChainIndex ?? -1]?.id : undefined;
       return (
         <WatchGameScreen
           home={watchGame.home}
           away={watchGame.away}
           game={watchGame.game}
           onFinish={finishWatchGame}
-          eraId={season?.era?.id}
+          eraId={watchEraId}
         />
       );
     }

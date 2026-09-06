@@ -791,3 +791,42 @@ export const ERA_GROUPS: EraGroup[] = [
 
 export const eraGroupForEraId = (eraId: string): EraGroup | undefined =>
   ERA_GROUPS.find((g) => g.seasonIds.includes(eraId));
+
+/** Group id used once a save walks past the end of ERAS (see `currentEra`). */
+export const MODERN_ERA_GROUP_ID = 'modern-era';
+
+/**
+ * Which era a save is living in RIGHT NOW, derived from SeasonState's
+ * eraChainIndex (which advances one entry per offseason) rather than from
+ * SeasonState.era, which is frozen at whatever the save STARTED as.
+ *
+ * That distinction is the whole point: because ERAS is one unbroken chain from
+ * 1979-80 to 2019-20, a long save started in the Jordan Era really does play
+ * its way into the Kobe Era, and the app should say so instead of still
+ * calling it 1990-91 a dozen seasons later.
+ *
+ * Past the end of the chain the save is running on procedural history, so it
+ * reports the Modern Era with NO visualId — which is exactly right, since a
+ * save with no era visual falls through to Court3D's own modern default (see
+ * src/theme/eraVisuals.ts). Returns undefined for a live (non-era) save.
+ */
+export interface CurrentEra {
+  /** Stable id for comparing across offseasons (an ERA_GROUPS id, or MODERN_ERA_GROUP_ID). */
+  groupId: string;
+  /** Display name, e.g. "Kobe Era" or "Era Moderna". */
+  label: string;
+  /** Key into ERA_VISUALS; undefined past the chain, on purpose. */
+  visualId?: string;
+  /** The specific season being played, e.g. "1998-99". Undefined past the chain. */
+  seasonLabel?: string;
+}
+
+export const currentEra = (eraChainIndex: number | undefined): CurrentEra | undefined => {
+  if (eraChainIndex === undefined) return undefined;
+  const era = ERAS[eraChainIndex];
+  if (!era) return { groupId: MODERN_ERA_GROUP_ID, label: 'Era Moderna' };
+  const group = eraGroupForEraId(era.id);
+  return group
+    ? { groupId: group.id, label: group.label, visualId: group.visualId, seasonLabel: era.seasonLabel }
+    : { groupId: MODERN_ERA_GROUP_ID, label: 'Era Moderna', seasonLabel: era.seasonLabel };
+};
