@@ -71,6 +71,13 @@ const SimulationScreen: React.FC<SimulationScreenProps> = ({
   // seasonNumber > 1 matters: a save STARTED on the first season of a group
   // (e.g. 1998-99, the first Kobe Era entry) would otherwise compare against
   // the group before it and claim the player crossed an era they never played.
+  // Real NBA offseason moves replayed on the way into this season. Read from
+  // state (only the ones that actually landed) rather than from data/eras, and
+  // shown here because the events feed can't carry them — an offseason pushes
+  // several hundred events through a 60-slot buffer that only ever renders its
+  // top 6, so these were being generated and then buried, every single year.
+  const offseasonMoves = season.gamesPlayed === 0 ? (season.lastOffseasonMoves ?? []) : [];
+  const teamName = (id: string) => getTeamNickname(season.teams.find((t) => t.id === id));
   const justCrossedEra =
     seasonNumber > 1 && season.gamesPlayed === 0
     && !!era && !!previousEra && era.groupId !== previousEra.groupId;
@@ -217,6 +224,31 @@ const SimulationScreen: React.FC<SimulationScreenProps> = ({
                 ? `Sua carreira atravessou da ${previousEra?.label} para a ${era.label}. A liga entra em ${era.seasonLabel}, com os elencos reais daquela temporada.`
                 : `A história real acaba aqui. Daqui pra frente é a ${era.label}, e a liga segue só pelo que você fizer dela.`}
             </Text>
+          </Panel>
+        ) : null}
+        {offseasonMoves.length > 0 ? (
+          <Panel padding={14} style={{ marginBottom: 10 }}>
+            <MonoLabel>Offseason real · {offseasonMoves.length} movimentações</MonoLabel>
+            <Text style={{ fontSize: 11, lineHeight: 15, color: INK.body, marginTop: 5, marginBottom: 9 }}>
+              O que de fato aconteceu na NBA entre uma temporada e outra, replicado no seu save.
+            </Text>
+            <View style={{ gap: 7 }}>
+              {offseasonMoves.slice(0, 8).map((m, i) => (
+                <View key={i} className="flex-row items-center" style={{ gap: 8 }}>
+                  <Text className="font-semibold text-white" style={{ fontSize: 11.5, flex: 1 }} numberOfLines={1}>
+                    {m.playerName}
+                  </Text>
+                  <Text className="font-mono" style={{ fontSize: 10, color: COLORS.textSoft }} numberOfLines={1}>
+                    {teamName(m.fromTeamId)} › {teamName(m.toTeamId)}
+                  </Text>
+                </View>
+              ))}
+            </View>
+            {offseasonMoves.length > 8 ? (
+              <Text style={{ fontSize: 10.5, color: COLORS.textSoft, marginTop: 9 }}>
+                e mais {offseasonMoves.length - 8} pela liga.
+              </Text>
+            ) : null}
           </Panel>
         ) : null}
         {/* Star + cap: the two constraints every decision on every other screen

@@ -352,6 +352,15 @@ export interface SeasonState {
   // permanently procedural once real data or a matching roster runs out —
   // no explicit "chain exhausted" state needed. Undefined for a live save.
   eraChainIndex?: number;
+  // The real NBA offseason moves that were actually APPLIED on the way into
+  // this season — not the raw list from data/eras, which includes moves that
+  // get skipped when the save has already diverged from real history (the
+  // player traded that guy away first). Recorded because the events feed
+  // cannot carry them: one offseason pushes several hundred events through a
+  // 60-slot buffer, so anything announced there is buried long before the
+  // player reads it. Rewritten every offseason; the season screen shows it
+  // only before the season's first game.
+  lastOffseasonMoves?: { playerName: string; fromTeamId: string; toTeamId: string }[];
   // Latest AI-generated league-wide commentary and the gamesPlayed checkpoint
   // it was generated at, so the app knows not to re-request it until the next
   // COMMENTARY_INTERVAL checkpoint (see App.tsx).

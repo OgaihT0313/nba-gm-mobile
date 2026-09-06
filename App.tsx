@@ -436,6 +436,11 @@ export default function App() {
       // data runs out — no separate "chain exhausted" state needed.
       const moveEvents: Event[] = [];
       const eraEvents: Event[] = [];
+      // The moves that actually land, for the season screen's offseason recap
+      // (SeasonState.lastOffseasonMoves). Collected here rather than read back
+      // from data/eras because the guard below skips any move the save has
+      // already diverged from.
+      const appliedMoves: { playerName: string; fromTeamId: string; toTeamId: string }[] = [];
       const sortByOvr = (roster: string[]) => [...roster].sort((a, b) => (rosterPlayers[b]?.ovr || 0) - (rosterPlayers[a]?.ovr || 0));
       const applyMoves = (moves: OffseasonMove[]) => {
         moves.forEach((move) => {
@@ -447,6 +452,7 @@ export default function App() {
           newTeams[fromIdx] = { ...newTeams[fromIdx], roster: newTeams[fromIdx].roster.filter((id) => id !== move.playerId) };
           newTeams[toIdx] = { ...newTeams[toIdx], roster: sortByOvr([...newTeams[toIdx].roster, move.playerId]) };
           moveEvents.push({ message: `🏀 OFFSEASON: ${move.playerName} deixou o ${fromName} e agora joga pelo ${toName}.`, type: 'trade' });
+          appliedMoves.push({ playerName: move.playerName, fromTeamId: move.fromTeamId, toTeamId: move.toTeamId });
         });
       };
       let nextEraChainIndex = prev.eraChainIndex;
@@ -547,6 +553,7 @@ export default function App() {
         awards: null,
         offseasonMovesApplied: true,
         eraChainIndex: nextEraChainIndex,
+        lastOffseasonMoves: appliedMoves,
         allStar: undefined,
         leagueCommentary: undefined,
         cup: undefined,
