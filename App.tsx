@@ -521,15 +521,28 @@ export default function App() {
         players: advanced.players,
         draft: advanced.draft,
         coaches: coaching.coaches,
-        // Order matters: this array is the feed's display order and is capped
-        // at 60, and the draft-pick + expiring-contract batches alone overflow
-        // that cap on their own. Anything listed after them was silently
-        // truncated and never reached the player — which is what used to
-        // happen to the real-NBA offseason moves (the whole point of the era
-        // chain) and would happen to the era-change announcement too. So the
-        // one-off narrative news goes first, and the routine bulk chatter
-        // fills whatever is left.
-        events: [...eraEvents, ...moveEvents, ...advanced.events, ...contracts.events, ...board.events, ...coaching.events, ...progressionEvents, ...prev.events].slice(0, 60),
+        // One offseason generates several HUNDRED events against a 60-slot
+        // buffer, so this array is a budget, not a list. It used to be plain
+        // concatenation, which meant the two biggest batches (draft picks and
+        // expiring contracts) filled all 60 between them and silently erased
+        // everything after — including the "🏀 OFFSEASON: X deixou o Y"
+        // replays that are the entire point of chaining real NBA history, so
+        // those had never actually reached a player.
+        //
+        // Each category now gets a slice of the buffer instead, ordered
+        // most-narrative first: an era change (at most one, and the rarest
+        // thing that can happen to a save) leads, then real history, then the
+        // routine bulk. Nothing is monopolised and nothing is wiped out.
+        events: [
+          ...eraEvents,
+          ...moveEvents.slice(0, 18),
+          ...advanced.events.slice(0, 12),
+          ...contracts.events.slice(0, 6),
+          ...board.events,
+          ...coaching.events.slice(0, 4),
+          ...progressionEvents.slice(0, 8),
+          ...prev.events,
+        ].slice(0, 60),
         playoff: null,
         awards: null,
         offseasonMovesApplied: true,
@@ -587,7 +600,12 @@ export default function App() {
         status: 'free_agency',
         teams: cpuFa.teams,
         players: cpuFa.players,
-        events: [...cpuFa.events, ...prev.events].slice(0, 60),
+        // Budgeted for the same reason the offseason batch above is: the CPU
+        // signs across all 29 teams at once, which on its own overruns the
+        // 60-slot buffer and wipes every earlier offseason headline out of
+        // the save. Capped, the buffer keeps a mix instead of one stage's
+        // worth of routine signings.
+        events: [...cpuFa.events.slice(0, 15), ...prev.events].slice(0, 60),
         draft: undefined,
       };
     });
