@@ -1,6 +1,6 @@
 
 import { playersData, getPlayerPositions, getPlayerAttributes, LINEUP_POSITIONS } from '../constants';
-import type { Team, Player, Coach, Event, PlayoffState, PlayoffSeries, PlayoffConference, PlayInBracket, AllStarResult, CupState, ScheduleGame, LiveGameState, LiveTactic, PendingDeciderRef } from '../types';
+import type { Team, Player, Coach, Event, PlayoffState, PlayoffSeries, PlayoffConference, PlayInBracket, AllStarResult, CupState, ScheduleGame, LiveGameState, LiveTactic, WatchPlay, PendingDeciderRef } from '../types';
 import { TRADE_DEADLINE_GAME } from './tradeService';
 import { sortStandings, compareStandings } from './scheduleService';
 import { coachOffenseMod, coachDefenseMod } from './coachService';
@@ -187,7 +187,7 @@ const ROTATION_WEIGHTS = [5.0, 4.6, 4.3, 4.0, 3.7, 2.7, 2.2, 1.7, 1.3, 0.9];
 // weight, the reduced exposure and slower fatigue accrual fall out for free.
 const LOAD_MANAGED_FACTOR = 0.6;
 
-const getRotationWeights = (team: Team, players: { [key: string]: Player }): { ids: string[]; weights: number[] } => {
+export const getRotationWeights = (team: Team, players: { [key: string]: Player }): { ids: string[]; weights: number[] } => {
     const ids = getTeamRotation(team, players, rotationSize(team));
     const weights = ids.map((pId, i) => {
         const base = ROTATION_WEIGHTS[i] ?? 0.5;
@@ -380,7 +380,7 @@ const updateMorale = (
 // of simulateGame so the live-game quarter engine (simulateQuarter below) can
 // compute the same full-game expectation once and split it across quarters,
 // instead of re-deriving a second, drifting copy of this formula.
-const computeExpectedPoints = (
+export const computeExpectedPoints = (
     teamA: Team, teamB: Team, players: { [key: string]: Player }, coaches: CoachMap, isAHome: boolean,
 ): { expectedPointsA: number; expectedPointsB: number } => {
     const ratingsA = getGameRatings(teamA, players);
@@ -481,39 +481,48 @@ const simulateGame = (teamA: Team, teamB: Team, players: { [key: string]: Player
         : { winner: teamB, loser: teamA, scoreWinner: scoreB, scoreLoser: scoreA };
 };
 
-// --- WATCHABLE GAME EVENTS (3D "Assistir ao Jogo") ---
-// Turns a resolved simulateGame() result into a chronological list of made
-// baskets for the 3D court screen to dramatize. The final score/winner is
-// never re-rolled here — it's the exact same simulateGame() call every other
-// game on the calendar goes through — only WHO scores and WHEN within the 48
-// minutes is synthesized, so what the user watches IS the real result.
+// --- SCORING ATTRIBUTION (3D "Assistir ao Jogo") ---
+// Breaks a point total into individual made baskets attributed to players, so
+// the 3D court screen can show WHO scores rather than just a rising number.
+// The total it's handed is never re-rolled here: whatever the caller resolved
+// is exactly what comes back out, split up.
 
 export interface GameEvent {
     team: 'A' | 'B';
     playerId: string;
     playerName: string;
     points: 1 | 2 | 3;
-    clockSeconds: number; // 0..2880 (48 real game-minutes); the watch screen compresses this into its own playback duration
+    clockSeconds: number; // filled in by the caller — this module only attributes, it doesn't schedule
 }
 
-export interface WatchableGame {
-    teamAId: string;
-    teamBId: string;
-    scoreA: number;
-    scoreB: number;
-    winnerId: string;
-    events: GameEvent[]; // both teams interleaved, sorted by clockSeconds ascending
-}
-
-const GAME_SECONDS = 48 * 60; // four real 12-minute quarters
+// How often a given player's baskets are threes. This used to be a flat 32%
+// for everybody, which was invisible while the 3D court only animated a ball
+// arc — but once a real body walks out to the spot the shot came from, a
+// center launching a third of his baskets from the arc is glaring. Driven by
+// the shooting attribute and damped hard for bigs.
+export const threeRate = (player: Player | undefined): number => {
+    if (!player) return 0.3;
+    const shooting = player.attributes?.shooting ?? 70;
+    const bigDamp = player.pos === 'C' ? 0.4 : player.pos === 'PF' ? 0.8 : 1;
+    return Math.max(0.04, Math.min(0.52, ((shooting - 50) / 85) * bigDamp));
+};
 
 // Breaks one team's final point total into a sequence of made baskets
 // (1s/2s/3s) attributed to players, using the SAME scoring-weight formula
 // recordGameStats uses to split points across the rotation (pow(off-58,1.9)
 // weighted by rotation minutes) — the player who leads the real box score is
 // the player who visibly scores the most on screen, not an independent RNG.
-const generateScoringPlays = (team: Team, players: { [key: string]: Player }, points: number, side: 'A' | 'B'): GameEvent[] => {
-    const { ids, weights } = getRotationWeights(team, players);
+//
+// `pool` narrows who is eligible to score. The watch screen passes the five
+// actually standing on the court (substitutions aren't implemented yet — see
+// ROADMAP.md), because a basket has to come out of a body the user can see.
+// Omitted, it falls back to the full rotation, which is what the box score
+// itself is split across.
+export const generateScoringPlays = (
+    team: Team, players: { [key: string]: Player }, points: number, side: 'A' | 'B',
+    pool?: { ids: string[]; weights: number[] },
+): GameEvent[] => {
+    const { ids, weights } = pool ?? getRotationWeights(team, players);
     if (ids.length === 0 || points <= 0) return [];
 
     const pow = (v: number, e: number) => Math.pow(Math.max(0, v), e);
@@ -534,43 +543,13 @@ const generateScoringPlays = (team: Team, players: { [key: string]: Player }, po
             const deficit = target[i] - earned[i];
             if (deficit > bestDeficit) { bestDeficit = deficit; idx = i; }
         });
-        const basketPts: 1 | 2 | 3 = remaining === 1 ? 1 : remaining === 2 ? 2 : (Math.random() < 0.32 ? 3 : 2);
+        const basketPts: 1 | 2 | 3 = remaining === 1 ? 1 : remaining === 2 ? 2
+            : (Math.random() < threeRate(players[ids[idx]]) ? 3 : 2);
         remaining -= basketPts;
         earned[idx] += basketPts;
         events.push({ team: side, playerId: ids[idx], playerName: players[ids[idx]].name, points: basketPts, clockSeconds: 0 });
     }
     return events;
-};
-
-// Spreads a team's basket sequence evenly across the 48 game-minutes with
-// light jitter, then the caller interleaves both teams by timestamp so
-// baskets don't land in two separate blocks.
-const scheduleAcrossGame = (events: GameEvent[]): GameEvent[] => {
-    const n = events.length;
-    return events.map((e, i) => ({
-        ...e,
-        clockSeconds: Math.max(0, Math.min(GAME_SECONDS - 1, Math.round(((i + Math.random()) / Math.max(1, n)) * GAME_SECONDS))),
-    }));
-};
-
-// Resolves a real game via simulateGame (same call every scheduled game on
-// the calendar uses) and layers a dramatized play-by-play on top for the 3D
-// "Assistir ao Jogo" screen. Whatever the watch screen ends on is exactly
-// what gets written back to the season afterward (see seasonRunner's
-// simulateOneDay `pinnedResult` — it consumes scoreA/scoreB from here so the
-// game is never re-rolled a second time).
-const simulateGameEvents = (
-    teamA: Team, teamB: Team, players: { [key: string]: Player }, homeTeamId?: string, coaches: CoachMap = {},
-): WatchableGame => {
-    const game = simulateGame(teamA, teamB, players, homeTeamId, coaches);
-    const scoreA = game.winner.id === teamA.id ? game.scoreWinner : game.scoreLoser;
-    const scoreB = game.winner.id === teamB.id ? game.scoreWinner : game.scoreLoser;
-
-    const eventsA = scheduleAcrossGame(generateScoringPlays(teamA, players, scoreA, 'A'));
-    const eventsB = scheduleAcrossGame(generateScoringPlays(teamB, players, scoreB, 'B'));
-    const events = [...eventsA, ...eventsB].sort((a, b) => a.clockSeconds - b.clockSeconds);
-
-    return { teamAId: teamA.id, teamBId: teamB.id, scoreA, scoreB, winnerId: game.winner.id, events };
 };
 
 // --- LIVE DECISIVE GAME (Fase F) ---
@@ -589,13 +568,50 @@ export const TACTIC_META: Record<LiveTactic, { label: string; blurb: string; sel
     isolar: { label: 'Isolar a Estrela', blurb: 'Todas as posses decisivas pro seu melhor pontuador.', selfDelta: 4, oppDelta: 0 },
 };
 
+// --- WATCH-GAME PLAYS (3D "Assistir ao Jogo") ---
+// Deliberately a SEPARATE table from TACTIC_META above, not an extension of
+// it. Both are bounded point deltas on the same computeExpectedPoints figure,
+// but these four are half-court SETS: each one also owns a choreography (who
+// screens, who cuts, who shoots) that the 3D court plays out — see
+// PLAY_CHOREO in services/watchDirector.ts. TACTIC_META's three emphases have
+// no bodies to move, and the Game 7 screen keeps using it untouched.
+//
+// `variance` widens or narrows that quarter's random swing: a night living off
+// pindown threes is streakier than one feeding the post, whatever the average
+// says. Applied on top of LIVE_QUARTER_VARIANCE.
+export const WATCH_PLAY_META: Record<WatchPlay, {
+    label: string; short: string; blurb: string;
+    selfDelta: number; oppDelta: number; variance: number;
+}> = {
+    pick_roll: {
+        label: 'Pick & Roll', short: 'P&R',
+        blurb: 'O pivô sobe pro bloqueio e rola pra cesta. Equilibrado, funciona contra quase tudo.',
+        selfDelta: 2, oppDelta: 0, variance: 0,
+    },
+    pindown: {
+        label: 'Pindown 3PT', short: '3PT',
+        blurb: 'Bloqueio na linha de fundo pra liberar o ala-armador atrás do arco. Noite de altos e baixos.',
+        selfDelta: 3, oppDelta: 1, variance: 5,
+    },
+    post_up: {
+        label: 'Post-Up', short: 'POSTE',
+        blurb: 'Bola no garrafão, de costas pra cesta. Poucos pontos a mais, mas quase sem risco.',
+        selfDelta: 1, oppDelta: -2, variance: -3,
+    },
+    iso: {
+        label: 'Isolar a Estrela', short: 'ISO',
+        blurb: 'Todo mundo abre e o seu melhor pontuador resolve sozinho.',
+        selfDelta: 4, oppDelta: 1, variance: 2,
+    },
+};
+
 // Timeout bonus is a flat, one-time bump to the user's own next quarter —
 // "stopping the bleeding," not a tactical choice, so it stacks with a tactic
 // if both are queued for the same quarter.
-const TIMEOUT_BONUS = 3;
-const STARTING_TIMEOUTS = 4;
-const LIVE_QUARTER_VARIANCE = 9; // narrower than a full game's 15 — a single quarter swings less
-const QUARTER_FLOOR = 16; // no quarter realistically scores below this
+export const TIMEOUT_BONUS = 3;
+export const STARTING_TIMEOUTS = 4;
+export const LIVE_QUARTER_VARIANCE = 9; // narrower than a full game's 15 — a single quarter swings less
+export const QUARTER_FLOOR = 16; // no quarter realistically scores below this
 
 export const startLiveGame = (ref: PendingDeciderRef, teamA: Team, teamB: Team, userTeamId: string): LiveGameState => ({
     ref,
@@ -1614,5 +1630,4 @@ export const simulationEngine = {
     startLiveGame,
     advanceLiveQuarter,
     applyDeciderResult,
-    simulateGameEvents,
 };

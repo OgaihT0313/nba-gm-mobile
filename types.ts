@@ -285,6 +285,13 @@ export interface PlayoffState {
 // simulationService.ts for the actual point deltas each one applies.
 export type LiveTactic = 'ritmo' | 'defesa' | 'isolar';
 
+// The four half-court sets the user can call during a watched 3D game. Unlike
+// LiveTactic — a pure scoreboard emphasis for the Game 7 screen — each of
+// these also owns a choreography the five players on court actually run. See
+// WATCH_PLAY_META (simulationService.ts) for the point deltas and PLAY_CHOREO
+// (watchDirector.ts) for the movement.
+export type WatchPlay = 'pick_roll' | 'pindown' | 'post_up' | 'iso';
+
 // The user's decisive Game 7 (or Finals-clinching game), played out quarter
 // by quarter instead of resolved in one shot like every other game in the
 // sim. Pure state — advanceLiveQuarter in simulationService.ts is the only

@@ -3,6 +3,8 @@ import { GestureResponderEvent, PanResponder, View } from 'react-native';
 import { Canvas, useFrame } from '@react-three/fiber/native';
 import * as THREE from 'three';
 
+import type { CourtState } from '../../services/watchDirector';
+
 // Native port of quadra-3d.html (the standalone Three.js prototype) into a
 // React Three Fiber component that renders inside the app via expo-gl,
 // instead of a WebView. Two things are deliberately NOT ported 1:1:
@@ -18,16 +20,14 @@ import * as THREE from 'three';
 //
 // Everything else (court proportions, hoop rig, camera feel) mirrors the
 // original file directly.
+//
+// WHAT THE COMPONENT DOES NOT DO: decide anything. Where the ten players are
+// and where the ball is comes entirely from services/watchDirector.ts. This
+// file is a renderer.
 
 export interface TeamVisual {
   primary: string;
   secondary: string;
-}
-
-export interface ShotEvent {
-  id: number; // bump to re-trigger the animation even if `side` repeats
-  side: 'home' | 'away';
-  points: 1 | 2 | 3;
 }
 
 /** Per-Era-Group visual touch (see src/theme/eraVisuals.ts) — optional and
@@ -51,19 +51,27 @@ interface CameraPreset {
   elev: number;
   dist: number;
   autoRotate: boolean;
+  /** How hard this framing tracks the ball, 0 = locked on center court.
+   * Overhead barely needs to move; the baseline camera lives and dies by it. */
+  follow: number;
 }
 
 const CAMERA_PRESETS: Record<CameraView, CameraPreset> = {
-  iso: { angle: 0.62, elev: 0.52, dist: 118, autoRotate: true },
-  tv: { angle: Math.PI / 2, elev: 0.22, dist: 145, autoRotate: false },
-  overhead: { angle: 0.3, elev: 1.48, dist: 95, autoRotate: false },
-  behind_basket: { angle: Math.PI, elev: 0.16, dist: 150, autoRotate: false },
+  iso: { angle: 0.62, elev: 0.52, dist: 118, autoRotate: true, follow: 0.35 },
+  tv: { angle: Math.PI / 2, elev: 0.22, dist: 145, autoRotate: false, follow: 0.6 },
+  overhead: { angle: 0.3, elev: 1.48, dist: 95, autoRotate: false, follow: 0.15 },
+  behind_basket: { angle: Math.PI, elev: 0.16, dist: 150, autoRotate: false, follow: 0.75 },
 };
 
 interface Court3DProps {
   home: TeamVisual;
   away: TeamVisual;
-  shot?: ShotEvent | null;
+  /** Live court state, read every frame. Deliberately a ref and not a prop
+   * value: the director produces a new state 60x a second, and pushing that
+   * through React state would re-render the whole scene graph on every tick.
+   * Court3D mutates Object3Ds directly instead — same reason CameraRig keeps
+   * its drag state in a ref. */
+  courtRef: React.MutableRefObject<CourtState | null>;
   visual?: Court3DVisual;
   /** Defaults to 'iso' — the same free-orbit view Court3D always had. */
   cameraView?: CameraView;
@@ -75,13 +83,6 @@ const COURT_L = 94;
 const COURT_W = 50;
 const HOOP_IN = 5.25;
 const HOOP_X = COURT_L / 2 - HOOP_IN; // 41.75 — distance of each hoop from center
-
-// Home always attacks the +X hoop, away the -X hoop. Purely a staging
-// convention for the animation — it doesn't track real end-swaps by quarter.
-const HOME_HOOP = new THREE.Vector3(HOOP_X, 10, 0);
-const AWAY_HOOP = new THREE.Vector3(-HOOP_X, 10, 0);
-const HOME_SPOT = new THREE.Vector3(HOOP_X - 20, 0, -7);
-const AWAY_SPOT = new THREE.Vector3(-HOOP_X + 20, 0, 7);
 
 /* ------------------------------------------------------------------ */
 /* Camera rig — drag-to-rotate + gentle auto-rotate. State lives in a  */
@@ -96,7 +97,13 @@ export interface CameraDragState {
   dragging: boolean;
 }
 
-function CameraRig({ stateRef, preset }: { stateRef: React.MutableRefObject<CameraDragState>; preset: CameraPreset }) {
+function CameraRig({
+  stateRef, preset, courtRef,
+}: {
+  stateRef: React.MutableRefObject<CameraDragState>;
+  preset: CameraPreset;
+  courtRef: React.MutableRefObject<CourtState | null>;
+}) {
   const target = useMemo(() => new THREE.Vector3(0, 6, 0), []);
   useFrame(({ camera }) => {
     const s = stateRef.current;
@@ -116,6 +123,16 @@ function CameraRig({ stateRef, preset }: { stateRef: React.MutableRefObject<Came
         s.dist = THREE.MathUtils.lerp(s.dist, preset.dist, 0.06);
       }
     }
+
+    // Drift the look-at point toward the action. Heavily damped and scaled
+    // per preset — a camera that snapped to the ball would be unwatchable at
+    // the speed possessions run.
+    const court = courtRef.current;
+    if (court) {
+      target.x = THREE.MathUtils.lerp(target.x, court.ball.x * preset.follow, 0.02);
+      target.z = THREE.MathUtils.lerp(target.z, court.ball.z * preset.follow, 0.02);
+    }
+
     camera.position.set(
       target.x + Math.cos(s.angle) * s.dist * Math.cos(s.elev),
       target.y + Math.sin(s.elev) * s.dist,
@@ -226,101 +243,119 @@ function Hoop({ x, facing }: { x: number; facing: 1 | -1 }) {
 }
 
 /* ------------------------------------------------------------------ */
-/* Player doll — same proportions as the HTML version, colored from   */
-/* real team accent colors (constants.ts getTeamAccent) instead of    */
-/* the hardcoded TEAMS dict.                                          */
+/* Player dolls — the SAME body the screen has always drawn (same 13  */
+/* parts, same proportions), but the geometry and the materials are   */
+/* built once at module scope and shared by all ten players. Ten      */
+/* independent copies would upload the same eight buffers ten times   */
+/* over for no visual difference whatsoever.                          */
 /* ------------------------------------------------------------------ */
-function PlayerDoll({ x, z, rotY, team, bob }: { x: number; z: number; rotY: number; team: TeamVisual; bob: number }) {
+const GEO = {
+  torso: new THREE.CylinderGeometry(0.85, 0.72, 2.1, 14),
+  collar: new THREE.TorusGeometry(0.42, 0.08, 8, 16),
+  head: new THREE.SphereGeometry(0.52, 16, 14),
+  upperArm: new THREE.CylinderGeometry(0.22, 0.2, 1.9, 10),
+  foreArm: new THREE.CylinderGeometry(0.19, 0.17, 1.0, 10),
+  short: new THREE.CylinderGeometry(0.42, 0.38, 1.15, 12),
+  shin: new THREE.CylinderGeometry(0.24, 0.2, 1.9, 10),
+  shoe: new THREE.BoxGeometry(0.42, 0.32, 0.75),
+};
+
+const SKIN_MAT = new THREE.MeshStandardMaterial({ color: '#c98a5c', roughness: 0.7 });
+const SHOE_MAT = new THREE.MeshStandardMaterial({ color: '#ffffff', roughness: 0.4 });
+
+const teamMaterials = (team: TeamVisual) => ({
+  primary: new THREE.MeshStandardMaterial({ color: team.primary, roughness: 0.6 }),
+  secondary: new THREE.MeshStandardMaterial({ color: team.secondary, roughness: 0.5 }),
+});
+
+type TeamMats = ReturnType<typeof teamMaterials>;
+
+function PlayerDoll({ mats, groupRef }: { mats: TeamMats; groupRef: (g: THREE.Group | null) => void }) {
   return (
-    <group position={[x, bob, z]} rotation={[0, rotY, 0]}>
-      <mesh position={[0, 4.7, 0]}>
-        <cylinderGeometry args={[0.85, 0.72, 2.1, 14]} />
-        <meshStandardMaterial color={team.primary} roughness={0.6} />
-      </mesh>
-      <mesh position={[0, 5.72, 0]} rotation={[Math.PI / 2, 0, 0]}>
-        <torusGeometry args={[0.42, 0.08, 8, 16]} />
-        <meshStandardMaterial color={team.secondary} roughness={0.5} />
-      </mesh>
-      <mesh position={[0, 6.35, 0]}>
-        <sphereGeometry args={[0.52, 16, 14]} />
-        <meshStandardMaterial color="#c98a5c" roughness={0.7} />
-      </mesh>
+    <group ref={groupRef}>
+      <mesh geometry={GEO.torso} material={mats.primary} position={[0, 4.7, 0]} />
+      <mesh geometry={GEO.collar} material={mats.secondary} position={[0, 5.72, 0]} rotation={[Math.PI / 2, 0, 0]} />
+      <mesh geometry={GEO.head} material={SKIN_MAT} position={[0, 6.35, 0]} />
       {[-1, 1].map((side) => (
         <group key={side}>
-          <mesh position={[side * 1.02, 4.55, 0]} rotation={[0, 0, side * 0.18]}>
-            <cylinderGeometry args={[0.22, 0.2, 1.9, 10]} />
-            <meshStandardMaterial color={team.primary} roughness={0.6} />
-          </mesh>
-          <mesh position={[side * 1.28, 3.55, 0.12]} rotation={[0, 0, side * 0.32]}>
-            <cylinderGeometry args={[0.19, 0.17, 1.0, 10]} />
-            <meshStandardMaterial color="#c98a5c" roughness={0.7} />
-          </mesh>
-          <mesh position={[side * 0.32, 3.35, 0]}>
-            <cylinderGeometry args={[0.42, 0.38, 1.15, 12]} />
-            <meshStandardMaterial color={team.secondary} roughness={0.6} />
-          </mesh>
-          <mesh position={[side * 0.32, 1.9, 0]}>
-            <cylinderGeometry args={[0.24, 0.2, 1.9, 10]} />
-            <meshStandardMaterial color="#c98a5c" roughness={0.7} />
-          </mesh>
-          <mesh position={[side * 0.32, 0.85, 0.15]}>
-            <boxGeometry args={[0.42, 0.32, 0.75]} />
-            <meshStandardMaterial color="#ffffff" roughness={0.4} />
-          </mesh>
+          <mesh geometry={GEO.upperArm} material={mats.primary} position={[side * 1.02, 4.55, 0]} rotation={[0, 0, side * 0.18]} />
+          <mesh geometry={GEO.foreArm} material={SKIN_MAT} position={[side * 1.28, 3.55, 0.12]} rotation={[0, 0, side * 0.32]} />
+          <mesh geometry={GEO.short} material={mats.secondary} position={[side * 0.32, 3.35, 0]} />
+          <mesh geometry={GEO.shin} material={SKIN_MAT} position={[side * 0.32, 1.9, 0]} />
+          <mesh geometry={GEO.shoe} material={SHOE_MAT} position={[side * 0.32, 0.85, 0.15]} />
         </group>
       ))}
     </group>
   );
 }
 
-/* ------------------------------------------------------------------ */
-/* Ball — idles at whichever side is about to shoot, arcs to that     */
-/* side's hoop when a new ShotEvent comes in, then idles at the other */
-/* side's spot ready for the next possession.                        */
-/* ------------------------------------------------------------------ */
-function Ball({ shot }: { shot?: ShotEvent | null }) {
-  const ref = useRef<THREE.Mesh>(null);
-  const anim = useRef<{ from: THREE.Vector3; to: THREE.Vector3; start: number; duration: number } | null>(null);
-  const idlePos = useRef(new THREE.Vector3(0, 3.2, 0));
-  const lastId = useRef<number | null>(null);
+// All ten bodies plus the ball, driven straight off courtRef once per frame.
+// Index is stable for the whole game — 0-4 is always the home five, 5-9 always
+// the away five (see CourtState.players) — so a doll never swaps teams.
+const HOME_COUNT = 5;
 
-  if (shot && shot.id !== lastId.current) {
-    lastId.current = shot.id;
-    const from = (shot.side === 'home' ? HOME_SPOT : AWAY_SPOT).clone().setY(3.2);
-    const to = (shot.side === 'home' ? HOME_HOOP : AWAY_HOOP).clone();
-    anim.current = { from, to, start: -1, duration: 0.9 };
-  }
+function Players({
+  home, away, courtRef,
+}: {
+  home: TeamVisual;
+  away: TeamVisual;
+  courtRef: React.MutableRefObject<CourtState | null>;
+}) {
+  const homeMats = useMemo(() => teamMaterials(home), [home]);
+  const awayMats = useMemo(() => teamMaterials(away), [away]);
+  const groups = useRef<(THREE.Group | null)[]>([]);
+  // Built once. An inline `ref={(g) => ...}` would be a new function on every
+  // render of the scene, which makes React detach and reattach all ten refs —
+  // and there is a frame in between where useFrame sees nulls.
+  const setters = useMemo(
+    () => Array.from({ length: 10 }, (_, i) => (g: THREE.Group | null) => { groups.current[i] = g; }),
+    [],
+  );
+  const ball = useRef<THREE.Mesh>(null);
+  // Previous XZ per player, so a body's stride can come from how fast it is
+  // actually moving instead of bobbing on the spot forever.
+  const prev = useRef<Float32Array>(new Float32Array(20));
 
-  useFrame((_, delta) => {
-    const mesh = ref.current;
-    if (!mesh) return;
-    const a = anim.current;
-    if (!a) {
-      mesh.position.lerp(idlePos.current, 0.08);
-      return;
-    }
-    if (a.start < 0) a.start = 0;
-    a.start += delta;
-    const t = Math.min(1, a.start / a.duration);
-    mesh.position.lerpVectors(a.from, a.to, t);
-    mesh.position.y += Math.sin(t * Math.PI) * 6; // arc height
-    if (t >= 1) {
-      idlePos.current.copy(a.to).setY(3.2);
-      anim.current = null;
-    }
+  useFrame(({ clock }) => {
+    const court = courtRef.current;
+    if (!court) return;
+    const t = clock.getElapsedTime();
+
+    court.players.forEach((p, i) => {
+      const g = groups.current[i];
+      if (!g) return;
+      const dx = p.x - prev.current[i * 2];
+      const dz = p.z - prev.current[i * 2 + 1];
+      prev.current[i * 2] = p.x;
+      prev.current[i * 2 + 1] = p.z;
+
+      // Stride: amplitude from speed, so a player standing in the corner is
+      // still and a player sprinting in transition pumps.
+      const speed = Math.min(1, Math.hypot(dx, dz) * 26);
+      const stride = Math.abs(Math.sin(t * 7 + i)) * speed * 0.55;
+      g.position.set(p.x, 0.05 + stride, p.z);
+      g.rotation.y = p.rotY;
+      // Lean into the run a little, and square up when holding the ball.
+      g.rotation.x = p.hasBall ? 0 : speed * 0.12;
+    });
+
+    if (ball.current) ball.current.position.set(court.ball.x, court.ball.y, court.ball.z);
   });
 
   return (
-    // A plain tuple here, NOT the idlePos Vector3 instance — R3F tries a
-    // direct `mesh.position = value` assignment when the prop is itself a
-    // Vector3, and Object3D.position has no setter, which crashed the whole
-    // watch screen on mount ("Cannot assign to read-only property
-    // 'position'"). Only the mount-time value matters; every frame after
-    // that mutates ref.current.position directly above.
-    <mesh ref={ref} position={[idlePos.current.x, idlePos.current.y, idlePos.current.z]}>
-      <sphereGeometry args={[0.5, 16, 12]} />
-      <meshStandardMaterial color="#e8792c" roughness={0.5} />
-    </mesh>
+    <>
+      {Array.from({ length: 10 }).map((_, i) => (
+        <PlayerDoll
+          key={i}
+          mats={i < HOME_COUNT ? homeMats : awayMats}
+          groupRef={setters[i]}
+        />
+      ))}
+      <mesh ref={ball} position={[0, 3.4, 0]}>
+        <sphereGeometry args={[0.5, 16, 12]} />
+        <meshStandardMaterial color="#e8792c" roughness={0.5} />
+      </mesh>
+    </>
   );
 }
 
@@ -362,7 +397,7 @@ function Stands() {
 /* ------------------------------------------------------------------ */
 /* Scene root.                                                        */
 /* ------------------------------------------------------------------ */
-function Scene({ home, away, shot, visual }: Court3DProps) {
+function Scene({ home, away, courtRef, visual }: Omit<Court3DProps, 'cameraView'>) {
   return (
     <>
       <hemisphereLight args={[0x9fb3ff, 0x1a1408, 0.6]} />
@@ -383,14 +418,12 @@ function Scene({ home, away, shot, visual }: Court3DProps) {
       <Hoop x={HOOP_X} facing={-1} />
       <Stands />
 
-      <PlayerDoll x={HOME_SPOT.x} z={HOME_SPOT.z} rotY={Math.PI / 2 - 0.3} team={home} bob={0.05} />
-      <PlayerDoll x={AWAY_SPOT.x} z={AWAY_SPOT.z} rotY={-Math.PI / 2 - 0.3} team={away} bob={0.05} />
-      <Ball shot={shot} />
+      <Players home={home} away={away} courtRef={courtRef} />
     </>
   );
 }
 
-export default function Court3D({ home, away, shot, visual, cameraView = 'iso' }: Court3DProps) {
+export default function Court3D({ home, away, courtRef, visual, cameraView = 'iso' }: Court3DProps) {
   const preset = CAMERA_PRESETS[cameraView];
   const camState = useRef<CameraDragState>({ angle: 0.62, elev: 0.52, dist: 118, dragging: false });
   const last = useRef({ x: 0, y: 0 });
@@ -425,8 +458,8 @@ export default function Court3D({ home, away, shot, visual, cameraView = 'iso' }
       <Canvas camera={{ fov: 42, near: 0.5, far: 900 }} style={{ flex: 1 }}>
         <color attach="background" args={['#05070d']} />
         <fog attach="fog" args={['#05070d', 80, 340]} />
-        <CameraRig stateRef={camState} preset={preset} />
-        <Scene home={home} away={away} shot={shot} visual={visual} />
+        <CameraRig stateRef={camState} preset={preset} courtRef={courtRef} />
+        <Scene home={home} away={away} courtRef={courtRef} visual={visual} />
       </Canvas>
     </View>
   );

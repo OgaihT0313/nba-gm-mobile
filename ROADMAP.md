@@ -9,16 +9,21 @@ Fonte: prototype gerado pelo Gemini (`Downloads/nba-gm-mobile.zip`, compartilhad
 2026-08-20). O código em si é web-only (`Platform.OS === 'web'` + Web Audio API
 puro) e não roda no app nativo — só as **ideias** valem, não o código. O que já
 foi aproveitado (câmeras fixas, indicador de cesta, som de drible/torcida) está
-commitado; o que segue é escopo maior, ainda não iniciado:
+commitado, assim como a chamada de jogada ao vivo; o resto segue em aberto:
 
-- **Chamar jogada tática ao vivo durante o jogo 3D** (Pick & Roll, Pindown 3PT,
-  Post-Up, Isolamento da Estrela) — extensão natural do `TACTIC_META` que já
-  existe no Jogo 7 ao vivo (`LiveGameScreen.tsx`), levado pro modo Assistir ao
-  Jogo. Precisa de um sistema de posse/animação reagindo à jogada escolhida.
-- **Substituições + fadiga/stamina + pedir tempo, tudo ao vivo** — transforma
-  "assistir a um replay de 5min já decidido" em "treinar o jogo ao vivo de
-  verdade". Escopo bem maior que os itens acima, provavelmente merece seu
-  próprio plano (`EnterPlanMode`) antes de começar.
+- ~~Chamar jogada tática ao vivo durante o jogo 3D~~ **Feito**: as quatro
+  jogadas (Pick & Roll, Pindown 3PT, Post-Up, Isolar a Estrela) vivem em
+  `WATCH_PLAY_META` (`simulationService.ts`) com a coreografia em
+  `services/watchDirector.ts`. Junto veio o pré-requisito: o jogo deixou de ser
+  pré-resolvido — cada quarto é resolvido quando começa (mesmo
+  `computeExpectedPoints` que `advanceLiveQuarter` fatia num Jogo 7), com
+  huddle entre quartos e `Pedir tempo` re-abrindo o restante do quarto. A
+  quadra passou de 2 bonecos parados pra 10 jogadores reais disputando posses.
+- **Substituições + fadiga/stamina ao vivo** — o que sobrou desse item: hoje os
+  cinco titulares jogam os 48 minutos. `PlayerState[]` (watchDirector.ts) já é
+  o ponto de entrada exato, e `buildFive` é onde a troca entraria. Pedir tempo
+  já existe. Escopo grande o bastante pra merecer seu próprio plano
+  (`EnterPlanMode`) antes de começar.
 - **Sistema de personalidade/química de vestiário** (líder/estrela/prodígio/
   mentor/workhorse/imprevisível — `services/lockerRoomService.ts` +
   `screens/LockerRoomHub.tsx` no zip do Gemini). Já tinha sido descartado antes

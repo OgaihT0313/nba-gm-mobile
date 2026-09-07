@@ -28,10 +28,11 @@ export type SimEffect =
     | { kind: 'notification'; message: string; type: string }
     | { kind: 'view'; view: 'allstar' | 'awards' };
 
-// A game result already resolved by the 3D "Assistir ao Jogo" screen
-// (simulationEngine.simulateGameEvents), so the day's simulation doesn't
-// re-roll simulateGame for that one fixture and risk disagreeing with what
-// the user just watched.
+// A game result already resolved by the 3D "Assistir ao Jogo" screen — the sum
+// of the baskets that went in on court, quarter by quarter (see
+// services/watchDirector.ts) — so the day's simulation doesn't re-roll
+// simulateGame for that one fixture and risk disagreeing with what the user
+// just watched.
 export interface PinnedGameResult {
     homeTeamId: string;
     awayTeamId: string;

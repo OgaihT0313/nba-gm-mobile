@@ -13,7 +13,6 @@ import { simulationEngine, ROTATION_MIN, ROTATION_MAX } from './services/simulat
 import { buildSeasonOwner, evaluateSeasonOutcome } from './services/ownerService';
 import { generateSchedule } from './services/scheduleService';
 import { simulateOneDay, SimEffect, ALL_STAR_GAME, PinnedGameResult } from './services/seasonRunner';
-import { WatchableGame } from './services/simulationService';
 import { MIN_ROSTER_SIZE } from './services/tradeService';
 import {
   buildDraftBoard, initialPickAssets, grantNextWindowPick, PICK_WINDOW,
@@ -125,7 +124,7 @@ export default function App() {
   // for team colors/names, and re-deriving them from season.teams later
   // risks drifting if state changes underneath (it doesn't here, but this
   // keeps the screen decoupled from season shape).
-  const [watchGame, setWatchGame] = useState<{ home: Team; away: Team; game: WatchableGame } | null>(null);
+  const [watchGame, setWatchGame] = useState<{ home: Team; away: Team } | null>(null);
   const [selectedTeamId, setSelectedTeamId] = useState<string | null>(null);
   // The franchise being previewed on the confirmation screen — chosen, but not
   // committed to yet, so it must not touch `season`.
@@ -199,18 +198,15 @@ export default function App() {
   };
 
   // --- WATCH GAME (3D) ---
-  // Resolves the user's next fixture through the real engine RIGHT NOW
-  // (simulateGameEvents calls simulateGame exactly once) and stashes the
-  // result — the watch screen only plays it back, it never re-rolls it, so
-  // whatever the user sees IS what finishWatchGame() commits to the season.
+  // Only picks the fixture. The game itself is NOT resolved here: the watch
+  // screen plays it out a quarter at a time so the play the user calls in the
+  // huddle can actually move the score (services/watchDirector.ts). Whatever
+  // it ends on is what finishWatchGame() commits.
   const startWatchGame = (opponent: Team, atHome: boolean) => {
     if (!season || season.status !== 'active' || isSimulating) return;
     const userTeam = season.teams.find((t) => t.id === season.userTeamId);
     if (!userTeam) return;
-    const home = atHome ? userTeam : opponent;
-    const away = atHome ? opponent : userTeam;
-    const game = simulationEngine.simulateGameEvents(home, away, season.players, home.id, season.coaches);
-    setWatchGame({ home, away, game });
+    setWatchGame({ home: atHome ? userTeam : opponent, away: atHome ? opponent : userTeam });
     setView('watch-game');
   };
 
@@ -218,13 +214,13 @@ export default function App() {
   // isn't simulated a second time with a different outcome — everything else
   // (records, box score, morale, injuries, trade offers, calendar checkpoints)
   // proceeds exactly like a normal day advance.
-  const finishWatchGame = () => {
+  const finishWatchGame = (scoreHome: number, scoreAway: number) => {
     if (!season || !watchGame) return;
     const pinned: PinnedGameResult = {
       homeTeamId: watchGame.home.id,
       awayTeamId: watchGame.away.id,
-      scoreHome: watchGame.game.scoreA,
-      scoreAway: watchGame.game.scoreB,
+      scoreHome,
+      scoreAway,
     };
     const { season: next, effects, fired } = simulateOneDay(season, pinned);
     effects.forEach(applyEffect);
@@ -997,7 +993,9 @@ export default function App() {
         <WatchGameScreen
           home={watchGame.home}
           away={watchGame.away}
-          game={watchGame.game}
+          players={season.players}
+          coaches={season.coaches}
+          userTeamId={season.userTeamId}
           onFinish={finishWatchGame}
           eraId={watchEraId}
         />
