@@ -310,15 +310,26 @@ export const generateCpuTradeOffer = (
     allTeams: Team[],
     players: { [key: string]: Player },
     gamesPlayed: number,
-    currentDraft: number
+    currentDraft: number,
+    /**
+     * Ask about THIS player specifically instead of whoever the CPU would have
+     * picked. Used when the user has put a name on the market — a GM who says
+     * he is listening on a player gets calls about that player, not about
+     * somebody else. The usual rating filter is bypassed for him: he is on the
+     * block because his own team said so, not because he fits a band.
+     */
+    forceTargetId?: string,
 ): TradeOffer | null => {
     if (gamesPlayed >= TRADE_DEADLINE_GAME) return null;
 
     // User players worth asking for: real rotation pieces, not fringe/end-of-bench.
-    const userTargets = userTeam.roster
-        .map(id => players[id])
-        .filter((p): p is Player => !!p && p.ovr >= 74 && p.ovr <= 90)
-        .sort((a, b) => playerValue(b) - playerValue(a));
+    const forced = forceTargetId ? players[forceTargetId] : undefined;
+    const userTargets = forced && userTeam.roster.includes(forced.id)
+        ? [forced]
+        : userTeam.roster
+            .map(id => players[id])
+            .filter((p): p is Player => !!p && p.ovr >= 74 && p.ovr <= 90)
+            .sort((a, b) => playerValue(b) - playerValue(a));
     if (userTargets.length === 0) return null;
 
     for (const cpu of shuffle(allTeams.filter(t => t.id !== userTeam.id))) {

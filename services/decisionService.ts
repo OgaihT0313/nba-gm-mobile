@@ -11,10 +11,12 @@
 // exercised headlessly (see scripts/check_decisions.ts), which is how the
 // frequency budget below is enforced rather than guessed at.
 
-import type { Decision, DecisionOption, Player, SeasonState, Team } from '../types';
+import type { Decision, DecisionOption, Player, SeasonState, Team, TradeOffer } from '../types';
 import { getPlayerPositions, getTeamSalary } from '../constants';
-import { simulationEngine, ROTATION_MIN, DEFAULT_ROTATION_SIZE } from './simulationService';
+import { simulationEngine, ROTATION_MIN, DEFAULT_ROTATION_SIZE, TRADE_REQUEST_MORALE } from './simulationService';
 import { getFreeAgents, signFreeAgentLegality, evaluateSigningInterest, newContractYears } from './freeAgencyService';
+import { generateCpuTradeOffer, TRADE_DEADLINE_GAME } from './tradeService';
+import { sortStandings } from './scheduleService';
 
 /**
  * How long a starter has to be out before covering the hole is a real decision.
@@ -33,6 +35,25 @@ const INJURY_COVER_MIN_GAMES = 6;
 
 /** A young player worth handing a starting job to. */
 const PROSPECT_MAX_AGE = 24;
+
+/** Below this a player is not good enough for his unhappiness to be your problem. */
+const TRADE_REQUEST_MIN_OVR = 78;
+
+/**
+ * When the buy-or-sell question lands. Three games before the deadline itself,
+ * so the answer still has time to matter — asking on the day would be theatre.
+ */
+const DEADLINE_STANCE_GAME = TRADE_DEADLINE_GAME - 3;
+
+/**
+ * What tearing the season down costs you with the owner, by what he asked for.
+ * Selling under a title mandate is insubordination; under a rebuild it is
+ * exactly what he wanted. Stated in the option's own copy before it is chosen —
+ * no option in this queue charges a price it did not name.
+ */
+const SELL_CONFIDENCE: Record<string, number> = {
+    championship: -22, contender: -14, playoffs: -6, develop: +4, rebuild: +8,
+};
 
 const money = (v: number) => `$${(v / 1_000_000).toFixed(1)}M`;
 
@@ -137,6 +158,89 @@ const buildInjuryCover = (
 };
 
 /**
+ * A good player has just stopped putting up with his situation.
+ *
+ * The morale system that produces this has existed the whole time and never
+ * once fired (see updateMorale). It is the most dramatic thing a GM deals with,
+ * so it gets its own stop rather than a line in a feed that renders six items.
+ */
+const buildTradeRequest = (season: SeasonState, team: Team, p: Player): Decision => {
+    const slot = getPlayerPositions(p)[0];
+    return {
+        id: `trade_request:${p.id}:${season.gamesPlayed}`,
+        kind: 'trade_request',
+        day: season.gamesPlayed,
+        subjectId: p.id,
+        headline: `${p.name} pediu para sair`,
+        body: `${p.name} (${p.ovr} OVR) está infeliz com o papel dele no ${team.name} e pediu para ser trocado. `
+            + `O que você faz com ele?`,
+        options: [
+            {
+                id: `minutes:${p.id}`,
+                label: 'Prometer mais minutos',
+                detail: `Crava ${p.name} como titular de ${slot}. O ânimo dele volta.`,
+                consequence: 'Quem perde a vaga fica insatisfeito no lugar dele',
+            },
+            {
+                id: `shop:${p.id}`,
+                label: 'Colocar no mercado',
+                detail: 'Avisa a liga que você ouve propostas por ele.',
+                consequence: 'Você negocia de posição fraca — todos sabem que ele quer sair',
+            },
+            {
+                id: 'ignore',
+                label: 'Ignorar o pedido',
+                detail: 'Ele que resolva. Você manda no elenco.',
+                consequence: 'O ânimo segue caindo e arrasta a química do time',
+            },
+        ],
+    };
+};
+
+/**
+ * Buy, hold, or tear it down. The one decision that hands the user the lever the
+ * CPU has had since teams started tanking for the lottery — the engine
+ * deliberately never pulls it for them, which left the mechanic asymmetric.
+ */
+const buildDeadlineStance = (season: SeasonState, team: Team): Decision => {
+    const conf = sortStandings(season.teams.filter(t => t.conference === team.conference), season.schedule);
+    const rank = conf.findIndex(t => t.id === team.id) + 1;
+    const inPlayIn = rank <= 10;
+    const hit = SELL_CONFIDENCE[season.owner.mandate] ?? -10;
+
+    return {
+        id: `deadline_stance:${season.gamesPlayed}`,
+        kind: 'deadline_stance',
+        day: season.gamesPlayed,
+        headline: 'O prazo de trocas está chegando',
+        body: `${team.name} é o ${rank}º do ${team.conference === 'East' ? 'Leste' : 'Oeste'} com ${team.wins}-${team.losses}`
+            + `${inPlayIn ? ', dentro da zona de play-in' : ', fora da zona de play-in'}. `
+            + `Faltam três jogos para o prazo. Você compra, segura ou vende?`,
+        options: [
+            {
+                id: 'buy',
+                label: 'Comprar',
+                detail: 'Avisa a liga que você quer reforço agora. Os vendedores ligam.',
+                consequence: 'Propostas chegam na Central de Trocas',
+            },
+            {
+                id: 'hold',
+                label: 'Segurar o elenco',
+                detail: 'Nada muda. Você aposta em quem já está aqui.',
+            },
+            {
+                id: 'sell',
+                label: 'Vender e jogar pela loteria',
+                detail: 'Seus dois melhores sentam pelo resto da temporada. Os minutos vão para os jovens.',
+                consequence: hit < 0
+                    ? `Você perde ${Math.abs(hit)} pontos de confiança do dono`
+                    : `O dono aprova (+${hit} de confiança)`,
+            },
+        ],
+    };
+};
+
+/**
  * Look at what just happened and raise any decisions it warrants.
  *
  * Takes both sides of the tick because "a starter just got hurt" is a
@@ -173,6 +277,27 @@ export const generateDecisions = (before: SeasonState, after: SeasonState): Deci
         if (!hurt) return;
         out.push(buildInjuryCover(after, teamAfter, hurt, absence.duration, startingFive.has(pId)));
     });
+
+    // A good player crossing the give-up line. Detected as a CROSSING rather
+    // than a state, the same way the injury is: morale hovering below the
+    // threshold must ask once, not every night for the rest of the season.
+    const alreadyAsked = new Set(teamAfter.tradeRequestedIds ?? []);
+    teamAfter.roster.forEach(pId => {
+        const now = after.players[pId];
+        const was = before.players[pId];
+        if (!now || !was) return;
+        if (now.ovr < TRADE_REQUEST_MIN_OVR) return;
+        if (alreadyAsked.has(pId)) return;   // he asked already; once a season
+        const moraleBefore = was.morale ?? 70;
+        const moraleAfter = now.morale ?? 70;
+        if (moraleBefore < TRADE_REQUEST_MORALE || moraleAfter >= TRADE_REQUEST_MORALE) return;
+        out.push(buildTradeRequest(after, teamAfter, now));
+    });
+
+    // Buy or sell, once, three games out from the deadline.
+    if (after.gamesPlayed === DEADLINE_STANCE_GAME && after.status === 'active') {
+        out.push(buildDeadlineStance(after, teamAfter));
+    }
 
     return out;
 };
@@ -260,6 +385,67 @@ export const resolveDecision = (season: SeasonState, decisionId: string, optionI
                     [hurt.id]: { ...absence, duration: Math.max(1, Math.ceil(absence.duration / 2)) },
                 },
             }),
+        };
+    }
+
+    if (action === 'minutes' && targetId) {
+        const player = season.players[targetId];
+        if (!player || !team.roster.includes(targetId)) return { ...season, decisions: rest };
+        const slot = getPlayerPositions(player)[0];
+        return {
+            ...season,
+            decisions: rest,
+            // Lifted clear of the give-up line rather than to contentment: you
+            // made a promise, you did not fix his career. Where it settles from
+            // here is up to whether the minutes are real, which the sim decides.
+            players: { ...season.players, [targetId]: { ...player, morale: TRADE_REQUEST_MORALE + 20 } },
+            teams: season.teams.map(t =>
+                t.id === team.id ? { ...t, starters: { ...(t.starters ?? {}), [slot]: targetId } } : t),
+        };
+    }
+
+    if (action === 'shop' && targetId) {
+        // Word gets out, and the calls are about HIM. If nothing legal
+        // assembles tonight the decision is still answered — the league simply
+        // has no offer worth making yet.
+        const offer = generateCpuTradeOffer(
+            team, season.teams, season.players, season.gamesPlayed,
+            season.awardHistory.length + 1, targetId,
+        );
+        return {
+            ...season,
+            decisions: rest,
+            tradeOffers: offer ? [offer, ...(season.tradeOffers ?? [])] : (season.tradeOffers ?? []),
+        };
+    }
+
+    if (action === 'buy') {
+        // Two calls, from whoever is willing. Same generator the season uses on
+        // its own; this just makes it happen because you asked.
+        const offers: TradeOffer[] = [];
+        for (let i = 0; i < 2; i++) {
+            const o = generateCpuTradeOffer(
+                team, season.teams, season.players, season.gamesPlayed, season.awardHistory.length + 1);
+            if (o && !offers.some(x => x.fromTeamId === o.fromTeamId)) offers.push(o);
+        }
+        return { ...season, decisions: rest, tradeOffers: [...offers, ...(season.tradeOffers ?? [])] };
+    }
+
+    if (action === 'sell') {
+        const delta = SELL_CONFIDENCE[season.owner.mandate] ?? -10;
+        return {
+            ...season,
+            decisions: rest,
+            // The user's own tanking flag. decideTanking skips this team
+            // entirely, so what is set here survives the deadline.
+            teams: season.teams.map(t => (t.id === team.id ? { ...t, tanking: true } : t)),
+            owner: {
+                ...season.owner,
+                confidence: Math.max(0, Math.min(100, season.owner.confidence + delta)),
+                note: delta < 0
+                    ? `O dono soube que voc\u00ea desmontou o elenco no prazo. Ele n\u00e3o pediu isso.`
+                    : `O dono aprovou a decis\u00e3o de olhar para o futuro.`,
+            },
         };
     }
 

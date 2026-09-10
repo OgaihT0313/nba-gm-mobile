@@ -115,11 +115,10 @@ export function simulateOneDay(season: SeasonState, pinnedResult?: PinnedGameRes
     // Update player morale from each team's situation (record, role, being
     // buried). Mutates newPlayers; surfaces trade requests from the user's
     // unhappy rotation players as events.
-    const moraleEvents = simulationEngine.updateMorale(teamsAfterEvents, newPlayers, season.userTeamId);
-    moraleEvents.forEach(ev => {
-        newEvents.unshift(ev);
-        notify(ev.message, ev.type);
-    });
+    // Mutates newPlayers. It used to also return a "player demands a trade"
+    // event for the feed; that demand is a decision now (decisionService), so
+    // there is nothing left here to announce.
+    simulationEngine.updateMorale(teamsAfterEvents, newPlayers, season.userTeamId);
 
     const nextGamesPlayed = season.gamesPlayed + 1;
     let nextStatus = season.status;
@@ -223,7 +222,21 @@ export function simulateOneDay(season: SeasonState, pinnedResult?: PinnedGameRes
     // state — the absence map alone cannot say whether it happened tonight.
     // The caller stops advancing while the queue is non-empty.
     const raised = generateDecisions(season, nextSeason);
-    if (raised.length) nextSeason.decisions = [...(season.decisions ?? []), ...raised];
+    if (raised.length) {
+        nextSeason.decisions = [...(season.decisions ?? []), ...raised];
+        // Remember who has now made his demand. Done here rather than inside
+        // generateDecisions so the write is visible at the place that owns the
+        // next season object, and so the generator stays a pure read.
+        const asked = raised
+            .filter(d => d.kind === 'trade_request' && d.subjectId)
+            .map(d => d.subjectId as string);
+        if (asked.length) {
+            nextSeason.teams = nextSeason.teams.map(t => t.id !== season.userTeamId ? t : {
+                ...t,
+                tradeRequestedIds: [...(t.tradeRequestedIds ?? []), ...asked],
+            });
+        }
+    }
 
     return { season: nextSeason, effects, fired: firedThisTick };
 }

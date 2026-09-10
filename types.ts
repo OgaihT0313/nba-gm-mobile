@@ -169,6 +169,14 @@ export interface Team {
   // trade deadline, and cleared every offseason. NEVER set on the user's team —
   // tanking is a GM decision, and the user is the GM.
   tanking?: boolean;
+  // Players who have already made their trade demand this season. A star on a
+  // bad team sits far below the give-up line all year, so answering him lifts
+  // his morale for a few games and then it sinks back and crosses again --
+  // seen live, the same player asked twice in one season after being promised
+  // minutes. He asks ONCE; refusing him is a decision you live with, not a
+  // question the game keeps re-asking. Reset every offseason with the rest of
+  // the season state.
+  tradeRequestedIds?: string[];
 }
 
 // A tradeable future first-round pick. The slot isn't known until draft night:

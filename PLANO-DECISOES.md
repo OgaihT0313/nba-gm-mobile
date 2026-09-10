@@ -177,13 +177,27 @@ existente. Sem inventar componente novo.
 
 ## Fases
 
-**Fase 1 — encanamento + uma decisão de ponta a ponta.**
+**Fase 1 — FEITA** (commit `4d72204`) — encanamento + uma decisão de ponta a ponta.
 `types.ts`, `decisionService.ts`, bloqueio no `seasonRunner`/`App.tsx`, o modal,
 e **só a decisão A** (cobrir ausência). Prova o caminho inteiro com a decisão
 que mais dispara e que toca três sistemas.
 
-**Fase 2 — B e C.** Inclui o conserto do limiar de moral, que é pré-requisito de
-B e vale por si só (um sistema inteiro construído que nunca dispara).
+**Fase 2 — FEITA.** B e C, mais o conserto da moral. Três coisas saíram
+diferentes do plano, todas por medição:
+
+- O limiar de moral não era o problema principal. Medido, o jogador mais infeliz
+  de um elenco chegava a 32 e **nunca** a 25 — e os infelizes eram os índices 0 e
+  1, as **estrelas** de times ruins, não reservas enterrados como eu supus. A
+  penalidade de "estrela desperdiçando o auge" era um degrau fixo de -10 que não
+  conseguia levar ninguém abaixo da linha; virou proporcional ao quão ruim é o
+  time.
+- **O pedido se repetia.** Visto ao vivo: prometer minutos levanta a moral pra
+  45, o alvo continua baixo, ela desce e cruza de novo. Virava insistência.
+  Agora `Team.tradeRequestedIds` garante um pedido por jogador por temporada.
+- **`decideTanking` apagava a escolha do usuário.** A decisão do prazo é no jogo
+  52 e o `decideTanking` roda no 55 atribuindo `tanking` a todo time da
+  conferência — inclusive `false` ao do usuário. Agora ele pula o time do
+  usuário em vez de atribuir.
 
 **Fase 3 — personalidade.** É aqui que a camada de fantasia pedida lá no começo
 finalmente encaixa: a personalidade do jogador não vira texto decorativo, vira

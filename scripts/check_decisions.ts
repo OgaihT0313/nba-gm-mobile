@@ -57,11 +57,15 @@ const byKind: Record<string, number> = {};
 const byOption: Record<string, number> = {};
 let seasonsFinished = 0;
 let signedCount = 0, promotedCount = 0, shortenedCount = 0, rushedCount = 0;
+let soldCount = 0, boughtCount = 0, shoppedCount = 0, minutesCount = 0;
+const stanceSeasons = new Set<number>();
 
 console.log(`Simulando ${RUNS} temporadas respondendo as decisoes...`);
 for (let run = 0; run < RUNS; run++) {
   let season = buildSeason((teamsData as Team[])[run % teamsData.length].id);
   let raisedThisSeason = 0;
+  let soldThisSeason = false;
+  const askedThisSeason = new Set<string>();
   let guard = 0;
 
   while (season.gamesPlayed < 82 && guard++ < 500) {
@@ -73,6 +77,19 @@ for (let run = 0; run < RUNS; run++) {
       const d: Decision = season.decisions[0];
       raisedThisSeason++;
       byKind[d.kind] = (byKind[d.kind] || 0) + 1;
+      if (d.kind === 'trade_request' && d.subjectId) {
+        // Seen live before the cooldown existed: promise a star minutes, his
+        // morale lifts, sinks back under the line and he asks again. Nagging,
+        // not drama.
+        check('ninguem pede para sair duas vezes na mesma temporada',
+          !askedThisSeason.has(d.subjectId), `-> ${d.subjectId}`);
+        askedThisSeason.add(d.subjectId);
+      }
+      if (d.kind === 'deadline_stance') {
+        // Exactly one a season, or the buy/sell question is not a moment.
+        check('postura de prazo so aparece uma vez por temporada', !stanceSeasons.has(run), `temporada ${run}`);
+        stanceSeasons.add(run);
+      }
 
       const enabled = d.options.filter(o => !o.disabled);
       check('toda decisao tem opcao habilitada', enabled.length > 0, `-> ${d.id}`);
@@ -117,9 +134,31 @@ for (let run = 0; run < RUNS; run++) {
         check('encurtar reduz a rotacao', (t1.rotationSize ?? 99) < (t0.rotationSize ?? 10), `${t0.rotationSize} -> ${t1.rotationSize}`);
         shortenedCount++;
       }
+      if (action === 'minutes') {
+        const target = pick.id.split(':')[1];
+        check('prometer minutos crava o titular', Object.values(t1.starters ?? {}).includes(target), `-> ${target}`);
+        check('prometer minutos levanta o animo',
+          (season.players[target].morale ?? 0) > (before.players[target].morale ?? 0),
+          `${before.players[target].morale} -> ${season.players[target].morale}`);
+        minutesCount++;
+      }
+      if (action === 'shop') shoppedCount++;
+      if (action === 'buy') boughtCount++;
+      if (action === 'sell') {
+        check('vender liga o tanking no time do usuario', !!t1.tanking, `tanking=${t1.tanking}`);
+        soldThisSeason = true;
+        soldCount++;
+      }
     }
   }
 
+  // The deadline-stance decision fires at game 52 and decideTanking runs at 55.
+  // If the latter wrote `false` over the user's team, a teardown the player
+  // chose would silently vanish three games later.
+  if (soldThisSeason) {
+    const me = season.teams.find(t => t.id === season.userTeamId)!;
+    check('o tanking escolhido sobrevive ao prazo de trocas', !!me.tanking, `tanking=${me.tanking}`);
+  }
   check('a temporada chega ao jogo 82 (sem deadlock)', season.gamesPlayed >= 82, `parou em ${season.gamesPlayed}`);
   if (season.gamesPlayed >= 82) seasonsFinished++;
   perSeason.push(raisedThisSeason);
@@ -136,17 +175,16 @@ console.log(`Decisoes por temporada: media ${media.toFixed(1)}  (min ${min}, max
 console.log(`Por tipo:   ${Object.entries(byKind).map(([k, v]) => `${k} ${(v / RUNS).toFixed(1)}`).join('  |  ') || '(nenhuma)'}`);
 console.log(`Escolhidas: ${Object.entries(byOption).map(([k, v]) => `${k} ${v}`).join('  |  ') || '(nenhuma)'}`);
 console.log(`Temporadas que chegaram ao fim: ${seasonsFinished}/${RUNS}`);
+console.log(`Pedidos de troca atendidos: minutos ${minutesCount} / mercado ${shoppedCount}`);
 
-// The gate.
-//
-// The design budget for the FINISHED queue is 4-8 a season: roughly one every
-// 10-20 games, enough to feel like the job and rare enough that each one is
-// worth reading. Phase 1 ships one decision type of the three, so it is checked
-// against its own share -- 3 to 6. The deadline stance fires once a season and
-// trade requests land around one or two, which is what carries the total into
-// the 4-8 band when phase 2 arrives. Raise this floor then.
+// The gate. All three decision types ship now, so this is the real budget:
+// 4-8 a season, roughly one every 10-20 games. Enough to feel like the job,
+// rare enough that each one is worth reading. Below it the season runs itself
+// and you watch; above it the game is paperwork.
 console.log('');
-check('frequencia da fase 1 dentro de 3-6 por temporada', media >= 3 && media <= 6, `medido ${media.toFixed(1)}`);
+check('frequencia dentro do orcamento de 4-8 por temporada', media >= 4 && media <= 8, `medido ${media.toFixed(1)}`);
+check('a postura de prazo aparece em toda temporada', stanceSeasons.size === RUNS,
+  `${stanceSeasons.size}/${RUNS}`);
 check('nenhuma temporada sem nenhuma decisao', min > 0, `min ${min}`);
 check('nenhuma temporada virou burocracia', max <= 14, `max ${max}`);
 // `sign` is deliberately NOT required: in-season the free agent market is empty
@@ -157,5 +195,13 @@ check('nenhuma temporada virou burocracia', max <= 14, `max ${max}`);
 check('as opcoes sempre disponiveis foram exercitadas',
   rushedCount > 0 && promotedCount > 0 && shortenedCount > 0,
   `rush ${rushedCount} / promote ${promotedCount} / shorten ${shortenedCount}`);
+check('as tres posturas de prazo foram exercitadas',
+  soldCount > 0 && boughtCount > 0,
+  `buy ${boughtCount} / sell ${soldCount}`);
+// The failure this whole phase exists to fix: a system that is built, wired,
+// and never fires. It is meant to be RARE -- a star only asks out when the team
+// is genuinely bad -- but never is not rare, it is dead.
+check('o pedido de troca dispara em algum momento', (byKind['trade_request'] ?? 0) > 0,
+  `${byKind['trade_request'] ?? 0} em ${RUNS} temporadas`);
 
 console.log(failures === 0 ? '\nALL CHECKS PASSED' : `\n${failures} CHECK(S) FAILED`);

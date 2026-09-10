@@ -118,11 +118,12 @@ export const decideTanking = (teams: Team[], schedule: ScheduleGame[], userTeamI
     (['East', 'West'] as const).forEach(conf => {
         const ranked = sortStandings(teams.filter(t => t.conference === conf), schedule);
         ranked.forEach((team, i) => {
-            // Never the user's team. Tanking is a GM decision and the user is
-            // the GM — deciding it for them would be taking the one call the
-            // whole game is about. (Offering it TO them is a UI feature, not
-            // an engine one; see PLANO-V2.md.)
-            team.tanking = team.id !== userTeamId && i + 1 >= TANK_RANK_CUTOFF;
+            // SKIP the user's team, never assign false to it. Tanking is a GM
+            // decision and the user is the GM; since the deadline-stance
+            // decision fires three games BEFORE this runs, writing `false` here
+            // would silently undo a teardown the player had just chosen.
+            if (team.id === userTeamId) return;
+            team.tanking = i + 1 >= TANK_RANK_CUTOFF;
         });
     });
 };
@@ -373,6 +374,12 @@ const gauss = (): number => (Math.random() + Math.random() + Math.random() - 1.5
 // A content player sits at 70; morale is undefined until the sim first touches
 // it (older data / fresh signees), so read it through this default.
 const DEFAULT_MORALE = 70;
+/**
+ * Morale at which a good player stops putting up with his situation and asks
+ * out. Read by decisionService, which raises the decision when a player crosses
+ * it — one threshold, one place.
+ */
+export const TRADE_REQUEST_MORALE = 25;
 const getMorale = (p: Player): number => p.morale ?? DEFAULT_MORALE;
 
 // A fresh player sits at 0 (no accumulated fatigue); load is undefined until
@@ -468,7 +475,16 @@ const updateMorale = (
             else if (idx < size) target += 3;     // rotation
             else if (idx >= size + 2) target -= 15; // deep bench / out of the rotation
             if (p.ovr >= 80 && idx >= size) target -= 12; // a good player buried
-            if (p.ovr >= 82 && winPct < 0.4) target -= 10; // a star wasting his prime
+            // A star wasting his prime. Scaled by HOW bad it is rather than a
+            // flat step at .400, because a flat -10 could never take anyone
+            // below the give-up line: measured across 10 seasons, the lowest
+            // morale any 78+ player reached was 32, and the unhappiest were
+            // always a bad team's two BEST players -- index 0 and 1 on a 23-59
+            // roster, sitting at 34. Which is the right story (the trade demand
+            // in real basketball is a star on a loser, not a buried reserve);
+            // the penalty just was not strong enough to tell it. At .25 this
+            // takes a star to ~21 and the demand finally lands.
+            if (p.ovr >= 82 && winPct < 0.45) target -= (0.45 - winPct) * 110;
             const eff = team.playerStatusEffects?.[id];
             if (eff?.type === 'hot') target += 6;
             if (eff?.type === 'slump') target -= 6;
@@ -479,9 +495,22 @@ const updateMorale = (
             const wasContent = cur >= 25;
             p.morale = next;
 
-            if (team.id === userTeamId && p.ovr >= 78 && idx <= size && next < 25 && wasContent) {
-                events.push({ message: `😤 ${p.name} está insatisfeito com sua situação e pediu para ser trocado.`, type: 'injury' });
-            }
+            // The demand itself is no longer raised here. It is a DECISION now
+            // (see services/decisionService.ts, which watches morale cross
+            // TRADE_REQUEST_MORALE), because a star asking out is the most
+            // dramatic thing a GM faces and it used to be one line in a 50-slot
+            // feed that renders six.
+            //
+            // It also never actually fired. The old test required a ROTATION
+            // player (idx <= size) below 25, but a rotation player's morale
+            // TARGET bottoms out at ~25 on its own -- 50 + (winPct-0.5)*60 on a
+            // 20%-win team is 32, +3 for the rotation, -10 for a star wasting
+            // his prime -- and morale converges asymptotically toward the
+            // target, so it approaches 25 and never crosses. Measured: 0.0
+            // requests per season. The players who DO get that unhappy are the
+            // ones the penalties below are written for: good players buried out
+            // of the rotation. Gating the demand on being IN the rotation
+            // excluded exactly the people who would make it.
         });
     });
     return events;

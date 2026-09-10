@@ -381,6 +381,8 @@ export default function App() {
         // Last season's give-up is not this season's: every team starts the
         // year trying, and decideTanking re-decides at the next deadline.
         tanking: undefined,
+        // A demand made last season is settled. Everyone gets to ask again.
+        tradeRequestedIds: undefined,
       }));
 
       // No retirement system: rosters carry every player straight through from
