@@ -7,7 +7,7 @@ import {
   getTeamLogoUrl, getTeamSalary, SALARY_CAP, getTeamNickname, conferenceLabel, coachOf,
 } from '../constants';
 import { MIN_ROSTER_SIZE } from '../services/tradeService';
-import { simulationEngine } from '../services/simulationService';
+import { simulationEngine, DEFAULT_ROTATION_SIZE } from '../services/simulationService';
 import { COLORS, INK, RADIUS } from '../src/theme/tokens';
 import Screen, { HeroContent, Body } from '../components/ui/Screen';
 import {
@@ -78,7 +78,7 @@ const MyTeamHub: React.FC<MyTeamHubProps> = ({
 
   const roster = team.roster.map((pId) => players[pId]).filter(Boolean).sort((a, b) => b.ovr - a.ovr);
   const canWaive = team.roster.length > MIN_ROSTER_SIZE;
-  const rotationSize = team.rotationSize ?? 9;
+  const rotationSize = team.rotationSize ?? DEFAULT_ROTATION_SIZE;
 
   const chemistry = Math.round(simulationEngine.teamChemistry(team, players));
   const chemColor = chemistry >= 70 ? COLORS.goodSoft : chemistry >= 45 ? COLORS.warn : COLORS.bad;

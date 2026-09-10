@@ -48,7 +48,11 @@ const REGULATION_SECONDS = 12 * 60;
 const OVERTIME_SECONDS = 5 * 60;
 // Mirrors the `Math.max(80, ...)` clamp simulateGame applies to every other
 // game in the season.
-const MIN_GAME_SCORE = 80;
+// Mirrors simulateGame's own score floor — a watched game is the same game,
+// so it gets the same guarantee. Both were 80 back when the league averaged
+// 96 a night; at a modern ~114 that floor sat close enough to the mean to
+// stack scores on a visible plateau.
+const MIN_GAME_SCORE = 50;
 
 export const quarterSeconds = (quarter: number) =>
     (quarter <= REGULATION_QUARTERS ? REGULATION_SECONDS : OVERTIME_SECONDS);

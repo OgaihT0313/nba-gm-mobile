@@ -44,3 +44,6 @@ _logcat*.txt
 # generated native folders
 /ios
 /android
+
+# scratch build dir used by scripts/check_watch_director.ts and scripts/diagnose_season.ts
+.check/

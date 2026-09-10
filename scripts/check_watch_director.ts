@@ -148,7 +148,10 @@ const lo = Math.min(...finals);
 const hi = Math.max(...finals);
 const mean = finals.reduce((x, y) => x + y, 0) / finals.length;
 check('no ties ever reach the season', ties === 0, `${ties}`);
-check('scores look like basketball', lo >= 80 && hi <= 150, `${lo}..${hi}`);
+// Band widened with the engine calibration: the league went from averaging
+// 96 a night to a modern ~114, and the score variance from sd 4.3 to ~13,
+// so a 300-game sample legitimately reaches into the 70s and the 160s.
+check('scores look like basketball', lo >= 70 && hi <= 175, `${lo}..${hi}`);
 console.log(`\n300 full games: avg ${mean.toFixed(1)} pts, range ${lo}-${hi}, ${overtimes} went to OT, ${ties} ties`);
 
 console.log(failures === 0 ? '\nALL CHECKS PASSED' : `\n${failures} CHECK(S) FAILED`);

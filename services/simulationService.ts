@@ -152,7 +152,7 @@ const getLineup = (team: Team, players: { [key: string]: Player }): { slots: Lin
 // Picks the rotation (default 8) a team actually plays: the resolved
 // starting five (see getLineup) plus the best remaining players by OVR
 // regardless of position filling any bench spots left.
-const getTeamRotation = (team: Team, players: { [key: string]: Player }, size: number = 8): string[] => {
+const getTeamRotation = (team: Team, players: { [key: string]: Player }, size: number = DEFAULT_ROTATION_SIZE): string[] => {
     const { slots, usedIds } = getLineup(team, players);
     const starters = slots.map(s => s.playerId).filter((id): id is string => !!id);
 
@@ -166,11 +166,11 @@ const getTeamRotation = (team: Team, players: { [key: string]: Player }, size: n
 // How deep a team's real rotation runs — user-tunable via Team.rotationSize
 // (a single stepper in MyTeamHub, not a per-player minutes slider — mobile
 // scope, same call as the draft-pick protection toggle in Fase C). Bounded so
-// it never drops below the 7 that keep a bench functional or climbs past what
+// it never drops below the 8 that keep a bench functional or climbs past what
 // the minutes curve below can sensibly spread across.
-export const ROTATION_MIN = 7;
-export const ROTATION_MAX = 10;
-export const DEFAULT_ROTATION_SIZE = 8;
+export const ROTATION_MIN = 8;
+export const ROTATION_MAX = 12;
+export const DEFAULT_ROTATION_SIZE = 10;
 const rotationSize = (team: Team): number =>
     Math.round(clampMod(team.rotationSize ?? DEFAULT_ROTATION_SIZE, ROTATION_MIN, ROTATION_MAX));
 
@@ -179,7 +179,15 @@ const rotationSize = (team: Team): number =>
 // plays the most, not a flat average across the rotation) and recordGameStats
 // (box-score minutes) — both read the same weights so "who plays" and "who
 // the sim thinks is good" never disagree.
-const ROTATION_WEIGHTS = [5.0, 4.6, 4.3, 4.0, 3.7, 2.7, 2.2, 1.7, 1.3, 0.9];
+//
+// The numbers ARE a real NBA minutes distribution, divided by 6:
+// 36/34/32/30/28 for the starters, then 24/20/16/12/8 off the bench. That
+// matters because TEAM_MINUTES (240) is split proportionally to them — the
+// old curve was steep enough that an 8-man rotation handed its best player
+// 43.8 mpg, which nobody in the modern NBA plays (measured; see
+// scripts/diagnose_season.ts). A 10-man rotation on this curve lands the
+// leader at ~36.
+const ROTATION_WEIGHTS = [6.0, 5.67, 5.33, 5.0, 4.67, 4.0, 3.33, 2.67, 2.0, 1.33, 0.9, 0.6];
 
 // A player flagged for load management (Team.loadManagedIds) gets a lighter
 // share of his slot's minutes — that's the whole point of flagging him — and
@@ -218,9 +226,11 @@ const getGameRatings = (team: Team, players: { [key: string]: Player }) => {
             tempDef += Math.round(ovrChange * (player.def / player.ovr));
         }
 
-        const formFluctuation = Math.random() * 6 - 3; // Fluctuation from -3 to +3
-        offense += (tempOff + formFluctuation) * w;
-        defense += (tempDef + formFluctuation) * w;
+        // Rolled twice, not once: a player can have a hot shooting night while
+        // still getting cooked defensively. Sharing one draw made every good
+        // night a two-way night, which is not how a basketball game reads.
+        offense += (tempOff + (Math.random() * 6 - 3)) * w;
+        defense += (tempDef + (Math.random() * 6 - 3)) * w;
         totalWeight += w;
     });
 
@@ -270,6 +280,18 @@ const getTeamProfile = (team: Team, players: { [key: string]: Player }): TeamPro
 
 const clampMod = (value: number, lo: number, hi: number) => Math.max(lo, Math.min(hi, value));
 
+/**
+ * A standard normal draw (mean 0, sd 1), by the Irwin-Hall route: three
+ * uniforms sum to a distribution with sd 0.5, so doubling it lands on 1.
+ *
+ * Cheaper than Box-Muller and, unlike a true normal, naturally bounded at ±3sd
+ * — which is what we want for a basketball score. Every score in the sim is
+ * shaped by this rather than by `Math.random()` directly: a uniform gives a
+ * flat-topped distribution where a 30-point night is exactly as likely as an
+ * average one, right up to a hard edge where it becomes impossible.
+ */
+const gauss = (): number => (Math.random() + Math.random() + Math.random() - 1.5) * 2;
+
 // --- MORALE / CHEMISTRY ---
 // A content player sits at 70; morale is undefined until the sim first touches
 // it (older data / fresh signees), so read it through this default.
@@ -299,6 +321,12 @@ const injuryRisk = (p: Player, idx: number, rotSize: number): number => {
 
 // Severity tier for a new injury: most are minor, a rare few are season-altering,
 // and older players skew slightly more severe. Returns games missed + a label.
+// Odds that a given team picks up a new injury on a given night. Tuned against
+// scripts/diagnose_season.ts so rotation players land near the real NBA's ~68
+// games played, which is the number that makes depth, load management and
+// "who's healthy in May" mean anything.
+const INJURY_CHANCE_PER_TEAM = 0.15;
+
 const rollInjury = (age: number): { duration: number; label: string } => {
     const r = Math.random() - Math.max(0, age - 30) * 0.015;
     if (r < 0.55) return { duration: 2 + Math.floor(Math.random() * 4), label: 'uma lesão leve' };          // 2-5
@@ -420,7 +448,11 @@ export const computeExpectedPoints = (
     const chemModB = clampMod((teamChemistry(teamB, players) - 65) * 0.12, -3, 3);
 
     // 1. Determine base score from team styles
-    let baseScore = 98; // Slightly higher average score for modern NBA
+    // 115 puts the league's average team night at ~113 once the modifiers below
+    // net out, which is where the modern NBA actually scores. It used to be 98
+    // — a 1998 number that made a 118-112 final literally unreachable (the
+    // highest score in 14,760 measured games was 120).
+    let baseScore = 115;
     const styles = [teamA.style, teamB.style];
     if (styles.includes('Run and Gun') || styles.includes('Pace and Space')) {
         baseScore += 7;
@@ -432,7 +464,13 @@ export const computeExpectedPoints = (
     // 2. Calculate expected points for each team
     const homeAdvantage = 2.5; // Point advantage
     const momentumFactor = 0.75; // Points per momentum point
-    const matchupStrength = 0.6; // How much offense/defense difference matters
+    // How much of the offense-minus-defense gap converts to points. Raised
+    // from 0.6 alongside the variance fix: with realistic noise AND a
+    // 10-man rotation flattening every team's rating toward the league mean,
+    // 0.6 left the standings almost talent-blind (best record 58, league win
+    // sd 8.7, talent-to-wins correlation 0.66). This is the signal side of the
+    // signal-to-noise ratio the whole standings shape rests on.
+    const matchupStrength = 1.15;
 
     const expectedPointsA = baseScore
         + (ratingsA.offense - ratingsB.defense) * matchupStrength
@@ -457,14 +495,30 @@ const simulateGame = (teamA: Team, teamB: Team, players: { [key: string]: Player
     const isAHome = homeTeamId ? homeTeamId === teamA.id : Math.random() > 0.5;
     const { expectedPointsA, expectedPointsB } = computeExpectedPoints(teamA, teamB, players, coaches, isAHome);
 
-    // 3. Add unpredictability (random variance)
-    const variance = 15; // Wider range for more upsets
-    let scoreA = Math.round(expectedPointsA + (Math.random() * variance - variance / 2));
-    let scoreB = Math.round(expectedPointsB + (Math.random() * variance - variance / 2));
+    // 3. Add unpredictability.
+    //
+    // This used to be a single uniform ±7.5 per side — a standard deviation of
+    // 4.3 points, against the ~12.5 a real NBA team's score carries. The
+    // consequences were not cosmetic: with only 4 points of noise a 6-point
+    // talent edge always cashes, so the league produced 73-win champions and
+    // four 60-win teams a year, 45% of games were decided by five or less, and
+    // 2.4% were blowouts (the real figures are ~25% and ~22%).
+    //
+    // The noise is now split in two, which is also what the real distribution
+    // looks like: a PACE swing both teams share (a track meet lifts both
+    // scores, a rock fight sinks both) plus each side's own shooting night.
+    // Sharing part of the variance is what keeps the margin's spread (~13.8)
+    // below sqrt(2)x the score's — sampling the two sides independently would
+    // put it at 17.7 and manufacture blowouts.
+    const pace = gauss() * 7.8;
+    let scoreA = Math.round(expectedPointsA + pace + gauss() * 9.0);
+    let scoreB = Math.round(expectedPointsB + pace + gauss() * 9.0);
 
-    // Ensure scores are realistic
-    scoreA = Math.max(80, scoreA);
-    scoreB = Math.max(80, scoreB);
+    // A floor low enough that it effectively never binds — the old one sat at
+    // 80 and, against a distribution squeezed around 96, fired on 0.79% of
+    // scores, stacking them on a visible plateau at exactly 80.
+    scoreA = Math.max(50, scoreA);
+    scoreB = Math.max(50, scoreB);
 
     // 4. Handle overtime and determine winner
     if (scoreA === scoreB) {
@@ -610,8 +664,17 @@ export const WATCH_PLAY_META: Record<WatchPlay, {
 // if both are queued for the same quarter.
 export const TIMEOUT_BONUS = 3;
 export const STARTING_TIMEOUTS = 4;
-export const LIVE_QUARTER_VARIANCE = 9; // narrower than a full game's 15 — a single quarter swings less
-export const QUARTER_FLOOR = 16; // no quarter realistically scores below this
+// Uniform width (not a standard deviation) of a single period's swing, shared
+// by advanceLiveQuarter and the watched-game director. 22 wide is sd ~6.3,
+// which is the full game's ~13 spread divided across four independent
+// quarters. It used to be 9 — sd 2.6 — which quietly made the one game the
+// user actually plays out, a Game 7, five times more deterministic than every
+// game the sim resolves in the background.
+export const LIVE_QUARTER_VARIANCE = 22;
+// No quarter realistically scores below this. Real NBA quarters bottom out
+// around 10; 16 was set against a league that averaged 24 a period and now
+// averages ~29, where it would bind on any genuinely cold quarter.
+export const QUARTER_FLOOR = 10;
 
 export const startLiveGame = (ref: PendingDeciderRef, teamA: Team, teamB: Team, userTeamId: string): LiveGameState => ({
     ref,
@@ -776,7 +839,10 @@ const recordGameStats = (team: Team, pointsScored: number, pointsAllowed: number
     // Team box-score totals — same rating-based model as before, now also the
     // pool that gets split among players so team and player stats stay coherent.
     const teamRebounds = Math.floor(38 + (ratings.defense / 20) + (Math.random() * 10));
-    const teamAssists = Math.floor((pointsScored * 0.22) + (ratings.offense / 30) + (Math.random() * 5));
+    // 0.19, not 0.22: the coefficient is a share of points scored, so raising
+    // the league's scoring to a modern 113 dragged team assists to ~30 a night.
+    // The real NBA sits at ~26.5.
+    const teamAssists = Math.floor((pointsScored * 0.19) + (ratings.offense / 30) + (Math.random() * 5));
     const teamSteals = Math.floor(5 + (ratings.defense / 25) + (Math.random() * 4));
     const teamBlocks = Math.floor(3 + (ratings.defense / 30) + (Math.random() * 4));
     const teamTurnovers = Math.floor(16 - (ratings.offense / 25) + (Math.random() * 5));
@@ -871,7 +937,7 @@ const recordGameStats = (team: Team, pointsScored: number, pointsAllowed: number
     });
 };
 
-const handleRandomEvents = (currentTeams: Team[], players: { [key: string]: Player }, gamesPlayed: number) => {
+const handleRandomEvents = (currentTeams: Team[], players: { [key: string]: Player }, gamesPlayed: number, userTeamId?: string) => {
     let newTeams: Team[] = JSON.parse(JSON.stringify(currentTeams));
     let event: { message: string, type: string } | null = null;
 
@@ -944,31 +1010,62 @@ const handleRandomEvents = (currentTeams: Team[], players: { [key: string]: Play
         }
     }
     
+    // INJURY. Rolled for EVERY team, every night.
+    //
+    // This used to sample one random team per day and roll 2% on it — about
+    // 1.6 injuries per season for the entire league, which is why the measured
+    // average was 81.0 of 82 games played (real NBA rotation players average
+    // ~68). Nothing downstream could mean anything: load management lowered a
+    // risk that never materialized, roster depth never got tested, and a
+    // championship never turned on who was healthy in May.
+    //
+    // Who gets hurt inside a team is still weighted by age + minutes load +
+    // accumulated fatigue (injuryRisk), so it lands on someone who matters.
+    // Severity runs from a minor tweak to a season-altering blow.
+    let worstInjury: { message: string; duration: number } | null = null;
+    newTeams.forEach(t => {
+        if (Math.random() >= INJURY_CHANCE_PER_TEAM) return;
+        const eligible = t.roster
+            .map((pId, idx) => ({ pId, idx }))
+            .filter(({ pId }) => !t.playerAbsences?.[pId] && players[pId]);
+        if (eligible.length === 0) return;
+        const rotSize = rotationSize(t);
+        const chosen = eligible[weightedIndex(eligible.map(({ pId, idx }) => injuryRisk(players[pId], idx, rotSize)))];
+        const player = players[chosen.pId];
+        const { duration, label } = rollInjury(player.age);
+        if (!t.playerAbsences) t.playerAbsences = {};
+        t.playerAbsences[chosen.pId] = { reason: 'injury', duration };
+        // Which injuries are NEWS. Every one of them applies to the roster;
+        // only some earn the day's single message slot.
+        //
+        // A realistic injury rate is ~5 a night across 30 teams, so "announce
+        // the worst one" meant the feed carried nothing but injuries — the
+        // trade, hot-streak, slump and chemistry events below were still
+        // firing and still being overwritten, every day, forever. The feed is
+        // a 60-slot buffer the season screen renders six of; it cannot be a
+        // transaction log. So it gets the two kinds a GM would actually be
+        // told about: anything on YOUR OWN roster, and a star lost for the
+        // season anywhere in the league. Everything else is on the roster
+        // screens, where it belongs.
+        const mine = t.id === userTeamId;
+        const leagueNews = duration >= 18 && player.ovr >= 85;
+        if (!mine && !leagueNews) return;
+        if (!worstInjury || duration > worstInjury.duration) {
+            const severe = duration >= 18 ? ' Lesão séria — pode comprometer a temporada.' : '';
+            worstInjury = {
+                duration,
+                message: `❤️‍🩹 LESÃO! ${player.name} (${t.name}) sofreu ${label} e perderá ${duration} jogos.${severe}`,
+            };
+        }
+    });
+    if (worstInjury) event = { message: (worstInjury as { message: string }).message, type: 'injury' };
+
     const eventRoll = Math.random();
     const teamIndex = Math.floor(Math.random() * newTeams.length);
     const team = newTeams[teamIndex];
 
-    // INJURY (2% chance). Who gets hurt is weighted by age + minutes load (a
-    // rotation regular or aging vet is far likelier than an end-of-bench name),
-    // and severity runs from a minor tweak to a season-altering blow — so an
-    // injury actually lands on someone who matters and sometimes really hurts.
-    if (eventRoll < 0.02) {
-        const eligible = team.roster
-            .map((pId, idx) => ({ pId, idx }))
-            .filter(({ pId }) => !team.playerAbsences?.[pId] && players[pId]);
-        if (eligible.length > 0) {
-            const rotSize = rotationSize(team);
-            const chosen = eligible[weightedIndex(eligible.map(({ pId, idx }) => injuryRisk(players[pId], idx, rotSize)))];
-            const player = players[chosen.pId];
-            const { duration, label } = rollInjury(player.age);
-            if (!team.playerAbsences) team.playerAbsences = {};
-            team.playerAbsences[chosen.pId] = { reason: 'injury', duration };
-            const severe = duration >= 18 ? ' Lesão séria — pode comprometer a temporada.' : '';
-            event = { message: `❤️‍🩹 LESÃO! ${player.name} (${team.name}) sofreu ${label} e perderá ${duration} jogos.${severe}`, type: 'injury' };
-        }
-    }
     // SUSPENSION (0.5% chance)
-    else if (eventRoll < 0.025) {
+    if (eventRoll < 0.005) {
         const eligiblePlayers = team.roster.filter(pId => !team.playerAbsences?.[pId]);
         if (eligiblePlayers.length > 0) {
             const pId = eligiblePlayers[Math.floor(Math.random() * eligiblePlayers.length)];
@@ -980,7 +1077,7 @@ const handleRandomEvents = (currentTeams: Team[], players: { [key: string]: Play
         }
     }
     // HOT STREAK (1.5% chance)
-    else if (eventRoll < 0.040) {
+    else if (eventRoll < 0.020) {
         const eligiblePlayers = team.roster.filter(pId => !team.playerStatusEffects?.[pId]);
         if (eligiblePlayers.length > 0) {
             const pId = eligiblePlayers[Math.floor(Math.random() * eligiblePlayers.length)];
@@ -993,7 +1090,7 @@ const handleRandomEvents = (currentTeams: Team[], players: { [key: string]: Play
         }
     }
     // SLUMP (1.5% chance)
-    else if (eventRoll < 0.055) {
+    else if (eventRoll < 0.035) {
         const eligiblePlayers = team.roster.filter(pId => !team.playerStatusEffects?.[pId]);
         if (eligiblePlayers.length > 0) {
             const pId = eligiblePlayers[Math.floor(Math.random() * eligiblePlayers.length)];
@@ -1006,7 +1103,7 @@ const handleRandomEvents = (currentTeams: Team[], players: { [key: string]: Play
         }
     }
     // TEAM CHEMISTRY (5% chance)
-    else if (eventRoll < 0.105) {
+    else if (eventRoll < 0.085) {
         const isGoodEvent = Math.random() > 0.5;
         if (isGoodEvent) {
             if (!team.momentum || team.momentum < 3) {

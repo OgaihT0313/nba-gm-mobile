@@ -1,6 +1,6 @@
 import { Player, Team, PlayerAttributes } from '../types';
 import { getPlayerPositions, getPlayerAttributes, LINEUP_POSITIONS } from '../constants';
-import { simulationEngine } from './simulationService';
+import { simulationEngine, DEFAULT_ROTATION_SIZE } from './simulationService';
 import { playerValue } from './tradeService';
 import { getFreeAgents, signFreeAgentLegality, evaluateSigningInterest } from './freeAgencyService';
 
@@ -51,8 +51,12 @@ const PROFILE_SIGNALS: { attribute: keyof PlayerAttributes; label: string; mode:
   { attribute: 'interiorD', label: 'Proteção do garrafão', mode: 'best' },
 ];
 
+// The team's OWN rotation depth, not a hardcoded 8 — the advisor has to read
+// the same rotation the match sim actually plays, or it diagnoses a roster
+// hole in a slot that never sees the floor (and misses one that does).
 const rotationOf = (team: Team, players: PlayerMap): Player[] =>
-  simulationEngine.getTeamRotation(team, players, 8).map((id) => players[id]).filter(Boolean);
+  simulationEngine.getTeamRotation(team, players, team.rotationSize ?? DEFAULT_ROTATION_SIZE)
+    .map((id) => players[id]).filter(Boolean);
 
 const signalValue = (rotation: Player[], attribute: keyof PlayerAttributes, mode: 'avg' | 'best'): number => {
   if (rotation.length === 0) return 0;

@@ -105,7 +105,7 @@ export function simulateOneDay(season: SeasonState, pinnedResult?: PinnedGameRes
         }
     });
 
-    const { teams: teamsAfterEvents, event } = simulationEngine.handleRandomEvents(newTeams, newPlayers, season.gamesPlayed + 1);
+    const { teams: teamsAfterEvents, event } = simulationEngine.handleRandomEvents(newTeams, newPlayers, season.gamesPlayed + 1, season.userTeamId);
     if (event) {
         newEvents.unshift(event);
         notify(event.message, event.type);

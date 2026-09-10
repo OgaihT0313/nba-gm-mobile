@@ -65,7 +65,20 @@ export const projectConfidence = (owner: OwnerExpectation, team: Team): number =
     const losses = team.losses || 0;
     const gp = wins + losses;
     if (gp < 5) return owner.confidence;
-    const projWins = (wins / gp) * 82;
+    // Regress the pace toward the owner's own target by sample size, instead
+    // of extrapolating whatever has happened so far straight out to 82 games.
+    // Without this a 2-5 opening week projected to 23 wins and put a title
+    // contender's GM on 6% confidence — "beira da demissão" after seven games.
+    // That was survivable while the match sim had almost no variance and a
+    // good team essentially never started 2-5; now that scores carry a real
+    // spread, cold weeks are normal and the owner has to read them as such.
+    // PRIOR_GAMES is the weight of the preseason expectation in games: at 7
+    // played it is ~74% of the read, at 41 played ~33%, and the end-of-season
+    // judgment (evaluateSeasonOutcome) ignores it entirely and uses the real
+    // record.
+    const PRIOR_GAMES = 20;
+    const observed = (wins / gp) * 82;
+    const projWins = (observed * gp + owner.targetWins * PRIOR_GAMES) / (gp + PRIOR_GAMES);
     // Each win above/below the target is worth ~2.2 points, centered at 60 so a
     // team exactly on target sits comfortably clear of the danger zone.
     return clamp(Math.round(60 + (projWins - owner.targetWins) * 2.2), 0, 100);
