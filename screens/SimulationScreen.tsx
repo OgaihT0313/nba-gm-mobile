@@ -16,7 +16,6 @@ import {
   Panel, MonoLabel, Eyebrow, HeroTitle, Stat, Meter, Chip, CtaButton, GhostButton, SectionLabel,
 } from '../components/ui/kit';
 import { currentEra } from '../data/eras';
-import CommentaryPanel from '../components/CommentaryPanel';
 import CupPanel from '../components/CupPanel';
 import StandingsTable from '../components/StandingsTable';
 
@@ -30,8 +29,6 @@ interface SimulationScreenProps {
   season: SeasonState;
   isSimulating: boolean;
   onAdvance: (target: number) => void;
-  isCommentaryLoading: boolean;
-  commentaryInterval: number;
   /** Opens the 3D "Assistir ao Jogo" screen for the user's next fixture. */
   onWatchGame?: (opponent: Team, atHome: boolean) => void;
 }
@@ -48,7 +45,7 @@ const abbreviate = (name: string) => {
 };
 
 const SimulationScreen: React.FC<SimulationScreenProps> = ({
-  season, isSimulating, onAdvance, isCommentaryLoading, commentaryInterval, onWatchGame,
+  season, isSimulating, onAdvance, onWatchGame,
 }) => {
   const { accent } = useTheme();
   const userTeam = season.teams.find((t) => t.id === season.userTeamId);
@@ -383,12 +380,6 @@ const SimulationScreen: React.FC<SimulationScreenProps> = ({
             </View>
           </Panel>
         ) : null}
-
-        <CommentaryPanel
-          commentary={season.leagueCommentary}
-          isLoading={isCommentaryLoading}
-          interval={commentaryInterval}
-        />
 
         <CupPanel cup={season.cup} teams={season.teams} />
 

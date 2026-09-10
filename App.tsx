@@ -22,7 +22,6 @@ import {
 import { processOffseasonContracts, runCpuFreeAgency, signFreeAgentLegality, newContractYears, evaluateSigningInterest } from './services/freeAgencyService';
 import { accumulateCareers, championRosterOf } from './services/careerService';
 import { initCoaches, ageCoachesAndRetire, buildDevelopmentBonusMap, fireCoach, hireCoach } from './services/coachService';
-import { generateAnalysis } from './services/geminiService';
 
 import { ThemeProvider } from './src/theme/ThemeProvider';
 import { COLORS } from './src/theme/tokens';
@@ -55,40 +54,6 @@ import { IconName } from './components/Icon';
 type AppView =
   | 'era-select' | 'team-select' | 'team-confirm' | 'home' | 'teams' | 'team-detail' | 'scout' | 'my-team' | 'draft' | 'free-agency'
   | 'simulation' | 'standings' | 'leaders' | 'trade' | 'awards' | 'allstar' | 'playoffs' | 'live-game' | 'watch-game';
-
-// How often (in simulated games) a fresh league-wide commentary is requested.
-const COMMENTARY_INTERVAL = 10;
-
-const buildLeagueCommentaryPrompt = (teams: Team[], players: { [key: string]: Player }, events: Event[], gamesPlayed: number) => {
-  const ranked = [...teams].sort((a, b) => (b.wins || 0) - (a.wins || 0));
-  const top3 = ranked.slice(0, 3).map((t) => `${t.name} (${t.wins || 0}-${t.losses || 0})`).join(', ');
-  const bottom3 = ranked.slice(-3).map((t) => `${t.name} (${t.wins || 0}-${t.losses || 0})`).join(', ');
-  const topPlayers = (Object.values(players) as Player[]).filter((p) => !p.prospect).sort((a, b) => b.ovr - a.ovr).slice(0, 5).map((p) => `${p.name} (${p.ovr})`).join(', ');
-  const recentEvents = events.slice(0, 5).map((e) => e.message).join(' | ') || 'nada relevante';
-
-  return `Você é um comentarista de basquete estilo ESPN cobrindo a NBA em tempo real. A temporada está em ${gamesPlayed} de 82 jogos.
-Melhores campanhas: ${top3}.
-Piores campanhas: ${bottom3}.
-Jogadores mais bem avaliados da liga: ${topPlayers}.
-Acontecimentos recentes: ${recentEvents}.
-Escreva um comentário de 3 a 4 frases, em português, num tom de análise esportiva de TV, destacando storylines interessantes da liga (favoritos, zebras, times surpreendendo). Não invente placares ou estatísticas específicas de jogos — fale de forma qualitativa.`;
-};
-
-// Deterministic commentary used whenever the AI proxy is down/rate-limited (the
-// free tier caps out at ~20 calls/day), so the panel always shows a sensible,
-// standings-aware line instead of an error.
-const buildLocalCommentary = (teams: Team[], gamesPlayed: number): string => {
-  const ranked = [...teams].sort((a, b) => (b.wins || 0) - (a.wins || 0));
-  const leader = ranked[0];
-  const worst = ranked[ranked.length - 1];
-  const east = [...teams].filter((t) => t.conference === 'East').sort((a, b) => (b.wins || 0) - (a.wins || 0))[0];
-  const west = [...teams].filter((t) => t.conference === 'West').sort((a, b) => (b.wins || 0) - (a.wins || 0))[0];
-  const record = (t?: Team) => (t ? `${t.wins || 0}-${t.losses || 0}` : '');
-  const phase = gamesPlayed < 27 ? 'No início de temporada' : gamesPlayed < 55 ? 'Já passando da metade da temporada' : 'Na reta final da temporada regular';
-  return `${phase}, o ${leader?.name} lidera a liga com campanha de ${record(leader)} e chega embalado. ` +
-    `Na disputa por conferência, ${east?.name} (${record(east)}) manda no Leste enquanto ${west?.name} (${record(west)}) domina o Oeste. ` +
-    `Do outro lado da tabela, o ${worst?.name} (${record(worst)}) segue penando e já pensa no futuro.`;
-};
 
 const PLACEHOLDERS: Record<string, { title: string; icon: IconName }> = {
   teams: { title: 'Franquias', icon: 'teams' },
@@ -134,7 +99,6 @@ export default function App() {
   // just one screen earlier; only becomes part of `season` inside initSeason.
   const [pendingEraId, setPendingEraId] = useState<string | null>(null);
   const [notifications, setNotifications] = useState<NotificationType[]>([]);
-  const [isCommentaryLoading, setIsCommentaryLoading] = useState(false);
 
   // Date.now() alone collides when several events fire in the same tick
   // (season end, offseason) → duplicate keys; the random suffix keeps ids unique.
@@ -171,25 +135,6 @@ export default function App() {
     }, 16);
     return () => clearTimeout(t);
   }, [season, isSimulating, targetGames]);
-
-  // Refresh the league commentary once a sim settles and COMMENTARY_INTERVAL
-  // games have passed since the last one. Comparing against the last
-  // checkpoint (rather than an exact `gp % 10 === 0`) keeps it correct however
-  // far a single batch jumps. Fire-and-forget — never blocks the sim.
-  useEffect(() => {
-    if (!season || season.status !== 'active' || isCommentaryLoading || isSimulating) return;
-    const gp = season.gamesPlayed;
-    const last = season.leagueCommentary?.gamesPlayed ?? 0;
-    if (gp === 0 || gp - last < COMMENTARY_INTERVAL) return;
-
-    setIsCommentaryLoading(true);
-    const prompt = buildLeagueCommentaryPrompt(season.teams, season.players, season.events, gp);
-    const local = buildLocalCommentary(season.teams, gp);
-    generateAnalysis(prompt, local).then((text) => {
-      setSeason((prev) => (prev ? { ...prev, leagueCommentary: { text: text.trim(), gamesPlayed: gp } } : null));
-      setIsCommentaryLoading(false);
-    });
-  }, [season?.gamesPlayed, season?.status, isSimulating]);
 
   const runSimulation = (target: number) => {
     if (!season || season.status !== 'active' || isSimulating || season.gamesPlayed >= target) return;
@@ -551,7 +496,6 @@ export default function App() {
         eraChainIndex: nextEraChainIndex,
         lastOffseasonMoves: appliedMoves,
         allStar: undefined,
-        leagueCommentary: undefined,
         cup: undefined,
         schedule: [],
         tradeOffers: [],
@@ -977,8 +921,6 @@ export default function App() {
           season={season}
           isSimulating={isSimulating}
           onAdvance={runSimulation}
-          isCommentaryLoading={isCommentaryLoading}
-          commentaryInterval={COMMENTARY_INTERVAL}
           onWatchGame={startWatchGame}
         />
       );

@@ -42,12 +42,6 @@ imprime um **link de download do `.apk`** — abra esse link no celular e instal
 | Ícone | `assets/icon.png` (o mesmo logo do app web) |
 | Tema | dark (`#020617`) |
 | Perfil `preview` | gera **APK** instalável (não AAB) |
-| `EXPO_PUBLIC_AI_PROXY_URL` | já embutido no `eas.json` → aponta pro Worker da Cloudflare |
-
-> **Por que a URL do proxy está no `eas.json`?** O `.env` local não é enviado pro
-> build na nuvem. A URL não é segredo (a chave do Gemini vive só no Worker), então
-> declará-la no perfil de build é o jeito correto — sem isso, o APK sairia com a
-> narração de IA desligada.
 
 ## Atualizar o app depois
 

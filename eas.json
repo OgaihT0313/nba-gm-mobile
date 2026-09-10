@@ -9,25 +9,16 @@
       "distribution": "internal",
       "android": {
         "buildType": "apk"
-      },
-      "env": {
-        "EXPO_PUBLIC_AI_PROXY_URL": "https://nba-gm-ai-proxy.thiagonx.workers.dev"
       }
     },
     "preview": {
       "distribution": "internal",
       "android": {
         "buildType": "apk"
-      },
-      "env": {
-        "EXPO_PUBLIC_AI_PROXY_URL": "https://nba-gm-ai-proxy.thiagonx.workers.dev"
       }
     },
     "production": {
-      "autoIncrement": true,
-      "env": {
-        "EXPO_PUBLIC_AI_PROXY_URL": "https://nba-gm-ai-proxy.thiagonx.workers.dev"
-      }
+      "autoIncrement": true
     }
   },
   "submit": {

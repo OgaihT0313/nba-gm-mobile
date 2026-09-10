@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useCallback, useEffect } from 'react';
-import { View, Text, Pressable, ScrollView, Modal, ActivityIndicator } from 'react-native';
+import { View, Text, Pressable, ScrollView, Modal } from 'react-native';
 import { Image } from 'expo-image';
 import { LinearGradient } from 'expo-linear-gradient';
 
@@ -8,7 +8,6 @@ import {
   getPlayerImageUrl, PLAYER_PLACEHOLDER_SVG, getTeamLogoUrl, getTeamSalary, SALARY_CAP,
   formatPositions, getPlayerPositions, picksOf, getTeamNickname, getTeamTricode, attributeColor,
 } from '../constants';
-import { generateAnalysis } from '../services/geminiService';
 import {
   evaluateTradeLegality, evaluateTradeValue, TRADE_DEADLINE_GAME, playerValue, picksValue,
 } from '../services/tradeService';
@@ -184,9 +183,8 @@ const TradeCenter: React.FC<TradeCenterProps> = ({
 
   const [pickerOpen, setPickerOpen] = useState(false);
   const [assetSheet, setAssetSheet] = useState<'user' | 'partner' | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
   const [tradeStatus, setTradeStatus] = useState<'idle' | 'accepted' | 'rejected'>('idle');
-  const [aiResponse, setAiResponse] = useState('');
+  const [gmReaction, setGmReaction] = useState('');
   const [inspecting, setInspecting] = useState<Player | null>(null);
 
   useEffect(() => { setUserAssets([]); setUserPickIds([]); setProtections({}); }, [userTeamId]);
@@ -266,18 +264,16 @@ const TradeCenter: React.FC<TradeCenterProps> = ({
   // "you're overpaying" — which is the question you're actually asking it.
   const markerPos = Math.max(0.03, Math.min(0.97, 0.5 - valuePct / 120));
 
-  const executeTrade = useCallback(async () => {
+  const executeTrade = useCallback(() => {
     if (!userTeam || !partnerTeam || !legality?.legal || !partnerEval) return;
     const userPlayerDetails = userAssets.map((pId) => players[pId]);
     const partnerPlayerDetails = partnerAssets.map((pId) => players[pId]);
 
-    // Accept/reject is decided deterministically from asset value — the LLM
-    // only narrates afterwards, so the outcome never depends on the model.
+    // Accept/reject is decided deterministically from asset value — the
+    // reaction only narrates afterwards, so the outcome never depends on it.
     const accepted = partnerEval.accepted;
 
     setTradeStatus(accepted ? 'accepted' : 'rejected');
-    setAiResponse('');
-    setIsLoading(true);
     if (accepted) {
       onTradeExecute(userTeam.id, partnerTeam.id, userAssets, partnerAssets, userPickIds, partnerPickIds, protections);
       setUserAssets([]);
@@ -287,62 +283,49 @@ const TradeCenter: React.FC<TradeCenterProps> = ({
       setProtections({});
     }
 
-    // Picks read as their own line items so the GM's reaction can talk about
-    // future capital, which is half the point of trading them.
-    const describePicks = (picks: DraftPickAsset[]) =>
-      picks.map((p) => `pick de 1ª rodada do ${teams.find((t) => t.id === p.originalTeamId)?.name ?? p.originalTeamId}${p.protection ? ` (top ${p.protection} protegido)` : ''}`);
-    const offerParts = [...userPlayerDetails.map((p) => `${p.name} (${p.ovr})`), ...describePicks(selectedPicks.give)];
-    const askParts = [...partnerPlayerDetails.map((p) => `${p.name} (${p.ovr})`), ...describePicks(selectedPicks.receive)];
+    // The opposing GM's answer, written here rather than generated. This used
+    // to be an LLM call through a proxy, with these lines as the offline
+    // fallback; the call cost up to three 12s attempts before timing out, so
+    // the answer to a trade you just proposed regularly took half a minute to
+    // arrive — for two sentences of flavor. The lines below know the partner's
+    // competitive situation and name the actual players moving, which is the
+    // part that carried the meaning anyway, and they land instantly.
+    const situation = partnerTeam.powerRank <= 10 ? 'contender' : partnerTeam.powerRank <= 20 ? 'bubble' : 'rebuild';
+    const incoming = userPlayerDetails.map((p) => p.name).join(' e ');
+    const outgoing = partnerPlayerDetails.map((p) => p.name).join(' e ');
+    const accepts: Record<string, string[]> = {
+      contender: [
+        `${incoming} nos dá exatamente a peça que faltava pra brigar pelo título agora. Abrir mão de ${outgoing} dói, mas a janela é essa.`,
+        `Estamos em modo "vencer já", e ${incoming} eleva nosso teto. Foi um preço que valeu a pena pagar.`,
+      ],
+      bubble: [
+        `Precisávamos de reforço pra garantir os playoffs, e ${incoming} encaixa no nosso plano. Boa troca pros dois lados.`,
+        `${incoming} nos deixa mais competitivos no curto prazo sem comprometer o vestiário. Topamos.`,
+      ],
+      rebuild: [
+        `Faz sentido pro nosso projeto de reconstrução: ${incoming} soma ao que estamos montando pro futuro.`,
+        `Estamos pensando no longo prazo, e receber ${incoming} por ${outgoing} nos dá flexibilidade. Fechado.`,
+      ],
+    };
+    const rejects: Record<string, string[]> = {
+      contender: [
+        `Não posso mexer no nosso núcleo agora — ${outgoing} é importante demais pra nossa corrida pelo título. Vou passar.`,
+        `Com o time brigando lá em cima, abrir mão de ${outgoing} por ${incoming} não nos torna melhores. Recuso.`,
+      ],
+      bubble: [
+        `Gosto de ${incoming}, mas não o suficiente pra desfalcar o time nessa altura da temporada. Fica pra próxima.`,
+        `A conta não fecha pro nosso momento: perder ${outgoing} agora nos atrapalha mais do que ajuda.`,
+      ],
+      rebuild: [
+        `${outgoing} faz parte do nosso futuro — não vou trocá-lo por ${incoming} sem uma oferta bem melhor.`,
+        `Estamos construindo com paciência. Essa proposta não acelera nada pra gente. Vou recusar.`,
+      ],
+    };
+    const pool = (accepted ? accepts : rejects)[situation];
+    setGmReaction(pool[Math.floor(Math.random() * pool.length)]);
+  }, [userTeam, partnerTeam, userAssets, partnerAssets, userPickIds, partnerPickIds, protections, players, legality, partnerEval, onTradeExecute]);
 
-    const prompt = `Você é o General Manager do ${partnerTeam.name}. Seu time tem um estilo de jogo focado em '${partnerTeam.style}' e está ${partnerTeam.powerRank <= 10 ? 'competindo pelo título' : partnerTeam.powerRank <= 20 ? 'buscando uma vaga nos playoffs' : 'em reconstrução'}.
-Você recebeu a seguinte proposta de troca do ${userTeam.name} e já decidiu ${accepted ? 'ACEITAR' : 'RECUSAR'}:
-O ${userTeam.name} oferece: ${offerParts.join(', ')}
-Em troca de: ${askParts.join(', ')}
-Escreva de 2 a 3 frases, em primeira pessoa e no seu personagem de GM, explicando por que você ${accepted ? 'topou' : 'recusou'} essa troca. Não repita a palavra ACEITAR/RECUSAR nem cite números — só a justificativa.`;
-
-    // Deterministic in-world reaction for when the AI proxy is down/rate-limited.
-    const localReaction = (() => {
-      const situation = partnerTeam.powerRank <= 10 ? 'contender' : partnerTeam.powerRank <= 20 ? 'bubble' : 'rebuild';
-      const incoming = userPlayerDetails.map((p) => p.name).join(' e ');
-      const outgoing = partnerPlayerDetails.map((p) => p.name).join(' e ');
-      const accepts: Record<string, string[]> = {
-        contender: [
-          `${incoming} nos dá exatamente a peça que faltava pra brigar pelo título agora. Abrir mão de ${outgoing} dói, mas a janela é essa.`,
-          `Estamos em modo "vencer já", e ${incoming} eleva nosso teto. Foi um preço que valeu a pena pagar.`,
-        ],
-        bubble: [
-          `Precisávamos de reforço pra garantir os playoffs, e ${incoming} encaixa no nosso plano. Boa troca pros dois lados.`,
-          `${incoming} nos deixa mais competitivos no curto prazo sem comprometer o vestiário. Topamos.`,
-        ],
-        rebuild: [
-          `Faz sentido pro nosso projeto de reconstrução: ${incoming} soma ao que estamos montando pro futuro.`,
-          `Estamos pensando no longo prazo, e receber ${incoming} por ${outgoing} nos dá flexibilidade. Fechado.`,
-        ],
-      };
-      const rejects: Record<string, string[]> = {
-        contender: [
-          `Não posso mexer no nosso núcleo agora — ${outgoing} é importante demais pra nossa corrida pelo título. Vou passar.`,
-          `Com o time brigando lá em cima, abrir mão de ${outgoing} por ${incoming} não nos torna melhores. Recuso.`,
-        ],
-        bubble: [
-          `Gosto de ${incoming}, mas não o suficiente pra desfalcar o time nessa altura da temporada. Fica pra próxima.`,
-          `A conta não fecha pro nosso momento: perder ${outgoing} agora nos atrapalha mais do que ajuda.`,
-        ],
-        rebuild: [
-          `${outgoing} faz parte do nosso futuro — não vou trocá-lo por ${incoming} sem uma oferta bem melhor.`,
-          `Estamos construindo com paciência. Essa proposta não acelera nada pra gente. Vou recusar.`,
-        ],
-      };
-      const pool = (accepted ? accepts : rejects)[situation];
-      return pool[Math.floor(Math.random() * pool.length)];
-    })();
-
-    const result = await generateAnalysis(prompt, localReaction);
-    setAiResponse(result.trim());
-    setIsLoading(false);
-  }, [userTeam, partnerTeam, userAssets, partnerAssets, userPickIds, partnerPickIds, protections, selectedPicks, teams, currentDraft, players, legality, partnerEval, onTradeExecute]);
-
-  const canPropose = !!legality?.legal && !isLoading;
+  const canPropose = !!legality?.legal;
   const outgoingCount = userAssets.length + userPickIds.length;
   const incomingCount = partnerAssets.length + partnerPickIds.length;
 
@@ -508,14 +491,7 @@ Escreva de 2 a 3 frases, em primeira pessoa e no seu personagem de GM, explicand
             <HeroTitle size={24} color={tradeStatus === 'accepted' ? COLORS.goodSoft : COLORS.badSoft} style={{ marginTop: 6 }}>
               {tradeStatus === 'accepted' ? 'Aceito!' : 'Rejeitado!'}
             </HeroTitle>
-            {isLoading ? (
-              <View className="flex-row items-center" style={{ gap: 10, marginTop: 10 }}>
-                <ActivityIndicator size="small" color={accent.primary} />
-                <MonoLabel size={9.5} color={INK.meta}>Carregando reação…</MonoLabel>
-              </View>
-            ) : (
-              <Text style={{ fontSize: 12, lineHeight: 18, color: COLORS.textSoft, marginTop: 10 }}>“{aiResponse}”</Text>
-            )}
+            <Text style={{ fontSize: 12, lineHeight: 18, color: COLORS.textSoft, marginTop: 10 }}>“{gmReaction}”</Text>
           </Panel>
         ) : null}
 

@@ -368,10 +368,6 @@ export interface SeasonState {
   // player reads it. Rewritten every offseason; the season screen shows it
   // only before the season's first game.
   lastOffseasonMoves?: { playerName: string; fromTeamId: string; toTeamId: string }[];
-  // Latest AI-generated league-wide commentary and the gamesPlayed checkpoint
-  // it was generated at, so the app knows not to re-request it until the next
-  // COMMENTARY_INTERVAL checkpoint (see App.tsx).
-  leagueCommentary?: { text: string; gamesPlayed: number };
   // Set once the ALL_STAR_GAME checkpoint fires (see App.tsx); undefined
   // before that point in the season.
   allStar?: AllStarResult;
