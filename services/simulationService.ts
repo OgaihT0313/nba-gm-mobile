@@ -55,8 +55,81 @@ const SLUMP_OVERRIDE_MARGIN = 3;
 // reverts automatically once the starter is healthy/hot again. A position with
 // no eligible player at all (thin roster) resolves to `playerId: null` and is
 // simply skipped upstream.
+// --- TANKING ---
+// How many players a tanking team sits. Two is deliberately small: the point is
+// to remove the players who actually win games, not to forfeit. A bad team's
+// third-best player is already replacement level, so sitting more would flatten
+// every tanking team onto the same floor instead of leaving the bottom of the
+// league ordered by how much talent each one still has.
+const TANK_SHUTDOWN_COUNT = 2;
+
+/**
+ * The players a tanking team has shut down for the rest of the season — its
+ * best ones, by definition. Real tanking is not "try less"; it is resting the
+ * veterans who win you games you would rather lose, and handing their minutes
+ * to whoever is behind them.
+ *
+ * Nothing else has to change for that to have a real payoff: minutes are what
+ * `runPlayerProgression` reads as development opportunity, so the young players
+ * absorbing these minutes genuinely improve over the offseason. Tanking costs
+ * wins and buys both draft position and development, the way it should.
+ *
+ * Returns an empty set for any team that is not tanking, so every caller can
+ * ask unconditionally.
+ */
+const shutDownIds = (team: Team, players: { [key: string]: Player }): Set<string> => {
+    if (!team.tanking) return new Set();
+    const healthy = team.roster.filter(pId => !team.playerAbsences?.[pId] && !!players[pId]);
+    // Never shut down so many that the rotation cannot be filled — a tanking
+    // team still has to put five players on the floor.
+    const budget = Math.min(TANK_SHUTDOWN_COUNT, Math.max(0, healthy.length - ROTATION_MIN));
+    if (budget <= 0) return new Set();
+    return new Set(
+        [...healthy]
+            .sort((a, b) => (players[b]?.ovr ?? 0) - (players[a]?.ovr ?? 0))
+            .slice(0, budget),
+    );
+};
+
+/**
+ * Conference position at which a CPU team stops trying, evaluated once at the
+ * trade deadline. 13th of 15 leaves the three teams per conference that are
+ * genuinely out of it — the play-in already reaches down to 10th, so 11th and
+ * 12th still have something to play for and keep playing for it.
+ */
+const TANK_RANK_CUTOFF = 13;
+
+/**
+ * Decide, once, which CPU teams are playing for draft position. Called at the
+ * trade deadline (see seasonRunner) — the same moment a real front office
+ * either buys or sells, and late enough that the standings mean something.
+ *
+ * This exists because the league's bottom would not sink on its own. Measured
+ * over 30 seasons, the sim produced 0.3 teams a year under 20 wins against a
+ * real NBA figure of 1-3, and the worst record averaged 22 where real tankers
+ * reach 14. That gap was never a variance problem — it was a missing decision.
+ * Real teams are that bad because they CHOOSE to be, and nothing in the engine
+ * chose anything.
+ *
+ * Mutates in place: sortStandings returns the same team objects in a new array,
+ * and the caller has already deep-cloned the league for this tick.
+ */
+export const decideTanking = (teams: Team[], schedule: ScheduleGame[], userTeamId: string): void => {
+    (['East', 'West'] as const).forEach(conf => {
+        const ranked = sortStandings(teams.filter(t => t.conference === conf), schedule);
+        ranked.forEach((team, i) => {
+            // Never the user's team. Tanking is a GM decision and the user is
+            // the GM — deciding it for them would be taking the one call the
+            // whole game is about. (Offering it TO them is a UI feature, not
+            // an engine one; see PLANO-V2.md.)
+            team.tanking = team.id !== userTeamId && i + 1 >= TANK_RANK_CUTOFF;
+        });
+    });
+};
+
 const getLineup = (team: Team, players: { [key: string]: Player }): { slots: LineupSlot[]; usedIds: Set<string> } => {
-    const available = team.roster.filter(pId => !team.playerAbsences?.[pId] && !!players[pId]);
+    const resting = shutDownIds(team, players);
+    const available = team.roster.filter(pId => !team.playerAbsences?.[pId] && !!players[pId] && !resting.has(pId));
     const availableSet = new Set(available);
 
     // Pass 1: reserve each available designated starter to its own slot so the
@@ -156,8 +229,12 @@ const getTeamRotation = (team: Team, players: { [key: string]: Player }, size: n
     const { slots, usedIds } = getLineup(team, players);
     const starters = slots.map(s => s.playerId).filter((id): id is string => !!id);
 
+    // The shut-down filter has to be repeated here: getLineup excluded them from
+    // the STARTERS, which leaves them out of usedIds, so without this they would
+    // walk straight back in as the first names off the bench.
+    const resting = shutDownIds(team, players);
     const bench = team.roster
-        .filter(pId => !team.playerAbsences?.[pId] && !!players[pId] && !usedIds.has(pId))
+        .filter(pId => !team.playerAbsences?.[pId] && !!players[pId] && !usedIds.has(pId) && !resting.has(pId))
         .sort((a, b) => effectiveOvr(team, b, players) - effectiveOvr(team, a, players));
 
     return [...starters, ...bench].slice(0, size);
@@ -1709,6 +1786,7 @@ const resolveCupGroupStage = (cup: CupState, teams: Team[], players: { [key: str
 
 export const simulationEngine = {
     simulateGame,
+    decideTanking,
     simulateSeries,
     handleRandomEvents,
     runPlayerProgression,

@@ -163,6 +163,12 @@ export interface Team {
   // stale ids (a since-traded/waived player) are harmless, nothing ever
   // matches them against a roster they're no longer on.
   loadManagedIds?: string[];
+  // This CPU team has given up on the season and is playing for draft position:
+  // its best players sit and the minutes go to whoever is behind them (see
+  // shutDownIds / decideTanking in simulationService.ts). Decided once, at the
+  // trade deadline, and cleared every offseason. NEVER set on the user's team —
+  // tanking is a GM decision, and the user is the GM.
+  tanking?: boolean;
 }
 
 // A tradeable future first-round pick. The slot isn't known until draft night:

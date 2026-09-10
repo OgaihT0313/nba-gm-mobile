@@ -357,6 +357,9 @@ export default function App() {
         performanceHistory: [{ gamesPlayed: 0, wins: 0 }],
         playerAbsences: undefined,
         playerStatusEffects: undefined,
+        // Last season's give-up is not this season's: every team starts the
+        // year trying, and decideTanking re-decides at the next deadline.
+        tanking: undefined,
       }));
 
       // No retirement system: rosters carry every player straight through from

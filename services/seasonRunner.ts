@@ -131,6 +131,10 @@ export function simulateOneDay(season: SeasonState, pinnedResult?: PinnedGameRes
     if (nextGamesPlayed === TRADE_DEADLINE_GAME) {
         notify('🔒 PRAZO DE TROCAS! Nenhuma troca mais até a próxima temporada.', 'trade');
         nextTradeOffers = []; // pending offers expire at the deadline
+        // Same moment a real front office decides whether it is buying or
+        // selling: the teams out of the race shut their best players down and
+        // play for lottery position from here to game 82.
+        simulationEngine.decideTanking(teamsAfterEvents, newSchedule, season.userTeamId);
     }
 
     // Occasionally a CPU GM proactively pitches the user a trade (never past the
