@@ -404,6 +404,18 @@ const injuryRisk = (p: Player, idx: number, rotSize: number): number => {
 // "who's healthy in May" mean anything.
 const INJURY_CHANCE_PER_TEAM = 0.15;
 
+// What makes an injury NEWS rather than just roster bookkeeping.
+//
+// rollInjury has three tiers of its own -- 2-5 games (minor), 6-14, 18-35 --
+// and these thresholds are read off them rather than invented. A two-game tweak
+// to your eleventh man changes nothing you would act on, and at a realistic
+// injury rate those tweaks alone were enough to crowd the feed: a full measured
+// season left the 27-slot buffer holding 19 injuries against 4 trades and 4
+// everything-else. The absences all still apply; the roster screens are where
+// you read them.
+const NEWSWORTHY_ABSENCE = 6;  // "estiramento" or worse, on your own roster
+const STAR_OVR = 88;           // top ~5% of the league, for injuries elsewhere
+
 const rollInjury = (age: number): { duration: number; label: string } => {
     const r = Math.random() - Math.max(0, age - 30) * 0.015;
     if (r < 0.55) return { duration: 2 + Math.floor(Math.random() * 4), label: 'uma lesão leve' };          // 2-5
@@ -1121,11 +1133,11 @@ const handleRandomEvents = (currentTeams: Team[], players: { [key: string]: Play
         // firing and still being overwritten, every day, forever. The feed is
         // a 60-slot buffer the season screen renders six of; it cannot be a
         // transaction log. So it gets the two kinds a GM would actually be
-        // told about: anything on YOUR OWN roster, and a star lost for the
-        // season anywhere in the league. Everything else is on the roster
-        // screens, where it belongs.
-        const mine = t.id === userTeamId;
-        const leagueNews = duration >= 18 && player.ovr >= 85;
+        // told about: a real absence on YOUR OWN roster, and a genuine star
+        // lost for the season anywhere in the league. See NEWSWORTHY_ABSENCE
+        // and STAR_OVR for where those lines are drawn and why.
+        const mine = t.id === userTeamId && duration >= NEWSWORTHY_ABSENCE;
+        const leagueNews = duration >= 18 && player.ovr >= STAR_OVR;
         if (!mine && !leagueNews) return;
         if (!worstInjury || duration > worstInjury.duration) {
             const severe = duration >= 18 ? ' Lesão séria — pode comprometer a temporada.' : '';
@@ -1604,8 +1616,14 @@ const generateAwards = (teams: Team[], players: { [key: string]: Player }) => {
 
     // Sixth Man: best production among non-starters (not in the team's top-5
     // position-aware rotation), judged on scoring/creation off the bench.
+    // `tanking: false` on purpose. getTeamRotation hides the players a tanking
+    // team shut down, so reading it straight would classify a team's own best
+    // player as a bench player the moment he was benched for the lottery —
+    // which handed Sixth Man of the Year to Alperen Sengun, Houston's leading
+    // scorer, in a live playthrough. The award judges the season as it was
+    // PLAYED, and he started 55 of 82 games.
     const startersByTeam = new Map<string, Set<string>>();
-    teams.forEach(t => startersByTeam.set(t.id, new Set(getTeamRotation(t, players, 5))));
+    teams.forEach(t => startersByTeam.set(t.id, new Set(getTeamRotation({ ...t, tanking: false }, players, 5))));
     const smoyPool = allPlayers.filter(p => {
         const team = teamOf(p);
         return !!team && played(p, SIXTH_MAN_MIN_GP) && !startersByTeam.get(team.id)!.has(p.id);
@@ -1672,26 +1690,51 @@ const simulateAllStarGame = (eastRoster: string[], westRoster: string[], players
 
 // Dunk Contest: weighted toward younger players — age is the closest proxy
 // available since no athleticism attribute exists in the data.
+// Dunk Contest: athleticism first, youth second. It used to weight ONLY
+// `30 - age`, which made the contest a pure age lottery among the All-Stars —
+// the attribute breakdown carries a real athleticism rating, so use it.
 const pickDunkContestWinner = (roster: string[], players: { [key: string]: Player }): string =>
-    weightedRandomPick(roster.map(id => ({ id, score: Math.max(1, 30 - players[id].age) })), 8);
+    weightedRandomPick(
+        roster.map(id => ({
+            id,
+            score: Math.max(1, (getPlayerAttributes(players[id]).athleticism - 70) + Math.max(0, 30 - players[id].age)),
+        })),
+        8,
+    );
 
-// Three-Point Contest: weighted by OVR — no dedicated shooting attribute
-// exists, so this is a simple ratings-based roll among the selected stars.
+// Three-Point Contest: weighted by the SHOOTING attribute. This used to roll on
+// raw OVR with a comment explaining that no shooting attribute existed — true
+// when it was written, stale since the attribute rebuild. Rolling on OVR meant
+// the best player in the league kept winning the three-point contest whether or
+// not he could shoot; a live playthrough crowned Victor Wembanyama.
 const pickThreePointWinner = (roster: string[], players: { [key: string]: Player }): string =>
-    weightedRandomPick(roster.map(id => ({ id, score: players[id].ovr })), 8);
+    weightedRandomPick(
+        roster.map(id => ({ id, score: Math.max(1, getPlayerAttributes(players[id]).shooting - 65) })),
+        8,
+    );
 
 const simulateAllStarWeekend = (teams: Team[], players: { [key: string]: Player }, gamesPlayed: number): AllStarResult => {
     const { eastRoster, westRoster } = selectAllStars(teams, players);
     const game = simulateAllStarGame(eastRoster, westRoster, players);
     const combinedRoster = [...eastRoster, ...westRoster];
+    const dunkWinnerId = pickDunkContestWinner(combinedRoster, players);
 
     return {
         eastRoster,
         westRoster,
         winner: game.winner,
         mvpId: game.mvpId,
-        dunkWinnerId: pickDunkContestWinner(combinedRoster, players),
-        threePointWinnerId: pickThreePointWinner(combinedRoster, players),
+        dunkWinnerId: dunkWinnerId,
+        // Saturday night has two trophies and two winners. The two draws were
+        // independent, so nothing stopped one player taking both — Wembanyama
+        // won the dunk contest AND the three-point contest in a live
+        // playthrough. The dunk winner is removed from the shooting pool
+        // (falling back to the full roster only in the degenerate case where
+        // he was the only All-Star).
+        threePointWinnerId: pickThreePointWinner(
+            combinedRoster.filter(id => id !== dunkWinnerId).length ? combinedRoster.filter(id => id !== dunkWinnerId) : combinedRoster,
+            players,
+        ),
         gamesPlayed,
     };
 };
