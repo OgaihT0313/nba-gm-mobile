@@ -36,7 +36,8 @@
         }
       ],
       "expo-asset",
-      "expo-audio"
+      "expo-audio",
+      "expo-status-bar"
     ],
     "extra": {
       "eas": {

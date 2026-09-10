@@ -1,5 +1,14 @@
 /** @type {import('tailwindcss').Config} */
 module.exports = {
+  // The app is dark-only (`userInterfaceStyle: "dark"` in app.json) and uses no
+  // `dark:` variants at all, so this is not a theming choice — it silences a
+  // thrown error. Tailwind's default is 'media', and NativeWind's web runtime
+  // installs a MutationObserver on <html> that calls its own colorScheme
+  // setter, which throws outright under 'media' ("Cannot manually set color
+  // scheme, as dark mode is type 'media'"). Pre-dates the SDK 57 patch bump —
+  // reproduced on the old lockfile too. Web-only: the APK never bundles that
+  // runtime.
+  darkMode: 'class',
   content: [
     './App.tsx',
     './src/**/*.{js,jsx,ts,tsx}',
