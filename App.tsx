@@ -21,6 +21,7 @@ import {
 } from './services/draftService';
 import { processOffseasonContracts, runCpuFreeAgency, signFreeAgentLegality, newContractYears, evaluateSigningInterest } from './services/freeAgencyService';
 import { accumulateCareers, championRosterOf } from './services/careerService';
+import { resolveDecision } from './services/decisionService';
 import { initCoaches, ageCoachesAndRetire, buildDevelopmentBonusMap, fireCoach, hireCoach } from './services/coachService';
 
 import { ThemeProvider } from './src/theme/ThemeProvider';
@@ -47,6 +48,7 @@ import TeamDetail from './screens/TeamDetail';
 import StandingsScreen from './screens/StandingsScreen';
 import NotificationContainer from './components/NotificationContainer';
 import FiredOverlay from './components/FiredOverlay';
+import DecisionModal from './components/DecisionModal';
 import FadeInView from './components/FadeInView';
 import Placeholder from './screens/Placeholder';
 import { IconName } from './components/Icon';
@@ -127,6 +129,14 @@ export default function App() {
       setIsSimulating(false);
       return;
     }
+    // A pending decision stops the clock. That block IS the feature: measured
+    // before the queue existed, an 82-game season asked the user for a decision
+    // about twice, so the season ran itself and you watched. Nothing advances
+    // until the GM answers.
+    if (season.decisions?.length) {
+      setIsSimulating(false);
+      return;
+    }
     const t = setTimeout(() => {
       const { season: next, effects, fired } = simulateOneDay(season);
       effects.forEach(applyEffect);
@@ -138,8 +148,19 @@ export default function App() {
 
   const runSimulation = (target: number) => {
     if (!season || season.status !== 'active' || isSimulating || season.gamesPlayed >= target) return;
+    // Refuse to start too, not just to continue — otherwise "+7 dias" with a
+    // decision open would spin up and immediately halt, which reads as a broken
+    // button rather than as a blocked season.
+    if (season.decisions?.length) return;
     setTargetGames(target);
     setIsSimulating(true);
+  };
+
+  // Answering pops the decision off the queue and applies whatever it chose.
+  // The season stays halted while anything is left behind it, so a night that
+  // raised two questions asks both before play resumes.
+  const handleResolveDecision = (decisionId: string, optionId: string) => {
+    setSeason((prev) => (prev ? resolveDecision(prev, decisionId, optionId) : prev));
   };
 
   // --- WATCH GAME (3D) ---
@@ -1042,6 +1063,15 @@ export default function App() {
             </FadeInView>
             <NotificationContainer notifications={notifications} onRemove={(id) => setNotifications((p) => p.filter((n) => n.id !== id))} />
           </View>
+
+          {/* The decision queue. Rendered above the season screen and below the
+              fired takeover: being let go outranks any question about tonight. */}
+          <DecisionModal
+            decision={season?.decisions?.[0]}
+            players={season?.players ?? {}}
+            remaining={Math.max(0, (season?.decisions?.length ?? 0) - 1)}
+            onChoose={handleResolveDecision}
+          />
 
           {/* Fired: full-screen takeover that ends the save. */}
           <FiredOverlay

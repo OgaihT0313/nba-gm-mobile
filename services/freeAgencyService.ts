@@ -51,13 +51,25 @@ export interface SignLegalityResult {
 // roster minimum can always sign (real NBA teams sign minimum deals over the
 // cap to stay legal), so the user can never get soft-locked out of fielding a
 // legal roster.
+/**
+ * Ceiling for a "veteran minimum" deal. A team over the cap can always add a
+ * minimum-salary player -- that is a real NBA rule, and without it this project's
+ * free agent market is decorative: the salary model runs hot enough that 29 of
+ * the 30 teams open ABOVE the cap (median payroll ~$198M against a $154.6M cap),
+ * so every in-season signing was illegal for almost everybody. $3M sits at
+ * roughly the bottom fifth of the salaries in data/players.json, which is where
+ * the real minimum sits relative to its own league too.
+ */
+export const MINIMUM_CONTRACT = 3_000_000;
+
 export const signFreeAgentLegality = (team: Team, player: Player, players: PlayerMap): SignLegalityResult => {
     if (team.roster.length >= MAX_ROSTER_SIZE) {
         return { legal: false, reason: `Elenco cheio (${MAX_ROSTER_SIZE} jogadores). Dispense ou troque alguém antes.` };
     }
     const salaryAfter = getTeamSalary(team, players) + player.salary;
     const belowMin = team.roster.length < MIN_ROSTER_SIZE;
-    if (salaryAfter > SALARY_CAP && !belowMin) {
+    const minimumDeal = player.salary <= MINIMUM_CONTRACT;
+    if (salaryAfter > SALARY_CAP && !belowMin && !minimumDeal) {
         return {
             legal: false,
             reason: `Essa contratação deixaria o elenco em $${(salaryAfter / 1_000_000).toFixed(1)}M, acima do teto de $${(SALARY_CAP / 1_000_000).toFixed(1)}M.`,

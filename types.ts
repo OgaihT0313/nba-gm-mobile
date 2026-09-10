@@ -320,6 +320,41 @@ export interface LiveGameState {
   winnerId?: string;
 }
 
+// --- DECISION QUEUE ---
+// The moments the season stops and asks the GM something. Measured before this
+// existed, an 82-game season asked the user for a decision about twice; the
+// simulation was producing plenty worth deciding about and none of it reached
+// the player as a choice. See services/decisionService.ts.
+
+export type DecisionKind = 'injury_cover' | 'trade_request' | 'deadline_stance';
+
+export interface DecisionOption {
+  // Carries its own target (`sign:<playerId>`, `promote:<playerId>`, `shorten`,
+  // `ride`) rather than an index — decisions live in the save, and an index
+  // would rot the moment the roster changed between raising and answering.
+  id: string;
+  label: string;
+  /** What it does, in one line. */
+  detail: string;
+  /** The price, stated outright — no option here is free. */
+  consequence?: string;
+  disabled?: boolean;
+  /** Why it is unavailable. A dead button with no explanation is a bug. */
+  disabledReason?: string;
+}
+
+export interface Decision {
+  id: string;
+  kind: DecisionKind;
+  day: number;          // gamesPlayed when it fired
+  headline: string;
+  body: string;
+  subjectId?: string;   // the player it is about, for the portrait
+  // At least one option must always be enabled, or the queue deadlocks and the
+  // season can never advance again.
+  options: DecisionOption[];
+}
+
 export type SeasonStatus = 'idle' | 'active' | 'finished' | 'awards' | 'playoffs_idle' | 'playoffs_simulating' | 'champion' | 'offseason' | 'draft' | 'free_agency';
 export type PlayoffStage = 'none' | 'playin' | 'round1' | 'semis' | 'confFinals' | 'finals' | 'complete';
 
@@ -413,6 +448,10 @@ export interface SeasonState {
   // history to preserve. Built by initCoaches at initSeason, aged/replaced each
   // offseason (see services/coachService.ts).
   coaches: { [key: string]: Coach };
+  // Decisions waiting on the GM. The day-by-day simulation refuses to advance
+  // while this is non-empty — that block IS the feature. Optional so saves
+  // predating it stay valid; absent means an empty queue.
+  decisions?: Decision[];
   // Present only while a Game 7 (or Finals-clinching game) involving the user
   // is being played out live — see PlayoffState.pendingDecider. Cleared once
   // the game resolves and its result is written back into the bracket.

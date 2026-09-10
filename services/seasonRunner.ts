@@ -14,6 +14,7 @@ import { Team, Player, SeasonState } from '../types';
 import { simulationEngine } from './simulationService';
 import { TRADE_DEADLINE_GAME, generateCpuTradeOffer } from './tradeService';
 import { projectConfidence, confidenceZone, shouldFireMidSeason } from './ownerService';
+import { generateDecisions } from './decisionService';
 
 // Calendar checkpoints (moved out of App.tsx so the runner is self-contained).
 // Roughly where the real All-Star break falls on the 82-game calendar, a few
@@ -216,6 +217,13 @@ export function simulateOneDay(season: SeasonState, pinnedResult?: PinnedGameRes
         owner: nextOwner,
         tradeOffers: nextTradeOffers,
     };
+
+    // Raise any decisions tonight warrants. Done last, and against BOTH sides of
+    // the tick, because "a starter just got hurt" is a difference rather than a
+    // state — the absence map alone cannot say whether it happened tonight.
+    // The caller stops advancing while the queue is non-empty.
+    const raised = generateDecisions(season, nextSeason);
+    if (raised.length) nextSeason.decisions = [...(season.decisions ?? []), ...raised];
 
     return { season: nextSeason, effects, fired: firedThisTick };
 }

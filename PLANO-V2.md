@@ -369,6 +369,12 @@ versão anterior) e **os dois já existiam antes do upgrade** — nenhum é regr
 
 ## Fase 4 — Fantasia (imersão / narrativa)
 
+> **Pré-requisito descoberto depois:** ver [PLANO-DECISOES.md](PLANO-DECISOES.md).
+> Medido, o jogo pede uma decisão do usuário ~2 vezes por temporada de 82 jogos.
+> Sem uma superfície de decisão, personalidade e imprensa viram texto decorativo
+> no mesmo feed que já engole tudo. A fila de decisões vem antes.
+
+
 O que o usuário chamou de "fantasy": a sensação de ser um GM de verdade.
 Duas dessas ideias já estavam mapeadas no `ROADMAP.md` e foram adiadas.
 
