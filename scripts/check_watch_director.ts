@@ -148,10 +148,23 @@ const lo = Math.min(...finals);
 const hi = Math.max(...finals);
 const mean = finals.reduce((x, y) => x + y, 0) / finals.length;
 check('no ties ever reach the season', ties === 0, `${ties}`);
-// Band widened with the engine calibration: the league went from averaging
-// 96 a night to a modern ~114, and the score variance from sd 4.3 to ~13,
-// so a 300-game sample legitimately reaches into the 70s and the 160s.
-check('scores look like basketball', lo >= 70 && hi <= 175, `${lo}..${hi}`);
+
+// Checked on the CENTRE of the distribution, not its edges.
+//
+// This used to assert that the observed min and max of 300 games fell inside a
+// band, which is the same sample-size trap diagnose_season.ts already had to
+// drop: the extreme of a sample is not a property of the model, it drifts
+// outward the more you run, and the only way to keep such a check passing is to
+// widen it forever. It flipped on roughly one run in four. The mean and the
+// spread are stable at any sample size and say the same thing about whether the
+// watched game produces basketball.
+const sorted = [...finals].sort((x, y) => x - y);
+const pct = (f: number) => sorted[Math.min(sorted.length - 1, Math.floor(f * sorted.length))];
+const sd = Math.sqrt(finals.reduce((s, v) => s + (v - mean) ** 2, 0) / finals.length);
+check('watched games score like the rest of the league', mean >= 110 && mean <= 122, mean.toFixed(1));
+check('watched games carry a real spread', sd >= 10 && sd <= 16, sd.toFixed(1));
+check('the bulk of scores is plausible', pct(0.05) >= 88 && pct(0.95) <= 145,
+  `p5 ${pct(0.05)} / p95 ${pct(0.95)}`);
 console.log(`\n300 full games: avg ${mean.toFixed(1)} pts, range ${lo}-${hi}, ${overtimes} went to OT, ${ties} ties`);
 
 console.log(failures === 0 ? '\nALL CHECKS PASSED' : `\n${failures} CHECK(S) FAILED`);

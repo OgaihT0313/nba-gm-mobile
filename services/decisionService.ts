@@ -17,6 +17,7 @@ import { simulationEngine, ROTATION_MIN, DEFAULT_ROTATION_SIZE, TRADE_REQUEST_MO
 import { getFreeAgents, signFreeAgentLegality, evaluateSigningInterest, newContractYears } from './freeAgencyService';
 import { generateCpuTradeOffer, TRADE_DEADLINE_GAME } from './tradeService';
 import { sortStandings } from './scheduleService';
+import { personalityOf, rushLoadCost } from './personalityService';
 
 /**
  * How long a starter has to be out before covering the hole is a real decision.
@@ -82,7 +83,14 @@ const buildInjuryCover = (
         id: 'rush',
         label: 'Apressar o retorno',
         detail: `Tratamento agressivo: volta em ~${Math.ceil(games / 2)} jogos em vez de ${games}.`,
-        consequence: 'Carga alta e risco real de recair',
+        // The price is his, not a constant: a workhorse shrugs it off, the
+        // volatile one takes it worst. Named here so the difference is
+        // something the player reads BEFORE choosing, not a surprise after.
+        consequence: personalityOf(hurt).id === 'guerreiro'
+            ? 'Ele aguenta \u2014 carga bem menor que o normal'
+            : personalityOf(hurt).id === 'imprevisivel'
+                ? 'Carga pesada demais para ele \u2014 risco alto de recair'
+                : 'Carga alta e risco real de recair',
     });
 
     // --- 2. sign a free agent -------------------------------------------------
@@ -166,20 +174,32 @@ const buildInjuryCover = (
  */
 const buildTradeRequest = (season: SeasonState, team: Team, p: Player): Decision => {
     const slot = getPlayerPositions(p)[0];
+    // The star is unhappy about the RECORD, not the role, which is what makes
+    // minutes the wrong answer for him and the right one for everyone else.
+    // Stated in the option's own copy: the player should be able to tell the
+    // difference before choosing, not discover it afterwards.
+    const isStar = personalityOf(p).id === 'estrela';
     return {
         id: `trade_request:${p.id}:${season.gamesPlayed}`,
         kind: 'trade_request',
         day: season.gamesPlayed,
         subjectId: p.id,
         headline: `${p.name} pediu para sair`,
-        body: `${p.name} (${p.ovr} OVR) está infeliz com o papel dele no ${team.name} e pediu para ser trocado. `
-            + `O que você faz com ele?`,
+        body: isStar
+            ? `${p.name} (${p.ovr} OVR) cansou de perder no ${team.name} e pediu para ser trocado. `
+                + `${team.wins}-${team.losses} não é o que ele veio fazer aqui. O que você faz?`
+            : `${p.name} (${p.ovr} OVR) está infeliz com o papel dele no ${team.name} e pediu para ser trocado. `
+                + `O que você faz com ele?`,
         options: [
             {
                 id: `minutes:${p.id}`,
                 label: 'Prometer mais minutos',
-                detail: `Crava ${p.name} como titular de ${slot}. O ânimo dele volta.`,
-                consequence: 'Quem perde a vaga fica insatisfeito no lugar dele',
+                detail: isStar
+                    ? `Crava ${p.name} como titular de ${slot} — mas o problema dele é a campanha, não o papel.`
+                    : `Crava ${p.name} como titular de ${slot}. O ânimo dele volta.`,
+                consequence: isStar
+                    ? 'Acalma pouco: ele quer ganhar, não jogar mais'
+                    : 'Quem perde a vaga fica insatisfeito no lugar dele',
             },
             {
                 id: `shop:${p.id}`,
@@ -288,6 +308,11 @@ export const generateDecisions = (before: SeasonState, after: SeasonState): Deci
         if (!now || !was) return;
         if (now.ovr < TRADE_REQUEST_MIN_OVR) return;
         if (alreadyAsked.has(pId)) return;   // he asked already; once a season
+        // The leader endures. That is the whole of what the archetype is for:
+        // the player you build around is the one who does not walk when it goes
+        // badly, and it costs the roster something real -- he is one of five
+        // slots that could have held a star instead.
+        if (personalityOf(now).id === 'lider') return;
         const moraleBefore = was.morale ?? 70;
         const moraleAfter = now.morale ?? 70;
         if (moraleBefore < TRADE_REQUEST_MORALE || moraleAfter >= TRADE_REQUEST_MORALE) return;
@@ -372,7 +397,7 @@ export const resolveDecision = (season: SeasonState, decisionId: string, optionI
             ...season.players,
             // Bounded at 100 by the same clamp the sim uses; injuryRisk scales
             // with it, so this is the bill for coming back early.
-            [hurt.id]: { ...hurt, load: Math.min(100, (hurt.load ?? 0) + 25) },
+            [hurt.id]: { ...hurt, load: Math.min(100, (hurt.load ?? 0) + rushLoadCost(hurt)) },
         };
         return {
             ...season,
@@ -398,7 +423,15 @@ export const resolveDecision = (season: SeasonState, decisionId: string, optionI
             // Lifted clear of the give-up line rather than to contentment: you
             // made a promise, you did not fix his career. Where it settles from
             // here is up to whether the minutes are real, which the sim decides.
-            players: { ...season.players, [targetId]: { ...player, morale: TRADE_REQUEST_MORALE + 20 } },
+            players: {
+                ...season.players,
+                [targetId]: {
+                    ...player,
+                    // Barely anything for a star: minutes were never what he
+                    // was asking for.
+                    morale: TRADE_REQUEST_MORALE + (personalityOf(player).id === 'estrela' ? 7 : 20),
+                },
+            },
             teams: season.teams.map(t =>
                 t.id === team.id ? { ...t, starters: { ...(t.starters ?? {}), [slot]: targetId } } : t),
         };

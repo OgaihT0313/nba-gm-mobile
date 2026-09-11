@@ -199,7 +199,30 @@ diferentes do plano, todas por medição:
   conferência — inclusive `false` ao do usuário. Agora ele pula o time do
   usuário em vez de atribuir.
 
-**Fase 3 — personalidade.** É aqui que a camada de fantasia pedida lá no começo
-finalmente encaixa: a personalidade do jogador não vira texto decorativo, vira
-**como ele reage à sua escolha**. Sem a superfície de decisão, ela não tinha
-onde grudar.
+**Fase 3 — FEITA.** Personalidade de vestiário: cinco arquétipos derivados
+(hash estável do id, nunca armazenados, então eras / calouros / elenco atual
+ganham um de graça e ele nunca muda). Cada um mexe num número que a simulação
+já lia, e o `scripts/check_personality.ts` existe para provar isso — se um
+arquétipo pudesse ser apagado sem mover nenhuma medida, ele não merecia existir.
+
+| | efeito | medido |
+|---|---|---|
+| Líder | levanta a moral do vestiário; **nunca pede para sair** | elencos com líder terminam com moral média maior |
+| Estrela | infeliz com a *campanha*, não com o papel — minutos não o compram | mais infeliz que os companheiros em time perdedor |
+| Guerreiro | aguenta carga; retorno apressado custa menos | perde 18,6 jogos contra 21,7 da média |
+| Prodígio | cada minuto vale mais no desenvolvimento | evolui +0,46 contra +0,27 da média |
+| Imprevisível | a moral viaja o dobro da velocidade | retorno apressado custa mais carga |
+
+Dois achados fora do plano:
+
+- **O líder terminava com a moral mais baixa da liga** (46,4 contra 52). Artefato
+  de eu tê-lo excluído do próprio bônus *e* do dos outros líderes. Agora ele
+  recebe dos outros, só não de si mesmo.
+- **O jogo assistido era mais volátil que o resto da liga** (desvio 16 contra
+  13,3). O `LIVE_QUARTER_VARIANCE = 22` da Fase 2 foi derivado no papel e
+  esqueceu uma segunda fonte: os dois consumidores ao vivo re-sorteiam
+  `computeExpectedPoints` a **cada quarto**, e o ruído de forma re-sorteado
+  quatro vezes é variância que o `simulateGame` de um tiro só não paga. 17 é o
+  que a medição pede. O `check_watch_director` deixou de testar os extremos
+  observados (que oscilavam 1 em 4 execuções) e passou a testar média, desvio e
+  percentis.

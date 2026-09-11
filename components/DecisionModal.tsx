@@ -4,6 +4,7 @@ import { Image } from 'expo-image';
 
 import type { Decision, DecisionOption, Player } from '../types';
 import { getPlayerImageUrl } from '../constants';
+import { personalityOf } from '../services/personalityService';
 import { COLORS, INK, RADIUS, withAlpha } from '../src/theme/tokens';
 import { MonoLabel, HeroTitle, Stat } from './ui/kit';
 
@@ -23,6 +24,10 @@ interface DecisionModalProps {
   remaining: number;
   onChoose: (decisionId: string, optionId: string) => void;
 }
+
+const TONE: Record<string, string> = {
+  good: COLORS.goodSoft, warn: COLORS.warn, info: COLORS.info, bad: COLORS.badSoft, neutral: COLORS.textDim,
+};
 
 const OptionRow: React.FC<{ option: DecisionOption; onPress: () => void }> = ({ option, onPress }) => {
   const off = !!option.disabled;
@@ -109,10 +114,18 @@ const DecisionModal: React.FC<DecisionModalProps> = ({ decision, players, remain
                     {decision.headline}
                   </HeroTitle>
                   {subject ? (
-                    <View className="flex-row items-baseline" style={{ gap: 6, marginTop: 5 }}>
+                    <View className="flex-row items-baseline flex-wrap" style={{ gap: 6, marginTop: 5 }}>
                       <Stat size={13}>{subject.ovr}</Stat>
                       <MonoLabel size={9} color={INK.meta}>
                         OVR · {subject.pos} · {subject.age} anos
+                      </MonoLabel>
+                      {/* Who he is, right where it changes the answer: the
+                          options below are already written differently for him
+                          (a star will not be bought off with minutes, a
+                          workhorse shrugs off a rushed return), so the label
+                          has to be visible at the moment of choosing. */}
+                      <MonoLabel size={9} color={TONE[personalityOf(subject).tone]}>
+                        · {personalityOf(subject).label}
                       </MonoLabel>
                     </View>
                   ) : null}

@@ -4,6 +4,7 @@ import type { Team, Player, Coach, Event, PlayoffState, PlayoffSeries, PlayoffCo
 import { TRADE_DEADLINE_GAME } from './tradeService';
 import { sortStandings, compareStandings } from './scheduleService';
 import { coachOffenseMod, coachDefenseMod } from './coachService';
+import { personalityOf, moraleTargetShift, moraleSpeed, fatigueFactor, developmentFactor, LEADER_LIFT } from './personalityService';
 
 type CoachMap = { [key: string]: Coach };
 
@@ -399,8 +400,12 @@ const getLoad = (p: Player): number => p.load ?? 0;
 const injuryRisk = (p: Player, idx: number, rotSize: number): number => {
     const ageFactor = 1 + Math.max(0, p.age - 28) * 0.12;
     const loadFactor = idx < 5 ? 1.5 : idx < rotSize ? 1.2 : idx < rotSize + 2 ? 0.8 : 0.4;
-    const fatigueFactor = 1 + (clampMod(getLoad(p), 0, 100) / 100) * 0.6;
-    return ageFactor * loadFactor * fatigueFactor;
+    // The workhorse carries load without it turning into a hamstring; see
+    // personalityService.fatigueFactor. This is the one archetype that touches
+    // availability, which is the scarcest resource in the game now that
+    // injuries land at a realistic rate.
+    const fatigue = 1 + (clampMod(getLoad(p), 0, 100) / 100) * 0.6 * fatigueFactor(p);
+    return ageFactor * loadFactor * fatigue;
 };
 
 // Severity tier for a new injury: most are minor, a rare few are season-altering,
@@ -467,6 +472,11 @@ const updateMorale = (
         const gp = (team.wins || 0) + (team.losses || 0);
         const winPct = gp ? (team.wins || 0) / gp : 0.5;
         const size = rotationSize(team);
+        // A leader steadies the room. Counted once for the whole team rather
+        // than per pair, and capped at two, because three captains is not three
+        // times the effect -- it is a coincidence of the roster.
+        const leaderIds = getTeamRotation(team, players, size)
+            .filter(id => players[id] && personalityOf(players[id]).id === 'lider');
         team.roster.forEach((id, idx) => {
             const p = players[id];
             if (!p) return;
@@ -488,11 +498,20 @@ const updateMorale = (
             const eff = team.playerStatusEffects?.[id];
             if (eff?.type === 'hot') target += 6;
             if (eff?.type === 'slump') target -= 6;
+            // Personality, last: what he is unhappy ABOUT (the star cares about
+            // the record, not the role) and who is in the room with him.
+            target += moraleTargetShift(p, winPct);
+            // Every leader in the room but himself. Excluding him from his own
+            // effect is right — he is the one carrying it — but excluding him
+            // from OTHER leaders' too left captains with the lowest morale in
+            // the league (measured: 46.4 against a 52 average), which is an
+            // artefact and not a character trait.
+            target += LEADER_LIFT * Math.min(1, leaderIds.filter(id => id !== p.id).length);
             target = clampMod(target, 5, 98);
 
             const cur = getMorale(p);
-            const next = clampMod(Math.round(cur + (target - cur) * 0.15), 0, 100);
-            const wasContent = cur >= 25;
+            // The volatile player travels twice as fast, in both directions.
+            const next = clampMod(Math.round(cur + (target - cur) * moraleSpeed(p)), 0, 100);
             p.morale = next;
 
             // The demand itself is no longer raised here. It is a DECISION now
@@ -783,12 +802,20 @@ export const WATCH_PLAY_META: Record<WatchPlay, {
 export const TIMEOUT_BONUS = 3;
 export const STARTING_TIMEOUTS = 4;
 // Uniform width (not a standard deviation) of a single period's swing, shared
-// by advanceLiveQuarter and the watched-game director. 22 wide is sd ~6.3,
-// which is the full game's ~13 spread divided across four independent
-// quarters. It used to be 9 — sd 2.6 — which quietly made the one game the
-// user actually plays out, a Game 7, five times more deterministic than every
-// game the sim resolves in the background.
-export const LIVE_QUARTER_VARIANCE = 22;
+// by advanceLiveQuarter and the watched-game director.
+//
+// It used to be 9 — sd 2.6 — which made the one game the user actually plays
+// out five times more deterministic than every game the sim resolves in the
+// background. The first correction went to 22, derived on paper as "the full
+// game's ~13 spread across four independent quarters". Measured, that produced
+// a watched game with sd 16 against the league's 13.3, because the paper
+// version missed a second source: both live consumers re-roll
+// computeExpectedPoints EVERY quarter, and per-player form noise re-rolled four
+// times is variance the one-shot simulateGame never pays. 17 is what the
+// measurement asks for once that is accounted for (see
+// scripts/check_watch_director.ts, which now checks the spread rather than the
+// extremes).
+export const LIVE_QUARTER_VARIANCE = 17;
 // No quarter realistically scores below this. Real NBA quarters bottom out
 // around 10; 16 was set against a league that averaged 24 a period and now
 // averages ~29, where it would bind on any genuinely cold quarter.
@@ -1274,7 +1301,11 @@ const runPlayerProgression = (
         // over-perform their base development odds. Only really matters for
         // developing ages — a vet's decline isn't minutes-driven.
         const mpg = player.seasonStats?.mpg ?? 0;
-        const opportunity = clampMod((0.25 + (mpg / 28) * 0.9) * (devBonus[pId] ?? 1), 0.2, 1.6);
+        // developmentFactor is the prodigy: the same minutes are simply worth
+        // more in him. Gated on age inside that helper, so the archetype stops
+        // paying out when it stops making sense without his label changing.
+        const opportunity = clampMod(
+            (0.25 + (mpg / 28) * 0.9) * (devBonus[pId] ?? 1) * developmentFactor(player), 0.2, 1.6);
 
         if (player.age < 24) { // Peak development — gated hard on opportunity
             if (Math.random() < (0.6 + potential * 0.08) * opportunity) {

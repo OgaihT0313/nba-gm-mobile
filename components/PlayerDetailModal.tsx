@@ -3,6 +3,7 @@ import { View, Text, Pressable, ScrollView, Modal } from 'react-native';
 import { Image } from 'expo-image';
 import { Player } from '../types';
 import { careerAverages, honorsSummary } from '../services/careerService';
+import { personalityOf } from '../services/personalityService';
 import {
   getPlayerImageUrl,
   PLAYER_PLACEHOLDER_SVG,
@@ -82,6 +83,30 @@ const PlayerDetailModal: React.FC<{ player: Player; onClose: () => void }> = ({ 
               <Tile label="Ataque" value={player.off} />
               <Tile label="Defesa" value={player.def} />
             </View>
+
+            {/* Locker room. Sits directly above morale because it is what
+                explains the number underneath: the star's is low because the
+                team is losing, the leader's steadies everyone else's. The blurb
+                states the MECHANIC, not a mood — a badge that only named a mood
+                would be the decoration this system was built to avoid. */}
+            {(() => {
+              const per = personalityOf(player);
+              const tone = { good: '#34d399', warn: '#fbbf24', info: '#7dd3fc', bad: '#f87171', neutral: '#94a3b8' }[per.tone];
+              return (
+                <View className="gap-1.5">
+                  <Text className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Vestiário</Text>
+                  <View className="flex-row items-center gap-2">
+                    <View
+                      className="px-2.5 py-1 rounded-full"
+                      style={{ backgroundColor: `${tone}22`, borderWidth: 1, borderColor: `${tone}55` }}
+                    >
+                      <Text className="text-[10px] font-black uppercase" style={{ color: tone }}>{per.label}</Text>
+                    </View>
+                    <Text className="text-[11px] text-slate-400 flex-1">{per.blurb}</Text>
+                  </View>
+                </View>
+              );
+            })()}
 
             {/* Morale */}
             {typeof player.morale === 'number' ? (() => {
