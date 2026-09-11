@@ -1,46 +1,116 @@
 # Roadmap / backlog
 
-Ideias já mapeadas mas deliberadamente fora do escopo de quando foram
-descobertas — não iniciar nenhuma sem pedido explícito do usuário.
+O que **ainda não foi feito**, em ordem de prioridade. Reescrito em 2026-09-10,
+depois da rodada que calibrou o motor e construiu a fila de decisões — a lista
+anterior tinha itens já entregues.
 
-## "Assistir ao Jogo" 3D — próximas camadas
+Histórico e raciocínio das decisões já tomadas: [PLANO-V2.md](PLANO-V2.md) e
+[PLANO-DECISOES.md](PLANO-DECISOES.md). **Não iniciar nada daqui sem pedido
+explícito do usuário.**
 
-Fonte: prototype gerado pelo Gemini (`Downloads/nba-gm-mobile.zip`, compartilhado
-2026-08-20). O código em si é web-only (`Platform.OS === 'web'` + Web Audio API
-puro) e não roda no app nativo — só as **ideias** valem, não o código. O que já
-foi aproveitado (câmeras fixas, indicador de cesta, som de drible/torcida) está
-commitado, assim como a chamada de jogada ao vivo; o resto segue em aberto:
+---
 
-- ~~Chamar jogada tática ao vivo durante o jogo 3D~~ **Feito**: as quatro
-  jogadas (Pick & Roll, Pindown 3PT, Post-Up, Isolar a Estrela) vivem em
-  `WATCH_PLAY_META` (`simulationService.ts`) com a coreografia em
-  `services/watchDirector.ts`. Junto veio o pré-requisito: o jogo deixou de ser
-  pré-resolvido — cada quarto é resolvido quando começa (mesmo
-  `computeExpectedPoints` que `advanceLiveQuarter` fatia num Jogo 7), com
-  huddle entre quartos e `Pedir tempo` re-abrindo o restante do quarto. A
-  quadra passou de 2 bonecos parados pra 10 jogadores reais disputando posses.
-- **Substituições + fadiga/stamina ao vivo** — o que sobrou desse item: hoje os
-  cinco titulares jogam os 48 minutos. `PlayerState[]` (watchDirector.ts) já é
-  o ponto de entrada exato, e `buildFive` é onde a troca entraria. Pedir tempo
-  já existe. Escopo grande o bastante pra merecer seu próprio plano
-  (`EnterPlanMode`) antes de começar.
-- **Sistema de personalidade/química de vestiário** (líder/estrela/prodígio/
-  mentor/workhorse/imprevisível — `services/lockerRoomService.ts` +
-  `screens/LockerRoomHub.tsx` no zip do Gemini). Já tinha sido descartado antes
-  como "personalidade+imprensa" fora de escopo (ver histórico do roadmap A-F);
-  o zip do Gemini implementou essa mesma ideia de forma independente.
+## 0. Rodar um APK — o único risco não verificado
 
-## NBA Eras (MyEras) — pendências
+Não é feature, é a única coisa aberta que pode estar quebrada agora. A correção
+da regressão de memória do Hermes V1 (commit `806f0d2`) tem como sintoma o app
+engasgar ou fechar **em sessão longa no celular**, e isso não aparece no
+navegador. Tudo que foi verificado nesta rodada foi web.
 
-- ~~Fonte alternativa de rating histórico pré-1996-97~~ **Resolvido
-  2026-08-20**: `leagueleaders` (outro endpoint do nba_api) tem box score
-  clássico real desde pelo menos 1959-60. Modelo clássico construído e
-  validado (`nba-gm-simulator` commit `ddfb875`), Magic vs. Bird Era (1979-80→
-  1989-90) e Jordan Era (1990-91→1997-98) puxadas e commitadas
-  (`nba-gm-mobile` commit `0e9c315`) — 19 temporadas reais encadeadas.
-- **Filtro de TV / uniformes de época**, além do piso retrô já implementado
-  (`src/theme/eraVisuals.ts`) — cosmético, fora do escopo original por
-  decisão do usuário.
-- **Regras de simulação variáveis por era** (ex. sem linha de 3) — fora de
-  escopo: o motor não tem engine de faltas em lugar nenhum do projeto, e
-  nenhuma era alcançável hoje precisaria dessa regra mesmo (todas pós-1979).
+```
+npx eas-cli build --platform android --profile preview --non-interactive --no-wait
+```
+
+Não faz pergunta nenhuma (conta e keystore já existem). ~10-15 min.
+
+---
+
+## 1. Ciclo de contratos — o maior buraco de sistema
+
+**O teto salarial hoje é um número que você lê, não uma restrição que te obriga
+a escolher.** Medido nesta rodada:
+
+- **29 dos 30 times abrem acima do teto** (folha mediana $198M contra teto de
+  $154,6M);
+- **existem zero agentes livres em temporada** — todo jogador do `players.json`
+  começa num elenco e a mediana de elenco é 18, que é o próprio
+  `MAX_ROSTER_SIZE`;
+- **não existe extensão de contrato**. Você nunca perde uma estrela por não ter
+  renovado, e nunca escolhe entre pagar caro agora ou arriscar.
+
+Isso é o que faz a opção "assinar agente livre" da fila de decisões ser
+condicional: ela quase nunca tem alguém pra oferecer. A regra do contrato mínimo
+já entrou (`MINIMUM_CONTRACT`), mas não era ela que travava.
+
+"Estender agora por $X ou deixar ele chegar na agência livre" é a decisão
+central de um GM de basquete e encaixa direto na fila que já existe. É o item que
+converte o sistema morto de maior valor.
+
+## 2. Substituições e fadiga ao vivo no "Assistir ao Jogo"
+
+Hoje os cinco titulares jogam os 48 minutos. `PlayerState[]` e `buildFive`
+(`services/watchDirector.ts`) são o ponto de entrada exato; "Pedir tempo" já
+existe.
+
+Subiu de prioridade porque **agora o banco tem motivo pra existir**: lesões são
+reais (~4,1 no seu elenco por temporada), `load` alimenta `injuryRisk`, e o
+arquétipo Guerreiro já diferencia quem aguenta carga. É também a parte mais
+vistosa do app. Item grande — merece plano próprio antes de começar.
+
+## 3. Tornar visível o que já existe
+
+Dívida pequena, e mecânica invisível que muda resultado é bug:
+
+- **Tanking da CPU não aparece em lugar nenhum.** Você vê a tabela mudar mas não
+  vê que um time sentou suas duas estrelas, e pode negociar com um time em
+  liquidação sem saber. Falta marca em `TeamsList`/`TeamDetail`.
+- **A caixa de propostas trava em 2** e só esvazia no prazo. Se você não
+  responde, a liga para de te procurar.
+- **O hero da tela de Simulação rola pra fora** assim que você lê qualquer outra
+  coisa (achado da tentativa de paisagem — vale em retrato). Header compacto que
+  gruda resolve.
+- **Draft e Agência Livre ficam atrás do "Mais"** justamente na noite do draft.
+  Promover a fase aberta pra barra de baixo resolve.
+
+## 4. Imprensa e storylines
+
+O último item da camada de fantasia. Coletivas, manchetes, rivalidades, jogos de
+revanche, marcos de carreira.
+
+Ficou por último de propósito e continua fazendo sentido: ele precisava de uma
+**superfície de decisão** pra grudar, e agora ela existe. A personalidade já
+mostrou o caminho — o arquétipo não virou texto no card, virou como o jogador
+responde à sua escolha. Imprensa tem que passar pelo mesmo teste.
+
+**Restrição dura:** nada disso pode ser anunciado pelo feed `season.events`. O
+buffer é de 50, a tela mostra 6, e uma offseason empurra centenas.
+
+---
+
+## Menor, ou fora de escopo por decisão
+
+- **Feed ainda é 62% lesão.** Não desce sem tornar sequência quente / má fase /
+  vestiário eventos **por time** (hoje é um time sorteado por dia). Isso os
+  tornaria ~30× mais comuns e eles mexem em rating e momentum — é mudança de
+  balanceamento, pede re-medir o `diagnose_season`.
+- **Ratings de veteranos no pipeline.** `T.J. McConnell` está OVR 88 aos 34 anos
+  no `data/players.json`. O `pickSeriesMVP` está certo; o rating é que é
+  estranho, e vem do modelo Python no repo irmão (`nba-gm-simulator`).
+- **`diagnose_season.ts` não responde às decisões** — só simula. Como decisões
+  só afetam o time do usuário (1 de 30), as métricas de liga não se movem, mas é
+  uma inconsistência.
+- **Filtro de TV / uniformes de época** — cosmético, fora de escopo por decisão
+  do usuário.
+- **Regras de simulação variáveis por era** (ex. sem linha de 3) — o motor não
+  tem engine de faltas em lugar nenhum, e nenhuma era alcançável precisaria.
+
+---
+
+## O que eu **não** faria
+
+**Reescrever o motor em posses.** A calibração tornou isso desnecessário: o
+modelo de pontos esperados produz 0 de 23 métricas fora da faixa real da NBA.
+Seriam meses pra ganhar realismo que já existe.
+
+**Refazer a UI inteira de novo.** A tentativa de paisagem foi construída,
+avaliada e descartada em 2026-09-09. O que sobrou dela está no item 3.
