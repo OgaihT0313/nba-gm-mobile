@@ -410,11 +410,20 @@ const injuryRisk = (p: Player, idx: number, rotSize: number): number => {
 
 // Severity tier for a new injury: most are minor, a rare few are season-altering,
 // and older players skew slightly more severe. Returns games missed + a label.
-// Odds that a given team picks up a new injury on a given night. Tuned against
-// scripts/diagnose_season.ts so rotation players land near the real NBA's ~68
-// games played, which is the number that makes depth, load management and
-// "who's healthy in May" mean anything.
-const INJURY_CHANCE_PER_TEAM = 0.15;
+// Odds that a given team picks up a new injury on a given night.
+//
+// Lowered from 0.15 after play-testing on device: one user season had the same
+// starter go down three separate times. Measured, that was not bad luck -- at
+// 0.15, 4.7% of a team's top five got hurt 3+ times in a season, which is a
+// one-in-four chance of it happening to SOMEBODY on your roster every year, and
+// rotation players averaged 60.9 games played against the real NBA's ~68. The
+// rate was simply too high and the diagnostic band's floor had been hiding it.
+// At 0.11 the 3+ case falls to 1.7% and games played rise to ~64.
+//
+// Still deliberately high enough that depth, load management and "who is
+// healthy in May" decide seasons -- it used to be ~1.6 injuries a year for the
+// entire league, which made all three of those decorative.
+const INJURY_CHANCE_PER_TEAM = 0.11;
 
 // What makes an injury NEWS rather than just roster bookkeeping.
 //
