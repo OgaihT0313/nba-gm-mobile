@@ -105,7 +105,9 @@ const Home: React.FC<HomeProps> = ({ onStart, onContinue, season }) => {
 
           <View style={[CARD, { padding: 14, gap: 9 }]}>
             <MonoLabel size={8.5} color={INK.meta}>Dados da liga</MonoLabel>
-            <Row label="Elencos e ratings" value="2025-26 reais" />
+            <Row label="Elencos" value="2026-27 reais" />
+            {/* The season has not tipped off: ratings come from last season's numbers. */}
+            <Row label="Ratings" value="estatísticas 2025-26" />
             <Row label="Teto salarial" value={`$${(SALARY_CAP / 1_000_000).toFixed(1)}M`} />
             <Row label="Franquias" value="30" />
             <Text style={{ fontSize: 10.5, lineHeight: 15, color: 'rgba(255,255,255,0.32)', marginTop: 4 }}>
