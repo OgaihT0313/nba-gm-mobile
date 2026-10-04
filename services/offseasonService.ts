@@ -19,6 +19,7 @@ import { processOffseasonContracts, runCpuFreeAgency, trimCpuRosters } from './f
 import { accumulateCareers, championRosterOf } from './careerService';
 import { ageCoachesAndRetire, buildDevelopmentBonusMap } from './coachService';
 import { retirePlayers } from './retirementService';
+import { rivalriesAfterSeason } from './rivalryService';
 
 // Champion crowned -> progression, real NBA offseason moves replayed, contracts
 // tick down, then the rookie draft (BEFORE free agency, matching the real
@@ -223,6 +224,8 @@ export const startOffseason = (prev: SeasonState): SeasonState => {
     eraChainIndex: nextEraChainIndex,
     lastOffseasonMoves: appliedMoves,
     lastRetirements: retiring.retired,
+    // Last spring's series feed the rivalries; everything cools a notch.
+    rivalries: rivalriesAfterSeason(prev.rivalries, prev.playoff, prev.userTeamId, `temporada ${prev.gmLegacy.seasons}`),
     allStar: undefined,
     cup: undefined,
     schedule: [],

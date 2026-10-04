@@ -83,7 +83,11 @@
     "number": 0,
     "potential": "C",
     "salary": 4887000,
-    "contractYears": 4
+    "contractYears": 4,
+    "formerTeam": {
+      "teamId": "okc",
+      "season": -1
+    }
   },
   "jalen_johnson": {
     "id": "jalen_johnson",
@@ -140,7 +144,11 @@
     "number": 2,
     "potential": "C",
     "salary": 10052000,
-    "contractYears": 4
+    "contractYears": 4,
+    "formerTeam": {
+      "teamId": "okc",
+      "season": -1
+    }
   },
   "cj_mccollum": {
     "id": "cj_mccollum",
@@ -284,7 +292,11 @@
     "number": 8,
     "potential": "D",
     "salary": 2156000,
-    "contractYears": 1
+    "contractYears": 1,
+    "formerTeam": {
+      "teamId": "hou",
+      "season": -1
+    }
   },
   "henri_veesaar": {
     "id": "henri_veesaar",
@@ -452,7 +464,11 @@
     "number": 22,
     "potential": "C",
     "salary": 3909000,
-    "contractYears": 2
+    "contractYears": 2,
+    "formerTeam": {
+      "teamId": "bkn",
+      "season": -1
+    }
   },
   "corey_kispert": {
     "id": "corey_kispert",
@@ -538,7 +554,11 @@
     "number": 0,
     "potential": "B",
     "salary": 2648000,
-    "contractYears": 2
+    "contractYears": 2,
+    "formerTeam": {
+      "teamId": "uta",
+      "season": -1
+    }
   },
   "jayson_tatum": {
     "id": "jayson_tatum",
@@ -595,7 +615,11 @@
     "number": 4,
     "potential": "C",
     "salary": 37734000,
-    "contractYears": 3
+    "contractYears": 3,
+    "formerTeam": {
+      "teamId": "nyk",
+      "season": -1
+    }
   },
   "derrick_white": {
     "id": "derrick_white",
@@ -711,7 +735,11 @@
     "number": 13,
     "potential": "D",
     "salary": 14575000,
-    "contractYears": 5
+    "contractYears": 5,
+    "formerTeam": {
+      "teamId": "phi",
+      "season": -1
+    }
   },
   "ron_harper_jr": {
     "id": "ron_harper_jr",
@@ -795,7 +823,11 @@
     "number": 22,
     "potential": "C",
     "salary": 9279000,
-    "contractYears": 4
+    "contractYears": 4,
+    "formerTeam": {
+      "teamId": "sac",
+      "season": -1
+    }
   },
   "jordan_walsh": {
     "id": "jordan_walsh",
@@ -908,7 +940,11 @@
     "number": 45,
     "potential": "D",
     "salary": 3176000,
-    "contractYears": 2
+    "contractYears": 2,
+    "formerTeam": {
+      "teamId": "min",
+      "season": -1
+    }
   },
   "luka_garza": {
     "id": "luka_garza",
@@ -1105,7 +1141,11 @@
     "number": 1,
     "potential": "C",
     "salary": 2648000,
-    "contractYears": 4
+    "contractYears": 4,
+    "formerTeam": {
+      "teamId": "den",
+      "season": -1
+    }
   },
   "james_harden": {
     "id": "james_harden",
@@ -1248,7 +1288,11 @@
     "number": 8,
     "potential": "C",
     "salary": 10516000,
-    "contractYears": 1
+    "contractYears": 1,
+    "formerTeam": {
+      "teamId": "den",
+      "season": -1
+    }
   },
   "craig_porter_jr": {
     "id": "craig_porter_jr",
@@ -1559,7 +1603,11 @@
     "number": 0,
     "potential": "B",
     "salary": 7299000,
-    "contractYears": 5
+    "contractYears": 5,
+    "formerTeam": {
+      "teamId": "was",
+      "season": -1
+    }
   },
   "jeremiah_fears": {
     "id": "jeremiah_fears",
@@ -1789,7 +1837,11 @@
     "number": 9,
     "potential": "C",
     "salary": 9279000,
-    "contractYears": 5
+    "contractYears": 5,
+    "formerTeam": {
+      "teamId": "phi",
+      "season": -1
+    }
   },
   "bryce_mcgowens": {
     "id": "bryce_mcgowens",
@@ -1845,7 +1897,11 @@
     "number": 14,
     "potential": "B",
     "salary": 1820000,
-    "contractYears": 3
+    "contractYears": 3,
+    "formerTeam": {
+      "teamId": "dal",
+      "season": -1
+    }
   },
   "karlo_matkovic": {
     "id": "karlo_matkovic",
@@ -1959,7 +2015,11 @@
     "number": 24,
     "potential": "C",
     "salary": 10516000,
-    "contractYears": 5
+    "contractYears": 5,
+    "formerTeam": {
+      "teamId": "lac",
+      "season": -1
+    }
   },
   "trey_murphy_iii": {
     "id": "trey_murphy_iii",
@@ -2016,7 +2076,11 @@
     "number": 35,
     "potential": "C",
     "salary": 6341000,
-    "contractYears": 2
+    "contractYears": 2,
+    "formerTeam": {
+      "teamId": "atl",
+      "season": -1
+    }
   },
   "saddiq_bey": {
     "id": "saddiq_bey",
@@ -2215,7 +2279,11 @@
     "number": 8,
     "potential": "D",
     "salary": 7756000,
-    "contractYears": 3
+    "contractYears": 3,
+    "formerTeam": {
+      "teamId": "atl",
+      "season": -1
+    }
   },
   "nic_claxton": {
     "id": "nic_claxton",
@@ -2243,7 +2311,11 @@
     "number": 9,
     "potential": "C",
     "salary": 24744000,
-    "contractYears": 4
+    "contractYears": 4,
+    "formerTeam": {
+      "teamId": "bkn",
+      "season": -1
+    }
   },
   "drew_peterson": {
     "id": "drew_peterson",
@@ -2442,7 +2514,11 @@
     "number": 24,
     "potential": "D",
     "salary": 17088000,
-    "contractYears": 1
+    "contractYears": 1,
+    "formerTeam": {
+      "teamId": "mia",
+      "season": -1
+    }
   },
   "jalen_smith": {
     "id": "jalen_smith",
@@ -2755,7 +2831,11 @@
     "number": 8,
     "potential": "C",
     "salary": 7268000,
-    "contractYears": 3
+    "contractYears": 3,
+    "formerTeam": {
+      "teamId": "det",
+      "season": -1
+    }
   },
   "zaccharie_risacher": {
     "id": "zaccharie_risacher",
@@ -2783,7 +2863,11 @@
     "number": 10,
     "potential": "B",
     "salary": 4508000,
-    "contractYears": 1
+    "contractYears": 1,
+    "formerTeam": {
+      "teamId": "atl",
+      "season": -1
+    }
   },
   "kyrie_irving": {
     "id": "kyrie_irving",
@@ -2839,7 +2923,11 @@
     "number": 13,
     "potential": "B",
     "salary": 3909000,
-    "contractYears": 3
+    "contractYears": 3,
+    "formerTeam": {
+      "teamId": "orl",
+      "season": -1
+    }
   },
   "morez_johnson_jr": {
     "id": "morez_johnson_jr",
@@ -3039,7 +3127,11 @@
     "number": 34,
     "potential": "C",
     "salary": 14228000,
-    "contractYears": 5
+    "contractYears": 5,
+    "formerTeam": {
+      "teamId": "mem",
+      "season": -1
+    }
   },
   "sergio_de_larrea": {
     "id": "sergio_de_larrea",
@@ -3125,7 +3217,11 @@
     "number": 1,
     "potential": "B",
     "salary": 5018000,
-    "contractYears": 1
+    "contractYears": 1,
+    "formerTeam": {
+      "teamId": "was",
+      "season": -1
+    }
   },
   "julian_strawther": {
     "id": "julian_strawther",
@@ -3182,7 +3278,11 @@
     "number": 3,
     "potential": "C",
     "salary": 32167000,
-    "contractYears": 4
+    "contractYears": 4,
+    "formerTeam": {
+      "teamId": "dal",
+      "season": -1
+    }
   },
   "tyus_jones": {
     "id": "tyus_jones",
@@ -3268,7 +3368,11 @@
     "number": 9,
     "potential": "B",
     "salary": 9279000,
-    "contractYears": 2
+    "contractYears": 2,
+    "formerTeam": {
+      "teamId": "dal",
+      "season": -1
+    }
   },
   "demar_derozan": {
     "id": "demar_derozan",
@@ -3297,7 +3401,11 @@
     "number": 10,
     "potential": "D",
     "salary": 7539000,
-    "contractYears": 5
+    "contractYears": 5,
+    "formerTeam": {
+      "teamId": "sac",
+      "season": -1
+    }
   },
   "bryce_hopkins": {
     "id": "bryce_hopkins",
@@ -3381,7 +3489,11 @@
     "number": 14,
     "potential": "C",
     "salary": 3309000,
-    "contractYears": 5
+    "contractYears": 5,
+    "formerTeam": {
+      "teamId": "sas",
+      "season": -1
+    }
   },
   "nikola_jokic": {
     "id": "nikola_jokic",
@@ -3840,7 +3952,11 @@
     "number": 12,
     "potential": "C",
     "salary": 24744000,
-    "contractYears": 2
+    "contractYears": 2,
+    "formerTeam": {
+      "teamId": "dal",
+      "season": -1
+    }
   },
   "gui_santos": {
     "id": "gui_santos",
@@ -3953,7 +4069,11 @@
     "number": 21,
     "potential": "C",
     "salary": 5072000,
-    "contractYears": 2
+    "contractYears": 2,
+    "formerTeam": {
+      "teamId": "phi",
+      "season": -1
+    }
   },
   "draymond_green": {
     "id": "draymond_green",
@@ -4123,7 +4243,11 @@
     "number": 0,
     "potential": "B",
     "salary": 2648000,
-    "contractYears": 1
+    "contractYears": 1,
+    "formerTeam": {
+      "teamId": "lac",
+      "season": -1
+    }
   },
   "quadir_copeland": {
     "id": "quadir_copeland",
@@ -4237,7 +4361,11 @@
     "number": 4,
     "potential": "B",
     "salary": 1820000,
-    "contractYears": 2
+    "contractYears": 2,
+    "formerTeam": {
+      "teamId": "min",
+      "season": -1
+    }
   },
   "fred_vanvleet": {
     "id": "fred_vanvleet",
@@ -4551,7 +4679,11 @@
     "number": 31,
     "potential": "D",
     "salary": 4154000,
-    "contractYears": 2
+    "contractYears": 2,
+    "formerTeam": {
+      "teamId": "lac",
+      "season": -1
+    }
   },
   "oscar_tshiebwe": {
     "id": "oscar_tshiebwe",
@@ -4579,7 +4711,11 @@
     "number": 34,
     "potential": "C",
     "salary": 29383000,
-    "contractYears": 4
+    "contractYears": 4,
+    "formerTeam": {
+      "teamId": "uta",
+      "season": -1
+    }
   },
   "marcus_smart": {
     "id": "marcus_smart",
@@ -4608,7 +4744,11 @@
     "number": 36,
     "potential": "D",
     "salary": 6178000,
-    "contractYears": 4
+    "contractYears": 4,
+    "formerTeam": {
+      "teamId": "lal",
+      "season": -1
+    }
   },
   "keaton_wagler": {
     "id": "keaton_wagler",
@@ -4665,7 +4805,11 @@
     "number": 1,
     "potential": "B",
     "salary": 5072000,
-    "contractYears": 5
+    "contractYears": 5,
+    "formerTeam": {
+      "teamId": "por",
+      "season": -1
+    }
   },
   "bradley_beal": {
     "id": "bradley_beal",
@@ -4780,7 +4924,11 @@
     "number": 7,
     "potential": "C",
     "salary": 20104000,
-    "contractYears": 3
+    "contractYears": 3,
+    "formerTeam": {
+      "teamId": "tor",
+      "season": -1
+    }
   },
   "kris_dunn": {
     "id": "kris_dunn",
@@ -4837,7 +4985,11 @@
     "number": 8,
     "potential": "C",
     "salary": 5072000,
-    "contractYears": 2
+    "contractYears": 2,
+    "formerTeam": {
+      "teamId": "chi",
+      "season": -1
+    }
   },
   "gradey_dick": {
     "id": "gradey_dick",
@@ -4866,7 +5018,11 @@
     "number": 9,
     "potential": "B",
     "salary": 3998000,
-    "contractYears": 5
+    "contractYears": 5,
+    "formerTeam": {
+      "teamId": "tor",
+      "season": -1
+    }
   },
   "darius_garland": {
     "id": "darius_garland",
@@ -5064,7 +5220,11 @@
     "number": 24,
     "potential": "C",
     "salary": 8196000,
-    "contractYears": 4
+    "contractYears": 4,
+    "formerTeam": {
+      "teamId": "den",
+      "season": -1
+    }
   },
   "rui_hachimura": {
     "id": "rui_hachimura",
@@ -5093,7 +5253,11 @@
     "number": 28,
     "potential": "C",
     "salary": 9124000,
-    "contractYears": 2
+    "contractYears": 2,
+    "formerTeam": {
+      "teamId": "lal",
+      "season": -1
+    }
   },
   "max_strus": {
     "id": "max_strus",
@@ -5121,7 +5285,11 @@
     "number": 31,
     "potential": "D",
     "salary": 8196000,
-    "contractYears": 1
+    "contractYears": 1,
+    "formerTeam": {
+      "teamId": "cle",
+      "season": -1
+    }
   },
   "adou_thiero": {
     "id": "adou_thiero",
@@ -5206,7 +5374,11 @@
     "number": 4,
     "potential": "C",
     "salary": 17784000,
-    "contractYears": 2
+    "contractYears": 2,
+    "formerTeam": {
+      "teamId": "por",
+      "season": -1
+    }
   },
   "dalton_knecht": {
     "id": "dalton_knecht",
@@ -5264,7 +5436,11 @@
     "number": 5,
     "potential": "C",
     "salary": 13145000,
-    "contractYears": 4
+    "contractYears": 4,
+    "formerTeam": {
+      "teamId": "phi",
+      "season": -1
+    }
   },
   "jaden_hardy": {
     "id": "jaden_hardy",
@@ -5292,7 +5468,11 @@
     "number": 7,
     "potential": "C",
     "salary": 5072000,
-    "contractYears": 5
+    "contractYears": 5,
+    "formerTeam": {
+      "teamId": "was",
+      "season": -1
+    }
   },
   "bronny_james": {
     "id": "bronny_james",
@@ -5350,7 +5530,11 @@
     "number": 10,
     "potential": "C",
     "salary": 24744000,
-    "contractYears": 5
+    "contractYears": 5,
+    "formerTeam": {
+      "teamId": "chi",
+      "season": -1
+    }
   },
   "ziaire_williams": {
     "id": "ziaire_williams",
@@ -5379,7 +5563,11 @@
     "number": 11,
     "potential": "C",
     "salary": 10516000,
-    "contractYears": 2
+    "contractYears": 2,
+    "formerTeam": {
+      "teamId": "bkn",
+      "season": -1
+    }
   },
   "jake_laravia": {
     "id": "jake_laravia",
@@ -5464,7 +5652,11 @@
     "number": 14,
     "potential": "C",
     "salary": 2648000,
-    "contractYears": 4
+    "contractYears": 4,
+    "formerTeam": {
+      "teamId": "uta",
+      "season": -1
+    }
   },
   "austin_reaves": {
     "id": "austin_reaves",
@@ -5579,7 +5771,11 @@
     "number": 54,
     "potential": "C",
     "salary": 24744000,
-    "contractYears": 3
+    "contractYears": 3,
+    "formerTeam": {
+      "teamId": "tor",
+      "season": -1
+    }
   },
   "kevon_looney": {
     "id": "kevon_looney",
@@ -5607,7 +5803,11 @@
     "number": 55,
     "potential": "D",
     "salary": 11599000,
-    "contractYears": 2
+    "contractYears": 2,
+    "formerTeam": {
+      "teamId": "nop",
+      "season": -1
+    }
   },
   "luka_doncic": {
     "id": "luka_doncic",
@@ -5776,7 +5976,11 @@
     "number": 7,
     "potential": "D",
     "salary": 43116000,
-    "contractYears": 4
+    "contractYears": 4,
+    "formerTeam": {
+      "teamId": "mil",
+      "season": -1
+    }
   },
   "nick_richards": {
     "id": "nick_richards",
@@ -5804,7 +6008,11 @@
     "number": 8,
     "potential": "C",
     "salary": 10052000,
-    "contractYears": 3
+    "contractYears": 3,
+    "formerTeam": {
+      "teamId": "chi",
+      "season": -1
+    }
   },
   "pelle_larsson": {
     "id": "pelle_larsson",
@@ -5862,7 +6070,11 @@
     "number": 10,
     "potential": "D",
     "salary": 8544000,
-    "contractYears": 1
+    "contractYears": 1,
+    "formerTeam": {
+      "teamId": "den",
+      "season": -1
+    }
   },
   "klay_thompson": {
     "id": "klay_thompson",
@@ -5891,7 +6103,11 @@
     "number": 11,
     "potential": "D",
     "salary": 4724000,
-    "contractYears": 4
+    "contractYears": 4,
+    "formerTeam": {
+      "teamId": "dal",
+      "season": -1
+    }
   },
   "dru_smith": {
     "id": "dru_smith",
@@ -6033,7 +6249,11 @@
     "number": 19,
     "potential": "B",
     "salary": 5072000,
-    "contractYears": 2
+    "contractYears": 2,
+    "formerTeam": {
+      "teamId": "uta",
+      "season": -1
+    }
   },
   "andrew_wiggins": {
     "id": "andrew_wiggins",
@@ -6146,7 +6366,11 @@
     "number": 95,
     "potential": "D",
     "salary": 19060000,
-    "contractYears": 4
+    "contractYears": 4,
+    "formerTeam": {
+      "teamId": "mil",
+      "season": -1
+    }
   },
   "jericho_sims": {
     "id": "jericho_sims",
@@ -6316,7 +6540,11 @@
     "number": 9,
     "potential": "A",
     "salary": 19223000,
-    "contractYears": 4
+    "contractYears": 4,
+    "formerTeam": {
+      "teamId": "mia",
+      "season": -1
+    }
   },
   "tyler_herro": {
     "id": "tyler_herro",
@@ -6345,7 +6573,11 @@
     "number": 11,
     "potential": "C",
     "salary": 24744000,
-    "contractYears": 2
+    "contractYears": 2,
+    "formerTeam": {
+      "teamId": "mia",
+      "season": -1
+    }
   },
   "caris_levert": {
     "id": "caris_levert",
@@ -6374,7 +6606,11 @@
     "number": 12,
     "potential": "D",
     "salary": 7756000,
-    "contractYears": 3
+    "contractYears": 3,
+    "formerTeam": {
+      "teamId": "det",
+      "season": -1
+    }
   },
   "ryan_rollins": {
     "id": "ryan_rollins",
@@ -6488,7 +6724,11 @@
     "number": 19,
     "potential": "C",
     "salary": 3909000,
-    "contractYears": 3
+    "contractYears": 3,
+    "formerTeam": {
+      "teamId": "ind",
+      "season": -1
+    }
   },
   "aj_green": {
     "id": "aj_green",
@@ -6573,7 +6813,11 @@
     "number": 24,
     "potential": "C",
     "salary": 16083000,
-    "contractYears": 2
+    "contractYears": 2,
+    "formerTeam": {
+      "teamId": "mia",
+      "season": -1
+    }
   },
   "kasparas_jakucionis": {
     "id": "kasparas_jakucionis",
@@ -6601,7 +6845,11 @@
     "number": 25,
     "potential": "B",
     "salary": 5018000,
-    "contractYears": 1
+    "contractYears": 1,
+    "formerTeam": {
+      "teamId": "mia",
+      "season": -1
+    }
   },
   "cormac_ryan": {
     "id": "cormac_ryan",
@@ -6686,7 +6934,11 @@
     "number": 0,
     "potential": "C",
     "salary": 2648000,
-    "contractYears": 4
+    "contractYears": 4,
+    "formerTeam": {
+      "teamId": "lac",
+      "season": -1
+    }
   },
   "donte_divincenzo": {
     "id": "donte_divincenzo",
@@ -6743,7 +6995,11 @@
     "number": 1,
     "potential": "C",
     "salary": 30187000,
-    "contractYears": 2
+    "contractYears": 2,
+    "formerTeam": {
+      "teamId": "cha",
+      "season": -1
+    }
   },
   "jaden_mcdaniels": {
     "id": "jaden_mcdaniels",
@@ -6913,7 +7169,11 @@
     "number": 9,
     "potential": "B",
     "salary": 2688000,
-    "contractYears": 5
+    "contractYears": 5,
+    "formerTeam": {
+      "teamId": "uta",
+      "season": -1
+    }
   },
   "antonio_reeves": {
     "id": "antonio_reeves",
@@ -6941,7 +7201,11 @@
     "number": 12,
     "potential": "C",
     "salary": 2648000,
-    "contractYears": 3
+    "contractYears": 3,
+    "formerTeam": {
+      "teamId": "cha",
+      "season": -1
+    }
   },
   "ayo_dosunmu": {
     "id": "ayo_dosunmu",
@@ -7026,7 +7290,11 @@
     "number": 17,
     "potential": "C",
     "salary": 3309000,
-    "contractYears": 4
+    "contractYears": 4,
+    "formerTeam": {
+      "teamId": "lal",
+      "season": -1
+    }
   },
   "joan_beringer": {
     "id": "joan_beringer",
@@ -7083,7 +7351,11 @@
     "number": 24,
     "potential": "A",
     "salary": 11753000,
-    "contractYears": 2
+    "contractYears": 2,
+    "formerTeam": {
+      "teamId": "atl",
+      "season": -1
+    }
   },
   "enrique_freeman": {
     "id": "enrique_freeman",
@@ -7252,7 +7524,11 @@
     "number": 1,
     "potential": "C",
     "salary": 9124000,
-    "contractYears": 5
+    "contractYears": 5,
+    "formerTeam": {
+      "teamId": "cle",
+      "season": -1
+    }
   },
   "danny_wolf": {
     "id": "danny_wolf",
@@ -7422,7 +7698,11 @@
     "number": 13,
     "potential": "C",
     "salary": 10052000,
-    "contractYears": 4
+    "contractYears": 4,
+    "formerTeam": {
+      "teamId": "orl",
+      "season": -1
+    }
   },
   "terance_mann": {
     "id": "terance_mann",
@@ -7592,7 +7872,11 @@
     "number": 30,
     "potential": "D",
     "salary": 19060000,
-    "contractYears": 5
+    "contractYears": 5,
+    "formerTeam": {
+      "teamId": "min",
+      "season": -1
+    }
   },
   "chaney_johnson": {
     "id": "chaney_johnson",
@@ -7704,7 +7988,11 @@
     "number": 0,
     "potential": "D",
     "salary": 19060000,
-    "contractYears": 4
+    "contractYears": 4,
+    "formerTeam": {
+      "teamId": "phi",
+      "season": -1
+    }
   },
   "jordan_clarkson": {
     "id": "jordan_clarkson",
@@ -7961,7 +8249,11 @@
     "number": 11,
     "potential": "D",
     "salary": 8196000,
-    "contractYears": 5
+    "contractYears": 5,
+    "formerTeam": {
+      "teamId": "den",
+      "season": -1
+    }
   },
   "jalen_brunson": {
     "id": "jalen_brunson",
@@ -8017,7 +8309,11 @@
     "number": 13,
     "potential": "C",
     "salary": 6341000,
-    "contractYears": 3
+    "contractYears": 3,
+    "formerTeam": {
+      "teamId": "atl",
+      "season": -1
+    }
   },
   "tyler_kolek": {
     "id": "tyler_kolek",
@@ -8073,7 +8369,11 @@
     "number": 17,
     "potential": "C",
     "salary": 10052000,
-    "contractYears": 5
+    "contractYears": 5,
+    "formerTeam": {
+      "teamId": "sac",
+      "season": -1
+    }
   },
   "mikal_bridges": {
     "id": "mikal_bridges",
@@ -8130,7 +8430,11 @@
     "number": 30,
     "potential": "C",
     "salary": 4887000,
-    "contractYears": 3
+    "contractYears": 3,
+    "formerTeam": {
+      "teamId": "bkn",
+      "season": -1
+    }
   },
   "karl_anthony_towns": {
     "id": "karl_anthony_towns",
@@ -8357,7 +8661,11 @@
     "number": 4,
     "potential": "C",
     "salary": 2648000,
-    "contractYears": 2
+    "contractYears": 2,
+    "formerTeam": {
+      "teamId": "hou",
+      "season": -1
+    }
   },
   "paolo_banchero": {
     "id": "paolo_banchero",
@@ -8442,7 +8750,11 @@
     "number": 9,
     "potential": "D",
     "salary": 14575000,
-    "contractYears": 2
+    "contractYears": 2,
+    "formerTeam": {
+      "teamId": "bos",
+      "season": -1
+    }
   },
   "jase_richardson": {
     "id": "jase_richardson",
@@ -8897,7 +9209,11 @@
     "number": 10,
     "potential": "D",
     "salary": 13145000,
-    "contractYears": 3
+    "contractYears": 3,
+    "formerTeam": {
+      "teamId": "phi",
+      "season": -1
+    }
   },
   "johnny_furphy": {
     "id": "johnny_furphy",
@@ -9009,7 +9325,11 @@
     "number": 22,
     "potential": "D",
     "salary": 4154000,
-    "contractYears": 5
+    "contractYears": 5,
+    "formerTeam": {
+      "teamId": "cle",
+      "season": -1
+    }
   },
   "aaron_nesmith": {
     "id": "aaron_nesmith",
@@ -9294,7 +9614,11 @@
     "number": 0,
     "potential": "C",
     "salary": 2648000,
-    "contractYears": 5
+    "contractYears": 5,
+    "formerTeam": {
+      "teamId": "nyk",
+      "season": -1
+    }
   },
   "kentavious_caldwell_pope": {
     "id": "kentavious_caldwell_pope",
@@ -9323,7 +9647,11 @@
     "number": 1,
     "potential": "D",
     "salary": 6178000,
-    "contractYears": 4
+    "contractYears": 4,
+    "formerTeam": {
+      "teamId": "mem",
+      "season": -1
+    }
   },
   "caleb_love": {
     "id": "caleb_love",
@@ -9351,7 +9679,11 @@
     "number": 2,
     "potential": "C",
     "salary": 5815000,
-    "contractYears": 4
+    "contractYears": 4,
+    "formerTeam": {
+      "teamId": "por",
+      "season": -1
+    }
   },
   "anfernee_simons": {
     "id": "anfernee_simons",
@@ -9380,7 +9712,11 @@
     "number": 5,
     "potential": "C",
     "salary": 14691000,
-    "contractYears": 4
+    "contractYears": 4,
+    "formerTeam": {
+      "teamId": "chi",
+      "season": -1
+    }
   },
   "jaylen_brown": {
     "id": "jaylen_brown",
@@ -9409,7 +9745,11 @@
     "number": 7,
     "potential": "C",
     "salary": 37734000,
-    "contractYears": 2
+    "contractYears": 2,
+    "formerTeam": {
+      "teamId": "bos",
+      "season": -1
+    }
   },
   "justin_edwards": {
     "id": "justin_edwards",
@@ -9465,7 +9805,11 @@
     "number": 21,
     "potential": "B",
     "salary": 2688000,
-    "contractYears": 5
+    "contractYears": 5,
+    "formerTeam": {
+      "teamId": "mem",
+      "season": -1
+    }
   },
   "joel_embiid": {
     "id": "joel_embiid",
@@ -9522,7 +9866,11 @@
     "number": 23,
     "potential": "D",
     "salary": 20908000,
-    "contractYears": 5
+    "contractYears": 5,
+    "formerTeam": {
+      "teamId": "lal",
+      "season": -1
+    }
   },
   "dominick_barlow": {
     "id": "dominick_barlow",
@@ -9635,7 +9983,11 @@
     "number": 45,
     "potential": "C",
     "salary": 8196000,
-    "contractYears": 3
+    "contractYears": 3,
+    "formerTeam": {
+      "teamId": "cle",
+      "season": -1
+    }
   },
   "ariel_hukporti": {
     "id": "ariel_hukporti",
@@ -9663,7 +10015,11 @@
     "number": 55,
     "potential": "C",
     "salary": 2648000,
-    "contractYears": 3
+    "contractYears": 3,
+    "formerTeam": {
+      "teamId": "nyk",
+      "season": -1
+    }
   },
   "vj_edgecombe": {
     "id": "vj_edgecombe",
@@ -9919,7 +10275,11 @@
     "number": 8,
     "potential": "D",
     "salary": 16238000,
-    "contractYears": 4
+    "contractYears": 4,
+    "formerTeam": {
+      "teamId": "lal",
+      "season": -1
+    }
   },
   "khaman_maluach": {
     "id": "khaman_maluach",
@@ -10173,7 +10533,11 @@
     "number": 22,
     "potential": "C",
     "salary": 17784000,
-    "contractYears": 5
+    "contractYears": 5,
+    "formerTeam": {
+      "teamId": "cha",
+      "season": -1
+    }
   },
   "jordan_goodwin": {
     "id": "jordan_goodwin",
@@ -10231,7 +10595,11 @@
     "number": 61,
     "potential": "D",
     "salary": 11599000,
-    "contractYears": 3
+    "contractYears": 3,
+    "formerTeam": {
+      "teamId": "gsw",
+      "season": -1
+    }
   },
   "jayson_kent": {
     "id": "jayson_kent",
@@ -10344,7 +10712,11 @@
     "number": 1,
     "potential": "C",
     "salary": 32167000,
-    "contractYears": 4
+    "contractYears": 4,
+    "formerTeam": {
+      "teamId": "mem",
+      "season": -1
+    }
   },
   "chris_youngblood": {
     "id": "chris_youngblood",
@@ -10486,7 +10858,11 @@
     "number": 9,
     "potential": "C",
     "salary": 27063000,
-    "contractYears": 1
+    "contractYears": 1,
+    "formerTeam": {
+      "teamId": "ind",
+      "season": -1
+    }
   },
   "branden_carlson": {
     "id": "branden_carlson",
@@ -10514,7 +10890,11 @@
     "number": 10,
     "potential": "C",
     "salary": 11599000,
-    "contractYears": 2
+    "contractYears": 2,
+    "formerTeam": {
+      "teamId": "okc",
+      "season": -1
+    }
   },
   "yang_hansen": {
     "id": "yang_hansen",
@@ -10599,7 +10979,11 @@
     "number": 20,
     "potential": "B",
     "salary": 4330000,
-    "contractYears": 4
+    "contractYears": 4,
+    "formerTeam": {
+      "teamId": "nyk",
+      "season": -1
+    }
   },
   "donovan_clingan": {
     "id": "donovan_clingan",
@@ -10797,7 +11181,11 @@
     "number": 2,
     "potential": "C",
     "salary": 2648000,
-    "contractYears": 4
+    "contractYears": 4,
+    "formerTeam": {
+      "teamId": "tor",
+      "season": -1
+    }
   },
   "elfrid_payton": {
     "id": "elfrid_payton",
@@ -10997,7 +11385,11 @@
     "number": 12,
     "potential": "C",
     "salary": 3835000,
-    "contractYears": 3
+    "contractYears": 3,
+    "formerTeam": {
+      "teamId": "was",
+      "season": -1
+    }
   },
   "tristen_newton": {
     "id": "tristen_newton",
@@ -11025,7 +11417,11 @@
     "number": 13,
     "potential": "C",
     "salary": 2648000,
-    "contractYears": 2
+    "contractYears": 2,
+    "formerTeam": {
+      "teamId": "hou",
+      "season": -1
+    }
   },
   "keegan_murray": {
     "id": "keegan_murray",
@@ -11451,7 +11847,11 @@
     "number": 4,
     "potential": "C",
     "salary": 3068000,
-    "contractYears": 2
+    "contractYears": 2,
+    "formerTeam": {
+      "teamId": "ind",
+      "season": -1
+    }
   },
   "stephon_castle": {
     "id": "stephon_castle",
@@ -11651,7 +12051,11 @@
     "number": 23,
     "potential": "D",
     "salary": 12488000,
-    "contractYears": 2
+    "contractYears": 2,
+    "formerTeam": {
+      "teamId": "det",
+      "season": -1
+    }
   },
   "devin_vassell": {
     "id": "devin_vassell",
@@ -12334,7 +12738,11 @@
     "number": 2,
     "potential": "D",
     "salary": 26336000,
-    "contractYears": 3
+    "contractYears": 3,
+    "formerTeam": {
+      "teamId": "lac",
+      "season": -1
+    }
   },
   "scottie_barnes": {
     "id": "scottie_barnes",
@@ -12478,7 +12886,11 @@
     "number": 13,
     "potential": "D",
     "salary": 12488000,
-    "contractYears": 4
+    "contractYears": 4,
+    "formerTeam": {
+      "teamId": "min",
+      "season": -1
+    }
   },
   "ja_kobe_walter": {
     "id": "ja_kobe_walter",
@@ -12535,7 +12947,11 @@
     "number": 18,
     "potential": "C",
     "salary": 11599000,
-    "contractYears": 5
+    "contractYears": 5,
+    "formerTeam": {
+      "teamId": "bkn",
+      "season": -1
+    }
   },
   "jakob_poeltl": {
     "id": "jakob_poeltl",
@@ -12703,7 +13119,11 @@
     "number": 44,
     "potential": "C",
     "salary": 2648000,
-    "contractYears": 2
+    "contractYears": 2,
+    "formerTeam": {
+      "teamId": "mil",
+      "season": -1
+    }
   },
   "trey_jemison_iii": {
     "id": "trey_jemison_iii",
@@ -12731,7 +13151,11 @@
     "number": 50,
     "potential": "C",
     "salary": 3309000,
-    "contractYears": 4
+    "contractYears": 4,
+    "formerTeam": {
+      "teamId": "nyk",
+      "season": -1
+    }
   },
   "alijah_martin": {
     "id": "alijah_martin",
@@ -12929,7 +13353,11 @@
     "number": 5,
     "potential": "C",
     "salary": 5815000,
-    "contractYears": 4
+    "contractYears": 4,
+    "formerTeam": {
+      "teamId": "cha",
+      "season": -1
+    }
   },
   "isaiah_collier": {
     "id": "isaiah_collier",
@@ -13013,7 +13441,11 @@
     "number": 11,
     "potential": "C",
     "salary": 29383000,
-    "contractYears": 3
+    "contractYears": 3,
+    "formerTeam": {
+      "teamId": "lal",
+      "season": -1
+    }
   },
   "ace_bailey": {
     "id": "ace_bailey",
@@ -13099,7 +13531,11 @@
     "number": 21,
     "potential": "C",
     "salary": 5413000,
-    "contractYears": 3
+    "contractYears": 3,
+    "formerTeam": {
+      "teamId": "hou",
+      "season": -1
+    }
   },
   "darryn_peterson": {
     "id": "darryn_peterson",
@@ -13185,7 +13621,11 @@
     "number": 23,
     "potential": "B",
     "salary": 2648000,
-    "contractYears": 1
+    "contractYears": 1,
+    "formerTeam": {
+      "teamId": "nop",
+      "season": -1
+    }
   },
   "brice_sensabaugh": {
     "id": "brice_sensabaugh",
@@ -13298,7 +13738,11 @@
     "number": 55,
     "potential": "B",
     "salary": 2648000,
-    "contractYears": 4
+    "contractYears": 4,
+    "formerTeam": {
+      "teamId": "sas",
+      "season": -1
+    }
   },
   "jahmai_mashack": {
     "id": "jahmai_mashack",
@@ -13441,7 +13885,11 @@
     "number": 3,
     "potential": "D",
     "salary": 12488000,
-    "contractYears": 2
+    "contractYears": 2,
+    "formerTeam": {
+      "teamId": "por",
+      "season": -1
+    }
   },
   "walter_clayton_jr": {
     "id": "walter_clayton_jr",
@@ -13498,7 +13946,11 @@
     "number": 7,
     "potential": "C",
     "salary": 3489000,
-    "contractYears": 2
+    "contractYears": 2,
+    "formerTeam": {
+      "teamId": "nop",
+      "season": -1
+    }
   },
   "javon_small": {
     "id": "javon_small",
@@ -13582,7 +14034,11 @@
     "number": 17,
     "potential": "C",
     "salary": 5413000,
-    "contractYears": 3
+    "contractYears": 3,
+    "formerTeam": {
+      "teamId": "por",
+      "season": -1
+    }
   },
   "olivier_maxence_prosper": {
     "id": "olivier_maxence_prosper",
@@ -13753,7 +14209,11 @@
     "number": 28,
     "potential": "C",
     "salary": 19795000,
-    "contractYears": 3
+    "contractYears": 3,
+    "formerTeam": {
+      "teamId": "det",
+      "season": -1
+    }
   },
   "quinten_post": {
     "id": "quinten_post",
@@ -13782,7 +14242,11 @@
     "number": 41,
     "potential": "C",
     "salary": 13145000,
-    "contractYears": 4
+    "contractYears": 4,
+    "formerTeam": {
+      "teamId": "gsw",
+      "season": -1
+    }
   },
   "gg_jackson": {
     "id": "gg_jackson",
@@ -13924,7 +14388,11 @@
     "number": 1,
     "potential": "C",
     "salary": 3909000,
-    "contractYears": 5
+    "contractYears": 5,
+    "formerTeam": {
+      "teamId": "cha",
+      "season": -1
+    }
   },
   "trae_young": {
     "id": "trae_young",
@@ -13980,7 +14448,11 @@
     "number": 3,
     "potential": "B",
     "salary": 2648000,
-    "contractYears": 5
+    "contractYears": 5,
+    "formerTeam": {
+      "teamId": "mia",
+      "season": -1
+    }
   },
   "aj_dybantsa": {
     "id": "aj_dybantsa",
@@ -14093,7 +14565,11 @@
     "number": 8,
     "potential": "C",
     "salary": 27063000,
-    "contractYears": 3
+    "contractYears": 3,
+    "formerTeam": {
+      "teamId": "lal",
+      "season": -1
+    }
   },
   "justin_champagnie": {
     "id": "justin_champagnie",
@@ -14265,7 +14741,11 @@
     "number": 22,
     "potential": "D",
     "salary": 3518000,
-    "contractYears": 2
+    "contractYears": 2,
+    "formerTeam": {
+      "teamId": "dal",
+      "season": -1
+    }
   },
   "anthony_davis": {
     "id": "anthony_davis",
@@ -14577,7 +15057,11 @@
     "number": 12,
     "potential": "D",
     "salary": 6967000,
-    "contractYears": 3
+    "contractYears": 3,
+    "formerTeam": {
+      "teamId": "mil",
+      "season": -1
+    }
   },
   "elijah_harkless": {
     "id": "elijah_harkless",
@@ -14605,7 +15089,11 @@
     "number": 16,
     "potential": "C",
     "salary": 7268000,
-    "contractYears": 4
+    "contractYears": 4,
+    "formerTeam": {
+      "teamId": "uta",
+      "season": -1
+    }
   },
   "isaiah_joe": {
     "id": "isaiah_joe",
@@ -14633,7 +15121,11 @@
     "number": 17,
     "potential": "C",
     "salary": 20104000,
-    "contractYears": 2
+    "contractYears": 2,
+    "formerTeam": {
+      "teamId": "okc",
+      "season": -1
+    }
   },
   "john_collins": {
     "id": "john_collins",
@@ -14662,7 +15154,11 @@
     "number": 20,
     "potential": "C",
     "salary": 17784000,
-    "contractYears": 3
+    "contractYears": 3,
+    "formerTeam": {
+      "teamId": "lac",
+      "season": -1
+    }
   },
   "ebuka_okorie": {
     "id": "ebuka_okorie",
@@ -14891,7 +15387,11 @@
     "number": 0,
     "potential": "D",
     "salary": 9859000,
-    "contractYears": 2
+    "contractYears": 2,
+    "formerTeam": {
+      "teamId": "phx",
+      "season": -1
+    }
   },
   "grant_williams": {
     "id": "grant_williams",
@@ -15062,7 +15562,11 @@
     "number": 8,
     "potential": "D",
     "salary": 20104000,
-    "contractYears": 2
+    "contractYears": 2,
+    "formerTeam": {
+      "teamId": "phx",
+      "season": -1
+    }
   },
   "naz_reid": {
     "id": "naz_reid",
@@ -15091,7 +15595,11 @@
     "number": 11,
     "potential": "C",
     "salary": 20104000,
-    "contractYears": 4
+    "contractYears": 4,
+    "formerTeam": {
+      "teamId": "min",
+      "season": -1
+    }
   },
   "ryan_kalkbrenner": {
     "id": "ryan_kalkbrenner",
@@ -15204,7 +15712,11 @@
     "number": 17,
     "potential": "D",
     "salary": 11173000,
-    "contractYears": 4
+    "contractYears": 4,
+    "formerTeam": {
+      "teamId": "cle",
+      "season": -1
+    }
   },
   "pat_connaughton": {
     "id": "pat_connaughton",

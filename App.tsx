@@ -17,6 +17,7 @@ import { MIN_ROSTER_SIZE } from './services/tradeService';
 import { initialPickAssets, PICK_WINDOW, makeUserPick, scoutProspect, consensusValue } from './services/draftService';
 import { signFreeAgentLegality, evaluateSigningInterest, signPlayer, askingSalary } from './services/freeAgencyService';
 import { resolveDecision } from './services/decisionService';
+import { isRival } from './services/rivalryService';
 import { startOffseason, finishDraft, startSeason } from './services/offseasonService';
 import { initCoaches, fireCoach, hireCoach } from './services/coachService';
 
@@ -766,11 +767,11 @@ export default function App() {
     if (view === 'leaders') return <LeagueLeaders players={season.players} teams={season.teams} />;
     if (view === 'allstar') return <AllStarWeekend allStar={season.allStar} players={season.players} teams={season.teams} allStarGame={ALL_STAR_GAME} />;
     if (view === 'teams') {
-      return <TeamsList teams={season.teams} players={season.players} onSelect={(id) => { setSelectedTeamId(id); setView('team-detail'); }} />;
+      return <TeamsList teams={season.teams} players={season.players} rivalIds={season.teams.filter((x) => isRival(season.rivalries, x.id)).map((x) => x.id)} onSelect={(id) => { setSelectedTeamId(id); setView('team-detail'); }} />;
     }
     if (view === 'team-detail') {
       const t = season.teams.find((x) => x.id === selectedTeamId);
-      if (t) return <TeamDetail team={t} players={season.players} teams={season.teams} coaches={season.coaches} currentDraft={currentDraft} onBack={() => setView('teams')} />;
+      if (t) return <TeamDetail team={t} players={season.players} teams={season.teams} coaches={season.coaches} currentDraft={currentDraft} rivalry={isRival(season.rivalries, t.id) ? season.rivalries![t.id] : undefined} onBack={() => setView('teams')} />;
     }
     if (view === 'trade') {
       return (

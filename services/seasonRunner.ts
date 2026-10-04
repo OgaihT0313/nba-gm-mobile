@@ -11,11 +11,12 @@
 // it must be safe to import in a worker context.
 
 import { Team, Player, SeasonState } from '../types';
-import { simulationEngine } from './simulationService';
+import { simulationEngine, DEFAULT_ROTATION_SIZE } from './simulationService';
 import { TRADE_DEADLINE_GAME, generateCpuTradeOffer, OFFER_TTL, MAX_PENDING_OFFERS } from './tradeService';
 import { projectConfidence, confidenceZone, shouldFireMidSeason } from './ownerService';
 import { generateDecisions } from './decisionService';
 import { notePressHeld } from './pressService';
+import { trackMoves, applyRevengeNights, markRevengeFaced, settleUserGame } from './rivalryService';
 
 // Calendar checkpoints (moved out of App.tsx so the runner is self-contained).
 // Roughly where the real All-Star break falls on the 82-game calendar, a few
@@ -71,6 +72,13 @@ export function simulateOneDay(season: SeasonState, pinnedResult?: PinnedGameRes
     const dayIndex = season.gamesPlayed + 1;
     const todaysGames = season.schedule.filter(g => g.day === dayIndex);
 
+    // Who changed teams since yesterday -- by any route -- and who is facing
+    // his old team tonight. See services/rivalryService.ts.
+    const seasonNo = season.awardHistory.length;
+    const rosterSnapshot = trackMoves(season.rosterSnapshot, newTeams, newPlayers, seasonNo);
+    applyRevengeNights(todaysGames, newTeams, newPlayers, seasonNo);
+    let rivalries = season.rivalries;
+
     todaysGames.forEach(game => {
         const homeTeam = newTeams.find(t => t.id === game.homeTeamId);
         const awayTeam = newTeams.find(t => t.id === game.awayTeamId);
@@ -91,8 +99,21 @@ export function simulateOneDay(season: SeasonState, pinnedResult?: PinnedGameRes
         newTeams[winnerIdx].wins = (newTeams[winnerIdx].wins || 0) + 1;
         newTeams[loserIdx].losses = (newTeams[loserIdx].losses || 0) + 1;
 
+        // The user's rotation, read before the box score moves anyone.
+        const userIdx = homeTeam.id === season.userTeamId ? newTeams.indexOf(homeTeam)
+            : awayTeam.id === season.userTeamId ? newTeams.indexOf(awayTeam) : -1;
+        const userRotation = userIdx >= 0
+            ? simulationEngine.getTeamRotation(newTeams[userIdx], newPlayers, newTeams[userIdx].rotationSize ?? DEFAULT_ROTATION_SIZE)
+            : [];
+
         simulationEngine.recordGameStats(newTeams[winnerIdx], result.scoreWinner, result.scoreLoser, newPlayers, pinned?.minutes);
         simulationEngine.recordGameStats(newTeams[loserIdx], result.scoreLoser, result.scoreWinner, newPlayers, pinned?.minutes);
+        markRevengeFaced(game, newTeams, newPlayers, seasonNo);
+        if (userIdx >= 0) {
+            const opponentId = userIdx === winnerIdx ? newTeams[loserIdx].id : newTeams[winnerIdx].id;
+            rivalries = settleUserGame(rivalries, newTeams[userIdx], opponentId, userIdx === winnerIdx,
+                result.scoreWinner - result.scoreLoser, newPlayers, userRotation);
+        }
 
         const totalGames = (newTeams[winnerIdx].wins || 0) + (newTeams[winnerIdx].losses || 0);
         if (totalGames % 5 === 0) {
@@ -208,8 +229,15 @@ export function simulateOneDay(season: SeasonState, pinnedResult?: PinnedGameRes
         }
     }
 
+    // Tomorrow's revenge nights, set tonight so a live game -- which plays
+    // before the runner -- already sees them. The daily tick above has just
+    // cleared tonight's.
+    applyRevengeNights(season.schedule.filter(g => g.day === dayIndex + 1), teamsAfterEvents, newPlayers, seasonNo);
+
     const nextSeason: SeasonState = {
         ...season,
+        rosterSnapshot,
+        rivalries,
         gamesPlayed: nextGamesPlayed,
         teams: teamsAfterEvents,
         players: newPlayers,

@@ -103,6 +103,10 @@ export interface Player {
   // award history and career totals point at him; off every roster and out of
   // the free-agent market for good.
   retired?: boolean;
+  // The team he last left, and when (season number = awardHistory.length;
+  // -1 for a move baked into the opening data). Stamped by
+  // rivalryService.trackMoves; `faced` once the revenge game has been played.
+  formerTeam?: { teamId: string; season: number; faced?: boolean };
   // Salary of an extension signed during his final year, which takes effect
   // when that year runs out (processOffseasonContracts swaps it in). Until
   // then he is paid what his current deal says.
@@ -483,6 +487,12 @@ export interface SeasonState {
   // while this is non-empty — that block IS the feature. Optional so saves
   // predating it stay valid; absent means an empty queue.
   decisions?: Decision[];
+  // Who was on which team at the end of the last simulated day, so the next
+  // day can tell who moved (rivalryService.trackMoves). Absent on a fresh save.
+  rosterSnapshot?: Record<string, string>;
+  // The user franchise's rivalries, by opponent id. Heat >= RIVAL_HEAT makes a
+  // rival. See services/rivalryService.ts.
+  rivalries?: { [teamId: string]: { heat: number; why?: string; close?: number } };
   // Present only while a Game 7 (or Finals-clinching game) involving the user
   // is being played out live — see PlayoffState.pendingDecider. Cleared once
   // the game resolves and its result is written back into the bracket.

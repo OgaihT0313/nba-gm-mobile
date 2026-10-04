@@ -9,6 +9,7 @@ import {
 } from '../constants';
 import { MANDATE_META, confidenceZone, ZONE_META } from '../services/ownerService';
 import { PROMISE_LABEL, PROMISE_KEPT, PROMISE_BROKEN } from '../services/pressService';
+import { isRival, rivalryReason, revengePlayers, REVENGE_BOOST, RIVAL_WIN_MORALE, RIVAL_LOSS_MORALE } from '../services/rivalryService';
 import { recentForm, currentStreak, nextGame, winProbability } from '../services/formService';
 import { useTheme } from '../src/theme/ThemeProvider';
 import { COLORS, INK, RADIUS } from '../src/theme/tokens';
@@ -109,6 +110,10 @@ const SimulationScreen: React.FC<SimulationScreenProps> = ({
     : undefined;
   const atHome = fixture?.homeTeamId === season.userTeamId;
   const winPct = userTeam && opponent ? winProbability(userTeam, opponent, season.players, !!atHome) : 0.5;
+  // What makes the next game more than a game: a rival, or someone facing the
+  // team he left.
+  const rival = opponent && isRival(season.rivalries, opponent.id) ? season.rivalries![opponent.id] : undefined;
+  const revenge = userTeam && opponent ? revengePlayers(season, userTeam, opponent).slice(0, 2) : [];
 
   const zone = confidenceZone(season.owner.confidence);
   const zoneColor = ZONE_COLOR[zone];
@@ -397,6 +402,30 @@ const SimulationScreen: React.FC<SimulationScreenProps> = ({
             <MonoLabel size={9} color={INK.faint} style={{ marginTop: 9, letterSpacing: 0 }}>
               Projeção pela força das rotações
             </MonoLabel>
+            {rival || revenge.length ? (
+              <View style={{ gap: 7, marginTop: 11 }}>
+                {rival ? (
+                  <View className="flex-row" style={{ gap: 8 }}>
+                    <MonoLabel size={9} color={COLORS.cta}>Rival</MonoLabel>
+                    <Text style={{ fontSize: 11, lineHeight: 16, color: INK.body, flex: 1 }}>
+                      {`${rivalryReason(rival)[0].toUpperCase()}${rivalryReason(rival).slice(1)}. `}
+                      Vencer dá ânimo (+{RIVAL_WIN_MORALE}) e embalo; perder pesa ({RIVAL_LOSS_MORALE}).
+                    </Text>
+                  </View>
+                ) : null}
+                {revenge.map((p) => {
+                  const mine = userTeam!.roster.includes(p.id);
+                  return (
+                    <View key={p.id} className="flex-row" style={{ gap: 8 }}>
+                      <MonoLabel size={9} color={COLORS.warn}>Revanche</MonoLabel>
+                      <Text style={{ fontSize: 11, lineHeight: 16, color: INK.body, flex: 1 }}>
+                        {p.name} enfrenta o ex-time pela primeira vez{mine ? '' : ' — e quer provar que vocês erraram'}. +{REVENGE_BOOST} de OVR neste jogo.
+                      </Text>
+                    </View>
+                  );
+                })}
+              </View>
+            ) : null}
             {onWatchGame ? (
               <GhostButton
                 label="Assistir ao jogo"

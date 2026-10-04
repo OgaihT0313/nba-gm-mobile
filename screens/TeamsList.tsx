@@ -16,9 +16,13 @@ const NBA_FALLBACK = 'https://a.espncdn.com/i/teamlogos/nba/500/nba.png';
 // Franchise browser — taps through to TeamDetail. Same card treatment as the
 // team picker (design 4b): each franchise wearing its own real color, washed
 // out to near-black so thirty of them can sit side by side.
-const TeamsList: React.FC<{ teams: Team[]; players: { [key: string]: Player }; onSelect: (teamId: string) => void }> = ({
-  teams, players, onSelect,
-}) => (
+const TeamsList: React.FC<{
+  teams: Team[];
+  players: { [key: string]: Player };
+  /** Your franchise's rivals, tagged on their cards. */
+  rivalIds?: string[];
+  onSelect: (teamId: string) => void;
+}> = ({ teams, players, rivalIds = [], onSelect }) => (
   <Screen heroHeight={132}>
     <HeroContent>
       <PageHeader eyebrow="A liga" title="Franquias" subtitle="Elencos e folha salarial de qualquer time." />
@@ -49,18 +53,32 @@ const TeamsList: React.FC<{ teams: Team[]; players: { [key: string]: Player }; o
                     help now. The sim has done this since the deadline logic
                     landed; until now nothing on screen said so. A corner tag,
                     so the card keeps the grid's height. */}
-                {t.tanking ? (
-                  <View
-                    accessibilityLabel="Jogando pela loteria"
-                    style={{
-                      position: 'absolute', top: 10, right: 10, paddingHorizontal: 6, paddingVertical: 2,
-                      borderRadius: RADIUS.pill, backgroundColor: withAlpha(COLORS.warn, 0.14),
-                      borderWidth: 1, borderColor: withAlpha(COLORS.warn, 0.35),
-                    }}
-                  >
-                    <MonoLabel size={9} color={COLORS.warn} style={{ letterSpacing: 0.3 }}>Loteria</MonoLabel>
-                  </View>
-                ) : null}
+                <View style={{ position: 'absolute', top: 10, right: 10, gap: 4, alignItems: 'flex-end' }}>
+                  {rivalIds.includes(t.id) ? (
+                    <View
+                      accessibilityLabel="Rival da sua franquia"
+                      style={{
+                        paddingHorizontal: 6, paddingVertical: 2,
+                        borderRadius: RADIUS.pill, backgroundColor: withAlpha(COLORS.cta, 0.14),
+                        borderWidth: 1, borderColor: withAlpha(COLORS.cta, 0.4),
+                      }}
+                    >
+                      <MonoLabel size={9} color={COLORS.cta} style={{ letterSpacing: 0.3 }}>Rival</MonoLabel>
+                    </View>
+                  ) : null}
+                  {t.tanking ? (
+                    <View
+                      accessibilityLabel="Jogando pela loteria"
+                      style={{
+                        paddingHorizontal: 6, paddingVertical: 2,
+                        borderRadius: RADIUS.pill, backgroundColor: withAlpha(COLORS.warn, 0.14),
+                        borderWidth: 1, borderColor: withAlpha(COLORS.warn, 0.35),
+                      }}
+                    >
+                      <MonoLabel size={9} color={COLORS.warn} style={{ letterSpacing: 0.3 }}>Loteria</MonoLabel>
+                    </View>
+                  ) : null}
+                </View>
                 <Image
                   source={{ uri: getTeamLogoUrl(t) }}
                   placeholder={{ uri: NBA_FALLBACK }}

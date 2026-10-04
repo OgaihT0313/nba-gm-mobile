@@ -8,6 +8,7 @@ import {
   getTeamNickname, getTeamCity, conferenceLabel, attributeColor,
 } from '../constants';
 import { teamRating } from '../services/formService';
+import { rivalryReason } from '../services/rivalryService';
 import { COLORS, INK } from '../src/theme/tokens';
 import Screen, { HeroContent, Body } from '../components/ui/Screen';
 import { Panel, MonoLabel, Eyebrow, HeroTitle, StatTile, SectionLabel } from '../components/ui/kit';
@@ -30,8 +31,10 @@ const TeamDetail: React.FC<{
   teams: Team[];
   coaches: { [key: string]: Coach };
   currentDraft: number;
+  /** Your rivalry with this team, when it has become one. */
+  rivalry?: { heat: number; why?: string; close?: number };
   onBack: () => void;
-}> = ({ team, players, teams, coaches, currentDraft, onBack }) => {
+}> = ({ team, players, teams, coaches, currentDraft, rivalry, onBack }) => {
   const salary = getTeamSalary(team, players);
   const capSpace = SALARY_CAP - salary;
   const roster = team.roster.map((pId) => players[pId]).filter(Boolean).sort((a, b) => b.ovr - a.ovr);
@@ -61,6 +64,11 @@ const TeamDetail: React.FC<{
             <MonoLabel size={10} color="rgba(255,255,255,0.55)" style={{ marginTop: 3, letterSpacing: 0.4 }} numberOfLines={1}>
               {team.wins ?? 0}-{team.losses ?? 0} · {coach?.name ?? 'Sem técnico'}
             </MonoLabel>
+            {rivalry ? (
+              <MonoLabel size={10} color={COLORS.cta} style={{ marginTop: 3, letterSpacing: 0.4 }} numberOfLines={2}>
+                Rival · {rivalryReason(rivalry)}
+              </MonoLabel>
+            ) : null}
             {team.tanking ? (
               <MonoLabel size={10} color={COLORS.warn} style={{ marginTop: 3, letterSpacing: 0.4 }} numberOfLines={1}>
                 Jogando pela loteria · titulares poupados

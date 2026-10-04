@@ -102,7 +102,33 @@ Cada resposta mexe em número que o motor lê:
   painel do dono na Simulação e é cobrada em `evaluateSeasonOutcome`: cumprida
   +5, quebrada −12, e o dono cita a coletiva no veredito.
 
-Medido em `scripts/check_decisions.ts`.
+Medido em `scripts/check_decisions.ts`. A coletiva cede quando a temporada já
+parou 7 vezes (`PRESS_QUEUE_CEILING`), para não estourar o teto da fila.
+
+### 4b. Rivalidades e jogos de revanche — FEITO (2026-10-04)
+
+`services/rivalryService.ts`.
+
+- **Revanche:** quem trocou de time ganha +4 de OVR (o mesmo efeito "em
+  chamas" que o motor já usa) no primeiro jogo contra o ex-time — vale para o
+  craque que você trocou e volta para te castigar, e para o que você tirou de
+  um rival. Quem mudou é derivado comparando os elencos dia a dia
+  (`rosterSnapshot`), então toda rota de mudança entra. As mudanças da offseason
+  real de 2026 vêm marcadas no `players.json` (`formerTeam`, gerado por
+  `nba-gm-simulator/pipeline/sync_former_teams.py`): Giannis volta a Milwaukee
+  na primeira temporada. Medido: ~46 noites de revanche por temporada na liga,
+  ~2,5 envolvendo o seu time.
+- **Rivalidades do seu time:** esquentam com eliminação nos playoffs (quem te
+  eliminou vira rival na hora) e com jogos decididos por até 5 pontos; esfriam
+  pela metade a cada verão; no máximo 3 rivais. Vencer um rival dá ânimo (+4) e
+  embalo à rotação, perder tira (−3). Medido: ~2 rivais e ~2-3 jogos contra
+  rival por temporada.
+- Aparece no card do próximo jogo (Rival / Revanche, com o motivo e o efeito),
+  na etiqueta "Rival" da lista de franquias e na página do time. Nada no feed.
+
+Medido em `scripts/check_rivalry.ts` (carreiras com playoffs reais).
+
+Falta: manchetes e marcos de carreira.
 
 ---
 
