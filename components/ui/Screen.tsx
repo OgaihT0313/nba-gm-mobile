@@ -103,15 +103,17 @@ const Screen: React.FC<ScreenProps> = ({
         className="flex-1"
         contentContainerStyle={{ paddingBottom: footer ? 8 : 22 }}
         showsVerticalScrollIndicator={false}
-        scrollEventThrottle={stickyHeader ? 32 : scrollProps.scrollEventThrottle}
-        onScroll={(e) => {
+        {...scrollProps}
+        // Only listen when someone needs it: a handler with no throttle makes
+        // React Native warn on every frame of every scroll, on every screen.
+        scrollEventThrottle={stickyHeader || onScroll ? (scrollProps.scrollEventThrottle ?? 32) : undefined}
+        onScroll={stickyHeader || onScroll ? (e) => {
           if (stickyHeader) {
             const past = e.nativeEvent.contentOffset.y > heroHeight - 40;
             if (past !== pinned) setPinned(past);
           }
           onScroll?.(e);
-        }}
-        {...scrollProps}
+        } : undefined}
       >
         {/* The band lives INSIDE the scrolled content, not pinned behind it.
             Pinned looked right on the static 844px mockups, but on a real

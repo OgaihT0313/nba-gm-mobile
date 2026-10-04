@@ -31,6 +31,7 @@ import Court3D, { CameraView } from '../components/court3d/Court3D';
 const CAMERA_VIEWS: { id: CameraView; label: string }[] = [
   { id: 'iso', label: 'Livre' },
   { id: 'tv', label: 'TV' },
+  { id: 'close', label: 'Perto' },
   { id: 'overhead', label: 'Aérea' },
   { id: 'behind_basket', label: 'Cesta' },
 ];
@@ -128,6 +129,13 @@ const WatchGameScreen: React.FC<WatchGameScreenProps> = ({
     return v ? { floorColor: v.floorTone } : undefined;
   }, [eraId]);
   const userSide: CourtSide = home.id === userTeamId ? 'home' : 'away';
+  // Jersey numbers for Court3D, both rosters. Memoized for the same reason as
+  // courtVisual: the 3D scene must not see a new object every scoreboard tick.
+  const jerseyNumbers = useMemo(() => {
+    const out: { [id: string]: number } = {};
+    [...home.roster, ...away.roster].forEach((id) => { if (players[id]) out[id] = players[id].number; });
+    return out;
+  }, [home, away, players]);
 
   const fives = useRef<{ home: FiveOnCourt; away: FiveOnCourt }>({
     home: buildFive(home, players, 'home'),
@@ -549,6 +557,8 @@ const WatchGameScreen: React.FC<WatchGameScreenProps> = ({
         courtRef={courtRef}
         visual={courtVisual}
         cameraView={cameraView}
+        homeLabel={getTeamTricode(home)}
+        numbers={jerseyNumbers}
       />
 
       {banner && (

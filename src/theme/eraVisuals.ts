@@ -5,8 +5,8 @@
 // for a save that started in that era. Same flat-lookup-plus-pure-function
 // shape as TEAM_COLORS/getTeamAccent in constants.ts.
 //
-// `floorTone` deliberately stays close to Court3D's existing hardcoded
-// '#b5793f' for the live/no-era case (not present here at all — a save
+// `floorTone` deliberately stays close to Court3D's default light maple
+// ('#caa271') for the live/no-era case (not present here at all — a save
 // without an era passes no `visual` prop, so Court3D's own default applies
 // unchanged) — the Kobe Era gets a visibly warmer/more saturated wood tone as
 // its one piece of "old broadcast" flavor; LeBron/Warriors Era intentionally
@@ -37,7 +37,7 @@ export const ERA_VISUALS: { [visualId: string]: EraVisual } = {
   'lebron-warriors-era': {
     accentPrimary: '#1D428A', // Warriors blue — 6 of the 10 seasons are the Warriors dynasty
     accentSecondary: '#FFC72C', // Warriors gold
-    floorTone: '#b5793f', // matches Court3D's modern default — this era already looks like "now"
+    floorTone: '#caa271', // matches Court3D's modern default (light maple) — this era already looks like "now"
   },
 };
 

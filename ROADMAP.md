@@ -35,6 +35,17 @@ toque, rotação automática liga/desliga), energia dos seus cinco ao vivo com
 aviso de exausto, e os minutos jogados na tela vão para o box score e para a
 carga — segurar o titular o jogo todo custa no risco de lesão do jogo seguinte.
 
+## 2b. O 3D refeito — FEITO (2026-10-04)
+
+Pedido do usuário: o "Assistir ao Jogo" parecia protótipo. Refeito do zero em
+`components/court3d/` — piso de madeira com a quadra pintada nas cores do
+mandante (texturas geradas por código, `textures.ts`), arena com ~3.300
+torcedores instanciados, placas de LED, mesa, bancos e telão (`Arena.tsx`),
+cestas com vidro, rede e relógio de posse, e jogadores articulados com camisa e
+número que correm, defendem, driblam e sobem pro arremesso (`PlayerRig.ts`).
+Câmera nova "Perto" segue a bola. Não testado no celular: ~280 draw calls e
+~250k triângulos, texturas montadas em ~120 ms (V8) ao abrir a tela.
+
 ## 3. Tornar visível o que já existe — FEITO (2026-10-04)
 
 Os quatro itens entraram juntos com uma rodada de acessibilidade e legibilidade:
