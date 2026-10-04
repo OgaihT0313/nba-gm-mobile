@@ -12,9 +12,11 @@
 // frequency budget below is enforced rather than guessed at.
 
 import type { Decision, DecisionOption, Player, SeasonState, Team, TradeOffer } from '../types';
-import { getPlayerPositions, getTeamSalary } from '../constants';
+import { getPlayerPositions, getTeamSalary, LUXURY_TAX } from '../constants';
 import { simulationEngine, ROTATION_MIN, DEFAULT_ROTATION_SIZE, TRADE_REQUEST_MORALE } from './simulationService';
-import { getFreeAgents, signFreeAgentLegality, evaluateSigningInterest, signPlayer } from './freeAgencyService';
+import { getFreeAgents, signFreeAgentLegality, evaluateSigningInterest, signPlayer, askingSalary, newContractYears, willingToReSign } from './freeAgencyService';
+import { luxuryTaxConfidenceHit } from './ownerService';
+import { playerValue } from './tradeService';
 import { generateCpuTradeOffer, TRADE_DEADLINE_GAME } from './tradeService';
 import { sortStandings } from './scheduleService';
 import { personalityOf, rushLoadCost } from './personalityService';
@@ -56,7 +58,55 @@ const SELL_CONFIDENCE: Record<string, number> = {
     championship: -22, contender: -14, playoffs: -6, develop: +4, rebuild: +8,
 };
 
+/**
+ * When the extension talks happen: a quarter into the season, so the record
+ * means something (it is half of whether he wants to stay) and there is still a
+ * whole month before the deadline to trade him if he will not.
+ */
+const EXTENSION_GAME = 20;
+
+/** Only players who matter: the rotation, or anyone this good. */
+const EXTENSION_MIN_OVR = 76;
+
+/**
+ * At most this many extension talks a season, best players first. The queue's
+ * 4-8 budget is shared with every other kind; a roster with five expiring deals
+ * would otherwise spend a quarter of the season's stops in one evening. The
+ * rest reach free agency with the Bird right, which is still a choice.
+ */
+const EXTENSION_MAX_PER_SEASON = 2;
+
+/** The Líder takes less to stay. Named in the decision, so it is a reason to keep him. */
+const LEADER_DISCOUNT = 0.9;
+
 const money = (v: number) => `$${(v / 1_000_000).toFixed(1)}M`;
+
+/**
+ * What he asks to extend: his market price at NEXT season's age, when the new
+ * deal starts -- the same askingSalary every other contract uses, so extending
+ * now is a bet on the player rather than a different price list. Waiting is
+ * the other side of that bet: if he declines he will ask less in July, if he
+ * breaks out he will ask more, and someone else may pay it first.
+ */
+export const extensionTerms = (p: Player): { salary: number; years: number } => {
+    const next = { ...p, age: p.age + 1 };
+    const base = askingSalary(next);
+    const salary = personalityOf(p).id === 'lider' ? Math.round(base * LEADER_DISCOUNT / 10_000) * 10_000 : base;
+    return { salary, years: newContractYears(next) };
+};
+
+/** Next season's payroll: everyone still under contract then, plus `extra`. */
+const nextSeasonPayroll = (team: Team, players: { [k: string]: Player }, extra = 0): number =>
+    team.roster.reduce((sum, id) => {
+        const p = players[id];
+        if (!p || p.contractYears <= 1) return sum;
+        return sum + (p.nextSalary ?? p.salary);
+    }, 0) + extra;
+
+const winPctOf = (team: Team): number => {
+    const g = (team.wins ?? 0) + (team.losses ?? 0);
+    return g ? (team.wins ?? 0) / g : 0.5;
+};
 
 const teamOf = (season: SeasonState, id: string): Team | undefined =>
     season.teams.find(t => t.id === id);
@@ -261,6 +311,86 @@ const buildDeadlineStance = (season: SeasonState, team: Team): Decision => {
 };
 
 /**
+ * A player entering the last year of his deal. The decision the roadmap called
+ * the centre of the job: pay him now at today's price, or let him reach free
+ * agency and find out. If he will not stay -- unhappy, or a star on a losing
+ * team -- the question turns into whether you get anything for him first.
+ */
+const buildContractExtension = (season: SeasonState, team: Team, p: Player): Decision => {
+    const terms = extensionTerms(p);
+    const willing = willingToReSign(p, winPctOf(team));
+    const payrollAfter = nextSeasonPayroll(team, season.players, terms.salary);
+    const tax = luxuryTaxConfidenceHit(payrollAfter);
+    const isLeader = personalityOf(p).id === 'lider';
+    const why = personalityOf(p).id === 'estrela' && winPctOf(team) < 0.45
+        ? `quer jogar num time que vence, e ${team.wins}-${team.losses} não é isso`
+        : 'anda insatisfeito no time';
+
+    const shop: DecisionOption = {
+        id: `shop:${p.id}`,
+        label: 'Negociar agora',
+        detail: 'Ouve propostas antes do prazo de trocas, enquanto ele ainda vale alguma coisa.',
+        consequence: willing ? 'Você abre mão de um jogador que queria ficar' : 'A liga sabe que ele vai sair: você negocia de posição fraca',
+    };
+
+    if (!willing) {
+        return {
+            id: `contract_extension:${p.id}:${season.gamesPlayed}`,
+            kind: 'contract_extension',
+            day: season.gamesPlayed,
+            subjectId: p.id,
+            headline: `${p.name} não vai renovar`,
+            body: `${p.name} (${p.ovr} OVR, ${p.age} anos) está no último ano de contrato e avisou que ${why}. `
+                + `No fim da temporada ele vai para a agência livre, e você fica sem nada em troca.`,
+            options: [
+                {
+                    id: `extend:${p.id}`,
+                    label: 'Oferecer extensão',
+                    detail: `${money(terms.salary)}/ano por ${terms.years} anos.`,
+                    disabled: true,
+                    disabledReason: `Ele não aceita: ${why}.`,
+                },
+                shop,
+                {
+                    id: 'keep',
+                    label: 'Ficar com ele até o fim',
+                    detail: 'Ele joga a temporada por você e vai embora no verão.',
+                    consequence: 'Sai de graça na agência livre',
+                },
+            ],
+        };
+    }
+
+    return {
+        id: `contract_extension:${p.id}:${season.gamesPlayed}`,
+        kind: 'contract_extension',
+        day: season.gamesPlayed,
+        subjectId: p.id,
+        headline: `${p.name} entra no último ano de contrato`,
+        body: `${p.name} (${p.ovr} OVR, ${p.age} anos) ganha ${money(p.salary)} e o contrato acaba nesta temporada. `
+            + `O agente dele pede ${money(terms.salary)}/ano por ${terms.years} anos para estender agora`
+            + `${isLeader ? ' — um desconto, porque ele quer ficar' : ''}.`,
+        options: [
+            {
+                id: `extend:${p.id}`,
+                label: `Estender: ${money(terms.salary)} × ${terms.years} anos`,
+                detail: `Fecha agora. O novo salário começa na próxima temporada. Folha projetada: ${money(payrollAfter)}.`,
+                consequence: tax > 0
+                    ? `Passa da linha de imposto (${money(LUXURY_TAX)}): -${tax} de confiança do dono por temporada`
+                    : 'Fica abaixo da linha de imposto',
+            },
+            {
+                id: 'wait',
+                label: 'Deixar chegar à agência livre',
+                detail: 'Ele quer ficar: no verão você tem a preferência, pelo que ele valer depois da evolução.',
+                consequence: 'Se ele melhorar, fica mais caro; se o ânimo cair até lá, ele sai sem te dar a preferência',
+            },
+            shop,
+        ],
+    };
+};
+
+/**
  * Look at what just happened and raise any decisions it warrants.
  *
  * Takes both sides of the tick because "a starter just got hurt" is a
@@ -318,6 +448,19 @@ export const generateDecisions = (before: SeasonState, after: SeasonState): Deci
         if (moraleBefore < TRADE_REQUEST_MORALE || moraleAfter >= TRADE_REQUEST_MORALE) return;
         out.push(buildTradeRequest(after, teamAfter, now));
     });
+
+    // Contract talks, once, a quarter into the season.
+    if (after.gamesPlayed === EXTENSION_GAME && after.status === 'active') {
+        const rotation = new Set(simulationEngine.getTeamRotation(
+            teamAfter, after.players, teamAfter.rotationSize ?? DEFAULT_ROTATION_SIZE));
+        teamAfter.roster
+            .map(id => after.players[id])
+            .filter(p => p && p.contractYears === 1 && p.nextSalary === undefined
+                && (rotation.has(p.id) || p.ovr >= EXTENSION_MIN_OVR))
+            .sort((a, b) => playerValue(b) - playerValue(a))
+            .slice(0, EXTENSION_MAX_PER_SEASON)
+            .forEach(p => out.push(buildContractExtension(after, teamAfter, p)));
+    }
 
     // Buy or sell, once, three games out from the deadline.
     if (after.gamesPlayed === DEADLINE_STANCE_GAME && after.status === 'active') {
@@ -451,6 +594,33 @@ export const resolveDecision = (season: SeasonState, decisionId: string, optionI
         };
     }
 
+    if (action === 'extend' && targetId) {
+        const player = season.players[targetId];
+        if (!player || !team.roster.includes(targetId) || player.contractYears !== 1) return { ...season, decisions: rest };
+        // Priced again at the moment of signing, from the same function the
+        // decision quoted -- nothing about him can have changed in between,
+        // since the season does not advance while the decision is open.
+        const terms = extensionTerms(player);
+        const after: SeasonState = {
+            ...season,
+            players: {
+                ...season.players,
+                [targetId]: { ...player, contractYears: 1 + terms.years, nextSalary: terms.salary },
+            },
+        };
+        // Talks raised the same night were priced against a payroll without
+        // this deal. Rebuilt here so the next one quotes the real bill -- seen
+        // live: the second card read $187M, under the tax, right after the
+        // first had taken it to $219M.
+        return {
+            ...after,
+            decisions: rest.map(d => {
+                const subject = d.kind === 'contract_extension' && d.subjectId ? after.players[d.subjectId] : undefined;
+                return subject ? { ...buildContractExtension(after, team, subject), id: d.id, day: d.day } : d;
+            }),
+        };
+    }
+
     if (action === 'buy') {
         // Two calls, from whoever is willing. Same generator the season uses on
         // its own; this just makes it happen because you asked.
@@ -474,6 +644,9 @@ export const resolveDecision = (season: SeasonState, decisionId: string, optionI
             owner: {
                 ...season.owner,
                 confidence: Math.max(0, Math.min(100, season.owner.confidence + delta)),
+                // Without this the price was gone by the next game day:
+                // projectConfidence rebuilds confidence from the record alone.
+                adjustment: (season.owner.adjustment ?? 0) + delta,
                 note: delta < 0
                     ? `O dono soube que voc\u00ea desmontou o elenco no prazo. Ele n\u00e3o pediu isso.`
                     : `O dono aprovou a decis\u00e3o de olhar para o futuro.`,

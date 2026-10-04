@@ -269,6 +269,11 @@ export const processOffseasonContracts = (
             const p = updatedPlayers[id];
             if (!p) return;
             p.contractYears = Math.max(0, p.contractYears - 1);
+            // An extension signed last season starts now.
+            if (p.nextSalary !== undefined) {
+                p.salary = p.nextSalary;
+                p.nextSalary = undefined;
+            }
             if (p.contractYears <= 0) expiring.push(p);
             else kept.push(id);
         });
@@ -299,6 +304,36 @@ export const processOffseasonContracts = (
         return { ...team, roster: sortRosterByOvr(kept, updatedPlayers), starters: pruneStarters(team.starters, kept) };
     });
 
+    return { teams: newTeams, players: updatedPlayers, events };
+};
+
+/**
+ * Bring every CPU roster down to MAX_ROSTER_SIZE by releasing its least
+ * valuable players to the market. The draft adds rookies with no regard for
+ * the limit (a team can hold several picks), and now that teams keep their own
+ * players a summer can end with 20+ under contract. The user's team is left
+ * alone: the user decides who goes, and startSeason will not open the season
+ * until he has.
+ */
+export const trimCpuRosters = (
+    teams: Team[],
+    players: PlayerMap,
+    userTeamId: string,
+): { teams: Team[]; players: PlayerMap; events: Event[] } => {
+    const updatedPlayers: PlayerMap = { ...players };
+    const events: Event[] = [];
+    const newTeams = teams.map(team => {
+        if (team.id === userTeamId || team.roster.length <= MAX_ROSTER_SIZE) return team;
+        const byValue = [...team.roster].sort((a, b) => playerValue(updatedPlayers[b]) - playerValue(updatedPlayers[a]));
+        const cut = byValue.slice(MAX_ROSTER_SIZE);
+        cut.forEach(id => {
+            const p = updatedPlayers[id];
+            updatedPlayers[id] = { ...p, contractYears: 0, salary: askingSalary(p), birdTeamId: undefined, nextSalary: undefined };
+            events.push({ message: `✂️ ${team.name} dispensou ${p.name} para abrir vaga no elenco.`, type: 'trade' });
+        });
+        const kept = team.roster.filter(id => !cut.includes(id));
+        return { ...team, roster: kept, starters: pruneStarters(team.starters, kept) };
+    });
     return { teams: newTeams, players: updatedPlayers, events };
 };
 
@@ -345,7 +380,8 @@ export const runCpuFreeAgency = (
     const events: Event[] = [];
 
     // Live free-agent pool, kept value-sorted; ids removed as they're signed.
-    let pool = getFreeAgents(workTeams, updatedPlayers);
+    // The user's own free agents who want to stay are held back (first refusal).
+    let pool = getFreeAgents(workTeams, updatedPlayers).filter(p => p.birdTeamId !== userTeamId);
 
     const sign = (idx: number, player: Player, years?: number) => {
         const res = signPlayer(workTeams[idx], player, updatedPlayers, years);
@@ -380,15 +416,16 @@ export const runCpuFreeAgency = (
     // Pass 2: the market.
     for (let stage = 0; stage < 3; stage++) {
         const ceiling = stage === 1 ? MID_LEVEL_EXCEPTION : stage === 2 ? MINIMUM_CONTRACT : Infinity;
-        // A player waiting on the user's offer (the user's Bird right) does not
-        // cool: the CPU may still pay him his full price, but nobody gets him
-        // at a discount before the user has had a turn. startSeason releases
-        // whoever the user leaves unsigned.
         pool.forEach(p => {
-            if (p.birdTeamId === userTeamId) return;
             updatedPlayers[p.id] = { ...updatedPlayers[p.id], salary: Math.min(p.salary, ceiling) };
         });
-        pool = pool.map(p => updatedPlayers[p.id]);
+        // First refusal: a player who wants to stay with the user (he still
+        // carries the user's Bird right) waits for the user's offer and is not
+        // on this market at all. Measured without it, the CPU signed nearly
+        // every one of them before the user's turn came -- even a GM who
+        // extended everyone he could could not keep a core together.
+        // startSeason drops the right and releases whoever the user passes on.
+        pool = pool.filter(p => p.birdTeamId !== userTeamId).map(p => updatedPlayers[p.id]);
 
         let signedThisRound = true;
         while (signedThisRound && pool.length > 0) {

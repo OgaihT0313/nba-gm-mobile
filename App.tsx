@@ -551,7 +551,7 @@ export default function App() {
         ...prev,
         // Cut loose, he asks the market for what he is worth now. No Bird
         // right: you released him, you do not get to bring him back over the cap.
-        players: { ...prev.players, [playerId]: { ...player, contractYears: 0, salary: askingSalary(player), birdTeamId: undefined } },
+        players: { ...prev.players, [playerId]: { ...player, contractYears: 0, salary: askingSalary(player), birdTeamId: undefined, nextSalary: undefined } },
         teams: prev.teams.map((t) =>
           t.id === team.id
             ? { ...t, roster: t.roster.filter((id) => id !== playerId), starters: newStarters }

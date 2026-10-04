@@ -101,6 +101,33 @@ Três coisas que a medição mudou no caminho:
   de agentes livres crescer (~40 por ano, todos abaixo de 76). Fora do escopo
   deste item — anotado no ROADMAP.
 
+### Fases 2 e 3 — FEITAS (2026-10-04)
+
+Verificadas no `check_decisions` (5,8 decisões por temporada, 1,2 delas de
+extensão), no `check_contracts` e no app web (carreira com o Knicks até a
+extensão do Brunson; carreira com o Hawks até a agência livre e o imposto na
+abertura da temporada seguinte). O que saiu diferente do texto original abaixo:
+
+- **Preferência em vez de corrida.** O jogador que quer ficar não entra no
+  mercado da CPU enquanto o usuário não decide — medido com um usuário
+  "competente" que estende todo mundo, a CPU ainda levava quase todos antes da
+  vez dele. O risco de esperar agora é o preço mudar com a evolução do verão e
+  o ânimo cair até o fim da temporada (aí ele sai sem preferência).
+- **O desconto da diretoria não sobrevivia ao dia seguinte.** A confiança do
+  dono é reprojetada do retrospecto todo dia, então o "-22 por vender no prazo"
+  sumia na rodada seguinte. `OwnerExpectation.adjustment` guarda o preço das
+  escolhas do GM pela temporada inteira e entra no julgamento final; o imposto
+  usa o mesmo caminho.
+- **Duas extensões na mesma noite citavam a folha errada.** Visto ao vivo: a
+  segunda dizia $187M, abaixo do imposto, logo depois de a primeira levar a
+  folha a $219M. Resolver uma extensão agora recalcula as que estão na fila.
+- **O draft furava o limite de 18.** Com times mantendo seus jogadores, um verão
+  terminava com 20+. A CPU dispensa o excedente antes da agência livre; o
+  usuário não começa a temporada acima de 18 (o botão diz o porquê).
+
+Ficou para depois: **dinheiro morto ao dispensar** — hoje dispensar ainda apaga
+o salário da folha.
+
 **Fase 2 — a decisão.** Extensão de contrato na fila de decisões: um jogador da
 sua rotação entra no último ano → "estender agora por $X/N anos" ou "deixar ele
 chegar na agência livre". O preço é o de mercado *hoje*; esperar é apostar que

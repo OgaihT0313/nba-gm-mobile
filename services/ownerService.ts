@@ -1,4 +1,5 @@
 import { Team, Player, OwnerMandate, OwnerExpectation } from '../types';
+import { LUXURY_TAX } from '../constants';
 
 type PlayerMap = { [key: string]: Player };
 
@@ -81,8 +82,18 @@ export const projectConfidence = (owner: OwnerExpectation, team: Team): number =
     const projWins = (observed * gp + owner.targetWins * PRIOR_GAMES) / (gp + PRIOR_GAMES);
     // Each win above/below the target is worth ~2.2 points, centered at 60 so a
     // team exactly on target sits comfortably clear of the danger zone.
-    return clamp(Math.round(60 + (projWins - owner.targetWins) * 2.2), 0, 100);
+    return clamp(Math.round(60 + (projWins - owner.targetWins) * 2.2) + (owner.adjustment ?? 0), 0, 100);
 };
+
+/**
+ * What a payroll over the luxury tax line costs the GM with the owner for the
+ * season: 2 points per $5M over, capped at 15. The owner writes the check, so
+ * it reaches the one number he controls -- and through `adjustment` it stays
+ * on the books until the season is judged. Named in the extension decision
+ * before the user commits to it.
+ */
+export const luxuryTaxConfidenceHit = (payroll: number): number =>
+    payroll <= LUXURY_TAX ? 0 : Math.min(15, Math.ceil((payroll - LUXURY_TAX) / 5_000_000) * 2);
 
 // Whether the owner fires the user mid-season. Deliberately unforgiving to
 // trigger: only once the season is at least half over AND confidence has
@@ -103,7 +114,7 @@ export const evaluateSeasonOutcome = (
     wonTitle: boolean
 ): { confidence: number; fired: boolean; message: string } => {
     const wins = team.wins || 0;
-    let c = clamp(Math.round(60 + (wins - owner.targetWins) * 2.2), 0, 100);
+    let c = clamp(Math.round(60 + (wins - owner.targetWins) * 2.2) + (owner.adjustment ?? 0), 0, 100);
     if (wonTitle) c = 100;
     else if (madePlayoffs) c = clamp(c + 12, 0, 100);
     else c = clamp(c - 15, 0, 100);

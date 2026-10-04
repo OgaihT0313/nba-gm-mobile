@@ -190,7 +190,7 @@ const MyTeamHub: React.FC<MyTeamHubProps> = ({
                   meta={
                     absence
                       ? `${p.age}a · ${money(p.salary)} · ${absence.reason === 'injury' ? 'lesionado' : 'suspenso'}`
-                      : `${p.age}a · ${money(p.salary)} · ${p.contractYears} ${p.contractYears === 1 ? 'ano' : 'anos'}`
+                      : `${p.age}a · ${money(p.salary)} · ${p.nextSalary !== undefined ? `estendido · ${p.contractYears} anos` : p.contractYears === 1 ? 'último ano' : `${p.contractYears} anos`}`
                   }
                   share={absence ? 0 : Math.min(1, mpg / MINUTES_IN_A_GAME)}
                   caption={mpg > 0 ? `${Math.round(mpg)} min` : '—'}

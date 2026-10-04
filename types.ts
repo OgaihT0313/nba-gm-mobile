@@ -99,6 +99,10 @@ export interface Player {
   // the right to re-sign him over the cap (NBA Bird rights). Cleared the moment
   // anyone signs him. See signFreeAgentLegality.
   birdTeamId?: string;
+  // Salary of an extension signed during his final year, which takes effect
+  // when that year runs out (processOffseasonContracts swaps it in). Until
+  // then he is paid what his current deal says.
+  nextSalary?: number;
   // Player happiness (0-100), driven by team success, role/minutes, and being
   // buried behind better players — see updateMorale in simulationService.ts.
   // Undefined until the sim first touches it; treated as 70 (content) by
@@ -342,7 +346,7 @@ export interface LiveGameState {
 // simulation was producing plenty worth deciding about and none of it reached
 // the player as a choice. See services/decisionService.ts.
 
-export type DecisionKind = 'injury_cover' | 'trade_request' | 'deadline_stance';
+export type DecisionKind = 'injury_cover' | 'trade_request' | 'deadline_stance' | 'contract_extension';
 
 export interface DecisionOption {
   // Carries its own target (`sign:<playerId>`, `promote:<playerId>`, `shorten`,
@@ -535,6 +539,13 @@ export interface OwnerExpectation {
   confidence: number;   // 0-100 job security
   fired: boolean;       // set true when the owner lets the GM go
   note?: string;        // latest owner message (season mandate, praise, warning)
+  // What the GM's own choices have cost (or earned) with the owner THIS season
+  // -- tearing it down at the deadline, paying the luxury tax. Confidence is
+  // re-projected from the record every day, so a one-off change to
+  // `confidence` would be gone by tomorrow; this offset is what makes the price
+  // stick, through the season and into the end-of-season judgment. Reset each
+  // season by buildSeasonOwner.
+  adjustment?: number;
 }
 
 // A trade proposal a CPU team sends TO the user (see generateCpuTradeOffer in

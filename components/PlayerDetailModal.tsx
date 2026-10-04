@@ -217,7 +217,8 @@ const PlayerDetailModal: React.FC<{ player: Player; onClose: () => void }> = ({ 
               <View>
                 <Text className="text-[9px] font-bold text-slate-500 uppercase tracking-widest">Contrato</Text>
                 <Text className="text-sm font-black text-emerald-400">
-                  {formatMoney(player.salary)} · {player.contractYears} {player.contractYears === 1 ? 'ano' : 'anos'}
+                  {formatMoney(player.salary)} · {player.contractYears === 1 ? 'último ano' : `${player.contractYears} anos`}
+                  {player.nextSalary !== undefined ? ` · depois ${formatMoney(player.nextSalary)}` : ''}
                 </Text>
               </View>
               <View className="items-end">

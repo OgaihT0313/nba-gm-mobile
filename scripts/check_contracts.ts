@@ -27,8 +27,10 @@ import { expectedSalary, playerValue } from '../services/tradeService';
 declare const process: { argv: string[] };
 const CAREERS = Number(process.argv[2] || 3);
 const YEARS = Number(process.argv[3] || 6);
-// `passivo` as a third argument: the user never re-signs anyone, the worst case.
+// Third argument: `passivo` -- the user never re-signs anyone, the worst case;
+// `competente` -- see playRegularSeason.
 const RESIGN = process.argv[4] !== 'passivo';
+const COMPETENT = process.argv[4] === 'competente';
 
 let failures = 0;
 const check = (label: string, ok: boolean, detail = '') => {
@@ -69,7 +71,10 @@ const playRegularSeason = (s: SeasonState): SeasonState => {
       const d = s.decisions[0];
       const enabled = d.options.filter(o => !o.disabled);
       if (!enabled.length) { s = { ...s, decisions: s.decisions.slice(1) }; continue; }
-      s = resolveDecision(s, d.id, enabled[Math.floor(Math.random() * enabled.length)].id);
+      // `competente`: extends whoever will extend and never tears the roster
+      // down -- the user who is actually trying to keep a core together.
+      const keen = COMPETENT && (enabled.find(o => o.id.startsWith('extend:')) ?? enabled.find(o => ['hold', 'ride', 'keep', 'ignore'].includes(o.id)));
+      s = resolveDecision(s, d.id, (keen || enabled[Math.floor(Math.random() * enabled.length)]).id);
     }
   }
   return s;
@@ -120,12 +125,21 @@ const userSummer = (s: SeasonState): SeasonState => {
     const signed = signPlayer(me, fa, s.players);
     s = { ...s, players: { ...s.players, [fa.id]: signed.player }, teams: s.teams.map(t => t.id === me.id ? signed.team : t) };
   }
-  return startSeason(s);
+  // Over the limit after the draft: cut the least valuable, as the user must
+  // before startSeason will open the season.
+  const me = s.teams.find(t => t.id === s.userTeamId)!;
+  if (me.roster.length > 18) {
+    const cut = [...me.roster].sort((a, b) => playerValue(s.players[a]) - playerValue(s.players[b])).slice(0, me.roster.length - 18);
+    s = { ...s, teams: s.teams.map(t => t.id === me.id ? { ...t, roster: t.roster.filter(id => !cut.includes(id)) } : t) };
+  }
+  const opened = startSeason(s);
+  check('a temporada abre', opened.status === 'active', `elenco ${s.teams.find(t => t.id === s.userTeamId)!.roster.length}`);
+  return opened;
 };
 
 interface YearRow {
   payMed: number; payMax: number; overCap: number; rosterMin: number; rosterMed: number;
-  pool: number; poolGood: number; goodExpired: number; goodStayed: number; goodMoved: number; goodUnsigned: number;
+  pool: number; poolGood: number; rosterMax: number; goodExpired: number; goodStayed: number; goodMoved: number; goodUnsigned: number;
   ratioGood: number; userPay: number; userGood: number;
 }
 const rows: YearRow[][] = Array.from({ length: YEARS }, () => []);
@@ -173,7 +187,7 @@ for (let c = 0; c < CAREERS; c++) {
     const me = s.teams.find(t => t.id === s.userTeamId)!;
     rows[y].push({
       payMed: q(pays, 0.5), payMax: Math.max(...pays), overCap: pays.filter(p => p > SALARY_CAP).length,
-      rosterMin: Math.min(...sizes), rosterMed: q(sizes, 0.5),
+      rosterMin: Math.min(...sizes), rosterMed: q(sizes, 0.5), rosterMax: Math.max(...sizes),
       pool: pool.length, poolGood: pool.filter(p => p.ovr >= 76).length,
       goodExpired: expiring.length,
       goodStayed: expiring.filter(p => teamAfter.get(p.id) === teamBefore.get(p.id)).length,
@@ -183,7 +197,7 @@ for (let c = 0; c < CAREERS; c++) {
       ratioGood: mean(goodRostered.map(p => p.salary / expectedSalary(p.ovr, p.age))),
       userPay: getTeamSalary(me, s.players), userGood: me.roster.filter(id => good(s.players[id])).length,
     });
-    check('todo time abre a temporada com elenco legal', Math.min(...sizes) >= 8, `min ${Math.min(...sizes)}`);
+    check('todo time abre a temporada com elenco legal', Math.min(...sizes) >= 8 && Math.max(...sizes) <= 18, `min ${Math.min(...sizes)} max ${Math.max(...sizes)}`);
   }
   console.log(`  carreira ${c + 1}/${CAREERS} ok`);
 }

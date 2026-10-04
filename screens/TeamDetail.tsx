@@ -99,7 +99,7 @@ const TeamDetail: React.FC<{
               out={!!absence}
               badge={absence ? `Fora ${absence.duration}` : p.pos}
               badgeTone={absence ? 'danger' : 'info'}
-              meta={`${p.age}a · ${money(p.salary)} · ${p.contractYears} ${p.contractYears === 1 ? 'ano' : 'anos'}`}
+              meta={`${p.age}a · ${money(p.salary)} · ${p.nextSalary !== undefined ? `estendido · ${p.contractYears} anos` : p.contractYears === 1 ? 'último ano' : `${p.contractYears} anos`}`}
             />
           );
         })}

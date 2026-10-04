@@ -4,11 +4,11 @@ import { Image } from 'expo-image';
 
 import { SeasonState, Player } from '../types';
 import {
-  getPlayerImageUrl, PLAYER_PLACEHOLDER_SVG, getTeamSalary, SALARY_CAP, getPlayerPositions,
+  getPlayerImageUrl, PLAYER_PLACEHOLDER_SVG, getTeamSalary, SALARY_CAP, LUXURY_TAX, getPlayerPositions,
   formatPositions, getTeamNickname, attributeColor, LINEUP_POSITIONS,
 } from '../constants';
-import { getFreeAgents, signFreeAgentLegality, newContractYears, evaluateSigningInterest } from '../services/freeAgencyService';
-import { MIN_ROSTER_SIZE } from '../services/tradeService';
+import { getFreeAgents, signFreeAgentLegality, newContractYears, evaluateSigningInterest, signingRoute } from '../services/freeAgencyService';
+import { MIN_ROSTER_SIZE, MAX_ROSTER_SIZE } from '../services/tradeService';
 import { useTheme } from '../src/theme/ThemeProvider';
 import { COLORS, INK, RADIUS } from '../src/theme/tokens';
 import Screen, { HeroContent, Body } from '../components/ui/Screen';
@@ -79,10 +79,20 @@ const FreeAgency: React.FC<FreeAgencyProps> = ({ season, onSign, onStartSeason }
   const capSpace = SALARY_CAP - salary;
   const rosterCount = userTeam.roster.length;
   const belowMin = rosterCount < MIN_ROSTER_SIZE;
+  // The draft can push a roster past the limit; the season will not open until
+  // the user cuts back (dispensar, in Meu Time).
+  const aboveMax = rosterCount > MAX_ROSTER_SIZE;
 
   const byPos = posFilter === 'TODOS' ? freeAgents : freeAgents.filter((p) => getPlayerPositions(p).includes(posFilter));
   const sortValue = SORTS.find((s) => s.key === sortKey)!.value;
-  const filtered = [...byPos].sort((a, b) => (sortAsc ? sortValue(a) - sortValue(b) : sortValue(b) - sortValue(a)));
+  // Your own free agents lead the list whatever the sort: they are the ones
+  // only you can sign right now (first refusal), and the ones you lose if you
+  // start the season without deciding.
+  const isOwn = (p: Player) => p.birdTeamId === userTeamId;
+  const filtered = [...byPos].sort((a, b) =>
+    Number(isOwn(b)) - Number(isOwn(a))
+    || (sortAsc ? sortValue(a) - sortValue(b) : sortValue(b) - sortValue(a)));
+  const ownCount = freeAgents.filter(isOwn).length;
 
   // Clicking the active key flips direction; a new key starts descending
   // (best/most first, the common case).
@@ -100,9 +110,13 @@ const FreeAgency: React.FC<FreeAgencyProps> = ({ season, onSign, onStartSeason }
       footer={
         <CtaButton
           label="Começar temporada"
-          sub={belowMin ? `Faltam ${MIN_ROSTER_SIZE - rosterCount} para o mínimo de ${MIN_ROSTER_SIZE}` : `${rosterCount} no elenco · pronto`}
+          sub={belowMin
+            ? `Faltam ${MIN_ROSTER_SIZE - rosterCount} para o mínimo de ${MIN_ROSTER_SIZE}`
+            : aboveMax
+              ? `Dispense ${rosterCount - MAX_ROSTER_SIZE} em Meu Time · máximo de ${MAX_ROSTER_SIZE}`
+              : `${rosterCount} no elenco · pronto`}
           onPress={onStartSeason}
-          disabled={belowMin}
+          disabled={belowMin || aboveMax}
         />
       }
     >
@@ -118,7 +132,7 @@ const FreeAgency: React.FC<FreeAgencyProps> = ({ season, onSign, onStartSeason }
             </MonoLabel>
           </View>
           <View className="items-end" style={{ paddingBottom: 3 }}>
-            <Stat size={15} color={belowMin ? COLORS.badSoft : '#fff'}>{rosterCount}</Stat>
+            <Stat size={15} color={belowMin || aboveMax ? COLORS.badSoft : '#fff'}>{rosterCount}</Stat>
             <MonoLabel size={9.5} color="rgba(255,255,255,0.55)" style={{ marginTop: 3, letterSpacing: 0.4 }}>
               No elenco · mín {MIN_ROSTER_SIZE}
             </MonoLabel>
@@ -131,6 +145,9 @@ const FreeAgency: React.FC<FreeAgencyProps> = ({ season, onSign, onStartSeason }
           colors={salary > SALARY_CAP ? [COLORS.warn, COLORS.cta] : [accent.primary, accent.secondary]}
           style={{ marginTop: 12 }}
         />
+        <MonoLabel size={9} color={salary > LUXURY_TAX ? COLORS.badSoft : 'rgba(255,255,255,0.55)'} style={{ marginTop: 6, letterSpacing: 0.3 }}>
+          Folha {money(salary)} · teto {money(SALARY_CAP)} · imposto {money(LUXURY_TAX)}
+        </MonoLabel>
       </HeroContent>
 
       <Body top={16}>
@@ -145,7 +162,14 @@ const FreeAgency: React.FC<FreeAgencyProps> = ({ season, onSign, onStartSeason }
             )}
             {belowMin ? <Chip tone="bad" size={10}>Elenco abaixo do mínimo</Chip> : null}
             {capSpace < 0 ? <Chip tone="warn" size={10}>Acima do teto</Chip> : null}
+            {aboveMax ? <Chip tone="bad" size={10}>Elenco acima do máximo</Chip> : null}
           </View>
+          {ownCount > 0 ? (
+            <Text style={{ fontSize: 10.5, lineHeight: 15, color: INK.meta, marginTop: 9 }}>
+              {ownCount === 1 ? '1 jogador seu quer' : `${ownCount} jogadores seus querem`} renovar. Você tem a preferência e pode
+              passar do teto para mantê-los — quem você não assinar vai ao mercado quando a temporada começar.
+            </Text>
+          ) : null}
           <MonoLabel size={9.5} color={INK.faint} style={{ marginTop: 10, letterSpacing: 0 }}>
             {freeAgents.length} agentes livres no mercado
           </MonoLabel>
@@ -179,6 +203,8 @@ const FreeAgency: React.FC<FreeAgencyProps> = ({ season, onSign, onStartSeason }
           const legality = signFreeAgentLegality(userTeam, player, players);
           const interest = evaluateSigningInterest(player, userTeam, teams, players);
           const fillsHole = holes.some((h) => getPlayerPositions(player).includes(h));
+          const own = isOwn(player);
+          const route = legality.legal ? signingRoute(userTeam, player, players) : null;
 
           const standing: Standing = !legality.legal
             ? STANDING.noRoom
@@ -205,6 +231,11 @@ const FreeAgency: React.FC<FreeAgencyProps> = ({ season, onSign, onStartSeason }
                     <Text className="font-extrabold text-white" style={{ fontSize: 13.5, flexShrink: 1 }} numberOfLines={1}>
                       {player.name}
                     </Text>
+                    {own ? (
+                      <View style={{ paddingHorizontal: 6, paddingVertical: 2, borderRadius: 5, backgroundColor: COLORS.line }}>
+                        <MonoLabel size={8.5} color={COLORS.good} style={{ letterSpacing: 0.4 }}>Seu jogador</MonoLabel>
+                      </View>
+                    ) : null}
                     {fillsHole ? (
                       <View style={{ paddingHorizontal: 6, paddingVertical: 2, borderRadius: 5, backgroundColor: COLORS.line }}>
                         <MonoLabel size={8.5} color={COLORS.warn} style={{ letterSpacing: 0.4 }}>Lacuna</MonoLabel>
@@ -226,6 +257,18 @@ const FreeAgency: React.FC<FreeAgencyProps> = ({ season, onSign, onStartSeason }
 
               {reason ? (
                 <Text style={{ fontSize: 10.5, lineHeight: 15, color: INK.faint, marginTop: 7 }}>{reason}</Text>
+              ) : null}
+              {/* How the signing fits, when it is not plain cap room: the
+                  mid-level is spent once, so using it is worth knowing. */}
+              {canSign && route === 'mid_level' ? (
+                <Text style={{ fontSize: 10.5, lineHeight: 15, color: INK.faint, marginTop: 7 }}>
+                  Usa a exceção de nível médio — só uma por verão.
+                </Text>
+              ) : null}
+              {canSign && route === 'bird' && capSpace < player.salary ? (
+                <Text style={{ fontSize: 10.5, lineHeight: 15, color: INK.faint, marginTop: 7 }}>
+                  Direito de renovação: pode passar do teto.
+                </Text>
               ) : null}
 
               {canSign ? (
@@ -249,7 +292,7 @@ const FreeAgency: React.FC<FreeAgencyProps> = ({ season, onSign, onStartSeason }
         ) : null}
 
         <Text style={{ fontSize: 10.5, lineHeight: 15, color: INK.faint, paddingHorizontal: 4 }}>
-          Contratos expiraram pela liga inteira. Reforce o {getTeamNickname(userTeam)} antes de começar a nova temporada.
+          Contratos expiraram pela liga inteira. Quem ninguém pôde pagar baixou o pedido. Reforce o {getTeamNickname(userTeam)} antes de começar a nova temporada.
         </Text>
       </Body>
     </Screen>

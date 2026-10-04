@@ -25,26 +25,14 @@ Não faz pergunta nenhuma (conta e keystore já existem). ~10-15 min.
 
 ---
 
-## 1. Ciclo de contratos — o maior buraco de sistema
+## 1. Ciclo de contratos — FEITO (2026-10-04)
 
-**O teto salarial hoje é um número que você lê, não uma restrição que te obriga
-a escolher.** Medido nesta rodada:
+Ver [PLANO-CONTRATOS.md](PLANO-CONTRATOS.md). Teto flexível com os números
+reais de 2025-26, preço de mercado em todo contrato novo, direito de renovação,
+exceção de nível médio, mercado que esfria, extensão na fila de decisões e
+imposto cobrado pelo dono. Medido em `scripts/check_contracts.ts`.
 
-- **29 dos 30 times abrem acima do teto** (folha mediana $198M contra teto de
-  $154,6M);
-- **existem zero agentes livres em temporada** — todo jogador do `players.json`
-  começa num elenco e a mediana de elenco é 18, que é o próprio
-  `MAX_ROSTER_SIZE`;
-- **não existe extensão de contrato**. Você nunca perde uma estrela por não ter
-  renovado, e nunca escolhe entre pagar caro agora ou arriscar.
-
-Isso é o que faz a opção "assinar agente livre" da fila de decisões ser
-condicional: ela quase nunca tem alguém pra oferecer. A regra do contrato mínimo
-já entrou (`MINIMUM_CONTRACT`), mas não era ela que travava.
-
-"Estender agora por $X ou deixar ele chegar na agência livre" é a decisão
-central de um GM de basquete e encaixa direto na fila que já existe. É o item que
-converte o sistema morto de maior valor.
+Sobra: **dinheiro morto ao dispensar** (dispensar ainda apaga o salário).
 
 ## 2. Substituições e fadiga ao vivo no "Assistir ao Jogo"
 
@@ -93,6 +81,10 @@ buffer é de 50, a tela mostra 6, e uma offseason empurra centenas.
   vestiário eventos **por time** (hoje é um time sorteado por dia). Isso os
   tornaria ~30× mais comuns e eles mexem em rating e momentum — é mudança de
   balanceamento, pede re-medir o `diagnose_season`.
+- **Não existe aposentadoria.** Achado do `check_contracts`: o top-8 médio da
+  liga cai de 81,6 para 78,6 em 8 temporadas, a folha mediana acompanha
+  ($192M → $150M) e o pool de agentes livres cresce ~40 jogadores fracos por
+  ano. Aposentar veteranos (idade + queda de OVR) estabilizaria as três coisas.
 - **Ratings de veteranos no pipeline.** `T.J. McConnell` está OVR 88 aos 34 anos
   no `data/players.json`. O `pickSeriesMVP` está certo; o rating é que é
   estranho, e vem do modelo Python no repo irmão (`nba-gm-simulator`).

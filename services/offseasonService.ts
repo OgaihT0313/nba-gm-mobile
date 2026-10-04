@@ -5,17 +5,17 @@
 // setState callback could be measured there.
 
 import type { Team, Player, SeasonState, DraftState, Event, OffseasonMove } from '../types';
-import { offseasonMoves } from '../constants';
+import { offseasonMoves, getTeamSalary, LUXURY_TAX } from '../constants';
 import { ERAS, currentEra } from '../data/eras';
 import { simulationEngine } from './simulationService';
-import { buildSeasonOwner } from './ownerService';
+import { buildSeasonOwner, luxuryTaxConfidenceHit } from './ownerService';
 import { generateSchedule } from './scheduleService';
-import { MIN_ROSTER_SIZE } from './tradeService';
+import { MIN_ROSTER_SIZE, MAX_ROSTER_SIZE } from './tradeService';
 import {
     buildDraftBoard, grantNextWindowPick, PICK_WINDOW,
     generateDraftClass, generateRealDraftClass, generateUndraftedClass, advanceDraftToUser, SCOUT_BUDGET,
 } from './draftService';
-import { processOffseasonContracts, runCpuFreeAgency } from './freeAgencyService';
+import { processOffseasonContracts, runCpuFreeAgency, trimCpuRosters } from './freeAgencyService';
 import { accumulateCareers, championRosterOf } from './careerService';
 import { ageCoachesAndRetire, buildDevelopmentBonusMap } from './coachService';
 
@@ -229,7 +229,8 @@ export const startOffseason = (prev: SeasonState): SeasonState => {
 // Draft over -> CPUs fill holes via free agency (now that rookies landed), then
 // the market opens for the user.
 export const finishDraft = (prev: SeasonState): SeasonState => {
-  const cpuFa = runCpuFreeAgency(prev.teams, prev.players, prev.userTeamId);
+  const trimmed = trimCpuRosters(prev.teams, prev.players, prev.userTeamId);
+  const cpuFa = runCpuFreeAgency(trimmed.teams, trimmed.players, prev.userTeamId);
   return {
     ...prev,
     status: 'free_agency',
@@ -249,7 +250,7 @@ export const finishDraft = (prev: SeasonState): SeasonState => {
 // the legal minimum.
 export const startSeason = (prev: SeasonState): SeasonState => {
   const uTeam0 = prev.teams.find((t) => t.id === prev.userTeamId);
-  if (uTeam0 && uTeam0.roster.length < MIN_ROSTER_SIZE) return prev;
+  if (uTeam0 && (uTeam0.roster.length < MIN_ROSTER_SIZE || uTeam0.roster.length > MAX_ROSTER_SIZE)) return prev;
   // The user passed on his own free agents: the Bird right lapses and the
   // market gets one last look at everyone still unsigned, so nobody good sits
   // out a whole season because the user said no.
@@ -265,7 +266,19 @@ export const startSeason = (prev: SeasonState): SeasonState => {
   for (const id in prev.players) freshPlayers[id] = { ...prev.players[id], seasonStats: undefined };
   // Re-derive the owner mandate now that rosters are final, carrying
   // confidence forward from last season's judgment.
-  const owner = uTeam ? buildSeasonOwner(uTeam, prev.teams, freshPlayers, prev.owner) : prev.owner;
+  let owner = uTeam ? buildSeasonOwner(uTeam, prev.teams, freshPlayers, prev.owner) : prev.owner;
+  // The luxury tax bill lands on opening night, on rosters that are now final.
+  const payroll = uTeam ? getTeamSalary(uTeam, freshPlayers) : 0;
+  const taxHit = luxuryTaxConfidenceHit(payroll);
+  if (taxHit > 0) {
+    owner = {
+      ...owner,
+      confidence: Math.max(0, owner.confidence - taxHit),
+      adjustment: -taxHit,
+      note: `A folha de $${(payroll / 1_000_000).toFixed(1)}M passa da linha de imposto ($${(LUXURY_TAX / 1_000_000).toFixed(1)}M). `
+        + `O dono paga a conta e cobra: -${taxHit} de confiança nesta temporada.`,
+    };
+  }
   return {
     ...prev,
     status: 'active',

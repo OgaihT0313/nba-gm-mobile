@@ -21,7 +21,7 @@ import { simulateOneDay } from '../services/seasonRunner';
 import { buildSeasonOwner } from '../services/ownerService';
 import { initCoaches } from '../services/coachService';
 import { initialPickAssets } from '../services/draftService';
-import { resolveDecision } from '../services/decisionService';
+import { resolveDecision, extensionTerms } from '../services/decisionService';
 
 declare const process: { argv: string[] };
 const RUNS = Number(process.argv[2] || 12);
@@ -57,7 +57,7 @@ const byKind: Record<string, number> = {};
 const byOption: Record<string, number> = {};
 let seasonsFinished = 0;
 let signedCount = 0, promotedCount = 0, shortenedCount = 0, rushedCount = 0;
-let soldCount = 0, boughtCount = 0, shoppedCount = 0, minutesCount = 0;
+let soldCount = 0, boughtCount = 0, shoppedCount = 0, minutesCount = 0, extendedCount = 0, requotedCount = 0;
 const stanceSeasons = new Set<number>();
 
 console.log(`Simulando ${RUNS} temporadas respondendo as decisoes...`);
@@ -142,6 +142,36 @@ for (let run = 0; run < RUNS; run++) {
           `${before.players[target].morale} -> ${season.players[target].morale}`);
         minutesCount++;
       }
+      if (action === 'extend') {
+        const target = pick.id.split(':')[1];
+        const p0 = before.players[target], p1 = season.players[target];
+        // The new money waits for the new season; the years are added now, so
+        // he is no longer an expiring contract.
+        check('estender adiciona anos', p1.contractYears > p0.contractYears, `${p0.contractYears} -> ${p1.contractYears}`);
+        check('estender agenda o salario novo sem mexer no atual',
+          p1.nextSalary !== undefined && p1.salary === p0.salary, `${p0.salary} -> ${p1.salary} / next ${p1.nextSalary}`);
+        extendedCount++;
+        // A second talk queued the same night must now quote a payroll that
+        // includes this deal -- it was generated before it existed.
+        const me = season.teams.find(t => t.id === season.userTeamId)!;
+        (season.decisions ?? []).filter(x => x.kind === 'contract_extension' && x.subjectId).forEach(x => {
+          const quoted = x.options.find(o => o.id.startsWith('extend:'))?.detail.match(/Folha projetada: \$([\d.]+)M/);
+          if (!quoted) return;
+          const other = season.players[x.subjectId!];
+          const base = me.roster.reduce((s, id) => {
+            const q = season.players[id];
+            return q && q.contractYears > 1 ? s + (q.nextSalary ?? q.salary) : s;
+          }, 0);
+          const expected = (base + extensionTerms(other).salary) / 1e6;
+          check('a extensao seguinte cita a folha atualizada', Math.abs(Number(quoted[1]) - expected) < 0.11,
+            `citou ${quoted[1]}M, esperado ${expected.toFixed(1)}M`);
+          requotedCount++;
+        });
+      }
+      if (d.kind === 'contract_extension') {
+        check('extensao so para jogador no ultimo ano', before.players[d.subjectId!].contractYears === 1,
+          `-> ${d.subjectId} (${before.players[d.subjectId!].contractYears})`);
+      }
       if (action === 'shop') shoppedCount++;
       if (action === 'buy') boughtCount++;
       if (action === 'sell') {
@@ -174,6 +204,7 @@ console.log(`\n================ FILA DE DECISOES (${RUNS} temporadas) ==========
 console.log(`Decisoes por temporada: media ${media.toFixed(1)}  (min ${min}, max ${max})`);
 console.log(`Por tipo:   ${Object.entries(byKind).map(([k, v]) => `${k} ${(v / RUNS).toFixed(1)}`).join('  |  ') || '(nenhuma)'}`);
 console.log(`Escolhidas: ${Object.entries(byOption).map(([k, v]) => `${k} ${v}`).join('  |  ') || '(nenhuma)'}`);
+console.log(`Extensoes re-cotadas depois de outra: ${requotedCount}`);
 console.log(`Temporadas que chegaram ao fim: ${seasonsFinished}/${RUNS}`);
 console.log(`Pedidos de troca atendidos: minutos ${minutesCount} / mercado ${shoppedCount}`);
 
@@ -195,6 +226,8 @@ check('nenhuma temporada virou burocracia', max <= 14, `max ${max}`);
 check('as opcoes sempre disponiveis foram exercitadas',
   rushedCount > 0 && promotedCount > 0 && shortenedCount > 0,
   `rush ${rushedCount} / promote ${promotedCount} / shorten ${shortenedCount}`);
+check('a extensao de contrato foi oferecida e exercitada', (byKind['contract_extension'] ?? 0) > 0 && extendedCount > 0,
+  `${byKind['contract_extension'] ?? 0} oferecidas / ${extendedCount} estendidas`);
 check('as tres posturas de prazo foram exercitadas',
   soldCount > 0 && boughtCount > 0,
   `buy ${boughtCount} / sell ${soldCount}`);
