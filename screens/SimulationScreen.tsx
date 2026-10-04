@@ -8,6 +8,7 @@ import {
   conferenceLabel, attributeColor,
 } from '../constants';
 import { MANDATE_META, confidenceZone, ZONE_META } from '../services/ownerService';
+import { PROMISE_LABEL, PROMISE_KEPT, PROMISE_BROKEN } from '../services/pressService';
 import { recentForm, currentStreak, nextGame, winProbability } from '../services/formService';
 import { useTheme } from '../src/theme/ThemeProvider';
 import { COLORS, INK, RADIUS } from '../src/theme/tokens';
@@ -343,6 +344,17 @@ const SimulationScreen: React.FC<SimulationScreenProps> = ({
           </View>
           {season.owner.note ? (
             <Text style={{ fontSize: 11, lineHeight: 16, color: INK.body, marginTop: 11 }}>{season.owner.note}</Text>
+          ) : null}
+          {/* The one thing said at a press conference that outlives it. Shown
+              here, next to the meters it will move, until the season is judged. */}
+          {season.owner.press?.promise ? (
+            <View className="flex-row items-center" style={{ gap: 8, marginTop: 11 }}>
+              <MonoLabel size={9} color={COLORS.warn}>Promessa</MonoLabel>
+              <Text style={{ fontSize: 11, lineHeight: 16, color: INK.body, flex: 1 }}>
+                Na coletiva do dia {season.owner.press.promise.day}, você prometeu {PROMISE_LABEL[season.owner.press.promise.kind]}.
+                {' '}Cumprida: +{PROMISE_KEPT} de confiança no fim; quebrada: {PROMISE_BROKEN}.
+              </Text>
+            </View>
           ) : null}
         </Panel>
 

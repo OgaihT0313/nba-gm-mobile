@@ -354,7 +354,7 @@ export interface LiveGameState {
 // simulation was producing plenty worth deciding about and none of it reached
 // the player as a choice. See services/decisionService.ts.
 
-export type DecisionKind = 'injury_cover' | 'trade_request' | 'deadline_stance' | 'contract_extension';
+export type DecisionKind = 'injury_cover' | 'trade_request' | 'deadline_stance' | 'contract_extension' | 'press_conference';
 
 export interface DecisionOption {
   // Carries its own target (`sign:<playerId>`, `promote:<playerId>`, `shorten`,
@@ -557,6 +557,21 @@ export interface OwnerExpectation {
   // stick, through the season and into the end-of-season judgment. Reset each
   // season by buildSeasonOwner.
   adjustment?: number;
+  // What the GM said in front of the cameras this season (see
+  // services/pressService.ts). Lives on the owner because he is the one who
+  // holds you to it, and because buildSeasonOwner resets it with everything
+  // else at the start of every season.
+  press?: {
+    days: number[];          // gamesPlayed of every press conference held
+    promise?: PressPromise;  // at most one public promise a season
+  };
+}
+
+// A promise made at a press conference. Settled by evaluateSeasonOutcome:
+// kept or broken, it moves the owner's end-of-season verdict.
+export interface PressPromise {
+  kind: 'playoffs' | 'conf_finals';
+  day: number;
 }
 
 // A trade proposal a CPU team sends TO the user (see generateCpuTradeOffer in

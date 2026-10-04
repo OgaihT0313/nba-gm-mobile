@@ -79,6 +79,31 @@ responde à sua escolha. Imprensa tem que passar pelo mesmo teste.
 **Restrição dura:** nada disso pode ser anunciado pelo feed `season.events`. O
 buffer é de 50, a tela mostra 6, e uma offseason empurra centenas.
 
+Fases: **coletiva** → rivalidades e jogos de revanche → manchetes e marcos de
+carreira.
+
+### 4a. Coletiva — FEITO (2026-10-04)
+
+`services/pressService.ts`. A coletiva é uma decisão da fila (tipo
+`press_conference`), chamada depois de 6 derrotas ou 7 vitórias seguidas — no
+máximo 2 por temporada, 15 jogos de intervalo, nenhuma antes do jogo 10. Medido:
+~1 por temporada, e a fila ficou em 6-7 decisões (dentro do orçamento de 4-8).
+
+Cada resposta mexe em número que o motor lê:
+
+- **Má fase:** bancar o elenco (ânimo da rotação +8, dono −3), cobrar o mais bem
+  pago do quinteto (o dono gosta, +3; quanto o ânimo dele cai depende do
+  arquétipo — o Líder aguenta e o time ganha embalo, o Imprevisível pode explodir
+  e pedir para sair) ou garantir os playoffs.
+- **Boa fase:** um jogo de cada vez (nada muda), dizer que é candidato (promessa
+  de final de conferência; a Estrela adora) ou dar o crédito a um coadjuvante (o
+  ânimo dele sobe, e uma Estrela na rotação fica incomodada).
+- **Promessa pública:** uma por temporada, guardada em `owner.press`, aparece no
+  painel do dono na Simulação e é cobrada em `evaluateSeasonOutcome`: cumprida
+  +5, quebrada −12, e o dono cita a coletiva no veredito.
+
+Medido em `scripts/check_decisions.ts`.
+
 ---
 
 ## Menor, ou fora de escopo por decisão

@@ -23,6 +23,9 @@ import { initCoaches } from '../services/coachService';
 import { initialPickAssets } from '../services/draftService';
 import { resolveDecision, extensionTerms } from '../services/decisionService';
 import { OFFER_TTL, MAX_PENDING_OFFERS } from '../services/tradeService';
+import { MAX_PRESS_PER_SEASON, PRESS_MIN_GAP, PROMISE_KEPT, PROMISE_BROKEN, calloutResponse, settlePromise } from '../services/pressService';
+import { evaluateSeasonOutcome } from '../services/ownerService';
+import { personalityOf } from '../services/personalityService';
 
 declare const process: { argv: string[] };
 const RUNS = Number(process.argv[2] || 12);
@@ -61,12 +64,16 @@ let signedCount = 0, promotedCount = 0, shortenedCount = 0, rushedCount = 0;
 let offersSeen = 0;
 let soldCount = 0, boughtCount = 0, shoppedCount = 0, minutesCount = 0, extendedCount = 0, requotedCount = 0;
 const stanceSeasons = new Set<number>();
+const pressPerSeason: number[] = [];
+const pressByOption: Record<string, number> = {};
+let promisesMade = 0;
 
 console.log(`Simulando ${RUNS} temporadas respondendo as decisoes...`);
 for (let run = 0; run < RUNS; run++) {
   let season = buildSeason((teamsData as Team[])[run % teamsData.length].id);
   let raisedThisSeason = 0;
   let soldThisSeason = false;
+  const pressDays: number[] = [];
   const askedThisSeason = new Set<string>();
   let guard = 0;
 
@@ -98,6 +105,13 @@ for (let run = 0; run < RUNS; run++) {
         // Exactly one a season, or the buy/sell question is not a moment.
         check('postura de prazo so aparece uma vez por temporada', !stanceSeasons.has(run), `temporada ${run}`);
         stanceSeasons.add(run);
+      }
+
+      if (d.kind === 'press_conference') {
+        check('coletivas espacadas', !pressDays.length || d.day - pressDays[pressDays.length - 1] >= PRESS_MIN_GAP,
+          `${pressDays.join(',')} -> ${d.day}`);
+        pressDays.push(d.day);
+        check('coletiva registrada no dono', (season.owner.press?.days ?? []).includes(d.day), `dia ${d.day}`);
       }
 
       const enabled = d.options.filter(o => !o.disabled);
@@ -181,6 +195,24 @@ for (let run = 0; run < RUNS; run++) {
         check('extensao so para jogador no ultimo ano', before.players[d.subjectId!].contractYears === 1,
           `-> ${d.subjectId} (${before.players[d.subjectId!].contractYears})`);
       }
+      if (action.startsWith('press_')) pressByOption[action] = (pressByOption[action] || 0) + 1;
+      if (action === 'press_back') {
+        check('bancar o elenco custa confianca do dono',
+          (season.owner.adjustment ?? 0) < (before.owner.adjustment ?? 0), `${before.owner.adjustment} -> ${season.owner.adjustment}`);
+      }
+      if (action === 'press_callout') {
+        const target = pick.id.split(':')[1];
+        const m0 = before.players[target].morale ?? 70, m1 = season.players[target].morale ?? 70;
+        check('cobrar em publico derruba o animo do cobrado', m1 < m0 || m0 === 0, `${m0} -> ${m1}`);
+        // The archetype decides how hard: the leader barely feels it.
+        check('o tamanho da queda depende da personalidade',
+          m1 === Math.max(0, m0 + calloutResponse(season.players[target]).morale), `${personalityOf(season.players[target]).id} ${m0} -> ${m1}`);
+      }
+      if (action === 'press_promise') {
+        check('promessa fica registrada', !!season.owner.press?.promise, '');
+        check('so uma promessa por temporada', !before.owner.press?.promise, '');
+        promisesMade++;
+      }
       if (action === 'shop') shoppedCount++;
       if (action === 'buy') boughtCount++;
       if (action === 'sell') {
@@ -201,6 +233,8 @@ for (let run = 0; run < RUNS; run++) {
   check('a temporada chega ao jogo 82 (sem deadlock)', season.gamesPlayed >= 82, `parou em ${season.gamesPlayed}`);
   if (season.gamesPlayed >= 82) seasonsFinished++;
   perSeason.push(raisedThisSeason);
+  pressPerSeason.push(pressDays.length);
+  check('coletivas por temporada no limite', pressDays.length <= MAX_PRESS_PER_SEASON, `${pressDays.length}`);
   console.log(`  temporada ${run + 1}/${RUNS} - ${raisedThisSeason} decisoes`);
 }
 
@@ -217,6 +251,8 @@ console.log(`Extensoes re-cotadas depois de outra: ${requotedCount}`);
 console.log(`Propostas de troca recebidas por temporada: ${(offersSeen / RUNS).toFixed(1)}`);
 console.log(`Temporadas que chegaram ao fim: ${seasonsFinished}/${RUNS}`);
 console.log(`Pedidos de troca atendidos: minutos ${minutesCount} / mercado ${shoppedCount}`);
+console.log(`Coletivas por temporada: ${mean(pressPerSeason).toFixed(1)}  (temporadas sem nenhuma: ${pressPerSeason.filter(x => x === 0).length})`);
+console.log(`Respostas na coletiva: ${Object.entries(pressByOption).map(([k, v]) => `${k} ${v}`).join('  |  ') || '(nenhuma)'}  -- promessas ${promisesMade}`);
 
 // The gate. All three decision types ship now, so this is the real budget:
 // 4-8 a season, roughly one every 10-20 games. Enough to feel like the job,
@@ -253,5 +289,29 @@ check('as tres posturas de prazo foram exercitadas',
 // is genuinely bad -- but never is not rare, it is dead.
 check('o pedido de troca dispara em algum momento', (byKind['trade_request'] ?? 0) > 0,
   `${byKind['trade_request'] ?? 0} em ${RUNS} temporadas`);
+
+// The press layer must actually happen, and every answer kind must be reachable.
+check('a coletiva acontece', mean(pressPerSeason) >= 0.5, `${mean(pressPerSeason).toFixed(2)} por temporada`);
+check('todas as respostas da coletiva foram exercitadas',
+  ['press_back', 'press_callout', 'press_promise', 'press_humble', 'press_praise'].every(k => (pressByOption[k] ?? 0) > 0),
+  JSON.stringify(pressByOption));
+
+// The promise settles at the end-of-season verdict: same season, same record,
+// kept is worth more than broken, and the owner says why.
+{
+  const owner = { mandate: 'playoffs' as const, targetWins: 45, confidence: 60, fired: false };
+  const team = { id: 'x', name: 'Teste', wins: 45, losses: 37 } as Team;
+  const promised = (kind: 'playoffs' | 'conf_finals') => ({ ...owner, press: { days: [20], promise: { kind, day: 20 } } });
+  const none = evaluateSeasonOutcome(owner, team, false, false);
+  const broken = evaluateSeasonOutcome(promised('playoffs'), team, false, false);
+  const kept = evaluateSeasonOutcome(promised('playoffs'), team, true, false);
+  const keptNone = evaluateSeasonOutcome(owner, team, true, false);
+  check('promessa quebrada pesa no veredito', broken.confidence === Math.max(0, none.confidence + PROMISE_BROKEN), `${none.confidence} -> ${broken.confidence}`);
+  check('promessa cumprida pesa no veredito', kept.confidence === Math.min(100, keptNone.confidence + PROMISE_KEPT), `${keptNone.confidence} -> ${kept.confidence}`);
+  check('o dono cita a promessa', broken.message.includes('coletiva'), broken.message);
+  const cf = evaluateSeasonOutcome(promised('conf_finals'), team, true, false, false);
+  check('final de conferencia exige chegar la', cf.confidence === Math.max(0, keptNone.confidence + PROMISE_BROKEN), `${cf.confidence}`);
+  check('sem promessa, nada muda', settlePromise(undefined, false, false) === undefined, '');
+}
 
 console.log(failures === 0 ? '\nALL CHECKS PASSED' : `\n${failures} CHECK(S) FAILED`);

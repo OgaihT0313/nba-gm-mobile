@@ -15,6 +15,7 @@ import { simulationEngine } from './simulationService';
 import { TRADE_DEADLINE_GAME, generateCpuTradeOffer, OFFER_TTL, MAX_PENDING_OFFERS } from './tradeService';
 import { projectConfidence, confidenceZone, shouldFireMidSeason } from './ownerService';
 import { generateDecisions } from './decisionService';
+import { notePressHeld } from './pressService';
 
 // Calendar checkpoints (moved out of App.tsx so the runner is self-contained).
 // Roughly where the real All-Star break falls on the 82-game calendar, a few
@@ -230,6 +231,11 @@ export function simulateOneDay(season: SeasonState, pinnedResult?: PinnedGameRes
     const raised = generateDecisions(season, nextSeason);
     if (raised.length) {
         nextSeason.decisions = [...(season.decisions ?? []), ...raised];
+        // The conference counts as held the moment it is called, whatever the
+        // answer: that is what spaces them out and caps them per season.
+        if (raised.some(d => d.kind === 'press_conference')) {
+            nextSeason.owner = notePressHeld(nextSeason, nextGamesPlayed).owner;
+        }
         // Remember who has now made his demand. Done here rather than inside
         // generateDecisions so the write is visible at the place that owns the
         // next season object, and so the generator stays a pure read.

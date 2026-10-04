@@ -92,7 +92,7 @@ const DecisionModal: React.FC<DecisionModalProps> = ({ decision, players, remain
             <ScrollView contentContainerStyle={{ padding: 18, paddingBottom: 26 }} showsVerticalScrollIndicator={false}>
               <View className="flex-row items-center justify-between" style={{ marginBottom: 12 }}>
                 <MonoLabel size={9} color={COLORS.cta} style={{ letterSpacing: 1 }}>
-                  Decisão do GM · dia {decision.day}
+                  {decision.kind === 'press_conference' ? 'Coletiva de imprensa' : 'Decisão do GM'} · dia {decision.day}
                 </MonoLabel>
                 {remaining > 0 ? (
                   <MonoLabel size={9} color={INK.faint}>

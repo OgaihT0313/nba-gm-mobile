@@ -225,7 +225,10 @@ export default function App() {
           conf.bracket.round1.some((s) => s.m.some((t) => t?.id === season.userTeamId));
         const madePlayoffs = inRound1(updatedPlayoff.east) || inRound1(updatedPlayoff.west);
         const wonTitle = newChampion.id === season.userTeamId;
-        const outcome = evaluateSeasonOutcome(season.owner, uTeam, madePlayoffs, wonTitle);
+        const inConfFinals = (conf: typeof updatedPlayoff.east) =>
+          conf.bracket.round3.some((s) => s.m.some((t) => t?.id === season.userTeamId));
+        const reachedConfFinals = inConfFinals(updatedPlayoff.east) || inConfFinals(updatedPlayoff.west);
+        const outcome = evaluateSeasonOutcome(season.owner, uTeam, madePlayoffs, wonTitle, reachedConfFinals);
         ownerAfter = { ...season.owner, confidence: outcome.confidence, fired: outcome.fired, note: outcome.message };
       }
     }

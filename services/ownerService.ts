@@ -1,5 +1,6 @@
 import { Team, Player, OwnerMandate, OwnerExpectation } from '../types';
 import { LUXURY_TAX } from '../constants';
+import { settlePromise } from './pressService';
 
 type PlayerMap = { [key: string]: Player };
 
@@ -111,10 +112,15 @@ export const evaluateSeasonOutcome = (
     owner: OwnerExpectation,
     team: Team,
     madePlayoffs: boolean,
-    wonTitle: boolean
+    wonTitle: boolean,
+    reachedConfFinals = false
 ): { confidence: number; fired: boolean; message: string } => {
     const wins = team.wins || 0;
     let c = clamp(Math.round(60 + (wins - owner.targetWins) * 2.2) + (owner.adjustment ?? 0), 0, 100);
+    // What you promised in front of the cameras, kept or broken. Before the
+    // playoff bonus so a title still overrides everything.
+    const promise = settlePromise(owner.press?.promise, madePlayoffs, reachedConfFinals || wonTitle);
+    if (promise) c = clamp(c + promise.delta, 0, 100);
     if (wonTitle) c = 100;
     else if (madePlayoffs) c = clamp(c + 12, 0, 100);
     else c = clamp(c - 15, 0, 100);
@@ -141,6 +147,7 @@ export const evaluateSeasonOutcome = (
         message = `${wins} vitórias e nenhuma vaga nos playoffs. O dono está descontente — a cadeira esquentou para a próxima temporada.`;
     }
 
+    if (promise) message = `${message} ${promise.line}`;
     return { confidence: c, fired, message };
 };
 

@@ -20,6 +20,7 @@ import { playerValue, MAX_PENDING_OFFERS } from './tradeService';
 import { generateCpuTradeOffer, TRADE_DEADLINE_GAME } from './tradeService';
 import { sortStandings } from './scheduleService';
 import { personalityOf, rushLoadCost } from './personalityService';
+import { pressConferenceFor, resolvePress } from './pressService';
 
 /**
  * How long a starter has to be out before covering the hole is a real decision.
@@ -467,6 +468,12 @@ export const generateDecisions = (before: SeasonState, after: SeasonState): Deci
         out.push(buildDeadlineStance(after, teamAfter));
     }
 
+    // The press room, after a run long enough to be a story. Last, so on a
+    // night that already stopped the season for something bigger it still
+    // queues behind it rather than in front.
+    const press = pressConferenceFor(after);
+    if (press) out.push(press);
+
     return out;
 };
 
@@ -494,6 +501,10 @@ export const resolveDecision = (season: SeasonState, decisionId: string, optionI
         [...roster].sort((a, b) => (players[b]?.ovr || 0) - (players[a]?.ovr || 0));
 
     const [action, targetId] = optionId.split(':');
+
+    if (decision.kind === 'press_conference') {
+        return resolvePress(season, rest, optionId) ?? { ...season, decisions: rest };
+    }
 
     if (action === 'sign' && targetId) {
         const player = season.players[targetId];
