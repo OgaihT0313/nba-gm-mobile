@@ -81,6 +81,13 @@ export const attributeColor = (value: number): string => {
 // model (see pipeline/salary_model.py) since the NBA doesn't expose real
 // contract data via any public API — but the cap figure is real.
 export const SALARY_CAP = 154_647_000;
+// The rest of the 2025-26 soft-cap ladder (see PLANO-CONTRATOS.md). The cap
+// only stops a team from signing OTHER teams' players; past it a team can still
+// re-sign its own (Bird rights, Player.birdTeamId), add one free agent a summer
+// up to the mid-level, and fill with minimum deals. The tax line is where that
+// freedom starts costing the owner real money.
+export const LUXURY_TAX = 187_895_000;
+export const MID_LEVEL_EXCEPTION = 14_104_000;
 
 // --- HELPER FUNCTIONS ---
 export const getPlayerImageUrl = (p?: Player) => {

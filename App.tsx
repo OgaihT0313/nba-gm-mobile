@@ -6,23 +6,19 @@ import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 import { useFonts, Inter_900Black_Italic } from '@expo-google-fonts/inter';
 import { JetBrainsMono_400Regular, JetBrainsMono_700Bold } from '@expo-google-fonts/jetbrains-mono';
 
-import { Team, Player, Coach, SeasonState, DraftState, Event, LiveTactic, Notification as NotificationType, OffseasonMove } from './types';
-import { teamsData, playersData, offseasonMoves, picksOf } from './constants';
-import { ERAS, eraById, currentEra } from './data/eras';
+import { Team, Player, Coach, SeasonState, LiveTactic, Notification as NotificationType } from './types';
+import { teamsData, playersData, picksOf } from './constants';
+import { ERAS, eraById } from './data/eras';
 import { simulationEngine, ROTATION_MIN, ROTATION_MAX } from './services/simulationService';
 import { buildSeasonOwner, evaluateSeasonOutcome } from './services/ownerService';
 import { generateSchedule } from './services/scheduleService';
 import { simulateOneDay, SimEffect, ALL_STAR_GAME, PinnedGameResult } from './services/seasonRunner';
 import { MIN_ROSTER_SIZE } from './services/tradeService';
-import {
-  buildDraftBoard, initialPickAssets, grantNextWindowPick, PICK_WINDOW,
-  generateDraftClass, generateRealDraftClass, generateUndraftedClass, advanceDraftToUser, makeUserPick,
-  scoutProspect, consensusValue, SCOUT_BUDGET,
-} from './services/draftService';
-import { processOffseasonContracts, runCpuFreeAgency, signFreeAgentLegality, newContractYears, evaluateSigningInterest } from './services/freeAgencyService';
-import { accumulateCareers, championRosterOf } from './services/careerService';
+import { initialPickAssets, PICK_WINDOW, makeUserPick, scoutProspect, consensusValue } from './services/draftService';
+import { signFreeAgentLegality, evaluateSigningInterest, signPlayer, askingSalary } from './services/freeAgencyService';
 import { resolveDecision } from './services/decisionService';
-import { initCoaches, ageCoachesAndRetire, buildDevelopmentBonusMap, fireCoach, hireCoach } from './services/coachService';
+import { startOffseason, finishDraft, startSeason } from './services/offseasonService';
+import { initCoaches, fireCoach, hireCoach } from './services/coachService';
 
 import { ThemeProvider } from './src/theme/ThemeProvider';
 import { COLORS } from './src/theme/tokens';
@@ -331,202 +327,7 @@ export default function App() {
   // tick down, then the rookie draft (BEFORE free agency, matching the real
   // calendar). CPU free agency waits until the draft finishes.
   const handleStartNewSeason = () => {
-    setSeason((prev) => {
-      if (!prev) return prev;
-      // The draft board is built from the just-finished records (lottery for the
-      // top four), so it must read prev.teams BEFORE wins reset. It also settles
-      // who OWNS each slot and consumes the picks spent on this draft, so its
-      // updated teams are what the rest of the offseason has to build on.
-      const draftNumber = prev.awardHistory.length;
-      const board = buildDraftBoard(prev.teams, draftNumber);
-
-      // League lifecycle, in a strict order (see services/careerService.ts):
-      // credit the season just played to career totals FIRST, at the age it was
-      // actually played and before handleStartSeason wipes seasonStats...
-      const lastRecord = prev.awardHistory[prev.awardHistory.length - 1];
-      const withCareers = accumulateCareers(
-        prev.players,
-        championRosterOf(prev.teams, lastRecord),
-        prev.awards,
-        prev.playoff?.awards.finalsMVP ?? lastRecord?.finalsMvp,
-        [...(prev.allStar?.eastRoster || []), ...(prev.allStar?.westRoster || [])],
-      );
-
-      // Development credit uses the coach who actually ran the season just
-      // played (prev.teams/prev.coaches), captured before anyone below ages or
-      // retires — see coachService.buildDevelopmentBonusMap.
-      const devBonus = buildDevelopmentBonusMap(prev.teams, prev.coaches);
-      const { updatedPlayers, progressionEvents } = simulationEngine.runPlayerProgression(withCareers, devBonus);
-      // Snapshot last season's OVR so next season's MIP can measure real growth.
-      for (const id in updatedPlayers) {
-        updatedPlayers[id].ovrLastSeason = prev.players[id]?.ovr ?? updatedPlayers[id].ovr;
-      }
-
-      // Every coach ages a year; past 60 there's a rising chance he retires and
-      // is auto-replaced (see ageCoachesAndRetire) — independent of the roster
-      // work above, run on board.teams so the result flows into newTeams below
-      // along with everything else buildDraftBoard already carried forward.
-      const coaching = ageCoachesAndRetire(board.teams, prev.coaches);
-
-      // Annotated so the inferred literal type doesn't make wins/losses non-optional.
-      const newTeams: Team[] = coaching.teams.map((t) => ({
-        ...t,
-        wins: 0,
-        losses: 0,
-        momentum: 0,
-        stats: { ppg: 0, oppg: 0, rpg: 0, apg: 0, spg: 0, bpg: 0, tpg: 0 },
-        performanceHistory: [{ gamesPlayed: 0, wins: 0 }],
-        playerAbsences: undefined,
-        playerStatusEffects: undefined,
-        // Last season's give-up is not this season's: every team starts the
-        // year trying, and decideTanking re-decides at the next deadline.
-        tanking: undefined,
-        // A demand made last season is settled. Everyone gets to ask again.
-        tradeRequestedIds: undefined,
-      }));
-
-      // No retirement system: rosters carry every player straight through from
-      // progression into the offseason moves/contracts below.
-      const rosterPlayers = updatedPlayers;
-
-      // Replay real NBA offseason moves (skips any player the user already
-      // moved elsewhere — see the roster.includes guard below). A LIVE save
-      // only ever has one real transition available (today's season into
-      // next), applied once via offseasonMovesApplied. An ERA save instead
-      // walks the chain in ERAS one entry per offseason (eraChainIndex) —
-      // each entry is that era's own real season -> the next chronological
-      // era's, generated by pipeline/sync_era_moves.py — so a 2010-11 save
-      // keeps replaying real trades/signings every year instead of being a
-      // single disconnected snapshot. Reading past the last chained era (or a
-      // move that no longer matches current save state) resolves to an empty
-      // list, so the chain quietly and permanently goes procedural once real
-      // data runs out — no separate "chain exhausted" state needed.
-      const moveEvents: Event[] = [];
-      const eraEvents: Event[] = [];
-      // The moves that actually land, for the season screen's offseason recap
-      // (SeasonState.lastOffseasonMoves). Collected here rather than read back
-      // from data/eras because the guard below skips any move the save has
-      // already diverged from.
-      const appliedMoves: { playerName: string; fromTeamId: string; toTeamId: string }[] = [];
-      const sortByOvr = (roster: string[]) => [...roster].sort((a, b) => (rosterPlayers[b]?.ovr || 0) - (rosterPlayers[a]?.ovr || 0));
-      const applyMoves = (moves: OffseasonMove[]) => {
-        moves.forEach((move) => {
-          const fromIdx = newTeams.findIndex((t) => t.id === move.fromTeamId);
-          const toIdx = newTeams.findIndex((t) => t.id === move.toTeamId);
-          if (fromIdx === -1 || toIdx === -1 || !newTeams[fromIdx].roster.includes(move.playerId)) return;
-          const fromName = newTeams[fromIdx].name;
-          const toName = newTeams[toIdx].name;
-          newTeams[fromIdx] = { ...newTeams[fromIdx], roster: newTeams[fromIdx].roster.filter((id) => id !== move.playerId) };
-          newTeams[toIdx] = { ...newTeams[toIdx], roster: sortByOvr([...newTeams[toIdx].roster, move.playerId]) };
-          moveEvents.push({ message: `🏀 OFFSEASON: ${move.playerName} deixou o ${fromName} e agora joga pelo ${toName}.`, type: 'trade' });
-          appliedMoves.push({ playerName: move.playerName, fromTeamId: move.fromTeamId, toTeamId: move.toTeamId });
-        });
-      };
-      let nextEraChainIndex = prev.eraChainIndex;
-      if (prev.era) {
-        applyMoves(prev.eraChainIndex !== undefined ? (ERAS[prev.eraChainIndex]?.offseasonMoves.moves ?? []) : []);
-        nextEraChainIndex = prev.eraChainIndex !== undefined ? prev.eraChainIndex + 1 : undefined;
-        // Crossing an era boundary is the one moment the save's identity
-        // changes on its own, so it gets announced like any other league news.
-        // Compared by group id, not index, so it fires once per era — not once
-        // per season — and fires exactly once more when real history runs out
-        // and the chain goes procedural (see currentEra in data/eras).
-        const fromEra = currentEra(prev.eraChainIndex);
-        const toEra = currentEra(nextEraChainIndex);
-        if (fromEra && toEra && fromEra.groupId !== toEra.groupId) {
-          eraEvents.push({
-            message: toEra.seasonLabel
-              ? `✨ NOVA ERA: começa a ${toEra.label} — sua carreira atravessa para ${toEra.seasonLabel}.`
-              : `✨ NOVA ERA: a história real acaba aqui. Daqui pra frente é a ${toEra.label}, e a liga segue só pelo que você fizer dela.`,
-            type: 'era',
-          });
-        }
-      } else if (!prev.offseasonMovesApplied) {
-        applyMoves(offseasonMoves.moves);
-      }
-
-      const contracts = processOffseasonContracts(newTeams, rosterPlayers);
-      // Both generators are seeded with the ids already in the league: prospect
-      // ids are name-derived from a small name space, and these maps are merged
-      // OVER the existing players, so an unseeded collision would silently
-      // overwrite a real rostered player.
-      //
-      // A chained era save draws the REAL draft class for this transition
-      // (ERAS[eraChainIndex].realDraftClass — see its own comment in
-      // data/eras/index.ts): who enters the league is real, WHICH team lands
-      // them still comes entirely from this save's own board above. Real
-      // rookie ratings live on the NEXT chronological era's player pool (the
-      // same season that class's rookie year was fetched into), so that's the
-      // source read here. Falls back to the fully-procedural class exactly
-      // like before once the chain has no realDraftClass at this index (a
-      // live save, or an era save that's walked past the last chained draft).
-      const chainEra = prev.era && prev.eraChainIndex !== undefined ? ERAS[prev.eraChainIndex] : undefined;
-      const { prospects, reports, ids } = chainEra?.realDraftClass
-        ? generateRealDraftClass(
-            chainEra.realDraftClass.picks,
-            ERAS[prev.eraChainIndex! + 1]?.players ?? {},
-            Object.keys(contracts.players),
-          )
-        : generateDraftClass(30, Object.keys(contracts.players));
-      // Undrafted/international fringe talent enters the market alongside the draft.
-      const undrafted = generateUndraftedClass(10, [...Object.keys(contracts.players), ...ids]);
-      const playersWithProspects = { ...contracts.players, ...prospects, ...undrafted.players };
-      // `reports` is the fog of war: prospects carry their real rating in
-      // `players` (the sim needs it the instant they're drafted), and this is the
-      // only rating the draft screen and the CPU are allowed to read.
-      const initialDraft: DraftState = {
-        order: board.order, picks: [], available: ids, complete: false,
-        reports, scoutBudget: SCOUT_BUDGET,
-      };
-      // The window slides forward: everyone gets their own pick for the draft
-      // that just entered the horizon (picks they traded away stay gone).
-      const teamsWithPicks = grantNextWindowPick(contracts.teams, draftNumber + PICK_WINDOW);
-      const advanced = advanceDraftToUser(initialDraft, teamsWithPicks, playersWithProspects, prev.userTeamId);
-
-      return {
-        ...prev,
-        status: 'draft',
-        playoffStage: 'none',
-        gamesPlayed: 0,
-        teams: advanced.teams,
-        // Not playersWithProspects: the CPU picks made above already lifted the
-        // fog on those prospects (applyPick returns an updated map).
-        players: advanced.players,
-        draft: advanced.draft,
-        coaches: coaching.coaches,
-        // One offseason generates several HUNDRED events against a 60-slot
-        // buffer, so this array is a budget, not a list. It used to be plain
-        // concatenation, which meant the two biggest batches (draft picks and
-        // expiring contracts) filled all 60 between them and silently erased
-        // everything after — including the "🏀 OFFSEASON: X deixou o Y"
-        // replays that are the entire point of chaining real NBA history, so
-        // those had never actually reached a player.
-        //
-        // Each category now gets a slice of the buffer instead, ordered
-        // most-narrative first: an era change (at most one, and the rarest
-        // thing that can happen to a save) leads, then real history, then the
-        // routine bulk. Nothing is monopolised and nothing is wiped out.
-        events: [
-          ...eraEvents,
-          ...moveEvents.slice(0, 18),
-          ...advanced.events.slice(0, 12),
-          ...contracts.events.slice(0, 6),
-          ...board.events,
-          ...coaching.events.slice(0, 4),
-          ...progressionEvents.slice(0, 8),
-          ...prev.events,
-        ].slice(0, 60),
-        playoff: null,
-        awards: null,
-        offseasonMovesApplied: true,
-        eraChainIndex: nextEraChainIndex,
-        lastOffseasonMoves: appliedMoves,
-        allStar: undefined,
-        cup: undefined,
-        schedule: [],
-        tradeOffers: [],
-      };
-    });
+    setSeason((prev) => (prev ? startOffseason(prev) : prev));
     setView('draft');
   };
 
@@ -565,23 +366,7 @@ export default function App() {
   // Draft over → CPUs fill holes via free agency (now that rookies landed), then
   // the market opens for the user.
   const handleFinishDraft = () => {
-    setSeason((prev) => {
-      if (!prev) return prev;
-      const cpuFa = runCpuFreeAgency(prev.teams, prev.players, prev.userTeamId);
-      return {
-        ...prev,
-        status: 'free_agency',
-        teams: cpuFa.teams,
-        players: cpuFa.players,
-        // Budgeted for the same reason the offseason batch above is: the CPU
-        // signs across all 29 teams at once, which on its own overruns the
-        // 60-slot buffer and wipes every earlier offseason headline out of
-        // the save. Capped, the buffer keeps a mix instead of one stage's
-        // worth of routine signings.
-        events: [...cpuFa.events.slice(0, 15), ...prev.events].slice(0, 60),
-        draft: undefined,
-      };
-    });
+    setSeason((prev) => (prev ? finishDraft(prev) : prev));
     setView('free-agency');
   };
 
@@ -594,36 +379,17 @@ export default function App() {
       if (!signFreeAgentLegality(team, player, prev.players).legal) return prev;
       // Players have agency — a star won't ride the bench on a rebuild.
       if (!evaluateSigningInterest(player, team, prev.teams, prev.players).willing) return prev;
-      const sortByOvr = (roster: string[]) => [...roster].sort((a, b) => (prev.players[b]?.ovr || 0) - (prev.players[a]?.ovr || 0));
+      const signed = signPlayer(team, player, prev.players);
       return {
         ...prev,
-        players: { ...prev.players, [playerId]: { ...player, contractYears: newContractYears(player) } },
-        teams: prev.teams.map((t) => (t.id === prev.userTeamId ? { ...t, roster: sortByOvr([...t.roster, playerId]) } : t)),
+        players: { ...prev.players, [playerId]: signed.player },
+        teams: prev.teams.map((t) => (t.id === prev.userTeamId ? signed.team : t)),
       };
     });
   };
 
   const handleStartSeason = () => {
-    setSeason((prev) => {
-      if (!prev) return prev;
-      const uTeam = prev.teams.find((t) => t.id === prev.userTeamId);
-      if (uTeam && uTeam.roster.length < MIN_ROSTER_SIZE) return prev;
-      // Wipe last season's box scores so leaders/awards start clean.
-      const freshPlayers: { [key: string]: Player } = {};
-      for (const id in prev.players) freshPlayers[id] = { ...prev.players[id], seasonStats: undefined };
-      // Re-derive the owner mandate now that rosters are final, carrying
-      // confidence forward from last season's judgment.
-      const owner = uTeam ? buildSeasonOwner(uTeam, prev.teams, freshPlayers, prev.owner) : prev.owner;
-      return {
-        ...prev,
-        status: 'active',
-        gamesPlayed: 0,
-        players: freshPlayers,
-        owner,
-        cup: simulationEngine.initCupGroups(prev.teams),
-        schedule: generateSchedule(prev.teams),
-      };
-    });
+    setSeason((prev) => (prev ? startSeason(prev) : prev));
     setView('simulation');
   };
 
@@ -783,6 +549,9 @@ export default function App() {
       waivedName = player.name;
       return {
         ...prev,
+        // Cut loose, he asks the market for what he is worth now. No Bird
+        // right: you released him, you do not get to bring him back over the cap.
+        players: { ...prev.players, [playerId]: { ...player, contractYears: 0, salary: askingSalary(player), birdTeamId: undefined } },
         teams: prev.teams.map((t) =>
           t.id === team.id
             ? { ...t, roster: t.roster.filter((id) => id !== playerId), starters: newStarters }

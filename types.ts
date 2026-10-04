@@ -95,6 +95,10 @@ export interface Player {
   potential: 'A' | 'B' | 'C' | 'D';
   salary: number;
   contractYears: number;
+  // While he is a free agent: the team whose contract just ran out, which keeps
+  // the right to re-sign him over the cap (NBA Bird rights). Cleared the moment
+  // anyone signs him. See signFreeAgentLegality.
+  birdTeamId?: string;
   // Player happiness (0-100), driven by team success, role/minutes, and being
   // buried behind better players — see updateMorale in simulationService.ts.
   // Undefined until the sim first touches it; treated as 70 (content) by
@@ -137,6 +141,10 @@ export interface Team {
   starters?: { [pos: string]: string };
   wins?: number;
   losses?: number;
+  // This summer's mid-level exception is spent: an over-the-cap team gets ONE
+  // outside free agent up to MID_LEVEL_EXCEPTION per offseason. Reset by
+  // startOffseason.
+  midLevelUsed?: boolean;
   playerAbsences?: { [playerId: string]: { reason: 'injury' | 'suspension'; duration: number } };
   playerStatusEffects?: { [playerId: string]: { type: 'hot' | 'slump'; duration: number; ovrChange: number } };
   momentum?: number;

@@ -1,6 +1,7 @@
 import type { Player, Team, Event } from '../types';
-import { SALARY_CAP, getTeamSalary, getPlayerPositions, LINEUP_POSITIONS } from '../constants';
-import { MIN_ROSTER_SIZE, MAX_ROSTER_SIZE, playerValue } from './tradeService';
+import { SALARY_CAP, LUXURY_TAX, MID_LEVEL_EXCEPTION, getTeamSalary, getPlayerPositions, LINEUP_POSITIONS } from '../constants';
+import { MIN_ROSTER_SIZE, MAX_ROSTER_SIZE, playerValue, expectedSalary } from './tradeService';
+import { personalityOf } from './personalityService';
 
 // The 5 position buckets a lineup must cover. A team with zero players who can
 // play a slot has a "hole" the CPU prioritizes filling in free agency.
@@ -24,6 +25,15 @@ export const newContractYears = (p: Player): number => {
     if (p.age <= 26) return 3;
     return 2;
 };
+
+// What a player asks for on a NEW contract: what he is worth today, by the same
+// curve the pipeline used to generate every salary in data/ (and that
+// contractFactor already reads to call a deal good or bad). Every signing,
+// re-signing and extension goes through this -- before it, a new contract kept
+// the old salary forever, so a breakout star stayed cheap and a declining
+// veteran stayed expensive, and a $40M free agent asked $40M until he retired.
+export const askingSalary = (p: Player): number =>
+    Math.round(expectedSalary(p.ovr, p.age) / 10_000) * 10_000;
 
 // Free agents are simply every player not on any roster — the league is a
 // closed pool, so there's no separate "free agent" list to keep in sync; a
@@ -62,20 +72,50 @@ export interface SignLegalityResult {
  */
 export const MINIMUM_CONTRACT = 3_000_000;
 
+/** How a signing fits under the rules -- the first route that applies wins. */
+export type SigningRoute = 'cap_room' | 'bird' | 'minimum' | 'mid_level' | 'emergency';
+
+export const signingRoute = (team: Team, player: Player, players: PlayerMap): SigningRoute | null => {
+    if (player.birdTeamId === team.id) return 'bird';
+    if (getTeamSalary(team, players) + player.salary <= SALARY_CAP) return 'cap_room';
+    if (player.salary <= MINIMUM_CONTRACT) return 'minimum';
+    if (player.salary <= MID_LEVEL_EXCEPTION && !team.midLevelUsed) return 'mid_level';
+    if (team.roster.length < MIN_ROSTER_SIZE) return 'emergency';
+    return null;
+};
+
 export const signFreeAgentLegality = (team: Team, player: Player, players: PlayerMap): SignLegalityResult => {
     if (team.roster.length >= MAX_ROSTER_SIZE) {
         return { legal: false, reason: `Elenco cheio (${MAX_ROSTER_SIZE} jogadores). Dispense ou troque alguém antes.` };
     }
+    if (signingRoute(team, player, players)) return { legal: true };
     const salaryAfter = getTeamSalary(team, players) + player.salary;
-    const belowMin = team.roster.length < MIN_ROSTER_SIZE;
-    const minimumDeal = player.salary <= MINIMUM_CONTRACT;
-    if (salaryAfter > SALARY_CAP && !belowMin && !minimumDeal) {
-        return {
-            legal: false,
-            reason: `Essa contratação deixaria o elenco em $${(salaryAfter / 1_000_000).toFixed(1)}M, acima do teto de $${(SALARY_CAP / 1_000_000).toFixed(1)}M.`,
-        };
-    }
-    return { legal: true };
+    return {
+        legal: false,
+        reason: team.midLevelUsed
+            ? `Acima do teto ($${(salaryAfter / 1_000_000).toFixed(1)}M) e a exceção de nível médio deste verão já foi usada. Só contratos mínimos.`
+            : `Acima do teto ($${(salaryAfter / 1_000_000).toFixed(1)}M) e ele pede mais que a exceção de nível médio ($${(MID_LEVEL_EXCEPTION / 1_000_000).toFixed(1)}M).`,
+    };
+};
+
+/**
+ * Sign `player` to `team`. The single place a free agent becomes rostered, so
+ * the bookkeeping cannot drift between the user's screen, the decision queue
+ * and the CPU: a fresh contract length, the Bird right consumed, and the
+ * mid-level marked spent when that is the route that made it legal. The salary
+ * is whatever he is asking at this moment (his `salary` while unsigned).
+ * Assumes legality was already checked.
+ */
+export const signPlayer = (
+    team: Team, player: Player, players: PlayerMap, years = newContractYears(player),
+): { team: Team; player: Player } => {
+    const route = signingRoute(team, player, players);
+    const signed: Player = { ...player, contractYears: years, birdTeamId: undefined };
+    const roster = sortRosterByOvr([...team.roster, player.id], { ...players, [player.id]: signed });
+    return {
+        team: { ...team, roster, midLevelUsed: team.midLevelUsed || route === 'mid_level' },
+        player: signed,
+    };
 };
 
 const sortRosterByOvr = (roster: string[], players: PlayerMap): string[] =>
@@ -109,6 +149,9 @@ export const evaluateSigningInterest = (
     teams: Team[],
     players: PlayerMap
 ): SigningInterest => {
+    // His own team still holds his Bird right only because he was willing to
+    // stay (see processOffseasonContracts) -- that question is already answered.
+    if (player.birdTeamId === team.id) return { willing: true };
     if (player.ovr < 76) return { willing: true }; // needs the paycheck — takes any role
 
     const leagueAvg = teams.reduce((s, t) => s + teamTop8Avg(t, players), 0) / Math.max(1, teams.length);
@@ -157,31 +200,103 @@ const pickBestForTeam = (team: Team, pool: Player[], players: PlayerMap): Player
     return pool[0];
 };
 
-// Advances every rostered player's contract by one year and releases anyone who
-// hits zero into free agency. Free agents already at 0 stay at 0 (they're
-// unsigned, not counting down). This is the ongoing engine of the market: it's
-// what actually puts players on the block each offseason.
+/** How many of a team's most valuable players a CPU front office fights to keep. */
+const CPU_CORE_SIZE = 9;
+/** A star the CPU will pay into the tax for, up to the second apron. */
+const CPU_TAX_STAR_OVR = 85;
+const CPU_STAR_PAYROLL_LIMIT = 207_824_000;
+/** Below this morale a player wants to see what else is out there. */
+const RESIGN_MIN_MORALE = 40;
+
+/**
+ * Whether a player whose contract just ran out is willing to re-sign where he
+ * is. Morale is the main read -- an unhappy player tests the market. The Estrela
+ * is the one who leaves a LOSING team even when he likes his role, which is what
+ * makes him the player who changes the league every summer.
+ */
+export const willingToReSign = (p: Player, teamWinPct: number): boolean => {
+    if ((p.morale ?? 70) < RESIGN_MIN_MORALE) return false;
+    if (personalityOf(p).id === 'estrela' && teamWinPct < 0.45) return false;
+    return true;
+};
+
+// A player who would rather leave goes to the market with no Bird right: his
+// old team has no inside track on a player who wants out.
+const putOnMarket = (p: Player, birdTeamId: string | undefined) => {
+    p.contractYears = 0;
+    p.salary = askingSalary(p);
+    p.birdTeamId = birdTeamId;
+};
+
+// Advances every rostered player's contract by one year. Anyone who hits zero
+// either re-signs on the spot -- CPU teams, by Bird rights, at today's price --
+// or goes to the market asking what he is worth, with his old team keeping the
+// right to bring him back over the cap. The user's own expiring players always
+// go to the market: that choice is the user's to make (the extension decision
+// during the season, or the Bird right in free agency).
+//
+// The CPU keeps its core (the CPU_CORE_SIZE most valuable players), provided
+// the player wants to stay and the bill stays under the luxury tax -- a star
+// can take it to the second apron. Before this, nobody ever re-signed: every
+// expiring contract became a free agent nobody over the cap could sign back,
+// and 22 players rated 80+ spent the first measured season without a team.
+//
+// `winPct` is last season's record by team id, read BEFORE the offseason reset
+// the standings.
 export const processOffseasonContracts = (
     teams: Team[],
-    players: PlayerMap
+    players: PlayerMap,
+    userTeamId?: string,
+    winPct: { [teamId: string]: number } = {},
 ): { teams: Team[]; players: PlayerMap; events: Event[] } => {
     const updatedPlayers: PlayerMap = {};
     for (const id in players) updatedPlayers[id] = { ...players[id] };
 
     const events: Event[] = [];
+    const leaves = (p: Player, team: Team, wouldStay: boolean) => {
+        putOnMarket(p, wouldStay ? team.id : undefined);
+        events.push({
+            message: wouldStay
+                ? `📄 ${p.name} chegou ao fim do contrato com o ${team.name} e virou agente livre.`
+                : `📄 ${p.name} não quis renovar com o ${team.name} e vai testar o mercado.`,
+            type: 'trade',
+        });
+    };
     const newTeams = teams.map(team => {
         const kept: string[] = [];
+        const expiring: Player[] = [];
         team.roster.forEach(id => {
             const p = updatedPlayers[id];
             if (!p) return;
             p.contractYears = Math.max(0, p.contractYears - 1);
-            if (p.contractYears <= 0) {
-                events.push({ message: `📄 ${p.name} chegou ao fim do contrato com o ${team.name} e virou agente livre.`, type: 'trade' });
-            } else {
-                kept.push(id);
-            }
+            if (p.contractYears <= 0) expiring.push(p);
+            else kept.push(id);
         });
-        return { ...team, roster: kept, starters: pruneStarters(team.starters, kept) };
+
+        if (team.id === userTeamId) {
+            expiring.forEach(p => leaves(p, team, willingToReSign(p, winPct[team.id] ?? 0.5)));
+        } else {
+            const core = new Set(
+                [...team.roster].sort((a, b) => playerValue(updatedPlayers[b]) - playerValue(updatedPlayers[a]))
+                    .slice(0, CPU_CORE_SIZE),
+            );
+            let payroll = kept.reduce((sum, id) => sum + (updatedPlayers[id]?.salary || 0), 0);
+            [...expiring].sort((a, b) => playerValue(b) - playerValue(a)).forEach(p => {
+                const ask = askingSalary(p);
+                const limit = p.ovr >= CPU_TAX_STAR_OVR ? CPU_STAR_PAYROLL_LIMIT : LUXURY_TAX;
+                const wouldStay = willingToReSign(p, winPct[team.id] ?? 0.5);
+                if (core.has(p.id) && wouldStay && payroll + ask <= limit) {
+                    p.salary = ask;
+                    p.contractYears = newContractYears(p);
+                    payroll += ask;
+                    kept.push(p.id);
+                    events.push({ message: `🖊️ ${team.name} renovou com ${p.name} por $${(ask / 1_000_000).toFixed(1)}M/ano.`, type: 'trade' });
+                } else {
+                    leaves(p, team, wouldStay);
+                }
+            });
+        }
+        return { ...team, roster: sortRosterByOvr(kept, updatedPlayers), starters: pruneStarters(team.starters, kept) };
     });
 
     return { teams: newTeams, players: updatedPlayers, events };
@@ -199,15 +314,25 @@ const pruneStarters = (starters: Team['starters'], roster: string[]): Team['star
     return pruned;
 };
 
-// Deterministic CPU free agency. Runs after contracts expire, before the user
-// gets their turn. Two passes:
-//   1. Necessity — any CPU team below the roster minimum signs (ignoring the
-//      cap, like a real minimum-salary signing) until it's legal again.
-//   2. Fill — weakest teams first, each CPU team under CPU_TARGET_ROSTER that
-//      can fit a signing under the cap grabs its best-value option, repeating
-//      until nobody signs in a full round.
-// Weaker teams (higher powerRank) pick first for a bit of competitive balance.
-// The user's team is skipped entirely — they sign for themselves in the UI.
+// Deterministic CPU free agency. Runs after contracts expire and the draft,
+// before the user gets their turn.
+//   1. Necessity -- a CPU team below the roster minimum signs the cheapest
+//      useful players until it is legal (the emergency route, at their ask).
+//   2. The market, in three stages. At each one every CPU team under
+//      CPU_TARGET_ROSTER signs whoever is legal for it AND wants to come
+//      (evaluateSigningInterest), weakest teams first, until a full round
+//      passes with nobody signing. Between stages the market cools: whoever
+//      nobody could pay drops his ask --
+//        stage 0: what he is worth (cap room, Bird rights, the mid-level);
+//        stage 1: down to the mid-level, so any team with it unspent can bid;
+//        stage 2: down to the minimum, on a one-year prove-it deal -- and a
+//                 team with a full rotation may still take him if he would
+//                 crack its top nine.
+//      Without the cooling, a $40M free agent asked $40M forever and only a
+//      team with $40M of room could ever sign him -- in a league where 29 of
+//      30 teams sit over the cap, that was nobody.
+// The user's team is skipped entirely -- they sign for themselves in the UI,
+// from whatever is left (at its cooled price).
 export const runCpuFreeAgency = (
     teams: Team[],
     players: PlayerMap,
@@ -216,62 +341,78 @@ export const runCpuFreeAgency = (
     const updatedPlayers: PlayerMap = {};
     for (const id in players) updatedPlayers[id] = { ...players[id] };
 
-    const workTeams = teams.map(t => ({ ...t, roster: [...t.roster] }));
-    const byId = new Map(workTeams.map(t => [t.id, t]));
+    const workTeams: Team[] = teams.map(t => ({ ...t, roster: [...t.roster] }));
     const events: Event[] = [];
 
     // Live free-agent pool, kept value-sorted; ids removed as they're signed.
     let pool = getFreeAgents(workTeams, updatedPlayers);
-    const removeFromPool = (id: string) => { pool = pool.filter(p => p.id !== id); };
 
-    const sign = (team: { id: string; name: string; roster: string[]; starters?: Team['starters'] }, player: Player) => {
-        updatedPlayers[player.id] = { ...updatedPlayers[player.id], contractYears: newContractYears(player) };
-        team.roster = sortRosterByOvr([...team.roster, player.id], updatedPlayers);
-        removeFromPool(player.id);
-        events.push({ message: `✍️ ${team.name} assinou ${player.name} (${player.ovr} OVR) na agência livre.`, type: 'trade' });
+    const sign = (idx: number, player: Player, years?: number) => {
+        const res = signPlayer(workTeams[idx], player, updatedPlayers, years);
+        workTeams[idx] = res.team;
+        updatedPlayers[player.id] = res.player;
+        pool = pool.filter(p => p.id !== player.id);
+        events.push({ message: `✍️ ${res.team.name} assinou ${player.name} (${player.ovr} OVR) por $${(player.salary / 1_000_000).toFixed(1)}M.`, type: 'trade' });
     };
 
-    const cpuTeams = workTeams
-        .filter(t => t.id !== userTeamId)
-        .sort((a, b) => b.powerRank - a.powerRank);
+    // Weaker teams (higher powerRank) pick first, for a bit of competitive balance.
+    const cpuIdx = workTeams
+        .map((t, i) => ({ t, i }))
+        .filter(({ t }) => t.id !== userTeamId)
+        .sort((a, b) => b.t.powerRank - a.t.powerRank)
+        .map(({ i }) => i);
 
-    // Pass 1: necessity signings (cap-exempt) to reach a legal roster.
-    cpuTeams.forEach(team => {
-        while (team.roster.length < MIN_ROSTER_SIZE && pool.length > 0) {
-            const pick = pickBestForTeam(team as Team, pool, updatedPlayers);
+    // Pass 1: necessity.
+    cpuIdx.forEach(i => {
+        while (workTeams[i].roster.length < MIN_ROSTER_SIZE && pool.length > 0) {
+            const cheap = pool.filter(p => p.salary <= MINIMUM_CONTRACT);
+            const pick = pickBestForTeam(workTeams[i], cheap.length ? cheap : [...pool].sort((a, b) => a.salary - b.salary), updatedPlayers);
             if (!pick) break;
-            sign(team, pick);
+            sign(i, pick);
         }
     });
 
-    // Pass 2: discretionary fill, cap-respecting, rounds until steady state.
-    // Players now have agency — a team only lands a free agent who actually
-    // wants to sign there (winning + role), so a bottom team can't just hoard
-    // stars. The necessity pass above stays exempt so nobody gets soft-locked
-    // below a legal roster.
-    let signedThisRound = true;
-    while (signedThisRound && pool.length > 0) {
-        signedThisRound = false;
-        for (const team of cpuTeams) {
-            if (team.roster.length >= CPU_TARGET_ROSTER || team.roster.length >= MAX_ROSTER_SIZE) continue;
-            const affordable = pool.filter(
-                p => getTeamSalary(team as Team, updatedPlayers) + p.salary <= SALARY_CAP
-                    && evaluateSigningInterest(p, team as Team, workTeams, updatedPlayers).willing
-            );
-            if (affordable.length === 0) continue;
-            const pick = pickBestForTeam(team as Team, affordable, updatedPlayers);
-            if (!pick) continue;
-            sign(team, pick);
-            signedThisRound = true;
+    const top9Floor = (team: Team) => {
+        const ovrs = team.roster.map(id => updatedPlayers[id]?.ovr || 0).sort((a, b) => b - a);
+        return ovrs[8] ?? 0;
+    };
+
+    // Pass 2: the market.
+    for (let stage = 0; stage < 3; stage++) {
+        const ceiling = stage === 1 ? MID_LEVEL_EXCEPTION : stage === 2 ? MINIMUM_CONTRACT : Infinity;
+        // A player waiting on the user's offer (the user's Bird right) does not
+        // cool: the CPU may still pay him his full price, but nobody gets him
+        // at a discount before the user has had a turn. startSeason releases
+        // whoever the user leaves unsigned.
+        pool.forEach(p => {
+            if (p.birdTeamId === userTeamId) return;
+            updatedPlayers[p.id] = { ...updatedPlayers[p.id], salary: Math.min(p.salary, ceiling) };
+        });
+        pool = pool.map(p => updatedPlayers[p.id]);
+
+        let signedThisRound = true;
+        while (signedThisRound && pool.length > 0) {
+            signedThisRound = false;
+            for (const i of cpuIdx) {
+                const team = workTeams[i];
+                if (team.roster.length >= MAX_ROSTER_SIZE) continue;
+                const open = team.roster.length < CPU_TARGET_ROSTER;
+                const candidates = pool.filter(p =>
+                    (open || (stage === 2 && p.ovr > top9Floor(team)))
+                    && signFreeAgentLegality(team, p, updatedPlayers).legal
+                    && evaluateSigningInterest(p, team, workTeams, updatedPlayers).willing);
+                if (candidates.length === 0) continue;
+                const pick = pickBestForTeam(team, candidates, updatedPlayers);
+                if (!pick) continue;
+                sign(i, pick, stage === 2 ? 1 : stage === 1 ? Math.min(2, newContractYears(pick)) : undefined);
+                signedThisRound = true;
+            }
         }
     }
 
-    // Merge signed rosters back onto the original team objects (preserving every
-    // other field the caller set on them).
-    const merged = teams.map(t => {
-        const w = byId.get(t.id);
-        return w ? { ...t, roster: w.roster } : t;
-    });
+    // Merge back onto the original team objects (preserving every other field
+    // the caller set on them).
+    const merged = teams.map((t, i) => ({ ...t, roster: workTeams[i].roster, midLevelUsed: workTeams[i].midLevelUsed }));
 
     return { teams: merged, players: updatedPlayers, events };
 };

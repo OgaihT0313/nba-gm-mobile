@@ -14,7 +14,7 @@
 import type { Decision, DecisionOption, Player, SeasonState, Team, TradeOffer } from '../types';
 import { getPlayerPositions, getTeamSalary } from '../constants';
 import { simulationEngine, ROTATION_MIN, DEFAULT_ROTATION_SIZE, TRADE_REQUEST_MORALE } from './simulationService';
-import { getFreeAgents, signFreeAgentLegality, evaluateSigningInterest, newContractYears } from './freeAgencyService';
+import { getFreeAgents, signFreeAgentLegality, evaluateSigningInterest, signPlayer } from './freeAgencyService';
 import { generateCpuTradeOffer, TRADE_DEADLINE_GAME } from './tradeService';
 import { sortStandings } from './scheduleService';
 import { personalityOf, rushLoadCost } from './personalityService';
@@ -359,13 +359,12 @@ export const resolveDecision = (season: SeasonState, decisionId: string, optionI
         if (!player || team.roster.includes(targetId)) return { ...season, decisions: rest };
         if (!signFreeAgentLegality(team, player, season.players).legal) return { ...season, decisions: rest };
         if (!evaluateSigningInterest(player, team, season.teams, season.players).willing) return { ...season, decisions: rest };
-        const players = { ...season.players, [targetId]: { ...player, contractYears: newContractYears(player) } };
+        const signed = signPlayer(team, player, season.players);
         return {
             ...season,
             decisions: rest,
-            players,
-            teams: season.teams.map(t =>
-                t.id === team.id ? { ...t, roster: sortByOvr([...t.roster, targetId], players) } : t),
+            players: { ...season.players, [targetId]: signed.player },
+            teams: season.teams.map(t => (t.id === team.id ? signed.team : t)),
         };
     }
 
