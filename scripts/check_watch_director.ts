@@ -11,8 +11,9 @@
 //   npx tsc scripts/check_watch_director.ts --ignoreConfig --ignoreDeprecations 6.0 //     --outDir .check --module commonjs --target es2020 --moduleResolution node //     --esModuleInterop --resolveJsonModule --skipLibCheck
 //   cp -r data .check/data && node .check/scripts/check_watch_director.js
 import { teamsData, playersData } from '../constants';
-import { buildFive, planQuarter, courtStateAt, quarterSeconds } from '../services/watchDirector';
-import type { WatchPlay } from '../types';
+import { buildFive, planQuarter, courtStateAt, quarterSeconds, breakRecovery, rotationAt, type Energy, type FiveOnCourt } from '../services/watchDirector';
+import type { WatchPlay, Player } from '../types';
+import { simulationEngine, getRotationWeights } from '../services/simulationService';
 
 const home = teamsData[0];
 const away = teamsData[1];
@@ -121,28 +122,143 @@ console.log(`timeout: ${before} pts kept, remainder replanned from ${cut}s (${re
 // quarter, sum the baskets that actually went in, go to overtime on a tie.
 // This is the number that gets pinned into the season, so it has to look like
 // a basketball score and never like a draw.
-const finals: number[] = [];
-let overtimes = 0;
-let ties = 0;
-for (let g = 0; g < 300; g++) {
+// The rotation carries from quarter to quarter -- the five and everyone's
+// energy at the buzzer, plus the break's recovery -- exactly as the screen
+// threads it. `autoHome: false` is a GM who never subs: the starters play it out.
+interface GameResult { h: number; a: number; q: number; minutes: Map<string, number>; q4Home: number; badFives: number }
+const playGame = (play: WatchPlay, autoHome: boolean): GameResult => {
   let h = 0;
   let a = 0;
   let q = 0;
+  let q4Home = 0;
+  let badFives = 0;
+  let fh: FiveOnCourt = fiveHome;
+  let fa: FiveOnCourt = fiveAway;
+  let energy: Energy | undefined;
+  const minutes = new Map<string, number>();
   while (q < 4 || h === a) {
     q += 1;
     if (q > 8) { h += 1; break; }
     const plan = planQuarter({
-      home, away, players, coaches: {}, fiveHome, fiveAway,
-      userSide: 'home', play: PLAYS[g % PLAYS.length], timeout: false, quarter: q, from: 0,
+      home, away, players, coaches: {}, fiveHome: fh, fiveAway: fa, energy,
+      autoSubs: { home: autoHome, away: true },
+      userSide: 'home', play, timeout: false, quarter: q, from: 0,
     });
     for (const p of plan.possessions) {
+      const secs = p.end - p.start;
+      for (const pl of p.fiveHome!.players) minutes.set(pl.playerId, (minutes.get(pl.playerId) ?? 0) + secs / 60);
+      // Five distinct bodies, every one of them on the roster.
+      const ids = p.fiveHome!.players.map((x) => x.playerId);
+      if (new Set(ids).size !== 5 || !ids.every((id) => home.roster.includes(id))) badFives++;
+      const idsA = p.fiveAway!.players.map((x) => x.playerId);
+      if (new Set(idsA).size !== 5 || !idsA.every((id) => away.roster.includes(id))) badFives++;
       if (!p.made) continue;
       if (p.side === 'home') h += p.points; else a += p.points;
+      if (q === 4 && p.side === 'home') q4Home += p.points;
     }
+    fh = plan.endFiveHome;
+    fa = plan.endFiveAway;
+    energy = breakRecovery(plan.endEnergy, q);
   }
-  if (q > 4) overtimes++;
-  if (h === a) ties++;
-  finals.push(h, a);
+  return { h, a, q, minutes, q4Home, badFives };
+};
+
+const finals: number[] = [];
+let overtimes = 0;
+let ties = 0;
+let badFives = 0;
+const minutesSum = new Map<string, number>();
+const q4Auto: number[] = [];
+const GAMES = 300;
+for (let g = 0; g < GAMES; g++) {
+  const r = playGame(PLAYS[g % PLAYS.length], true);
+  if (r.q > 4) overtimes++;
+  if (r.h === r.a) ties++;
+  badFives += r.badFives;
+  finals.push(r.h, r.a);
+  if (r.q === 4) q4Auto.push(r.q4Home);
+  r.minutes.forEach((m, id) => minutesSum.set(id, (minutesSum.get(id) ?? 0) + m));
+}
+check('every five is five distinct rostered players', badFives === 0, `${badFives}`);
+
+// Minutes the automatic rotation hands out, against what the season's box
+// score gives the same players (getRotationWeights' curve: ~36 for the top
+// starter tapering to the end of the bench).
+const perGame = [...minutesSum.entries()].map(([id, m]) => ({ id, m: m / GAMES })).sort((x, y) => y.m - x.m);
+console.log('\nminutes per game, automatic rotation (home):');
+console.log('  ' + perGame.map((x) => `${players[x.id].name.split(' ').pop()} ${x.m.toFixed(1)}`).join(' | '));
+const starterIds = fiveHome.players.map((p) => p.playerId);
+const starterMin = perGame.filter((x) => starterIds.includes(x.id)).map((x) => x.m);
+const benchMin = perGame.filter((x) => !starterIds.includes(x.id)).reduce((s2, x) => s2 + x.m, 0);
+check('starters play real-NBA starter minutes', starterMin.every((m) => m >= 26 && m <= 40),
+  starterMin.map((m) => m.toFixed(1)).join(','));
+check('the bench actually plays', benchMin >= 40 && benchMin <= 110, benchMin.toFixed(1));
+
+// Riding the starters: stronger names on the floor, but they wear down. The
+// fourth quarter is where it shows.
+const q4Ride: number[] = [];
+let rideMinutes = 0;
+for (let g = 0; g < GAMES; g++) {
+  const r = playGame(PLAYS[g % PLAYS.length], false);
+  if (r.q === 4) q4Ride.push(r.q4Home);
+  rideMinutes += starterIds.reduce((s2, id) => s2 + (r.minutes.get(id) ?? 0), 0) / 5;
+}
+const avgOf = (xs: number[]) => xs.reduce((x, y) => x + y, 0) / (xs.length || 1);
+console.log(`4th quarter, home: auto rotation ${avgOf(q4Auto).toFixed(1)} pts vs starters all game ${avgOf(q4Ride).toFixed(1)} pts (starters ${(rideMinutes / GAMES).toFixed(1)} min)`);
+check('a five that never rests fades late', avgOf(q4Ride) < avgOf(q4Auto) - 1,
+  `${avgOf(q4Ride).toFixed(1)} vs ${avgOf(q4Auto).toFixed(1)}`);
+
+// What the screen played is what the season records: the minutes go into the
+// box score, and through it into load. A GM who rides his starters pays for it
+// in the very next game's injury risk.
+{
+  const loadAfter = (autoHome: boolean) => {
+    const r = playGame('pick_roll', autoHome);
+    const minutes: { [id: string]: number } = {};
+    r.minutes.forEach((m, id) => { minutes[id] = m; });
+    const ps: { [k: string]: Player } = JSON.parse(JSON.stringify(players));
+    const team = JSON.parse(JSON.stringify(home));
+    team.wins = 1; team.losses = 0;
+    simulationEngine.recordGameStats(team, 110, 100, ps, minutes);
+    const mpg = starterIds.map((id) => ps[id].seasonStats?.mpg ?? 0);
+    return { load: starterIds.reduce((acc, id) => acc + (ps[id].load ?? 0), 0) / 5, mpg };
+  };
+  const auto = loadAfter(true);
+  const ride = loadAfter(false);
+  console.log(`load after one game, starters: auto rotation ${auto.load.toFixed(1)} vs never subbed ${ride.load.toFixed(1)}`);
+  check('box score records the minutes played on screen', ride.mpg.every((m) => m > 44), ride.mpg.map((m) => m.toFixed(0)).join(','));
+  check('riding the starters costs load', ride.load > auto.load + 3, `${ride.load.toFixed(1)} vs ${auto.load.toFixed(1)}`);
+}
+
+// The GM's own five survives the coach. Seen live before the fix: swap a
+// reserve in for a starter, and the automatic rotation sent the starter back
+// at the very first dead ball.
+{
+  const reserve = home.roster.find((id) => !starterIds.includes(id) && players[id] && players[id].ovr >= 70)!;
+  const mine = { ...fiveHome, players: fiveHome.players.map((p, i) => (i === 1 ? { playerId: reserve, name: players[reserve].name, slot: p.slot } : p)) };
+  const chosen = mine.players.map((p) => p.playerId);
+  const plan = planQuarter({
+    home, away, players, coaches: {}, fiveHome: mine, fiveAway,
+    userPriority: [...chosen, ...getRotationWeights(home, players).ids.filter((id) => !chosen.includes(id))],
+    userSide: 'home', play: 'pick_roll', timeout: false, quarter: 1, from: 0,
+  });
+  const early = plan.possessions.filter((p) => p.start < 180);
+  // ...and behind it the coach still only uses his rotation.
+  const rotationIds = new Set([...chosen, ...getRotationWeights(home, players).ids]);
+  check('nobody outside the rotation plays', plan.possessions.every((p) => p.fiveHome!.players.every((x) => rotationIds.has(x.playerId))));
+  check("the GM's choice is not undone at the next dead ball",
+    early.every((p) => p.fiveHome!.players.some((x) => x.playerId === reserve)), players[reserve].name);
+}
+
+// A timeout reads the rotation as it stood, so the remainder starts from the
+// same five and the same legs.
+{
+  const pl = planQuarter({
+    home, away, players, coaches: {}, fiveHome, fiveAway,
+    userSide: 'home', play: 'pick_roll', timeout: false, quarter: 1, from: 0,
+  });
+  const at = rotationAt(pl, 500);
+  check('rotation readable mid-quarter', !!at && at.fiveHome.players.length === 5 && Object.keys(at.energy).length > 10);
 }
 const lo = Math.min(...finals);
 const hi = Math.max(...finals);

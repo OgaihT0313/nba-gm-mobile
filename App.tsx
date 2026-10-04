@@ -176,13 +176,14 @@ export default function App() {
   // isn't simulated a second time with a different outcome — everything else
   // (records, box score, morale, injuries, trade offers, calendar checkpoints)
   // proceeds exactly like a normal day advance.
-  const finishWatchGame = (scoreHome: number, scoreAway: number) => {
+  const finishWatchGame = (scoreHome: number, scoreAway: number, minutes?: { [playerId: string]: number }) => {
     if (!season || !watchGame) return;
     const pinned: PinnedGameResult = {
       homeTeamId: watchGame.home.id,
       awayTeamId: watchGame.away.id,
       scoreHome,
       scoreAway,
+      minutes,
     };
     const { season: next, effects, fired } = simulateOneDay(season, pinned);
     effects.forEach(applyEffect);

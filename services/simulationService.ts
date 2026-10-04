@@ -981,7 +981,15 @@ const splitTotal = (total: number, weights: number[]): number[] => {
 // has real individual production (leaders, awards) instead of ratings-only
 // stand-ins. A player only accrues a game when they're actually in the
 // rotation — deep-bench/injured players log DNPs (their gp doesn't move).
-const recordGameStats = (team: Team, pointsScored: number, pointsAllowed: number, players: { [key: string]: Player }) => {
+// `playedMinutes`: minutes a watched game actually gave each player on screen
+// (see WatchGameScreen / PinnedGameResult). When present for this team they
+// replace the rotation's usual split, so a starter the GM rode for 46 minutes
+// logs 46 -- in his box score and, through the load target below, in his
+// injury risk.
+const recordGameStats = (
+    team: Team, pointsScored: number, pointsAllowed: number, players: { [key: string]: Player },
+    playedMinutes?: { [playerId: string]: number },
+) => {
     if (!team.stats) {
         team.stats = { ppg: 0, oppg: 0, rpg: 0, apg: 0, spg: 0, bpg: 0, tpg: 0 };
     }
@@ -1017,10 +1025,17 @@ const recordGameStats = (team: Team, pointsScored: number, pointsAllowed: number
     // Same weights getGameRatings used to rate this team (rotationSize +
     // load-management factored in), so who plays and who the sim thinks is
     // good never disagree.
-    const { ids: rotation, weights: minuteWeights } = getRotationWeights(team, players);
+    const watched = playedMinutes
+        ? team.roster.filter(id => players[id] && (playedMinutes[id] ?? 0) >= 0.5)
+            .sort((a, b) => (playedMinutes[b] ?? 0) - (playedMinutes[a] ?? 0))
+        : [];
+    const fromRotation = getRotationWeights(team, players);
+    const rotation = watched.length >= 5 ? watched : fromRotation.ids;
     if (rotation.length === 0) return;
 
-    const minutes = splitTotal(TEAM_MINUTES, minuteWeights);
+    const minutes = watched.length >= 5
+        ? watched.map(id => playedMinutes![id])
+        : splitTotal(TEAM_MINUTES, fromRotation.weights);
 
     // Per-stat weights: rating for the relevant skill × minutes played, so a
     // high-usage star both rates and plays into a bigger line. A floor of 58 is

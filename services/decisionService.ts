@@ -16,7 +16,7 @@ import { getPlayerPositions, getTeamSalary, LUXURY_TAX } from '../constants';
 import { simulationEngine, ROTATION_MIN, DEFAULT_ROTATION_SIZE, TRADE_REQUEST_MORALE } from './simulationService';
 import { getFreeAgents, signFreeAgentLegality, evaluateSigningInterest, signPlayer, askingSalary, newContractYears, willingToReSign } from './freeAgencyService';
 import { luxuryTaxConfidenceHit } from './ownerService';
-import { playerValue } from './tradeService';
+import { playerValue, MAX_PENDING_OFFERS } from './tradeService';
 import { generateCpuTradeOffer, TRADE_DEADLINE_GAME } from './tradeService';
 import { sortStandings } from './scheduleService';
 import { personalityOf, rushLoadCost } from './personalityService';
@@ -590,7 +590,9 @@ export const resolveDecision = (season: SeasonState, decisionId: string, optionI
         return {
             ...season,
             decisions: rest,
-            tradeOffers: offer ? [offer, ...(season.tradeOffers ?? [])] : (season.tradeOffers ?? []),
+            // Newest first and capped: the call you just asked for always
+            // lands, the oldest pending one makes room.
+            tradeOffers: offer ? [offer, ...(season.tradeOffers ?? [])].slice(0, MAX_PENDING_OFFERS) : (season.tradeOffers ?? []),
         };
     }
 
@@ -630,7 +632,7 @@ export const resolveDecision = (season: SeasonState, decisionId: string, optionI
                 team, season.teams, season.players, season.gamesPlayed, season.awardHistory.length + 1);
             if (o && !offers.some(x => x.fromTeamId === o.fromTeamId)) offers.push(o);
         }
-        return { ...season, decisions: rest, tradeOffers: [...offers, ...(season.tradeOffers ?? [])] };
+        return { ...season, decisions: rest, tradeOffers: [...offers, ...(season.tradeOffers ?? [])].slice(0, MAX_PENDING_OFFERS) };
     }
 
     if (action === 'sell') {

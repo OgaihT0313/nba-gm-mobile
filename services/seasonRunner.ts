@@ -39,6 +39,9 @@ export interface PinnedGameResult {
     awayTeamId: string;
     scoreHome: number;
     scoreAway: number;
+    /** Minutes each player actually played on screen, both teams. Feeds that
+     * game's box score and the load it leaves behind. */
+    minutes?: { [playerId: string]: number };
 }
 
 /**
@@ -87,8 +90,8 @@ export function simulateOneDay(season: SeasonState, pinnedResult?: PinnedGameRes
         newTeams[winnerIdx].wins = (newTeams[winnerIdx].wins || 0) + 1;
         newTeams[loserIdx].losses = (newTeams[loserIdx].losses || 0) + 1;
 
-        simulationEngine.recordGameStats(newTeams[winnerIdx], result.scoreWinner, result.scoreLoser, newPlayers);
-        simulationEngine.recordGameStats(newTeams[loserIdx], result.scoreLoser, result.scoreWinner, newPlayers);
+        simulationEngine.recordGameStats(newTeams[winnerIdx], result.scoreWinner, result.scoreLoser, newPlayers, pinned?.minutes);
+        simulationEngine.recordGameStats(newTeams[loserIdx], result.scoreLoser, result.scoreWinner, newPlayers, pinned?.minutes);
 
         const totalGames = (newTeams[winnerIdx].wins || 0) + (newTeams[winnerIdx].losses || 0);
         if (totalGames % 5 === 0) {

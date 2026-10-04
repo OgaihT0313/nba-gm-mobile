@@ -4,24 +4,28 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useAudioPlayer, type AudioPlayer } from 'expo-audio';
 
 import { Team, Player, Coach, WatchPlay } from '../types';
-import { getTeamAccent, getTeamNickname, getTeamTricode } from '../constants';
-import { WATCH_PLAY_META, STARTING_TIMEOUTS } from '../services/simulationService';
+import { getTeamAccent, getTeamNickname, getTeamTricode, formatPositions } from '../constants';
+import { WATCH_PLAY_META, STARTING_TIMEOUTS, getRotationWeights } from '../services/simulationService';
 import {
   buildFive,
   courtStateAt,
   planQuarter,
   quarterSeconds,
   tipOffState,
+  initialEnergy,
+  breakRecovery,
+  rotationAt,
   REGULATION_QUARTERS,
   type CourtSide,
   type CourtState,
+  type Energy,
   type FiveOnCourt,
   type QuarterPlan,
 } from '../services/watchDirector';
 import { eraGroupForEraId } from '../data/eras';
 import { getEraVisual } from '../src/theme/eraVisuals';
 import { COLORS, INK, RADIUS, withAlpha } from '../src/theme/tokens';
-import { Panel, MonoLabel, Stat, CtaButton, GhostButton } from '../components/ui/kit';
+import { Panel, MonoLabel, Stat, CtaButton, GhostButton, Meter } from '../components/ui/kit';
 import Court3D, { CameraView } from '../components/court3d/Court3D';
 
 const CAMERA_VIEWS: { id: CameraView; label: string }[] = [
@@ -64,6 +68,24 @@ const SLOW_MO_SECONDS = 20; // game-seconds, i.e. roughly one possession
 const MAX_QUARTER = 8; // 4 regulation + 4 OT, the same safety valve advanceLiveQuarter has
 
 type Phase = 'huddle' | 'live' | 'final';
+type HuddleTab = 'play' | 'lineup';
+
+/** Below this the live panel calls a player out as spent. */
+const EXHAUSTED = 35;
+
+const energyColor = (e: number) => (e >= 70 ? COLORS.good : e >= 50 ? COLORS.warn : COLORS.cta);
+const lastName = (name: string) => name.split(' ').slice(-1)[0];
+
+/** Minutes each player spent on the floor in a plan's trips, added into `into`. */
+const addMinutes = (into: { [id: string]: number }, plan: QuarterPlan, until = Infinity) => {
+  for (const p of plan.possessions) {
+    if (p.start >= until) continue;
+    const secs = Math.min(p.end, until) - p.start;
+    for (const five of [p.fiveHome, p.fiveAway]) {
+      five?.players.forEach((pl) => { into[pl.playerId] = (into[pl.playerId] ?? 0) + secs / 60; });
+    }
+  }
+};
 
 const clockLabel = (secondsIntoQuarter: number, quarter: number) => {
   const remaining = Math.max(0, Math.round(quarterSeconds(quarter) - secondsIntoQuarter));
@@ -85,7 +107,7 @@ interface WatchGameScreenProps {
   userTeamId: string;
   /** Called with the score that actually happened on screen — App pins exactly
    * this into the season, so the game is never re-rolled afterward. */
-  onFinish: (scoreHome: number, scoreAway: number) => void;
+  onFinish: (scoreHome: number, scoreAway: number, minutes?: { [playerId: string]: number }) => void;
   /** Which historical era (if any) the save is in — see data/eras/index.ts.
    * Only used to pick Court3D's floor tone (Fase C's per-era visual
    * identity); undefined for a live/current-season save renders the exact
@@ -111,6 +133,16 @@ const WatchGameScreen: React.FC<WatchGameScreenProps> = ({
     home: buildFive(home, players, 'home'),
     away: buildFive(away, players, 'away'),
   });
+  // Everyone's legs, carried across periods (see breakRecovery) and read back
+  // out of the plan at a timeout (rotationAt).
+  const energyRef = useRef<Energy>(initialEnergy([home, away], players));
+  // Minutes actually played on screen, handed back with the score so the
+  // season's box score -- and therefore load -- is the game you watched.
+  const minutesRef = useRef<{ [id: string]: number }>({});
+  const autoRef = useRef(true);
+  // Set the first time the GM edits his five: his choice becomes the coach's
+  // starters (see autoSubstitute), the rest of the rotation behind them.
+  const priorityRef = useRef<string[] | undefined>(undefined);
 
   // --- Everything the 60fps loop touches lives in a ref, never in state. ---
   // Seeded with the tip-off so the court is already populated behind the
@@ -137,6 +169,14 @@ const WatchGameScreen: React.FC<WatchGameScreenProps> = ({
   const [isTimeoutHuddle, setIsTimeoutHuddle] = useState(false);
   const [cameraView, setCameraView] = useState<CameraView>('iso');
   const [banner, setBanner] = useState<{ text: string; sub: string; color: string } | null>(null);
+  const [huddleTab, setHuddleTab] = useState<HuddleTab>('play');
+  const [autoSubs, setAutoSubs] = useState(true);
+  // Bumped whenever the user's five or the energy map changes outside a plan
+  // (a swap in the huddle, a quarter break), so the lineup panel re-reads refs.
+  const [rotationTick, setRotationTick] = useState(0);
+  const [selectedSlot, setSelectedSlot] = useState<number | null>(null);
+  // The user's five and their energy as of the last scoreboard refresh.
+  const [liveFive, setLiveFive] = useState<{ id: string; name: string; energy: number }[]>([]);
 
   // Synthesized placeholder SFX (assets/sfx — see scripts/generate_sfx.js).
   // .seekTo(0) before each play() so a basket landing mid-decay of the
@@ -207,6 +247,9 @@ const WatchGameScreen: React.FC<WatchGameScreenProps> = ({
       home, away, players, coaches,
       fiveHome: fives.current.home,
       fiveAway: fives.current.away,
+      energy: energyRef.current,
+      autoSubs: { home: userSide === 'home' ? autoRef.current : true, away: userSide === 'away' ? autoRef.current : true },
+      userPriority: priorityRef.current,
       userSide,
       play: nextPlay,
       timeout: spendTimeout,
@@ -216,8 +259,12 @@ const WatchGameScreen: React.FC<WatchGameScreenProps> = ({
 
     if (spendTimeout && planRef.current) {
       // Keep everything already played (and already on the scoreboard); only
-      // the rest of the quarter is re-resolved with the new call.
-      const kept = planRef.current.possessions.filter((p) => p.start < from);
+      // the rest of the quarter is re-resolved with the new call. The kept
+      // trips' minutes were banked at the whistle, so they are flagged to be
+      // skipped when the quarter's minutes are counted.
+      const kept = planRef.current.possessions
+        .filter((p) => p.start < from)
+        .map((p) => ({ ...p, fiveHome: undefined, fiveAway: undefined }));
       planRef.current = { ...fresh, possessions: [...kept, ...fresh.possessions] };
     } else {
       planRef.current = fresh;
@@ -245,6 +292,13 @@ const WatchGameScreen: React.FC<WatchGameScreenProps> = ({
   const endQuarter = () => {
     const final = scoreAt(quarterSeconds(quarterRef.current));
     const q = quarterRef.current;
+    const ended = planRef.current;
+    if (ended) {
+      addMinutes(minutesRef.current, ended);
+      fives.current = { home: ended.endFiveHome, away: ended.endFiveAway };
+      energyRef.current = breakRecovery(ended.endEnergy, q);
+      setRotationTick((n) => n + 1);
+    }
     const decided = q >= REGULATION_QUARTERS && final.home !== final.away;
     // Safety valve, same as advanceLiveQuarter's: past four overtimes, settle
     // it rather than loop forever. A tie must never reach the season — the
@@ -335,6 +389,11 @@ const WatchGameScreen: React.FC<WatchGameScreenProps> = ({
       if (phaseRef.current !== 'live') return;
       setClock(clockRef.current);
       setScore(scoreAt(clockRef.current));
+      const at = planRef.current ? rotationAt(planRef.current, clockRef.current) : null;
+      if (at) {
+        const five = userSide === 'home' ? at.fiveHome : at.fiveAway;
+        setLiveFive(five.players.map((p) => ({ id: p.playerId, name: p.name, energy: at.energy[p.playerId] ?? 100 })));
+      }
     }, 200);
     return () => clearInterval(id);
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -350,6 +409,20 @@ const WatchGameScreen: React.FC<WatchGameScreenProps> = ({
   const callTimeout = () => {
     if (timeoutsLeft <= 0 || phaseRef.current !== 'live') return;
     playSound(whistleSound);
+    // The huddle edits the five that is actually out there, with the legs it
+    // has right now. Minutes up to the whistle are banked; the rest of the
+    // quarter is replanned from here.
+    const plan = planRef.current;
+    if (plan) {
+      const at = rotationAt(plan, clockRef.current);
+      if (at) {
+        fives.current = { home: at.fiveHome, away: at.fiveAway };
+        energyRef.current = at.energy;
+      }
+      addMinutes(minutesRef.current, plan, clockRef.current);
+      planRef.current = { ...plan, possessions: plan.possessions.filter((p) => p.start < clockRef.current) };
+      setRotationTick((n) => n + 1);
+    }
     phaseRef.current = 'huddle';
     setPhase('huddle');
     setIsTimeoutHuddle(true);
@@ -361,27 +434,42 @@ const WatchGameScreen: React.FC<WatchGameScreenProps> = ({
   const skipToEnd = () => {
     let h = completedRef.current.home;
     let a = completedRef.current.away;
+    let energy = energyRef.current;
+    let fh = fives.current.home;
+    let fa = fives.current.away;
     if (planRef.current) {
       const t = totalOf(planRef.current);
       h += t.home;
       a += t.away;
+      addMinutes(minutesRef.current, planRef.current);
+      energy = breakRecovery(planRef.current.endEnergy, quarterRef.current);
+      fh = planRef.current.endFiveHome;
+      fa = planRef.current.endFiveAway;
     }
     let q = quarterRef.current;
     while (q < REGULATION_QUARTERS || h === a) {
       q += 1;
       if (q > MAX_QUARTER) { h += 1; break; }
-      const t = totalOf(planQuarter({
+      const plan = planQuarter({
         home, away, players, coaches,
-        fiveHome: fives.current.home,
-        fiveAway: fives.current.away,
+        fiveHome: fh,
+        fiveAway: fa,
+        energy,
+        autoSubs: { home: userSide === 'home' ? autoRef.current : true, away: userSide === 'away' ? autoRef.current : true },
+        userPriority: priorityRef.current,
         userSide,
         play: playRef.current,
         timeout: false,
         quarter: q,
         from: 0,
-      }));
+      });
+      const t = totalOf(plan);
       h += t.home;
       a += t.away;
+      addMinutes(minutesRef.current, plan);
+      energy = breakRecovery(plan.endEnergy, q);
+      fh = plan.endFiveHome;
+      fa = plan.endFiveAway;
     }
     completedRef.current = { home: h, away: a };
     planRef.current = null;
@@ -398,6 +486,42 @@ const WatchGameScreen: React.FC<WatchGameScreenProps> = ({
     speedRef.current = next;
     setSpeed(next);
   };
+
+  const userTeam = userSide === 'home' ? home : away;
+  const myFive = userSide === 'home' ? fives.current.home : fives.current.away;
+  // The bench: everyone on the roster who is not out there and not hurt,
+  // freshest-first within the rotation order.
+  const bench = useMemo(() => {
+    const onCourt = new Set(myFive.players.map((p) => p.playerId));
+    const out = userTeam.playerAbsences ?? {};
+    return userTeam.roster
+      .filter((id) => !onCourt.has(id) && !out[id] && players[id])
+      .map((id) => ({ p: players[id], e: energyRef.current[id] ?? 100 }))
+      .sort((x, y) => y.p.ovr - x.p.ovr);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [rotationTick, userTeam, players]);
+
+  const swapIn = (playerId: string) => {
+    if (selectedSlot === null) return;
+    const p = players[playerId];
+    if (!p) return;
+    const five = myFive.players.map((x, i) => (i === selectedSlot ? { playerId, name: p.name, slot: x.slot } : x));
+    const next = { ...myFive, players: five };
+    fives.current = userSide === 'home' ? { ...fives.current, home: next } : { ...fives.current, away: next };
+    const chosen = five.map((x) => x.playerId);
+    // Behind his five, the rotation as he set it in Meu Time -- rotationSize
+    // still decides who is even eligible, so the deep bench stays on it.
+    priorityRef.current = [...chosen, ...getRotationWeights(userTeam, players).ids.filter((id) => !chosen.includes(id))];
+    setSelectedSlot(null);
+    setRotationTick((n) => n + 1);
+  };
+
+  const toggleAuto = () => {
+    autoRef.current = !autoRef.current;
+    setAutoSubs(autoRef.current);
+  };
+
+  const exhausted = liveFive.filter((p) => p.energy < EXHAUSTED);
 
   const userAccent = userSide === 'home' ? homeAccent : awayAccent;
   const huddleTitle = isTimeoutHuddle
@@ -482,6 +606,27 @@ const WatchGameScreen: React.FC<WatchGameScreenProps> = ({
               </MonoLabel>
             </View>
           )}
+
+          {/* Your five's legs. The one number that tells you when to stop the
+              game -- before this, nobody on screen ever got tired. */}
+          {phase === 'live' && liveFive.length === 5 && (
+            <View className="flex-row" style={{ gap: 6, marginTop: 9 }}>
+              {liveFive.map((p) => (
+                <View key={p.id} style={{ flex: 1 }} accessibilityLabel={`${p.name}, energia ${Math.round(p.energy)}`}>
+                  <MonoLabel size={9} color={p.energy < EXHAUSTED ? COLORS.badSoft : INK.faint} numberOfLines={1} style={{ letterSpacing: 0 }}>
+                    {lastName(p.name)}
+                  </MonoLabel>
+                  <Meter value={p.energy / 100} color={energyColor(p.energy)} height={4} track="rgba(255,255,255,0.08)" style={{ marginTop: 3 }} />
+                </View>
+              ))}
+            </View>
+          )}
+          {phase === 'live' && exhausted.length > 0 && (
+            <MonoLabel size={9} color={COLORS.badSoft} style={{ marginTop: 6, letterSpacing: 0.2 }} numberOfLines={1}>
+              {exhausted.map((p) => lastName(p.name)).join(', ')} {exhausted.length === 1 ? 'está exausto' : 'estão exaustos'}
+              {timeoutsLeft > 0 ? ' · peça tempo' : ''}
+            </MonoLabel>
+          )}
         </Panel>
 
         <View className="flex-row" style={{ marginTop: 8, gap: 6 }}>
@@ -518,6 +663,104 @@ const WatchGameScreen: React.FC<WatchGameScreenProps> = ({
             <MonoLabel size={9} color={userAccent.primary}>{huddleTitle}</MonoLabel>
             <MonoLabel size={9} color={INK.faint} style={{ marginTop: 3 }}>{huddleSub}</MonoLabel>
 
+            <View className="flex-row" style={{ gap: 6, marginTop: 10 }}>
+              {([['play', 'Jogada'], ['lineup', 'Quinteto']] as [HuddleTab, string][]).map(([id, label]) => {
+                const active = huddleTab === id;
+                return (
+                  <Pressable
+                    key={id}
+                    accessibilityRole="tab"
+                    accessibilityLabel={label}
+                    aria-selected={active}
+                    onPress={() => { setHuddleTab(id); setSelectedSlot(null); }}
+                    className="active:opacity-70"
+                    style={{
+                      flex: 1, alignItems: 'center', paddingVertical: 7, borderRadius: 999,
+                      backgroundColor: active ? '#ffffff' : 'rgba(255,255,255,0.05)',
+                      borderWidth: 1, borderColor: active ? '#ffffff' : 'rgba(255,255,255,0.12)',
+                    }}
+                  >
+                    <MonoLabel size={9.5} color={active ? COLORS.bg : INK.faint}>{label}</MonoLabel>
+                  </Pressable>
+                );
+              })}
+            </View>
+
+            {huddleTab === 'lineup' ? (
+              <ScrollView style={{ maxHeight: 262, marginTop: 10 }} showsVerticalScrollIndicator={false}>
+                <Pressable
+                  accessibilityRole="switch"
+                  accessibilityLabel="Rotação automática"
+                  aria-checked={autoSubs}
+                  onPress={toggleAuto}
+                  className="flex-row items-center justify-between active:opacity-70"
+                  style={{ paddingVertical: 8, paddingHorizontal: 10, borderRadius: RADIUS.control, backgroundColor: 'rgba(255,255,255,0.04)' }}
+                >
+                  <View style={{ flex: 1 }}>
+                    <Text style={{ color: COLORS.text, fontSize: 12, fontWeight: '800' }}>Rotação automática</Text>
+                    <MonoLabel size={9} color={INK.faint} style={{ marginTop: 2, letterSpacing: 0 }}>
+                      {autoSubs ? 'O técnico tira quem cansa' : 'Ninguém sai sem você mandar'}
+                    </MonoLabel>
+                  </View>
+                  <MonoLabel size={9.5} color={autoSubs ? COLORS.good : INK.faint}>{autoSubs ? 'Ligada' : 'Desligada'}</MonoLabel>
+                </Pressable>
+
+                <MonoLabel size={9} color={INK.faint} style={{ marginTop: 10, marginBottom: 6 }}>
+                  {selectedSlot === null ? 'Em quadra · toque em quem sai' : `Quem entra no lugar de ${lastName(myFive.players[selectedSlot].name)}?`}
+                </MonoLabel>
+                <View style={{ gap: 5 }}>
+                  {myFive.players.map((cp, i) => {
+                    const e = energyRef.current[cp.playerId] ?? 100;
+                    const sel = selectedSlot === i;
+                    return (
+                      <Pressable
+                        key={cp.playerId}
+                        accessibilityRole="button"
+                        accessibilityLabel={`${cp.slot} ${cp.name}, energia ${Math.round(e)}`}
+                        aria-selected={sel}
+                        onPress={() => setSelectedSlot(sel ? null : i)}
+                        className="flex-row items-center active:opacity-70"
+                        style={{
+                          gap: 8, paddingVertical: 7, paddingHorizontal: 10, borderRadius: RADIUS.control,
+                          backgroundColor: sel ? withAlpha(userAccent.primary, 0.18) : 'rgba(255,255,255,0.04)',
+                          borderWidth: 1, borderColor: sel ? userAccent.primary : 'transparent',
+                        }}
+                      >
+                        <MonoLabel size={9} color={INK.faint} style={{ width: 22 }}>{cp.slot}</MonoLabel>
+                        <Text style={{ color: COLORS.text, fontSize: 12, fontWeight: '700', flex: 1 }} numberOfLines={1}>{cp.name}</Text>
+                        <Meter value={e / 100} color={energyColor(e)} height={5} track="rgba(255,255,255,0.08)" style={{ width: 54 }} />
+                        <MonoLabel size={9} color={energyColor(e)} style={{ width: 22, textAlign: 'right' }}>{Math.round(e)}</MonoLabel>
+                      </Pressable>
+                    );
+                  })}
+                </View>
+
+                <MonoLabel size={9} color={INK.faint} style={{ marginTop: 10, marginBottom: 6 }}>Banco</MonoLabel>
+                <View style={{ gap: 5 }}>
+                  {bench.map(({ p, e }) => (
+                    <Pressable
+                      key={p.id}
+                      accessibilityRole="button"
+                      accessibilityLabel={`${p.name}, ${formatPositions(p)}, ${p.ovr} de geral, energia ${Math.round(e)}`}
+                      aria-disabled={selectedSlot === null}
+                      onPress={() => swapIn(p.id)}
+                      className="flex-row items-center active:opacity-70"
+                      style={{
+                        gap: 8, paddingVertical: 6, paddingHorizontal: 10, borderRadius: RADIUS.control,
+                        backgroundColor: 'rgba(255,255,255,0.03)', opacity: selectedSlot === null ? 0.65 : 1,
+                      }}
+                    >
+                      <MonoLabel size={9} color={INK.faint} style={{ width: 22 }}>{p.ovr}</MonoLabel>
+                      <Text style={{ color: COLORS.textDim, fontSize: 11.5, fontWeight: '600', flex: 1 }} numberOfLines={1}>
+                        {p.name} <Text style={{ color: INK.faint, fontSize: 10 }}>{formatPositions(p)}</Text>
+                      </Text>
+                      <Meter value={e / 100} color={energyColor(e)} height={5} track="rgba(255,255,255,0.08)" style={{ width: 54 }} />
+                      <MonoLabel size={9} color={energyColor(e)} style={{ width: 22, textAlign: 'right' }}>{Math.round(e)}</MonoLabel>
+                    </Pressable>
+                  ))}
+                </View>
+              </ScrollView>
+            ) : (
             <ScrollView style={{ maxHeight: 232, marginTop: 10 }} showsVerticalScrollIndicator={false}>
               <View style={{ gap: 7 }}>
                 {PLAY_ORDER.map((id) => {
@@ -546,6 +789,7 @@ const WatchGameScreen: React.FC<WatchGameScreenProps> = ({
                 })}
               </View>
             </ScrollView>
+            )}
 
             <View style={{ marginTop: 10 }}>
               <CtaButton
@@ -581,7 +825,7 @@ const WatchGameScreen: React.FC<WatchGameScreenProps> = ({
           <CtaButton
             label={winnerLine}
             sub={`${score.home}-${score.away} · ${userWon ? 'vitória sua' : 'derrota'} · toque para continuar`}
-            onPress={() => onFinish(score.home, score.away)}
+            onPress={() => onFinish(score.home, score.away, minutesRef.current)}
           />
         )}
       </View>

@@ -1,4 +1,6 @@
 import type { Team, Player, Coach, WatchPlay } from '../types';
+import { getPlayerPositions } from '../constants';
+import { fatigueFactor } from './personalityService';
 import {
     computeExpectedPoints,
     generateScoringPlays,
@@ -167,8 +169,8 @@ export interface FiveOnCourt {
 }
 
 // The starting five, with any unfilled lineup slot backfilled from the top of
-// the rotation so the court is never short a body. Substitutions aren't
-// implemented yet (ROADMAP.md) — these five play all 48 minutes.
+// the rotation so the court is never short a body. Who replaces them as the
+// game goes on is the rotation's job (see "Energy and the bench" below).
 export const buildFive = (team: Team, players: { [key: string]: Player }, side: CourtSide): FiveOnCourt => {
     const { slots } = simulationEngine.getLineup(team, players);
     const rotation = getRotationWeights(team, players).ids;
@@ -189,6 +191,150 @@ export const buildFive = (team: Team, players: { [key: string]: Player }, side: 
     });
 
     return { side, teamId: team.id, players: five };
+};
+
+/* ------------------------------------------------------------------ */
+/* Energy and the bench.                                               */
+/* ------------------------------------------------------------------ */
+// Before this the five starters played all 48 minutes on screen. Now every
+// player carries energy (0-100) that drains on the floor and comes back on the
+// bench, and the coach rotates on it. Tuned so the automatic rotation lands
+// starters in the mid-30s in minutes -- what the season's box score already
+// gives them -- which keeps a watched game the same game as an unwatched one.
+// See PLANO-BANCO.md.
+
+export type Energy = { [playerId: string]: number };
+
+/** Per game-second on the floor. A fresh starter hits the sub line ~8 minutes in. */
+const DRAIN_PER_SECOND = 0.1;
+/** Per game-second on the bench. ~4 minutes brings a tired player back. */
+const REST_PER_SECOND = 0.15;
+/** Below this the coach takes him out. */
+const SUB_OUT = 52;
+/** A reserve has to be at least this fresh to go in. */
+const SUB_IN = 75;
+/** A higher-priority player this rested takes his spot back from a reserve. */
+const SUB_BACK = 90;
+/**
+ * At most this many changes per side at one dead ball. Five starters drain at
+ * the same rate, so without a cap they all hit SUB_OUT together and the coach
+ * changed the whole five at once -- seen live, a hockey line change with
+ * guards at PF and C. Staggered, the starters' energies spread apart and stay
+ * apart, which is how a real rotation looks.
+ */
+const MAX_SUBS_PER_STOP = 2;
+/** Only this spent is a player pulled for someone who doesn't play his spot. */
+const OUT_OF_POSITION_FLOOR = 35;
+/** Where tiredness starts to cost him on the floor. */
+const FATIGUE_FREE = 60;
+/** OVR lost per point of energy under FATIGUE_FREE (at 20 energy, -8 OVR). */
+const FATIGUE_COST = 0.2;
+/**
+ * How much of a rating gap becomes points per game. computeExpectedPoints'
+ * own `matchupStrength`, mirrored so the lineup adjustment speaks the same
+ * currency as the rest of the score.
+ */
+const MATCHUP_STRENGTH = 1.15;
+
+/** Energy a player brings into the game: the season's fatigue comes with him. */
+export const initialEnergy = (teams: Team[], players: { [key: string]: Player }): Energy => {
+    const e: Energy = {};
+    teams.forEach((t) => t.roster.forEach((id) => {
+        const p = players[id];
+        if (p) e[id] = Math.max(40, 100 - (p.load ?? 0) * 0.3);
+    }));
+    return e;
+};
+
+/** Between periods everyone gets a breather; halftime is a real one. */
+export const breakRecovery = (energy: Energy, endedQuarter: number): Energy => {
+    const gain = endedQuarter === 2 ? 25 : 10;
+    const out: Energy = {};
+    for (const id in energy) out[id] = Math.min(100, energy[id] + gain);
+    return out;
+};
+
+const effectiveOvr = (p: Player | undefined, energy: number): number =>
+    (p?.ovr ?? 60) - Math.max(0, FATIGUE_FREE - energy) * FATIGUE_COST;
+
+/** The rating the season engine plays this team at: its rotation, minutes-weighted. */
+const rotationOvr = (team: Team, players: { [key: string]: Player }): number => {
+    const { ids, weights } = getRotationWeights(team, players);
+    let sum = 0;
+    let w = 0;
+    ids.forEach((id, i) => {
+        if (!players[id]) return;
+        sum += players[id].ovr * weights[i];
+        w += weights[i];
+    });
+    return w > 0 ? sum / w : 70;
+};
+
+const playsSlot = (p: Player | undefined, slot: string) => !!p && getPlayerPositions(p).includes(slot);
+
+/**
+ * The coach's call at a dead ball: anyone under SUB_OUT comes out for the
+ * freshest-ranked reserve who plays the spot, and a rested regular takes his
+ * minutes back from a reserve. Priority is the rotation order (starters
+ * first), so rotationSize decides who is even eligible -- the same setting
+ * that shapes the season's minutes.
+ */
+export const autoSubstitute = (
+    five: FiveOnCourt, team: Team, players: { [key: string]: Player }, energy: Energy,
+    /** Who the coach treats as his starters, in order. Defaults to the
+     * rotation; the screen passes the GM's own five first once he has picked
+     * one, so the coach rests them and brings THEM back instead of undoing
+     * the change at the next dead ball. */
+    priorityOverride?: string[],
+): FiveOnCourt => {
+    const priority = priorityOverride ?? getRotationWeights(team, players).ids;
+    const rank = (id: string) => {
+        const i = priority.indexOf(id);
+        return i >= 0 ? i : 99;
+    };
+    const lineup = five.players.map((p) => ({ ...p }));
+    const onCourt = () => new Set(lineup.map((p) => p.playerId));
+
+    let changes = 0;
+    // The most tired come out first, so the cap spends itself where it matters.
+    const order = lineup.map((_, i) => i).sort((a, b) => (energy[lineup[a].playerId] ?? 100) - (energy[lineup[b].playerId] ?? 100));
+    order.forEach((i) => {
+        if (changes >= MAX_SUBS_PER_STOP) return;
+        const slot = lineup[i];
+        const occupant = slot.playerId;
+        const e = energy[occupant] ?? 100;
+        const taken = onCourt();
+        const pick = (minEnergy: number, betterThan: number) => {
+            const ok = (id: string) => !taken.has(id) && !!players[id] && (energy[id] ?? 100) >= minEnergy && rank(id) < betterThan;
+            return priority.find((id) => ok(id) && playsSlot(players[id], slot.slot))
+                ?? (minEnergy === SUB_IN && e < OUT_OF_POSITION_FLOOR ? priority.find(ok) : undefined);
+        };
+        let incoming: string | undefined;
+        if (e < SUB_OUT) incoming = pick(SUB_IN, 99);
+        else if (rank(occupant) >= 5) incoming = pick(SUB_BACK, rank(occupant));
+        if (incoming) {
+            lineup[i] = { playerId: incoming, name: players[incoming].name, slot: slot.slot };
+            changes++;
+        }
+    });
+    return { ...five, players: lineup };
+};
+
+const drainAndRest = (
+    energy: Energy, seconds: number, onCourt: Set<string>, players: { [key: string]: Player },
+): Energy => {
+    const out: Energy = {};
+    for (const id in energy) {
+        if (onCourt.has(id)) {
+            // The workhorse burns slower -- the same archetype that already
+            // shrugs off load in the season sim, at a gentler ratio here.
+            const rate = DRAIN_PER_SECOND * (0.5 + 0.5 * fatigueFactor(players[id] ?? ({} as Player)));
+            out[id] = Math.max(0, energy[id] - rate * seconds);
+        } else {
+            out[id] = Math.min(100, energy[id] + REST_PER_SECOND * seconds);
+        }
+    }
+    return out;
 };
 
 /* ------------------------------------------------------------------ */
@@ -223,22 +369,34 @@ const playBias = (play: WatchPlay, five: CourtPlayer[], players: { [key: string]
     }
 };
 
+// Who gets the side's baskets this span: everyone who was on the floor for its
+// offensive trips, weighted by how long, by the rotation taper, and by what
+// the called play asks of his spot (read off the five he spent most of the
+// span in).
 const scoringPool = (
-    team: Team, players: { [key: string]: Player }, five: FiveOnCourt, play: WatchPlay,
+    team: Team, players: { [key: string]: Player }, fives: FiveOnCourt[], durations: number[], play: WatchPlay,
 ): { ids: string[]; weights: number[] } => {
-    const bias = playBias(play, five.players, players);
-    // Rotation weights taper starters 1st -> 5th; keep that taper and layer
-    // the play bias on top, so the base set still spreads the way the box
-    // score does.
     const rotation = getRotationWeights(team, players);
+    const seconds = new Map<string, number>();
+    const biasOf = new Map<string, number>();
+    fives.forEach((five, k) => {
+        const bias = playBias(play, five.players, players);
+        five.players.forEach((p, i) => {
+            if (!players[p.playerId]) return; // backfilled empty slot — nobody there to score
+            seconds.set(p.playerId, (seconds.get(p.playerId) ?? 0) + durations[k]);
+            if (!biasOf.has(p.playerId) || durations[k] > 0) biasOf.set(p.playerId, bias[i]);
+        });
+    });
+    const total = [...seconds.values()].reduce((a, b) => a + b, 0) || 1;
     const ids: string[] = [];
     const weights: number[] = [];
-    five.players.forEach((p, i) => {
-        if (!players[p.playerId]) return; // backfilled empty slot — nobody there to score
-        const rotIdx = rotation.ids.indexOf(p.playerId);
+    seconds.forEach((secs, id) => {
+        const rotIdx = rotation.ids.indexOf(id);
+        // Rotation weights taper starters 1st -> 5th; keep that taper so a
+        // span played by the starters still spreads the way the box score does.
         const base = rotIdx >= 0 ? rotation.weights[rotIdx] : 0.6;
-        ids.push(p.playerId);
-        weights.push(base * bias[i]);
+        ids.push(id);
+        weights.push(base * (biasOf.get(id) ?? 1) * (secs / total) * 5);
     });
     return { ids, weights };
 };
@@ -271,6 +429,10 @@ export interface Possession {
     assistName: string | null;
     shotAt: number; // absolute second the ball reaches the rim
     beats: Beat[];
+    /** Who was on the floor for this trip, both sides, and how fresh. */
+    fiveHome?: FiveOnCourt;
+    fiveAway?: FiveOnCourt;
+    energy?: Energy;
 }
 
 export interface QuarterPlan {
@@ -279,6 +441,10 @@ export interface QuarterPlan {
     pointsHome: number; // points scored WITHIN this plan's span, not the running total
     pointsAway: number;
     possessions: Possession[];
+    /** Where the rotation stands at the buzzer -- the next period starts here. */
+    endFiveHome: FiveOnCourt;
+    endFiveAway: FiveOnCourt;
+    endEnergy: Energy;
 }
 
 const withShooter = (spots: Spot[], idx: number, spot: Spot): Spot[] =>
@@ -398,6 +564,14 @@ export interface PlanQuarterArgs {
     /** Second of the quarter to start planning from — 0 for a fresh quarter,
      * or wherever the clock was when a timeout re-opened the remainder. */
     from: number;
+    /** Everyone's energy at `from`. Omitted: both rosters fresh from the season. */
+    energy?: Energy;
+    /** Whether the coach rotates each side on his own. The user can switch his
+     * off and run the bench by hand. Omitted: both on. */
+    autoSubs?: { home: boolean; away: boolean };
+    /** The user's own pecking order once he has edited his five (see
+     * autoSubstitute). Applies to his side only. */
+    userPriority?: string[];
 }
 
 // The CPU opponent picks a set too, so its possessions don't all look the
@@ -407,39 +581,12 @@ const CPU_PLAYS: WatchPlay[] = ['pick_roll', 'pindown', 'post_up', 'iso'];
 const cpuPlay = (): WatchPlay => CPU_PLAYS[Math.floor(Math.random() * CPU_PLAYS.length)];
 
 export const planQuarter = (args: PlanQuarterArgs): QuarterPlan => {
-    const { home, away, players, coaches, fiveHome, fiveAway, userSide, play, timeout, quarter, from } = args;
+    const { home, away, players, coaches, userSide, play, timeout, quarter, from } = args;
+    const autoSubs = args.autoSubs ?? { home: true, away: true };
 
     const total = quarterSeconds(quarter);
     const span = Math.max(0, total - from) / total;
     const meta = WATCH_PLAY_META[play];
-
-    // Same shape as advanceLiveQuarter: the whole-game expectation split by
-    // period, nudged by what the user called, floored so no quarter collapses.
-    const { expectedPointsA, expectedPointsB } = computeExpectedPoints(home, away, players, coaches, true);
-    const periodShare = quarter <= REGULATION_QUARTERS
-        ? 1 / REGULATION_QUARTERS
-        : OVERTIME_SECONDS / (REGULATION_SECONDS * REGULATION_QUARTERS);
-
-    let selfDelta = meta.selfDelta;
-    const oppDelta = meta.oppDelta;
-    if (timeout) selfDelta += TIMEOUT_BONUS;
-
-    const deltaHome = userSide === 'home' ? selfDelta : oppDelta;
-    const deltaAway = userSide === 'home' ? oppDelta : selfDelta;
-    const variance = Math.max(4, LIVE_QUARTER_VARIANCE + meta.variance);
-    const swing = () => Math.random() * variance - variance / 2;
-
-    // simulateGame clamps every other game on the calendar to at least 80
-    // points a side. A watched game is the same game, so it gets the same
-    // guarantee, spread over the four regulation periods — otherwise the one
-    // game the user actually sits through is the only one that can end 73-91.
-    // An overtime period keeps the narrower Game 7 floor, scaled to length.
-    const floorPerPeriod = quarter <= REGULATION_QUARTERS
-        ? Math.max(QUARTER_FLOOR, MIN_GAME_SCORE / REGULATION_QUARTERS)
-        : QUARTER_FLOOR * (OVERTIME_SECONDS / REGULATION_SECONDS);
-    const floor = Math.round(floorPerPeriod * span);
-    const pointsHome = Math.max(floor, Math.round((expectedPointsA * periodShare + deltaHome + swing()) * span));
-    const pointsAway = Math.max(floor, Math.round((expectedPointsB * periodShare + deltaAway + swing()) * span));
 
     // Lay possessions end to end across the span, alternating sides. The tail
     // is absorbed by the last possession rather than left as a stub: a
@@ -461,21 +608,81 @@ export const planQuarter = (args: PlanQuarterArgs): QuarterPlan => {
         slots[slots.length - 1].duration = total - slots[slots.length - 1].start;
     }
 
-    // Split each side's points into real baskets attributed to the five on the
-    // floor, then drop those baskets onto that side's possessions. Everything
-    // left over is a miss — which is what makes it read as a basketball game
-    // and not a highlight reel.
+    // Walk the span once to settle who is on the floor for every trip. It
+    // depends only on the clock, never on the score, so it can be decided
+    // before a single point is.
+    let energy: Energy = args.energy ?? initialEnergy([home, away], players);
+    let fh = args.fiveHome;
+    let fa = args.fiveAway;
+    const lineups: { fiveHome: FiveOnCourt; fiveAway: FiveOnCourt; energy: Energy }[] = [];
+    for (const slot of slots) {
+        if (autoSubs.home) fh = autoSubstitute(fh, home, players, energy, userSide === 'home' ? args.userPriority : undefined);
+        if (autoSubs.away) fa = autoSubstitute(fa, away, players, energy, userSide === 'away' ? args.userPriority : undefined);
+        lineups.push({ fiveHome: fh, fiveAway: fa, energy });
+        const onCourt = new Set([...fh.players, ...fa.players].map((p) => p.playerId));
+        energy = drainAndRest(energy, slot.duration, onCourt, players);
+    }
+
+    // Who was out there, against who the season engine assumes plays these
+    // minutes. Both ends: a better five scores more AND gives up less.
+    const lineupEdge = (team: Team, which: 'fiveHome' | 'fiveAway'): number => {
+        if (slots.length === 0) return 0;
+        let sum = 0;
+        let secs = 0;
+        slots.forEach((slot, k) => {
+            const five = lineups[k][which];
+            const avg = five.players.reduce((acc, p) => acc + effectiveOvr(players[p.playerId], lineups[k].energy[p.playerId] ?? 100), 0) / 5;
+            sum += avg * slot.duration;
+            secs += slot.duration;
+        });
+        return sum / secs - rotationOvr(team, players);
+    };
+
+    // Same shape as advanceLiveQuarter: the whole-game expectation split by
+    // period, nudged by what the user called, floored so no quarter collapses.
+    const { expectedPointsA, expectedPointsB } = computeExpectedPoints(home, away, players, coaches, true);
+    const periodShare = quarter <= REGULATION_QUARTERS
+        ? 1 / REGULATION_QUARTERS
+        : OVERTIME_SECONDS / (REGULATION_SECONDS * REGULATION_QUARTERS);
+
+    let selfDelta = meta.selfDelta;
+    const oppDelta = meta.oppDelta;
+    if (timeout) selfDelta += TIMEOUT_BONUS;
+
+    const edge = (lineupEdge(home, 'fiveHome') - lineupEdge(away, 'fiveAway')) * MATCHUP_STRENGTH * periodShare;
+    const deltaHome = (userSide === 'home' ? selfDelta : oppDelta) + edge;
+    const deltaAway = (userSide === 'home' ? oppDelta : selfDelta) - edge;
+    const variance = Math.max(4, LIVE_QUARTER_VARIANCE + meta.variance);
+    const swing = () => Math.random() * variance - variance / 2;
+
+    // simulateGame clamps every other game on the calendar to at least 80
+    // points a side. A watched game is the same game, so it gets the same
+    // guarantee, spread over the four regulation periods — otherwise the one
+    // game the user actually sits through is the only one that can end 73-91.
+    // An overtime period keeps the narrower Game 7 floor, scaled to length.
+    const floorPerPeriod = quarter <= REGULATION_QUARTERS
+        ? Math.max(QUARTER_FLOOR, MIN_GAME_SCORE / REGULATION_QUARTERS)
+        : QUARTER_FLOOR * (OVERTIME_SECONDS / REGULATION_SECONDS);
+    const floor = Math.round(floorPerPeriod * span);
+    const pointsHome = Math.max(floor, Math.round((expectedPointsA * periodShare + deltaHome + swing()) * span));
+    const pointsAway = Math.max(floor, Math.round((expectedPointsB * periodShare + deltaAway + swing()) * span));
+
+    // Split each side's points into real baskets attributed to whoever was on
+    // the floor for its trips, then drop each basket onto a trip its scorer
+    // actually played. Everything left over is a miss — which is what makes it
+    // read as a basketball game and not a highlight reel.
     const possessions: Possession[] = [];
     for (const s of (['home', 'away'] as CourtSide[])) {
         const team = s === 'home' ? home : away;
-        const five = s === 'home' ? fiveHome : fiveAway;
+        const which = s === 'home' ? 'fiveHome' : 'fiveAway';
         const sidePlay = s === userSide ? play : cpuPlay();
         const points = s === 'home' ? pointsHome : pointsAway;
-        const mine = slots.filter((slot) => slot.side === s);
+        const mine = slots.map((slot, k) => ({ slot, k })).filter(({ slot }) => slot.side === s);
         if (mine.length === 0) continue;
 
         const baskets: GameEvent[] = generateScoringPlays(
-            team, players, points, s === 'home' ? 'A' : 'B', scoringPool(team, players, five, sidePlay),
+            team, players, points, s === 'home' ? 'A' : 'B',
+            scoringPool(team, players, mine.map(({ k }) => lineups[k][which]), mine.map(({ slot }) => slot.duration), sidePlay),
         );
 
         // A blowout quarter can produce more baskets than possessions; the
@@ -484,26 +691,22 @@ export const planQuarter = (args: PlanQuarterArgs): QuarterPlan => {
         // the points that were attributed.
         interface Scored { points: number; shotKind: 1 | 2 | 3; playerId: string; playerName: string }
         const scoring = new Map<number, Scored>();
-        const order = mine.map((_, i) => i).sort(() => Math.random() - 0.5);
-        baskets.forEach((b, i) => {
-            const idx = order[i % order.length];
+        baskets.forEach((b) => {
+            const played = mine.map((_, i) => i).filter((i) => lineups[mine[i].k][which].players.some((p) => p.playerId === b.playerId));
+            const pool = played.length ? played : mine.map((_, i) => i);
+            const free = pool.filter((i) => !scoring.has(i));
+            const idx = (free.length ? free : pool)[Math.floor(Math.random() * (free.length ? free.length : pool.length))];
             const existing = scoring.get(idx);
-            if (existing) {
-                existing.points += b.points;
-            } else {
-                scoring.set(idx, { points: b.points, shotKind: b.points, playerId: b.playerId, playerName: b.playerName });
-            }
+            if (existing) existing.points += b.points;
+            else scoring.set(idx, { points: b.points, shotKind: b.points, playerId: b.playerId, playerName: b.playerName });
         });
 
-        const indexOfPlayer = (playerId: string) => {
-            const i = five.players.findIndex((p) => p.playerId === playerId);
-            return i >= 0 ? i : 0;
-        };
-
-        mine.forEach((slot, i) => {
+        mine.forEach(({ slot, k }, i) => {
+            const five = lineups[k][which];
             const basket = scoring.get(i);
             const made = !!basket;
-            const shooter = basket ? indexOfPlayer(basket.playerId) : Math.floor(Math.random() * 5);
+            const found = basket ? five.players.findIndex((p) => p.playerId === basket.playerId) : -1;
+            const shooter = found >= 0 ? found : Math.floor(Math.random() * 5);
             // A missed shot picks its spot the same way a made one does, so
             // the bigs aren't the only players who never brick from the arc.
             const shotKind: 1 | 2 | 3 = basket
@@ -513,19 +716,39 @@ export const planQuarter = (args: PlanQuarterArgs): QuarterPlan => {
             // it up, or the big does when the guard is the one shooting.
             const passer = shotKind === 1 ? null : shooter === 0 ? 4 : 0;
             const assisted = made && passer !== null && passer !== shooter && Math.random() < 0.62;
-            possessions.push(buildPossession(
+            const poss = buildPossession(
                 s, sidePlay, slot.start, slot.duration, made,
                 basket ? basket.points : 0, shotKind,
                 shooter, passer,
                 basket?.playerName ?? five.players[shooter]?.name ?? '',
                 assisted && passer !== null ? five.players[passer]?.name ?? null : null,
-            ));
+            );
+            poss.fiveHome = lineups[k].fiveHome;
+            poss.fiveAway = lineups[k].fiveAway;
+            poss.energy = lineups[k].energy;
+            possessions.push(poss);
         });
     }
 
     possessions.sort((a, b) => a.start - b.start);
     stitch(possessions);
-    return { quarter, from, pointsHome, pointsAway, possessions };
+    return {
+        quarter, from, pointsHome, pointsAway, possessions,
+        endFiveHome: fh, endFiveAway: fa, endEnergy: energy,
+    };
+};
+
+/**
+ * The rotation as it stood at `seconds` into a plan -- what a timeout reopens
+ * the quarter from. Read off the trip in progress (its fives and the energy
+ * they started it with).
+ */
+export const rotationAt = (
+    plan: QuarterPlan, seconds: number,
+): { fiveHome: FiveOnCourt; fiveAway: FiveOnCourt; energy: Energy } | null => {
+    const poss = possessionAt(plan, seconds);
+    if (!poss || !poss.fiveHome || !poss.fiveAway || !poss.energy) return null;
+    return { fiveHome: poss.fiveHome, fiveAway: poss.fiveAway, energy: poss.energy };
 };
 
 // Each possession is authored independently, in its own attacking frame, so
@@ -675,8 +898,12 @@ export const courtStateAt = (
     // A held ball bounces; an airborne one doesn't.
     if (a.handler !== null) ball.y += Math.abs(Math.sin(seconds * 7)) * 1.1 - 0.5;
 
-    const offFive = poss.side === 'home' ? fiveHome : fiveAway;
-    const defFive = poss.side === 'home' ? fiveAway : fiveHome;
+    // The trip's own fives when the plan recorded them (it always does now);
+    // the caller's are the fallback for a plan built before substitutions.
+    const fh = poss.fiveHome ?? fiveHome;
+    const fa = poss.fiveAway ?? fiveAway;
+    const offFive = poss.side === 'home' ? fh : fa;
+    const defFive = poss.side === 'home' ? fa : fh;
     const handler = a.handler;
 
     const build = (five: FiveOnCourt, from: Vec2[], to: Vec2[], isOffense: boolean): PlayerState[] =>

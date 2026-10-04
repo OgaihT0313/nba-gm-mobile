@@ -10,18 +10,11 @@ explícito do usuário.**
 
 ---
 
-## 0. Rodar um APK — o único risco não verificado
+## 0. Rodar um APK — FEITO (2026-10-04)
 
-Não é feature, é a única coisa aberta que pode estar quebrada agora. A correção
-da regressão de memória do Hermes V1 (commit `806f0d2`) tem como sintoma o app
-engasgar ou fechar **em sessão longa no celular**, e isso não aparece no
-navegador. Tudo que foi verificado nesta rodada foi web.
-
-```
-npx eas-cli build --platform android --profile preview --non-interactive --no-wait
-```
-
-Não faz pergunta nenhuma (conta e keystore já existem). ~10-15 min.
+Build `ab6933d3` (tudo até a rodada de UI/UX, SDK 57.0.26) instalado e testado
+pelo usuário no celular: sem problemas, inclusive em sessão longa. A correção do
+Hermes V1 (`806f0d2`) está confirmada fora do navegador.
 
 ---
 
@@ -34,16 +27,13 @@ imposto cobrado pelo dono. Medido em `scripts/check_contracts.ts`.
 
 Sobra: **dinheiro morto ao dispensar** (dispensar ainda apaga o salário).
 
-## 2. Substituições e fadiga ao vivo no "Assistir ao Jogo"
+## 2. Substituições e fadiga ao vivo no "Assistir ao Jogo" — FEITO (2026-10-04)
 
-Hoje os cinco titulares jogam os 48 minutos. `PlayerState[]` e `buildFive`
-(`services/watchDirector.ts`) são o ponto de entrada exato; "Pedir tempo" já
-existe.
-
-Subiu de prioridade porque **agora o banco tem motivo pra existir**: lesões são
-reais (~4,1 no seu elenco por temporada), `load` alimenta `injuryRisk`, e o
-arquétipo Guerreiro já diferencia quem aguenta carga. É também a parte mais
-vistosa do app. Item grande — merece plano próprio antes de começar.
+Ver [PLANO-BANCO.md](PLANO-BANCO.md). Energia por jogador, rotação automática
+que roda o banco em minutos de NBA, aba **Quinteto** no huddle (trocas por
+toque, rotação automática liga/desliga), energia dos seus cinco ao vivo com
+aviso de exausto, e os minutos jogados na tela vão para o box score e para a
+carga — segurar o titular o jogo todo custa no risco de lesão do jogo seguinte.
 
 ## 3. Tornar visível o que já existe — FEITO (2026-10-04)
 
