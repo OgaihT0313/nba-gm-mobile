@@ -11,7 +11,7 @@
 //     --outDir .check --module commonjs --target es2020 --moduleResolution node \
 //     --esModuleInterop --resolveJsonModule --skipLibCheck
 //   cp -r data .check/data && node .check/scripts/check_contracts.js [careers] [years]
-import { teamsData, playersData, getTeamSalary, SALARY_CAP } from '../constants';
+import { teamsData, playersData, getTeamSalary, SALARY_CAP, releaseWithDeadMoney } from '../constants';
 import type { Team, Player, SeasonState } from '../types';
 import { simulationEngine } from '../services/simulationService';
 import { generateSchedule } from '../services/scheduleService';
@@ -21,7 +21,7 @@ import { initCoaches } from '../services/coachService';
 import { initialPickAssets, makeUserPick, consensusValue } from '../services/draftService';
 import { resolveDecision } from '../services/decisionService';
 import { startOffseason, finishDraft, startSeason } from '../services/offseasonService';
-import { getFreeAgents, signFreeAgentLegality, evaluateSigningInterest, signPlayer } from '../services/freeAgencyService';
+import { getFreeAgents, signFreeAgentLegality, evaluateSigningInterest, signPlayer, processOffseasonContracts } from '../services/freeAgencyService';
 import { expectedSalary, playerValue } from '../services/tradeService';
 
 declare const process: { argv: string[] };
@@ -141,6 +141,7 @@ interface YearRow {
   payMed: number; payMax: number; overCap: number; rosterMin: number; rosterMed: number;
   pool: number; poolGood: number; rosterMax: number; goodExpired: number; goodStayed: number; goodMoved: number; goodUnsigned: number;
   ratioGood: number; userPay: number; userGood: number;
+  retired: number; top8: number;
 }
 const rows: YearRow[][] = Array.from({ length: YEARS }, () => []);
 
@@ -169,6 +170,11 @@ for (let c = 0; c < CAREERS; c++) {
     const off = startOffseason(s);
     s = userSummer(off);
     if (process.argv[5] === 'debug') {
+      const ros = s.teams.flatMap(t => t.roster.map(id => s.players[id]));
+      const band = (lo: number, hi: number) => { const g = ros.filter(p => p.age >= lo && p.age <= hi); return `${g.length}@${mean(g.map(p => p.ovr)).toFixed(1)}`; };
+      const top100 = [...ros].sort((x, y) => y.ovr - x.ovr).slice(0, 100);
+      const rookies = ros.filter(p => p.draftInfo && (p.age <= 22));
+      console.log(`  liga: idade media ${mean(ros.map(p => p.age)).toFixed(1)} | top100 ${mean(top100.map(p => p.ovr)).toFixed(1)} (idade ${mean(top100.map(p => p.age)).toFixed(1)}) | <=23 ${band(0, 23)} 24-28 ${band(24, 28)} 29-33 ${band(29, 33)} 34+ ${band(34, 50)} | calouros ${rookies.length}@${mean(rookies.map(p => p.ovr)).toFixed(1)}`);
       const ms = before.teams.flatMap(t => { const g = (t.wins ?? 0) + (t.losses ?? 0); return t.roster.map(id => ({ m: before.players[id].morale ?? 70, w: (t.wins ?? 0) / g, o: before.players[id].ovr })); }).filter(x => x.o >= 76);
       const by = (lo: number, hi: number) => ms.filter(x => x.w >= lo && x.w < hi).map(x => x.m);
       console.log(`  moral 76+ fim de temporada: geral q25/50/75 ${q(ms.map(x => x.m), .25).toFixed(0)}/${q(ms.map(x => x.m), .5).toFixed(0)}/${q(ms.map(x => x.m), .75).toFixed(0)} | <40% vit ${q(by(0, .4), .5).toFixed(0)} | 40-60% ${q(by(.4, .6), .5).toFixed(0)} | >60% ${q(by(.6, 1.01), .5).toFixed(0)} | <40 moral: ${(100 * ms.filter(x => x.m < 40).length / ms.length).toFixed(0)}%`);
@@ -192,10 +198,12 @@ for (let c = 0; c < CAREERS; c++) {
       goodExpired: expiring.length,
       goodStayed: expiring.filter(p => teamAfter.get(p.id) === teamBefore.get(p.id)).length,
       goodMoved: expiring.filter(p => teamAfter.has(p.id) && teamAfter.get(p.id) !== teamBefore.get(p.id)).length,
-      goodUnsigned: expiring.filter(p => !teamAfter.has(p.id)).length,
+      goodUnsigned: expiring.filter(p => !teamAfter.has(p.id) && !s.players[p.id].retired).length,
       // How far salaries have drifted from what the player is now worth.
       ratioGood: mean(goodRostered.map(p => p.salary / expectedSalary(p.ovr, p.age))),
       userPay: getTeamSalary(me, s.players), userGood: me.roster.filter(id => good(s.players[id])).length,
+      retired: (s.lastRetirements ?? []).length,
+      top8: mean(s.teams.map(t => mean(t.roster.map(id => s.players[id].ovr).sort((a2, b2) => b2 - a2).slice(0, 8)))),
     });
     check('todo time abre a temporada com elenco legal', Math.min(...sizes) >= 8 && Math.max(...sizes) <= 18, `min ${Math.min(...sizes)} max ${Math.max(...sizes)}`);
   }
@@ -203,14 +211,15 @@ for (let c = 0; c < CAREERS; c++) {
 }
 
 console.log(`\n================ CICLO DE CONTRATOS (${CAREERS} carreiras x ${YEARS} anos) ================\n`);
-console.log('ano | folha med  max  >teto | elenco min/med | pool  76+ | 80+ vencendo: fica/troca/sem time | salario/valor 80+ | usuario folha 80+');
+console.log('ano | folha med  max  >teto | elenco min/med | pool  76+ | 80+ vencendo: fica/troca/sem time | salario/valor 80+ | usuario folha 80+ | aposent. top8');
 rows.forEach((r, y) => {
   const a = (k: keyof YearRow) => mean(r.map(x => x[k]));
   console.log(
     `${String(y + 1).padStart(3)} | ${M(a('payMed')).padStart(6)} ${M(a('payMax')).padStart(5)} ${a('overCap').toFixed(1).padStart(5)} | `
     + `${a('rosterMin').toFixed(1).padStart(5)} / ${a('rosterMed').toFixed(1).padStart(4)} | ${a('pool').toFixed(0).padStart(4)} ${a('poolGood').toFixed(1).padStart(4)} | `
     + `${a('goodExpired').toFixed(1).padStart(5)}: ${a('goodStayed').toFixed(1)} / ${a('goodMoved').toFixed(1)} / ${a('goodUnsigned').toFixed(1)}          | `
-    + `${a('ratioGood').toFixed(2).padStart(17)} | ${M(a('userPay')).padStart(6)} ${a('userGood').toFixed(1)}`,
+    + `${a('ratioGood').toFixed(2).padStart(17)} | ${M(a('userPay')).padStart(6)} ${a('userGood').toFixed(1)}`
+    + ` | ${a('retired').toFixed(0).padStart(7)} ${a('top8').toFixed(1)}`,
   );
 });
 
@@ -225,9 +234,35 @@ rows.forEach((r, y) => {
   check('folha mediana estavel', a('payMed') >= 140e6 && a('payMed') <= 215e6, `ano ${y + 1}: ${M(a('payMed'))}`);
   check('salario acompanha o valor (80+)', a('ratioGood') >= 0.8 && a('ratioGood') <= 1.15, `ano ${y + 1}: ${a('ratioGood').toFixed(2)}`);
 });
+// The league must not age itself out. Before retirement and the recalibrated
+// development curve the average top eight lost 4.5 OVR in ten years; now ~2.
+const firstTop8 = mean(rows[0].map(r => r.top8));
+const lastTop8 = mean(rows[rows.length - 1].map(r => r.top8));
+check('a liga nao envelhece', lastTop8 >= firstTop8 - 0.25 * YEARS, `${firstTop8.toFixed(1)} -> ${lastTop8.toFixed(1)}`);
+const retiredPerYear = mean(rows.slice(1).flat().map(r => r.retired));
+check('aposentadorias em ritmo de NBA', retiredPerYear >= 15 && retiredPerYear <= 60, retiredPerYear.toFixed(1));
 const stayed = mean(rows.flat().map(r => r.goodStayed)), moved = mean(rows.flat().map(r => r.goodMoved));
 // Both halves of a market: teams keep most of what they want to keep, and the
 // stars who want out actually go somewhere.
 check('renovacoes e mudancas acontecem as duas', stayed > 0 && moved > 0, `fica ${stayed.toFixed(1)} / troca ${moved.toFixed(1)}`);
+
+// Dead money: a release under contract keeps costing until the deal runs out.
+{
+  const s0 = buildSeason((teamsData as Team[])[0].id);
+  const team = s0.teams[0];
+  const victim = team.roster.map(id => s0.players[id]).find(p => p.contractYears >= 2)!;
+  const before = getTeamSalary(team, s0.players);
+  const released: Team = { ...team, roster: team.roster.filter(id => id !== victim.id), deadMoney: releaseWithDeadMoney(team, victim) };
+  check('dispensar sob contrato nao alivia a folha', getTeamSalary(released, s0.players) === before,
+    `${M(before)} -> ${M(getTeamSalary(released, s0.players))}`);
+  let teams = s0.teams.map(t => (t.id === team.id ? released : t));
+  let players = s0.players;
+  for (let y = 0; y < victim.contractYears; y++) {
+    const r = processOffseasonContracts(teams, players, s0.userTeamId);
+    teams = r.teams; players = r.players;
+  }
+  check('o dinheiro morto acaba junto com o contrato',
+    !(teams.find(t => t.id === team.id)!.deadMoney ?? []).some(d => d.playerId === victim.id), `${victim.contractYears} anos`);
+}
 
 console.log(failures ? `\n${failures} falha(s).` : '\nSem falhas.');

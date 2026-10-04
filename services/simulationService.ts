@@ -1331,16 +1331,28 @@ const runPlayerProgression = (
         const opportunity = clampMod(
             (0.25 + (mpg / 28) * 0.9) * (devBonus[pId] ?? 1) * developmentFactor(player), 0.2, 1.6);
 
-        if (player.age < 24) { // Peak development — gated hard on opportunity
-            if (Math.random() < (0.6 + potential * 0.08) * opportunity) {
-                change = Math.floor(Math.random() * (potential / 2 + 1) * opportunity) + 1;
+        // The curve below was recalibrated against a ten-year league
+        // (scripts/check_contracts.ts, `debug`). The old one let rookies arrive
+        // at ~68.6 and stay there (development was almost entirely gated on
+        // minutes a rookie never gets) and gave a 24-28 player ~+0.1 a year, so
+        // nobody replaced the stars as they aged: the top hundred fell from
+        // 86.0 to 81.7 OVR in ten years and the league's payroll went with it.
+        // Real players climb until ~26 and plateau before they fade.
+        const youngOpportunity = 0.45 + opportunity * 0.55; // minutes help, but a kid still grows on the bench
+        if (player.age < 24) { // Peak development
+            if (Math.random() < (0.72 + potential * 0.07) * youngOpportunity) {
+                change = Math.floor(Math.random() * (potential / 2 + 2) * youngOpportunity) + 1;
             }
-        } else if (player.age < 29) { // Prime — a heavy role can still spark a jump
-            if (Math.random() < (0.25 + potential * 0.05) * opportunity) {
-                 change = Math.random() > 0.4 ? 1 : -1;
+        } else if (player.age < 28) { // Late development — the good ones keep climbing
+            if (Math.random() < (0.42 + potential * 0.08) * opportunity) {
+                change = Math.random() < 0.8 ? (Math.random() < potential * 0.06 ? 2 : 1) : -1;
+            }
+        } else if (player.age < 31) { // Prime plateau
+            if (Math.random() < 0.38) {
+                change = Math.random() < 0.45 ? 1 : -1;
             }
         } else if (player.age < 34) { // Post-prime
-            if (Math.random() < 0.4 + (player.age - 29) * 0.05) {
+            if (Math.random() < 0.45 + (player.age - 31) * 0.08) {
                 change = -1 * (Math.floor(Math.random() * 2) + 1); // -1 or -2
             }
         } else { // Veteran decline

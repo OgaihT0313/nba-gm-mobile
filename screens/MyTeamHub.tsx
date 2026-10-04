@@ -168,6 +168,11 @@ const MyTeamHub: React.FC<MyTeamHubProps> = ({
                 bar={COLORS.warn}
               />
             </View>
+            {(team.deadMoney ?? []).length > 0 ? (
+              <MonoLabel size={9.5} color={COLORS.warn} style={{ letterSpacing: 0, marginTop: -2 }}>
+                Dinheiro morto na folha: {(team.deadMoney ?? []).map((d) => `${d.name} ${money(d.amount)} (${d.years}a)`).join(' · ')}
+              </MonoLabel>
+            ) : null}
 
             <SectionLabel>Elenco · {roster.length} jogadores</SectionLabel>
             {roster.map((p) => {
@@ -315,8 +320,10 @@ const MyTeamHub: React.FC<MyTeamHubProps> = ({
           >
             <HeroTitle size={19}>Dispensar jogador?</HeroTitle>
             <Text style={{ fontSize: 12.5, lineHeight: 19, color: INK.body }}>
-              <Text className="font-bold text-white">{confirmWaive?.name}</Text> vira agente livre. Abre vaga e libera o
-              salário, mas você só poderá recontratá-lo na próxima agência livre — e outro time pode assiná-lo antes.
+              <Text className="font-bold text-white">{confirmWaive?.name}</Text> vira agente livre e abre uma vaga no elenco.
+              {confirmWaive && confirmWaive.contractYears > 0
+                ? ` O contrato continua sendo pago: ${money(confirmWaive.salary)} por ano fica na sua folha como dinheiro morto por mais ${confirmWaive.contractYears} ${confirmWaive.contractYears === 1 ? 'temporada' : 'temporadas'}.`
+                : ' Ele está sem contrato, então não sobra nada na folha.'}
             </Text>
             <View className="flex-row" style={{ gap: 10 }}>
               <GhostButton label="Cancelar" onPress={() => setConfirmWaive(null)} style={{ flex: 1 }} />

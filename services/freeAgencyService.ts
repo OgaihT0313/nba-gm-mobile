@@ -1,5 +1,5 @@
 import type { Player, Team, Event } from '../types';
-import { SALARY_CAP, LUXURY_TAX, MID_LEVEL_EXCEPTION, getTeamSalary, getPlayerPositions, LINEUP_POSITIONS } from '../constants';
+import { SALARY_CAP, LUXURY_TAX, MID_LEVEL_EXCEPTION, getTeamSalary, getPlayerPositions, LINEUP_POSITIONS, releaseWithDeadMoney } from '../constants';
 import { MIN_ROSTER_SIZE, MAX_ROSTER_SIZE, playerValue, expectedSalary } from './tradeService';
 import { personalityOf } from './personalityService';
 
@@ -47,7 +47,7 @@ export const getFreeAgents = (teams: Team[], players: PlayerMap): Player[] => {
     // the draft pool, and their true rating is still fogged, so they must never
     // surface in a list sorted by real value (see Player.prospect).
     return Object.values(players)
-        .filter(p => !rostered.has(p.id) && !p.prospect)
+        .filter(p => !rostered.has(p.id) && !p.prospect && !p.retired)
         .sort((a, b) => playerValue(b) - playerValue(a));
 };
 
@@ -301,7 +301,14 @@ export const processOffseasonContracts = (
                 }
             });
         }
-        return { ...team, roster: sortRosterByOvr(kept, updatedPlayers), starters: pruneStarters(team.starters, kept) };
+        // A year of dead money comes off with every other contract year.
+        const deadMoney = (team.deadMoney ?? [])
+            .map(d => ({ ...d, years: d.years - 1 }))
+            .filter(d => d.years > 0);
+        return {
+            ...team, roster: sortRosterByOvr(kept, updatedPlayers), starters: pruneStarters(team.starters, kept),
+            deadMoney: deadMoney.length ? deadMoney : undefined,
+        };
     });
 
     return { teams: newTeams, players: updatedPlayers, events };
@@ -326,13 +333,15 @@ export const trimCpuRosters = (
         if (team.id === userTeamId || team.roster.length <= MAX_ROSTER_SIZE) return team;
         const byValue = [...team.roster].sort((a, b) => playerValue(updatedPlayers[b]) - playerValue(updatedPlayers[a]));
         const cut = byValue.slice(MAX_ROSTER_SIZE);
+        let deadMoney = team.deadMoney;
+        cut.forEach(id => { deadMoney = releaseWithDeadMoney({ ...team, deadMoney }, updatedPlayers[id]); });
         cut.forEach(id => {
             const p = updatedPlayers[id];
             updatedPlayers[id] = { ...p, contractYears: 0, salary: askingSalary(p), birdTeamId: undefined, nextSalary: undefined };
             events.push({ message: `✂️ ${team.name} dispensou ${p.name} para abrir vaga no elenco.`, type: 'trade' });
         });
         const kept = team.roster.filter(id => !cut.includes(id));
-        return { ...team, roster: kept, starters: pruneStarters(team.starters, kept) };
+        return { ...team, roster: kept, starters: pruneStarters(team.starters, kept), deadMoney };
     });
     return { teams: newTeams, players: updatedPlayers, events };
 };

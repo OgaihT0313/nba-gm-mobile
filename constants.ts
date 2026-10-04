@@ -132,8 +132,24 @@ export const getTeamNickname = (t?: Team) => {
 /** Conference, in the app's language. */
 export const conferenceLabel = (t?: Team) => (t?.conference === 'East' ? 'Leste' : 'Oeste');
 
+// Payroll: everyone on the roster plus the dead money of anyone released while
+// still under contract. Every cap rule and every screen reads this, so a
+// release costs the same wherever the payroll is checked.
 export const getTeamSalary = (team: Team, players: { [key: string]: Player }) =>
-    team.roster.reduce((total, pId) => total + (players[pId]?.salary || 0), 0);
+    team.roster.reduce((total, pId) => total + (players[pId]?.salary || 0), 0) + deadMoneyOf(team);
+
+export const deadMoneyOf = (team: Team) =>
+    (team.deadMoney ?? []).reduce((total, d) => total + d.amount, 0);
+
+/**
+ * Releasing a player under contract leaves his salary on the books for the
+ * years he had left. A player with no years left (an unsigned or expired deal)
+ * costs nothing to let go.
+ */
+export const releaseWithDeadMoney = (team: Team, player: Player): Team['deadMoney'] =>
+    player.contractYears > 0
+        ? [...(team.deadMoney ?? []), { playerId: player.id, name: player.name, amount: player.salary, years: player.contractYears }]
+        : team.deadMoney;
 
 // Draft picks a team holds. Optional on Team (data/teams.json predates them), so
 // every read goes through here rather than repeating the ?? [] everywhere.

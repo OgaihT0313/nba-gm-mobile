@@ -18,6 +18,7 @@ import {
 import { processOffseasonContracts, runCpuFreeAgency, trimCpuRosters } from './freeAgencyService';
 import { accumulateCareers, championRosterOf } from './careerService';
 import { ageCoachesAndRetire, buildDevelopmentBonusMap } from './coachService';
+import { retirePlayers } from './retirementService';
 
 // Champion crowned -> progression, real NBA offseason moves replayed, contracts
 // tick down, then the rookie draft (BEFORE free agency, matching the real
@@ -77,9 +78,11 @@ export const startOffseason = (prev: SeasonState): SeasonState => {
     midLevelUsed: undefined,
   }));
 
-  // No retirement system: rosters carry every player straight through from
-  // progression into the offseason moves/contracts below.
-  const rosterPlayers = updatedPlayers;
+  // Retirement comes right after aging, before real moves and contracts: a
+  // player who hangs it up must not be re-signed or replayed into a trade.
+  const retiring = retirePlayers(newTeams, updatedPlayers);
+  newTeams.splice(0, newTeams.length, ...retiring.teams);
+  const rosterPlayers = retiring.players;
 
   // Replay real NBA offseason moves (skips any player the user already
   // moved elsewhere — see the roster.includes guard below). A LIVE save
@@ -219,6 +222,7 @@ export const startOffseason = (prev: SeasonState): SeasonState => {
     offseasonMovesApplied: true,
     eraChainIndex: nextEraChainIndex,
     lastOffseasonMoves: appliedMoves,
+    lastRetirements: retiring.retired,
     allStar: undefined,
     cup: undefined,
     schedule: [],

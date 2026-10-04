@@ -74,6 +74,10 @@ const SimulationScreen: React.FC<SimulationScreenProps> = ({
   // several hundred events through a 60-slot buffer that only ever renders its
   // top 6, so these were being generated and then buried, every single year.
   const offseasonMoves = season.gamesPlayed === 0 ? (season.lastOffseasonMoves ?? []) : [];
+  // Retirements worth naming: anyone who still mattered, and any of yours.
+  const retirements = season.gamesPlayed === 0
+    ? (season.lastRetirements ?? []).filter((r) => r.ovr >= 74 || r.teamId === season.userTeamId)
+    : [];
   const teamName = (id: string) => getTeamNickname(season.teams.find((t) => t.id === id));
   const justCrossedEra =
     seasonNumber > 1 && season.gamesPlayed === 0
@@ -256,6 +260,28 @@ const SimulationScreen: React.FC<SimulationScreenProps> = ({
             {offseasonMoves.length > 8 ? (
               <Text style={{ fontSize: 10.5, color: COLORS.textSoft, marginTop: 9 }}>
                 e mais {offseasonMoves.length - 8} pela liga.
+              </Text>
+            ) : null}
+          </Panel>
+        ) : null}
+        {retirements.length > 0 ? (
+          <Panel padding={14} style={{ marginBottom: 10 }}>
+            <MonoLabel>Aposentadorias · {retirements.length}</MonoLabel>
+            <View style={{ gap: 7, marginTop: 9 }}>
+              {retirements.slice(0, 6).map((r) => (
+                <View key={r.playerId} className="flex-row items-center" style={{ gap: 8 }}>
+                  <Text className="font-semibold text-white" style={{ fontSize: 11.5, flex: 1 }} numberOfLines={1}>
+                    {r.name}
+                  </Text>
+                  <Text className="font-mono" style={{ fontSize: 10, color: r.teamId === season.userTeamId ? COLORS.warn : COLORS.textSoft }} numberOfLines={1}>
+                    {r.age} anos · {r.ovr} · {r.teamId ? teamName(r.teamId) : 'sem time'}
+                  </Text>
+                </View>
+              ))}
+            </View>
+            {retirements.length > 6 ? (
+              <Text style={{ fontSize: 10.5, color: COLORS.textSoft, marginTop: 9 }}>
+                e mais {retirements.length - 6}.
               </Text>
             ) : null}
           </Panel>

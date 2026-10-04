@@ -25,7 +25,9 @@ reais de 2025-26, preço de mercado em todo contrato novo, direito de renovaçã
 exceção de nível médio, mercado que esfria, extensão na fila de decisões e
 imposto cobrado pelo dono. Medido em `scripts/check_contracts.ts`.
 
-Sobra: **dinheiro morto ao dispensar** (dispensar ainda apaga o salário).
+Dinheiro morto ao dispensar: FEITO (2026-10-04) — o salário de quem é
+dispensado sob contrato fica na folha (`Team.deadMoney`, somado em
+`getTeamSalary`) até o contrato acabar, e a confirmação diz o preço antes.
 
 ## 2. Substituições e fadiga ao vivo no "Assistir ao Jogo" — FEITO (2026-10-04)
 
@@ -85,10 +87,15 @@ buffer é de 50, a tela mostra 6, e uma offseason empurra centenas.
   vestiário eventos **por time** (hoje é um time sorteado por dia). Isso os
   tornaria ~30× mais comuns e eles mexem em rating e momentum — é mudança de
   balanceamento, pede re-medir o `diagnose_season`.
-- **Não existe aposentadoria.** Achado do `check_contracts`: o top-8 médio da
-  liga cai de 81,6 para 78,6 em 8 temporadas, a folha mediana acompanha
-  ($192M → $150M) e o pool de agentes livres cresce ~40 jogadores fracos por
-  ano. Aposentar veteranos (idade + queda de OVR) estabilizaria as três coisas.
+- **Aposentadoria + curva de evolução — FEITO (2026-10-04).** Não havia
+  aposentadoria e a liga envelhecia: o top-8 médio caía 4,5 de OVR em 10 anos.
+  Medindo por faixa de idade apareceu a causa real — os calouros chegavam a ~68
+  e não evoluíam (a evolução dependia quase só de minutos, que calouro não tem)
+  e quem tinha 24-28 ganhava ~+0,1 por ano. `retirementService.ts` aposenta
+  ~37 por temporada (painel próprio na tela de Simulação, nunca o feed), e a
+  curva em `runPlayerProgression` foi recalibrada. Em 10 anos: top-100 86,4 →
+  85,6 (era 86,0 → 81,7), top-8 81,9 → 80,0. Resta uma erosão lenta depois do
+  7º ano; o `check_contracts` tem portão para ela não voltar a crescer.
 - **Ratings de veteranos no pipeline.** `T.J. McConnell` está OVR 88 aos 34 anos
   no `data/players.json`. O `pickSeriesMVP` está certo; o rating é que é
   estranho, e vem do modelo Python no repo irmão (`nba-gm-simulator`).

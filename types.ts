@@ -99,6 +99,10 @@ export interface Player {
   // the right to re-sign him over the cap (NBA Bird rights). Cleared the moment
   // anyone signs him. See signFreeAgentLegality.
   birdTeamId?: string;
+  // Retired (see services/retirementService.ts). Kept in `players` because
+  // award history and career totals point at him; off every roster and out of
+  // the free-agent market for good.
+  retired?: boolean;
   // Salary of an extension signed during his final year, which takes effect
   // when that year runs out (processOffseasonContracts swaps it in). Until
   // then he is paid what his current deal says.
@@ -145,6 +149,10 @@ export interface Team {
   starters?: { [pos: string]: string };
   wins?: number;
   losses?: number;
+  // Salary still owed to players this team released while they were under
+  // contract ("dinheiro morto"): it counts on the payroll -- cap, tax, all of
+  // it -- until `years` runs out, one per offseason. See getTeamSalary.
+  deadMoney?: { playerId: string; name: string; amount: number; years: number }[];
   // This summer's mid-level exception is spent: an over-the-cap team gets ONE
   // outside free agent up to MID_LEVEL_EXCEPTION per offseason. Reset by
   // startOffseason.
@@ -429,6 +437,9 @@ export interface SeasonState {
   // player reads it. Rewritten every offseason; the season screen shows it
   // only before the season's first game.
   lastOffseasonMoves?: { playerName: string; fromTeamId: string; toTeamId: string }[];
+  // Who retired on the way into this season, best first. Same reason as
+  // lastOffseasonMoves: the event feed buries anything an offseason says.
+  lastRetirements?: { playerId: string; name: string; age: number; ovr: number; teamId?: string }[];
   // Set once the ALL_STAR_GAME checkpoint fires (see App.tsx); undefined
   // before that point in the season.
   allStar?: AllStarResult;

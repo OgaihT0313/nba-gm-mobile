@@ -7,7 +7,7 @@ import { useFonts, Inter_900Black_Italic } from '@expo-google-fonts/inter';
 import { JetBrainsMono_400Regular, JetBrainsMono_700Bold } from '@expo-google-fonts/jetbrains-mono';
 
 import { Team, Player, Coach, SeasonState, LiveTactic, Notification as NotificationType } from './types';
-import { teamsData, playersData, picksOf } from './constants';
+import { teamsData, playersData, picksOf, releaseWithDeadMoney } from './constants';
 import { ERAS, eraById } from './data/eras';
 import { simulationEngine, ROTATION_MIN, ROTATION_MAX } from './services/simulationService';
 import { buildSeasonOwner, evaluateSeasonOutcome } from './services/ownerService';
@@ -555,7 +555,7 @@ export default function App() {
         players: { ...prev.players, [playerId]: { ...player, contractYears: 0, salary: askingSalary(player), birdTeamId: undefined, nextSalary: undefined } },
         teams: prev.teams.map((t) =>
           t.id === team.id
-            ? { ...t, roster: t.roster.filter((id) => id !== playerId), starters: newStarters }
+            ? { ...t, roster: t.roster.filter((id) => id !== playerId), starters: newStarters, deadMoney: releaseWithDeadMoney(t, player) }
             : t
         ),
         // Any pending CPU offer that wanted this now-gone player is void.
