@@ -12,6 +12,9 @@ explícito do usuário.**
 
 ## 0. Rodar um APK — FEITO (2026-10-04)
 
+Último APK testado pelo usuário: `609f0b0c` (tudo até `3e07c3f` — item 4
+completo, elencos 2026-27, 3D novo), sem problemas.
+
 Build `ab6933d3` (tudo até a rodada de UI/UX, SDK 57.0.26) instalado e testado
 pelo usuário no celular: sem problemas, inclusive em sessão longa. A correção do
 Hermes V1 (`806f0d2`) está confirmada fora do navegador.
@@ -45,8 +48,9 @@ mandante (texturas geradas por código, `textures.ts`), arena com ~3.300
 torcedores instanciados, placas de LED, mesa, bancos e telão (`Arena.tsx`),
 cestas com vidro, rede e relógio de posse, e jogadores articulados com camisa e
 número que correm, defendem, driblam e sobem pro arremesso (`PlayerRig.ts`).
-Câmera nova "Perto" segue a bola. Não testado no celular: ~280 draw calls e
-~250k triângulos, texturas montadas em ~120 ms (V8) ao abrir a tela.
+Câmera nova "Perto" segue a bola. ~280 draw calls e ~250k triângulos, texturas
+montadas em ~120 ms (V8) ao abrir a tela. Testado no celular pelo usuário no
+APK `609f0b0c` (2026-10-04): tudo certo.
 
 ## 3. Tornar visível o que já existe — FEITO (2026-10-04)
 
