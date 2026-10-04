@@ -33,6 +33,14 @@ export const HOT_STREAK = 7;
  */
 export const MAX_PRESS_PER_SEASON = 2;
 export const PRESS_MIN_GAP = 15;
+/**
+ * The press conference is the only stop that is not forced by something
+ * happening to the roster, so it is the one that gives way. Once a season has
+ * already stopped this many times -- usually a pile-up of injuries -- the
+ * press room is not called. Without it the busiest seasons reached 13-15
+ * stops against an 11 ceiling (check_decisions, p95).
+ */
+export const PRESS_QUEUE_CEILING = 7;
 /** None in the first ten games (a 0-5 start is news, but not a story yet) or the last two. */
 const PRESS_FIRST_GAME = 10;
 const PRESS_LAST_GAME = 80;
@@ -203,6 +211,7 @@ export const pressConferenceFor = (after: SeasonState): Decision | undefined => 
     const held = after.owner.press?.days ?? [];
     if (held.length >= MAX_PRESS_PER_SEASON) return undefined;
     if (held.length && gp - held[held.length - 1] < PRESS_MIN_GAP) return undefined;
+    if ((after.owner.decisionsRaised ?? 0) >= PRESS_QUEUE_CEILING) return undefined;
     const team = after.teams.find(t => t.id === after.userTeamId);
     if (!team) return undefined;
 

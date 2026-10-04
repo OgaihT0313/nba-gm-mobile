@@ -1060,7 +1060,10 @@ const recordGameStats = (
         ptsW.push(pow(p.off - 58, 1.9) * m);
         rebW.push(pow(a.rebounding - 58, 1.0) * m);
         astW.push(pow(a.playmaking - 58, 1.3) * m);
-        stlW.push(pow(a.perimeterD - 58, 1.1) * m);
+        // Below 1 on purpose: steals spread wide in real basketball, and at 1.1
+        // a 93-perimeterD specialist handed starter minutes (Dru Smith on the
+        // 2026-27 Heat) led the league at 2.7 -- above any recent real leader.
+        stlW.push(pow(a.perimeterD - 58, 0.9) * m);
         blkW.push(pow(a.interiorD - 58, 1.5) * m);
         tovW.push((pow(p.off - 58, 1.2) + pow(a.playmaking - 58, 1.0)) * m);
     });

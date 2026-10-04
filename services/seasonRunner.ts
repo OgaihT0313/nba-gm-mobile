@@ -231,6 +231,7 @@ export function simulateOneDay(season: SeasonState, pinnedResult?: PinnedGameRes
     const raised = generateDecisions(season, nextSeason);
     if (raised.length) {
         nextSeason.decisions = [...(season.decisions ?? []), ...raised];
+        nextSeason.owner = { ...nextSeason.owner, decisionsRaised: (nextSeason.owner.decisionsRaised ?? 0) + raised.length };
         // The conference counts as held the moment it is called, whatever the
         // answer: that is what spaces them out and caps them per season.
         if (raised.some(d => d.kind === 'press_conference')) {

@@ -565,6 +565,10 @@ export interface OwnerExpectation {
     days: number[];          // gamesPlayed of every press conference held
     promise?: PressPromise;  // at most one public promise a season
   };
+  // How many decisions this season has raised so far, of every kind. The
+  // press conference is the one optional stop, and it yields once the season
+  // has already been busy (see PRESS_QUEUE_CEILING).
+  decisionsRaised?: number;
 }
 
 // A promise made at a press conference. Settled by evaluateSeasonOutcome:

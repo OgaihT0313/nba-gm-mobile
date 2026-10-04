@@ -29,6 +29,9 @@ export const MANDATE_META: Record<OwnerMandate, { label: string; blurb: string }
 // roster strength ranks in the league at season start. A stacked roster gets a
 // title mandate and a high bar; a bottom-five roster gets a forgiving rebuild
 // mandate. Recomputed every season start so it tracks roster moves.
+/** A player this good on the roster rules out a rebuild mandate. */
+const SUPERSTAR_OVR = 90;
+
 export const deriveMandate = (
     team: Team,
     teams: Team[],
@@ -41,6 +44,14 @@ export const deriveMandate = (
     if (rank <= 7) return { mandate: 'contender', targetWins: 48 };
     if (rank <= 14) return { mandate: 'playoffs', targetWins: 42 };
     if (rank <= 21) return { mandate: 'develop', targetWins: 34 };
+    // No owner calls it a rebuild with a superstar on the books. A thin roster
+    // around one can still rank bottom-eight on the top-8 average -- the
+    // 2026-27 Heat, Giannis at 93 and little behind him -- but it wins like a
+    // middling team (measured ~35 a season), not a 25-win rebuild. The top-8
+    // average itself stays: it predicts simulated wins better than the
+    // star-weighted OVR badge does (r 0.88 vs 0.84; target error 4.9 vs 5.5
+    // wins), so it is only the floor that is new.
+    if (team.roster.some(id => (players[id]?.ovr ?? 0) >= SUPERSTAR_OVR)) return { mandate: 'develop', targetWins: 34 };
     return { mandate: 'rebuild', targetWins: 25 };
 };
 
