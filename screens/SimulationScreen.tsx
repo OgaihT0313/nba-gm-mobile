@@ -131,6 +131,18 @@ const SimulationScreen: React.FC<SimulationScreenProps> = ({
   return (
     <Screen
       heroHeight={330}
+      stickyHeader={
+        <View className="flex-row items-center" style={{ gap: 10 }}>
+          <Image source={{ uri: getTeamLogoUrl(userTeam) }} style={{ width: 26, height: 26 }} contentFit="contain" />
+          <Text className="font-extrabold text-white" style={{ fontSize: 14 }} numberOfLines={1}>
+            {getTeamNickname(userTeam)}
+          </Text>
+          <Stat size={14}>{wins}-{losses}</Stat>
+          <View className="flex-1" />
+          <MonoLabel size={9.5} color={INK.meta} style={{ letterSpacing: 0.3 }}>Jogo {gp}/82</MonoLabel>
+          <View style={{ width: 7, height: 7, borderRadius: 4, backgroundColor: zoneColor }} />
+        </View>
+      }
       footer={
         <View>
           {quickSim}

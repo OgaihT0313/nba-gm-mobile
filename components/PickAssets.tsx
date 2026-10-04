@@ -32,7 +32,7 @@ export const PickChip: React.FC<{
   const yearsOut = pick.draft - currentDraft;
 
   return (
-    <Pressable
+    <Pressable accessibilityRole="button"
       onPress={onPress}
       disabled={!onPress}
       className={`flex-row items-center gap-2.5 px-3 py-2 rounded-xl border ${selected ? '' : 'bg-sunken border-line'}`}

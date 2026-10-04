@@ -30,7 +30,7 @@ const TeamsList: React.FC<{ teams: Team[]; players: { [key: string]: Player }; o
           const capSpace = SALARY_CAP - getTeamSalary(t, players);
           const accent = getTeamAccent(t.id);
           return (
-            <Pressable
+            <Pressable accessibilityRole="button"
               key={t.id}
               onPress={() => onSelect(t.id)}
               className="active:opacity-75"
@@ -44,6 +44,23 @@ const TeamsList: React.FC<{ teams: Team[]; players: { [key: string]: Player }; o
                 style={{ borderRadius: RADIUS.card, padding: 13, borderWidth: 1, borderColor: COLORS.line, overflow: 'hidden' }}
               >
                 <View style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: 3, backgroundColor: accent.primary }} />
+                {/* A team out of the race that sat its best players is a
+                    different trade partner -- it wants picks and youth, not
+                    help now. The sim has done this since the deadline logic
+                    landed; until now nothing on screen said so. A corner tag,
+                    so the card keeps the grid's height. */}
+                {t.tanking ? (
+                  <View
+                    accessibilityLabel="Jogando pela loteria"
+                    style={{
+                      position: 'absolute', top: 10, right: 10, paddingHorizontal: 6, paddingVertical: 2,
+                      borderRadius: RADIUS.pill, backgroundColor: withAlpha(COLORS.warn, 0.14),
+                      borderWidth: 1, borderColor: withAlpha(COLORS.warn, 0.35),
+                    }}
+                  >
+                    <MonoLabel size={9} color={COLORS.warn} style={{ letterSpacing: 0.3 }}>Loteria</MonoLabel>
+                  </View>
+                ) : null}
                 <Image
                   source={{ uri: getTeamLogoUrl(t) }}
                   placeholder={{ uri: NBA_FALLBACK }}
@@ -56,6 +73,7 @@ const TeamsList: React.FC<{ teams: Team[]; players: { [key: string]: Player }; o
                 <MonoLabel size={9.5} color={INK.meta} style={{ marginTop: 3, letterSpacing: 0 }} numberOfLines={1}>
                   {conferenceLabel(t)} · {t.wins ?? 0}-{t.losses ?? 0}
                 </MonoLabel>
+
                 <View className="flex-row items-center justify-between" style={{ marginTop: 9 }}>
                   <Stat size={12} color={capSpace >= 0 ? COLORS.goodSoft : COLORS.badSoft}>
                     {capSpace >= 0

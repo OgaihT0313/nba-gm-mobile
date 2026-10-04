@@ -428,7 +428,7 @@ const WatchGameScreen: React.FC<WatchGameScreenProps> = ({
       />
 
       {banner && (
-        <View pointerEvents="none" style={{ position: 'absolute', top: '40%', left: 0, right: 0, alignItems: 'center' }}>
+        <View style={{ pointerEvents: 'none', position: 'absolute', top: '40%', left: 0, right: 0, alignItems: 'center' }}>
           <View
             style={{
               backgroundColor: 'rgba(10,15,25,0.88)',
@@ -449,7 +449,7 @@ const WatchGameScreen: React.FC<WatchGameScreenProps> = ({
       )}
 
       {/* Scoreboard, floating over the canvas like the prototype's top-left panel. */}
-      <View pointerEvents="box-none" style={{ position: 'absolute', top: insets.top + 10, left: 14, right: 14 }}>
+      <View style={{ pointerEvents: 'box-none', position: 'absolute', top: insets.top + 10, left: 14, right: 14 }}>
         <Panel padding={14}>
           <View className="flex-row items-center justify-between">
             <MonoLabel size={9}>Assistir ao jogo</MonoLabel>
@@ -488,7 +488,7 @@ const WatchGameScreen: React.FC<WatchGameScreenProps> = ({
           {CAMERA_VIEWS.map((v) => {
             const active = v.id === cameraView;
             return (
-              <Pressable
+              <Pressable accessibilityRole="button"
                 key={v.id}
                 onPress={() => setCameraView(v.id)}
                 className="active:opacity-70"
@@ -524,7 +524,7 @@ const WatchGameScreen: React.FC<WatchGameScreenProps> = ({
                   const meta = WATCH_PLAY_META[id];
                   const active = id === play;
                   return (
-                    <Pressable
+                    <Pressable accessibilityRole="button"
                       key={id}
                       onPress={() => setPlay(id)}
                       className="active:opacity-70"

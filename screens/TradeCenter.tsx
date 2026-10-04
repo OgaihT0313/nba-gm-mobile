@@ -9,7 +9,7 @@ import {
   formatPositions, getPlayerPositions, picksOf, getTeamNickname, getTeamTricode, attributeColor,
 } from '../constants';
 import {
-  evaluateTradeLegality, evaluateTradeValue, TRADE_DEADLINE_GAME, playerValue, picksValue,
+  evaluateTradeLegality, evaluateTradeValue, TRADE_DEADLINE_GAME, playerValue, picksValue, OFFER_TTL,
 } from '../services/tradeService';
 import { projectedPickSlot } from '../services/draftService';
 import { useTheme } from '../src/theme/ThemeProvider';
@@ -69,7 +69,7 @@ const AssetRow: React.FC<{ label: string; sub: string; ovr?: number; onRemove?: 
     </View>
     {ovr !== undefined ? <Stat size={15} color={attributeColor(ovr)}>{ovr}</Stat> : <Stat size={15} color={COLORS.warn}>—</Stat>}
     {onRemove ? (
-      <Pressable onPress={onRemove} hitSlop={10} className="active:opacity-60">
+      <Pressable accessibilityRole="button" onPress={onRemove} hitSlop={10} className="active:opacity-60">
         <Text style={{ fontSize: 15, color: 'rgba(255,255,255,0.45)', lineHeight: 18 }}>×</Text>
       </Pressable>
     ) : null}
@@ -349,7 +349,7 @@ const TradeCenter: React.FC<TradeCenterProps> = ({
             <HeroTitle size={17}>{getTeamTricode(userTeam ?? undefined)}</HeroTitle>
           </View>
           <HeroTitle size={15} color="rgba(255,255,255,0.4)">⇄</HeroTitle>
-          <Pressable
+          <Pressable accessibilityRole="button"
             onPress={() => setPickerOpen(true)}
             className="flex-row items-center active:opacity-70"
             style={{
@@ -466,7 +466,7 @@ const TradeCenter: React.FC<TradeCenterProps> = ({
                   <Text className="font-bold text-white" style={{ fontSize: 11.5 }}>
                     1ª rodada {pick.originalTeamId.toUpperCase()} · draft {pick.draft}
                   </Text>
-                  <Pressable
+                  <Pressable accessibilityRole="button"
                     onPress={() => toggleProtection(pick.id)}
                     className="active:opacity-70"
                     style={{
@@ -501,6 +501,7 @@ const TradeCenter: React.FC<TradeCenterProps> = ({
           teams={teams}
           players={players}
           currentDraft={currentDraft}
+          gamesPlayed={gamesPlayed}
           onAccept={onAcceptOffer}
           onReject={onRejectOffer}
           onSelectPlayer={setInspecting}
@@ -510,7 +511,7 @@ const TradeCenter: React.FC<TradeCenterProps> = ({
       {/* Partner picker */}
       <Sheet visible={pickerOpen} onClose={() => setPickerOpen(false)} title="Escolha o parceiro">
         {teams.filter((t) => t.id !== userTeamId).map((t) => (
-          <Pressable
+          <Pressable accessibilityRole="button"
             key={t.id}
             onPress={() => { setPartnerTeamId(t.id); setPartnerAssets([]); setPartnerPickIds([]); setPickerOpen(false); }}
             className="flex-row items-center gap-3 p-3 rounded-xl active:opacity-70"
@@ -546,7 +547,7 @@ const Sheet: React.FC<{ visible: boolean; onClose: () => void; title: string; ch
   visible, onClose, title, children,
 }) => (
   <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
-    <Pressable className="flex-1 bg-black/70 justify-end" onPress={onClose}>
+    <Pressable accessible={false} className="flex-1 bg-black/70 justify-end" onPress={onClose}>
       <Pressable
         className="rounded-t-3xl p-4 max-h-[76%]"
         style={{ backgroundColor: COLORS.navBg, borderTopWidth: 1, borderTopColor: COLORS.navLine }}
@@ -589,7 +590,7 @@ const AssetSheet: React.FC<{
         {roster.map((p) => {
           const on = selectedPlayers.includes(p.id);
           return (
-            <Pressable
+            <Pressable accessibilityRole="button"
               key={p.id}
               onPress={() => onTogglePlayer(p.id)}
               className="flex-row items-center active:opacity-75"
@@ -626,7 +627,7 @@ const AssetSheet: React.FC<{
               const on = selectedPicks.includes(pick.id);
               const slot = projectedPickSlot(pick.originalTeamId, teams);
               return (
-                <Pressable
+                <Pressable accessibilityRole="button"
                   key={pick.id}
                   onPress={() => onTogglePick(pick.id)}
                   className="flex-row items-center active:opacity-75"
@@ -669,10 +670,11 @@ const OffersInbox: React.FC<{
   teams: Team[];
   players: { [key: string]: Player };
   currentDraft: number;
+  gamesPlayed: number;
   onAccept: (id: string) => void;
   onReject: (id: string) => void;
   onSelectPlayer: (p: Player) => void;
-}> = ({ offers, teams, players, currentDraft, onAccept, onReject, onSelectPlayer }) => {
+}> = ({ offers, teams, players, currentDraft, gamesPlayed, onAccept, onReject, onSelectPlayer }) => {
   if (offers.length === 0) return null;
   const named = (ids: string[]) => ids.map((id) => players[id]).filter(Boolean);
 
@@ -713,13 +715,21 @@ const OffersInbox: React.FC<{
                 </Text>
                 <MonoLabel size={9.5} color={verdict.c} style={{ letterSpacing: 0.4 }}>{verdict.t}</MonoLabel>
               </View>
+              {offer.day !== undefined ? (() => {
+                const left = Math.max(1, Math.min(OFFER_TTL - (gamesPlayed - offer.day), TRADE_DEADLINE_GAME - gamesPlayed));
+                return (
+                  <MonoLabel size={9} color={left <= 2 ? COLORS.warn : INK.faint} style={{ letterSpacing: 0.3, marginTop: -4 }}>
+                    {left === 1 ? 'Expira no próximo jogo' : `Expira em ${left} jogos`}
+                  </MonoLabel>
+                );
+              })() : null}
 
               <OfferSide label="Você cede" color={COLORS.badSoft} list={give} onSelect={onSelectPlayer} />
               <OfferSide label="Você recebe" color={COLORS.goodSoft} list={get} onSelect={onSelectPlayer} extra={offeredPicks.length} />
 
               <View className="flex-row" style={{ gap: 8 }}>
                 <GhostButton label="Recusar" onPress={() => onReject(offer.id)} padding={9} size={10.5} style={{ flex: 1 }} />
-                <Pressable
+                <Pressable accessibilityRole="button"
                   onPress={() => onAccept(offer.id)}
                   className="active:opacity-80"
                   style={{
@@ -751,7 +761,7 @@ const OfferSide: React.FC<{
     <MonoLabel size={8.5} color={color}>{label}</MonoLabel>
     <View className="flex-row flex-wrap" style={{ gap: 6 }}>
       {list.map((p) => (
-        <Pressable
+        <Pressable accessibilityRole="button"
           key={p.id}
           onPress={() => onSelect(p)}
           className="flex-row items-center active:opacity-70"

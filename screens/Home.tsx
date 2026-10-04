@@ -35,7 +35,7 @@ const Home: React.FC<HomeProps> = ({ onStart, onContinue, season }) => {
   return (
     <View className="flex-1" style={{ backgroundColor: '#050505' }}>
       {/* The single red in the whole screen, as a glow rather than a fill. */}
-      <View pointerEvents="none" style={StyleSheet.absoluteFill}>
+      <View style={[StyleSheet.absoluteFill, { pointerEvents: 'none' }]}>
         <Svg style={StyleSheet.absoluteFill}>
           <Defs>
             <RadialGradient id="homeGlow" cx="20%" cy="8%" r="75%">
@@ -70,7 +70,7 @@ const Home: React.FC<HomeProps> = ({ onStart, onContinue, season }) => {
         <View style={{ paddingHorizontal: 16, marginTop: 30, gap: 10 }}>
           {/* Save in progress — the one card that isn't chrome. */}
           {season && userTeam && onContinue ? (
-            <Pressable onPress={onContinue} className="active:opacity-80">
+            <Pressable accessibilityRole="button" onPress={onContinue} className="active:opacity-80">
               <View style={[CARD, { padding: 14, flexDirection: 'row', alignItems: 'center', gap: 12 }]}>
                 <Image source={{ uri: getTeamLogoUrl(userTeam) }} style={{ width: 40, height: 40 }} contentFit="contain" />
                 <View style={{ flex: 1 }}>

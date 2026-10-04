@@ -42,7 +42,7 @@ const TeamDetail: React.FC<{
   return (
     <Screen heroHeight={186}>
       <HeroContent>
-        <Pressable onPress={onBack} hitSlop={12} className="active:opacity-60">
+        <Pressable accessibilityRole="button" onPress={onBack} hitSlop={12} className="active:opacity-60">
           <Eyebrow size={9.5}>‹ Franquias</Eyebrow>
         </Pressable>
 
@@ -61,6 +61,11 @@ const TeamDetail: React.FC<{
             <MonoLabel size={10} color="rgba(255,255,255,0.55)" style={{ marginTop: 3, letterSpacing: 0.4 }} numberOfLines={1}>
               {team.wins ?? 0}-{team.losses ?? 0} · {coach?.name ?? 'Sem técnico'}
             </MonoLabel>
+            {team.tanking ? (
+              <MonoLabel size={10} color={COLORS.warn} style={{ marginTop: 3, letterSpacing: 0.4 }} numberOfLines={1}>
+                Jogando pela loteria · titulares poupados
+              </MonoLabel>
+            ) : null}
           </View>
         </View>
       </HeroContent>

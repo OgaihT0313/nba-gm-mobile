@@ -173,7 +173,7 @@ const LiveGameScreen: React.FC<LiveGameScreenProps> = ({
                 const meta = TACTIC_META[tactic];
                 const selected = liveGame.pendingTactic === tactic;
                 return (
-                  <Pressable
+                  <Pressable accessibilityRole="button"
                     key={tactic}
                     onPress={() => onSetTactic(selected ? null : tactic)}
                     className="active:opacity-75"

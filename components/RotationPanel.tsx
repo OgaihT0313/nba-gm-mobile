@@ -83,7 +83,7 @@ const RotationPanel: React.FC<RotationPanelProps> = ({ team, players, onSetRotat
                   {Math.round(load)}%
                 </MonoLabel>
               </View>
-              <Pressable
+              <Pressable accessibilityRole="button"
                 onPress={() => onToggleLoadManagement(p.id)}
                 className="active:opacity-70"
                 style={{
@@ -104,7 +104,7 @@ const RotationPanel: React.FC<RotationPanelProps> = ({ team, players, onSetRotat
 };
 
 const Stepper: React.FC<{ label: string; disabled: boolean; onPress: () => void }> = ({ label, disabled, onPress }) => (
-  <Pressable
+  <Pressable accessibilityRole="button"
     onPress={disabled ? undefined : onPress}
     className="active:opacity-70"
     style={{

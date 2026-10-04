@@ -38,14 +38,14 @@ const PlayerDetailModal: React.FC<{ player: Player; onClose: () => void }> = ({ 
 
   return (
     <Modal visible transparent animationType="slide" onRequestClose={onClose}>
-      <Pressable className="flex-1 bg-black/70 justify-end" onPress={onClose}>
+      <Pressable accessible={false} className="flex-1 bg-black/70 justify-end" onPress={onClose}>
         <Pressable
           className="bg-panel border border-line rounded-t-3xl max-h-[90%]"
           onPress={(e) => e.stopPropagation()}
         >
           {/* Header */}
           <View className="h-36 bg-line rounded-t-3xl items-center justify-end overflow-hidden">
-            <Pressable
+            <Pressable accessibilityRole="button"
               onPress={onClose}
               className="absolute top-3 right-3 z-10 w-8 h-8 rounded-full bg-ink/70 border border-line items-center justify-center"
             >

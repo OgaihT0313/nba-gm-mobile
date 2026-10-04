@@ -22,6 +22,7 @@ import { buildSeasonOwner } from '../services/ownerService';
 import { initCoaches } from '../services/coachService';
 import { initialPickAssets } from '../services/draftService';
 import { resolveDecision, extensionTerms } from '../services/decisionService';
+import { OFFER_TTL, MAX_PENDING_OFFERS } from '../services/tradeService';
 
 declare const process: { argv: string[] };
 const RUNS = Number(process.argv[2] || 12);
@@ -57,6 +58,7 @@ const byKind: Record<string, number> = {};
 const byOption: Record<string, number> = {};
 let seasonsFinished = 0;
 let signedCount = 0, promotedCount = 0, shortenedCount = 0, rushedCount = 0;
+let offersSeen = 0;
 let soldCount = 0, boughtCount = 0, shoppedCount = 0, minutesCount = 0, extendedCount = 0, requotedCount = 0;
 const stanceSeasons = new Set<number>();
 
@@ -69,7 +71,14 @@ for (let run = 0; run < RUNS; run++) {
   let guard = 0;
 
   while (season.gamesPlayed < 82 && guard++ < 500) {
+    const offersBefore = new Set((season.tradeOffers ?? []).map(o => o.id));
     season = simulateOneDay(season).season;
+    // The inbox: bounded, and nothing in it older than its shelf life.
+    const pending = season.tradeOffers ?? [];
+    offersSeen += pending.filter(o => !offersBefore.has(o.id)).length;
+    check('caixa de propostas no limite', pending.length <= MAX_PENDING_OFFERS, `${pending.length}`);
+    pending.forEach(o => check('proposta pendente dentro do prazo', o.day === undefined || season.gamesPlayed - o.day < OFFER_TTL,
+      `dia ${o.day}, hoje ${season.gamesPlayed}`));
 
     // Stand in for the player: answer everything the queue raises, picking at
     // random among the options that are actually available.
@@ -205,6 +214,7 @@ console.log(`Decisoes por temporada: media ${media.toFixed(1)}  (min ${min}, max
 console.log(`Por tipo:   ${Object.entries(byKind).map(([k, v]) => `${k} ${(v / RUNS).toFixed(1)}`).join('  |  ') || '(nenhuma)'}`);
 console.log(`Escolhidas: ${Object.entries(byOption).map(([k, v]) => `${k} ${v}`).join('  |  ') || '(nenhuma)'}`);
 console.log(`Extensoes re-cotadas depois de outra: ${requotedCount}`);
+console.log(`Propostas de troca recebidas por temporada: ${(offersSeen / RUNS).toFixed(1)}`);
 console.log(`Temporadas que chegaram ao fim: ${seasonsFinished}/${RUNS}`);
 console.log(`Pedidos de troca atendidos: minutos ${minutesCount} / mercado ${shoppedCount}`);
 

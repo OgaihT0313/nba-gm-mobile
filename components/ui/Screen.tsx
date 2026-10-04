@@ -1,4 +1,4 @@
-import React, { useId } from 'react';
+import React, { useId, useState } from 'react';
 import { View, ScrollView, StyleSheet, ScrollViewProps } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Svg, Defs, LinearGradient as SvgGradient, Stop, Polygon } from 'react-native-svg';
@@ -38,7 +38,7 @@ export const HeroBackdrop: React.FC<{ height: number; primary: string; secondary
   const { base, mid, cut } = heroPalette(primary, secondary);
 
   return (
-    <View pointerEvents="none" style={{ position: 'absolute', left: 0, right: 0, top: 0, height }}>
+    <View style={{ pointerEvents: 'none', position: 'absolute', left: 0, right: 0, top: 0, height }}>
       <LinearGradient
         colors={[base, mid, COLORS.bg]}
         locations={[0, 0.46, 1]}
@@ -73,6 +73,12 @@ interface ScreenProps extends Pick<ScrollViewProps, 'onScroll' | 'scrollEventThr
   backdrop?: React.ReactNode | null;
   /** Page background, for the screens that deliberately leave the system. */
   background?: string;
+  /**
+   * A compact bar pinned to the top once the hero has scrolled out of view.
+   * The hero carries what a screen is ABOUT (record, game number, the owner's
+   * mood); without this it was gone the moment you read anything below it.
+   */
+  stickyHeader?: React.ReactNode;
   children: React.ReactNode;
 }
 
@@ -81,11 +87,15 @@ const Screen: React.FC<ScreenProps> = ({
   footer,
   backdrop,
   background = COLORS.bg,
+  stickyHeader,
   children,
+  onScroll,
   ...scrollProps
 }) => {
   const insets = useSafeAreaInsets();
   const { accent } = useTheme();
+  // Only flips at the threshold, so scrolling does not re-render the page.
+  const [pinned, setPinned] = useState(false);
 
   return (
     <View className="flex-1" style={{ backgroundColor: background }}>
@@ -93,6 +103,14 @@ const Screen: React.FC<ScreenProps> = ({
         className="flex-1"
         contentContainerStyle={{ paddingBottom: footer ? 8 : 22 }}
         showsVerticalScrollIndicator={false}
+        scrollEventThrottle={stickyHeader ? 32 : scrollProps.scrollEventThrottle}
+        onScroll={(e) => {
+          if (stickyHeader) {
+            const past = e.nativeEvent.contentOffset.y > heroHeight - 40;
+            if (past !== pinned) setPinned(past);
+          }
+          onScroll?.(e);
+        }}
         {...scrollProps}
       >
         {/* The band lives INSIDE the scrolled content, not pinned behind it.
@@ -114,6 +132,19 @@ const Screen: React.FC<ScreenProps> = ({
           <View style={{ paddingTop: insets.top + 6 }}>{children}</View>
         </View>
       </ScrollView>
+
+      {stickyHeader && pinned ? (
+        <View
+          style={{
+            position: 'absolute', top: 0, left: 0, right: 0,
+            paddingTop: insets.top + 8, paddingBottom: 9, paddingHorizontal: 16,
+            backgroundColor: COLORS.navBg, borderBottomWidth: 1, borderBottomColor: COLORS.navLine,
+          }}
+        >
+          <View style={{ position: 'absolute', left: 0, right: 0, bottom: -1, height: 2, backgroundColor: accent.primary, opacity: 0.8 }} />
+          {stickyHeader}
+        </View>
+      ) : null}
 
       {footer ? <View style={{ paddingHorizontal: SIDE, paddingTop: 10, paddingBottom: 10 }}>{footer}</View> : null}
     </View>

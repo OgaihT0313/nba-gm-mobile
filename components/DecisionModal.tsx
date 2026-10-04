@@ -35,7 +35,7 @@ const OptionRow: React.FC<{ option: DecisionOption; onPress: () => void }> = ({ 
     <Pressable
       onPress={off ? undefined : onPress}
       accessibilityRole="button"
-      accessibilityState={{ disabled: off }}
+      aria-disabled={off}
       className={off ? '' : 'active:opacity-75'}
       style={{
         borderRadius: RADIUS.control,

@@ -77,12 +77,22 @@ const BottomNav: React.FC<BottomNavProps> = ({ view, onNavigate, hasSeason, faOp
     setMoreOpen(false);
   };
 
-  const moreActive = MORE_ITEMS.some((item) => item.id === view);
+  // The offseason phase that is open takes the Playoffs slot. There are no
+  // playoffs in July, and the draft and free agency are the only screens that
+  // matter then -- they used to sit two taps deep behind "Mais" on exactly the
+  // night they were open.
+  const phaseItem = draftOpen
+    ? MORE_ITEMS.find((i) => i.id === 'draft')!
+    : faOpen
+      ? MORE_ITEMS.find((i) => i.id === 'free-agency')!
+      : null;
+  const primaryItems = PRIMARY_ITEMS.map((item) => (item.id === 'playoffs' && phaseItem ? phaseItem : item));
+  const moreActive = MORE_ITEMS.some((item) => item.id === view && item.id !== phaseItem?.id);
 
   return (
     <>
       <Modal visible={moreOpen} transparent animationType="slide" onRequestClose={() => setMoreOpen(false)}>
-        <Pressable className="flex-1 bg-black/60 justify-end" onPress={() => setMoreOpen(false)}>
+        <Pressable accessible={false} className="flex-1 bg-black/60 justify-end" onPress={() => setMoreOpen(false)}>
           <Pressable
             className="rounded-t-3xl p-4 pb-8"
             style={{ backgroundColor: COLORS.navBg, borderTopWidth: 1, borderTopColor: COLORS.navLine }}
@@ -97,6 +107,9 @@ const BottomNav: React.FC<BottomNavProps> = ({ view, onNavigate, hasSeason, faOp
                   <Pressable
                     key={item.id}
                     onPress={() => navigate(item.id)}
+                    accessibilityRole="button"
+                    accessibilityLabel={item.label}
+                    aria-disabled={disabled} aria-selected={active}
                     className={`w-[31%] mb-3 items-center justify-center gap-2 py-4 rounded-2xl ${disabled ? 'opacity-30' : ''}`}
                     style={{
                       backgroundColor: active ? accent.primary : COLORS.panel,
@@ -127,18 +140,21 @@ const BottomNav: React.FC<BottomNavProps> = ({ view, onNavigate, hasSeason, faOp
         className="flex-row"
         style={{ backgroundColor: COLORS.navBg, borderTopWidth: 1, borderTopColor: COLORS.navLine, paddingTop: 7, paddingBottom: 9 }}
       >
-        {PRIMARY_ITEMS.map((item) => {
+        {primaryItems.map((item) => {
           const disabled = isDisabled(item.id);
           const active = view === item.id;
           return (
             <Pressable
               key={item.id}
               onPress={() => navigate(item.id)}
+              accessibilityRole="tab"
+              accessibilityLabel={item.label}
+              aria-disabled={disabled} aria-selected={active}
               className={`flex-1 items-center justify-center gap-1.5 py-1 ${disabled ? 'opacity-30' : ''}`}
             >
               <NavChip active={active} icon={item.icon} accent={accent} />
               <Text
-                className={active ? 'text-[8.5px] font-black' : 'text-[8.5px] font-semibold'}
+                className={active ? 'text-[10px] font-black' : 'text-[10px] font-semibold'}
                 style={{ color: active ? '#fff' : COLORS.navIdle }}
               >
                 {item.label}
@@ -146,10 +162,16 @@ const BottomNav: React.FC<BottomNavProps> = ({ view, onNavigate, hasSeason, faOp
             </Pressable>
           );
         })}
-        <Pressable onPress={() => setMoreOpen(true)} className="flex-1 items-center justify-center gap-1.5 py-1">
+        <Pressable
+          onPress={() => setMoreOpen(true)}
+          accessibilityRole="tab"
+          accessibilityLabel="Mais"
+          aria-selected={moreActive}
+          className="flex-1 items-center justify-center gap-1.5 py-1"
+        >
           <NavChip active={moreActive} icon="menu" accent={accent} />
           <Text
-            className={moreActive ? 'text-[8.5px] font-black' : 'text-[8.5px] font-semibold'}
+            className={moreActive ? 'text-[10px] font-black' : 'text-[10px] font-semibold'}
             style={{ color: moreActive ? '#fff' : COLORS.navIdle }}
           >
             Mais

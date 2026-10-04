@@ -14,6 +14,15 @@ export const MAX_ROSTER_SIZE = 18;
 // after this point until the next season.
 export const TRADE_DEADLINE_GAME = 55;
 
+/**
+ * How long a CPU offer stays on the table, in games. Before this an offer only
+ * lapsed at the deadline and the inbox held two, so a user who did not answer
+ * stopped hearing from the league for the rest of the trading season.
+ */
+export const OFFER_TTL = 8;
+/** Most offers pending at once. */
+export const MAX_PENDING_OFFERS = 3;
+
 export interface TradeLegalityResult {
     legal: boolean;
     reason?: string;
@@ -379,6 +388,7 @@ export const generateCpuTradeOffer = (
                         fromTeamId: cpu.id,
                         requestIds: [target.id],
                         offerIds,
+                        day: gamesPlayed,
                     };
                 }
             }
@@ -407,6 +417,7 @@ export const generateCpuTradeOffer = (
                 requestIds: [target.id],
                 offerIds,
                 offerPickIds: [sweetener.pick.id],
+                day: gamesPlayed,
             };
         }
     }

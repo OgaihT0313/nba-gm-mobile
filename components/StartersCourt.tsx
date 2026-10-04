@@ -74,7 +74,7 @@ const StartersCourt: React.FC<StartersCourtProps> = ({ team, players, onSetStart
           const player = slot?.playerId ? players[slot.playerId] : null;
           const isActive = activePos === pos;
           return (
-            <Pressable
+            <Pressable accessibilityRole="button"
               key={pos}
               onPress={() => setActivePos(isActive ? null : pos)}
               style={{ position: 'absolute', top: top as any, left: left as any, marginLeft: -SLOT / 2, marginTop: -SLOT / 2, alignItems: 'center' }}
@@ -123,7 +123,7 @@ const StartersCourt: React.FC<StartersCourtProps> = ({ team, players, onSetStart
           {candidatesFor(activeBucket || '').map((p) => {
             const isDesignated = team.starters?.[activePos] === p.id;
             return (
-              <Pressable
+              <Pressable accessibilityRole="button"
                 key={p.id}
                 onPress={() => { onSetStarter(activePos, p.id); setActivePos(null); }}
                 className={`flex-row items-center justify-between gap-3 p-2 rounded-xl border ${isDesignated ? '' : 'bg-panel border-line'}`}

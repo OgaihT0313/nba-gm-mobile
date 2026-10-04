@@ -39,7 +39,7 @@ const AwardsScreen: React.FC<AwardsScreenProps> = ({ season, onGoToPlayoffs, onS
   const finalsScore = season.playoff?.finals?.s;
 
   const goldBackdrop = (
-    <View pointerEvents="none" style={StyleSheet.absoluteFill}>
+    <View style={[StyleSheet.absoluteFill, { pointerEvents: 'none' }]}>
       <Svg style={StyleSheet.absoluteFill}>
         <Defs>
           <RadialGradient id="champGlow" cx="50%" cy="0%" r="80%">

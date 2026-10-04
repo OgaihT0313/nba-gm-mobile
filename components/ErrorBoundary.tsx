@@ -41,7 +41,7 @@ export class ErrorBoundary extends React.Component<Props, State> {
         <ScrollView className="max-h-32 mb-6 w-full">
           <Text className="text-slate-500 text-xs">{error.message}</Text>
         </ScrollView>
-        <Pressable
+        <Pressable accessibilityRole="button"
           className="bg-red-600 px-8 py-3 rounded-control items-center"
           onPress={() => this.setState({ error: null })}
         >

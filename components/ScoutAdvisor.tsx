@@ -19,7 +19,7 @@ interface ScoutAdvisorProps {
 }
 
 const RecRow: React.FC<{ rec: Recommendation; onPress: () => void }> = ({ rec, onPress }) => (
-  <Pressable
+  <Pressable accessibilityRole="button"
     onPress={onPress}
     className="flex-row items-center gap-2.5 p-2.5 bg-sunken rounded-xl border border-line active:border-slate-500"
   >
@@ -57,7 +57,7 @@ const ScoutAdvisor: React.FC<ScoutAdvisorProps> = ({ userTeam, teams, players, o
 
   return (
     <Card padding="md" className="gap-3">
-      <Pressable onPress={() => setOpen((v) => !v)} className="flex-row items-center gap-2.5">
+      <Pressable accessibilityRole="button" onPress={() => setOpen((v) => !v)} className="flex-row items-center gap-2.5">
         <Icon name="scout" size={18} color={accent.primary} />
         <View className="flex-1 min-w-0">
           <Text className="font-bold text-sm text-white">Análise do Scout</Text>

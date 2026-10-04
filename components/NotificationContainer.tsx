@@ -21,12 +21,12 @@ const NotificationContainer: React.FC<{ notifications: NotificationType[]; onRem
   const insets = useSafeAreaInsets();
   if (notifications.length === 0) return null;
   return (
-    <View pointerEvents="box-none" style={{ position: 'absolute', top: insets.top + 8, left: 12, right: 12, zIndex: 50 }}>
+    <View style={{ pointerEvents: 'box-none', position: 'absolute', top: insets.top + 8, left: 12, right: 12, zIndex: 50 }}>
       {notifications.slice(-3).map((n) => {
         const tone = TONE[n.type] || TONE.info;
         return (
           <FadeInView key={n.id}>
-            <Pressable
+            <Pressable accessibilityRole="button"
               onPress={() => onRemove(n.id)}
               className={`bg-panel/95 border rounded-2xl px-4 py-3 mb-2 ${tone.border}`}
             >

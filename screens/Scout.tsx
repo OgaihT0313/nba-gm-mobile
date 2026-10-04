@@ -122,7 +122,7 @@ const Scout: React.FC<ScoutProps> = ({ players, teams, userTeamId }) => {
               style={{ flex: 1, fontSize: 13, color: '#fff', paddingVertical: 9, paddingHorizontal: 8 }}
             />
             {query.length > 0 ? (
-              <Pressable onPress={() => setQuery('')} hitSlop={8}>
+              <Pressable accessibilityRole="button" onPress={() => setQuery('')} hitSlop={8}>
                 <Text style={{ color: COLORS.navIdle, fontSize: 16, fontWeight: '700' }}>×</Text>
               </Pressable>
             ) : null}
@@ -164,7 +164,7 @@ const Scout: React.FC<ScoutProps> = ({ players, teams, userTeamId }) => {
         windowSize={8}
         showsVerticalScrollIndicator={false}
         renderItem={({ item }) => (
-          <Pressable
+          <Pressable accessibilityRole="button"
             onPress={() => setSelected(item)}
             className="active:opacity-80"
             style={{ paddingHorizontal: 14, marginBottom: 8 }}

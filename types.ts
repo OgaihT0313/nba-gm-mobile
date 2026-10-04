@@ -561,6 +561,10 @@ export interface TradeOffer {
   // Draft picks the CPU is throwing in — how a rebuilding team pays for a
   // veteran it can't match with bodies. Ids of assets it actually holds.
   offerPickIds?: string[];
+  // gamesPlayed when it arrived. Offers lapse OFFER_TTL games later (see
+  // seasonRunner); undefined on saves from before that, which lapse at the
+  // deadline like they always did.
+  day?: number;
 }
 
 export interface OffseasonMove {

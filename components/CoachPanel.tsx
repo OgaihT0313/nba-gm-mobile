@@ -49,7 +49,7 @@ const CoachCard: React.FC<{ coach: Coach; team: Team; onPress?: () => void; acti
         <AttrBar label="Desenv." value={coach.development} color="#a78bfa" />
       </View>
       {onPress ? (
-        <Pressable onPress={onPress} className="mt-1 rounded-xl py-2.5 items-center" style={{ backgroundColor: accent.primary }}>
+        <Pressable accessibilityRole="button" onPress={onPress} className="mt-1 rounded-xl py-2.5 items-center" style={{ backgroundColor: accent.primary }}>
           <Text className="text-xs font-black uppercase" style={{ color: onAccent(accent.primary) }}>{actionLabel}</Text>
         </Pressable>
       ) : null}
@@ -93,27 +93,27 @@ const CoachPanel: React.FC<CoachPanelProps> = ({ team, coaches, editable, onFire
       )}
 
       {editable && !current ? (
-        <Pressable onPress={openHiring} className="rounded-xl py-2.5 items-center" style={{ backgroundColor: accent.primary }}>
+        <Pressable accessibilityRole="button" onPress={openHiring} className="rounded-xl py-2.5 items-center" style={{ backgroundColor: accent.primary }}>
           <Text className="text-xs font-black uppercase" style={{ color: onAccent(accent.primary) }}>Contratar técnico</Text>
         </Pressable>
       ) : null}
       {editable && current ? (
-        <Pressable onPress={openHiring} className="rounded-xl border border-line py-2.5 items-center">
+        <Pressable accessibilityRole="button" onPress={openHiring} className="rounded-xl border border-line py-2.5 items-center">
           <Text className="text-xs font-black uppercase text-slate-300">Ver candidatos</Text>
         </Pressable>
       ) : null}
 
       {/* Fire confirmation */}
       <Modal visible={confirmFire} transparent animationType="fade" onRequestClose={() => setConfirmFire(false)}>
-        <Pressable className="flex-1 bg-black/70 items-center justify-center p-4" onPress={() => setConfirmFire(false)}>
+        <Pressable accessible={false} className="flex-1 bg-black/70 items-center justify-center p-4" onPress={() => setConfirmFire(false)}>
           <Pressable className="bg-panel border border-line rounded-3xl p-6 w-full max-w-sm gap-4" onPress={(e) => e.stopPropagation()}>
             <Text className="text-xl font-black uppercase italic tracking-tight text-white">Demitir técnico?</Text>
             <Text className="text-sm text-slate-400 leading-5">
               <Text className="font-bold text-white">{current?.name}</Text> deixa o comando do {team.name}. Você pode contratar um substituto na sequência.
             </Text>
             <View className="flex-row gap-3 justify-end">
-              <Pressable onPress={() => setConfirmFire(false)} className="px-4 py-2 rounded-xl"><Text className="text-sm font-bold text-slate-300">Cancelar</Text></Pressable>
-              <Pressable
+              <Pressable accessibilityRole="button" onPress={() => setConfirmFire(false)} className="px-4 py-2 rounded-xl"><Text className="text-sm font-bold text-slate-300">Cancelar</Text></Pressable>
+              <Pressable accessibilityRole="button"
                 onPress={() => { setConfirmFire(false); onFire?.(); openHiring(); }}
                 className="px-4 py-2 rounded-xl bg-red-600"
               >
@@ -126,7 +126,7 @@ const CoachPanel: React.FC<CoachPanelProps> = ({ team, coaches, editable, onFire
 
       {/* Hire candidates */}
       <Modal visible={hiring} transparent animationType="slide" onRequestClose={() => setHiring(false)}>
-        <Pressable className="flex-1 bg-black/70 justify-end" onPress={() => setHiring(false)}>
+        <Pressable accessible={false} className="flex-1 bg-black/70 justify-end" onPress={() => setHiring(false)}>
           <Pressable className="bg-ink border-t border-line rounded-t-3xl p-4 max-h-[80%]" onPress={(e) => e.stopPropagation()}>
             <View className="w-10 h-1 bg-slate-700 rounded-full self-center mb-4" />
             <Text className="text-xs font-black text-slate-500 uppercase tracking-[0.3em] mb-3">Candidatos a técnico</Text>

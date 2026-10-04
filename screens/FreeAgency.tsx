@@ -182,7 +182,7 @@ const FreeAgency: React.FC<FreeAgencyProps> = ({ season, onSign, onStartSeason }
           {SORTS.map((s) => {
             const active = sortKey === s.key;
             return (
-              <Pressable
+              <Pressable accessibilityRole="button"
                 key={s.key}
                 onPress={() => onSortPress(s.key)}
                 className="flex-row items-center active:opacity-70"

@@ -34,7 +34,7 @@ const FiredOverlay: React.FC<FiredOverlayProps> = ({ visible, note, seasons, tit
           </View>
         </View>
 
-        <Pressable onPress={onRestart} className="px-8 py-4 rounded-card bg-white active:opacity-80">
+        <Pressable accessibilityRole="button" onPress={onRestart} className="px-8 py-4 rounded-card bg-white active:opacity-80">
           <Text className="text-slate-950 font-black uppercase tracking-wide">Assumir outro time</Text>
         </Pressable>
       </View>

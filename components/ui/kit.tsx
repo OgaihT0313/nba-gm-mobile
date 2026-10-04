@@ -16,6 +16,14 @@ import { COLORS, INK, RADIUS, tracking, withAlpha } from '../../src/theme/tokens
 /* Type                                                                        */
 /* -------------------------------------------------------------------------- */
 
+/**
+ * The smallest a label may render. The mockups went down to 7-8.5px, which is
+ * legible on a 2x desktop render and not on a phone held at arm's length --
+ * 186 labels in the app sat at or under 9.5px. Raised here, once, instead of in
+ * every call site; nothing that asks for more is touched.
+ */
+export const MIN_LABEL_SIZE = 9;
+
 /** JetBrains Mono micro-label — the workhorse label of the whole design. */
 export const MonoLabel: React.FC<{
   children: React.ReactNode;
@@ -23,15 +31,18 @@ export const MonoLabel: React.FC<{
   size?: number;
   style?: StyleProp<TextStyle>;
   numberOfLines?: number;
-}> = ({ children, color = INK.label, size = 8.5, style, numberOfLines }) => (
-  <Text
-    className="font-mono-bold"
-    numberOfLines={numberOfLines}
-    style={[{ fontSize: size, letterSpacing: tracking(size, 0.16), color, textTransform: 'uppercase' }, style]}
-  >
-    {children}
-  </Text>
-);
+}> = ({ children, color = INK.label, size: asked = 9, style, numberOfLines }) => {
+  const size = Math.max(MIN_LABEL_SIZE, asked);
+  return (
+    <Text
+      className="font-mono-bold"
+      numberOfLines={numberOfLines}
+      style={[{ fontSize: size, letterSpacing: tracking(size, 0.16), color, textTransform: 'uppercase' }, style]}
+    >
+      {children}
+    </Text>
+  );
+};
 
 /** The wider-tracked label that rides on the hero band. */
 export const Eyebrow: React.FC<{ children: React.ReactNode; color?: string; size?: number }> = ({
@@ -220,7 +231,7 @@ export const Chip: React.FC<{
     borderColor: c.border,
   };
   return onPress ? (
-    <Pressable onPress={onPress} style={[box, style]} className="active:opacity-70">
+    <Pressable onPress={onPress} style={[box, style]} className="active:opacity-70" accessibilityRole="button">
       {inner}
     </Pressable>
   ) : (
@@ -242,6 +253,10 @@ export const FilterRow: React.FC<{
         <Pressable
           key={it.id}
           onPress={() => onChange(it.id)}
+          accessibilityRole="tab"
+          accessibilityLabel={it.label}
+          aria-selected={active}
+          hitSlop={{ top: 6, bottom: 6 }}
           className="active:opacity-70"
           style={{
             paddingHorizontal: 12,
@@ -340,9 +355,15 @@ export const CtaButton: React.FC<{
   const tint: [string, string] = gold ? [COLORS.gold, COLORS.goldDeep] : [COLORS.cta, COLORS.ctaDark];
   const fg = gold ? '#1a1305' : '#fff';
 
+  // Disabled keeps its `sub`. That line is where every screen explains WHY the
+  // action is closed ("Faltam 2 para o mínimo", "Dispense 3 em Meu Time") --
+  // dropping it with the gradient left a grey button and no reason.
   if (disabled) {
     return (
       <View
+        accessibilityRole="button"
+        aria-disabled
+        accessibilityLabel={sub ? `${label}. ${sub}` : label}
         style={[
           {
             borderRadius: 18,
@@ -356,15 +377,26 @@ export const CtaButton: React.FC<{
           style,
         ]}
       >
-        <Text className="font-black" style={{ fontSize: 13, color: '#525252', textTransform: 'uppercase' }}>
+        <Text className="font-black" style={{ fontSize: 13, color: INK.faint, textTransform: 'uppercase' }}>
           {label}
         </Text>
+        {sub ? (
+          <MonoLabel size={9.5} color={COLORS.warn} style={{ marginTop: 4, letterSpacing: 0, textAlign: 'center' }}>
+            {sub}
+          </MonoLabel>
+        ) : null}
       </View>
     );
   }
 
   return (
-    <Pressable onPress={onPress} className="active:opacity-85" style={style}>
+    <Pressable
+      onPress={onPress}
+      className="active:opacity-85"
+      style={style}
+      accessibilityRole="button"
+      accessibilityLabel={sub ? `${label}. ${sub}` : label}
+    >
       <LinearGradient
         colors={tint}
         start={{ x: 0, y: 0.2 }}
@@ -433,6 +465,9 @@ export const GhostButton: React.FC<{
   <Pressable
     onPress={disabled ? undefined : onPress}
     className="active:opacity-70"
+    accessibilityRole="button"
+    accessibilityLabel={label}
+    aria-disabled={!!disabled}
     style={[
       {
         borderRadius: 16,

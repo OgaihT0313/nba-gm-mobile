@@ -45,20 +45,23 @@ reais (~4,1 no seu elenco por temporada), `load` alimenta `injuryRisk`, e o
 arquétipo Guerreiro já diferencia quem aguenta carga. É também a parte mais
 vistosa do app. Item grande — merece plano próprio antes de começar.
 
-## 3. Tornar visível o que já existe
+## 3. Tornar visível o que já existe — FEITO (2026-10-04)
 
-Dívida pequena, e mecânica invisível que muda resultado é bug:
+Os quatro itens entraram juntos com uma rodada de acessibilidade e legibilidade:
 
-- **Tanking da CPU não aparece em lugar nenhum.** Você vê a tabela mudar mas não
-  vê que um time sentou suas duas estrelas, e pode negociar com um time em
-  liquidação sem saber. Falta marca em `TeamsList`/`TeamDetail`.
-- **A caixa de propostas trava em 2** e só esvazia no prazo. Se você não
-  responde, a liga para de te procurar.
-- **O hero da tela de Simulação rola pra fora** assim que você lê qualquer outra
-  coisa (achado da tentativa de paisagem — vale em retrato). Header compacto que
-  gruda resolve.
-- **Draft e Agência Livre ficam atrás do "Mais"** justamente na noite do draft.
-  Promover a fase aberta pra barra de baixo resolve.
+- Tanking da CPU marcado em `TeamsList` (etiqueta "Loteria") e `TeamDetail`.
+- Propostas expiram em `OFFER_TTL` (8 jogos), com contagem no card; a caixa vai
+  a 3. Medido: 3,9 propostas por temporada (eram ~2).
+- `Screen` ganhou `stickyHeader`; a Simulação mostra time, campanha, jogo e o
+  humor do dono quando o hero sai da tela.
+- A fase aberta (Draft / Agência Livre) ocupa o lugar de Playoffs na barra.
+
+De quebra: todo `Pressable` declara papel (eram 62 sem — leitor de tela via
+"genérico"), estados vão por `aria-*` (o `accessibilityState` não chegava ao
+web), o `CtaButton` desabilitado mantém o `sub` que explica o porquê, rótulos
+nunca abaixo de 9px (`MIN_LABEL_SIZE`; eram 186 entre 7 e 9,5px), barra de baixo
+em 10px, `pointerEvents` movido para `style` (aviso de depreciação), e o SDK 57
+alinhado nos patches (`expo-doctor` 21/21).
 
 ## 4. Imprensa e storylines
 

@@ -116,7 +116,7 @@ const MyTeamHub: React.FC<MyTeamHubProps> = ({
           {TABS.map((t) => {
             const active = t.id === tab;
             return (
-              <Pressable
+              <Pressable accessibilityRole="button"
                 key={t.id}
                 onPress={() => setTab(t.id)}
                 className="active:opacity-70"
@@ -260,7 +260,7 @@ const MyTeamHub: React.FC<MyTeamHubProps> = ({
 
             <View className="flex-row items-center justify-between" style={{ gap: 12, marginTop: 4 }}>
               <SectionLabel>Comparar com rival</SectionLabel>
-              <Pressable
+              <Pressable accessibilityRole="button"
                 onPress={() => setRivalPickerOpen(true)}
                 className="flex-row items-center active:opacity-70"
                 style={{
@@ -281,7 +281,7 @@ const MyTeamHub: React.FC<MyTeamHubProps> = ({
 
       {/* Rival picker */}
       <Modal visible={rivalPickerOpen} transparent animationType="slide" onRequestClose={() => setRivalPickerOpen(false)}>
-        <Pressable className="flex-1 bg-black/70 justify-end" onPress={() => setRivalPickerOpen(false)}>
+        <Pressable accessible={false} className="flex-1 bg-black/70 justify-end" onPress={() => setRivalPickerOpen(false)}>
           <Pressable
             className="rounded-t-3xl p-4 max-h-[70%]"
             style={{ backgroundColor: COLORS.navBg, borderTopWidth: 1, borderTopColor: COLORS.navLine }}
@@ -291,7 +291,7 @@ const MyTeamHub: React.FC<MyTeamHubProps> = ({
             <MonoLabel style={{ marginBottom: 10 }}>Comparar com</MonoLabel>
             <ScrollView>
               {allTeams.filter((t) => t.id !== team.id).map((t) => (
-                <Pressable
+                <Pressable accessibilityRole="button"
                   key={t.id}
                   onPress={() => { setRivalId(t.id); setRivalPickerOpen(false); }}
                   className="flex-row items-center gap-3 p-3 rounded-xl active:opacity-70"
@@ -307,7 +307,7 @@ const MyTeamHub: React.FC<MyTeamHubProps> = ({
 
       {/* Waive confirmation */}
       <Modal visible={confirmWaive !== null} transparent animationType="fade" onRequestClose={() => setConfirmWaive(null)}>
-        <Pressable className="flex-1 bg-black/70 items-center justify-center p-4" onPress={() => setConfirmWaive(null)}>
+        <Pressable accessible={false} className="flex-1 bg-black/70 items-center justify-center p-4" onPress={() => setConfirmWaive(null)}>
           <Pressable
             className="w-full max-w-sm"
             style={{ backgroundColor: COLORS.panel, borderWidth: 1, borderColor: COLORS.line, borderRadius: RADIUS.hero, padding: 20, gap: 14 }}

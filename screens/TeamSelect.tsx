@@ -65,7 +65,7 @@ const TeamSelect: React.FC<TeamSelectProps> = ({ teams, players, onSelect }) => 
             const titles = TEAM_TITLES[t.id] ?? 0;
 
             return (
-              <Pressable
+              <Pressable accessibilityRole="button"
                 key={t.id}
                 onPress={() => onSelect(t.id)}
                 className="active:opacity-75"

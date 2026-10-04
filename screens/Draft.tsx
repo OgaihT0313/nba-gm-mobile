@@ -294,7 +294,7 @@ const Draft: React.FC<DraftProps> = ({ season, onPick, onAutoPick, onFinish, onS
           const r = draft.reports[p.id];
           const conf = CONFIDENCE(r?.uncertainty ?? 9);
           return (
-            <Pressable key={p.id} onPress={() => setFocusId(p.id)} className="active:opacity-80">
+            <Pressable accessibilityRole="button" key={p.id} onPress={() => setFocusId(p.id)} className="active:opacity-80">
               <Panel padding={11}>
                 <View className="flex-row items-center" style={{ gap: 11 }}>
                   <Image

@@ -28,7 +28,7 @@ const EraCard: React.FC<{
   accentColor?: string;
   onPress: () => void;
 }> = ({ eyebrow, title, blurb, accentColor, onPress }) => (
-  <Pressable onPress={onPress} className="active:opacity-75">
+  <Pressable accessibilityRole="button" onPress={onPress} className="active:opacity-75">
     <View
       style={{
         backgroundColor: '#0e0e0e',
@@ -72,7 +72,7 @@ const EraGroupCard: React.FC<{
       }}
     >
       <View style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: 3, backgroundColor: accentColor }} />
-      <Pressable onPress={onStart} className="active:opacity-75">
+      <Pressable accessibilityRole="button" onPress={onStart} className="active:opacity-75">
         <MonoLabel size={9} color={accentColor} style={{ letterSpacing: tracking(9, 0.24) }}>
           {`Era · ${group.spanLabel}`}
         </MonoLabel>
@@ -83,7 +83,7 @@ const EraGroupCard: React.FC<{
           {group.blurb}
         </Text>
       </Pressable>
-      <Pressable onPress={onExpand} className="active:opacity-60" style={{ marginTop: 12 }}>
+      <Pressable accessibilityRole="button" onPress={onExpand} className="active:opacity-60" style={{ marginTop: 12 }}>
         <MonoLabel size={9} color={INK.faint} style={{ letterSpacing: tracking(9, 0.18) }}>
           Escolher temporada inicial ›
         </MonoLabel>
@@ -101,7 +101,7 @@ const EraSelect: React.FC<EraSelectProps> = ({ onSelect }) => {
     return (
       <View className="flex-1" style={{ backgroundColor: '#050505' }}>
         <View style={{ paddingTop: insets.top + 10, paddingHorizontal: 18 }}>
-          <Pressable onPress={() => setExpandedGroup(null)} className="active:opacity-60">
+          <Pressable accessibilityRole="button" onPress={() => setExpandedGroup(null)} className="active:opacity-60">
             <MonoLabel size={9.5} color={visual?.accentPrimary ?? COLORS.cta} style={{ letterSpacing: tracking(9.5, 0.24) }}>
               ‹ Voltar
             </MonoLabel>

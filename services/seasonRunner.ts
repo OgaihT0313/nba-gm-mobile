@@ -12,7 +12,7 @@
 
 import { Team, Player, SeasonState } from '../types';
 import { simulationEngine } from './simulationService';
-import { TRADE_DEADLINE_GAME, generateCpuTradeOffer } from './tradeService';
+import { TRADE_DEADLINE_GAME, generateCpuTradeOffer, OFFER_TTL, MAX_PENDING_OFFERS } from './tradeService';
 import { projectConfidence, confidenceZone, shouldFireMidSeason } from './ownerService';
 import { generateDecisions } from './decisionService';
 
@@ -137,9 +137,12 @@ export function simulateOneDay(season: SeasonState, pinnedResult?: PinnedGameRes
         simulationEngine.decideTanking(teamsAfterEvents, newSchedule, season.userTeamId);
     }
 
+    // Offers lapse after OFFER_TTL games -- an unanswered call is a no.
+    nextTradeOffers = nextTradeOffers.filter(o => o.day === undefined || nextGamesPlayed - o.day < OFFER_TTL);
+
     // Occasionally a CPU GM proactively pitches the user a trade (never past the
     // deadline; capped so the inbox doesn't pile up).
-    if (nextGamesPlayed < TRADE_DEADLINE_GAME && nextTradeOffers.length < 2 && Math.random() < 0.07) {
+    if (nextGamesPlayed < TRADE_DEADLINE_GAME && nextTradeOffers.length < MAX_PENDING_OFFERS && Math.random() < 0.07) {
         const userTeamObj = teamsAfterEvents.find(t => t.id === season.userTeamId);
         if (userTeamObj) {
             const offer = generateCpuTradeOffer(userTeamObj, teamsAfterEvents, newPlayers, nextGamesPlayed, season.awardHistory.length + 1);

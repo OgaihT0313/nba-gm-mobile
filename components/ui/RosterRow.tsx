@@ -115,7 +115,7 @@ const RosterRow: React.FC<RosterRowProps> = ({
   );
 
   return onPress ? (
-    <Pressable onPress={onPress} className="active:opacity-80">
+    <Pressable accessibilityRole="button" onPress={onPress} className="active:opacity-80">
       {body}
     </Pressable>
   ) : (

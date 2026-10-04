@@ -54,7 +54,7 @@ const TeamConfirm: React.FC<TeamConfirmProps> = ({ team, players, teams, onBack,
       footer={<CtaButton label={`Assumir o ${getTeamNickname(team)}`} onPress={onConfirm} size={15} />}
     >
       <HeroContent>
-        <Pressable onPress={onBack} hitSlop={12} className="active:opacity-60">
+        <Pressable accessibilityRole="button" onPress={onBack} hitSlop={12} className="active:opacity-60">
           <Text className="font-bold" style={{ fontSize: 11, color: 'rgba(255,255,255,0.65)' }}>‹ Voltar</Text>
         </Pressable>
 
