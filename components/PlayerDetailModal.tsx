@@ -3,6 +3,7 @@ import { View, Text, Pressable, ScrollView, Modal } from 'react-native';
 import { Image } from 'expo-image';
 import { Player } from '../types';
 import { careerAverages, honorsSummary } from '../services/careerService';
+import { nextMilestone, MILESTONES } from '../services/milestoneService';
 import { personalityOf } from '../services/personalityService';
 import {
   getPlayerImageUrl,
@@ -143,7 +144,7 @@ const PlayerDetailModal: React.FC<{ player: Player; onClose: () => void }> = ({ 
               </View>
             ) : null}
 
-            {/* Career totals — only once a full season has been folded in */}
+            {/* Career totals: real NBA totals when seeded (pipeline/sync_careers.py), otherwise once a full season has been folded in */}
             {player.career && player.career.seasons > 0 ? (() => {
               const c = player.career;
               const avg = careerAverages(c);
@@ -169,6 +170,14 @@ const PlayerDetailModal: React.FC<{ player: Player; onClose: () => void }> = ({ 
                   <Text className="text-[10px] font-bold text-slate-500">
                     {c.gp} jogos · {c.pts.toLocaleString('pt-BR')} pontos · {c.reb.toLocaleString('pt-BR')} rebotes · {c.ast.toLocaleString('pt-BR')} assistências
                   </Text>
+                  {(() => {
+                    const next = nextMilestone(player);
+                    return next ? (
+                      <Text className="text-[10px] font-bold text-sky-300">
+                        Próximo marco: {next.mark.toLocaleString('pt-BR')} {MILESTONES[next.stat].label} · faltam {next.gap.toLocaleString('pt-BR')} (~{next.games} {next.games === 1 ? 'jogo' : 'jogos'} no ritmo atual)
+                      </Text>
+                    ) : null;
+                  })()}
                   {honors ? (
                     <View className="bg-amber-500/5 border border-amber-500/20 rounded-2xl p-3">
                       <Text className="text-[9px] font-black text-amber-400 uppercase tracking-widest mb-1">Conquistas</Text>

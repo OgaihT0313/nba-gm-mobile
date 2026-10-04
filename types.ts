@@ -56,6 +56,10 @@ export interface PlayerCareer {
   allStar: number;
   allNba: number;
   finalsMvp: number;
+  // Real NBA totals and honors loaded by pipeline/sync_careers.py, so the
+  // career did not start with this save. Only seeded careers (and players
+  // drafted inside the save) count for milestones -- see milestoneService.
+  seeded?: boolean;
 }
 
 export interface Player {
@@ -490,6 +494,9 @@ export interface SeasonState {
   // Who was on which team at the end of the last simulated day, so the next
   // day can tell who moved (rivalryService.trackMoves). Absent on a fresh save.
   rosterSnapshot?: Record<string, string>;
+  // Career milestones reached this season, oldest first (milestoneService).
+  // Read by the headlines; reset on opening night.
+  milestones?: { playerId: string; name: string; teamId?: string; stat: 'pts' | 'reb' | 'ast' | 'stl' | 'blk' | 'gp'; value: number; day: number }[];
   // The user franchise's rivalries, by opponent id. Heat >= RIVAL_HEAT makes a
   // rival. See services/rivalryService.ts.
   rivalries?: { [teamId: string]: { heat: number; why?: string; close?: number } };

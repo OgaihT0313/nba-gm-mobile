@@ -1,4 +1,5 @@
 import type { Player, Team } from '../types';
+import { chasingMilestone, CHASE_RETIREMENT_FACTOR } from './milestoneService';
 
 // Retirement, once a summer, right after players age.
 //
@@ -41,7 +42,9 @@ export const retirementChance = (p: Player, rostered: boolean): number => {
   const byAge = 0.06 + (p.age - 33) * 0.13;
   const byLevel = (76 - p.ovr) * 0.025; // a fading role player goes sooner
   const star = p.ovr >= 86 ? -0.12 : 0;
-  return Math.max(0, Math.min(0.95, byAge + byLevel + star));
+  const base = Math.max(0, Math.min(0.95, byAge + byLevel + star));
+  // A veteran within a season of a big career mark plays one more year for it.
+  return chasingMilestone(p) ? base * CHASE_RETIREMENT_FACTOR : base;
 };
 
 export const retirePlayers = (

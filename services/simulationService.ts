@@ -1676,6 +1676,16 @@ const SIXTH_MAN_MIN_GP = 30;
 // filter also close the old "a non-rostered / barely-played player wins"
 // loophole. Falls back to ratings only if literally nobody has logged stats
 // (e.g. an award requested before any game was simulated).
+/**
+ * The MVP case: per-game production plus team success. Exported so the
+ * headlines' MVP race (headlineService) reads the same number the award does.
+ */
+export const mvpScore = (p: Player, team: Team): number => {
+    const s = p.seasonStats!;
+    const production = s.ppg + 1.4 * s.apg + 1.1 * s.rpg + 0.7 * s.spg + 0.7 * s.bpg - 1.0 * s.tpg;
+    return production + (team.wins || 0) * 0.35;
+};
+
 const generateAwards = (teams: Team[], players: { [key: string]: Player }) => {
     const allPlayers = Object.values(players);
     const teamOf = (p: Player) => teams.find(t => t.roster.includes(p.id));
@@ -1685,12 +1695,8 @@ const generateAwards = (teams: Team[], players: { [key: string]: Player }) => {
     // penalized for turnovers) plus a team-success bonus — a great player on a
     // winning team, judged on the court. Requires a roster spot and a real
     // sample.
-    const mvpPool = allPlayers.filter(p => played(p, AWARD_MIN_GP) && teamOf(p)).map(p => {
-        const s = p.seasonStats!;
-        const team = teamOf(p)!;
-        const production = s.ppg + 1.4 * s.apg + 1.1 * s.rpg + 0.7 * s.spg + 0.7 * s.bpg - 1.0 * s.tpg;
-        return { id: p.id, score: production + (team.wins || 0) * 0.35 };
-    });
+    const mvpPool = allPlayers.filter(p => played(p, AWARD_MIN_GP) && teamOf(p))
+        .map(p => ({ id: p.id, score: mvpScore(p, teamOf(p)!) }));
     const mvp = weightedRandomPick(mvpPool, 6) || allPlayers[0].id;
 
     // DPOY: defensive box production — steals (guards/wings) and blocks + boards

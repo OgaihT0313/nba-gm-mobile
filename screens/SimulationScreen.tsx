@@ -9,6 +9,7 @@ import {
 } from '../constants';
 import { MANDATE_META, confidenceZone, ZONE_META } from '../services/ownerService';
 import { PROMISE_LABEL, PROMISE_KEPT, PROMISE_BROKEN } from '../services/pressService';
+import { headlines } from '../services/headlineService';
 import { isRival, rivalryReason, revengePlayers, REVENGE_BOOST, RIVAL_WIN_MORALE, RIVAL_LOSS_MORALE } from '../services/rivalryService';
 import { recentForm, currentStreak, nextGame, winProbability } from '../services/formService';
 import { useTheme } from '../src/theme/ThemeProvider';
@@ -44,6 +45,10 @@ const abbreviate = (name: string) => {
   const parts = name.trim().split(/\s+/);
   if (parts.length < 2 || !parts[0]) return name;
   return `${parts[0][0]}. ${parts.slice(1).join(' ')}`;
+};
+
+const HEADLINE_TONE: Record<'good' | 'warn' | 'bad' | 'info', string> = {
+  good: COLORS.goodSoft, warn: COLORS.warn, bad: COLORS.badSoft, info: COLORS.info,
 };
 
 const SimulationScreen: React.FC<SimulationScreenProps> = ({
@@ -112,6 +117,7 @@ const SimulationScreen: React.FC<SimulationScreenProps> = ({
   const winPct = userTeam && opponent ? winProbability(userTeam, opponent, season.players, !!atHome) : 0.5;
   // What makes the next game more than a game: a rival, or someone facing the
   // team he left.
+  const front = headlines(season);
   const rival = opponent && isRival(season.rivalries, opponent.id) ? season.rivalries![opponent.id] : undefined;
   const revenge = userTeam && opponent ? revengePlayers(season, userTeam, opponent).slice(0, 2) : [];
 
@@ -436,6 +442,29 @@ const SimulationScreen: React.FC<SimulationScreenProps> = ({
                 style={{ marginTop: 11 }}
               />
             ) : null}
+          </Panel>
+        ) : null}
+
+        {/* The front page: the storylines the sim is acting on right now
+            (headlineService). Derived on render, so it is never stale and
+            never buried the way the feed below is. */}
+        {front.length > 0 ? (
+          <Panel padding={14}>
+            <MonoLabel size={9} style={{ marginBottom: 11 }}>Manchetes</MonoLabel>
+            <View style={{ gap: 12 }}>
+              {front.map((h) => (
+                <View key={h.id} className="flex-row" style={{ gap: 10 }}>
+                  <View style={{ width: 3, borderRadius: 2, backgroundColor: HEADLINE_TONE[h.tone] }} />
+                  <View className="flex-1">
+                    <MonoLabel size={9} color={HEADLINE_TONE[h.tone]} style={{ letterSpacing: 0.6 }}>{h.kicker}</MonoLabel>
+                    <Text className="font-bold text-white" style={{ fontSize: 13, lineHeight: 18, marginTop: 2 }}>{h.title}</Text>
+                    {h.sub ? (
+                      <Text style={{ fontSize: 11, lineHeight: 15, color: INK.body, marginTop: 2 }}>{h.sub}</Text>
+                    ) : null}
+                  </View>
+                </View>
+              ))}
+            </View>
           </Panel>
         ) : null}
 

@@ -66,7 +66,7 @@ nunca abaixo de 9px (`MIN_LABEL_SIZE`; eram 186 entre 7 e 9,5px), barra de baixo
 em 10px, `pointerEvents` movido para `style` (aviso de depreciação), e o SDK 57
 alinhado nos patches (`expo-doctor` 21/21).
 
-## 4. Imprensa e storylines
+## 4. Imprensa e storylines — FEITO (2026-10-04)
 
 O último item da camada de fantasia. Coletivas, manchetes, rivalidades, jogos de
 revanche, marcos de carreira.
@@ -128,7 +128,29 @@ parou 7 vezes (`PRESS_QUEUE_CEILING`), para não estourar o teto da fila.
 
 Medido em `scripts/check_rivalry.ts` (carreiras com playoffs reais).
 
-Falta: manchetes e marcos de carreira.
+### 4c. Marcos de carreira e manchetes — FEITO (2026-10-04)
+
+- **Carreiras reais:** `nba-gm-simulator/pipeline/sync_careers.py` grava em
+  `players.json` os totais reais de carreira (jogos, pontos, rebotes,
+  assistências, roubos, tocos) e os prêmios (títulos, MVPs, All-Star, All-NBA…)
+  de cada jogador, com `career.seeded`. A ficha do jogador mostra a carreira
+  real e o próximo marco.
+- **Marcos** (`services/milestoneService.ts`): 5 mil a 50 mil pontos, rebotes,
+  assistências, roubos, tocos e jogos. Na noite do marco o ânimo do jogador sobe
+  (+10). Um veterano a uma temporada de um marco grande adia a aposentadoria
+  (chance × 0,35) — o recorde segura o jogador na liga. Só contam carreiras reais
+  ou de quem foi draftado dentro do save (numa era antiga a carreira começa do
+  zero, e os marcos seriam falsos).
+- **Manchetes** (`services/headlineService.ts`): a primeira página da
+  temporada, derivada do estado a cada leitura — marco atingido, marco perto,
+  corrida ao MVP (a mesma conta do prêmio, `mvpScore`), maior sequência da liga,
+  cadeira quente do dono e a promessa da coletiva. Nenhuma manchete é mecânica
+  nova: cada uma é a cara de algo que o motor já faz. Painel na Simulação, nunca
+  o feed.
+
+Medido em `scripts/check_milestones.ts`.
+
+**Item 4 concluído.**
 
 ---
 

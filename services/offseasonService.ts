@@ -291,6 +291,7 @@ export const startSeason = (prev: SeasonState): SeasonState => {
     status: 'active',
     gamesPlayed: 0,
     players: freshPlayers,
+    milestones: undefined,
     owner,
     cup: simulationEngine.initCupGroups(prev.teams),
     schedule: generateSchedule(prev.teams),

@@ -17,6 +17,7 @@ import { projectConfidence, confidenceZone, shouldFireMidSeason } from './ownerS
 import { generateDecisions } from './decisionService';
 import { notePressHeld } from './pressService';
 import { trackMoves, applyRevengeNights, markRevengeFaced, settleUserGame } from './rivalryService';
+import { milestonesCrossed, MILESTONE_MORALE } from './milestoneService';
 
 // Calendar checkpoints (moved out of App.tsx so the runner is self-contained).
 // Roughly where the real All-Star break falls on the 82-game calendar, a few
@@ -131,6 +132,15 @@ export function simulateOneDay(season: SeasonState, pinnedResult?: PinnedGameRes
         }
     });
 
+    // Career marks reached tonight. The night he gets there lifts him.
+    const teamOfId = new Map<string, string>();
+    newTeams.forEach(t => t.roster.forEach(id => teamOfId.set(id, t.id)));
+    const reached = milestonesCrossed(season.players, newPlayers, teamOfId, season.gamesPlayed + 1);
+    reached.forEach(m => {
+        const p = newPlayers[m.playerId];
+        newPlayers[m.playerId] = { ...p, morale: Math.min(100, (p.morale ?? 70) + MILESTONE_MORALE) };
+    });
+
     const { teams: teamsAfterEvents, event } = simulationEngine.handleRandomEvents(newTeams, newPlayers, season.gamesPlayed + 1, season.userTeamId);
     if (event) {
         newEvents.unshift(event);
@@ -238,6 +248,7 @@ export function simulateOneDay(season: SeasonState, pinnedResult?: PinnedGameRes
         ...season,
         rosterSnapshot,
         rivalries,
+        milestones: reached.length ? [...(season.milestones ?? []), ...reached].slice(-40) : season.milestones,
         gamesPlayed: nextGamesPlayed,
         teams: teamsAfterEvents,
         players: newPlayers,
