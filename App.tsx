@@ -766,7 +766,7 @@ export default function App() {
     }
     if (view === 'scout') return <Scout players={season.players} teams={season.teams} userTeamId={season.userTeamId} />;
     if (view === 'standings') return <StandingsScreen season={season} />;
-    if (view === 'leaders') return <LeagueLeaders players={season.players} teams={season.teams} />;
+    if (view === 'leaders') return <LeagueLeaders players={season.players} teams={season.teams} userTeamId={season.userTeamId} />;
     if (view === 'allstar') return <AllStarWeekend allStar={season.allStar} players={season.players} teams={season.teams} allStarGame={ALL_STAR_GAME} />;
     if (view === 'teams') {
       return <TeamsList teams={season.teams} players={season.players} rivalIds={season.teams.filter((x) => isRival(season.rivalries, x.id)).map((x) => x.id)} onSelect={(id) => { setSelectedTeamId(id); setView('team-detail'); }} />;
