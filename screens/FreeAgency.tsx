@@ -10,9 +10,9 @@ import {
 import { getFreeAgents, signFreeAgentLegality, newContractYears, evaluateSigningInterest, signingRoute } from '../services/freeAgencyService';
 import { MIN_ROSTER_SIZE, MAX_ROSTER_SIZE } from '../services/tradeService';
 import { useTheme } from '../src/theme/ThemeProvider';
-import { COLORS, INK, RADIUS } from '../src/theme/tokens';
-import Screen, { HeroContent, Body } from '../components/ui/Screen';
-import { Panel, MonoLabel, Eyebrow, Stat, Meter, Chip, CtaButton, GhostButton, FilterRow } from '../components/ui/kit';
+import { COLORS, INK, RADIUS, FONT, ovrColor } from '../src/theme/tokens';
+import Screen, { Body } from '../components/ui/Screen';
+import { Panel, MonoLabel, Eyebrow, Stat, Meter, Chip, CtaButton, GhostButton, FilterRow, ScreenTitle, BodyText, Name, Dock } from '../components/ui/kit';
 
 // Design 3b. Two things are always on screen: how much room you actually have,
 // and whether the player would even come. The old version let you tap "Assinar"
@@ -47,9 +47,9 @@ const SORTS: { key: SortKey; label: string; value: (p: Player) => number }[] = [
 type Standing = { label: string; color: string; fill: number };
 const STANDING = {
   wants: { label: 'Quer vir', color: COLORS.good, fill: 0.9 },
-  open: { label: 'Disponível', color: COLORS.warn, fill: 0.55 },
-  refuses: { label: 'Sem interesse', color: COLORS.cta, fill: 0.18 },
-  noRoom: { label: 'Não cabe', color: COLORS.cta, fill: 0.12 },
+  open: { label: 'Disponível', color: COLORS.textSoft, fill: 0.55 },
+  refuses: { label: 'Sem interesse', color: COLORS.dim, fill: 0.18 },
+  noRoom: { label: 'Não cabe', color: COLORS.warn, fill: 0.12 },
 } satisfies Record<string, Standing>;
 
 const FreeAgency: React.FC<FreeAgencyProps> = ({ season, onSign, onStartSeason }) => {
@@ -106,94 +106,72 @@ const FreeAgency: React.FC<FreeAgencyProps> = ({ season, onSign, onStartSeason }
 
   return (
     <Screen
-      heroHeight={172}
+      heroHeight={110}
       footer={
-        <CtaButton
-          label="Começar temporada"
-          sub={belowMin
-            ? `Faltam ${MIN_ROSTER_SIZE - rosterCount} para o mínimo de ${MIN_ROSTER_SIZE}`
-            : aboveMax
-              ? `Dispense ${rosterCount - MAX_ROSTER_SIZE} em Meu Time · máximo de ${MAX_ROSTER_SIZE}`
-              : `${rosterCount} no elenco · pronto`}
-          onPress={onStartSeason}
-          disabled={belowMin || aboveMax}
-        />
+        <Dock>
+          <CtaButton
+            label="Começar temporada"
+            sub={belowMin ? `Faltam ${MIN_ROSTER_SIZE - rosterCount}` : aboveMax ? `Dispense ${rosterCount - MAX_ROSTER_SIZE}` : `${rosterCount} no elenco`}
+            onPress={onStartSeason}
+            disabled={belowMin || aboveMax}
+          />
+          {belowMin || aboveMax ? (
+            <BodyText size={12} color={COLORS.warn} style={{ textAlign: 'center' }}>
+              {belowMin
+                ? `O elenco precisa de no mínimo ${MIN_ROSTER_SIZE} jogadores.`
+                : `Máximo de ${MAX_ROSTER_SIZE}: dispense ${rosterCount - MAX_ROSTER_SIZE} em Meu Time.`}
+            </BodyText>
+          ) : null}
+        </Dock>
       }
     >
-      <HeroContent>
-        <Eyebrow>Agência livre</Eyebrow>
-        <View className="flex-row items-end justify-between" style={{ marginTop: 12 }}>
-          <View>
-            <Stat size={34} style={{ lineHeight: 31 }} color={capSpace >= 0 ? '#fff' : COLORS.badSoft}>
-              {capSpace >= 0 ? money(capSpace) : `-${money(Math.abs(capSpace))}`}
-            </Stat>
-            <MonoLabel size={10} color="rgba(255,255,255,0.65)" style={{ marginTop: 5, letterSpacing: 0.5 }}>
-              Espaço no teto
-            </MonoLabel>
-          </View>
-          <View className="items-end" style={{ paddingBottom: 3 }}>
-            <Stat size={15} color={belowMin || aboveMax ? COLORS.badSoft : '#fff'}>{rosterCount}</Stat>
-            <MonoLabel size={9.5} color="rgba(255,255,255,0.55)" style={{ marginTop: 3, letterSpacing: 0.4 }}>
-              No elenco · mín {MIN_ROSTER_SIZE}
-            </MonoLabel>
-          </View>
-        </View>
-        <Meter
-          value={Math.min(1, salary / SALARY_CAP)}
-          height={6}
-          track="rgba(0,0,0,0.35)"
-          colors={salary > SALARY_CAP ? [COLORS.warn, COLORS.cta] : [accent.primary, accent.secondary]}
-          style={{ marginTop: 12 }}
-        />
-        <MonoLabel size={9} color={salary > LUXURY_TAX ? COLORS.badSoft : 'rgba(255,255,255,0.55)'} style={{ marginTop: 6, letterSpacing: 0.3 }}>
-          Folha {money(salary)} · teto {money(SALARY_CAP)} · imposto {money(LUXURY_TAX)}
-        </MonoLabel>
-      </HeroContent>
+      <ScreenTitle title="Agência livre" />
+      <BodyText size={14} style={{ paddingHorizontal: 20, marginTop: -10 }}>
+        Offseason · {freeAgents.length} jogadores no mercado
+      </BodyText>
 
-      <Body top={16}>
-        {/* What the roster is actually missing. */}
-        <Panel padding={13}>
-          <MonoLabel style={{ marginBottom: 9 }}>Buracos no elenco</MonoLabel>
-          <View className="flex-row flex-wrap" style={{ gap: 7 }}>
-            {holes.length > 0 ? (
-              holes.map((h) => <Chip key={h} tone="bad" size={10}>Sem {h} natural</Chip>)
-            ) : (
-              <Chip tone="good" size={10}>Todas as posições cobertas</Chip>
-            )}
-            {belowMin ? <Chip tone="bad" size={10}>Elenco abaixo do mínimo</Chip> : null}
-            {capSpace < 0 ? <Chip tone="warn" size={10}>Acima do teto</Chip> : null}
-            {aboveMax ? <Chip tone="bad" size={10}>Elenco acima do máximo</Chip> : null}
-          </View>
-          {ownCount > 0 ? (
-            <Text style={{ fontSize: 10.5, lineHeight: 15, color: INK.meta, marginTop: 9 }}>
-              {ownCount === 1 ? '1 jogador seu quer' : `${ownCount} jogadores seus querem`} renovar. Você tem a preferência e pode
-              passar do teto para mantê-los — quem você não assinar vai ao mercado quando a temporada começar.
-            </Text>
-          ) : null}
-          <MonoLabel size={9.5} color={INK.faint} style={{ marginTop: 10, letterSpacing: 0 }}>
-            {freeAgents.length} agentes livres no mercado
-          </MonoLabel>
-        </Panel>
+      <Body top={14} gap={12}>
+        <View className="flex-row" style={{ gap: 8 }}>
+          <Panel padding={13} className="flex-1" style={{ gap: 3 }}>
+            <MonoLabel size={9}>Espaço no teto</MonoLabel>
+            <Stat size={24} color={capSpace >= 0 ? COLORS.good : COLORS.warn} fit>
+              {capSpace >= 0 ? money(capSpace) : `–${money(Math.abs(capSpace))}`}
+            </Stat>
+            <BodyText size={12} color={COLORS.dim}>
+              {capSpace >= 0 ? 'Livre para assinar' : salary > LUXURY_TAX ? 'Acima do imposto' : 'Só mínimo e exceção'}
+            </BodyText>
+          </Panel>
+          <Panel padding={13} className="flex-1" style={{ gap: 3 }}>
+            <MonoLabel size={9}>Buracos</MonoLabel>
+            <Stat size={24} fit>{holes.length > 0 ? holes.join(' · ') : 'Nenhum'}</Stat>
+            <BodyText size={12} color={belowMin || aboveMax ? COLORS.warn : COLORS.dim}>
+              {rosterCount} no elenco · mín {MIN_ROSTER_SIZE}
+            </BodyText>
+          </Panel>
+        </View>
+
+        {ownCount > 0 ? (
+          <BodyText size={12.5}>
+            {ownCount === 1 ? '1 jogador seu quer' : `${ownCount} jogadores seus querem`} renovar. Você tem a preferência e pode
+            passar do teto para mantê-los — quem você não assinar vai ao mercado quando a temporada começar.
+          </BodyText>
+        ) : null}
 
         <FilterRow items={POSITION_FILTERS} value={posFilter} onChange={setPosFilter} />
 
         <View className="flex-row items-center" style={{ gap: 6 }}>
-          <MonoLabel size={9} color={INK.faint}>Ordenar</MonoLabel>
-          {SORTS.map((s) => {
-            const active = sortKey === s.key;
+          <Text style={{ fontFamily: FONT.cond700, fontSize: 10.5, letterSpacing: 1.4, color: COLORS.dim, width: 58 }}>ORDENAR</Text>
+          {SORTS.map((so) => {
+            const active = sortKey === so.key;
             return (
               <Pressable accessibilityRole="button"
-                key={s.key}
-                onPress={() => onSortPress(s.key)}
-                className="flex-row items-center active:opacity-70"
-                style={{
-                  gap: 4, paddingHorizontal: 10, paddingVertical: 5, borderRadius: RADIUS.pill,
-                  backgroundColor: active ? COLORS.line : COLORS.panel,
-                  borderWidth: 1, borderColor: active ? COLORS.textDim : COLORS.line,
-                }}
+                key={so.key}
+                onPress={() => onSortPress(so.key)}
+                className="flex-row items-center active:opacity-75"
+                style={{ gap: 4, paddingHorizontal: 10, height: 30, borderRadius: 9, backgroundColor: active ? COLORS.lineStrong : COLORS.surface2 }}
               >
-                <MonoLabel size={9} color={active ? '#fff' : INK.meta} style={{ letterSpacing: 0.4 }}>{s.label}</MonoLabel>
-                {active ? <Text style={{ fontSize: 8, color: COLORS.textDim }}>{sortAsc ? '▲' : '▼'}</Text> : null}
+                <Text style={{ fontFamily: FONT.cond700, fontSize: 12, letterSpacing: 0.8, color: active ? COLORS.text : COLORS.muted, textTransform: 'uppercase' }}>{so.label}</Text>
+                {active ? <Text style={{ fontSize: 8, color: COLORS.muted }}>{sortAsc ? '▲' : '▼'}</Text> : null}
               </Pressable>
             );
           })}
@@ -218,82 +196,40 @@ const FreeAgency: React.FC<FreeAgencyProps> = ({ season, onSign, onStartSeason }
           const reason = !legality.legal ? legality.reason : !interest.willing ? interest.reason : undefined;
 
           return (
-            <Panel key={player.id} bar={standing.color} padding={13}>
-              <View className="flex-row items-center" style={{ gap: 11 }}>
-                <Image
-                  source={{ uri: getPlayerImageUrl(player) }}
-                  placeholder={{ uri: PLAYER_PLACEHOLDER_SVG }}
-                  style={{ width: 40, height: 40, borderRadius: RADIUS.pill, backgroundColor: COLORS.line }}
-                  contentFit="cover"
-                />
-                <View style={{ flex: 1 }}>
-                  <View className="flex-row items-center" style={{ gap: 6 }}>
-                    <Text className="font-extrabold text-white" style={{ fontSize: 13.5, flexShrink: 1 }} numberOfLines={1}>
-                      {player.name}
-                    </Text>
-                    {own ? (
-                      <View style={{ paddingHorizontal: 6, paddingVertical: 2, borderRadius: 5, backgroundColor: COLORS.line }}>
-                        <MonoLabel size={8.5} color={COLORS.good} style={{ letterSpacing: 0.4 }}>Seu jogador</MonoLabel>
-                      </View>
-                    ) : null}
-                    {fillsHole ? (
-                      <View style={{ paddingHorizontal: 6, paddingVertical: 2, borderRadius: 5, backgroundColor: COLORS.line }}>
-                        <MonoLabel size={8.5} color={COLORS.warn} style={{ letterSpacing: 0.4 }}>Lacuna</MonoLabel>
-                      </View>
-                    ) : null}
-                  </View>
-                  <MonoLabel size={10} color={INK.meta} style={{ marginTop: 3, letterSpacing: 0 }} numberOfLines={1}>
-                    {player.age}a · {formatPositions(player)} · pede {money(player.salary)}/{newContractYears(player)}a
-                  </MonoLabel>
+            <Panel key={player.id} bar={standing.color} padding={12} radius={14} style={{ gap: 8 }}>
+              <View className="flex-row items-center" style={{ gap: 12 }}>
+                <Text style={{ width: 30, fontFamily: FONT.cond800, fontSize: 24, lineHeight: 24, color: ovrColor(player.ovr) }}>{player.ovr}</Text>
+                <View style={{ flex: 1, minWidth: 0, gap: 2 }}>
+                  <Name size={16}>{player.name}</Name>
+                  <Text numberOfLines={1} style={{ fontFamily: FONT.body500, fontSize: 12, color: COLORS.dim }}>
+                    {formatPositions(player)} · {player.age}a · pede {money(player.salary)}/{newContractYears(player)}a
+                    {own ? ' · seu jogador' : ''}{fillsHole ? ' · lacuna' : ''}
+                  </Text>
                 </View>
-                <Stat size={21} color={attributeColor(player.ovr)}>{player.ovr}</Stat>
+                <Text style={{ fontFamily: FONT.cond700, fontSize: 11.5, letterSpacing: 0.9, color: standing.color, textTransform: 'uppercase' }}>{standing.label}</Text>
               </View>
-
-              <View className="flex-row items-center" style={{ gap: 8, marginTop: 11 }}>
-                <MonoLabel size={8.5} color={INK.faint}>Interesse</MonoLabel>
-                <Meter value={standing.fill} color={standing.color} height={5} track={COLORS.sunken} style={{ flex: 1 }} />
-                <MonoLabel size={10} color={standing.color} style={{ letterSpacing: 0.4 }}>{standing.label}</MonoLabel>
-              </View>
-
-              {reason ? (
-                <Text style={{ fontSize: 10.5, lineHeight: 15, color: INK.faint, marginTop: 7 }}>{reason}</Text>
-              ) : null}
-              {/* How the signing fits, when it is not plain cap room: the
-                  mid-level is spent once, so using it is worth knowing. */}
+              {reason ? <BodyText size={12} color={COLORS.dim}>{reason}</BodyText> : null}
+              {/* How the signing fits, when it is not plain cap room. */}
               {canSign && route === 'mid_level' ? (
-                <Text style={{ fontSize: 10.5, lineHeight: 15, color: INK.faint, marginTop: 7 }}>
-                  Usa a exceção de nível médio — só uma por verão.
-                </Text>
+                <BodyText size={12} color={COLORS.dim}>Usa a exceção de nível médio — só uma por verão.</BodyText>
               ) : null}
               {canSign && route === 'bird' && capSpace < player.salary ? (
-                <Text style={{ fontSize: 10.5, lineHeight: 15, color: INK.faint, marginTop: 7 }}>
-                  Direito de renovação: pode passar do teto.
-                </Text>
+                <BodyText size={12} color={COLORS.dim}>Direito de renovação: pode passar do teto.</BodyText>
               ) : null}
-
               {canSign ? (
-                <GhostButton
-                  label={`Assinar por ${money(player.salary)}`}
-                  onPress={() => onSign(player.id)}
-                  color={COLORS.goodSoft}
-                  padding={10}
-                  size={10.5}
-                  style={{ marginTop: 10 }}
-                />
+                <GhostButton filled label={`Assinar por ${money(player.salary)}`} onPress={() => onSign(player.id)} color={COLORS.good} />
               ) : null}
             </Panel>
           );
         })}
 
         {filtered.length === 0 ? (
-          <Text style={{ fontSize: 12, color: INK.faint, fontStyle: 'italic', paddingHorizontal: 4 }}>
-            Nenhum agente livre nessa posição.
-          </Text>
+          <BodyText color={COLORS.dim}>Nenhum agente livre nessa posição.</BodyText>
         ) : null}
 
-        <Text style={{ fontSize: 10.5, lineHeight: 15, color: INK.faint, paddingHorizontal: 4 }}>
+        <BodyText size={12} color={COLORS.dim}>
           Contratos expiraram pela liga inteira. Quem ninguém pôde pagar baixou o pedido. Reforce o {getTeamNickname(userTeam)} antes de começar a nova temporada.
-        </Text>
+        </BodyText>
       </Body>
     </Screen>
   );

@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from 'react';
-import { View, Text, Pressable, FlatList, TextInput } from 'react-native';
+import { View, Text, Pressable, FlatList, TextInput, ScrollView } from 'react-native';
 import { Image } from 'expo-image';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -9,11 +9,9 @@ import {
   formatPositions, attributeColor,
 } from '../constants';
 import { useTheme } from '../src/theme/ThemeProvider';
-import { COLORS, INK, RADIUS } from '../src/theme/tokens';
-import { HeroBackdrop } from '../components/ui/Screen';
-import { Panel, MonoLabel, Eyebrow, HeroTitle, Stat, FilterRow } from '../components/ui/kit';
+import { COLORS, FONT, withAlpha, ovrColor } from '../src/theme/tokens';
+import { ScreenTitle, BodyText, TeamBadge, Name } from '../components/ui/kit';
 import PlayerDetailModal from '../components/PlayerDetailModal';
-import Icon from '../components/Icon';
 import ScoutAdvisor from '../components/ScoutAdvisor';
 
 // Kept on FlatList rather than moved to <Screen>: this list is every player in
@@ -97,126 +95,115 @@ const Scout: React.FC<ScoutProps> = ({ players, teams, userTeamId }) => {
   }, [players, query, posFilter, ageFilter, ovrFilter, teamByPlayerId]);
 
   const header = (
-    <View style={{ paddingTop: insets.top + 6 }}>
-      <View style={{ paddingHorizontal: 18 }}>
-        <Eyebrow>Scout · {activeCount} jogadores</Eyebrow>
-        <HeroTitle size={28} style={{ marginTop: 9 }}>Olho na liga</HeroTitle>
-      </View>
+    <View style={{ paddingTop: insets.top + 4 }}>
+      <ScreenTitle title="Scout" />
+      <BodyText size={14} style={{ paddingHorizontal: 20, marginTop: -10 }}>Olho na liga · {activeCount} jogadores</BodyText>
 
-      <View style={{ paddingHorizontal: 14, marginTop: 16, gap: 10 }}>
+      <View style={{ paddingHorizontal: 14, marginTop: 12, gap: 10 }}>
         {userTeam ? <ScoutAdvisor userTeam={userTeam} teams={teams} players={players} onSelectPlayer={setSelected} /> : null}
 
-        <Panel padding={13}>
-          <View
-            className="flex-row items-center"
-            style={{ backgroundColor: COLORS.sunken, borderWidth: 1, borderColor: COLORS.line, borderRadius: RADIUS.control, paddingHorizontal: 11 }}
-          >
-            <Icon name="scout" size={14} color={COLORS.navIdle} />
-            <TextInput
-              value={query}
-              onChangeText={setQuery}
-              placeholder="Buscar por nome…"
-              placeholderTextColor="#475569"
-              autoCorrect={false}
-              autoCapitalize="none"
-              style={{ flex: 1, fontSize: 13, color: '#fff', paddingVertical: 9, paddingHorizontal: 8 }}
-            />
-            {query.length > 0 ? (
-              <Pressable accessibilityRole="button" onPress={() => setQuery('')} hitSlop={8}>
-                <Text style={{ color: COLORS.navIdle, fontSize: 16, fontWeight: '700' }}>×</Text>
-              </Pressable>
-            ) : null}
-          </View>
+        <View className="flex-row items-center" style={{ height: 46, borderRadius: 12, backgroundColor: COLORS.surface, paddingHorizontal: 14, gap: 8 }}>
+          <TextInput
+            value={query}
+            onChangeText={setQuery}
+            placeholder="Buscar jogador…"
+            placeholderTextColor={COLORS.faint}
+            autoCorrect={false}
+            autoCapitalize="none"
+            style={{ flex: 1, fontFamily: FONT.body500, fontSize: 15, color: COLORS.text, paddingVertical: 10 }}
+          />
+          {query.length > 0 ? (
+            <Pressable accessibilityRole="button" accessibilityLabel="Limpar busca" onPress={() => setQuery('')} hitSlop={8}>
+              <Text style={{ color: COLORS.dim, fontSize: 18 }}>×</Text>
+            </Pressable>
+          ) : null}
+        </View>
 
-          <View style={{ gap: 10, marginTop: 12 }}>
-            <View style={{ gap: 6 }}>
-              <MonoLabel size={8} color={INK.faint}>Posição</MonoLabel>
-              <FilterRow items={POSITION_FILTERS} value={posFilter} onChange={setPosFilter} />
-            </View>
-            <View style={{ gap: 6 }}>
-              <MonoLabel size={8} color={INK.faint}>Idade</MonoLabel>
-              <FilterRow items={AGE_FILTERS} value={ageFilter} onChange={setAgeFilter} />
-            </View>
-            <View style={{ gap: 6 }}>
-              <MonoLabel size={8} color={INK.faint}>Overall</MonoLabel>
-              <FilterRow items={OVR_FILTERS} value={ovrFilter} onChange={setOvrFilter} />
-            </View>
-          </View>
-        </Panel>
+        <View style={{ gap: 7 }}>
+          <FilterLine label="Posição" items={POSITION_FILTERS} value={posFilter} onChange={setPosFilter} />
+          <FilterLine label="Idade" items={AGE_FILTERS} value={ageFilter} onChange={setAgeFilter} />
+          <FilterLine label="Overall" items={OVR_FILTERS} value={ovrFilter} onChange={setOvrFilter} />
+        </View>
 
-        <MonoLabel style={{ paddingLeft: 3 }}>
-          {results.length} {results.length === 1 ? 'resultado' : 'resultados'}
-        </MonoLabel>
+        <View className="flex-row justify-between" style={{ paddingTop: 4, paddingBottom: 6, borderBottomWidth: 1, borderBottomColor: COLORS.line }}>
+          <Text style={{ fontFamily: FONT.cond700, fontSize: 10.5, letterSpacing: 1.5, color: COLORS.faint }}>
+            {results.length} {results.length === 1 ? 'JOGADOR' : 'JOGADORES'}
+          </Text>
+          <Text style={{ fontFamily: FONT.cond700, fontSize: 10.5, letterSpacing: 1.5, color: COLORS.faint }}>IDADE · SALÁRIO · OVR</Text>
+        </View>
       </View>
     </View>
   );
 
   return (
     <View className="flex-1" style={{ backgroundColor: COLORS.bg }}>
-      <HeroBackdrop height={132 + insets.top} primary={accent.primary} secondary={accent.secondary} />
-
       <FlatList
         data={results}
         keyExtractor={(item) => item.id}
         ListHeaderComponent={header}
         contentContainerStyle={{ paddingBottom: 24 }}
-        initialNumToRender={12}
+        initialNumToRender={14}
         windowSize={8}
         showsVerticalScrollIndicator={false}
         renderItem={({ item }) => (
-          <Pressable accessibilityRole="button"
+          <Pressable
+            accessibilityRole="button"
             onPress={() => setSelected(item)}
-            className="active:opacity-80"
-            style={{ paddingHorizontal: 14, marginBottom: 8 }}
+            className="flex-row items-center active:opacity-75"
+            style={{ height: 48, gap: 10, marginHorizontal: 14, borderBottomWidth: 1, borderBottomColor: COLORS.lineSoft }}
           >
-            <Panel bar={attributeColor(item.ovr)} padding={11}>
-              <View className="flex-row items-center" style={{ gap: 11 }}>
-                <Image
-                  source={{ uri: getPlayerImageUrl(item) }}
-                  placeholder={{ uri: PLAYER_PLACEHOLDER_SVG }}
-                  style={{ width: 38, height: 38, borderRadius: RADIUS.pill, backgroundColor: COLORS.line }}
-                  contentFit="cover"
-                />
-                <View style={{ flex: 1 }}>
-                  <Text className="font-extrabold text-white" style={{ fontSize: 12.5 }} numberOfLines={1}>{item.name}</Text>
-                  <MonoLabel size={9.5} color={INK.meta} style={{ marginTop: 2, letterSpacing: 0 }}>
-                    {formatPositions(item)} · {item.age} anos
-                  </MonoLabel>
-                </View>
-                <Stat size={19} color={attributeColor(item.ovr)}>{item.ovr}</Stat>
-                {item.team ? (
-                  <Image
-                    source={{ uri: getTeamLogoUrl(item.team) }}
-                    placeholder={{ uri: NBA_FALLBACK }}
-                    style={{ width: 20, height: 20 }}
-                    contentFit="contain"
-                  />
-                ) : (
-                  // Wide enough for the whole word: matching the 20px team-logo
-                  // slot broke "LIVRE" onto two lines ("LIV / RE") on device.
-                  <MonoLabel
-                    size={8}
-                    color={COLORS.goodSoft}
-                    numberOfLines={1}
-                    style={{ width: 32, letterSpacing: 0, textAlign: 'right' }}
-                  >
-                    Livre
-                  </MonoLabel>
-                )}
+            {item.team ? (
+              <TeamBadge teamId={item.team.id} width={34} height={20} />
+            ) : (
+              <View style={{ width: 34, height: 20, borderRadius: 4, borderWidth: 1, borderColor: withAlpha(COLORS.good, 0.5), alignItems: 'center', justifyContent: 'center' }}>
+                <Text style={{ fontFamily: FONT.cond800, fontSize: 9.5, color: COLORS.good }}>LIVRE</Text>
               </View>
-            </Panel>
+            )}
+            <View style={{ flex: 1, minWidth: 0, gap: 1 }}>
+              <Name size={15}>{item.name}</Name>
+              <Text style={{ fontFamily: FONT.body500, fontSize: 11.5, color: COLORS.dim }}>{formatPositions(item)}</Text>
+            </View>
+            <Text style={{ fontFamily: FONT.cond600, fontSize: 12.5, color: COLORS.muted }}>{item.age}a · {money(item.salary)}</Text>
+            <Text style={{ width: 28, textAlign: 'right', fontFamily: FONT.cond800, fontSize: 20, color: ovrColor(item.ovr) }}>{item.ovr}</Text>
           </Pressable>
         )}
-        ListEmptyComponent={
-          <Text style={{ fontSize: 12, color: INK.faint, fontStyle: 'italic', paddingHorizontal: 18 }}>
-            Nenhum jogador encontrado.
-          </Text>
-        }
+        ListEmptyComponent={<BodyText color={COLORS.dim} style={{ paddingHorizontal: 20, paddingTop: 10 }}>Nenhum jogador encontrado.</BodyText>}
       />
 
       {selected ? <PlayerDetailModal player={selected} onClose={() => setSelected(null)} /> : null}
     </View>
   );
 };
+
+const money = (v: number) => `$${(v / 1_000_000).toFixed(1)}M`;
+
+/** One filter line: label on the left, the chips in a row. */
+const FilterLine: React.FC<{
+  label: string;
+  items: { id: string; label: string }[];
+  value: string;
+  onChange: (id: string) => void;
+}> = ({ label, items, value, onChange }) => (
+  <View className="flex-row items-center" style={{ gap: 6 }}>
+    <Text style={{ width: 58, fontFamily: FONT.cond700, fontSize: 10.5, letterSpacing: 1.4, color: COLORS.dim, textTransform: 'uppercase' }}>{label}</Text>
+    <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 6 }}>
+      {items.map((it) => {
+        const on = it.id === value;
+        return (
+          <Pressable
+            key={it.id}
+            accessibilityRole="tab"
+            aria-selected={on}
+            onPress={() => onChange(it.id)}
+            className="active:opacity-75"
+            style={{ height: 32, paddingHorizontal: 11, borderRadius: 9, justifyContent: 'center', backgroundColor: on ? COLORS.ctaFill : COLORS.surface2 }}
+          >
+            <Text style={{ fontFamily: FONT.cond800, fontSize: 12.5, color: on ? COLORS.ctaInk : COLORS.muted, textTransform: 'uppercase' }}>{it.label}</Text>
+          </Pressable>
+        );
+      })}
+    </ScrollView>
+  </View>
+);
 
 export default Scout;
