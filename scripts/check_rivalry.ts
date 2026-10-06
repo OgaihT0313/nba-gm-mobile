@@ -4,8 +4,8 @@
 // What it gates:
 //   · every revenge night actually reaches the engine (the player carries the
 //     boost when the game is played), and each move is avenged ONCE;
-//   · the real 2026 offseason moves baked into players.json produce revenge
-//     games in season one (Giannis goes back to Milwaukee);
+//   · the real offseason moves baked into players.json (formerTeam) produce
+//     revenge games in season one;
 //   · rivalries form from what happened -- playoff series and close games --
 //     at a rate that keeps them meaningful: some, not all thirty;
 //   · the offseason update cools heat and adds last spring's series.
@@ -61,7 +61,7 @@ const userRevengeGames: number[] = [];
 const rivalGames: number[] = [];
 const rivalsAtSeasonEnd: number[] = [];
 const rivalsIntoNextSeason: number[] = [];
-let giannisAvenged = false;
+const bakedAvenged = new Set<string>();
 let boosted = 0;
 
 const playRegularSeason = (s: SeasonState, year: number) => {
@@ -108,7 +108,7 @@ const playRegularSeason = (s: SeasonState, year: number) => {
       nights++;
       if (d.teamId === s.userTeamId || s.schedule.some(g => g.day === s.gamesPlayed
         && [g.homeTeamId, g.awayTeamId].includes(s.userTeamId) && [g.homeTeamId, g.awayTeamId].includes(d.teamId))) userNights++;
-      if (year === 0 && p.name.startsWith('Giannis')) giannisAvenged = true;
+      if (year === 0 && p.formerTeam?.season === -1) bakedAvenged.add(p.name);
     });
     while (s.decisions && s.decisions.length) {
       const d = s.decisions[0];
@@ -220,7 +220,10 @@ console.log(`Rivais do usuario no fim da temporada regular: ${mean(rivalsAtSeaso
 console.log(`Rivais levados para a temporada seguinte: ${mean(rivalsIntoNextSeason).toFixed(1)}`);
 console.log(`Jogos contra rival por temporada: ${mean(rivalGames).toFixed(1)}`);
 
-check('Giannis volta a Milwaukee na primeira temporada', giannisAvenged, '');
+// The real offseason's moves are baked into players.json (formerTeam,
+// season -1): they must play out as revenge games in season one.
+console.log(`Revanches da offseason real na 1a temporada: ${bakedAvenged.size} (ex.: ${[...bakedAvenged].slice(0, 3).join(', ')})`);
+check('as mudancas reais da offseason viram revanche na primeira temporada', bakedAvenged.size >= 10, `${bakedAvenged.size}`);
 check('revanches acontecem', mean(revengeNights) >= 20, `${mean(revengeNights).toFixed(1)}`);
 check('o seu time vive revanches', mean(userRevengeGames) >= 1, `${mean(userRevengeGames).toFixed(1)}`);
 // Rivals must exist but stay few: a rivalry with a third of the league is no

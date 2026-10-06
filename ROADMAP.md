@@ -15,6 +15,13 @@ explícito do usuário.**
 Último APK testado pelo usuário: `609f0b0c` (tudo até `3e07c3f` — item 4
 completo, elencos 2026-27, 3D novo), sem problemas.
 
+**Elenco padrão de volta a 2025-26 (2026-10-05)**, a pedido do usuário depois de
+jogar: os elencos 2026-27 (pré-temporada, avaliados pelas estatísticas de
+2025-26, calouros pela posição no draft) bagunçaram salários, OVR e
+estatísticas. Voltaram os dados 2025-26 originais, com as 27 mudanças reais da
+offseason de 2026 replayadas na passagem para a 2ª temporada. O pipeline
+continua sabendo gerar a pré-temporada (`fetch_data.py --stats-season`).
+
 Build `ab6933d3` (tudo até a rodada de UI/UX, SDK 57.0.26) instalado e testado
 pelo usuário no celular: sem problemas, inclusive em sessão longa. A correção do
 Hermes V1 (`806f0d2`) está confirmada fora do navegador.
@@ -118,10 +125,10 @@ parou 7 vezes (`PRESS_QUEUE_CEILING`), para não estourar o teto da fila.
   craque que você trocou e volta para te castigar, e para o que você tirou de
   um rival. Quem mudou é derivado comparando os elencos dia a dia
   (`rosterSnapshot`), então toda rota de mudança entra. As mudanças da offseason
-  real de 2026 vêm marcadas no `players.json` (`formerTeam`, gerado por
-  `nba-gm-simulator/pipeline/sync_former_teams.py`): Giannis volta a Milwaukee
-  na primeira temporada. Medido: ~46 noites de revanche por temporada na liga,
-  ~2,5 envolvendo o seu time.
+  real que levou ao elenco padrão vêm marcadas no `players.json` (`formerTeam`,
+  gerado por `nba-gm-simulator/pipeline/sync_former_teams.py`) e viram revanche
+  já na primeira temporada (~78 com o elenco 2025-26). Medido: ~46-56 noites de
+  revanche por temporada na liga, ~2,5 envolvendo o seu time.
 - **Rivalidades do seu time:** esquentam com eliminação nos playoffs (quem te
   eliminou vira rival na hora) e com jogos decididos por até 5 pontos; esfriam
   pela metade a cada verão; no máximo 3 rivais. Vencer um rival dá ânimo (+4) e
@@ -138,7 +145,9 @@ Medido em `scripts/check_rivalry.ts` (carreiras com playoffs reais).
   `players.json` os totais reais de carreira (jogos, pontos, rebotes,
   assistências, roubos, tocos) e os prêmios (títulos, MVPs, All-Star, All-NBA…)
   de cada jogador, com `career.seeded`. A ficha do jogador mostra a carreira
-  real e o próximo marco.
+  real e o próximo marco. Com `--through` a carreira para na temporada anterior
+  ao elenco (elenco 2025-26 → `--through 2024-25`), senão o ano que o save vai
+  jogar contaria duas vezes.
 - **Marcos** (`services/milestoneService.ts`): 5 mil a 50 mil pontos, rebotes,
   assistências, roubos, tocos e jogos. Na noite do marco o ânimo do jogador sobe
   (+10). Um veterano a uma temporada de um marco grande adia a aposentadoria
