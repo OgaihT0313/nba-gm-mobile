@@ -1,19 +1,16 @@
 import React, { useMemo, useState } from 'react';
 import { View, Text, Pressable, ScrollView } from 'react-native';
-import { Image } from 'expo-image';
-import { LinearGradient } from 'expo-linear-gradient';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Team, Player } from '../types';
-import { getTeamLogoUrl, getTeamNickname, conferenceLabel, getTeamAccent, TEAM_TITLES } from '../constants';
+import { getTeamNickname, getTeamAccent, TEAM_TITLES } from '../constants';
 import { teamRating } from '../services/formService';
-import { COLORS, INK, RADIUS, tracking, withAlpha } from '../src/theme/tokens';
-import { MonoLabel, HeroTitle, FilterRow } from '../components/ui/kit';
+import { COLORS, FONT, withAlpha } from '../src/theme/tokens';
+import { Eyebrow, HeroTitle, TeamBadge, CtaButton, BodyText } from '../components/ui/kit';
 
-// Design 4b. All 30 franchises in one grid, each carrying its own real brand
-// color — the last screen before the app commits to a single accent, so it's
-// the one place all 30 appear at once. Still on the pre-team black palette
-// (#050505 / #0d0d0d): color belongs to the franchise cards, not the chrome.
+// Design 1a ("Transmissão"). The two conferences side by side — West red, East
+// blue, the colors they carry through the whole app — fifteen 36px rows each,
+// ordered by roster strength. Tapping a row selects it; the CTA confirms.
 
 interface TeamSelectProps {
   teams: Team[];
@@ -21,97 +18,94 @@ interface TeamSelectProps {
   onSelect: (teamId: string) => void;
 }
 
-const NBA_FALLBACK = 'https://a.espncdn.com/i/teamlogos/nba/500/nba.png';
+const ROW = 36;
 
-const FILTERS = [
-  { id: 'all', label: 'Todas' },
-  { id: 'East', label: 'Leste' },
-  { id: 'West', label: 'Oeste' },
-];
+const Column: React.FC<{
+  label: string;
+  color: string;
+  teams: Team[];
+  players: { [key: string]: Player };
+  selected: string | null;
+  onPick: (id: string) => void;
+}> = ({ label, color, teams, players, selected, onPick }) => (
+  <View style={{ flex: 1, minWidth: 0 }}>
+    <View
+      className="flex-row justify-between items-baseline"
+      style={{ backgroundColor: color, borderTopLeftRadius: 12, borderTopRightRadius: 12, paddingHorizontal: 12, paddingVertical: 9 }}
+    >
+      <Text style={{ fontFamily: FONT.cond800, fontSize: 22, lineHeight: 22, letterSpacing: 1.3, color: '#fff' }}>{label}</Text>
+      <Text style={{ fontFamily: FONT.cond600, fontSize: 11, letterSpacing: 0.9, color: 'rgba(255,255,255,0.85)' }}>OVR</Text>
+    </View>
+    <View style={{ backgroundColor: COLORS.surface, borderBottomLeftRadius: 12, borderBottomRightRadius: 12, overflow: 'hidden' }}>
+      {teams.map((t) => {
+        const on = t.id === selected;
+        return (
+          <Pressable
+            key={t.id}
+            onPress={() => onPick(t.id)}
+            accessibilityRole="button"
+            accessibilityLabel={getTeamNickname(t)}
+            aria-selected={on}
+            className="flex-row items-center active:opacity-75"
+            style={{
+              height: ROW, gap: 8, paddingLeft: 7, paddingRight: 9,
+              borderBottomWidth: 1, borderBottomColor: COLORS.line,
+              backgroundColor: on ? withAlpha(getTeamAccent(t.id).primary, 0.32) : 'transparent',
+            }}
+          >
+            {on ? <View style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: 3, backgroundColor: '#fff' }} /> : null}
+            <TeamBadge teamId={t.id} width={32} height={22} />
+            <Text numberOfLines={1} style={{ flex: 1, minWidth: 0, fontFamily: FONT.cond600, fontSize: 15, color: COLORS.text }}>
+              {getTeamNickname(t)}
+            </Text>
+            <Text style={{ fontFamily: FONT.cond700, fontSize: 14, color: COLORS.muted, fontVariant: ['tabular-nums'] }}>
+              {teamRating(t, players)}
+            </Text>
+          </Pressable>
+        );
+      })}
+    </View>
+  </View>
+);
 
 const TeamSelect: React.FC<TeamSelectProps> = ({ teams, players, onSelect }) => {
   const insets = useSafeAreaInsets();
-  const [filter, setFilter] = useState('all');
-
-  const rows = useMemo(() => {
-    const list = teams.filter((t) => {
-      if (filter === 'East' || filter === 'West') return t.conference === filter;
-      return true;
-    });
-    return [...list].sort((a, b) => a.powerRank - b.powerRank);
-  }, [teams, filter]);
+  const byRank = useMemo(() => [...teams].sort((a, b) => a.powerRank - b.powerRank), [teams]);
+  const west = byRank.filter((t) => t.conference === 'West');
+  const east = byRank.filter((t) => t.conference === 'East');
+  const [selected, setSelected] = useState<string | null>(byRank[0]?.id ?? null);
+  const team = teams.find((t) => t.id === selected);
+  const titles = team ? TEAM_TITLES[team.id] ?? 0 : 0;
 
   return (
-    <View className="flex-1" style={{ backgroundColor: '#050505' }}>
-      <View style={{ paddingTop: insets.top + 10, paddingHorizontal: 18 }}>
-        <Text
-          className="font-mono-bold"
-          style={{ fontSize: 9.5, letterSpacing: tracking(9.5, 0.24), color: COLORS.cta, textTransform: 'uppercase' }}
-        >
-          Passo 2 de 2
-        </Text>
-        <HeroTitle size={30} style={{ marginTop: 9 }}>Escolha sua franquia</HeroTitle>
-        <FilterRow items={FILTERS} value={filter} onChange={setFilter} style={{ marginTop: 15 }} />
+    <View className="flex-1" style={{ backgroundColor: COLORS.bg }}>
+      <View style={{ paddingTop: insets.top + 6, paddingHorizontal: 20, paddingBottom: 14, gap: 6 }}>
+        <Eyebrow>Passo 2 de 2</Eyebrow>
+        <HeroTitle size={34}>Escolha sua franquia</HeroTitle>
       </View>
 
-      <ScrollView
-        className="flex-1"
-        contentContainerStyle={{ paddingHorizontal: 14, paddingTop: 16, paddingBottom: 24 }}
-        showsVerticalScrollIndicator={false}
-      >
-        <View className="flex-row flex-wrap justify-between">
-          {rows.map((t) => {
-            const accent = getTeamAccent(t.id);
-            const titles = TEAM_TITLES[t.id] ?? 0;
-
-            return (
-              <Pressable accessibilityRole="button"
-                key={t.id}
-                onPress={() => onSelect(t.id)}
-                className="active:opacity-75"
-                style={{ width: '48.5%', marginBottom: 10 }}
-              >
-                {/* The franchise color washes in from the top-left and fades to
-                    near-black, so 30 cards stay legible side by side instead of
-                    turning into 30 competing color blocks. */}
-                <LinearGradient
-                  colors={[withAlpha(accent.primary, 0.32), '#0d0d0d']}
-                  locations={[0, 0.72]}
-                  start={{ x: 0.1, y: 0 }}
-                  end={{ x: 0.9, y: 1 }}
-                  style={{
-                    borderRadius: RADIUS.card,
-                    padding: 13,
-                    borderWidth: 1,
-                    borderColor: '#1f1f1f',
-                    overflow: 'hidden',
-                  }}
-                >
-                  <View style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: 3, backgroundColor: accent.primary }} />
-                  <Image
-                    source={{ uri: getTeamLogoUrl(t) }}
-                    placeholder={{ uri: NBA_FALLBACK }}
-                    style={{ width: 34, height: 34 }}
-                    contentFit="contain"
-                    transition={120}
-                  />
-                  <Text className="font-extrabold text-white" style={{ fontSize: 12.5, marginTop: 9 }} numberOfLines={1}>
-                    {getTeamNickname(t)}
-                  </Text>
-                  <MonoLabel size={9.5} color="rgba(255,255,255,0.42)" style={{ marginTop: 3, letterSpacing: 0 }} numberOfLines={1}>
-                    {conferenceLabel(t)} · {titles} {titles === 1 ? 'título' : 'títulos'}
-                  </MonoLabel>
-                  <View style={{ marginTop: 9 }}>
-                    <MonoLabel size={9.5} color={INK.meta} style={{ letterSpacing: 0 }}>
-                      OVR {teamRating(t, players)}
-                    </MonoLabel>
-                  </View>
-                </LinearGradient>
-              </Pressable>
-            );
-          })}
+      <ScrollView className="flex-1" contentContainerStyle={{ paddingHorizontal: 12, paddingBottom: 12 }} showsVerticalScrollIndicator={false}>
+        <View className="flex-row" style={{ gap: 8 }}>
+          <Column label="Oeste" color={COLORS.west} teams={west} players={players} selected={selected} onPick={setSelected} />
+          <Column label="Leste" color={COLORS.east} teams={east} players={players} selected={selected} onPick={setSelected} />
         </View>
       </ScrollView>
+
+      <View style={{ paddingHorizontal: 16, paddingTop: 12, paddingBottom: 16, gap: 8 }}>
+        {team ? (
+          <View className="flex-row justify-between">
+            <BodyText size={13} style={{ fontFamily: FONT.body600 }}>{team.name}</BodyText>
+            <BodyText size={13} style={{ fontFamily: FONT.body600 }}>
+              OVR {teamRating(team, players)} · {titles} {titles === 1 ? 'título' : 'títulos'}
+            </BodyText>
+          </View>
+        ) : null}
+        <CtaButton
+          label={team ? `Assumir o ${getTeamNickname(team)}` : 'Escolha um time'}
+          onPress={() => team && onSelect(team.id)}
+          disabled={!team}
+        />
+      </View>
     </View>
   );
 };
