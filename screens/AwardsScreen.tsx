@@ -1,13 +1,12 @@
 import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, Text } from 'react-native';
 import { Image } from 'expo-image';
-import { Svg, Defs, RadialGradient, Stop, Rect } from 'react-native-svg';
 
 import { SeasonState, Player } from '../types';
 import { getTeamAccent, getTeamLogoUrl, getTeamNickname } from '../constants';
-import { COLORS, INK, RADIUS } from '../src/theme/tokens';
-import Screen, { HeroContent, Body } from '../components/ui/Screen';
-import { Panel, MonoLabel, Eyebrow, HeroTitle, Stat, CtaButton, SectionLabel } from '../components/ui/kit';
+import { COLORS, INK, RADIUS, FONT } from '../src/theme/tokens';
+import Screen, { Body } from '../components/ui/Screen';
+import { Panel, MonoLabel, CtaButton, SectionLabel, ScreenTitle, BodyText, Name, TeamBadge, Dock } from '../components/ui/kit';
 import { AwardCard, FinalsAwardCard } from '../components/AwardCards';
 import AllNbaTeams from '../components/AllNbaTeams';
 import AwardHistory from '../components/AwardHistory';
@@ -38,90 +37,77 @@ const AwardsScreen: React.FC<AwardsScreenProps> = ({ season, onGoToPlayoffs, onS
   // "4-2" from the user's side of the Finals, when the Finals resolved.
   const finalsScore = season.playoff?.finals?.s;
 
-  const goldBackdrop = (
-    <View style={[StyleSheet.absoluteFill, { pointerEvents: 'none' }]}>
-      <Svg style={StyleSheet.absoluteFill}>
-        <Defs>
-          <RadialGradient id="champGlow" cx="50%" cy="0%" r="80%">
-            <Stop offset="0" stopColor={COLORS.gold} stopOpacity={0.28} />
-            <Stop offset="1" stopColor={COLORS.gold} stopOpacity={0} />
-          </RadialGradient>
-        </Defs>
-        <Rect x="0" y="0" width="100%" height="100%" fill="url(#champGlow)" />
-      </Svg>
-    </View>
-  );
+  // Finals line, read positionally ("m[0]wins-m[1]wins").
+  const finals = season.playoff?.finals;
+  const finalsLine = (() => {
+    if (!finals || !champion || !finals.s) return 'Campeão da NBA';
+    const idx = finals.m.findIndex((t) => t?.id === champion.id);
+    const opp = finals.m[1 - idx];
+    const [a0, a1] = finals.s.split('-').map(Number);
+    const mine = idx === 0 ? a0 : a1;
+    const theirs = idx === 0 ? a1 : a0;
+    return `Venceram o ${getTeamNickname(opp ?? undefined)} por ${mine}–${theirs} nas Finais`;
+  })();
+  // The year the title was won: the end year of the season just played.
+  const endYear = season.era?.seasonLabel
+    ? parseInt(season.era.seasonLabel.slice(0, 4), 10) + 1
+    : 2025 + seasonNumber;
 
   return (
     <Screen
-      heroHeight={isChampionScreen ? 0 : 140}
+      heroHeight={isChampionScreen ? 0 : 110}
       background={isChampionScreen ? COLORS.goldBg : COLORS.bg}
-      backdrop={isChampionScreen ? goldBackdrop : undefined}
       footer={
         season.status === 'offseason' ? (
-          <CtaButton
-            label="Começar próxima temporada"
-            sub="Progressão e draft"
-            onPress={onStartNewSeason}
-            gold={isChampionScreen}
-          />
+          <Dock style={isChampionScreen ? { backgroundColor: COLORS.goldBg, borderTopColor: COLORS.goldLine } : undefined}>
+            <CtaButton label="Ir para a offseason" sub="Draft e mercado" onPress={onStartNewSeason} gold={isChampionScreen} />
+          </Dock>
         ) : season.status === 'playoffs_idle' ? (
-          <CtaButton label="Ir para os playoffs" onPress={onGoToPlayoffs} />
+          <Dock><CtaButton label="Ir para os playoffs" onPress={onGoToPlayoffs} /></Dock>
         ) : undefined
       }
     >
       {isChampionScreen ? (
         /* ------------------------------------------------------- champion */
-        <HeroContent className="items-center">
-          <Eyebrow color={COLORS.gold} size={9.5}>
-            Temporada {seasonNumber} · campeão da NBA
-          </Eyebrow>
-          <Image
-            source={{ uri: getTeamLogoUrl(champion) }}
-            style={{ width: 104, height: 104, marginTop: 20 }}
-            contentFit="contain"
-          />
-          <HeroTitle size={40} style={{ marginTop: 16, textAlign: 'center' }} numberOfLines={1} adjustsFontSizeToFit>
+        <View style={{ marginHorizontal: 14, marginTop: 4, borderRadius: 24, backgroundColor: COLORS.gold, paddingHorizontal: 18, paddingVertical: 20, overflow: 'hidden', gap: 6 }}>
+          <Text style={{ position: 'absolute', right: -10, bottom: -36, fontFamily: FONT.cond800, fontSize: 150, lineHeight: 150, color: 'rgba(26,20,5,0.09)' }}>
+            {endYear}
+          </Text>
+          <Text style={{ fontFamily: FONT.cond700, fontSize: 12, letterSpacing: 2.4, color: COLORS.goldInk }}>CAMPEÕES DA NBA</Text>
+          <Text numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.5} style={{ fontFamily: FONT.cond800, fontSize: 60, lineHeight: 54, color: COLORS.goldInk, textTransform: 'uppercase' }}>
             {getTeamNickname(champion)}
-          </HeroTitle>
-          <MonoLabel size={11} color="rgba(255,255,255,0.6)" style={{ marginTop: 8, letterSpacing: 1.5 }}>
-            {finalsScore ? `Venceu as finais por ${finalsScore}` : 'Campeão da NBA'}
-          </MonoLabel>
-        </HeroContent>
+          </Text>
+          <Text style={{ fontFamily: FONT.body600, fontSize: 15, color: COLORS.goldInk }}>{finalsLine}</Text>
+          {userWon ? (
+            <View style={{ alignSelf: 'flex-start', marginTop: 8, backgroundColor: COLORS.goldInk, paddingHorizontal: 10, paddingVertical: 5, borderRadius: 6 }}>
+              <Text style={{ fontFamily: FONT.cond800, fontSize: 12, letterSpacing: 1.2, color: COLORS.gold }}>
+                {season.gmLegacy.titles}º TÍTULO DA CARREIRA
+              </Text>
+            </View>
+          ) : null}
+        </View>
       ) : (
-        <HeroContent>
-          <Eyebrow>Prêmios · temporada {seasonNumber}</Eyebrow>
-          <HeroTitle size={28} style={{ marginTop: 9 }}>Honrarias</HeroTitle>
-        </HeroContent>
+        <ScreenTitle label={`Temporada ${seasonNumber}`} title="Prêmios" />
       )}
 
       <Body top={isChampionScreen ? 26 : 18}>
         {/* Finals MVP leads on the champion screen — the hero-radius card. */}
-        {isChampionScreen && playoffAwards?.finalsMVP ? (
-          <FinalsAwardCard
-            title="MVP das finais"
-            pId={playoffAwards.finalsMVP}
-            players={season.players}
-            accentColor={COLORS.gold}
-          />
-        ) : null}
 
         {/* The regular-season honors, as a three-up strip on the champion
             screen and as full cards otherwise. */}
         {season.awards ? (
           isChampionScreen ? (
-            <>
-              <View className="flex-row" style={{ gap: 9 }}>
-                <GoldTile label="MVP da liga" id={season.awards.mvp} season={season} />
-                <GoldTile label="Defensor" id={season.awards.dpoy} season={season} />
-                <GoldTile label="Calouro" id={season.awards.roy} season={season} />
+            <View>
+              <SectionLabel color={COLORS.goldMeta}>Honrarias da temporada</SectionLabel>
+              <View style={{ marginTop: 4 }}>
+                <GoldRow label="MVP" id={season.awards.mvp} season={season} />
+                {playoffAwards?.finalsMVP ? <GoldRow label="Finais" id={playoffAwards.finalsMVP} season={season} /> : null}
+                <GoldRow label="Defensor" id={season.awards.dpoy} season={season} />
+                <GoldRow label="Calouro" id={season.awards.roy} season={season} />
+                <GoldRow label="6º homem" id={season.awards.smoy} season={season} />
+                {season.awards.mip ? <GoldRow label="Evolução" id={season.awards.mip} season={season} /> : null}
               </View>
-              <View className="flex-row" style={{ gap: 9 }}>
-                <GoldTile label="6º homem" id={season.awards.smoy} season={season} />
-                {season.awards.mip ? <GoldTile label="Evolução" id={season.awards.mip} season={season} /> : <View style={{ flex: 1 }} />}
-                <View style={{ flex: 1 }} />
-              </View>
-            </>
+            </View>
           ) : (
             <>
               <SectionLabel>Temporada regular</SectionLabel>
@@ -145,26 +131,21 @@ const AwardsScreen: React.FC<AwardsScreenProps> = ({ season, onGoToPlayoffs, onS
 
         {/* GM legacy — the one number that survives the season reset. */}
         {isChampionScreen ? (
-          <Panel
-            fill={COLORS.goldPanel}
-            padding={14}
-            style={{ borderColor: COLORS.goldLine }}
-          >
-            <MonoLabel color={INK.meta}>Seu legado como GM</MonoLabel>
-            <View className="flex-row items-end" style={{ gap: 22, marginTop: 12 }}>
-              <View>
-                <Stat size={30}>{season.gmLegacy.seasons}</Stat>
-                <MonoLabel size={9.5} color={INK.meta} style={{ marginTop: 3, letterSpacing: 0 }}>Temporadas</MonoLabel>
+          <View style={{ borderRadius: 16, backgroundColor: COLORS.goldPanel, paddingVertical: 12, flexDirection: 'row' }}>
+            {[
+              { v: season.gmLegacy.titles, l: 'Títulos', c: COLORS.gold },
+              { v: season.gmLegacy.seasons, l: 'Temporadas', c: COLORS.text },
+              { v: `${season.owner.confidence}%`, l: 'Confiança', c: COLORS.text },
+            ].map((it, i) => (
+              <View key={it.l} style={{ flex: 1, alignItems: 'center', gap: 1, borderLeftWidth: i ? 1 : 0, borderLeftColor: '#2A2414' }}>
+                <Text style={{ fontFamily: FONT.cond800, fontSize: 26, lineHeight: 26, color: it.c }}>{it.v}</Text>
+                <Text style={{ fontFamily: FONT.cond700, fontSize: 10.5, letterSpacing: 1.5, color: COLORS.goldMeta, textTransform: 'uppercase' }}>{it.l}</Text>
               </View>
-              <View>
-                <Stat size={30} color={COLORS.gold}>{season.gmLegacy.titles}</Stat>
-                <MonoLabel size={9.5} color={INK.meta} style={{ marginTop: 3, letterSpacing: 0 }}>Títulos</MonoLabel>
-              </View>
-              <Text style={{ flex: 1, textAlign: 'right', fontSize: 10.5, lineHeight: 15, color: INK.body }}>
-                {season.owner.note ? `“${season.owner.note}”` : userWon ? '“Entregou o que prometeu.”' : ''}
-              </Text>
-            </View>
-          </Panel>
+            ))}
+          </View>
+        ) : null}
+        {isChampionScreen && season.owner.note ? (
+          <BodyText color={COLORS.goldMeta}>“{season.owner.note}”</BodyText>
         ) : null}
 
         {season.awards?.allNba && season.awards.allNba.length > 0 ? (
@@ -196,49 +177,32 @@ const AwardsScreen: React.FC<AwardsScreenProps> = ({ season, onGoToPlayoffs, onS
         ) : null}
 
         {season.status === 'offseason' ? (
-          <Panel padding={14} fill={isChampionScreen ? COLORS.goldPanel : COLORS.panel} style={isChampionScreen ? { borderColor: COLORS.goldLine } : undefined}>
-            <MonoLabel>Offseason</MonoLabel>
-            <Text style={{ fontSize: 11.5, lineHeight: 17, color: INK.body, marginTop: 8 }}>
-              Começar a próxima temporada roda a progressão dos jogadores, aplica as movimentações reais da NBA,
-              expira contratos e abre o Draft de Recrutas.
-            </Text>
-          </Panel>
+          <BodyText size={12.5} color={isChampionScreen ? COLORS.goldMeta : COLORS.dim}>
+            A offseason roda a evolução dos jogadores, as aposentadorias, os contratos que vencem e abre o Draft de Recrutas.
+          </BodyText>
         ) : null}
       </Body>
     </Screen>
   );
 };
 
-/** Compact honor tile in the champion screen's gold register. */
-const GoldTile: React.FC<{ label: string; id?: string; season: SeasonState }> = ({ label, id, season }) => {
+/** One honor in the champion screen's gold register: label · name/line · team. */
+const GoldRow: React.FC<{ label: string; id?: string; season: SeasonState }> = ({ label, id, season }) => {
   const p: Player | undefined = id ? season.players[id] : undefined;
   const team = id ? season.teams.find((t) => t.roster.includes(id)) : undefined;
-  const mine = team?.id === season.userTeamId;
-
+  const st = p?.seasonStats;
   return (
-    <View
-      style={{
-        flex: 1,
-        backgroundColor: COLORS.goldPanel,
-        borderWidth: 1,
-        borderColor: COLORS.goldLine,
-        borderRadius: RADIUS.card,
-        paddingHorizontal: 12,
-        paddingVertical: 12,
-      }}
-    >
-      <MonoLabel size={8} color={INK.meta} numberOfLines={1}>{label}</MonoLabel>
-      <Text className="font-extrabold text-white" style={{ fontSize: 12.5, marginTop: 5 }} numberOfLines={1}>
-        {p ? `${p.name.split(' ')[0][0]}. ${p.name.split(' ').slice(-1)[0]}` : '—'}
-      </Text>
-      <MonoLabel
-        size={9.5}
-        color={mine ? COLORS.gold : INK.faint}
-        style={{ marginTop: 2, letterSpacing: 0 }}
-        numberOfLines={1}
-      >
-        {team ? team.id.toUpperCase() : '—'}
-      </MonoLabel>
+    <View className="flex-row items-center" style={{ height: 52, gap: 12, borderBottomWidth: 1, borderBottomColor: COLORS.goldLine }}>
+      <Text style={{ width: 72, fontFamily: FONT.cond700, fontSize: 12, letterSpacing: 1.4, color: COLORS.gold, textTransform: 'uppercase' }}>{label}</Text>
+      <View style={{ flex: 1, minWidth: 0, gap: 1 }}>
+        <Name size={16}>{p?.name ?? '—'}</Name>
+        {st ? (
+          <Text numberOfLines={1} style={{ fontFamily: FONT.body500, fontSize: 12, color: COLORS.goldMeta }}>
+            {st.ppg.toFixed(1)} pts · {st.rpg.toFixed(1)} reb · {st.apg.toFixed(1)} ast{team?.id === season.userTeamId ? ' · seu jogador' : ''}
+          </Text>
+        ) : null}
+      </View>
+      {team ? <TeamBadge teamId={team.id} width={34} height={20} /> : null}
     </View>
   );
 };

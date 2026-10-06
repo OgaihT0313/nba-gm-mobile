@@ -55,6 +55,8 @@ interface TradeCenterProps {
   offers: TradeOffer[];
   onAcceptOffer: (offerId: string) => void;
   onRejectOffer: (offerId: string) => void;
+  /** Opened from a team's page ("Abrir negociação"): start with them as partner. */
+  initialPartnerId?: string;
 }
 
 /* -------------------------------------------------------------------------- */
@@ -157,11 +159,10 @@ const PackagePanel: React.FC<{
 /* -------------------------------------------------------------------------- */
 
 const TradeCenter: React.FC<TradeCenterProps> = ({
-  teams, players, userTeamId, gamesPlayed, currentDraft, onTradeExecute, offers, onAcceptOffer, onRejectOffer,
-}) => {
+  teams, players, userTeamId, gamesPlayed, currentDraft, onTradeExecute, offers, onAcceptOffer, onRejectOffer, initialPartnerId}) => {
   const { accent } = useTheme();
   const userTeam = useMemo(() => teams.find((t) => t.id === userTeamId) || null, [teams, userTeamId]);
-  const [partnerTeamId, setPartnerTeamId] = useState<string | null>(null);
+  const [partnerTeamId, setPartnerTeamId] = useState<string | null>(initialPartnerId ?? null);
   const partnerTeam = useMemo(() => teams.find((t) => t.id === partnerTeamId) || null, [teams, partnerTeamId]);
 
   const [userAssets, setUserAssets] = useState<string[]>([]);

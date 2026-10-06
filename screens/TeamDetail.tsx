@@ -1,30 +1,42 @@
 import React, { useState } from 'react';
 import { View, Text, Pressable } from 'react-native';
-import { Image } from 'expo-image';
 
-import { Team, Player, Coach } from '../types';
+import { Team, Player, Coach, ScheduleGame } from '../types';
 import {
-  getTeamLogoUrl, getTeamSalary, SALARY_CAP, getTeamTitles, coachOf,
-  getTeamNickname, getTeamCity, conferenceLabel, attributeColor,
+  getTeamSalary, SALARY_CAP, getTeamTitles, getTeamNickname, getTeamCity, getTeamAccent, picksOf,
 } from '../constants';
 import { teamRating } from '../services/formService';
+import { sortStandings } from '../services/scheduleService';
+import { simulationEngine, DEFAULT_ROTATION_SIZE } from '../services/simulationService';
 import { rivalryReason } from '../services/rivalryService';
-import { COLORS, INK } from '../src/theme/tokens';
-import Screen, { HeroContent, Body } from '../components/ui/Screen';
-import { Panel, MonoLabel, Eyebrow, HeroTitle, StatTile, SectionLabel } from '../components/ui/kit';
-import RosterRow from '../components/ui/RosterRow';
-import PickAssets from '../components/PickAssets';
+import { COLORS, FONT, ovrColor, visibleTeamColor } from '../src/theme/tokens';
+import Screen, { Body } from '../components/ui/Screen';
+import { Panel, TeamBadge, Tag, BodyText, Name, SectionLabel, CtaButton, Dock, Stat, MonoLabel } from '../components/ui/kit';
 import CoachPanel from '../components/CoachPanel';
 import StartersCourt from '../components/StartersCourt';
 import PlayerDetailModal from '../components/PlayerDetailModal';
+import PickAssets from '../components/PickAssets';
 
-const money = (v: number) => `$${(v / 1_000_000).toFixed(1)}M`;
-const NBA_FALLBACK = 'https://a.espncdn.com/i/teamlogos/nba/500/nba.png';
+// Design 4c ("Transmissão"). Another franchise, read against yours: a mirrored
+// comparison (your bar grows left in your color, theirs right in theirs), the
+// three numbers that decide a trade conversation (cap room, picks, chemistry),
+// their five on the floor, the roster — and "Abrir negociação" straight into
+// the Trade Center with them already picked.
 
-// Browsing a rival. Deliberately keeps the USER's accent on the hero band
-// rather than the viewed team's: the chrome belongs to your franchise, and the
-// team you're scouting is identified by its logo and name, not by repainting
-// the whole app in its colors mid-save.
+const money = (v: number) => `$${(Math.abs(v) / 1_000_000).toFixed(1)}M`;
+
+/** The rotation's offense/defense/bench — the numbers the engine plays with. */
+const profile = (team: Team, players: { [k: string]: Player }) => {
+  const rot = simulationEngine.getTeamRotation(team, players, team.rotationSize ?? DEFAULT_ROTATION_SIZE).map((id) => players[id]).filter(Boolean);
+  const avg = (xs: number[]) => (xs.length ? Math.round(xs.reduce((a, b) => a + b, 0) / xs.length) : 0);
+  return {
+    geral: teamRating(team, players),
+    ataque: avg(rot.slice(0, 8).map((p) => p.off)),
+    defesa: avg(rot.slice(0, 8).map((p) => p.def)),
+    banco: avg(rot.slice(5, 10).map((p) => p.ovr)),
+  };
+};
+
 const TeamDetail: React.FC<{
   team: Team;
   players: { [key: string]: Player };
@@ -35,99 +47,149 @@ const TeamDetail: React.FC<{
   currentDraft: number;
   /** Your rivalry with this team, when it has become one. */
   rivalry?: { heat: number; why?: string; close?: number };
+  /** Your own team, for the mirrored comparison. */
+  userTeam?: Team;
+  schedule?: ScheduleGame[];
+  /** Opens the Trade Center with this team as partner; absent past the deadline. */
+  onOpenTrade?: () => void;
   onBack: () => void;
-}> = ({ team, players, teams, coaches, currentDraft, rivalry, onBack }) => {
+}> = ({ team, players, teams, coaches, currentDraft, rivalry, userTeam, schedule = [], onOpenTrade, onBack }) => {
   const salary = getTeamSalary(team, players);
   const capSpace = SALARY_CAP - salary;
   const roster = team.roster.map((pId) => players[pId]).filter(Boolean).sort((a, b) => b.ovr - a.ovr);
   const titles = getTeamTitles(team.id);
-  const coach = coachOf(team, coaches);
   const absences = team.playerAbsences ?? {};
   const [viewing, setViewing] = useState<Player | null>(null);
+  const gamesIn = (team.wins ?? 0) + (team.losses ?? 0);
+  const rank = gamesIn > 0
+    ? sortStandings(teams.filter((t) => t.conference === team.conference), schedule).findIndex((t) => t.id === team.id) + 1
+    : 0;
+  const chemistry = Math.round(simulationEngine.teamChemistry(team, players));
+  const mine = userTeam && userTeam.id !== team.id ? userTeam : undefined;
+  const them = profile(team, players);
+  const us = mine ? profile(mine, players) : undefined;
+  const vis = (id: string) => { const a = getTeamAccent(id); return visibleTeamColor(a.primary, a.secondary); };
+  const ourColor = mine ? vis(mine.id) : COLORS.dim;
+  const theirColor = vis(team.id);
+
+  const rows: { k: string; a: number; b: number }[] = us
+    ? [
+        { k: 'Geral', a: us.geral, b: them.geral },
+        { k: 'Ataque', a: us.ataque, b: them.ataque },
+        { k: 'Defesa', a: us.defesa, b: them.defesa },
+        { k: 'Banco', a: us.banco, b: them.banco },
+      ]
+    : [];
+  // Bars scaled between a floor and the best of the two, so a 2-point gap shows.
+  const barW = (v: number, other: number) => {
+    const lo = Math.min(v, other) - 6;
+    const hi = Math.max(v, other);
+    return `${Math.max(12, ((v - lo) / Math.max(1, hi - lo)) * 100)}%` as const;
+  };
 
   return (
-    <Screen heroHeight={186}>
-      <HeroContent>
-        <Pressable accessibilityRole="button" onPress={onBack} hitSlop={12} className="active:opacity-60">
-          <Eyebrow size={9.5}>‹ Franquias</Eyebrow>
+    <Screen
+      heroHeight={130}
+      footer={onOpenTrade ? <Dock><CtaButton label="Abrir negociação" onPress={onOpenTrade} /></Dock> : undefined}
+    >
+      <View style={{ paddingHorizontal: 20, paddingTop: 4, gap: 14 }}>
+        <Pressable accessibilityRole="button" onPress={onBack} hitSlop={12} className="active:opacity-60" style={{ alignSelf: 'flex-start' }}>
+          <Text style={{ fontFamily: FONT.cond700, fontSize: 14, letterSpacing: 1.4, color: COLORS.muted }}>‹ FRANQUIAS</Text>
         </Pressable>
-
-        <View className="flex-row items-center" style={{ gap: 13, marginTop: 14 }}>
-          <Image
-            source={{ uri: getTeamLogoUrl(team) }}
-            placeholder={{ uri: NBA_FALLBACK }}
-            style={{ width: 56, height: 56 }}
-            contentFit="contain"
-          />
-          <View style={{ flex: 1 }}>
-            <HeroTitle size={26} numberOfLines={1} adjustsFontSizeToFit>{getTeamNickname(team)}</HeroTitle>
-            <MonoLabel size={10} color="rgba(255,255,255,0.7)" style={{ marginTop: 4, letterSpacing: 0.4 }} numberOfLines={1}>
-              {getTeamCity(team)} · {conferenceLabel(team)} · {titles} {titles === 1 ? 'título' : 'títulos'}
-            </MonoLabel>
-            <MonoLabel size={10} color="rgba(255,255,255,0.55)" style={{ marginTop: 3, letterSpacing: 0.4 }} numberOfLines={1}>
-              {team.wins ?? 0}-{team.losses ?? 0} · {coach?.name ?? 'Sem técnico'}
-            </MonoLabel>
-            {rivalry ? (
-              <MonoLabel size={10} color={COLORS.cta} style={{ marginTop: 3, letterSpacing: 0.4 }} numberOfLines={2}>
-                Rival · {rivalryReason(rivalry)}
-              </MonoLabel>
-            ) : null}
-            {team.tanking ? (
-              <MonoLabel size={10} color={COLORS.warn} style={{ marginTop: 3, letterSpacing: 0.4 }} numberOfLines={1}>
-                Jogando pela loteria · titulares poupados
-              </MonoLabel>
-            ) : null}
+        <View className="flex-row items-center" style={{ gap: 14 }}>
+          <TeamBadge teamId={team.id} width={62} height={62} />
+          <View style={{ flex: 1, gap: 3 }}>
+            <Text numberOfLines={1} style={{ fontFamily: FONT.cond800, fontSize: 32, lineHeight: 32, color: COLORS.text, textTransform: 'uppercase' }}>
+              {getTeamNickname(team)}
+            </Text>
+            <BodyText size={13} numberOfLines={1}>
+              {getTeamCity(team)} · {team.wins ?? 0}–{team.losses ?? 0}{rank ? ` · ${rank}º ${team.conference === 'East' ? 'Leste' : 'Oeste'}` : ''} · {titles} {titles === 1 ? 'título' : 'títulos'}
+            </BodyText>
           </View>
+          {rivalry ? <Tag color={COLORS.west}>Rival</Tag> : team.tanking ? <Tag color={COLORS.warn}>Loteria</Tag> : null}
         </View>
-      </HeroContent>
+        {rivalry ? <BodyText size={12.5} color={COLORS.dim} style={{ marginTop: -6 }}>Rival · {rivalryReason(rivalry)}</BodyText> : null}
+        {team.tanking ? <BodyText size={12.5} color={COLORS.dim} style={{ marginTop: -6 }}>Jogando pela loteria · titulares poupados</BodyText> : null}
+      </View>
 
-      <Body top={16}>
-        <View className="flex-row" style={{ gap: 10 }}>
-          <StatTile
-            label="Cap space"
-            value={capSpace >= 0 ? money(capSpace) : `-${money(Math.abs(capSpace))}`}
-            sub={money(salary)}
-            color={capSpace >= 0 ? COLORS.goodSoft : COLORS.warn}
-            bar={capSpace >= 0 ? COLORS.goodSoft : COLORS.warn}
-          />
-          <StatTile label="Elenco" value={roster.length} sub={`${Object.keys(absences).length} fora`} />
-          <StatTile
-            label="Força"
-            value={teamRating(team, players)}
-            color={attributeColor(teamRating(team, players))}
-            bar={COLORS.info}
-          />
+      <Body top={16} gap={14}>
+        {mine && us ? (
+          <Panel style={{ gap: 10 }}>
+            <View className="flex-row justify-between">
+              <MonoLabel size={9}>{mine.id.toUpperCase()}</MonoLabel>
+              <MonoLabel size={9}>Comparação</MonoLabel>
+              <MonoLabel size={9}>{team.id.toUpperCase()}</MonoLabel>
+            </View>
+            {rows.map((r) => (
+              <View key={r.k} className="flex-row items-center" style={{ gap: 6 }}>
+                <Text style={{ width: 30, fontFamily: FONT.cond800, fontSize: 17, color: COLORS.text }}>{r.a}</Text>
+                <View style={{ flex: 1, height: 6, borderRadius: 3, backgroundColor: COLORS.line, flexDirection: 'row', justifyContent: 'flex-end' }}>
+                  <View style={{ height: '100%', borderRadius: 3, backgroundColor: ourColor, width: barW(r.a, r.b) }} />
+                </View>
+                <Text style={{ width: 64, textAlign: 'center', fontFamily: FONT.cond700, fontSize: 11, letterSpacing: 1.3, color: COLORS.dim, textTransform: 'uppercase' }}>{r.k}</Text>
+                <View style={{ flex: 1, height: 6, borderRadius: 3, backgroundColor: COLORS.line }}>
+                  <View style={{ height: '100%', borderRadius: 3, backgroundColor: theirColor, width: barW(r.b, r.a) }} />
+                </View>
+                <Text style={{ width: 30, textAlign: 'right', fontFamily: FONT.cond800, fontSize: 17, color: COLORS.text }}>{r.b}</Text>
+              </View>
+            ))}
+          </Panel>
+        ) : null}
+
+        <View className="flex-row" style={{ gap: 8 }}>
+          <Panel padding={12} radius={14} className="flex-1" style={{ gap: 3 }}>
+            <MonoLabel size={9}>Espaço</MonoLabel>
+            <Stat size={19} color={capSpace >= 0 ? COLORS.good : COLORS.warn} fit>{capSpace >= 0 ? money(capSpace) : `–${money(capSpace)}`}</Stat>
+          </Panel>
+          <Panel padding={12} radius={14} className="flex-1" style={{ gap: 3 }}>
+            <MonoLabel size={9}>Picks 1ª</MonoLabel>
+            <Stat size={19}>{picksOf(team).length}</Stat>
+          </Panel>
+          <Panel padding={12} radius={14} className="flex-1" style={{ gap: 3 }}>
+            <MonoLabel size={9}>Química</MonoLabel>
+            <Stat size={19} color={chemistry >= 70 ? COLORS.good : chemistry >= 45 ? COLORS.warn : COLORS.bad}>{chemistry}</Stat>
+          </Panel>
         </View>
 
         {/* Their five, the way the sim will start them tonight. */}
         <StartersCourt team={team} players={players} onPlayerPress={setViewing} />
 
+        <View>
+          <SectionLabel>Elenco · {roster.length}</SectionLabel>
+          <View style={{ marginTop: 4 }}>
+            {roster.map((p) => {
+              const absence = absences[p.id];
+              return (
+                <Pressable
+                  key={p.id}
+                  accessibilityRole="button"
+                  onPress={() => setViewing(p)}
+                  className="flex-row items-center active:opacity-75"
+                  style={{ height: 44, gap: 10, borderBottomWidth: 1, borderBottomColor: COLORS.lineSoft }}
+                >
+                  <Text style={{ width: 24, fontFamily: FONT.cond800, fontSize: 12, color: COLORS.dim }}>{p.pos}</Text>
+                  <View style={{ flex: 1, minWidth: 0, gap: 1 }}>
+                    <Name size={15}>{p.name}</Name>
+                    <Text numberOfLines={1} style={{ fontFamily: FONT.body500, fontSize: 11.5, color: absence ? COLORS.bad : COLORS.dim }}>
+                      {absence
+                        ? `Fora ${absence.duration} jogos · ${absence.reason === 'injury' ? 'lesionado' : 'suspenso'}`
+                        : `${p.age}a · $${(p.salary / 1_000_000).toFixed(1)}M · ${p.contractYears === 1 ? 'último ano' : `${p.contractYears} anos`}`}
+                    </Text>
+                  </View>
+                  <Text style={{ fontFamily: FONT.cond800, fontSize: 20, color: ovrColor(p.ovr) }}>{p.ovr}</Text>
+                </Pressable>
+              );
+            })}
+          </View>
+        </View>
+
         <CoachPanel team={team} coaches={coaches} />
 
-        <Panel padding={14}>
+        <Panel>
           <PickAssets team={team} teams={teams} currentDraft={currentDraft} />
         </Panel>
-
-        <SectionLabel>Elenco · {roster.length}</SectionLabel>
-        {roster.map((p) => {
-          const absence = absences[p.id];
-          return (
-            <RosterRow
-              key={p.id}
-              player={p}
-              out={!!absence}
-              badge={absence ? `Fora ${absence.duration}` : p.pos}
-              badgeTone={absence ? 'danger' : 'info'}
-              meta={`${p.age}a · ${money(p.salary)} · ${p.nextSalary !== undefined ? `estendido · ${p.contractYears} anos` : p.contractYears === 1 ? 'último ano' : `${p.contractYears} anos`}`}
-              onPress={() => setViewing(p)}
-            />
-          );
-        })}
-
-        <Text style={{ fontSize: 10.5, lineHeight: 15, color: INK.faint, paddingHorizontal: 4 }}>
-          Toque num jogador para ver a ficha. Use a Central de Trocas para abrir conversa com o {getTeamNickname(team)}.
-        </Text>
       </Body>
+
       {viewing ? (
         <PlayerDetailModal
           player={viewing}

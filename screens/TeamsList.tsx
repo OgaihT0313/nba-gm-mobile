@@ -1,114 +1,89 @@
 import React from 'react';
 import { View, Text, Pressable } from 'react-native';
-import { Image } from 'expo-image';
-import { LinearGradient } from 'expo-linear-gradient';
 
-import { Team, Player } from '../types';
-import { getTeamLogoUrl, getTeamSalary, SALARY_CAP, getTeamNickname, conferenceLabel, getTeamAccent } from '../constants';
-import { teamRating } from '../services/formService';
-import { COLORS, INK, RADIUS, withAlpha } from '../src/theme/tokens';
-import Screen, { HeroContent, Body } from '../components/ui/Screen';
-import { MonoLabel, Stat } from '../components/ui/kit';
-import PageHeader from '../components/PageHeader';
+import { Team, Player, ScheduleGame } from '../types';
+import { getTeamNickname } from '../constants';
+import { sortStandings } from '../services/scheduleService';
+import { COLORS, FONT } from '../src/theme/tokens';
+import Screen, { Body } from '../components/ui/Screen';
+import { ScreenTitle, BodyText, TeamBadge } from '../components/ui/kit';
 
-const NBA_FALLBACK = 'https://a.espncdn.com/i/teamlogos/nba/500/nba.png';
+// Design 4b ("Transmissão"). The same two-column West/East layout as the team
+// picker, 38px rows; under each name one tag line — VOCÊ, RIVAL, LOTERIA (a CPU
+// team playing for the lottery is a different trade partner: it wants picks
+// and youth), or where it stands (PLAYOFFS / PLAY-IN) — and the record.
 
-// Franchise browser — taps through to TeamDetail. Same card treatment as the
-// team picker (design 4b): each franchise wearing its own real color, washed
-// out to near-black so thirty of them can sit side by side.
 const TeamsList: React.FC<{
   teams: Team[];
   players: { [key: string]: Player };
-  /** Your franchise's rivals, tagged on their cards. */
+  /** Your franchise's rivals, tagged on their rows. */
   rivalIds?: string[];
+  userTeamId?: string;
+  schedule?: ScheduleGame[];
   onSelect: (teamId: string) => void;
-}> = ({ teams, players, rivalIds = [], onSelect }) => (
-  <Screen heroHeight={132}>
-    <HeroContent>
-      <PageHeader eyebrow="A liga" title="Franquias" subtitle="Elencos e folha salarial de qualquer time." />
-    </HeroContent>
+}> = ({ teams, rivalIds = [], userTeamId, schedule = [], onSelect }) => {
+  const hasGames = teams.some((t) => (t.wins || 0) + (t.losses || 0) > 0);
+  const order = (conf: 'East' | 'West') => {
+    const list = teams.filter((t) => t.conference === conf);
+    return hasGames ? sortStandings(list, schedule) : [...list].sort((a, b) => a.powerRank - b.powerRank);
+  };
 
-    <Body top={16}>
-      <View className="flex-row flex-wrap justify-between">
-        {[...teams].sort((a, b) => a.powerRank - b.powerRank).map((t) => {
-          const capSpace = SALARY_CAP - getTeamSalary(t, players);
-          const accent = getTeamAccent(t.id);
+  const tagOf = (t: Team, seed: number): { text: string; color: string } | null => {
+    if (t.id === userTeamId) return { text: 'Você', color: COLORS.east };
+    if (rivalIds.includes(t.id)) return { text: 'Rival', color: COLORS.west };
+    if (t.tanking) return { text: 'Loteria', color: COLORS.warn };
+    if (!hasGames) return null;
+    if (seed <= 6) return { text: 'Playoffs', color: COLORS.good };
+    if (seed <= 10) return { text: 'Play-in', color: COLORS.muted };
+    return null;
+  };
+
+  const Column: React.FC<{ conf: 'East' | 'West' }> = ({ conf }) => (
+    <View style={{ flex: 1, minWidth: 0 }}>
+      <View style={{ backgroundColor: conf === 'West' ? COLORS.west : COLORS.east, borderTopLeftRadius: 12, borderTopRightRadius: 12, paddingHorizontal: 12, paddingVertical: 8 }}>
+        <Text style={{ fontFamily: FONT.cond800, fontSize: 18, lineHeight: 18, letterSpacing: 1.1, color: '#fff' }}>{conf === 'West' ? 'OESTE' : 'LESTE'}</Text>
+      </View>
+      <View style={{ backgroundColor: COLORS.surface, borderBottomLeftRadius: 12, borderBottomRightRadius: 12, overflow: 'hidden' }}>
+        {order(conf).map((t, i) => {
+          const tag = tagOf(t, i + 1);
           return (
-            <Pressable accessibilityRole="button"
+            <Pressable
               key={t.id}
+              accessibilityRole="button"
+              accessibilityLabel={getTeamNickname(t)}
               onPress={() => onSelect(t.id)}
-              className="active:opacity-75"
-              style={{ width: '48.5%', marginBottom: 10 }}
+              className="flex-row items-center active:opacity-75"
+              style={{ height: 38, gap: 8, paddingLeft: 7, paddingRight: 8, borderBottomWidth: 1, borderBottomColor: COLORS.line }}
             >
-              <LinearGradient
-                colors={[withAlpha(accent.primary, 0.28), COLORS.panel]}
-                locations={[0, 0.75]}
-                start={{ x: 0.1, y: 0 }}
-                end={{ x: 0.9, y: 1 }}
-                style={{ borderRadius: RADIUS.card, padding: 13, borderWidth: 1, borderColor: COLORS.line, overflow: 'hidden' }}
-              >
-                <View style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: 3, backgroundColor: accent.primary }} />
-                {/* A team out of the race that sat its best players is a
-                    different trade partner -- it wants picks and youth, not
-                    help now. The sim has done this since the deadline logic
-                    landed; until now nothing on screen said so. A corner tag,
-                    so the card keeps the grid's height. */}
-                <View style={{ position: 'absolute', top: 10, right: 10, gap: 4, alignItems: 'flex-end' }}>
-                  {rivalIds.includes(t.id) ? (
-                    <View
-                      accessibilityLabel="Rival da sua franquia"
-                      style={{
-                        paddingHorizontal: 6, paddingVertical: 2,
-                        borderRadius: RADIUS.pill, backgroundColor: withAlpha(COLORS.cta, 0.14),
-                        borderWidth: 1, borderColor: withAlpha(COLORS.cta, 0.4),
-                      }}
-                    >
-                      <MonoLabel size={9} color={COLORS.cta} style={{ letterSpacing: 0.3 }}>Rival</MonoLabel>
-                    </View>
-                  ) : null}
-                  {t.tanking ? (
-                    <View
-                      accessibilityLabel="Jogando pela loteria"
-                      style={{
-                        paddingHorizontal: 6, paddingVertical: 2,
-                        borderRadius: RADIUS.pill, backgroundColor: withAlpha(COLORS.warn, 0.14),
-                        borderWidth: 1, borderColor: withAlpha(COLORS.warn, 0.35),
-                      }}
-                    >
-                      <MonoLabel size={9} color={COLORS.warn} style={{ letterSpacing: 0.3 }}>Loteria</MonoLabel>
-                    </View>
-                  ) : null}
-                </View>
-                <Image
-                  source={{ uri: getTeamLogoUrl(t) }}
-                  placeholder={{ uri: NBA_FALLBACK }}
-                  style={{ width: 34, height: 34 }}
-                  contentFit="contain"
-                />
-                <Text className="font-extrabold text-white" style={{ fontSize: 12.5, marginTop: 9 }} numberOfLines={1}>
-                  {getTeamNickname(t)}
-                </Text>
-                <MonoLabel size={9.5} color={INK.meta} style={{ marginTop: 3, letterSpacing: 0 }} numberOfLines={1}>
-                  {conferenceLabel(t)} · {t.wins ?? 0}-{t.losses ?? 0}
-                </MonoLabel>
-
-                <View className="flex-row items-center justify-between" style={{ marginTop: 9 }}>
-                  <Stat size={12} color={capSpace >= 0 ? COLORS.goodSoft : COLORS.badSoft}>
-                    {capSpace >= 0
-                      ? `$${(capSpace / 1_000_000).toFixed(1)}M`
-                      : `-$${Math.abs(capSpace / 1_000_000).toFixed(1)}M`}
-                  </Stat>
-                  <MonoLabel size={9.5} color={INK.faint} style={{ letterSpacing: 0 }}>
-                    OVR {teamRating(t, players)}
-                  </MonoLabel>
-                </View>
-              </LinearGradient>
+              <TeamBadge teamId={t.id} width={32} height={22} />
+              <View style={{ flex: 1, minWidth: 0 }}>
+                <Text numberOfLines={1} style={{ fontFamily: FONT.cond600, fontSize: 14, lineHeight: 15, color: COLORS.text }}>{getTeamNickname(t)}</Text>
+                {tag ? (
+                  <Text style={{ fontFamily: FONT.cond600, fontSize: 10.5, letterSpacing: 0.6, color: tag.color, textTransform: 'uppercase' }}>{tag.text}</Text>
+                ) : null}
+              </View>
+              <Text style={{ fontFamily: FONT.cond700, fontSize: 13, color: COLORS.muted, fontVariant: ['tabular-nums'] }}>
+                {t.wins ?? 0}–{t.losses ?? 0}
+              </Text>
             </Pressable>
           );
         })}
       </View>
-    </Body>
-  </Screen>
-);
+    </View>
+  );
+
+  return (
+    <Screen heroHeight={100}>
+      <ScreenTitle title="Franquias" />
+      <BodyText size={14} style={{ paddingHorizontal: 20, marginTop: -10 }}>Toque para ver elenco, folha e picks</BodyText>
+      <Body top={12}>
+        <View className="flex-row" style={{ gap: 8, marginHorizontal: -2 }}>
+          <Column conf="West" />
+          <Column conf="East" />
+        </View>
+      </Body>
+    </Screen>
+  );
+};
 
 export default TeamsList;

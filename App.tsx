@@ -16,7 +16,7 @@ import { simulationEngine, ROTATION_MIN, ROTATION_MAX } from './services/simulat
 import { buildSeasonOwner, evaluateSeasonOutcome } from './services/ownerService';
 import { generateSchedule } from './services/scheduleService';
 import { simulateOneDay, SimEffect, ALL_STAR_GAME, PinnedGameResult } from './services/seasonRunner';
-import { MIN_ROSTER_SIZE } from './services/tradeService';
+import { MIN_ROSTER_SIZE, TRADE_DEADLINE_GAME } from './services/tradeService';
 import { initialPickAssets, PICK_WINDOW, makeUserPick, scoutProspect, consensusValue } from './services/draftService';
 import { signFreeAgentLegality, evaluateSigningInterest, signPlayer, askingSalary } from './services/freeAgencyService';
 import { resolveDecision } from './services/decisionService';
@@ -92,6 +92,8 @@ export default function App() {
   // keeps the screen decoupled from season shape).
   const [watchGame, setWatchGame] = useState<{ home: Team; away: Team } | null>(null);
   const [selectedTeamId, setSelectedTeamId] = useState<string | null>(null);
+  // Set by a team page's "Abrir negociação": the Trade Center opens with them.
+  const [tradePartnerId, setTradePartnerId] = useState<string | null>(null);
   // The franchise being previewed on the confirmation screen — chosen, but not
   // committed to yet, so it must not touch `season`.
   const [pendingTeamId, setPendingTeamId] = useState<string | null>(null);
@@ -767,13 +769,13 @@ export default function App() {
     if (view === 'scout') return <Scout players={season.players} teams={season.teams} userTeamId={season.userTeamId} />;
     if (view === 'standings') return <StandingsScreen season={season} />;
     if (view === 'leaders') return <LeagueLeaders players={season.players} teams={season.teams} userTeamId={season.userTeamId} />;
-    if (view === 'allstar') return <AllStarWeekend allStar={season.allStar} players={season.players} teams={season.teams} allStarGame={ALL_STAR_GAME} />;
+    if (view === 'allstar') return <AllStarWeekend userTeamId={season.userTeamId} allStar={season.allStar} players={season.players} teams={season.teams} allStarGame={ALL_STAR_GAME} />;
     if (view === 'teams') {
-      return <TeamsList teams={season.teams} players={season.players} rivalIds={season.teams.filter((x) => isRival(season.rivalries, x.id)).map((x) => x.id)} onSelect={(id) => { setSelectedTeamId(id); setView('team-detail'); }} />;
+      return <TeamsList teams={season.teams} players={season.players} userTeamId={season.userTeamId} schedule={season.schedule} rivalIds={season.teams.filter((x) => isRival(season.rivalries, x.id)).map((x) => x.id)} onSelect={(id) => { setSelectedTeamId(id); setView('team-detail'); }} />;
     }
     if (view === 'team-detail') {
       const t = season.teams.find((x) => x.id === selectedTeamId);
-      if (t) return <TeamDetail team={t} players={season.players} teams={season.teams} coaches={season.coaches} currentDraft={currentDraft} rivalry={isRival(season.rivalries, t.id) ? season.rivalries![t.id] : undefined} onBack={() => setView('teams')} />;
+      if (t) return <TeamDetail team={t} players={season.players} teams={season.teams} coaches={season.coaches} currentDraft={currentDraft} rivalry={isRival(season.rivalries, t.id) ? season.rivalries![t.id] : undefined} userTeam={season.teams.find((x) => x.id === season.userTeamId)} schedule={season.schedule} onOpenTrade={season.gamesPlayed < TRADE_DEADLINE_GAME && season.status === 'active' && t.id !== season.userTeamId ? () => { setTradePartnerId(t.id); setView('trade'); } : undefined} onBack={() => setView('teams')} />;
     }
     if (view === 'trade') {
       return (
@@ -787,6 +789,8 @@ export default function App() {
           offers={season.tradeOffers || []}
           onAcceptOffer={handleAcceptOffer}
           onRejectOffer={handleRejectOffer}
+          initialPartnerId={tradePartnerId ?? undefined}
+          key={tradePartnerId ?? 'trade'}
         />
       );
     }

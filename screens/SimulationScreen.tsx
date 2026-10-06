@@ -9,7 +9,7 @@ import { headlines } from '../services/headlineService';
 import { isRival, rivalryReason, revengePlayers, REVENGE_BOOST, RIVAL_WIN_MORALE, RIVAL_LOSS_MORALE } from '../services/rivalryService';
 import { currentStreak, nextGame, winProbability, teamResults } from '../services/formService';
 import { sortStandings } from '../services/scheduleService';
-import { COLORS, RADIUS, FONT, withAlpha } from '../src/theme/tokens';
+import { COLORS, RADIUS, FONT, withAlpha, visibleTeamColor } from '../src/theme/tokens';
 import Screen, { Body } from '../components/ui/Screen';
 import {
   Panel, MonoLabel, Eyebrow, HeroTitle, Stat, Meter, CtaButton, GhostButton, SectionLabel,
@@ -233,8 +233,8 @@ const SimulationScreen: React.FC<SimulationScreenProps> = ({
             </View>
             <View style={{ gap: 5 }}>
               <View className="flex-row" style={{ height: 8, borderRadius: 4, overflow: 'hidden', gap: 2 }}>
-                <View style={{ width: `${Math.round(winPct * 100)}%`, backgroundColor: getTeamAccent(userTeam.id).primary }} />
-                <View style={{ flex: 1, backgroundColor: getTeamAccent(opponent.id).primary }} />
+                <View style={{ width: `${Math.round(winPct * 100)}%`, backgroundColor: visibleTeamColor(getTeamAccent(userTeam.id).primary, getTeamAccent(userTeam.id).secondary) }} />
+                <View style={{ flex: 1, backgroundColor: visibleTeamColor(getTeamAccent(opponent.id).primary, getTeamAccent(opponent.id).secondary) }} />
               </View>
               <View className="flex-row justify-between items-center">
                 <Text style={{ fontFamily: FONT.cond700, fontSize: 14, color: COLORS.text }}>{Math.round(winPct * 100)}%</Text>

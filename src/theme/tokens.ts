@@ -194,3 +194,11 @@ export const heroPalette = (primary: string, secondary: string) => {
   const cut = luminance(secondary) < 0.12 ? lighten(secondary, 0.35) : secondary;
   return { base, mid, cut };
 };
+
+/**
+ * A team color that reads as a FILL on the black background (bars, segments).
+ * Eight franchises ship a near-black primary (den #0E2240, bkn #000000...):
+ * as a bar on #141417 it disappears, so those use their secondary instead.
+ */
+export const visibleTeamColor = (primary: string, secondary: string): string =>
+  luminance(primary) < 0.06 ? secondary : primary;

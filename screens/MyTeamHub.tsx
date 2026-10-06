@@ -9,7 +9,7 @@ import {
 } from '../constants';
 import { MIN_ROSTER_SIZE } from '../services/tradeService';
 import { simulationEngine, DEFAULT_ROTATION_SIZE } from '../services/simulationService';
-import { COLORS, INK, RADIUS, FONT, withAlpha, onAccent, ovrColor } from '../src/theme/tokens';
+import { COLORS, INK, RADIUS, FONT, withAlpha, onAccent, ovrColor, visibleTeamColor } from '../src/theme/tokens';
 import { useTheme } from '../src/theme/ThemeProvider';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { teamRating } from '../services/formService';
@@ -81,6 +81,8 @@ const MyTeamHub: React.FC<MyTeamHubProps> = ({
   const insets = useSafeAreaInsets();
   const { accent } = useTheme();
   const heroInk = onAccent(accent.primary);
+  // Bars on black need a color that shows (a near-black primary would vanish).
+  const barColor = visibleTeamColor(accent.primary, accent.secondary);
   const [confirmWaive, setConfirmWaive] = useState<Player | null>(null);
   const [viewing, setViewing] = useState<Player | null>(null);
   const [rivalId, setRivalId] = useState<string | null>(null);
@@ -255,7 +257,7 @@ const MyTeamHub: React.FC<MyTeamHubProps> = ({
                     key={p.id}
                     style={{
                       height: 14, borderRadius: 2, width: `${(p.salary / scale) * 100}%`,
-                      backgroundColor: i < shades.length ? withAlpha(accent.primary, shades[i]) : '#2A2A30',
+                      backgroundColor: i < shades.length ? withAlpha(barColor, shades[i]) : '#2A2A30',
                     }}
                   />
                 ))}
@@ -305,7 +307,7 @@ const MyTeamHub: React.FC<MyTeamHubProps> = ({
                       <View style={{ width: 58, gap: 3, alignItems: 'flex-end' }}>
                         <Text style={{ fontFamily: FONT.cond600, fontSize: 11, color: COLORS.muted }}>{mpg > 0 ? `${Math.round(mpg)} MIN` : '— MIN'}</Text>
                         <View style={{ width: '100%', height: 3, borderRadius: 2, backgroundColor: COLORS.lineStrong }}>
-                          <View style={{ height: '100%', borderRadius: 2, backgroundColor: accent.primary, width: `${Math.min(1, mpg / MINUTES_IN_A_GAME) * 100}%` }} />
+                          <View style={{ height: '100%', borderRadius: 2, backgroundColor: barColor, width: `${Math.min(1, mpg / MINUTES_IN_A_GAME) * 100}%` }} />
                         </View>
                       </View>
                       <Text style={{ width: 30, textAlign: 'right', fontFamily: FONT.cond800, fontSize: 20, color: ovrColor(p.ovr) }}>{p.ovr}</Text>

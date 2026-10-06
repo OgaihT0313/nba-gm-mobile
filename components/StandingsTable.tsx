@@ -1,17 +1,20 @@
 import React from 'react';
 import { View, Text } from 'react-native';
-import { Image } from 'expo-image';
 import { Team, ScheduleGame } from '../types';
-import { getTeamLogoUrl, getTeamNickname } from '../constants';
+import { getTeamNickname, getTeamAccent } from '../constants';
 import { sortStandings } from '../services/scheduleService';
-import { COLORS, INK, tracking, withAlpha } from '../src/theme/tokens';
-import { useTheme } from '../src/theme/ThemeProvider';
+import { recentForm } from '../services/formService';
+import { COLORS, FONT, withAlpha } from '../src/theme/tokens';
+import { TeamBadge } from './ui/kit';
 
-// Design 3e: the densest table in the app. The seed zone is carried by a
-// colored 3px edge on the LEFT of each row (green = playoff berth, amber =
-// play-in) rather than by tinting the rank number, so the two bands read as
-// continuous blocks you can find without counting rows — and the user's own
-// team is washed in the franchise color so it's findable at a glance.
+// Design 4a ("Transmissão"). 36px rows: seed · tricode badge · name · W–L ·
+// point differential · last five as tiny bars. Seeds 1-6 in full text, 7-10
+// muted, the rest faint; a white rule under the 6th (playoffs) and a grey one
+// under the 10th (play-in). Your row carries your team color at 22%.
+//
+// Before a game is played there is no ranking, so it falls back to roster
+// strength and drops the seed colors and cut lines that would imply one.
+
 interface StandingsTableProps {
   teams: Team[];
   conference: 'East' | 'West';
@@ -21,10 +24,7 @@ interface StandingsTableProps {
   limit?: number;
 }
 
-const NBA_FALLBACK = 'https://a.espncdn.com/i/teamlogos/nba/500/nba.png';
-
 const StandingsTable: React.FC<StandingsTableProps> = ({ teams, conference, schedule, userTeamId, limit }) => {
-  const { accent } = useTheme();
   const confTeams = teams.filter((t) => t.conference === conference);
   const hasGames = confTeams.some((t) => (t.wins || 0) + (t.losses || 0) > 0);
 
@@ -34,13 +34,6 @@ const StandingsTable: React.FC<StandingsTableProps> = ({ teams, conference, sche
       : [...confTeams].sort((a, b) => (b.wins || 0) - (a.wins || 0))
     : [...confTeams].sort((a, b) => a.powerRank - b.powerRank);
 
-  // Games behind the conference leader, the column the mockup ends on.
-  const leader = ranked[0];
-  const leadW = leader?.wins ?? 0;
-  const leadL = leader?.losses ?? 0;
-
-  // With a limit, the user's team is pulled in even if it fell outside the cut
-  // — a standings table that can't show you where YOU are is useless.
   let rows = ranked;
   if (limit && ranked.length > limit) {
     const head = ranked.slice(0, limit);
@@ -51,80 +44,66 @@ const StandingsTable: React.FC<StandingsTableProps> = ({ teams, conference, sche
   return (
     <View>
       {!hasGames ? (
-        <Text style={{ fontSize: 10, color: INK.faint, fontStyle: 'italic', paddingHorizontal: 4, paddingBottom: 8 }}>
+        <Text style={{ fontFamily: FONT.body500, fontSize: 12, color: COLORS.dim, paddingBottom: 8 }}>
           Temporada ainda não começou — ordenado por força do elenco.
         </Text>
       ) : null}
 
-      {/* Column head */}
-      <View
-        className="flex-row"
-        style={{ backgroundColor: COLORS.sunken, paddingHorizontal: 11, paddingVertical: 8, borderRadius: 10, marginBottom: 2 }}
-      >
-        <Head style={{ width: 18 }}>#</Head>
+      <View className="flex-row items-center" style={{ height: 28, gap: 8, borderBottomWidth: 1, borderBottomColor: COLORS.line }}>
+        <View style={{ width: 18 }} />
         <Head style={{ flex: 1 }}>Time</Head>
-        <Head style={{ width: 46, textAlign: 'right' }}>V-D</Head>
-        <Head style={{ width: 38, textAlign: 'right' }}>Pct</Head>
-        <Head style={{ width: 30, textAlign: 'right' }}>GB</Head>
+        <Head style={{ width: 46, textAlign: 'right' }}>V–D</Head>
+        <Head style={{ width: 32, textAlign: 'right' }}>Dif</Head>
+        {schedule ? <Head style={{ width: 50, textAlign: 'right' }}>Últ. 5</Head> : null}
       </View>
 
       {rows.map((t) => {
         const seed = ranked.indexOf(t) + 1;
         const wins = t.wins || 0;
         const losses = t.losses || 0;
-        const total = wins + losses;
-        const pct = total > 0 ? (wins / total).toFixed(3).replace(/^0/, '') : '.000';
-        const gb = hasGames ? ((leadW - wins) + (losses - leadL)) / 2 : 0;
-        const zone = !hasGames ? 'transparent' : seed <= 6 ? COLORS.good : seed <= 10 ? COLORS.warn : 'transparent';
         const isUser = t.id === userTeamId;
+        const diff = t.stats ? (t.stats.ppg ?? 0) - (t.stats.oppg ?? 0) : 0;
+        const seedColor = !hasGames ? COLORS.dim : seed <= 6 ? COLORS.text : seed <= 10 ? COLORS.muted : COLORS.faint;
+        // The cut lines: white under the 6th, grey under the 10th.
+        const cut = hasGames && seed === 6 ? COLORS.text : hasGames && seed === 10 ? '#4A4950' : COLORS.line;
+        const last5 = schedule ? recentForm(schedule, t.id, 5) : [];
 
         return (
           <View
             key={t.id}
             className="flex-row items-center"
             style={{
-              paddingHorizontal: 11,
-              paddingVertical: isUser ? 10 : 8,
-              borderLeftWidth: 3,
-              borderLeftColor: zone,
-              backgroundColor: isUser ? withAlpha(accent.primary, 0.16) : 'transparent',
-              borderTopWidth: 1,
-              borderTopColor: '#131e33',
+              height: 36, gap: 8,
+              borderBottomWidth: cut === COLORS.line ? 1 : 2, borderBottomColor: cut,
+              backgroundColor: isUser ? withAlpha(getTeamAccent(t.id).primary, 0.22) : 'transparent',
             }}
           >
-            <Text className="font-mono-bold" style={{ width: 18, fontSize: 11, color: '#fff' }}>{seed}</Text>
-            <View className="flex-row items-center" style={{ flex: 1, gap: 8 }}>
-              <Image
-                source={{ uri: getTeamLogoUrl(t) }}
-                placeholder={{ uri: NBA_FALLBACK }}
-                style={{ width: 18, height: 18 }}
-                contentFit="contain"
-              />
-              <Text
-                className={isUser ? 'font-bold' : 'font-semibold'}
-                style={{ flex: 1, fontSize: 11, color: isUser ? '#fff' : COLORS.textSoft }}
-                numberOfLines={1}
-              >
-                {getTeamNickname(t)}
-              </Text>
-            </View>
-            <Text className="font-mono-bold" style={{ width: 46, fontSize: 11, color: '#fff', textAlign: 'right' }}>
-              {wins}-{losses}
+            <Text style={{ width: 18, textAlign: 'right', fontFamily: FONT.cond800, fontSize: 13, color: seedColor }}>{seed}</Text>
+            <TeamBadge teamId={t.id} width={30} height={20} />
+            <Text numberOfLines={1} style={{ flex: 1, minWidth: 0, fontFamily: FONT.cond600, fontSize: 14.5, color: COLORS.text }}>
+              {getTeamNickname(t)}
             </Text>
-            <Text className="font-mono" style={{ width: 38, fontSize: 11, color: 'rgba(255,255,255,0.5)', textAlign: 'right' }}>
-              {pct}
+            <Text style={{ width: 46, textAlign: 'right', fontFamily: FONT.cond700, fontSize: 14, color: COLORS.text, fontVariant: ['tabular-nums'] }}>
+              {wins}–{losses}
             </Text>
-            <Text className="font-mono" style={{ width: 30, fontSize: 11, color: INK.meta, textAlign: 'right' }}>
-              {!hasGames || gb <= 0 ? '—' : gb.toFixed(1)}
+            <Text style={{ width: 32, textAlign: 'right', fontFamily: FONT.cond600, fontSize: 12.5, color: diff > 0 ? COLORS.good : diff < 0 ? COLORS.bad : COLORS.dim }}>
+              {!hasGames ? '—' : `${diff > 0 ? '+' : ''}${diff.toFixed(1)}`}
             </Text>
+            {schedule ? (
+              <View className="flex-row justify-end" style={{ width: 50, gap: 2 }}>
+                {last5.map((g, i) => (
+                  <View key={i} style={{ width: 8, height: 12, borderRadius: 2, backgroundColor: g.won ? COLORS.good : COLORS.bad }} />
+                ))}
+              </View>
+            ) : null}
           </View>
         );
       })}
 
       {hasGames ? (
-        <View className="flex-row" style={{ gap: 12, paddingHorizontal: 4, paddingTop: 9 }}>
-          <Legend color={COLORS.good} label="Playoffs" />
-          <Legend color={COLORS.warn} label="Play-in" />
+        <View className="flex-row" style={{ gap: 14, paddingTop: 10 }}>
+          <Legend color={COLORS.text} label="Playoffs" />
+          <Legend color="#4A4950" label="Play-in" />
         </View>
       ) : null}
     </View>
@@ -132,18 +111,15 @@ const StandingsTable: React.FC<StandingsTableProps> = ({ teams, conference, sche
 };
 
 const Head: React.FC<{ children: React.ReactNode; style?: object }> = ({ children, style }) => (
-  <Text
-    className="font-mono-bold"
-    style={[{ fontSize: 8, letterSpacing: tracking(8, 0.14), color: 'rgba(255,255,255,0.35)', textTransform: 'uppercase' }, style]}
-  >
+  <Text style={[{ fontFamily: FONT.cond700, fontSize: 10.5, letterSpacing: 1.3, color: COLORS.faint, textTransform: 'uppercase' }, style]}>
     {children}
   </Text>
 );
 
 const Legend: React.FC<{ color: string; label: string }> = ({ color, label }) => (
   <View className="flex-row items-center" style={{ gap: 5 }}>
-    <View style={{ width: 8, height: 3, borderRadius: 2, backgroundColor: color }} />
-    <Text className="font-mono" style={{ fontSize: 9, color: INK.meta, textTransform: 'uppercase' }}>{label}</Text>
+    <View style={{ width: 10, height: 2, backgroundColor: color }} />
+    <Text style={{ fontFamily: FONT.body600, fontSize: 11.5, color: COLORS.dim }}>{label}</Text>
   </View>
 );
 

@@ -1,55 +1,66 @@
 import React, { useState } from 'react';
-import { View, Text } from 'react-native';
+import { View, Text, Pressable } from 'react-native';
 
 import { SeasonState } from '../types';
-import { COLORS, INK } from '../src/theme/tokens';
-import Screen, { HeroContent, Body } from '../components/ui/Screen';
-import { Panel, MonoLabel, Eyebrow, FilterRow } from '../components/ui/kit';
+import { COLORS, FONT } from '../src/theme/tokens';
+import Screen, { Body } from '../components/ui/Screen';
+import { ScreenTitle, BodyText } from '../components/ui/kit';
 import StandingsTable from '../components/StandingsTable';
 import LeadersPanel from '../components/LeadersPanel';
 
-// Design 3e — the densest screen in the app, so it's one tab bar over one
-// panel rather than four stacked cards. Conference first (your team pinned and
-// washed in the franchise color), league leaders on the same tab strip because
-// it's the same glance.
+// Design 4a ("Transmissão"). One segmented control — OESTE / LESTE / LÍDERES,
+// the active conference painted in its own color — over one table. Opens on the
+// user's own conference.
 
-const TABS = [
-  { id: 'West', label: 'Oeste' },
-  { id: 'East', label: 'Leste' },
-  { id: 'leaders', label: 'Líderes' },
+const TABS: { id: 'West' | 'East' | 'leaders'; label: string; color: string }[] = [
+  { id: 'West', label: 'Oeste', color: COLORS.west },
+  { id: 'East', label: 'Leste', color: COLORS.east },
+  { id: 'leaders', label: 'Líderes', color: COLORS.lineStrong },
 ];
 
 const StandingsScreen: React.FC<{ season: SeasonState }> = ({ season }) => {
-  // Open on the user's own conference — the standings you actually came to read.
   const userTeam = season.teams.find((t) => t.id === season.userTeamId);
   const [tab, setTab] = useState<string>(userTeam?.conference ?? 'West');
 
   return (
-    <Screen heroHeight={132}>
-      <HeroContent>
-        <Eyebrow>A liga · jogo {season.gamesPlayed} de 82</Eyebrow>
-        <FilterRow items={TABS} value={tab} onChange={setTab} style={{ marginTop: 13 }} />
-      </HeroContent>
+    <Screen heroHeight={100}>
+      <ScreenTitle title="Classificação" label={`Jogo ${season.gamesPlayed} de 82`} />
 
-      <Body top={16}>
+      <Body top={0} gap={12}>
+        <View className="flex-row" style={{ gap: 4, backgroundColor: COLORS.surface, borderRadius: 12, padding: 4 }}>
+          {TABS.map((t) => {
+            const on = t.id === tab;
+            return (
+              <Pressable
+                key={t.id}
+                accessibilityRole="tab"
+                aria-selected={on}
+                onPress={() => setTab(t.id)}
+                className="active:opacity-75"
+                style={{ flex: 1, height: 38, borderRadius: 9, alignItems: 'center', justifyContent: 'center', backgroundColor: on ? t.color : 'transparent' }}
+              >
+                <Text style={{ fontFamily: FONT.cond800, fontSize: 14, letterSpacing: 1.4, color: on ? '#fff' : COLORS.dim, textTransform: 'uppercase' }}>{t.label}</Text>
+              </Pressable>
+            );
+          })}
+        </View>
+
         {tab === 'leaders' ? (
           <LeadersPanel players={season.players} teams={season.teams} userTeamId={season.userTeamId} />
         ) : (
-          <Panel padding={13}>
-            <StandingsTable
-              teams={season.teams}
-              conference={tab as 'East' | 'West'}
-              schedule={season.schedule}
-              userTeamId={season.userTeamId}
-            />
-          </Panel>
+          <StandingsTable
+            teams={season.teams}
+            conference={tab as 'East' | 'West'}
+            schedule={season.schedule}
+            userTeamId={season.userTeamId}
+          />
         )}
 
-        <Text style={{ fontSize: 10.5, lineHeight: 15, color: INK.faint, paddingHorizontal: 4 }}>
+        <BodyText size={12} color={COLORS.dim}>
           {tab === 'leaders'
             ? 'Médias por jogo da temporada regular em curso.'
             : 'Ordenada pelos critérios de desempate reais da NBA (confronto direto, campanha na conferência).'}
-        </Text>
+        </BodyText>
       </Body>
     </Screen>
   );
