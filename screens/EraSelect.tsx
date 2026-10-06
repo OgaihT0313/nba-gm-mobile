@@ -3,133 +3,80 @@ import { View, Text, Pressable, ScrollView } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { ERA_GROUPS, eraById, type EraGroup } from '../data/eras';
-import { getEraVisual } from '../src/theme/eraVisuals';
-import { COLORS, INK, RADIUS, tracking } from '../src/theme/tokens';
-import { MonoLabel, HeroTitle } from '../components/ui/kit';
+import { COLORS, FONT } from '../src/theme/tokens';
+import { Eyebrow, HeroTitle, BodyText } from '../components/ui/kit';
 
-// Design 4a-bis, reworked into a 2-level MyEras-style pick (NBA 2K's "MyEras"
-// mode is the direct reference — see data/eras/index.ts's EraGroup comment).
-// Sits between Home and TeamSelect, on the same pre-team black/white palette.
-// `null` = today's live snapshot, the default and first card at level 1;
-// every ERA_GROUPS card is a single tap into that group's iconic/default
-// season (ERA_GROUPS[].seasonIds[0]) — the same 1-tap flow the real MyEras
-// uses. A secondary "escolher temporada inicial" affordance drops into level
-// 2, the flat per-season list this screen used to be entirely — nothing from
-// that granularity is lost, it's just a level deeper now.
+// Design 2b ("Transmissão"). The live league as the one light card (the
+// default); each era group as a surface row — decade, name, one line — that
+// starts at the group's first season. The chevron opens level 2: pick the exact
+// starting season inside the group.
 
 interface EraSelectProps {
   onSelect: (eraId: string | null) => void;
 }
 
-const EraCard: React.FC<{
-  eyebrow: string;
-  title: string;
-  blurb: string;
-  accentColor?: string;
-  onPress: () => void;
-}> = ({ eyebrow, title, blurb, accentColor, onPress }) => (
-  <Pressable accessibilityRole="button" onPress={onPress} className="active:opacity-75">
-    <View
-      style={{
-        backgroundColor: '#0e0e0e',
-        borderWidth: 1,
-        borderColor: '#232323',
-        borderRadius: RADIUS.card,
-        padding: 18,
-        overflow: 'hidden',
-      }}
-    >
-      <View style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: 3, backgroundColor: accentColor ?? COLORS.cta }} />
-      <MonoLabel size={9} color={accentColor ?? COLORS.cta} style={{ letterSpacing: tracking(9, 0.24) }}>
-        {eyebrow}
-      </MonoLabel>
-      <HeroTitle size={22} style={{ marginTop: 8 }} numberOfLines={1} adjustsFontSizeToFit>
-        {title}
-      </HeroTitle>
-      <Text style={{ fontSize: 12, lineHeight: 17, color: 'rgba(255,255,255,0.5)', marginTop: 8 }}>
-        {blurb}
-      </Text>
-    </View>
-  </Pressable>
-);
-
-const EraGroupCard: React.FC<{
-  group: EraGroup;
-  onStart: () => void;
-  onExpand: () => void;
-}> = ({ group, onStart, onExpand }) => {
-  const visual = getEraVisual(group.visualId);
-  const accentColor = visual?.accentPrimary ?? COLORS.cta;
-  return (
-    <View
-      style={{
-        backgroundColor: '#0e0e0e',
-        borderWidth: 1,
-        borderColor: '#232323',
-        borderRadius: RADIUS.card,
-        padding: 18,
-        overflow: 'hidden',
-      }}
-    >
-      <View style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: 3, backgroundColor: accentColor }} />
-      <Pressable accessibilityRole="button" onPress={onStart} className="active:opacity-75">
-        <MonoLabel size={9} color={accentColor} style={{ letterSpacing: tracking(9, 0.24) }}>
-          {`Era · ${group.spanLabel}`}
-        </MonoLabel>
-        <HeroTitle size={24} style={{ marginTop: 8 }} numberOfLines={1} adjustsFontSizeToFit>
-          {group.label}
-        </HeroTitle>
-        <Text style={{ fontSize: 12, lineHeight: 17, color: 'rgba(255,255,255,0.5)', marginTop: 8 }}>
-          {group.blurb}
-        </Text>
-      </Pressable>
-      <Pressable accessibilityRole="button" onPress={onExpand} className="active:opacity-60" style={{ marginTop: 12 }}>
-        <MonoLabel size={9} color={INK.faint} style={{ letterSpacing: tracking(9, 0.18) }}>
-          Escolher temporada inicial ›
-        </MonoLabel>
-      </Pressable>
-    </View>
-  );
+/**
+ * "1979-80 → 1989-90" → "1980s": the decade of the span's midpoint, so the
+ * Kobe era (1998-99 → 2009-10) reads 2000s rather than the year it opens in.
+ */
+const decadeOf = (span: string) => {
+  const years = span.match(/\d{4}/g)?.map(Number) ?? [];
+  if (!years.length) return '';
+  const mid = (years[0] + years[years.length - 1]) / 2;
+  return `${Math.floor(mid / 10) * 10}s`;
 };
+
+const Row: React.FC<{ big: string; title: string; sub: string; onPress: () => void; onMore?: () => void }> = ({
+  big, title, sub, onPress, onMore,
+}) => (
+  <View className="flex-row items-center" style={{ backgroundColor: COLORS.surface, borderRadius: 16 }}>
+    <Pressable
+      accessibilityRole="button"
+      accessibilityLabel={title}
+      onPress={onPress}
+      className="flex-1 flex-row items-center active:opacity-75"
+      style={{ paddingVertical: 12, paddingLeft: 14, gap: 14 }}
+    >
+      <Text style={{ width: 64, fontFamily: FONT.cond800, fontSize: 24, lineHeight: 26, color: COLORS.dim }}>{big}</Text>
+      <View className="flex-1" style={{ minWidth: 0, gap: 2 }}>
+        <Text numberOfLines={1} style={{ fontFamily: FONT.cond800, fontSize: 19, lineHeight: 20, color: COLORS.text, textTransform: 'uppercase' }}>{title}</Text>
+        <BodyText size={12.5} numberOfLines={2}>{sub}</BodyText>
+      </View>
+    </Pressable>
+    {onMore ? (
+      <Pressable
+        accessibilityRole="button"
+        accessibilityLabel={`Escolher temporada inicial: ${title}`}
+        onPress={onMore}
+        hitSlop={6}
+        className="active:opacity-60"
+        style={{ width: 48, alignSelf: 'stretch', alignItems: 'center', justifyContent: 'center' }}
+      >
+        <Text style={{ fontFamily: FONT.cond700, fontSize: 22, color: '#4A4950' }}>›</Text>
+      </Pressable>
+    ) : <View style={{ width: 14 }} />}
+  </View>
+);
 
 const EraSelect: React.FC<EraSelectProps> = ({ onSelect }) => {
   const insets = useSafeAreaInsets();
   const [expandedGroup, setExpandedGroup] = useState<EraGroup | null>(null);
 
   if (expandedGroup) {
-    const visual = getEraVisual(expandedGroup.visualId);
     return (
-      <View className="flex-1" style={{ backgroundColor: '#050505' }}>
-        <View style={{ paddingTop: insets.top + 10, paddingHorizontal: 18 }}>
-          <Pressable accessibilityRole="button" onPress={() => setExpandedGroup(null)} className="active:opacity-60">
-            <MonoLabel size={9.5} color={visual?.accentPrimary ?? COLORS.cta} style={{ letterSpacing: tracking(9.5, 0.24) }}>
-              ‹ Voltar
-            </MonoLabel>
+      <View className="flex-1" style={{ backgroundColor: COLORS.bg }}>
+        <View style={{ paddingTop: insets.top + 6, paddingHorizontal: 20, paddingBottom: 16, gap: 6 }}>
+          <Pressable accessibilityRole="button" onPress={() => setExpandedGroup(null)} className="active:opacity-60" hitSlop={8}>
+            <Text style={{ fontFamily: FONT.cond700, fontSize: 14, letterSpacing: 1.4, color: COLORS.text }}>‹ VOLTAR</Text>
           </Pressable>
-          <HeroTitle size={28} style={{ marginTop: 9 }}>{expandedGroup.label}</HeroTitle>
-          <Text style={{ fontSize: 12.5, lineHeight: 18, color: 'rgba(255,255,255,0.45)', marginTop: 10 }}>
-            Escolha exatamente onde nessa era sua carreira de GM começa.
-          </Text>
+          <Eyebrow>Temporada inicial · {expandedGroup.spanLabel}</Eyebrow>
+          <HeroTitle size={34}>{expandedGroup.label}</HeroTitle>
         </View>
-
-        <ScrollView
-          className="flex-1"
-          contentContainerStyle={{ paddingHorizontal: 16, paddingTop: 22, paddingBottom: 24, gap: 10 }}
-          showsVerticalScrollIndicator={false}
-        >
+        <ScrollView className="flex-1" contentContainerStyle={{ paddingHorizontal: 14, paddingBottom: 24, gap: 8 }} showsVerticalScrollIndicator={false}>
           {expandedGroup.seasonIds.map((eraId) => {
             const era = eraById(eraId);
             if (!era) return null;
-            return (
-              <EraCard
-                key={era.id}
-                eyebrow={`Temporada · ${era.seasonLabel}`}
-                title={era.label}
-                blurb={era.blurb}
-                accentColor={visual?.accentPrimary}
-                onPress={() => onSelect(era.id)}
-              />
-            );
+            return <Row key={era.id} big={era.seasonLabel.slice(2)} title={era.label} sub={era.blurb} onPress={() => onSelect(era.id)} />;
           })}
         </ScrollView>
       </View>
@@ -137,44 +84,39 @@ const EraSelect: React.FC<EraSelectProps> = ({ onSelect }) => {
   }
 
   return (
-    <View className="flex-1" style={{ backgroundColor: '#050505' }}>
-      <View style={{ paddingTop: insets.top + 10, paddingHorizontal: 18 }}>
-        <Text
-          className="font-mono-bold"
-          style={{ fontSize: 9.5, letterSpacing: tracking(9.5, 0.24), color: COLORS.cta, textTransform: 'uppercase' }}
-        >
-          Passo 1 de 2
-        </Text>
-        <HeroTitle size={30} style={{ marginTop: 9 }}>Escolha sua era</HeroTitle>
-        <Text style={{ fontSize: 12.5, lineHeight: 18, color: 'rgba(255,255,255,0.45)', marginTop: 10 }}>
-          De onde a sua carreira de GM começa. O resto do jogo — draft, agência livre, trocas — funciona igual em qualquer era.
-        </Text>
+    <View className="flex-1" style={{ backgroundColor: COLORS.bg }}>
+      <View style={{ paddingTop: insets.top + 6, paddingHorizontal: 20, paddingBottom: 16, gap: 6 }}>
+        <Eyebrow>Passo 1 de 2</Eyebrow>
+        <HeroTitle size={34}>Escolha sua era</HeroTitle>
       </View>
 
-      <ScrollView
-        className="flex-1"
-        contentContainerStyle={{ paddingHorizontal: 16, paddingTop: 22, paddingBottom: 24, gap: 10 }}
-        showsVerticalScrollIndicator={false}
-      >
-        <EraCard
-          eyebrow="Temporada atual"
-          title="2025-26"
-          blurb="Elenco e ratings reais de hoje — a experiência padrão do jogo."
-          onPress={() => onSelect(null)}
-        />
+      <ScrollView className="flex-1" contentContainerStyle={{ paddingHorizontal: 14, paddingBottom: 24, gap: 8 }} showsVerticalScrollIndicator={false}>
+        {/* The live league: the default, so the one inverted card. */}
+        <Pressable accessibilityRole="button" accessibilityLabel="2025-26" onPress={() => onSelect(null)} className="active:opacity-80">
+          <View style={{ backgroundColor: COLORS.ctaFill, borderRadius: 18, padding: 16, gap: 4 }}>
+            <View className="flex-row justify-between">
+              <Text style={{ fontFamily: FONT.cond700, fontSize: 11, letterSpacing: 1.5, color: 'rgba(11,11,13,0.6)' }}>LIGA ATUAL</Text>
+              <Text style={{ fontFamily: FONT.cond700, fontSize: 11, letterSpacing: 1.5, color: 'rgba(11,11,13,0.6)' }}>PADRÃO</Text>
+            </View>
+            <Text style={{ fontFamily: FONT.cond800, fontSize: 40, lineHeight: 40, color: COLORS.ctaInk }}>2025-26</Text>
+            <Text style={{ fontFamily: FONT.body500, fontSize: 13, color: 'rgba(11,11,13,0.7)' }}>Elencos reais de hoje</Text>
+          </View>
+        </Pressable>
 
         {ERA_GROUPS.map((group) => (
-          <EraGroupCard
+          <Row
             key={group.id}
-            group={group}
-            onStart={() => onSelect(group.seasonIds[0])}
-            onExpand={() => setExpandedGroup(group)}
+            big={decadeOf(group.spanLabel)}
+            title={group.label}
+            sub={group.blurb}
+            onPress={() => onSelect(group.seasonIds[0])}
+            onMore={() => setExpandedGroup(group)}
           />
         ))}
 
-        <MonoLabel size={9} color={INK.faint} style={{ marginTop: 4, letterSpacing: 0, paddingHorizontal: 2 }}>
-          Fotos e títulos de franquia mostram o dado mais recente, mesmo numa era antiga.
-        </MonoLabel>
+        <BodyText size={12} color={COLORS.dim} style={{ marginTop: 6, paddingHorizontal: 4 }}>
+          Toque numa era para começar na primeira temporada dela, ou no › para escolher a temporada inicial. Fotos e títulos de franquia mostram o dado mais recente, mesmo numa era antiga.
+        </BodyText>
       </ScrollView>
     </View>
   );

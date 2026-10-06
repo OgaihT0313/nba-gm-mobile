@@ -1,22 +1,16 @@
 import React from 'react';
-import { View, Text, Pressable, ScrollView, StyleSheet } from 'react-native';
-import { Image } from 'expo-image';
-import { LinearGradient } from 'expo-linear-gradient';
-import { Svg, Defs, RadialGradient, Stop, Rect } from 'react-native-svg';
+import { View, Text, ScrollView } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { SeasonState } from '../types';
-import { getTeamLogoUrl, getTeamNickname, SALARY_CAP } from '../constants';
-import { COLORS, INK, RADIUS, tracking } from '../src/theme/tokens';
-import { MonoLabel, HeroTitle, Stat, CtaButton } from '../components/ui/kit';
+import { getTeamNickname, SALARY_CAP } from '../constants';
+import { sortStandings } from '../services/scheduleService';
+import { COLORS, FONT } from '../src/theme/tokens';
+import { CtaButton, GhostButton, TeamBadge, StatStrip, BodyText } from '../components/ui/kit';
 
-// Design 4a. This and the team picker are the only two screens that exist
-// BEFORE there is a franchise, so there is no accent to theme with — the rule
-// the redesign sets is that the home screen stays black and white with a single
-// red, and color only arrives as a reward when you pick a team (see
-// TeamConfirm). The palette here is deliberately NOT the #06080f/#0d1526 system
-// ramp: it's near-black #050505 with #0e0e0e cards, so the moment the app gains
-// franchise navy one screen later actually reads as a change.
+// Design 2a ("Transmissão"). No team color yet — black and white, with the two
+// conference strokes as the only color. A saved career gets its own card;
+// "Continuar" is the light CTA, "Nova carreira" the outline under it.
 
 interface HomeProps {
   onStart: () => void;
@@ -25,121 +19,95 @@ interface HomeProps {
   season: SeasonState | null;
 }
 
-const CARD = { backgroundColor: '#0e0e0e', borderWidth: 1, borderColor: '#232323', borderRadius: RADIUS.card } as const;
-
 const Home: React.FC<HomeProps> = ({ onStart, onContinue, season }) => {
   const insets = useSafeAreaInsets();
   const userTeam = season?.teams.find((t) => t.id === season.userTeamId);
   const seasonNumber = (season?.gmLegacy.seasons ?? 0) + 1;
+  const y = 2025 + seasonNumber - 1;
+  const yearLabel = season?.era?.seasonLabel ?? `${y}-${String(y + 1).slice(-2)}`;
+  const rank = season && userTeam && season.gamesPlayed > 0
+    ? sortStandings(season.teams.filter((t) => t.conference === userTeam.conference), season.schedule)
+      .findIndex((t) => t.id === userTeam.id) + 1
+    : 0;
 
   return (
-    <View className="flex-1" style={{ backgroundColor: '#050505' }}>
-      {/* The single red in the whole screen, as a glow rather than a fill. */}
-      <View style={[StyleSheet.absoluteFill, { pointerEvents: 'none' }]}>
-        <Svg style={StyleSheet.absoluteFill}>
-          <Defs>
-            <RadialGradient id="homeGlow" cx="20%" cy="8%" r="75%">
-              <Stop offset="0" stopColor={COLORS.cta} stopOpacity={0.22} />
-              <Stop offset="1" stopColor={COLORS.cta} stopOpacity={0} />
-            </RadialGradient>
-          </Defs>
-          <Rect x="0" y="0" width="100%" height="100%" fill="url(#homeGlow)" />
-        </Svg>
-      </View>
-
+    <View className="flex-1" style={{ backgroundColor: COLORS.bg }}>
       <ScrollView
         className="flex-1"
-        contentContainerStyle={{ paddingTop: insets.top + 34, paddingBottom: 12 }}
+        contentContainerStyle={{ paddingTop: insets.top + 28, paddingHorizontal: 20, paddingBottom: 12, gap: 26 }}
         showsVerticalScrollIndicator={false}
       >
-        <View style={{ paddingHorizontal: 22 }}>
-          <Text
-            className="font-mono-bold"
-            style={{ fontSize: 9.5, letterSpacing: tracking(9.5, 0.3), color: COLORS.cta, textTransform: 'uppercase' }}
-          >
-            Simulador de carreira
-          </Text>
-          <HeroTitle size={64} style={{ marginTop: 18, lineHeight: 55, letterSpacing: -3.2 }}>
+        <View>
+          <View className="flex-row" style={{ gap: 4 }}>
+            <View style={{ width: 22, height: 5, backgroundColor: COLORS.west }} />
+            <View style={{ width: 22, height: 5, backgroundColor: COLORS.east }} />
+          </View>
+          <Text style={{ fontFamily: FONT.cond800, fontSize: 92, lineHeight: 78, color: COLORS.text, marginTop: 18 }}>
             NBA{'\n'}GM
-          </HeroTitle>
-          <Text style={{ fontSize: 13, lineHeight: 20, color: 'rgba(255,255,255,0.5)', marginTop: 20, maxWidth: 280 }}>
-            Assuma uma franquia real, monte o elenco, sobreviva à diretoria e levante o troféu.
           </Text>
+          <BodyText size={15} style={{ marginTop: 10 }}>Monte a franquia. Aguente o dono. Ganhe o anel.</BodyText>
         </View>
 
-        <View style={{ paddingHorizontal: 16, marginTop: 30, gap: 10 }}>
-          {/* Save in progress — the one card that isn't chrome. */}
-          {season && userTeam && onContinue ? (
-            <Pressable accessibilityRole="button" onPress={onContinue} className="active:opacity-80">
-              <View style={[CARD, { padding: 14, flexDirection: 'row', alignItems: 'center', gap: 12 }]}>
-                <Image source={{ uri: getTeamLogoUrl(userTeam) }} style={{ width: 40, height: 40 }} contentFit="contain" />
-                <View style={{ flex: 1 }}>
-                  <MonoLabel size={8.5} color={INK.meta}>Continuar</MonoLabel>
-                  <Text className="font-extrabold text-white" style={{ fontSize: 13.5, marginTop: 3 }} numberOfLines={1}>
-                    {getTeamNickname(userTeam)} · Temporada {seasonNumber}
-                  </Text>
-                  <MonoLabel size={10} color={INK.meta} style={{ marginTop: 3, letterSpacing: 0 }}>
-                    {userTeam.wins ?? 0}-{userTeam.losses ?? 0} · Jogo {season.gamesPlayed} de 82
-                  </MonoLabel>
-                </View>
-                <View
-                  style={{
-                    width: 30, height: 30, borderRadius: RADIUS.pill, backgroundColor: '#1c1c1c',
-                    alignItems: 'center', justifyContent: 'center',
-                  }}
-                >
-                  <Text className="font-extrabold text-white" style={{ fontSize: 14, lineHeight: 17 }}>›</Text>
-                </View>
-              </View>
-            </Pressable>
-          ) : null}
-
-          {/* Career record, only meaningful once a save exists. */}
-          {season ? (
-            <View className="flex-row" style={{ gap: 10 }}>
-              <Tile value={String(season.gmLegacy.titles)} label="Títulos" color={season.gmLegacy.titles > 0 ? COLORS.warn : '#fff'} />
-              <Tile value={String(season.gmLegacy.seasons)} label="Temporadas" />
-              <Tile value={`${season.owner.confidence}%`} label="Confiança" color={season.owner.confidence >= 60 ? COLORS.goodSoft : COLORS.warn} />
+        {season && userTeam ? (
+          <View style={{ backgroundColor: COLORS.surface, borderRadius: 20, overflow: 'hidden' }}>
+            <View className="flex-row justify-between items-center" style={{ paddingHorizontal: 16, paddingTop: 14, paddingBottom: 12, borderBottomWidth: 1, borderBottomColor: COLORS.line }}>
+              <Text style={{ fontFamily: FONT.cond700, fontSize: 11, letterSpacing: 1.5, color: COLORS.muted }}>CARREIRA SALVA</Text>
+              <Text style={{ fontFamily: FONT.cond700, fontSize: 11, letterSpacing: 1.5, color: COLORS.muted }}>
+                {yearLabel} · DIA {season.gamesPlayed}
+              </Text>
             </View>
-          ) : null}
-
-          <View style={[CARD, { padding: 14, gap: 9 }]}>
-            <MonoLabel size={8.5} color={INK.meta}>Dados da liga</MonoLabel>
-            <Row label="Elencos e ratings" value="2025-26 reais" />
-            <Row label="Teto salarial" value={`$${(SALARY_CAP / 1_000_000).toFixed(1)}M`} />
-            <Row label="Franquias" value="30" />
-            <Text style={{ fontSize: 10.5, lineHeight: 15, color: 'rgba(255,255,255,0.32)', marginTop: 4 }}>
-              Temporada completa: 82 jogos, play-in, playoffs, prêmios, draft e agência livre.
-            </Text>
+            <View className="flex-row items-center" style={{ padding: 16, gap: 12 }}>
+              <TeamBadge teamId={userTeam.id} width={48} height={48} fill={COLORS.lineStrong} />
+              <View className="flex-1" style={{ gap: 2 }}>
+                <Text style={{ fontFamily: FONT.cond800, fontSize: 24, lineHeight: 24, color: COLORS.text, textTransform: 'uppercase' }}>
+                  {getTeamNickname(userTeam)}
+                </Text>
+                <BodyText size={13}>
+                  {userTeam.wins ?? 0}–{userTeam.losses ?? 0}
+                  {rank ? ` · ${rank}º no ${userTeam.conference === 'East' ? 'Leste' : 'Oeste'}` : ` · temporada ${seasonNumber}`}
+                </BodyText>
+              </View>
+            </View>
+            <View style={{ borderTopWidth: 1, borderTopColor: COLORS.line, paddingVertical: 8 }}>
+              <StatStrip
+                size={22}
+                items={[
+                  { label: 'Títulos', value: season.gmLegacy.titles, color: season.gmLegacy.titles > 0 ? COLORS.gold : undefined },
+                  { label: 'Temporadas', value: season.gmLegacy.seasons },
+                  { label: 'Confiança', value: `${season.owner.confidence}%` },
+                ]}
+              />
+            </View>
           </View>
+        ) : null}
+
+        <View>
+          <Text style={{ fontFamily: FONT.cond700, fontSize: 11, letterSpacing: 1.5, color: COLORS.dim, paddingBottom: 6 }}>DADOS DA LIGA</Text>
+          <Row label="Elencos e ratings" value="2025-26 reais" />
+          <Row label="Teto salarial" value={`$${(SALARY_CAP / 1_000_000).toFixed(1)}M`} />
+          <Row label="Franquias" value="30" last />
         </View>
       </ScrollView>
 
-      <View style={{ paddingHorizontal: 16, paddingBottom: 20, paddingTop: 4 }}>
-        <CtaButton label="Nova carreira" onPress={onStart} size={16} />
-        {season ? (
-          <Text style={{ textAlign: 'center', fontSize: 11, color: 'rgba(255,255,255,0.35)', marginTop: 12 }} className="font-semibold">
-            Isso apaga o save atual
-          </Text>
-        ) : null}
+      <View style={{ paddingHorizontal: 16, paddingTop: 12, paddingBottom: 20, gap: 8 }}>
+        {season && userTeam && onContinue ? (
+          <>
+            <CtaButton label="Continuar" sub={getTeamNickname(userTeam)} onPress={onContinue} size={20} />
+            <GhostButton label="Nova carreira" onPress={onStart} />
+            <Text style={{ textAlign: 'center', fontFamily: FONT.body500, fontSize: 11.5, color: COLORS.dim }}>Uma nova carreira apaga o save atual</Text>
+          </>
+        ) : (
+          <CtaButton label="Nova carreira" onPress={onStart} size={20} />
+        )}
       </View>
     </View>
   );
 };
 
-const Tile: React.FC<{ value: string; label: string; color?: string }> = ({ value, label, color = '#fff' }) => (
-  <View style={[CARD, { flex: 1, padding: 14 }]}>
-    <Stat size={22} color={color} fit>{value}</Stat>
-    <MonoLabel size={8.5} color={INK.meta} style={{ marginTop: 4, letterSpacing: tracking(8.5, 0.14) }} numberOfLines={1}>
-      {label}
-    </MonoLabel>
-  </View>
-);
-
-const Row: React.FC<{ label: string; value: string }> = ({ label, value }) => (
-  <View className="flex-row justify-between">
-    <Text className="font-semibold" style={{ fontSize: 11, color: '#d4d4d4' }}>{label}</Text>
-    <Text className="font-mono" style={{ fontSize: 11, color: 'rgba(255,255,255,0.45)' }}>{value}</Text>
+const Row: React.FC<{ label: string; value: string; last?: boolean }> = ({ label, value, last }) => (
+  <View className="flex-row justify-between" style={{ paddingVertical: 9, borderBottomWidth: last ? 0 : 1, borderBottomColor: COLORS.lineSoft }}>
+    <Text style={{ fontFamily: FONT.body500, fontSize: 14, color: COLORS.muted }}>{label}</Text>
+    <Text style={{ fontFamily: FONT.body600, fontSize: 14, color: COLORS.text }}>{value}</Text>
   </View>
 );
 

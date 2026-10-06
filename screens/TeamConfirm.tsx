@@ -1,25 +1,21 @@
 import React from 'react';
 import { View, Text, Pressable } from 'react-native';
-import { Image } from 'expo-image';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Team, Player } from '../types';
 import {
-  getTeamLogoUrl, getTeamNickname, getTeamCity, conferenceLabel, TEAM_TITLES,
-  getTeamSalary, SALARY_CAP, attributeColor,
+  getTeamNickname, getTeamCity, TEAM_TITLES, getTeamSalary, SALARY_CAP, getTeamAccent,
 } from '../constants';
 import { buildSeasonOwner, MANDATE_META } from '../services/ownerService';
 import { PICK_WINDOW } from '../services/draftService';
 import { teamRating } from '../services/formService';
-import { useTheme } from '../src/theme/ThemeProvider';
-import { COLORS, INK } from '../src/theme/tokens';
-import Screen, { HeroContent, Body } from '../components/ui/Screen';
-import { Panel, MonoLabel, HeroTitle, Stat, CtaButton, Initials, StatTile } from '../components/ui/kit';
+import { COLORS, FONT, withAlpha, onAccent, ovrColor } from '../src/theme/tokens';
+import Screen, { HeroBackdrop, Body } from '../components/ui/Screen';
+import { Panel, CtaButton, StatStrip, SectionLabel, BodyText, Name, Dock } from '../components/ui/kit';
 
-// Design 4c — the hinge of the whole redesign. This is the exact moment the app
-// gains a color: the picker before it is black and white, and this screen opens
-// full-bleed in the franchise's own gradient. The mandate, the roster and the
-// cap situation are all on the table BEFORE you commit, so taking the Wizards
-// is an informed choice rather than a surprise two hours in.
+// Design 2c ("Transmissão"). The team color arrives here, as the reward for the
+// choice: a 300px flat block with the tricode as a giant watermark, then the
+// numbers, the owner's mandate (gold inset), the core and the coach.
 
 interface TeamConfirmProps {
   team: Team;
@@ -29,17 +25,20 @@ interface TeamConfirmProps {
   onConfirm: () => void;
 }
 
-const TeamConfirm: React.FC<TeamConfirmProps> = ({ team, players, teams, onBack, onConfirm }) => {
-  const { accent } = useTheme();
+const HERO = 300;
+const money = (v: number) => `$${Math.round(v / 1_000_000)}M`;
 
-  // The same mandate the owner will actually hold the user to all season —
-  // derived here from the untouched roster, not a separate marketing blurb.
+const TeamConfirm: React.FC<TeamConfirmProps> = ({ team, players, teams, onBack, onConfirm }) => {
+  const insets = useSafeAreaInsets();
+  const accent = getTeamAccent(team.id);
+  const ink = onAccent(accent.primary);
+  const inkA = (a: number) => withAlpha(ink === '#ffffff' ? '#ffffff' : '#000000', a);
+
   const owner = buildSeasonOwner(team, teams, players);
   const mandate = MANDATE_META[owner.mandate];
-
   const salary = getTeamSalary(team, players);
-  const capPct = Math.round((salary / SALARY_CAP) * 100);
   const rating = teamRating(team, players);
+  const rank = [...teams].sort((a, b) => teamRating(b, players) - teamRating(a, players)).findIndex((t) => t.id === team.id) + 1;
   const titles = TEAM_TITLES[team.id] ?? 0;
 
   const core = team.roster
@@ -50,69 +49,63 @@ const TeamConfirm: React.FC<TeamConfirmProps> = ({ team, players, teams, onBack,
 
   return (
     <Screen
-      heroHeight={360}
-      footer={<CtaButton label={`Assumir o ${getTeamNickname(team)}`} onPress={onConfirm} size={15} />}
+      heroHeight={HERO}
+      backdrop={<HeroBackdrop height={HERO + insets.top} primary={accent.primary} secondary={accent.secondary} />}
+      footer={<Dock><CtaButton label="Assinar como GM" onPress={onConfirm} size={20} /></Dock>}
     >
-      <HeroContent>
-        <Pressable accessibilityRole="button" onPress={onBack} hitSlop={12} className="active:opacity-60">
-          <Text className="font-bold" style={{ fontSize: 11, color: 'rgba(255,255,255,0.65)' }}>‹ Voltar</Text>
+      <View style={{ height: HERO - 6, paddingHorizontal: 20, paddingTop: 4, overflow: 'hidden' }}>
+        <Text style={{ position: 'absolute', right: -20, bottom: -48, fontFamily: FONT.cond800, fontSize: 210, lineHeight: 210, color: inkA(0.13) }}>
+          {team.id.toUpperCase()}
+        </Text>
+        <Pressable accessibilityRole="button" onPress={onBack} hitSlop={12} className="active:opacity-60" style={{ alignSelf: 'flex-start' }}>
+          <Text style={{ fontFamily: FONT.cond700, fontSize: 14, letterSpacing: 1.4, color: ink }}>‹ VOLTAR</Text>
         </Pressable>
-
-        <View className="items-center" style={{ marginTop: 14 }}>
-          <Image source={{ uri: getTeamLogoUrl(team) }} style={{ width: 92, height: 92 }} contentFit="contain" />
-          <HeroTitle size={34} style={{ marginTop: 14, textAlign: 'center' }} numberOfLines={1} adjustsFontSizeToFit>
+        <View style={{ flex: 1, justifyContent: 'flex-end', paddingBottom: 26, gap: 6 }}>
+          <Text style={{ fontFamily: FONT.cond700, fontSize: 12, letterSpacing: 2.4, color: inkA(0.8) }}>
+            {getTeamCity(team).toUpperCase()} · {team.conference === 'East' ? 'LESTE' : 'OESTE'}
+          </Text>
+          <Text numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.5} style={{ fontFamily: FONT.cond800, fontSize: 64, lineHeight: 58, color: ink, textTransform: 'uppercase' }}>
             {getTeamNickname(team)}
-          </HeroTitle>
-          <MonoLabel size={10} color="rgba(255,255,255,0.7)" style={{ marginTop: 7, textAlign: 'center' }} numberOfLines={1}>
-            {getTeamCity(team)} · {conferenceLabel(team)} · {titles} {titles === 1 ? 'título' : 'títulos'}
-          </MonoLabel>
+          </Text>
+          <Text style={{ fontFamily: FONT.body500, fontSize: 14, color: inkA(0.9) }}>
+            {titles} {titles === 1 ? 'título' : 'títulos'}
+          </Text>
         </View>
-      </HeroContent>
+      </View>
 
-      <Body top={24}>
-        <Panel bar={COLORS.cta} padding={14}>
-          <MonoLabel>Mandato da diretoria</MonoLabel>
-          <HeroTitle size={17} style={{ marginTop: 7 }}>{mandate.label}</HeroTitle>
-          <Text style={{ fontSize: 11.5, lineHeight: 17, color: INK.body, marginTop: 6 }}>{mandate.blurb}</Text>
-          <MonoLabel size={9.5} color={INK.meta} style={{ marginTop: 8, letterSpacing: 0 }}>
-            Meta: {owner.targetWins} vitórias
-          </MonoLabel>
+      <View style={{ borderBottomWidth: 1, borderBottomColor: COLORS.line, paddingVertical: 10, marginTop: 6 }}>
+        <StatStrip
+          size={28}
+          items={[
+            { label: `Força · ${rank}º`, value: rating },
+            { label: 'Folha', value: money(salary), color: salary > SALARY_CAP ? COLORS.warn : COLORS.text },
+            { label: 'Escolhas', value: PICK_WINDOW },
+          ]}
+        />
+      </View>
+
+      <Body top={16} gap={12}>
+        <Panel bar={COLORS.gold} style={{ gap: 6 }}>
+          <SectionLabel color={COLORS.gold}>Mandato da diretoria</SectionLabel>
+          <Text style={{ fontFamily: FONT.cond800, fontSize: 22, lineHeight: 22, color: COLORS.text, textTransform: 'uppercase' }}>{mandate.label}</Text>
+          <BodyText>Meta de {owner.targetWins} vitórias. {mandate.blurb}</BodyText>
         </Panel>
 
-        <View className="flex-row" style={{ gap: 10 }}>
-          <StatTile label="Força" value={rating} color={attributeColor(rating)} />
-          <StatTile label="Folha" value={`${capPct}%`} color={capPct > 95 ? COLORS.warn : COLORS.goodSoft} />
-          <StatTile label="Escolhas" value={PICK_WINDOW} />
+        <View>
+          <SectionLabel>Peças principais</SectionLabel>
+          {core.map((p, i) => (
+            <View key={p.id} className="flex-row items-center" style={{ height: 42, gap: 10, borderBottomWidth: i < core.length - 1 ? 1 : 0, borderBottomColor: COLORS.lineSoft }}>
+              <Text style={{ width: 24, fontFamily: FONT.cond800, fontSize: 12, color: COLORS.dim }}>{p.pos}</Text>
+              <Name size={16} style={{ flex: 1 }}>{p.name}</Name>
+              <Text style={{ fontFamily: FONT.cond800, fontSize: 20, color: ovrColor(p.ovr) }}>{p.ovr}</Text>
+            </View>
+          ))}
         </View>
 
-        <Panel padding={13}>
-          <MonoLabel>Peças principais</MonoLabel>
-          <View style={{ gap: 10, marginTop: 10 }}>
-            {core.map((p, i) => (
-              <View key={p.id} className="flex-row items-center" style={{ gap: 11 }}>
-                <Initials
-                  name={p.name}
-                  size={30}
-                  gradient={i === 0 ? [accent.primary, accent.secondary] : undefined}
-                />
-                <View style={{ flex: 1 }}>
-                  <Text className="font-bold text-white" style={{ fontSize: 12 }} numberOfLines={1}>{p.name}</Text>
-                  <MonoLabel size={9.5} color={INK.meta} style={{ marginTop: 2, letterSpacing: 0 }}>
-                    {p.age}a · {p.pos}
-                  </MonoLabel>
-                </View>
-                <Stat size={15} color={attributeColor(p.ovr)}>{p.ovr}</Stat>
-              </View>
-            ))}
-          </View>
-          <View
-            className="flex-row justify-between items-baseline"
-            style={{ marginTop: 11, paddingTop: 9, borderTopWidth: 1, borderTopColor: COLORS.line }}
-          >
-            <MonoLabel size={10} color={INK.faint} style={{ letterSpacing: 0 }}>Técnico</MonoLabel>
-            <Text className="font-bold text-white" style={{ fontSize: 11 }}>{team.coach}</Text>
-          </View>
-        </Panel>
+        <View className="flex-row justify-between items-center" style={{ paddingVertical: 10, borderTopWidth: 1, borderTopColor: COLORS.line }}>
+          <SectionLabel>Técnico</SectionLabel>
+          <Name size={15}>{team.coach}</Name>
+        </View>
       </Body>
     </Screen>
   );
