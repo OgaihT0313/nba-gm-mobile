@@ -7,6 +7,7 @@ import Card from './Card';
 import Icon from './Icon';
 import { MonoLabel } from './ui/kit';
 import { onAccent } from '../src/theme/tokens';
+import BottomSheet from './ui/BottomSheet';
 
 const FIT_META: { min: number; label: string; color: string }[] = [
   { min: 1, label: 'Encaixe perfeito', color: '#34d399' },
@@ -125,25 +126,17 @@ const CoachPanel: React.FC<CoachPanelProps> = ({ team, coaches, editable, onFire
       </Modal>
 
       {/* Hire candidates */}
-      <Modal visible={hiring} transparent animationType="slide" onRequestClose={() => setHiring(false)}>
-        <Pressable accessible={false} className="flex-1 bg-black/70 justify-end" onPress={() => setHiring(false)}>
-          <Pressable className="bg-ink border-t border-line rounded-t-3xl p-4 max-h-[80%]" onPress={(e) => e.stopPropagation()}>
-            <View className="w-10 h-1 bg-slate-700 rounded-full self-center mb-4" />
-            <Text className="text-xs font-black text-slate-500 uppercase tracking-[0.3em] mb-3">Candidatos a técnico</Text>
-            <ScrollView className="gap-3" contentContainerStyle={{ gap: 12, paddingBottom: 8 }}>
-              {candidates.map((c) => (
-                <CoachCard
-                  key={c.id}
-                  team={team}
-                  coach={c}
-                  actionLabel="Contratar"
-                  onPress={() => { onHire?.(c); setHiring(false); }}
-                />
-              ))}
-            </ScrollView>
-          </Pressable>
-        </Pressable>
-      </Modal>
+      <BottomSheet visible={hiring} onClose={() => setHiring(false)} title="Candidatos a técnico" maxHeight="82%">
+        {candidates.map((c) => (
+          <CoachCard
+            key={c.id}
+            team={team}
+            coach={c}
+            actionLabel="Contratar"
+            onPress={() => { onHire?.(c); setHiring(false); }}
+          />
+        ))}
+      </BottomSheet>
     </Card>
   );
 };

@@ -16,7 +16,7 @@ import { teamRating } from '../services/formService';
 import Screen, { HeroBackdrop, Body } from '../components/ui/Screen';
 import {
   Panel, MonoLabel, Eyebrow, HeroTitle, Stat, Meter, CtaButton, GhostButton, SectionLabel, StatTile,
-  StatStrip, Dock, Name, BodyText,
+  StatStrip, Dock, Name, BodyText, TeamBadge,
 } from '../components/ui/kit';
 import RosterRow from '../components/ui/RosterRow';
 import StartersCourt from '../components/StartersCourt';
@@ -27,6 +27,7 @@ import CoachPanel from '../components/CoachPanel';
 import RotationPanel from '../components/RotationPanel';
 import Icon from '../components/Icon';
 import PlayerDetailModal from '../components/PlayerDetailModal';
+import BottomSheet from '../components/ui/BottomSheet';
 
 // Design 1c of "Transmissão" (was design 2a) — elenco, rotação and técnico on one screen. The mockup shows three
 // segments doing exactly that; the real hub also carries draft capital, team
@@ -394,30 +395,19 @@ const MyTeamHub: React.FC<MyTeamHubProps> = ({
       </Body>
 
       {/* Rival picker */}
-      <Modal visible={rivalPickerOpen} transparent animationType="slide" onRequestClose={() => setRivalPickerOpen(false)}>
-        <Pressable accessible={false} className="flex-1 bg-black/70 justify-end" onPress={() => setRivalPickerOpen(false)}>
-          <Pressable
-            className="rounded-t-3xl p-4 max-h-[70%]"
-            style={{ backgroundColor: COLORS.navBg, borderTopWidth: 1, borderTopColor: COLORS.navLine }}
-            onPress={(e) => e.stopPropagation()}
+      <BottomSheet visible={rivalPickerOpen} onClose={() => setRivalPickerOpen(false)} title="Comparar com">
+        {allTeams.filter((t) => t.id !== team.id).map((t) => (
+          <Pressable accessibilityRole="button"
+            key={t.id}
+            onPress={() => { setRivalId(t.id); setRivalPickerOpen(false); }}
+            className="flex-row items-center active:opacity-70"
+            style={{ gap: 12, minHeight: 44 }}
           >
-            <View className="w-10 h-1 rounded-full self-center mb-4" style={{ backgroundColor: COLORS.line }} />
-            <MonoLabel style={{ marginBottom: 10 }}>Comparar com</MonoLabel>
-            <ScrollView>
-              {allTeams.filter((t) => t.id !== team.id).map((t) => (
-                <Pressable accessibilityRole="button"
-                  key={t.id}
-                  onPress={() => { setRivalId(t.id); setRivalPickerOpen(false); }}
-                  className="flex-row items-center gap-3 p-3 rounded-xl active:opacity-70"
-                >
-                  <Image source={{ uri: getTeamLogoUrl(t) }} style={{ width: 26, height: 26 }} contentFit="contain" />
-                  <Text className="text-sm font-bold text-white">{t.name}</Text>
-                </Pressable>
-              ))}
-            </ScrollView>
+            <TeamBadge teamId={t.id} width={34} height={22} />
+            <Name size={16}>{t.name}</Name>
           </Pressable>
-        </Pressable>
-      </Modal>
+        ))}
+      </BottomSheet>
 
       {/* Waive confirmation */}
       {viewing ? (
