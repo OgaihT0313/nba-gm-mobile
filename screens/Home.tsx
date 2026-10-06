@@ -7,6 +7,7 @@ import { getTeamNickname, SALARY_CAP } from '../constants';
 import { sortStandings } from '../services/scheduleService';
 import { COLORS, FONT } from '../src/theme/tokens';
 import { CtaButton, GhostButton, TeamBadge, StatStrip, BodyText } from '../components/ui/kit';
+import BrandLogo from '../components/BrandLogo';
 
 // Design 2a ("Transmissão"). No team color yet — black and white, with the two
 // conference strokes as the only color. A saved career gets its own card;
@@ -38,14 +39,8 @@ const Home: React.FC<HomeProps> = ({ onStart, onContinue, season }) => {
         showsVerticalScrollIndicator={false}
       >
         <View>
-          <View className="flex-row" style={{ gap: 4 }}>
-            <View style={{ width: 22, height: 5, backgroundColor: COLORS.west }} />
-            <View style={{ width: 22, height: 5, backgroundColor: COLORS.east }} />
-          </View>
-          <Text style={{ fontFamily: FONT.cond800, fontSize: 92, lineHeight: 78, color: COLORS.text, marginTop: 18 }}>
-            NBA{'\n'}GM
-          </Text>
-          <BodyText size={15} style={{ marginTop: 10 }}>Monte a franquia. Aguente o dono. Ganhe o anel.</BodyText>
+          <BrandLogo size={96} />
+          <BodyText size={15} style={{ marginTop: 14 }}>Monte a franquia. Aguente o dono. Ganhe o anel.</BodyText>
         </View>
 
         {season && userTeam ? (

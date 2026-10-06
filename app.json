@@ -1,12 +1,12 @@
 {
   "expo": {
-    "name": "NBA GM",
+    "name": "NBA Manager",
     "slug": "nba-gm-mobile",
     "version": "1.0.0",
     "orientation": "default",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "dark",
-    "backgroundColor": "#020617",
+    "backgroundColor": "#0B0B0D",
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.thiagonx.nbagm"
@@ -14,7 +14,7 @@
     "android": {
       "package": "com.thiagonx.nbagm",
       "adaptiveIcon": {
-        "backgroundColor": "#020617",
+        "backgroundColor": "#0B0B0D",
         "backgroundImage": "./assets/android-icon-background.png",
         "foregroundImage": "./assets/android-icon-foreground.png",
         "monochromeImage": "./assets/android-icon-monochrome.png"
@@ -31,9 +31,9 @@
         "expo-splash-screen",
         {
           "image": "./assets/splash-icon.png",
-          "imageWidth": 180,
+          "imageWidth": 300,
           "resizeMode": "contain",
-          "backgroundColor": "#020617"
+          "backgroundColor": "#0B0B0D"
         }
       ],
       "expo-asset",

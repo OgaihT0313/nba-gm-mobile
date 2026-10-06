@@ -184,7 +184,7 @@ export const buildFloorTexture = (opts: {
         const u = sx > 0 ? (z + 14) / 28 : (14 - z) / 28;
         // Read from midcourt: the edge farther from the court is the top.
         const v = 1 - (ax - (HALF_L + 1)) / 4.5;
-        if (textCovers('NBA GM', u, v)) c = white;
+        if (textCovers('NBA MANAGER', u, v)) c = white;
       }
 
       // --- lines --------------------------------------------------------
@@ -353,7 +353,7 @@ export const buildLedTexture = (primary: string, secondary: string): THREE.DataT
       const v = 1 - y / H;
       let c: RGB = [10, 12, 18];
       if (v < 0.1 || v > 0.9) c = bright;
-      if (textCovers('NBA GM', (u - 0.08) / 0.5, (v - 0.22) / 0.56)) c = [255, 255, 255];
+      if (textCovers('NBA MANAGER', (u - 0.08) / 0.5, (v - 0.22) / 0.56)) c = [255, 255, 255];
       if (u > 0.66 && u < 0.92 && v > 0.3 && v < 0.7) c = mix(bright, [255, 255, 255], (Math.sin(u * 60) + 1) * 0.15);
       const i = (y * W + x) * 4;
       data[i] = c[0]; data[i + 1] = c[1]; data[i + 2] = c[2]; data[i + 3] = 255;
