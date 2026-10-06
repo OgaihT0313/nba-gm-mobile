@@ -1,8 +1,7 @@
 
-import type { Player, Team, OffseasonMove, PlayerAttributes, DraftPickAsset, Coach } from './types';
+import type { Player, Team, PlayerAttributes, DraftPickAsset, Coach } from './types';
 import rawPlayersData from './data/players.json';
 import rawTeamsData from './data/teams.json';
-import rawOffseasonMoves from './data/offseason_moves.json';
 
 // --- ASSETS AND CONFIGURATION ---
 // Non-base64 (percent-encoded) data URIs decode fine in a browser, but Android's
@@ -232,7 +231,3 @@ export const darkenHex = (hex: string, factor = 0.7) => {
 export const playersData: { [key: string]: Player } = rawPlayersData as { [key: string]: Player };
 export const teamsData: Team[] = rawTeamsData as unknown as Team[];
 
-// Real trades/free-agency signings that happened between fromSeason and
-// toSeason, diffed from live nba_api rosters — see fetch_offseason_moves in
-// pipeline/fetch_data.py. Replayed once as events when starting a new season.
-export const offseasonMoves: { fromSeason: string; toSeason: string; moves: OffseasonMove[] } = rawOffseasonMoves;

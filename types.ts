@@ -413,12 +413,6 @@ export interface SeasonState {
   playoff: PlayoffState | null;
   awards: Awards | null;
   userTeamId: string;
-  // Whether the real-world offseason trades/signings (data/offseason_moves.json)
-  // have already been replayed into this save. Only applies to a LIVE
-  // (non-era) save — only one real transition exists (today's season into
-  // next), so it's a one-shot flag. An era save uses eraChainIndex instead
-  // (see below), which keeps replaying real history every offseason.
-  offseasonMovesApplied?: boolean;
   // Which historical era (see data/eras/index.ts) seeded this save's starting
   // roster — display/record-keeping only, undefined for today's live
   // snapshot (the default, pre-Eras behavior). Everything past initSeason

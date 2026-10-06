@@ -22,6 +22,12 @@ estatísticas. Voltaram os dados 2025-26 originais, com as 27 mudanças reais da
 offseason de 2026 replayadas na passagem para a 2ª temporada. O pipeline
 continua sabendo gerar a pré-temporada (`fetch_data.py --stats-season`).
 
+**Sem replay da offseason real no save atual (2026-10-05)**, também a pedido do
+usuário: engessava, e ele quer o "e se...". Da primeira offseason em diante, as
+trocas e assinaturas da liga são da simulação (agência livre, trocas da CPU,
+draft). `data/offseason_moves.json` e o flag `offseasonMovesApplied` saíram; as
+eras históricas continuam encadeando a história real.
+
 Build `ab6933d3` (tudo até a rodada de UI/UX, SDK 57.0.26) instalado e testado
 pelo usuário no celular: sem problemas, inclusive em sessão longa. A correção do
 Hermes V1 (`806f0d2`) está confirmada fora do navegador.

@@ -242,11 +242,16 @@ export function simulateOneDay(season: SeasonState, pinnedResult?: PinnedGameRes
     // Tomorrow's revenge nights, set tonight so a live game -- which plays
     // before the runner -- already sees them. The daily tick above has just
     // cleared tonight's.
+    // Re-read the rosters first: tonight's events can include a CPU trade,
+    // and a player moved tonight must face tomorrow as the player he now is
+    // (seen in check_rivalry: a deadline deal left a stale formerTeam, so
+    // the revenge was set against the wrong team and never marked done).
+    const rosterSnapshotEnd = trackMoves(rosterSnapshot, teamsAfterEvents, newPlayers, seasonNo);
     applyRevengeNights(season.schedule.filter(g => g.day === dayIndex + 1), teamsAfterEvents, newPlayers, seasonNo);
 
     const nextSeason: SeasonState = {
         ...season,
-        rosterSnapshot,
+        rosterSnapshot: rosterSnapshotEnd,
         rivalries,
         milestones: reached.length ? [...(season.milestones ?? []), ...reached].slice(-40) : season.milestones,
         gamesPlayed: nextGamesPlayed,
