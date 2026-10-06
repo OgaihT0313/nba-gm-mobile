@@ -24,7 +24,7 @@ import {
 } from '../services/watchDirector';
 import { eraGroupForEraId } from '../data/eras';
 import { getEraVisual } from '../src/theme/eraVisuals';
-import { COLORS, INK, RADIUS, FONT, withAlpha, onAccent } from '../src/theme/tokens';
+import { COLORS, INK, RADIUS, FONT, withAlpha, onAccent, ovrColor } from '../src/theme/tokens';
 import { Panel, MonoLabel, Stat, CtaButton, GhostButton, Meter } from '../components/ui/kit';
 import Court3D, { CameraView } from '../components/court3d/Court3D';
 
@@ -617,16 +617,15 @@ const WatchGameScreen: React.FC<WatchGameScreenProps> = ({
         </View>
       </View>
 
-      {/* Bottom controls. The app's BottomNav already reserves its own space
-          below this screen (it's a normal flex sibling, not an overlay), so
-          this only needs a flat gutter — no extra safe-area padding. */}
-      <View style={{ position: 'absolute', left: 14, right: 14, bottom: 14 }}>
+      {/* Bottom controls. The tab bar is hidden while watching, so this
+          clears the home indicator itself. */}
+      <View style={{ position: 'absolute', left: 14, right: 14, bottom: insets.bottom + 14 }}>
         {phase === 'huddle' && (
-          <Panel padding={14}>
-            <MonoLabel size={9} color={userAccent.primary}>{huddleTitle}</MonoLabel>
-            <MonoLabel size={9} color={INK.faint} style={{ marginTop: 3 }}>{huddleSub}</MonoLabel>
+          <View style={{ backgroundColor: 'rgba(11,11,13,0.94)', borderRadius: 20, borderWidth: 1, borderColor: COLORS.lineStrong, padding: 14 }}>
+            <Text style={{ fontFamily: FONT.cond700, fontSize: 11, letterSpacing: 1.5, color: COLORS.warn, textTransform: 'uppercase' }}>{huddleTitle}</Text>
+            <Text style={{ fontFamily: FONT.cond800, fontSize: 22, lineHeight: 24, color: COLORS.text, textTransform: 'uppercase' }}>{huddleSub}</Text>
 
-            <View className="flex-row" style={{ gap: 6, marginTop: 10 }}>
+            <View className="flex-row" style={{ gap: 4, marginTop: 10, padding: 3, borderRadius: 12, backgroundColor: COLORS.surface2 }}>
               {([['play', 'Jogada'], ['lineup', 'Quinteto']] as [HuddleTab, string][]).map(([id, label]) => {
                 const active = huddleTab === id;
                 return (
@@ -637,13 +636,9 @@ const WatchGameScreen: React.FC<WatchGameScreenProps> = ({
                     aria-selected={active}
                     onPress={() => { setHuddleTab(id); setSelectedSlot(null); }}
                     className="active:opacity-70"
-                    style={{
-                      flex: 1, alignItems: 'center', paddingVertical: 7, borderRadius: 999,
-                      backgroundColor: active ? '#ffffff' : 'rgba(255,255,255,0.05)',
-                      borderWidth: 1, borderColor: active ? '#ffffff' : 'rgba(255,255,255,0.12)',
-                    }}
+                    style={{ flex: 1, alignItems: 'center', paddingVertical: 8, borderRadius: 9, backgroundColor: active ? COLORS.text : 'transparent' }}
                   >
-                    <MonoLabel size={9.5} color={active ? COLORS.bg : INK.faint}>{label}</MonoLabel>
+                    <Text style={{ fontFamily: FONT.cond700, fontSize: 13, letterSpacing: 1.1, color: active ? COLORS.bg : COLORS.muted, textTransform: 'uppercase' }}>{label}</Text>
                   </Pressable>
                 );
               })}
@@ -657,21 +652,21 @@ const WatchGameScreen: React.FC<WatchGameScreenProps> = ({
                   aria-checked={autoSubs}
                   onPress={toggleAuto}
                   className="flex-row items-center justify-between active:opacity-70"
-                  style={{ paddingVertical: 8, paddingHorizontal: 10, borderRadius: RADIUS.control, backgroundColor: 'rgba(255,255,255,0.04)' }}
+                  style={{ paddingVertical: 9, paddingHorizontal: 12, borderRadius: 12, backgroundColor: COLORS.surface2 }}
                 >
                   <View style={{ flex: 1 }}>
-                    <Text style={{ color: COLORS.text, fontSize: 12, fontWeight: '800' }}>Rotação automática</Text>
-                    <MonoLabel size={9} color={INK.faint} style={{ marginTop: 2, letterSpacing: 0 }}>
+                    <Text style={{ fontFamily: FONT.cond700, fontSize: 15, color: COLORS.text }}>Rotação automática</Text>
+                    <Text style={{ fontFamily: FONT.body500, fontSize: 12, color: COLORS.muted }}>
                       {autoSubs ? 'O técnico tira quem cansa' : 'Ninguém sai sem você mandar'}
-                    </MonoLabel>
+                    </Text>
                   </View>
-                  <MonoLabel size={9.5} color={autoSubs ? COLORS.good : INK.faint}>{autoSubs ? 'Ligada' : 'Desligada'}</MonoLabel>
+                  <Text style={{ fontFamily: FONT.cond700, fontSize: 12, letterSpacing: 1.2, color: autoSubs ? COLORS.good : COLORS.dim }}>{autoSubs ? 'LIGADA' : 'DESLIGADA'}</Text>
                 </Pressable>
 
-                <MonoLabel size={9} color={INK.faint} style={{ marginTop: 10, marginBottom: 6 }}>
+                <Text style={{ fontFamily: FONT.cond700, fontSize: 11, letterSpacing: 1.5, color: COLORS.muted, textTransform: 'uppercase', marginTop: 12, marginBottom: 6 }}>
                   {selectedSlot === null ? 'Em quadra · toque em quem sai' : `Quem entra no lugar de ${lastName(myFive.players[selectedSlot].name)}?`}
-                </MonoLabel>
-                <View style={{ gap: 5 }}>
+                </Text>
+                <View style={{ gap: 4 }}>
                   {myFive.players.map((cp, i) => {
                     const e = energyRef.current[cp.playerId] ?? 100;
                     const sel = selectedSlot === i;
@@ -683,23 +678,19 @@ const WatchGameScreen: React.FC<WatchGameScreenProps> = ({
                         aria-selected={sel}
                         onPress={() => setSelectedSlot(sel ? null : i)}
                         className="flex-row items-center active:opacity-70"
-                        style={{
-                          gap: 8, paddingVertical: 7, paddingHorizontal: 10, borderRadius: RADIUS.control,
-                          backgroundColor: sel ? withAlpha(userAccent.primary, 0.18) : 'rgba(255,255,255,0.04)',
-                          borderWidth: 1, borderColor: sel ? userAccent.primary : 'transparent',
-                        }}
+                        style={{ gap: 8, paddingVertical: 8, paddingHorizontal: 12, borderRadius: 10, backgroundColor: sel ? COLORS.text : COLORS.surface2 }}
                       >
-                        <MonoLabel size={9} color={INK.faint} style={{ width: 22 }}>{cp.slot}</MonoLabel>
-                        <Text style={{ color: COLORS.text, fontSize: 12, fontWeight: '700', flex: 1 }} numberOfLines={1}>{cp.name}</Text>
-                        <Meter value={e / 100} color={energyColor(e)} height={5} track="rgba(255,255,255,0.08)" style={{ width: 54 }} />
-                        <MonoLabel size={9} color={energyColor(e)} style={{ width: 22, textAlign: 'right' }}>{Math.round(e)}</MonoLabel>
+                        <Text style={{ width: 24, fontFamily: FONT.cond700, fontSize: 12, color: sel ? COLORS.bg : COLORS.dim }}>{cp.slot}</Text>
+                        <Text style={{ flex: 1, fontFamily: FONT.cond700, fontSize: 15, color: sel ? COLORS.bg : COLORS.text }} numberOfLines={1}>{cp.name}</Text>
+                        <Meter value={e / 100} color={energyColor(e)} height={4} track={sel ? 'rgba(11,11,13,0.15)' : COLORS.lineStrong} style={{ width: 50 }} />
+                        <Text style={{ width: 24, textAlign: 'right', fontFamily: FONT.cond700, fontSize: 13, color: sel ? COLORS.bg : energyColor(e) }}>{Math.round(e)}</Text>
                       </Pressable>
                     );
                   })}
                 </View>
 
-                <MonoLabel size={9} color={INK.faint} style={{ marginTop: 10, marginBottom: 6 }}>Banco</MonoLabel>
-                <View style={{ gap: 5 }}>
+                <Text style={{ fontFamily: FONT.cond700, fontSize: 11, letterSpacing: 1.5, color: COLORS.muted, textTransform: 'uppercase', marginTop: 12, marginBottom: 6 }}>Banco</Text>
+                <View style={{ gap: 4 }}>
                   {bench.map(({ p, e }) => (
                     <Pressable
                       key={p.id}
@@ -708,45 +699,37 @@ const WatchGameScreen: React.FC<WatchGameScreenProps> = ({
                       aria-disabled={selectedSlot === null}
                       onPress={() => swapIn(p.id)}
                       className="flex-row items-center active:opacity-70"
-                      style={{
-                        gap: 8, paddingVertical: 6, paddingHorizontal: 10, borderRadius: RADIUS.control,
-                        backgroundColor: 'rgba(255,255,255,0.03)', opacity: selectedSlot === null ? 0.65 : 1,
-                      }}
+                      style={{ gap: 8, paddingVertical: 7, paddingHorizontal: 12, borderRadius: 10, backgroundColor: COLORS.surface, opacity: selectedSlot === null ? 0.6 : 1 }}
                     >
-                      <MonoLabel size={9} color={INK.faint} style={{ width: 22 }}>{p.ovr}</MonoLabel>
-                      <Text style={{ color: COLORS.textDim, fontSize: 11.5, fontWeight: '600', flex: 1 }} numberOfLines={1}>
-                        {p.name} <Text style={{ color: INK.faint, fontSize: 10 }}>{formatPositions(p)}</Text>
+                      <Text style={{ width: 24, fontFamily: FONT.cond700, fontSize: 13, color: ovrColor(p.ovr) }}>{p.ovr}</Text>
+                      <Text style={{ flex: 1, fontFamily: FONT.cond600, fontSize: 14.5, color: COLORS.textSoft }} numberOfLines={1}>
+                        {p.name} <Text style={{ fontFamily: FONT.cond600, color: COLORS.dim, fontSize: 12 }}>{formatPositions(p)}</Text>
                       </Text>
-                      <Meter value={e / 100} color={energyColor(e)} height={5} track="rgba(255,255,255,0.08)" style={{ width: 54 }} />
-                      <MonoLabel size={9} color={energyColor(e)} style={{ width: 22, textAlign: 'right' }}>{Math.round(e)}</MonoLabel>
+                      <Meter value={e / 100} color={energyColor(e)} height={4} track={COLORS.lineStrong} style={{ width: 50 }} />
+                      <Text style={{ width: 24, textAlign: 'right', fontFamily: FONT.cond700, fontSize: 13, color: energyColor(e) }}>{Math.round(e)}</Text>
                     </Pressable>
                   ))}
                 </View>
               </ScrollView>
             ) : (
             <ScrollView style={{ maxHeight: 232, marginTop: 10 }} showsVerticalScrollIndicator={false}>
-              <View style={{ gap: 7 }}>
+              <View style={{ gap: 6 }}>
                 {PLAY_ORDER.map((id) => {
                   const meta = WATCH_PLAY_META[id];
                   const active = id === play;
                   return (
                     <Pressable accessibilityRole="button"
                       key={id}
+                      aria-selected={active}
                       onPress={() => setPlay(id)}
                       className="active:opacity-70"
-                      style={{
-                        padding: 11,
-                        borderRadius: RADIUS.control,
-                        backgroundColor: active ? withAlpha(userAccent.primary, 0.16) : 'rgba(255,255,255,0.04)',
-                        borderWidth: 1,
-                        borderColor: active ? userAccent.primary : 'rgba(255,255,255,0.1)',
-                      }}
+                      style={{ paddingVertical: 10, paddingHorizontal: 12, borderRadius: 12, backgroundColor: active ? COLORS.text : COLORS.surface2 }}
                     >
                       <View className="flex-row items-center justify-between">
-                        <Text style={{ color: COLORS.text, fontSize: 13, fontWeight: '800' }}>{meta.label}</Text>
-                        <MonoLabel size={9} color={active ? userAccent.primary : INK.faint}>{meta.short}</MonoLabel>
+                        <Text style={{ fontFamily: FONT.cond800, fontSize: 17, color: active ? COLORS.bg : COLORS.text, textTransform: 'uppercase' }}>{meta.label}</Text>
+                        <Text style={{ fontFamily: FONT.cond700, fontSize: 11, letterSpacing: 1.2, color: active ? 'rgba(11,11,13,0.6)' : COLORS.dim }}>{meta.short}</Text>
                       </View>
-                      <MonoLabel size={9} color={INK.faint} style={{ marginTop: 4 }}>{meta.blurb}</MonoLabel>
+                      <Text style={{ fontFamily: FONT.body500, fontSize: 12.5, lineHeight: 17, marginTop: 2, color: active ? 'rgba(11,11,13,0.72)' : COLORS.muted }}>{meta.blurb}</Text>
                     </Pressable>
                   );
                 })}
@@ -756,12 +739,12 @@ const WatchGameScreen: React.FC<WatchGameScreenProps> = ({
 
             <View style={{ marginTop: 10 }}>
               <CtaButton
-                label={isTimeoutHuddle ? 'Voltar pra quadra ›' : `Começar ${periodLabel(quarter, 'huddle')} ›`}
+                label={isTimeoutHuddle ? 'Voltar pra quadra' : `Começar ${periodLabel(quarter, 'huddle')}`}
                 sub={WATCH_PLAY_META[play].label}
                 onPress={() => startQuarter(play, isTimeoutHuddle)}
               />
             </View>
-          </Panel>
+          </View>
         )}
 
         {phase === 'live' && (
@@ -828,7 +811,7 @@ const WatchGameScreen: React.FC<WatchGameScreenProps> = ({
         {phase === 'final' && (
           <CtaButton
             label={winnerLine}
-            sub={`${score.home}-${score.away} · ${userWon ? 'vitória sua' : 'derrota'} · toque para continuar`}
+            sub={`${userWon ? 'Vitória' : 'Derrota'} ${score.home}-${score.away}`}
             onPress={() => onFinish(score.home, score.away, minutesRef.current)}
           />
         )}

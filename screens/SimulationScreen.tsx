@@ -309,11 +309,10 @@ const SimulationScreen: React.FC<SimulationScreenProps> = ({
             {front.map((h, i) => (
               <View
                 key={h.id}
-                className="flex-row"
-                style={{ gap: 12, paddingHorizontal: 14, paddingVertical: 12, borderTopWidth: i ? 1 : 0, borderTopColor: COLORS.lineSoft }}
+                style={{ gap: 2, paddingHorizontal: 14, paddingVertical: 12, borderTopWidth: i ? 1 : 0, borderTopColor: COLORS.lineSoft }}
               >
-                <MonoLabel size={9} color={HEADLINE_TONE[h.tone]} style={{ width: 76, paddingTop: 2 }} numberOfLines={2}>{h.kicker}</MonoLabel>
-                <View className="flex-1">
+                <MonoLabel size={9} color={HEADLINE_TONE[h.tone]} numberOfLines={1}>{h.kicker}</MonoLabel>
+                <View>
                   <Text style={{ fontFamily: FONT.body600, fontSize: 14, lineHeight: 19, color: COLORS.text }}>{h.title}</Text>
                   {h.sub ? <BodyText size={12} color={COLORS.dim} style={{ marginTop: 1 }}>{h.sub}</BodyText> : null}
                 </View>

@@ -1710,10 +1710,15 @@ const generateAwards = (teams: Team[], players: { [key: string]: Player }) => {
     });
     const dpoy = weightedRandomPick(dpoyPool, 8) || allPlayers[0].id;
 
-    // Rookie of the Year: best rookie production. age<=21 is still the rookie
-    // proxy (the pipeline doesn't flag true rookie status), but it's judged on
-    // court output now, not raw rating.
-    const royPool = allPlayers.filter(p => p.age <= 21 && played(p, ROOKIE_MIN_GP)).map(p => {
+    // Rookie of the Year: best rookie production, judged on court output.
+    // A rookie is someone with no banked season. Careers are banked in the
+    // offseason (after awards) and the default roster is seeded with real
+    // careers, so that test is exact -- the old age<=21 proxy crowned 2nd-year
+    // Stephon Castle in 2025-26. A save with no career data anywhere (an era's
+    // first season) has nothing to test against, so it keeps the age proxy.
+    const careersKnown = allPlayers.some(p => (p.career?.seasons ?? 0) > 0);
+    const isRookie = (p: Player) => careersKnown ? (p.career?.seasons ?? 0) === 0 : p.age <= 21;
+    const royPool = allPlayers.filter(p => isRookie(p) && played(p, ROOKIE_MIN_GP)).map(p => {
         const s = p.seasonStats!;
         return { id: p.id, score: s.ppg + 1.2 * s.apg + 1.0 * s.rpg };
     });

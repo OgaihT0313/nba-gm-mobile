@@ -501,16 +501,17 @@ export const CtaButton: React.FC<{
         style,
       ]}
     >
+      {/* The label is the action and keeps its width; the sub is context and truncates first. */}
       <Text
         numberOfLines={1}
         adjustsFontSizeToFit
         minimumFontScale={0.6}
-        style={{ flexShrink: 1, fontFamily: FONT.cond800, fontSize: size, letterSpacing: tracking(size, 0.06), color: ink, textTransform: 'uppercase' }}
+        style={{ flexShrink: 0, maxWidth: sub ? '72%' : '100%', fontFamily: FONT.cond800, fontSize: size, letterSpacing: tracking(size, 0.06), color: ink, textTransform: 'uppercase' }}
       >
         {label}
       </Text>
       {sub ? (
-        <Text numberOfLines={1} style={{ flexShrink: 0, fontFamily: FONT.cond700, fontSize: 13.5, letterSpacing: 0.8, color: withAlpha(ink === '#ffffff' ? '#ffffff' : ink, 0.6), textTransform: 'uppercase' }}>
+        <Text numberOfLines={1} style={{ flexShrink: 1, fontFamily: FONT.cond700, fontSize: 13.5, letterSpacing: 0.8, color: withAlpha(ink === '#ffffff' ? '#ffffff' : ink, 0.6), textTransform: 'uppercase' }}>
           {sub} ›
         </Text>
       ) : null}

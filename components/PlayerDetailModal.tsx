@@ -140,7 +140,7 @@ const PlayerDetailModal: React.FC<{
             <View style={{ padding: 14, gap: 16 }}>
               {s && s.gp > 0 ? (
                 <BodyText size={12} color={COLORS.dim} style={{ marginTop: -6 }}>
-                  Temporada · {s.gp} jogos · {s.mpg.toFixed(1)} min · {s.bpg.toFixed(1)} tocos · {s.tpg.toFixed(1)} erros
+                  Temporada · {s.gp} {s.gp === 1 ? 'jogo' : 'jogos'} · {s.mpg.toFixed(1)} min · {s.bpg.toFixed(1)} tocos · {s.tpg.toFixed(1)} erros
                 </BodyText>
               ) : null}
 
@@ -213,7 +213,7 @@ const PlayerDetailModal: React.FC<{
                     {c.pts.toLocaleString('pt-BR')} pontos · {c.reb.toLocaleString('pt-BR')} rebotes · {c.ast.toLocaleString('pt-BR')} assistências
                   </BodyText>
                   {next ? (
-                    <BodyText size={12.5} color={COLORS.east}>
+                    <BodyText size={12.5} color={COLORS.warn}>
                       Próximo marco: {next.mark.toLocaleString('pt-BR')} {MILESTONES[next.stat].label} · faltam {next.gap.toLocaleString('pt-BR')} (~{next.games} {next.games === 1 ? 'jogo' : 'jogos'})
                     </BodyText>
                   ) : null}
@@ -226,7 +226,7 @@ const PlayerDetailModal: React.FC<{
                 </View>
               ) : null}
 
-              <BodyText size={12} color={COLORS.dim}>{formatPositionsFull(player)}</BodyText>
+              <BodyText size={12} color={COLORS.dim}>Posição · {formatPositionsFull(player)}</BodyText>
             </View>
           </ScrollView>
 

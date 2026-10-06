@@ -869,7 +869,8 @@ export default function App() {
           />
 
           {/* Bottom nav (only once a season exists) */}
-          {season ? (
+          {/* Hidden while watching: the HUD is full-bleed, and a tab tap mid-game would drop the game. */}
+          {season && view !== 'watch-game' ? (
             <BottomNav
               view={view}
               onNavigate={(v) => setView(v as AppView)}

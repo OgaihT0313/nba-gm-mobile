@@ -82,7 +82,8 @@ const BottomNav: React.FC<BottomNavProps> = ({ view, onNavigate, hasSeason, faOp
   const phaseItem = draftOpen
     ? MORE_ITEMS.find((i) => i.id === 'draft')!
     : faOpen
-      ? MORE_ITEMS.find((i) => i.id === 'free-agency')!
+      // "Agência Livre" doesn't fit a fifth of a phone next to "Trocas".
+      ? { ...MORE_ITEMS.find((i) => i.id === 'free-agency')!, label: 'Mercado' }
       : null;
   const primaryItems = PRIMARY_ITEMS.map((item) => (item.id === 'playoffs' && phaseItem ? phaseItem : item));
   const moreActive = MORE_ITEMS.some((item) => item.id === view && item.id !== phaseItem?.id);

@@ -1,17 +1,16 @@
 import React from 'react';
 import { View, Text } from 'react-native';
 import { Image } from 'expo-image';
-import { LinearGradient } from 'expo-linear-gradient';
 
-import { getPlayerImageUrl, PLAYER_PLACEHOLDER_SVG, getTeamLogoUrl, getTeamAccent, getTeamNickname } from '../constants';
+import { getPlayerImageUrl, PLAYER_PLACEHOLDER_SVG, getTeamAccent, getTeamNickname } from '../constants';
 import { Player, Team } from '../types';
-import { COLORS, INK, RADIUS, withAlpha } from '../src/theme/tokens';
-import { MonoLabel, HeroTitle, Stat, Panel } from './ui/kit';
+import { COLORS, FONT, visibleTeamColor } from '../src/theme/tokens';
+import { Panel, TeamBadge } from './ui/kit';
 
-// The award cards, repainted onto the redesign's ramp. Gold is the system's
-// trophy color and appears nowhere else, so a regular-season award reads gold
-// while a playoff-run award can take the winner's franchise color (`themed`).
-const NBA_FALLBACK = 'https://a.espncdn.com/i/teamlogos/nba/500/nba.png';
+// The award cards in the "Transmissão" register: flat surface, a colored stroke
+// on the left, condensed caps. Gold is the system's trophy color and appears
+// nowhere else, so a regular-season award reads gold while a playoff-run award
+// can take the winner's franchise color (`themed`).
 
 interface AwardCardProps {
   title: string;
@@ -26,10 +25,24 @@ interface AwardCardProps {
   themed?: boolean;
 }
 
+const Kicker: React.FC<{ color: string; children: React.ReactNode }> = ({ color, children }) => (
+  <Text style={{ fontFamily: FONT.cond700, fontSize: 11, letterSpacing: 1.5, color, textTransform: 'uppercase' }}>{children}</Text>
+);
+
+const Headshot: React.FC<{ p: Player; size: number }> = ({ p, size }) => (
+  <Image
+    source={{ uri: getPlayerImageUrl(p) }}
+    placeholder={{ uri: PLAYER_PLACEHOLDER_SVG }}
+    style={{ width: size, height: size, borderRadius: 12, backgroundColor: COLORS.surface2 }}
+    contentFit="cover"
+    contentPosition="top"
+  />
+);
+
 export const AwardCard: React.FC<AwardCardProps> = ({ title, winnerId, players, teams, themed }) => {
   const p = players[winnerId];
   const t = teams.find((team) => team.roster.includes(winnerId) || team.sixthMan === winnerId);
-  const tint = themed && t ? getTeamAccent(t.id).primary : COLORS.gold;
+  const tint = themed && t ? (({ primary, secondary }) => visibleTeamColor(primary, secondary))(getTeamAccent(t.id)) : COLORS.gold;
   if (!p) return null;
 
   const stats = p.seasonStats && p.seasonStats.gp > 0
@@ -38,37 +51,26 @@ export const AwardCard: React.FC<AwardCardProps> = ({ title, winnerId, players, 
 
   return (
     <Panel bar={tint} padding={14}>
-      <MonoLabel color={tint}>{title}</MonoLabel>
+      <Kicker color={tint}>{title}</Kicker>
 
-      <View className="flex-row items-center" style={{ gap: 13, marginTop: 11 }}>
-        <Image
-          source={{ uri: getPlayerImageUrl(p) }}
-          placeholder={{ uri: PLAYER_PLACEHOLDER_SVG }}
-          style={{
-            width: 56, height: 56, borderRadius: RADIUS.pill,
-            borderWidth: 2, borderColor: withAlpha(tint, 0.5), backgroundColor: COLORS.line,
-          }}
-          contentFit="cover"
-        />
-        <View style={{ flex: 1 }}>
-          <HeroTitle size={17} numberOfLines={1} adjustsFontSizeToFit>{p.name}</HeroTitle>
-          <View className="flex-row items-center" style={{ gap: 6, marginTop: 5 }}>
-            {t ? (
-              <Image source={{ uri: getTeamLogoUrl(t) }} placeholder={{ uri: NBA_FALLBACK }} style={{ width: 15, height: 15 }} contentFit="contain" />
-            ) : null}
-            <MonoLabel size={9.5} color={INK.meta} style={{ letterSpacing: 0.4 }}>{getTeamNickname(t)}</MonoLabel>
-          </View>
+      <View className="flex-row items-center" style={{ gap: 12, marginTop: 10 }}>
+        <Headshot p={p} size={52} />
+        <View style={{ flex: 1, minWidth: 0, gap: 4 }}>
+          <Text numberOfLines={1} style={{ fontFamily: FONT.cond800, fontSize: 21, lineHeight: 22, color: COLORS.text, textTransform: 'uppercase' }}>{p.name}</Text>
+          {t ? (
+            <View className="flex-row items-center" style={{ gap: 6 }}>
+              <TeamBadge teamId={t.id} />
+              <Text style={{ fontFamily: FONT.body500, fontSize: 12.5, color: COLORS.muted }}>{getTeamNickname(t)}</Text>
+            </View>
+          ) : null}
         </View>
       </View>
 
-      <View
-        className="flex-row"
-        style={{ gap: 20, marginTop: 12, paddingTop: 10, borderTopWidth: 1, borderTopColor: COLORS.line }}
-      >
+      <View className="flex-row" style={{ gap: 22, marginTop: 12, paddingTop: 10, borderTopWidth: 1, borderTopColor: COLORS.line }}>
         {stats.map(([label, val], i) => (
           <View key={label}>
-            <MonoLabel size={8} color={INK.faint}>{label}</MonoLabel>
-            <Stat size={14} color={i === 0 ? tint : '#fff'} style={{ marginTop: 2 }}>{val}</Stat>
+            <Text style={{ fontFamily: FONT.cond800, fontSize: 20, lineHeight: 21, color: i === 0 ? tint : COLORS.text }}>{val}</Text>
+            <Text style={{ fontFamily: FONT.cond700, fontSize: 10.5, letterSpacing: 1.3, color: COLORS.dim }}>{label}</Text>
           </View>
         ))}
       </View>
@@ -84,11 +86,7 @@ interface FinalsAwardCardProps {
   accentColor?: string;
 }
 
-/**
- * The Finals MVP, in the champion screen's gold register — 32px radius (the
- * hero tier), which the design reserves for the one card that only happens
- * once a season.
- */
+/** The Finals MVP, in the champion screen's gold register. */
 export const FinalsAwardCard: React.FC<FinalsAwardCardProps> = ({
   title, pId, players, subtitle = 'Campeão da NBA', accentColor = COLORS.gold,
 }) => {
@@ -98,38 +96,20 @@ export const FinalsAwardCard: React.FC<FinalsAwardCardProps> = ({
   const s = p.seasonStats;
 
   return (
-    <LinearGradient
-      colors={['#3a2a08', '#1a1305']}
-      start={{ x: 0.1, y: 0 }}
-      end={{ x: 0.9, y: 1 }}
-      style={{
-        borderRadius: RADIUS.hero,
-        padding: 18,
-        borderWidth: 1,
-        borderColor: withAlpha(accentColor, 0.35),
-      }}
-    >
-      <MonoLabel size={8.5} color={accentColor} style={{ letterSpacing: 1.6 }}>{title}</MonoLabel>
-      <View className="flex-row items-center" style={{ gap: 13, marginTop: 12 }}>
-        <Image
-          source={{ uri: getPlayerImageUrl(p) }}
-          placeholder={{ uri: PLAYER_PLACEHOLDER_SVG }}
-          style={{
-            width: 50, height: 50, borderRadius: RADIUS.pill,
-            borderWidth: 2, borderColor: accentColor, backgroundColor: '#1a1305',
-          }}
-          contentFit="cover"
-        />
-        <View style={{ flex: 1 }}>
-          <HeroTitle size={17} numberOfLines={1} adjustsFontSizeToFit>{p.name}</HeroTitle>
-          <MonoLabel size={10} color="rgba(255,255,255,0.6)" style={{ marginTop: 4, letterSpacing: 0.4 }}>
+    <Panel bar={accentColor} padding={16}>
+      <Kicker color={accentColor}>{title}</Kicker>
+      <View className="flex-row items-center" style={{ gap: 12, marginTop: 10 }}>
+        <Headshot p={p} size={50} />
+        <View style={{ flex: 1, minWidth: 0, gap: 3 }}>
+          <Text numberOfLines={1} style={{ fontFamily: FONT.cond800, fontSize: 21, lineHeight: 22, color: COLORS.text, textTransform: 'uppercase' }}>{p.name}</Text>
+          <Text style={{ fontFamily: FONT.body500, fontSize: 12.5, color: COLORS.muted }}>
             {s && s.gp > 0
               ? `${s.ppg.toFixed(1)} pts · ${s.apg.toFixed(1)} ast · ${s.rpg.toFixed(1)} reb`
               : subtitle}
-          </MonoLabel>
+          </Text>
         </View>
       </View>
-    </LinearGradient>
+    </Panel>
   );
 };
 
@@ -141,15 +121,15 @@ interface ChampionHeroProps {
 /** Used only outside the champion screen (which paints its own hero). */
 export const ChampionHero: React.FC<ChampionHeroProps> = ({ team, gmTitles }) => (
   <Panel bar={COLORS.gold} padding={16}>
-    <MonoLabel color={COLORS.gold}>Campeão da NBA</MonoLabel>
-    <View className="flex-row items-center" style={{ gap: 14, marginTop: 11 }}>
-      <Image source={{ uri: getTeamLogoUrl(team) }} placeholder={{ uri: NBA_FALLBACK }} style={{ width: 52, height: 52 }} contentFit="contain" />
-      <View style={{ flex: 1 }}>
-        <HeroTitle size={24} numberOfLines={1} adjustsFontSizeToFit>{getTeamNickname(team)}</HeroTitle>
+    <Kicker color={COLORS.gold}>Campeão da NBA</Kicker>
+    <View className="flex-row items-center" style={{ gap: 12, marginTop: 10 }}>
+      <TeamBadge teamId={team.id} width={52} height={52} />
+      <View style={{ flex: 1, minWidth: 0 }}>
+        <Text numberOfLines={1} style={{ fontFamily: FONT.cond800, fontSize: 28, lineHeight: 28, color: COLORS.text, textTransform: 'uppercase' }}>{getTeamNickname(team)}</Text>
         {typeof gmTitles === 'number' ? (
-          <MonoLabel size={10} color={COLORS.gold} style={{ marginTop: 5, letterSpacing: 0.4 }}>
-            🏆 Seu {gmTitles}º título como GM
-          </MonoLabel>
+          <Text style={{ fontFamily: FONT.cond700, fontSize: 12, letterSpacing: 1.2, color: COLORS.gold, marginTop: 3, textTransform: 'uppercase' }}>
+            Seu {gmTitles}º título como GM
+          </Text>
         ) : null}
       </View>
     </View>
