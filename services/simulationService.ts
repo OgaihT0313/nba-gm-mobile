@@ -584,8 +584,8 @@ export const computeExpectedPoints = (
         const reboundEdge = clampMod((attacker.rebounding - defender.rebounding) * 0.10, -2, 2);
         return spacing + creation - rimProtection + reboundEdge;
     };
-    const attrModA = offenseMod(profileA, profileB);
-    const attrModB = offenseMod(profileB, profileA);
+    const attrModA = 0.35 * offenseMod(profileA, profileB);
+    const attrModB = 0.35 * offenseMod(profileB, profileA);
 
     // Locker-room chemistry: a happy rotation gets a small lift, a disgruntled
     // one a small drag — bounded to ±3 points, the same texture-not-talent
@@ -616,7 +616,7 @@ export const computeExpectedPoints = (
     // 0.6 left the standings almost talent-blind (best record 58, league win
     // sd 8.7, talent-to-wins correlation 0.66). This is the signal side of the
     // signal-to-noise ratio the whole standings shape rests on.
-    const matchupStrength = 1.15;
+    const matchupStrength = 1.8;
 
     const expectedPointsA = baseScore
         + (ratingsA.offense - ratingsB.defense) * matchupStrength
@@ -967,6 +967,17 @@ const simulateSeries = (
 // Total minutes a team distributes across a game (5 on the floor × 48 min).
 const TEAM_MINUTES = 240;
 
+// Usage rate (USG%) and true shooting a player's scoring share is built from.
+// Real values come from the data (Player.usage/ts); anyone without them -- a
+// generated draft prospect, an old save -- gets an estimate fitted on the real
+// 2025-26 league (usage against off and the offensive attributes, r = 0.70).
+export const usageOf = (p: Player): number => {
+    if (p.usage !== undefined) return p.usage;
+    const a = getPlayerAttributes(p);
+    return clampMod(0.56 * p.off + 0.12 * a.shooting + 0.13 * a.finishing + 0.18 * a.playmaking - 55.5, 10, 35);
+};
+const tsOf = (p: Player): number => p.ts ?? 0.57;
+
 // Splits a team total across the rotation proportionally to `weights`, with
 // mild per-player game-to-game noise so box scores aren't identical every
 // night. Returns an array aligned to the weights (summing ~= total).
@@ -1057,14 +1068,17 @@ const recordGameStats = (
         // league ~30), but rebounds and assists spread more across the lineup —
         // calibrated so leaders land near real ranges (~13-14 reb, ~11 ast)
         // rather than one player hoarding half a team's total.
-        ptsW.push(pow(p.off - 58, 1.9) * m);
+        // Points are possessions used x points per possession x time on the
+        // floor. The old weight, (off - 58)^1.9, read efficiency as volume and
+        // handed a bench gunner like Cam Spencer 27.7 a night (real: 11.1).
+        ptsW.push(usageOf(p) * tsOf(p) * m);
         rebW.push(pow(a.rebounding - 58, 1.0) * m);
         astW.push(pow(a.playmaking - 58, 1.3) * m);
         // Below 1 on purpose: steals spread wide in real basketball, and at 1.1
         // a 93-perimeterD specialist handed starter minutes (Dru Smith on the
         // 2026-27 Heat) led the league at 2.7 -- above any recent real leader.
         stlW.push(pow(a.perimeterD - 58, 0.9) * m);
-        blkW.push(pow(a.interiorD - 58, 1.5) * m);
+        blkW.push(pow(a.interiorD - 58, 1.8) * m);
         tovW.push((pow(p.off - 58, 1.2) + pow(a.playmaking - 58, 1.0)) * m);
     });
 
@@ -1371,6 +1385,12 @@ const runPlayerProgression = (
             player.def += Math.round(change * (1 - ratio) * 1.5);
             player.off = Math.min(99, Math.max(60, player.off));
             player.def = Math.min(99, Math.max(60, player.def));
+            // A player who gets better on offense gets more of the ball, one
+            // who declines gets less -- so a fading star's real usage doesn't
+            // keep him atop the scoring table for years.
+            if (player.usage !== undefined) {
+                player.usage = Math.min(38, Math.max(8, player.usage + change * ratio * 0.75));
+            }
 
             // Evolve the attribute breakdown too, so it doesn't drift out of
             // sync with off/def over multiple seasons. Offensive attributes

@@ -6,7 +6,7 @@ import { getTeamNickname } from '../constants';
 import { sortStandings } from '../services/scheduleService';
 import { COLORS, FONT } from '../src/theme/tokens';
 import Screen, { Body } from '../components/ui/Screen';
-import { ScreenTitle, BodyText, TeamBadge } from '../components/ui/kit';
+import { ScreenTitle, BodyText, TeamBadge, TeamLogo } from '../components/ui/kit';
 
 // Design 4b ("Transmissão"). The same two-column West/East layout as the team
 // picker, 38px rows; under each name one tag line — VOCÊ, RIVAL, LOTERIA (a CPU
@@ -56,6 +56,7 @@ const TeamsList: React.FC<{
               style={{ height: 38, gap: 8, paddingLeft: 7, paddingRight: 8, borderBottomWidth: 1, borderBottomColor: COLORS.line }}
             >
               <TeamBadge teamId={t.id} width={32} height={22} />
+            <TeamLogo teamId={t.id} size={22} />
               <View style={{ flex: 1, minWidth: 0 }}>
                 <Text numberOfLines={1} style={{ fontFamily: FONT.cond600, fontSize: 14, lineHeight: 15, color: COLORS.text }}>{getTeamNickname(t)}</Text>
                 {tag ? (

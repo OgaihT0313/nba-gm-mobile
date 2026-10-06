@@ -121,23 +121,28 @@ const ageFactor = (age: number) => {
 
 const clamp = (v: number, lo: number, hi: number) => Math.max(lo, Math.min(hi, v));
 
-// Mirrors pipeline/salary_model.py so we can judge whether a player's *current*
-// salary is fair for their *current* OVR/age. Salaries are frozen at data-gen
-// time and never re-negotiated, but OVR drifts every offseason via
-// progression — so a declined veteran ends up overpaid and a young breakout
-// ends up on a bargain deal. That gap is what makes a contract a real asset or
-// liability, not just a cap-matching number.
+// What the market pays a player of this OVR/age on a NEW contract, as a share
+// of the cap -- the price every free agent asks, every extension costs, and the
+// yardstick contractFactor holds a current deal against (an aging star on a
+// deal signed at his peak reads as overpaid, a breakout on a cheap one as a
+// bargain).
+//
+// Fitted 2026-10 on real 2025-26 salaries against the BPM-based OVRs: rotation
+// players (75) land near the mid-level exception, good starters (85) at ~20%
+// of the cap, stars (90) at ~30%, and the top tops out at the 35% veteran max.
+// The age factor used to cut a 22-year-old's ask by 45% to mimic a rookie
+// deal; rookie deals are priced separately (draftService), and the young
+// players who reach a real negotiation get paid like Banchero, Holmgren and
+// Jalen Williams (27% of the cap each), so youth no longer discounts the ask.
 const MIN_SALARY = 1_157_153;
 const SALARY_OVR_CURVE: [number, number][] = [
-    [60, 0.010], [65, 0.018], [70, 0.035], [75, 0.065], [80, 0.115],
-    [85, 0.190], [90, 0.280], [95, 0.360], [99, 0.40],
+    [60, 0.008], [65, 0.012], [70, 0.025], [75, 0.070], [80, 0.130],
+    [85, 0.210], [90, 0.290], [95, 0.350], [99, 0.350],
 ];
 const salaryAgeFactor = (age: number) => {
-    if (age <= 22) return 0.55;
-    if (age <= 25) return 0.80;
     if (age <= 30) return 1.0;
-    if (age <= 34) return 0.85;
-    return 0.65;
+    if (age <= 34) return 0.9;
+    return 0.7;
 };
 const capFractionForOvr = (ovr: number): number => {
     if (ovr <= SALARY_OVR_CURVE[0][0]) return SALARY_OVR_CURVE[0][1];
@@ -153,7 +158,7 @@ const capFractionForOvr = (ovr: number): number => {
     return SALARY_OVR_CURVE[SALARY_OVR_CURVE.length - 1][1];
 };
 export const expectedSalary = (ovr: number, age: number): number =>
-    clamp(SALARY_CAP * capFractionForOvr(ovr) * salaryAgeFactor(age), MIN_SALARY, SALARY_CAP * 0.40);
+    clamp(SALARY_CAP * capFractionForOvr(ovr) * salaryAgeFactor(age), MIN_SALARY, SALARY_CAP * 0.35);
 
 // Contract as a tradeable asset. Two levers on top of raw OVR/age:
 //  • efficiency — underpaid vs. their fair salary is surplus value a GM covets;

@@ -119,7 +119,14 @@ for (let run = 0; run < RUNS; run++) {
       check('toda decisao tem manchete', !!d.headline && !!d.body, `-> ${d.id}`);
       if (enabled.length === 0) { season = { ...season, decisions: season.decisions.slice(1) }; continue; }
 
-      const pick = enabled[Math.floor(Math.random() * enabled.length)];
+      // Answers are picked least-used-first (ties at random): the
+      // "was every option exercised" checks below read a handful of rare
+      // decisions -- ~12 press conferences, ~8 extension talks -- and a uniform
+      // pick left one answer unexercised often enough to make them flaky.
+      const used = (o: { id: string }) => byOption[o.id.split(':')[0]] ?? 0;
+      const least = Math.min(...enabled.map(used));
+      const pool = enabled.filter(o => used(o) === least);
+      const pick = pool[Math.floor(Math.random() * pool.length)];
       const action = pick.id.split(':')[0];
       byOption[action] = (byOption[action] || 0) + 1;
 

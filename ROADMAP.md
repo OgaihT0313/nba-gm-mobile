@@ -15,6 +15,33 @@ explícito do usuário.**
 Último APK testado pelo usuário: `609f0b0c` (tudo até `3e07c3f` — item 4
 completo, elencos 2026-27, 3D novo), sem problemas.
 
+**Ratings, salários e simulação recalibrados contra a temporada real (2026-10-06)**,
+a pedido do usuário. Com 2025-26 encerrada, o pipeline (`nba-gm-simulator/pipeline`:
+`fetch_bbref.py` → `export_reality.py` → `apply_bbref.py --ratings --salaries --teams`)
+lê o Basketball-Reference e:
+- **OVR/off/def** vêm do BPM/OBPM/DBPM reais, regredidos por minutos (com 2024-25
+  como base para quem se machucou). off/def são lineares no BPM; o OVR usa a
+  mesma distribuição de antes, só reordenada. OVR x BPM real: 0,85 → 0,96.
+- **Salários reais** de 2025-26, anos restantes reais e extensões já assinadas
+  em `nextSalary`; curva de mercado (`expectedSalary`) reajustada nos salários
+  reais, sem desconto de juventude.
+- **Uso (USG%) e aproveitamento (TS%) reais** em `Player.usage/ts`; os pontos de
+  cada jogador saem de uso × TS × minutos (explica 99,7% do real).
+- Motor: `matchupStrength` 1,15 → 1,8 (nova escala de off/def), modificadores
+  de perfil do elenco a 35% (contavam em dobro o que o BPM mede), tocos mais
+  concentrados.
+- Medido em `scripts/backtest_season.ts` (vitórias sim x reais r 0,45 → 0,80;
+  força do elenco x vitórias reais 0,42 → 0,79; PPG r 0,79 → 0,82) e
+  `scripts/check_coaches.ts` (técnico elite +8,7 vitórias, fraco −6,2, contra
+  um neutro). `diagnose_season` 0 de 23 fora da faixa.
+- Visual (mesmo dia): rosto do jogador no Scout (`PlayerFace`), sigla + escudo +
+  nome nas listas de times (`TeamLogo`), escudo translúcido no topo de Confirmar,
+  troféu (silhueta Larry O'Brien, `components/Trophy.tsx`) sobre as Finais. Eras checadas em
+  `scripts/check_eras.ts` (continuam no formato real).
+- Pendente: as **eras** ainda usam o modelo antigo de rating e salários
+  sintéticos; o BBRef tem BPM desde 1973-74, então dá para levar o mesmo
+  tratamento a elas.
+
 **Elenco padrão de volta a 2025-26 (2026-10-05)**, a pedido do usuário depois de
 jogar: os elencos 2026-27 (pré-temporada, avaliados pelas estatísticas de
 2025-26, calouros pela posição no draft) bagunçaram salários, OVR e

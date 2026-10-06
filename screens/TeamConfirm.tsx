@@ -11,10 +11,10 @@ import { PICK_WINDOW } from '../services/draftService';
 import { teamRating } from '../services/formService';
 import { COLORS, FONT, withAlpha, onAccent, ovrColor } from '../src/theme/tokens';
 import Screen, { HeroBackdrop, Body } from '../components/ui/Screen';
-import { Panel, CtaButton, StatStrip, SectionLabel, BodyText, Name, Dock } from '../components/ui/kit';
+import { Panel, CtaButton, StatStrip, SectionLabel, BodyText, Name, Dock, TeamLogo } from '../components/ui/kit';
 
 // Design 2c ("Transmissão"). The team color arrives here, as the reward for the
-// choice: a 300px flat block with the tricode as a giant watermark, then the
+// choice: a 300px flat block with the crest as a giant watermark, then the
 // numbers, the owner's mandate (gold inset), the core and the coach.
 
 interface TeamConfirmProps {
@@ -54,9 +54,9 @@ const TeamConfirm: React.FC<TeamConfirmProps> = ({ team, players, teams, onBack,
       footer={<Dock><CtaButton label="Assinar como GM" onPress={onConfirm} size={20} /></Dock>}
     >
       <View style={{ height: HERO - 6, paddingHorizontal: 20, paddingTop: 4, overflow: 'hidden' }}>
-        <Text style={{ position: 'absolute', right: -20, bottom: -48, fontFamily: FONT.cond800, fontSize: 210, lineHeight: 210, color: inkA(0.13) }}>
-          {team.id.toUpperCase()}
-        </Text>
+        {/* The crest, oversized and half-transparent over the flat team color:
+            the franchise's own colors carry the block instead of a tricode. */}
+        <TeamLogo teamId={team.id} size={300} style={{ position: 'absolute', right: -60, top: -10, opacity: 0.22 }} />
         <Pressable accessibilityRole="button" onPress={onBack} hitSlop={12} className="active:opacity-60" style={{ alignSelf: 'flex-start' }}>
           <Text style={{ fontFamily: FONT.cond700, fontSize: 14, letterSpacing: 1.4, color: ink }}>‹ VOLTAR</Text>
         </Pressable>

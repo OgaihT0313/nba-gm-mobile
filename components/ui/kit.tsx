@@ -3,7 +3,9 @@ import { View, Text, Pressable, ViewStyle, TextStyle, StyleProp } from 'react-na
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { COLORS, INK, RADIUS, FONT, tracking, withAlpha, onAccent } from '../../src/theme/tokens';
-import { getTeamAccent } from '../../constants';
+import { Image } from 'expo-image';
+import type { Player } from '../../types';
+import { getTeamAccent, teamsData, getPlayerImageUrl, PLAYER_PLACEHOLDER_SVG } from '../../constants';
 
 // The "Transmissão" primitives (design_handoff_redesign_transmissao). Everything
 // the redesign repeats — the card, the condensed label, the meter, the one light
@@ -289,6 +291,32 @@ export const TeamBadge: React.FC<{
       <Text style={{ fontFamily: FONT.cond800, fontSize, color: onAccent(bg), letterSpacing: 0.4 }} numberOfLines={1}>
         {teamId.toUpperCase()}
       </Text>
+    </View>
+  );
+};
+
+/** The franchise crest (NBA CDN SVG), by team id. Logos never change during a
+ *  save, so it is looked up in the opening data rather than threaded through. */
+const LOGO_BY_ID = new Map(teamsData.map((t) => [t.id, t.logoUrl]));
+export const TeamLogo: React.FC<{ teamId: string; size?: number; style?: StyleProp<any> }> = ({ teamId, size = 22, style }) => {
+  const uri = LOGO_BY_ID.get(teamId);
+  if (!uri) return <View style={[{ width: size, height: size }, style]} />;
+  return <Image source={{ uri }} style={[{ width: size, height: size }, style]} contentFit="contain" />;
+};
+
+/** A player's headshot on a square tinted with his team's color (neutral for a
+ *  free agent): the face is what makes a list of names read as people. */
+export const PlayerFace: React.FC<{ player: Player; teamId?: string; size?: number; style?: StyleProp<ViewStyle> }> = ({ player, teamId, size = 36, style }) => {
+  const bg = teamId ? withAlpha(getTeamAccent(teamId).primary, 0.45) : COLORS.surface2;
+  return (
+    <View style={[{ width: size, height: size, borderRadius: Math.round(size * 0.28), overflow: 'hidden', backgroundColor: bg }, style]}>
+      <Image
+        source={{ uri: getPlayerImageUrl(player) }}
+        placeholder={{ uri: PLAYER_PLACEHOLDER_SVG }}
+        style={{ width: size, height: size }}
+        contentFit="cover"
+        contentPosition="top"
+      />
     </View>
   );
 };

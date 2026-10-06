@@ -73,6 +73,14 @@ export interface Player {
   // Optional so older saves / any data predating the attribute rebuild still
   // typecheck; UI and sim fall back gracefully when it's absent.
   attributes?: PlayerAttributes;
+  // Real usage rate (USG%, share of team possessions he finishes while on the
+  // floor) and true shooting, from the season the roster was rated on,
+  // regressed by minutes. A player's share of his team's points is usage x
+  // efficiency x minutes -- that product explains real 2025-26 scoring at
+  // r = 0.997, where the rating-only proxy managed 0.91. Absent for draft
+  // prospects and old saves; the sim estimates both from off/attributes.
+  usage?: number;
+  ts?: number;
   // OVR the player carried through *last* season, snapshotted just before the
   // offseason progression bump (handleStartNewSeason). Lets the sim award Most
   // Improved Player by real OVR growth. Undefined in the first season and for

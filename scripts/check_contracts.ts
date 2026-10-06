@@ -232,7 +232,13 @@ rows.forEach((r, y) => {
   check('ninguem 76+ fica parado no mercado', a('poolGood') <= 2, `ano ${y + 1}: ${a('poolGood').toFixed(1)}`);
   // Stable, not collapsing (the old economy fell to $110M by year five).
   check('folha mediana estavel', a('payMed') >= 140e6 && a('payMed') <= 215e6, `ano ${y + 1}: ${M(a('payMed'))}`);
-  check('salario acompanha o valor (80+)', a('ratioGood') >= 0.8 && a('ratioGood') <= 1.15, `ano ${y + 1}: ${a('ratioGood').toFixed(2)}`);
+  // Opening salaries are the real 2025-26 contracts, and a real league's 80+
+  // players include stars still on rookie deals (Wembanyama, Duren, Holmgren
+  // at 4-9% of the cap), so the first years read ~0.8 and the ratio climbs as
+  // those deals run out and get repriced. The floor allows for that; the
+  // ceiling still catches a market that overpays.
+  const floor = y < 3 ? 0.72 : 0.8;
+  check('salario acompanha o valor (80+)', a('ratioGood') >= floor && a('ratioGood') <= 1.15, `ano ${y + 1}: ${a('ratioGood').toFixed(2)}`);
 });
 // The league must not age itself out. Before retirement and the recalibrated
 // development curve the average top eight lost 4.5 OVR in ten years; now ~2.

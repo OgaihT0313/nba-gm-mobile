@@ -10,7 +10,7 @@ import {
 } from '../constants';
 import { useTheme } from '../src/theme/ThemeProvider';
 import { COLORS, FONT, withAlpha, ovrColor } from '../src/theme/tokens';
-import { ScreenTitle, BodyText, TeamBadge, Name } from '../components/ui/kit';
+import { ScreenTitle, BodyText, Name, PlayerFace } from '../components/ui/kit';
 import PlayerDetailModal from '../components/PlayerDetailModal';
 import ScoutAdvisor from '../components/ScoutAdvisor';
 
@@ -150,18 +150,17 @@ const Scout: React.FC<ScoutProps> = ({ players, teams, userTeamId }) => {
             accessibilityRole="button"
             onPress={() => setSelected(item)}
             className="flex-row items-center active:opacity-75"
-            style={{ height: 48, gap: 10, marginHorizontal: 14, borderBottomWidth: 1, borderBottomColor: COLORS.lineSoft }}
+            style={{ height: 54, gap: 10, marginHorizontal: 14, borderBottomWidth: 1, borderBottomColor: COLORS.lineSoft }}
           >
-            {item.team ? (
-              <TeamBadge teamId={item.team.id} width={34} height={20} />
-            ) : (
-              <View style={{ width: 34, height: 20, borderRadius: 4, borderWidth: 1, borderColor: withAlpha(COLORS.good, 0.5), alignItems: 'center', justifyContent: 'center' }}>
-                <Text style={{ fontFamily: FONT.cond800, fontSize: 9.5, color: COLORS.good }}>LIVRE</Text>
-              </View>
-            )}
+            <PlayerFace player={item} teamId={item.team?.id} size={36} />
             <View style={{ flex: 1, minWidth: 0, gap: 1 }}>
               <Name size={15}>{item.name}</Name>
-              <Text style={{ fontFamily: FONT.body500, fontSize: 11.5, color: COLORS.dim }}>{formatPositions(item)}</Text>
+              <Text style={{ fontFamily: FONT.body500, fontSize: 11.5, color: COLORS.dim }}>
+                {formatPositions(item)} ·{' '}
+                {item.team
+                  ? <Text style={{ fontFamily: FONT.cond700, color: COLORS.textSoft }}>{item.team.id.toUpperCase()}</Text>
+                  : <Text style={{ fontFamily: FONT.cond700, color: COLORS.good }}>LIVRE</Text>}
+              </Text>
             </View>
             <Text style={{ fontFamily: FONT.cond600, fontSize: 12.5, color: COLORS.muted }}>{item.age}a · {money(item.salary)}</Text>
             <Text style={{ width: 28, textAlign: 'right', fontFamily: FONT.cond800, fontSize: 20, color: ovrColor(item.ovr) }}>{item.ovr}</Text>

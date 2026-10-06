@@ -5,6 +5,7 @@ import { PlayoffState, PlayoffSeries, PlayInBracket, Team } from '../types';
 import { getTeamAccent } from '../constants';
 import { COLORS, FONT, withAlpha } from '../src/theme/tokens';
 import { SectionLabel } from './ui/kit';
+import Trophy from './Trophy';
 
 // Design 1d ("Transmissão"): a real converging bracket, laid out horizontally —
 // the West enters from the left, the East from the right, the Finals sit in the
@@ -26,6 +27,7 @@ const AREA_H = 420;
 const BOX_W = 42;
 const FIN_W = 54;
 const ROW_H = 20;
+const TROPHY_H = 56;
 const BOX_H = ROW_H * 2;
 
 const COL_X = { wR1: 0, wR2: 54, wR3: 108, fin: 156, eR3: 216, eR2: 270, eR1: 324 } as const;
@@ -282,13 +284,10 @@ const PlayoffBracket: React.FC<{ playoffState: PlayoffState | null; userTeamId?:
         ))}
         <Box series={east.bracket.round3[0]} left={x(COL_X.eR3)} centerY={Y_MID} width={bw} color={COLORS.east} seed={seedOf(east)} userTeamId={userTeamId} live={isLive('east', 'round3', 0)} />
 
-        {/* The Finals, under a gold diamond. */}
-        <View
-          style={{
-            position: 'absolute', left: x(COL_X.fin) + fw / 2 - 7, top: Y_MID - BOX_H / 2 - 24, width: 14, height: 14,
-            backgroundColor: COLORS.gold, transform: [{ rotate: '45deg' }],
-          }}
-        />
+        {/* The Finals, under the trophy. */}
+        <View style={{ position: 'absolute', left: x(COL_X.fin) + fw / 2 - TROPHY_H * 20 / 64, top: Y_MID - BOX_H / 2 - TROPHY_H - 8 }}>
+          <Trophy size={TROPHY_H} />
+        </View>
         <Box
           series={playoffState.finals ?? undefined}
           left={x(COL_X.fin)}
