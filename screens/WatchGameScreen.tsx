@@ -24,7 +24,7 @@ import {
 } from '../services/watchDirector';
 import { eraGroupForEraId } from '../data/eras';
 import { getEraVisual } from '../src/theme/eraVisuals';
-import { COLORS, INK, RADIUS, withAlpha } from '../src/theme/tokens';
+import { COLORS, INK, RADIUS, FONT, withAlpha, onAccent } from '../src/theme/tokens';
 import { Panel, MonoLabel, Stat, CtaButton, GhostButton, Meter } from '../components/ui/kit';
 import Court3D, { CameraView } from '../components/court3d/Court3D';
 
@@ -562,102 +562,55 @@ const WatchGameScreen: React.FC<WatchGameScreenProps> = ({
       />
 
       {banner && (
-        <View style={{ pointerEvents: 'none', position: 'absolute', top: '40%', left: 0, right: 0, alignItems: 'center' }}>
-          <View
-            style={{
-              backgroundColor: 'rgba(10,15,25,0.88)',
-              borderWidth: 1.5,
-              borderColor: banner.color,
-              borderRadius: 12,
-              paddingVertical: 8,
-              paddingHorizontal: 18,
-              alignItems: 'center',
-            }}
-          >
-            <Text style={{ color: banner.color, fontSize: 18, fontWeight: '900', letterSpacing: 1 }}>
-              {banner.text}
-            </Text>
-            <MonoLabel size={9} color={INK.faint} style={{ marginTop: 3 }}>{banner.sub}</MonoLabel>
+        <View style={{ pointerEvents: 'none', position: 'absolute', top: insets.top + 68, left: 14, maxWidth: 220 }}>
+          <View style={{ backgroundColor: 'rgba(11,11,13,0.82)', borderRadius: 12, paddingVertical: 9, paddingLeft: 15, paddingRight: 12, gap: 2, overflow: 'hidden' }}>
+            <View style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: 3, backgroundColor: banner.color }} />
+            <Text style={{ fontFamily: FONT.cond700, fontSize: 10.5, letterSpacing: 1.3, color: banner.color, textTransform: 'uppercase' }}>{banner.text}</Text>
+            <Text style={{ fontFamily: FONT.cond600, fontSize: 14, lineHeight: 17, color: COLORS.text }}>{banner.sub}</Text>
           </View>
         </View>
       )}
 
-      {/* Scoreboard, floating over the canvas like the prototype's top-left panel. */}
+      {/* Score bar: color blocks at the ends, the clock and possession in the middle. */}
       <View style={{ pointerEvents: 'box-none', position: 'absolute', top: insets.top + 10, left: 14, right: 14 }}>
-        <Panel padding={14}>
-          <View className="flex-row items-center justify-between">
-            <MonoLabel size={9}>Assistir ao jogo</MonoLabel>
-            <MonoLabel size={9} color={INK.faint}>
-              {phase === 'final' ? 'Final' : `${periodLabel(quarter, phase)} · ${clockLabel(clock, quarter)}`}
-            </MonoLabel>
+        <View style={{ height: 48, borderRadius: 12, overflow: 'hidden', flexDirection: 'row', backgroundColor: 'rgba(11,11,13,0.88)', borderWidth: 1, borderColor: 'rgba(255,255,255,0.08)' }}>
+          <View style={{ width: 58, backgroundColor: homeAccent.primary, alignItems: 'center', justifyContent: 'center' }}>
+            <Text style={{ fontFamily: FONT.cond800, fontSize: 16, color: onAccent(homeAccent.primary) }}>{getTeamTricode(home)}</Text>
           </View>
-          <View className="flex-row items-center justify-between" style={{ marginTop: 10 }}>
-            <View className="flex-1">
-              <MonoLabel size={9} color={homeAccent.primary} numberOfLines={1}>{getTeamTricode(home)}</MonoLabel>
-              <Stat size={26} style={{ marginTop: 2 }}>{score.home}</Stat>
-            </View>
-            <MonoLabel size={9} color={INK.faint} style={{ marginHorizontal: 10 }}>VS</MonoLabel>
-            <View className="flex-1" style={{ alignItems: 'flex-end' }}>
-              <MonoLabel size={9} color={awayAccent.primary} numberOfLines={1}>{getTeamTricode(away)}</MonoLabel>
-              <Stat size={26} style={{ marginTop: 2 }}>{score.away}</Stat>
-            </View>
+          <View style={{ width: 46, alignItems: 'center', justifyContent: 'center' }}>
+            <Text style={{ fontFamily: FONT.cond800, fontSize: 26, color: score.home >= score.away ? COLORS.text : COLORS.muted, fontVariant: ['tabular-nums'] }}>{score.home}</Text>
           </View>
+          <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', borderLeftWidth: 1, borderRightWidth: 1, borderColor: COLORS.lineStrong }}>
+            <Text style={{ fontFamily: FONT.cond800, fontSize: 16, lineHeight: 17, color: COLORS.text }}>
+              {phase === 'final' ? 'FINAL' : `${periodLabel(quarter, phase)} · ${clockLabel(clock, quarter)}`}
+            </Text>
+            <Text numberOfLines={1} style={{ fontFamily: FONT.cond600, fontSize: 10.5, letterSpacing: 1, color: COLORS.muted, textTransform: 'uppercase' }}>
+              {phase === 'live' ? `${WATCH_PLAY_META[play].label} · ${timeoutsLeft} tempo${timeoutsLeft === 1 ? '' : 's'}` : 'Assistir ao jogo'}
+            </Text>
+          </View>
+          <View style={{ width: 46, alignItems: 'center', justifyContent: 'center' }}>
+            <Text style={{ fontFamily: FONT.cond800, fontSize: 26, color: score.away >= score.home ? COLORS.text : COLORS.muted, fontVariant: ['tabular-nums'] }}>{score.away}</Text>
+          </View>
+          <View style={{ width: 58, backgroundColor: awayAccent.primary, alignItems: 'center', justifyContent: 'center' }}>
+            <Text style={{ fontFamily: FONT.cond800, fontSize: 16, color: onAccent(awayAccent.primary) }}>{getTeamTricode(away)}</Text>
+          </View>
+        </View>
 
-          {phase === 'live' && (
-            <View
-              className="flex-row items-center justify-between"
-              style={{ marginTop: 10, paddingTop: 9, borderTopWidth: 1, borderTopColor: withAlpha('#ffffff', 0.08) }}
-            >
-              <MonoLabel size={9} color={userAccent.primary}>
-                {WATCH_PLAY_META[play].label}
-              </MonoLabel>
-              <MonoLabel size={9} color={INK.faint} numberOfLines={1}>
-                {courtRef.current?.handlerName ?? '—'} · {timeoutsLeft} tempo{timeoutsLeft === 1 ? '' : 's'}
-              </MonoLabel>
-            </View>
-          )}
-
-          {/* Your five's legs. The one number that tells you when to stop the
-              game -- before this, nobody on screen ever got tired. */}
-          {phase === 'live' && liveFive.length === 5 && (
-            <View className="flex-row" style={{ gap: 6, marginTop: 9 }}>
-              {liveFive.map((p) => (
-                <View key={p.id} style={{ flex: 1 }} accessibilityLabel={`${p.name}, energia ${Math.round(p.energy)}`}>
-                  <MonoLabel size={9} color={p.energy < EXHAUSTED ? COLORS.badSoft : INK.faint} numberOfLines={1} style={{ letterSpacing: 0 }}>
-                    {lastName(p.name)}
-                  </MonoLabel>
-                  <Meter value={p.energy / 100} color={energyColor(p.energy)} height={4} track="rgba(255,255,255,0.08)" style={{ marginTop: 3 }} />
-                </View>
-              ))}
-            </View>
-          )}
-          {phase === 'live' && exhausted.length > 0 && (
-            <MonoLabel size={9} color={COLORS.badSoft} style={{ marginTop: 6, letterSpacing: 0.2 }} numberOfLines={1}>
-              {exhausted.map((p) => lastName(p.name)).join(', ')} {exhausted.length === 1 ? 'está exausto' : 'estão exaustos'}
-              {timeoutsLeft > 0 ? ' · peça tempo' : ''}
-            </MonoLabel>
-          )}
-        </Panel>
-
-        <View className="flex-row" style={{ marginTop: 8, gap: 6 }}>
+        {/* Cameras: a column on the right edge. */}
+        <View style={{ position: 'absolute', top: 58, right: 0, gap: 4, padding: 4, borderRadius: 12, backgroundColor: 'rgba(11,11,13,0.82)' }}>
           {CAMERA_VIEWS.map((v) => {
             const active = v.id === cameraView;
             return (
-              <Pressable accessibilityRole="button"
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel={`Câmera ${v.label}`}
+                aria-selected={active}
                 key={v.id}
                 onPress={() => setCameraView(v.id)}
-                className="active:opacity-70"
-                style={{
-                  flex: 1,
-                  paddingVertical: 7,
-                  borderRadius: 999,
-                  alignItems: 'center',
-                  backgroundColor: active ? COLORS.cta : 'rgba(10,15,25,0.75)',
-                  borderWidth: 1,
-                  borderColor: active ? COLORS.cta : 'rgba(255,255,255,0.14)',
-                }}
+                className="active:opacity-75"
+                style={{ height: 36, paddingHorizontal: 12, borderRadius: 9, justifyContent: 'center', backgroundColor: active ? COLORS.ctaFill : 'transparent' }}
               >
-                <MonoLabel size={9} color={active ? '#ffffff' : INK.faint}>{v.label}</MonoLabel>
+                <Text style={{ fontFamily: FONT.cond800, fontSize: 12.5, letterSpacing: 1, color: active ? COLORS.ctaInk : COLORS.textSoft, textTransform: 'uppercase' }}>{v.label}</Text>
               </Pressable>
             );
           })}
@@ -812,22 +765,63 @@ const WatchGameScreen: React.FC<WatchGameScreenProps> = ({
         )}
 
         {phase === 'live' && (
-          <View className="flex-row" style={{ gap: 8 }}>
-            <GhostButton
-              label="Pedir tempo"
-              onPress={callTimeout}
-              disabled={timeoutsLeft <= 0}
-              color={timeoutsLeft > 0 ? userAccent.primary : COLORS.textDim}
-              padding={13}
-              style={{ flex: 1.2 }}
-            />
-            <GhostButton
-              label={speed > 1 ? `${speed}x ✓` : '4x'}
-              onPress={toggleSpeed}
-              padding={13}
-              style={{ flex: 0.7 }}
-            />
-            <GhostButton label="Pular" onPress={skipToEnd} padding={13} style={{ flex: 0.8 }} />
+          <View style={{ gap: 8 }}>
+            {liveFive.length === 5 ? (
+              <View style={{ backgroundColor: 'rgba(11,11,13,0.9)', borderRadius: 16, paddingHorizontal: 12, paddingVertical: 10, gap: 8 }}>
+                <View className="flex-row justify-between">
+                  <Text style={{ fontFamily: FONT.cond700, fontSize: 11, letterSpacing: 1.5, color: COLORS.muted }}>EM QUADRA</Text>
+                  <Text style={{ fontFamily: FONT.cond700, fontSize: 11, letterSpacing: 1.5, color: autoSubs ? COLORS.good : COLORS.dim }}>
+                    {autoSubs ? 'ROTAÇÃO AUTOMÁTICA' : 'ROTAÇÃO MANUAL'}
+                  </Text>
+                </View>
+                {/* Your five's legs: the one number that tells you when to stop the game. */}
+                <View className="flex-row" style={{ gap: 4 }}>
+                  {liveFive.map((pl) => (
+                    <View key={pl.id} accessibilityLabel={`${pl.name}, energia ${Math.round(pl.energy)}`} style={{ flex: 1, borderRadius: 8, backgroundColor: COLORS.surface2, paddingVertical: 6, paddingHorizontal: 4, alignItems: 'center', gap: 3 }}>
+                      <Text numberOfLines={1} style={{ fontFamily: FONT.cond700, fontSize: 12, color: pl.energy < EXHAUSTED ? COLORS.bad : COLORS.text }}>{lastName(pl.name)}</Text>
+                      <View style={{ width: '100%', height: 3, borderRadius: 2, backgroundColor: COLORS.lineStrong }}>
+                        <View style={{ height: '100%', borderRadius: 2, backgroundColor: energyColor(pl.energy), width: `${Math.max(0, Math.min(100, pl.energy))}%` }} />
+                      </View>
+                    </View>
+                  ))}
+                </View>
+                {exhausted.length > 0 ? (
+                  <Text numberOfLines={1} style={{ fontFamily: FONT.body600, fontSize: 12, color: COLORS.bad }}>
+                    {exhausted.map((pl) => lastName(pl.name)).join(', ')} {exhausted.length === 1 ? 'está exausto' : 'estão exaustos'}
+                    {timeoutsLeft > 0 ? ' · peça tempo' : ''}
+                  </Text>
+                ) : null}
+              </View>
+            ) : null}
+            <View className="flex-row" style={{ gap: 8 }}>
+              <Pressable
+                accessibilityRole="button"
+                onPress={toggleSpeed}
+                className="active:opacity-75"
+                style={{ flex: 1, height: 48, borderRadius: 12, backgroundColor: 'rgba(11,11,13,0.9)', alignItems: 'center', justifyContent: 'center' }}
+              >
+                <Text style={{ fontFamily: FONT.cond700, fontSize: 14, letterSpacing: 1.1, color: COLORS.text }}>{speed > 1 ? `${speed}X ✓` : '4X'}</Text>
+              </Pressable>
+              <Pressable
+                accessibilityRole="button"
+                aria-disabled={timeoutsLeft <= 0}
+                onPress={timeoutsLeft > 0 ? callTimeout : undefined}
+                className="active:opacity-75"
+                style={{ flex: 1.4, height: 48, borderRadius: 12, backgroundColor: timeoutsLeft > 0 ? COLORS.ctaFill : 'rgba(11,11,13,0.9)', alignItems: 'center', justifyContent: 'center' }}
+              >
+                <Text style={{ fontFamily: FONT.cond800, fontSize: 16, letterSpacing: 1, color: timeoutsLeft > 0 ? COLORS.ctaInk : COLORS.dim }}>
+                  {timeoutsLeft > 0 ? 'PEDIR TEMPO' : 'SEM TEMPOS'}
+                </Text>
+              </Pressable>
+              <Pressable
+                accessibilityRole="button"
+                onPress={skipToEnd}
+                className="active:opacity-75"
+                style={{ flex: 1, height: 48, borderRadius: 12, backgroundColor: 'rgba(11,11,13,0.9)', alignItems: 'center', justifyContent: 'center' }}
+              >
+                <Text style={{ fontFamily: FONT.cond700, fontSize: 14, letterSpacing: 1.1, color: COLORS.text }}>PULAR ›</Text>
+              </Pressable>
+            </View>
           </View>
         )}
 

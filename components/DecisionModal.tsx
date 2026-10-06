@@ -1,17 +1,16 @@
 import React from 'react';
 import { View, Text, Pressable, ScrollView, Modal } from 'react-native';
 import { Image } from 'expo-image';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import type { Decision, DecisionOption, Player } from '../types';
-import { getPlayerImageUrl } from '../constants';
+import type { Decision, DecisionOption, DecisionKind, Player } from '../types';
+import { getPlayerImageUrl, PLAYER_PLACEHOLDER_SVG } from '../constants';
 import { personalityOf } from '../services/personalityService';
-import { COLORS, INK, RADIUS, withAlpha } from '../src/theme/tokens';
-import { MonoLabel, HeroTitle, Stat } from './ui/kit';
+import { COLORS, FONT, ovrColor } from '../src/theme/tokens';
 
-// The decision queue's one screen. A takeover Modal rather than a pushed
-// screen, for the same reason FiredOverlay is one: this is an INTERRUPTION.
-// Keeping the season screen visible behind it is what gives the choice weight —
-// your record is right there while you decide.
+// Design 5d ("Transmissão"). The decision queue's one screen, as an
+// INTERRUPTION: the season stays visible behind a dark veil — your record is
+// right there while you decide — and the choice sits in a card at the foot.
 //
 // Nothing here reaches the events feed. That buffer holds 50 and renders 6, and
 // an offseason pushes hundreds through it; a decision that mattered enough to
@@ -25,8 +24,12 @@ interface DecisionModalProps {
   onChoose: (decisionId: string, optionId: string) => void;
 }
 
-const TONE: Record<string, string> = {
-  good: COLORS.goodSoft, warn: COLORS.warn, info: COLORS.info, bad: COLORS.badSoft, neutral: COLORS.textDim,
+const CATEGORY: Record<DecisionKind, string> = {
+  injury_cover: 'Lesão',
+  trade_request: 'Vestiário',
+  deadline_stance: 'Prazo de trocas',
+  contract_extension: 'Contrato',
+  press_conference: 'Coletiva de imprensa',
 };
 
 const OptionRow: React.FC<{ option: DecisionOption; onPress: () => void }> = ({ option, onPress }) => {
@@ -37,106 +40,67 @@ const OptionRow: React.FC<{ option: DecisionOption; onPress: () => void }> = ({ 
       accessibilityRole="button"
       aria-disabled={off}
       className={off ? '' : 'active:opacity-75'}
-      style={{
-        borderRadius: RADIUS.control,
-        borderWidth: 1,
-        borderColor: off ? COLORS.line : withAlpha(COLORS.cta, 0.45),
-        backgroundColor: off ? COLORS.sunken : COLORS.panel,
-        padding: 13,
-        opacity: off ? 0.55 : 1,
-      }}
+      style={{ borderRadius: 14, paddingHorizontal: 14, paddingVertical: 12, backgroundColor: COLORS.surface2, gap: 4, opacity: off ? 0.5 : 1 }}
     >
-      <Text
-        className="font-black"
-        style={{ fontSize: 13.5, color: off ? COLORS.textDim : COLORS.text, textTransform: 'uppercase' }}
-      >
+      <Text style={{ fontFamily: FONT.cond800, fontSize: 17, lineHeight: 18, color: off ? COLORS.dim : COLORS.text, textTransform: 'uppercase' }}>
         {option.label}
       </Text>
-      <Text style={{ fontSize: 11.5, lineHeight: 16, color: INK.body, marginTop: 4 }}>
-        {/* A disabled option always says WHY. A dead button with no explanation
-            reads as a bug, and here it is usually information: "the market has
-            nobody at that position" is worth knowing. */}
+      {/* A disabled option always says WHY. A dead button with no explanation
+          reads as a bug, and here it is usually information. */}
+      <Text style={{ fontFamily: FONT.body500, fontSize: 12.5, lineHeight: 17, color: COLORS.muted }}>
         {off ? (option.disabledReason ?? option.detail) : option.detail}
       </Text>
       {!off && option.consequence ? (
-        <MonoLabel size={9} color={COLORS.warn} style={{ marginTop: 7, letterSpacing: 0.3 }}>
-          {option.consequence}
-        </MonoLabel>
+        <Text style={{ fontFamily: FONT.body600, fontSize: 12.5, lineHeight: 17, color: COLORS.warn }}>{option.consequence}</Text>
       ) : null}
     </Pressable>
   );
 };
 
 const DecisionModal: React.FC<DecisionModalProps> = ({ decision, players, remaining, onChoose }) => {
+  const insets = useSafeAreaInsets();
   const subject = decision?.subjectId ? players[decision.subjectId] : undefined;
 
   return (
     <Modal visible={!!decision} animationType="fade" transparent statusBarTranslucent>
       {decision ? (
-        <View className="flex-1 justify-end" style={{ backgroundColor: 'rgba(2,6,23,0.88)' }}>
-          <View
-            style={{
-              backgroundColor: COLORS.bg,
-              borderTopLeftRadius: RADIUS.hero,
-              borderTopRightRadius: RADIUS.hero,
-              borderTopWidth: 1,
-              borderColor: COLORS.line,
-              maxHeight: '92%',
-            }}
-          >
-            {/* The red edge marks this as the one thing standing between you and
-                the next game — the same "one red thing per screen" rule the rest
-                of the system follows. */}
-            <View style={{ height: 3, backgroundColor: COLORS.cta, borderTopLeftRadius: RADIUS.hero, borderTopRightRadius: RADIUS.hero }} />
-
-            <ScrollView contentContainerStyle={{ padding: 18, paddingBottom: 26 }} showsVerticalScrollIndicator={false}>
-              <View className="flex-row items-center justify-between" style={{ marginBottom: 12 }}>
-                <MonoLabel size={9} color={COLORS.cta} style={{ letterSpacing: 1 }}>
-                  {decision.kind === 'press_conference' ? 'Coletiva de imprensa' : 'Decisão do GM'} · dia {decision.day}
-                </MonoLabel>
-                {remaining > 0 ? (
-                  <MonoLabel size={9} color={INK.faint}>
-                    +{remaining} na fila
-                  </MonoLabel>
-                ) : null}
+        <View className="flex-1 justify-end" style={{ backgroundColor: 'rgba(5,5,6,0.72)', paddingBottom: insets.bottom + 12, paddingTop: insets.top + 20 }}>
+          <View style={{ marginHorizontal: 12, maxHeight: '100%', backgroundColor: COLORS.surface, borderRadius: 24, borderWidth: 1, borderColor: '#2A2A2F', overflow: 'hidden' }}>
+            <ScrollView style={{ flexGrow: 0, flexShrink: 1 }} contentContainerStyle={{ paddingHorizontal: 16, paddingTop: 18, paddingBottom: 16, gap: 14 }} showsVerticalScrollIndicator={false}>
+              <View className="flex-row items-center justify-between">
+                <Text style={{ fontFamily: FONT.cond700, fontSize: 11, letterSpacing: 1.5, color: COLORS.warn, textTransform: 'uppercase' }}>
+                  {CATEGORY[decision.kind] ?? 'Decisão'} · dia {decision.day}
+                </Text>
+                <Text style={{ fontFamily: FONT.cond700, fontSize: 11, letterSpacing: 1.5, color: COLORS.dim }}>
+                  1 DE {remaining + 1}
+                </Text>
               </View>
 
-              <View className="flex-row items-center" style={{ gap: 13 }}>
+              <View style={{ gap: 8 }}>
+                <Text style={{ fontFamily: FONT.cond800, fontSize: 28, lineHeight: 28, color: COLORS.text, textTransform: 'uppercase' }}>
+                  {decision.headline}
+                </Text>
                 {subject ? (
-                  <Image
-                    source={{ uri: getPlayerImageUrl(subject) }}
-                    style={{ width: 58, height: 58, borderRadius: 29, backgroundColor: COLORS.sunken }}
-                    contentFit="cover"
-                  />
+                  <View className="flex-row items-center" style={{ gap: 10 }}>
+                    <Image
+                      source={{ uri: getPlayerImageUrl(subject) }}
+                      placeholder={{ uri: PLAYER_PLACEHOLDER_SVG }}
+                      style={{ width: 40, height: 40, borderRadius: 10, backgroundColor: COLORS.surface2 }}
+                      contentFit="cover"
+                      contentPosition="top"
+                    />
+                    <Text style={{ fontFamily: FONT.cond800, fontSize: 20, color: ovrColor(subject.ovr) }}>{subject.ovr}</Text>
+                    {/* Who he is, right where it changes the answer: the
+                        options below are written differently for him. */}
+                    <Text style={{ flex: 1, fontFamily: FONT.body500, fontSize: 12.5, color: COLORS.muted }} numberOfLines={1}>
+                      {subject.pos} · {subject.age} anos · {personalityOf(subject).label}
+                    </Text>
+                  </View>
                 ) : null}
-                <View className="flex-1">
-                  <HeroTitle size={20} numberOfLines={2} adjustsFontSizeToFit>
-                    {decision.headline}
-                  </HeroTitle>
-                  {subject ? (
-                    <View className="flex-row items-baseline flex-wrap" style={{ gap: 6, marginTop: 5 }}>
-                      <Stat size={13}>{subject.ovr}</Stat>
-                      <MonoLabel size={9} color={INK.meta}>
-                        OVR · {subject.pos} · {subject.age} anos
-                      </MonoLabel>
-                      {/* Who he is, right where it changes the answer: the
-                          options below are already written differently for him
-                          (a star will not be bought off with minutes, a
-                          workhorse shrugs off a rushed return), so the label
-                          has to be visible at the moment of choosing. */}
-                      <MonoLabel size={9} color={TONE[personalityOf(subject).tone]}>
-                        · {personalityOf(subject).label}
-                      </MonoLabel>
-                    </View>
-                  ) : null}
-                </View>
+                <Text style={{ fontFamily: FONT.body500, fontSize: 14, lineHeight: 20, color: COLORS.muted }}>{decision.body}</Text>
               </View>
 
-              <Text style={{ fontSize: 12.5, lineHeight: 19, color: COLORS.textSoft, marginTop: 14 }}>
-                {decision.body}
-              </Text>
-
-              <View style={{ gap: 9, marginTop: 18 }}>
+              <View style={{ gap: 8 }}>
                 {decision.options.map((o) => (
                   <OptionRow key={o.id} option={o} onPress={() => onChoose(decision.id, o.id)} />
                 ))}

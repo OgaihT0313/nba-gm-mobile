@@ -193,6 +193,7 @@ const TeamDetail: React.FC<{
       {viewing ? (
         <PlayerDetailModal
           player={viewing}
+          teamId={team.id}
           onClose={() => setViewing(null)}
           status={absences[viewing.id] ? `Fora ${absences[viewing.id].duration} jogos · ${absences[viewing.id].reason === 'injury' ? 'lesionado' : 'suspenso'}` : undefined}
         />

@@ -170,7 +170,7 @@ const Scout: React.FC<ScoutProps> = ({ players, teams, userTeamId }) => {
         ListEmptyComponent={<BodyText color={COLORS.dim} style={{ paddingHorizontal: 20, paddingTop: 10 }}>Nenhum jogador encontrado.</BodyText>}
       />
 
-      {selected ? <PlayerDetailModal player={selected} onClose={() => setSelected(null)} /> : null}
+      {selected ? <PlayerDetailModal player={selected} teamId={teamByPlayerId.get(selected.id)?.id} onClose={() => setSelected(null)} /> : null}
     </View>
   );
 };

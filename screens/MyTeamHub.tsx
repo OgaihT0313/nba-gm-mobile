@@ -415,6 +415,7 @@ const MyTeamHub: React.FC<MyTeamHubProps> = ({
       {viewing ? (
         <PlayerDetailModal
           player={players[viewing.id] ?? viewing}
+          teamId={team.id}
           onClose={() => setViewing(null)}
           status={absences[viewing.id]
             ? `Fora ${absences[viewing.id].duration} ${absences[viewing.id].duration === 1 ? 'jogo' : 'jogos'} · ${absences[viewing.id].reason === 'injury' ? 'lesionado' : 'suspenso'}`

@@ -1,10 +1,13 @@
 import React from 'react';
-import { View, Text, Pressable, Modal } from 'react-native';
+import { View, Text, Modal } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-// RN port of the web's fired takeover. The owner let the GM go, so there's no
-// continuing this franchise — the only way out is taking over another team
-// (a fresh save). The web used a `fixed inset-0` div; here it's an RN Modal,
-// which sidesteps the ancestor-transform containing-block trap entirely.
+import { COLORS, FONT } from '../src/theme/tokens';
+import { CtaButton, BodyText } from './ui/kit';
+
+// Design 5e ("Transmissão"). A red stroke, "VOCÊ FOI DEMITIDO" at 88px, the
+// owner's reason, the record of the tenure — and the way back in.
+
 interface FiredOverlayProps {
   visible: boolean;
   note?: string;
@@ -13,33 +16,35 @@ interface FiredOverlayProps {
   onRestart: () => void;
 }
 
-const FiredOverlay: React.FC<FiredOverlayProps> = ({ visible, note, seasons, titles, onRestart }) => (
-  <Modal visible={visible} animationType="fade" transparent statusBarTranslucent>
-    <View className="flex-1 items-center justify-center px-6 bg-ink/95">
-      <View className="w-full max-w-lg items-center gap-5">
-        <Text className="text-[10px] font-black uppercase tracking-[3px] text-red-500">Diretoria</Text>
-        <Text className="text-5xl font-display uppercase tracking-tighter text-white text-center leading-[52px]">
-          Você foi{'\n'}demitido
-        </Text>
-        {note ? <Text className="text-slate-400 text-sm leading-5 text-center">{note}</Text> : null}
-
-        <View className="flex-row justify-center gap-10 py-1">
-          <View className="items-center">
-            <Text className="text-3xl font-black text-white">{seasons}</Text>
-            <Text className="text-[10px] font-bold uppercase tracking-widest text-slate-500">Temporadas</Text>
-          </View>
-          <View className="items-center">
-            <Text className="text-3xl font-black text-white">{titles}</Text>
-            <Text className="text-[10px] font-bold uppercase tracking-widest text-slate-500">Títulos</Text>
+const FiredOverlay: React.FC<FiredOverlayProps> = ({ visible, note, seasons, titles, onRestart }) => {
+  const insets = useSafeAreaInsets();
+  return (
+    <Modal visible={visible} animationType="fade" transparent statusBarTranslucent>
+      <View style={{ flex: 1, backgroundColor: COLORS.bg, paddingTop: insets.top, paddingBottom: insets.bottom }}>
+        <View style={{ flex: 1, justifyContent: 'center', paddingHorizontal: 22, gap: 22 }}>
+          <View style={{ height: 6, width: 60, backgroundColor: COLORS.bad }} />
+          <Text style={{ fontFamily: FONT.cond800, fontSize: 88, lineHeight: 74, color: COLORS.text, textTransform: 'uppercase' }} adjustsFontSizeToFit numberOfLines={2}>
+            Você foi{'\n'}demitido
+          </Text>
+          {note ? <BodyText size={16}>{note}</BodyText> : null}
+          <View style={{ borderTopWidth: 1, borderTopColor: COLORS.line }}>
+            {[
+              ['Temporadas no cargo', String(seasons)],
+              ['Títulos', String(titles)],
+            ].map(([k, v], i) => (
+              <View key={k} className="flex-row justify-between" style={{ paddingVertical: 12, borderBottomWidth: i === 0 ? 1 : 0, borderBottomColor: COLORS.line }}>
+                <Text style={{ fontFamily: FONT.body500, fontSize: 15, color: COLORS.muted }}>{k}</Text>
+                <Text style={{ fontFamily: FONT.cond700, fontSize: 16, color: COLORS.text }}>{v}</Text>
+              </View>
+            ))}
           </View>
         </View>
-
-        <Pressable accessibilityRole="button" onPress={onRestart} className="px-8 py-4 rounded-card bg-white active:opacity-80">
-          <Text className="text-slate-950 font-black uppercase tracking-wide">Assumir outro time</Text>
-        </Pressable>
+        <View style={{ paddingHorizontal: 16, paddingTop: 12, paddingBottom: 22 }}>
+          <CtaButton label="Procurar outro time" onPress={onRestart} size={20} />
+        </View>
       </View>
-    </View>
-  </Modal>
-);
+    </Modal>
+  );
+};
 
 export default FiredOverlay;
