@@ -1,12 +1,14 @@
 import React from 'react';
 import { View, Text, Pressable, ViewStyle, TextStyle, StyleProp } from 'react-native';
-import { LinearGradient } from 'expo-linear-gradient';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { COLORS, INK, RADIUS, tracking, withAlpha } from '../../src/theme/tokens';
+import { COLORS, INK, RADIUS, FONT, tracking, withAlpha, onAccent } from '../../src/theme/tokens';
+import { getTeamAccent } from '../../constants';
 
-// The "Console MyGM" primitives. Everything the redesign repeats — the panel,
-// the mono label, the meter, the one red CTA — lives here so the 15 screens
-// stay literally the same system instead of 15 near-misses.
+// The "Transmissão" primitives (design_handoff_redesign_transmissao). Everything
+// the redesign repeats — the card, the condensed label, the meter, the one light
+// CTA, the tricode badge — lives here so the screens stay literally the same
+// system instead of 25 near-misses.
 //
 // Colors are passed as concrete strings, never as `bg-accent/40` classes: the
 // accent is a runtime CSS variable and NativeWind's opacity shorthand does not
@@ -17,14 +19,18 @@ import { COLORS, INK, RADIUS, tracking, withAlpha } from '../../src/theme/tokens
 /* -------------------------------------------------------------------------- */
 
 /**
- * The smallest a label may render. The mockups went down to 7-8.5px, which is
- * legible on a 2x desktop render and not on a phone held at arm's length --
- * 186 labels in the app sat at or under 9.5px. Raised here, once, instead of in
- * every call site; nothing that asks for more is touched.
+ * The smallest a label may render. Barlow Condensed is narrow, so the floor is
+ * higher than the old mono's: below ~10px it stops being readable on a phone.
  */
-export const MIN_LABEL_SIZE = 9;
+export const MIN_LABEL_SIZE = 10;
 
-/** JetBrains Mono micro-label — the workhorse label of the whole design. */
+/**
+ * Old call sites were sized for JetBrains Mono, a wide face. Barlow Condensed
+ * at the same size reads ~20% smaller, so labels scale up once, here.
+ */
+const LABEL_SCALE = 1.2;
+
+/** Condensed 700 label with wide tracking — the workhorse label of the design. */
 export const MonoLabel: React.FC<{
   children: React.ReactNode;
   color?: string;
@@ -32,33 +38,29 @@ export const MonoLabel: React.FC<{
   style?: StyleProp<TextStyle>;
   numberOfLines?: number;
 }> = ({ children, color = INK.label, size: asked = 9, style, numberOfLines }) => {
-  const size = Math.max(MIN_LABEL_SIZE, asked);
+  const size = Math.max(MIN_LABEL_SIZE, Math.round(asked * LABEL_SCALE * 2) / 2);
   return (
     <Text
-      className="font-mono-bold"
       numberOfLines={numberOfLines}
-      style={[{ fontSize: size, letterSpacing: tracking(size, 0.16), color, textTransform: 'uppercase' }, style]}
+      style={[{ fontFamily: FONT.cond700, fontSize: size, letterSpacing: tracking(size, 0.12), color, textTransform: 'uppercase' }, style]}
     >
       {children}
     </Text>
   );
 };
 
-/** The wider-tracked label that rides on the hero band. */
+/** The label above a screen title ("PASSO 2 DE 2", "TEMPORADA 3 · 2025-26"). */
 export const Eyebrow: React.FC<{ children: React.ReactNode; color?: string; size?: number }> = ({
   children,
-  color = INK.labelOnHero,
-  size = 9.5,
+  color = COLORS.muted,
+  size = 11,
 }) => (
-  <Text
-    className="font-mono-bold"
-    style={{ fontSize: size, letterSpacing: tracking(size, 0.2), color, textTransform: 'uppercase' }}
-  >
+  <Text style={{ fontFamily: FONT.cond700, fontSize: Math.max(MIN_LABEL_SIZE, size), letterSpacing: tracking(size, 0.14), color, textTransform: 'uppercase' }}>
     {children}
   </Text>
 );
 
-/** Inter 900 italic display face. Hero titles and CTA labels only. */
+/** Condensed 800 display face: titles, team names, CTA labels. */
 export const HeroTitle: React.FC<{
   children: React.ReactNode;
   size?: number;
@@ -66,14 +68,13 @@ export const HeroTitle: React.FC<{
   style?: StyleProp<TextStyle>;
   numberOfLines?: number;
   adjustsFontSizeToFit?: boolean;
-}> = ({ children, size = 30, color = COLORS.text, style, numberOfLines, adjustsFontSizeToFit }) => (
+}> = ({ children, size = 34, color = COLORS.text, style, numberOfLines, adjustsFontSizeToFit }) => (
   <Text
-    className="font-display"
     numberOfLines={numberOfLines}
     adjustsFontSizeToFit={adjustsFontSizeToFit}
-    minimumFontScale={0.6}
+    minimumFontScale={0.55}
     style={[
-      { fontSize: size, lineHeight: size * 1.02, letterSpacing: -size * 0.035, color, textTransform: 'uppercase' },
+      { fontFamily: FONT.cond800, fontSize: size, lineHeight: size * 0.98, letterSpacing: 0, color, textTransform: 'uppercase' },
       style,
     ]}
   >
@@ -81,7 +82,7 @@ export const HeroTitle: React.FC<{
   </Text>
 );
 
-/** Mono number, the design's rule for every figure on screen. */
+/** A number: condensed 800, tabular. */
 export const Stat: React.FC<{
   children: React.ReactNode;
   size?: number;
@@ -89,16 +90,58 @@ export const Stat: React.FC<{
   style?: StyleProp<TextStyle>;
   numberOfLines?: number;
   fit?: boolean;
-}> = ({ children, size = 20, color = COLORS.text, style, numberOfLines = 1, fit }) => (
+}> = ({ children, size = 22, color = COLORS.text, style, numberOfLines = 1, fit }) => (
   <Text
-    className="font-mono-bold"
     numberOfLines={numberOfLines}
     adjustsFontSizeToFit={fit}
     minimumFontScale={0.6}
-    style={[{ fontSize: size, lineHeight: size * 1.06, color }, style]}
+    style={[{ fontFamily: FONT.cond800, fontSize: size * 1.1, lineHeight: size * 1.12, color, fontVariant: ['tabular-nums'] }, style]}
   >
     {children}
   </Text>
+);
+
+/** Body copy: Barlow 500, muted. */
+export const BodyText: React.FC<{
+  children: React.ReactNode;
+  size?: number;
+  color?: string;
+  style?: StyleProp<TextStyle>;
+  numberOfLines?: number;
+}> = ({ children, size = 13.5, color = COLORS.muted, style, numberOfLines }) => (
+  <Text numberOfLines={numberOfLines} style={[{ fontFamily: FONT.body500, fontSize: size, lineHeight: size * 1.45, color }, style]}>
+    {children}
+  </Text>
+);
+
+/** A name in a list: condensed 600. */
+export const Name: React.FC<{
+  children: React.ReactNode;
+  size?: number;
+  color?: string;
+  style?: StyleProp<TextStyle>;
+  numberOfLines?: number;
+}> = ({ children, size = 15, color = COLORS.text, style, numberOfLines = 1 }) => (
+  <Text numberOfLines={numberOfLines} style={[{ fontFamily: FONT.cond600, fontSize: size, lineHeight: size * 1.15, color }, style]}>
+    {children}
+  </Text>
+);
+
+/** Screen title block: optional label + 34px condensed title. */
+export const ScreenTitle: React.FC<{ label?: string; title: string; right?: React.ReactNode; style?: StyleProp<ViewStyle> }> = ({
+  label, title, right, style,
+}) => (
+  <View style={[{ paddingHorizontal: 20, paddingTop: 10, paddingBottom: 14 }, style]}>
+    <View className="flex-row items-end justify-between" style={{ gap: 10 }}>
+      <View className="flex-1">
+        {label ? <Eyebrow>{label}</Eyebrow> : null}
+        <HeroTitle size={34} style={{ marginTop: label ? 4 : 0 }} numberOfLines={2} adjustsFontSizeToFit>
+          {title}
+        </HeroTitle>
+      </View>
+      {right}
+    </View>
+  </View>
 );
 
 /* -------------------------------------------------------------------------- */
@@ -107,9 +150,9 @@ export const Stat: React.FC<{
 
 interface PanelProps {
   children: React.ReactNode;
-  /** 3px left edge bar, in the color of whatever the panel is about. */
+  /** 3px inset on the left edge, in the color of whatever the card is about. */
   bar?: string;
-  /** 2px ring — marks "this is the one that matters" (your team, your pick). */
+  /** 1px outline — marks "this is the one that matters" (your team, your pick). */
   highlight?: string;
   padding?: number;
   radius?: number;
@@ -122,9 +165,9 @@ export const Panel: React.FC<PanelProps> = ({
   children,
   bar,
   highlight,
-  padding = 13,
+  padding = 14,
   radius = RADIUS.card,
-  fill = COLORS.panel,
+  fill = COLORS.surface,
   className = '',
   style,
 }) => (
@@ -134,8 +177,8 @@ export const Panel: React.FC<PanelProps> = ({
       {
         backgroundColor: fill,
         borderRadius: radius,
-        borderWidth: highlight ? 2 : 1,
-        borderColor: highlight ?? COLORS.line,
+        borderWidth: highlight ? 1 : 0,
+        borderColor: highlight,
         padding,
         overflow: 'hidden',
       },
@@ -148,8 +191,10 @@ export const Panel: React.FC<PanelProps> = ({
     {children}
   </View>
 );
+/** Alias: the handoff calls it Card. */
+export const Card = Panel;
 
-/** An inset well inside a panel — rows, quotes, mini-tiles. */
+/** An inset well inside a card — rows, quotes, mini-tiles. */
 export const Well: React.FC<{
   children: React.ReactNode;
   padding?: number;
@@ -157,12 +202,12 @@ export const Well: React.FC<{
   className?: string;
   style?: StyleProp<ViewStyle>;
 }> = ({ children, padding = 10, radius = RADIUS.control, className = '', style }) => (
-  <View className={className} style={[{ backgroundColor: COLORS.sunken, borderRadius: radius, padding }, style]}>
+  <View className={className} style={[{ backgroundColor: COLORS.surface2, borderRadius: radius, padding }, style]}>
     {children}
   </View>
 );
 
-/** label-over-number tile. Three of these in a row is the design's stat strip. */
+/** label-over-number tile. */
 export const StatTile: React.FC<{
   label: string;
   value: React.ReactNode;
@@ -171,18 +216,101 @@ export const StatTile: React.FC<{
   bar?: string;
   children?: React.ReactNode;
 }> = ({ label, value, sub, color = COLORS.text, bar, children }) => (
-  <Panel bar={bar} padding={13} className="flex-1">
-    <MonoLabel size={8}>{label}</MonoLabel>
-    <Stat size={21} color={color} style={{ marginTop: 4 }} fit>
+  <Panel bar={bar} padding={13} radius={RADIUS.tile} className="flex-1">
+    <MonoLabel size={9}>{label}</MonoLabel>
+    <Stat size={22} color={color} style={{ marginTop: 3 }} fit>
       {value}
     </Stat>
     {sub ? (
-      <MonoLabel size={9} color={INK.meta} style={{ marginTop: 4, letterSpacing: 0 }}>
+      <BodyText size={11.5} color={COLORS.dim} style={{ marginTop: 2 }} numberOfLines={2}>
         {sub}
-      </MonoLabel>
+      </BodyText>
     ) : null}
     {children}
   </Panel>
+);
+
+/**
+ * A row of numbers separated by vertical hairlines — GERAL / ATAQUE / DEFESA.
+ * `onColor` for a strip sitting on a franchise-color block.
+ */
+export const StatStrip: React.FC<{
+  items: { label: string; value: React.ReactNode; color?: string }[];
+  size?: number;
+  onColor?: string;
+  style?: StyleProp<ViewStyle>;
+}> = ({ items, size = 26, onColor, style }) => {
+  const ink = onColor ? onAccent(onColor) : COLORS.text;
+  const divider = onColor ? withAlpha(ink === '#ffffff' ? '#ffffff' : '#000000', 0.18) : COLORS.line;
+  return (
+    <View className="flex-row" style={style}>
+      {items.map((it, i) => (
+        <View
+          key={it.label}
+          className="flex-1"
+          style={{ paddingHorizontal: 10, paddingVertical: 4, borderLeftWidth: i ? 1 : 0, borderLeftColor: divider }}
+        >
+          <Stat size={size} color={it.color ?? ink} fit>{it.value}</Stat>
+          <Text style={{ fontFamily: FONT.cond700, fontSize: 11, letterSpacing: 1.2, color: onColor ? withAlpha(ink === '#ffffff' ? '#ffffff' : '#000000', 0.7) : COLORS.muted, textTransform: 'uppercase', marginTop: 1 }}>
+            {it.label}
+          </Text>
+        </View>
+      ))}
+    </View>
+  );
+};
+
+/* -------------------------------------------------------------------------- */
+/* Identity                                                                    */
+/* -------------------------------------------------------------------------- */
+
+/**
+ * The team's tricode on a flat block of its primary color. Replaces logos in
+ * dense lists. Sizes: 30x20 list, 32x22 picker, 44x44 game, 62x62 hero.
+ */
+export const TeamBadge: React.FC<{
+  teamId: string;
+  width?: number;
+  height?: number;
+  /** Override the fill (neutral badge on Home). */
+  fill?: string;
+  style?: StyleProp<ViewStyle>;
+}> = ({ teamId, width = 30, height = 20, fill, style }) => {
+  const bg = fill ?? getTeamAccent(teamId).primary;
+  const big = height >= 40;
+  const fontSize = big ? Math.round(height * 0.34) : Math.max(10, Math.round(height * 0.52));
+  return (
+    <View
+      style={[{
+        width, height, borderRadius: big ? Math.round(height * 0.22) : 4,
+        backgroundColor: bg, alignItems: 'center', justifyContent: 'center',
+      }, style]}
+    >
+      <Text style={{ fontFamily: FONT.cond800, fontSize, color: onAccent(bg), letterSpacing: 0.4 }} numberOfLines={1}>
+        {teamId.toUpperCase()}
+      </Text>
+    </View>
+  );
+};
+
+/** Outline tag: RIVAL, VOCÊ, PLAYOFFS... never wraps. */
+export const Tag: React.FC<{
+  children: React.ReactNode;
+  color?: string;
+  filled?: boolean;
+  style?: StyleProp<ViewStyle>;
+}> = ({ children, color = COLORS.muted, filled, style }) => (
+  <View
+    style={[{
+      flexShrink: 0, paddingHorizontal: 7, paddingVertical: 2.5, borderRadius: RADIUS.tag,
+      borderWidth: 1, borderColor: filled ? color : withAlpha(color, 0.55),
+      backgroundColor: filled ? color : 'transparent', alignSelf: 'flex-start',
+    }, style]}
+  >
+    <Text numberOfLines={1} style={{ fontFamily: FONT.cond700, fontSize: 11.5, letterSpacing: 1.1, color: filled ? onAccent(color) : color, textTransform: 'uppercase' }}>
+      {children}
+    </Text>
+  </View>
 );
 
 /* -------------------------------------------------------------------------- */
@@ -192,12 +320,12 @@ export const StatTile: React.FC<{
 export type ChipTone = 'good' | 'warn' | 'bad' | 'info' | 'neutral' | 'solid';
 
 const CHIP: Record<ChipTone, { bg: string; border: string; fg: string }> = {
-  good: { bg: withAlpha(COLORS.goodSoft, 0.12), border: withAlpha(COLORS.goodSoft, 0.3), fg: COLORS.goodSoft },
-  warn: { bg: withAlpha(COLORS.warn, 0.12), border: withAlpha(COLORS.warn, 0.32), fg: COLORS.warn },
-  bad: { bg: withAlpha(COLORS.cta, 0.12), border: withAlpha(COLORS.cta, 0.32), fg: COLORS.badSoft },
-  info: { bg: withAlpha(COLORS.info, 0.12), border: withAlpha(COLORS.info, 0.3), fg: COLORS.info },
-  neutral: { bg: COLORS.panel, border: COLORS.line, fg: COLORS.textDim },
-  solid: { bg: '#ffffff', border: '#ffffff', fg: COLORS.bg },
+  good: { bg: 'transparent', border: withAlpha(COLORS.good, 0.55), fg: COLORS.good },
+  warn: { bg: 'transparent', border: withAlpha(COLORS.warn, 0.55), fg: COLORS.warn },
+  bad: { bg: 'transparent', border: withAlpha(COLORS.bad, 0.55), fg: COLORS.bad },
+  info: { bg: 'transparent', border: withAlpha(COLORS.east, 0.55), fg: COLORS.east },
+  neutral: { bg: COLORS.surface2, border: COLORS.surface2, fg: COLORS.muted },
+  solid: { bg: COLORS.ctaFill, border: COLORS.ctaFill, fg: COLORS.ctaInk },
 };
 
 export const Chip: React.FC<{
@@ -207,31 +335,24 @@ export const Chip: React.FC<{
   size?: number;
   mono?: boolean;
   style?: StyleProp<ViewStyle>;
-}> = ({ children, tone = 'neutral', onPress, size = 10, mono = false, style }) => {
+}> = ({ children, tone = 'neutral', onPress, size = 10, style }) => {
   const c = CHIP[tone];
+  const fs = Math.max(11, size * 1.15);
   const inner = (
-    <Text
-      className={mono ? 'font-mono-bold' : 'font-bold'}
-      style={{
-        fontSize: size,
-        color: c.fg,
-        letterSpacing: mono ? tracking(size, 0.08) : 0,
-        textTransform: mono ? 'uppercase' : 'none',
-      }}
-    >
+    <Text numberOfLines={1} style={{ fontFamily: FONT.cond700, fontSize: fs, color: c.fg, letterSpacing: 0.8, textTransform: 'uppercase' }}>
       {children}
     </Text>
   );
   const box: ViewStyle = {
-    paddingHorizontal: 11,
-    paddingVertical: 6,
-    borderRadius: RADIUS.pill,
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderRadius: RADIUS.tag + 2,
     backgroundColor: c.bg,
     borderWidth: 1,
     borderColor: c.border,
   };
   return onPress ? (
-    <Pressable onPress={onPress} style={[box, style]} className="active:opacity-70" accessibilityRole="button">
+    <Pressable onPress={onPress} style={[box, style]} className="active:opacity-75" accessibilityRole="button">
       {inner}
     </Pressable>
   ) : (
@@ -239,7 +360,7 @@ export const Chip: React.FC<{
   );
 };
 
-/** Horizontal filter chips (TODAS / LESTE / OESTE …). */
+/** Filter chips (TODAS / PG / SG …): active is light, inactive surface2. */
 export const FilterRow: React.FC<{
   items: { id: string; label: string }[];
   value: string;
@@ -257,20 +378,16 @@ export const FilterRow: React.FC<{
           accessibilityLabel={it.label}
           aria-selected={active}
           hitSlop={{ top: 6, bottom: 6 }}
-          className="active:opacity-70"
+          className="active:opacity-75"
           style={{
-            paddingHorizontal: 12,
-            paddingVertical: 6,
-            borderRadius: RADIUS.control,
-            backgroundColor: active ? '#ffffff' : COLORS.panel,
-            borderWidth: 1,
-            borderColor: active ? '#ffffff' : COLORS.line,
+            minHeight: 34,
+            paddingHorizontal: 13,
+            justifyContent: 'center',
+            borderRadius: RADIUS.chip,
+            backgroundColor: active ? COLORS.ctaFill : COLORS.surface2,
           }}
         >
-          <Text
-            className={active ? 'font-black' : 'font-bold'}
-            style={{ fontSize: 10.5, color: active ? COLORS.bg : COLORS.textDim, textTransform: 'uppercase' }}
-          >
+          <Text style={{ fontFamily: FONT.cond700, fontSize: 13, letterSpacing: 1, color: active ? COLORS.ctaInk : COLORS.muted, textTransform: 'uppercase' }}>
             {it.label}
           </Text>
         </Pressable>
@@ -279,39 +396,31 @@ export const FilterRow: React.FC<{
   </View>
 );
 
-/** Progress / share meter. `value` is 0..1. */
+/** Progress / share meter. `value` is 0..1. Solid fill, never a gradient. */
 export const Meter: React.FC<{
   value: number;
   color?: string;
+  /** Kept for old call sites: the first color is used, flat. */
   colors?: [string, string];
   height?: number;
   track?: string;
   style?: StyleProp<ViewStyle>;
-}> = ({ value, color = COLORS.good, colors, height = 6, track = COLORS.line, style }) => {
+}> = ({ value, color = COLORS.good, colors, height = 4, track = COLORS.lineStrong, style }) => {
   const pct = `${Math.max(0, Math.min(1, value || 0)) * 100}%` as const;
   return (
-    <View style={[{ height, borderRadius: RADIUS.pill, backgroundColor: track, overflow: 'hidden' }, style]}>
-      {colors ? (
-        <LinearGradient
-          colors={colors}
-          start={{ x: 0, y: 0 }}
-          end={{ x: 1, y: 0 }}
-          style={{ width: pct, height: '100%', borderRadius: RADIUS.pill }}
-        />
-      ) : (
-        <View style={{ width: pct, height: '100%', backgroundColor: color, borderRadius: RADIUS.pill }} />
-      )}
+    <View style={[{ height, borderRadius: 2, backgroundColor: track, overflow: 'hidden' }, style]}>
+      <View style={{ width: pct, height: '100%', backgroundColor: colors ? colors[0] : color, borderRadius: 2 }} />
     </View>
   );
 };
 
-/** Circular initials, the stand-in wherever a headshot doesn't belong. */
+/** Square initials, the stand-in wherever a headshot doesn't belong. */
 export const Initials: React.FC<{
   name: string;
   size?: number;
   gradient?: [string, string];
   color?: string;
-}> = ({ name, size = 34, gradient, color = COLORS.info }) => {
+}> = ({ name, size = 34, gradient, color = COLORS.textSoft }) => {
   const letters = name
     .split(' ')
     .filter(Boolean)
@@ -319,18 +428,11 @@ export const Initials: React.FC<{
     .map((w) => w[0])
     .join('')
     .toUpperCase();
-  const label = (
-    <Text className="font-black" style={{ fontSize: size * 0.32, color: gradient ? '#fff' : color }}>
-      {letters}
-    </Text>
-  );
-  const box: ViewStyle = { width: size, height: size, borderRadius: RADIUS.pill, alignItems: 'center', justifyContent: 'center' };
-  return gradient ? (
-    <LinearGradient colors={gradient} start={{ x: 0.1, y: 0 }} end={{ x: 0.9, y: 1 }} style={box}>
-      {label}
-    </LinearGradient>
-  ) : (
-    <View style={[box, { backgroundColor: COLORS.line }]}>{label}</View>
+  const bg = gradient ? gradient[0] : COLORS.surface2;
+  return (
+    <View style={{ width: size, height: size, borderRadius: Math.round(size * 0.22), alignItems: 'center', justifyContent: 'center', backgroundColor: bg }}>
+      <Text style={{ fontFamily: FONT.cond800, fontSize: size * 0.38, color: gradient ? onAccent(bg) : color }}>{letters}</Text>
+    </View>
   );
 };
 
@@ -339,25 +441,28 @@ export const Initials: React.FC<{
 /* -------------------------------------------------------------------------- */
 
 /**
- * The one red action per screen. `sub` turns it into the wide row-with-chevron
- * form the mockups use for "AVANÇAR TEMPORADA" / "JOGAR O JOGO 7".
+ * The one main action per screen — LIGHT. `sub` turns it into the row form:
+ * label on the left, meta + chevron on the right ("SIMULAR TEMPORADA · 29
+ * JOGOS ›").
  */
 export const CtaButton: React.FC<{
   label: string;
   sub?: string;
   onPress: () => void;
   disabled?: boolean;
-  /** Gold, for the champion screen — the one screen allowed to break the red rule. */
+  /** Gold, for the champion screen. */
   gold?: boolean;
+  /** Team-color variant (allowed by the handoff as the alternative CTA). */
+  tint?: string;
   size?: number;
   style?: StyleProp<ViewStyle>;
-}> = ({ label, sub, onPress, disabled, gold, size = sub ? 15 : 15, style }) => {
-  const tint: [string, string] = gold ? [COLORS.gold, COLORS.goldDeep] : [COLORS.cta, COLORS.ctaDark];
-  const fg = gold ? '#1a1305' : '#fff';
+}> = ({ label, sub, onPress, disabled, gold, tint, size = 19, style }) => {
+  const fill = gold ? COLORS.gold : tint ?? COLORS.ctaFill;
+  const ink = gold ? COLORS.goldInk : tint ? onAccent(tint) : COLORS.ctaInk;
 
   // Disabled keeps its `sub`. That line is where every screen explains WHY the
   // action is closed ("Faltam 2 para o mínimo", "Dispense 3 em Meu Time") --
-  // dropping it with the gradient left a grey button and no reason.
+  // dropping it left a grey button and no reason.
   if (disabled) {
     return (
       <View
@@ -366,24 +471,17 @@ export const CtaButton: React.FC<{
         accessibilityLabel={sub ? `${label}. ${sub}` : label}
         style={[
           {
-            borderRadius: 18,
-            paddingVertical: sub ? 14 : 16,
-            paddingHorizontal: 16,
-            backgroundColor: COLORS.panel,
-            borderWidth: 1,
-            borderColor: COLORS.line,
-            alignItems: 'center',
+            minHeight: 54, borderRadius: 14, paddingVertical: 10, paddingHorizontal: 16,
+            backgroundColor: COLORS.surface2, alignItems: 'center', justifyContent: 'center',
           },
           style,
         ]}
       >
-        <Text className="font-black" style={{ fontSize: 13, color: INK.faint, textTransform: 'uppercase' }}>
+        <Text style={{ fontFamily: FONT.cond800, fontSize: size * 0.85, letterSpacing: 1, color: COLORS.dim, textTransform: 'uppercase' }}>
           {label}
         </Text>
         {sub ? (
-          <MonoLabel size={9.5} color={COLORS.warn} style={{ marginTop: 4, letterSpacing: 0, textAlign: 'center' }}>
-            {sub}
-          </MonoLabel>
+          <Text style={{ fontFamily: FONT.body500, fontSize: 12, color: COLORS.warn, marginTop: 2, textAlign: 'center' }}>{sub}</Text>
         ) : null}
       </View>
     );
@@ -392,67 +490,35 @@ export const CtaButton: React.FC<{
   return (
     <Pressable
       onPress={onPress}
-      className="active:opacity-85"
-      style={style}
+      className="active:opacity-75"
       accessibilityRole="button"
       accessibilityLabel={sub ? `${label}. ${sub}` : label}
+      style={[
+        {
+          minHeight: 54, borderRadius: 14, paddingHorizontal: 18, backgroundColor: fill,
+          flexDirection: 'row', alignItems: 'center', justifyContent: sub ? 'space-between' : 'center', gap: 10,
+        },
+        style,
+      ]}
     >
-      <LinearGradient
-        colors={tint}
-        start={{ x: 0, y: 0.2 }}
-        end={{ x: 1, y: 0.8 }}
-        style={{
-          borderRadius: 18,
-          paddingVertical: sub ? 14 : 16,
-          paddingHorizontal: 16,
-          flexDirection: 'row',
-          alignItems: 'center',
-          gap: 10,
-          justifyContent: sub ? 'flex-start' : 'center',
-        }}
+      <Text
+        numberOfLines={1}
+        adjustsFontSizeToFit
+        minimumFontScale={0.6}
+        style={{ flexShrink: 1, fontFamily: FONT.cond800, fontSize: size, letterSpacing: tracking(size, 0.06), color: ink, textTransform: 'uppercase' }}
       >
-        {/* flex:1 in BOTH variants, not just the row-with-chevron one. Without
-            a bounded width the label has nothing to shrink against, so
-            adjustsFontSizeToFit no-ops and a long CTA ("Assumir o Thunder")
-            gets clipped mid-word instead of scaling down — seen on device. */}
-        <View style={{ flex: 1 }}>
-          <HeroTitle
-            size={size}
-            color={fg}
-            style={{ letterSpacing: 0.2, textAlign: sub ? 'left' : 'center' }}
-            numberOfLines={1}
-            adjustsFontSizeToFit
-          >
-            {label}
-          </HeroTitle>
-          {sub ? (
-            <MonoLabel size={9.5} color={gold ? 'rgba(26,19,5,0.75)' : 'rgba(255,255,255,0.75)'} style={{ marginTop: 2, letterSpacing: 0 }}>
-              {sub}
-            </MonoLabel>
-          ) : null}
-        </View>
-        {sub ? (
-          <View
-            style={{
-              width: 32,
-              height: 32,
-              borderRadius: RADIUS.pill,
-              backgroundColor: 'rgba(0,0,0,0.25)',
-              alignItems: 'center',
-              justifyContent: 'center',
-            }}
-          >
-            <Text className="font-black" style={{ fontSize: 15, color: fg, lineHeight: 18 }}>
-              ›
-            </Text>
-          </View>
-        ) : null}
-      </LinearGradient>
+        {label}
+      </Text>
+      {sub ? (
+        <Text numberOfLines={1} style={{ flexShrink: 0, fontFamily: FONT.cond700, fontSize: 13.5, letterSpacing: 0.8, color: withAlpha(ink === '#ffffff' ? '#ffffff' : ink, 0.6), textTransform: 'uppercase' }}>
+          {sub} ›
+        </Text>
+      ) : null}
     </Pressable>
   );
 };
 
-/** Secondary action — never competes with the red. */
+/** Outline secondary action — never competes with the light CTA. */
 export const GhostButton: React.FC<{
   label: string;
   onPress?: () => void;
@@ -460,37 +526,57 @@ export const GhostButton: React.FC<{
   color?: string;
   size?: number;
   padding?: number;
+  /** surface2 fill instead of an outline (the dock's secondary buttons). */
+  filled?: boolean;
   style?: StyleProp<ViewStyle>;
-}> = ({ label, onPress, disabled, color = COLORS.textDim, size = 11.5, padding = 13, style }) => (
+}> = ({ label, onPress, disabled, color = COLORS.text, size = 14.5, padding = 12, filled, style }) => (
   <Pressable
     onPress={disabled ? undefined : onPress}
-    className="active:opacity-70"
+    className="active:opacity-75"
     accessibilityRole="button"
     accessibilityLabel={label}
     aria-disabled={!!disabled}
     style={[
       {
-        borderRadius: 16,
+        minHeight: 46,
+        borderRadius: 12,
         paddingVertical: padding,
         paddingHorizontal: 12,
-        backgroundColor: COLORS.ghost,
-        borderWidth: 1,
-        borderColor: COLORS.line,
+        backgroundColor: filled ? COLORS.surface2 : 'transparent',
+        borderWidth: filled ? 0 : 1,
+        borderColor: COLORS.ghostBorder,
         alignItems: 'center',
+        justifyContent: 'center',
         opacity: disabled ? 0.4 : 1,
       },
       style,
     ]}
   >
-    <Text className="font-black" style={{ fontSize: size, color, textTransform: 'uppercase' }} numberOfLines={1}>
+    <Text numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.7} style={{ fontFamily: FONT.cond700, fontSize: Math.max(13, size * 1.15), letterSpacing: 1.1, color, textTransform: 'uppercase' }}>
       {label}
     </Text>
   </Pressable>
 );
 
 /** Section heading between card groups. */
-export const SectionLabel: React.FC<{ children: React.ReactNode; color?: string }> = ({ children, color }) => (
-  <MonoLabel color={color ?? INK.label} style={{ paddingLeft: 3 }}>
-    {children}
-  </MonoLabel>
+export const SectionLabel: React.FC<{ children: React.ReactNode; color?: string; right?: React.ReactNode }> = ({ children, color, right }) => (
+  <View className="flex-row items-center justify-between" style={{ paddingHorizontal: 2, marginTop: 4 }}>
+    <Text style={{ fontFamily: FONT.cond700, fontSize: 11, letterSpacing: 1.5, color: color ?? COLORS.muted, textTransform: 'uppercase' }}>
+      {children}
+    </Text>
+    {right}
+  </View>
 );
+
+/**
+ * The fixed action bar above the bottom nav: bg #111114, top hairline,
+ * padding 12/14. Pass it as a Screen `footer`.
+ */
+export const Dock: React.FC<{ children: React.ReactNode; style?: StyleProp<ViewStyle> }> = ({ children, style }) => {
+  const insets = useSafeAreaInsets();
+  return (
+    <View style={[{ backgroundColor: COLORS.dockBg, borderTopWidth: 1, borderTopColor: COLORS.line, paddingHorizontal: 14, paddingTop: 12, paddingBottom: 12 + Math.max(0, insets.bottom * 0), gap: 8 }, style]}>
+      {children}
+    </View>
+  );
+};

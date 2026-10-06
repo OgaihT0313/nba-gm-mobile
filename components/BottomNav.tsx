@@ -1,28 +1,25 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, Pressable, Modal } from 'react-native';
-import { LinearGradient } from 'expo-linear-gradient';
-import Icon, { IconName } from './Icon';
+import { IconName } from './Icon';
 import { useTheme } from '../src/theme/ThemeProvider';
-import { COLORS, onAccent } from '../src/theme/tokens';
+import { COLORS, FONT } from '../src/theme/tokens';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-// The rounded 20px square behind each tab icon. Active gets the franchise
-// gradient; idle gets the flat navy chip.
-const NavChip: React.FC<{ active: boolean; icon: IconName; accent: { primary: string; secondary: string } }> = ({
-  active,
-  icon,
-  accent,
-}) => {
-  const box = { width: 30, height: 30, borderRadius: 9, alignItems: 'center', justifyContent: 'center' } as const;
-  return active ? (
-    <LinearGradient colors={[accent.primary, accent.secondary]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={box}>
-      <Icon name={icon} size={17} color="#ffffff" strokeWidth={2} />
-    </LinearGradient>
-  ) : (
-    <View style={[box, { backgroundColor: COLORS.navIdleChip }]}>
-      <Icon name={icon} size={17} color={COLORS.navIdle} strokeWidth={1.8} />
-    </View>
-  );
-};
+// "Transmissão" nav: text only, no icon chips. The active tab is marked by a
+// 20x3 stroke in the team's primary above its label.
+const NavLabel: React.FC<{ active: boolean; label: string; color: string }> = ({ active, label, color }) => (
+  <View className="items-center" style={{ gap: 7 }}>
+    <View style={{ width: 20, height: 3, borderRadius: 2, backgroundColor: active ? color : 'transparent' }} />
+    <Text
+      numberOfLines={1}
+      adjustsFontSizeToFit
+      minimumFontScale={0.8}
+      style={{ fontFamily: FONT.cond700, fontSize: 13, letterSpacing: 1, color: active ? COLORS.text : COLORS.dim, textTransform: 'uppercase' }}
+    >
+      {label}
+    </Text>
+  </View>
+);
 
 interface NavItem {
   id: string;
@@ -60,6 +57,7 @@ const MORE_ITEMS: NavItem[] = [
 const BottomNav: React.FC<BottomNavProps> = ({ view, onNavigate, hasSeason, faOpen, draftOpen }) => {
   const [moreOpen, setMoreOpen] = useState(false);
   const { accent } = useTheme();
+  const insets = useSafeAreaInsets();
 
   useEffect(() => {
     setMoreOpen(false);
@@ -94,12 +92,11 @@ const BottomNav: React.FC<BottomNavProps> = ({ view, onNavigate, hasSeason, faOp
       <Modal visible={moreOpen} transparent animationType="slide" onRequestClose={() => setMoreOpen(false)}>
         <Pressable accessible={false} className="flex-1 bg-black/60 justify-end" onPress={() => setMoreOpen(false)}>
           <Pressable
-            className="rounded-t-3xl p-4 pb-8"
-            style={{ backgroundColor: COLORS.navBg, borderTopWidth: 1, borderTopColor: COLORS.navLine }}
+            style={{ backgroundColor: COLORS.navBg, borderTopLeftRadius: 24, borderTopRightRadius: 24, padding: 14, paddingBottom: 14 + insets.bottom }}
             onPress={(e) => e.stopPropagation()}
           >
-            <View className="w-10 h-1 rounded-full self-center mb-4" style={{ backgroundColor: COLORS.line }} />
-            <View className="flex-row flex-wrap justify-between">
+            <View className="self-center mb-3" style={{ width: 40, height: 4, borderRadius: 2, backgroundColor: COLORS.lineStrong }} />
+            <View style={{ gap: 6 }}>
               {MORE_ITEMS.map((item) => {
                 const disabled = isDisabled(item.id);
                 const active = view === item.id;
@@ -110,18 +107,13 @@ const BottomNav: React.FC<BottomNavProps> = ({ view, onNavigate, hasSeason, faOp
                     accessibilityRole="button"
                     accessibilityLabel={item.label}
                     aria-disabled={disabled} aria-selected={active}
-                    className={`w-[31%] mb-3 items-center justify-center gap-2 py-4 rounded-2xl ${disabled ? 'opacity-30' : ''}`}
+                    className="active:opacity-75"
                     style={{
-                      backgroundColor: active ? accent.primary : COLORS.panel,
-                      borderWidth: 1,
-                      borderColor: active ? accent.primary : COLORS.line,
+                      minHeight: 46, paddingHorizontal: 16, borderRadius: 12, justifyContent: 'center',
+                      backgroundColor: active ? COLORS.ctaFill : COLORS.surface, opacity: disabled ? 0.35 : 1,
                     }}
                   >
-                    <Icon name={item.icon} size={22} color={active ? onAccent(accent.primary) : '#cbd5e1'} />
-                    <Text
-                      className="text-[10px] font-bold uppercase tracking-wide text-center"
-                      style={{ color: active ? onAccent(accent.primary) : '#cbd5e1' }}
-                    >
+                    <Text style={{ fontFamily: FONT.cond700, fontSize: 16, letterSpacing: 1.2, color: active ? COLORS.ctaInk : COLORS.text, textTransform: 'uppercase' }}>
                       {item.label}
                     </Text>
                   </Pressable>
@@ -132,13 +124,9 @@ const BottomNav: React.FC<BottomNavProps> = ({ view, onNavigate, hasSeason, faOp
         </Pressable>
       </Modal>
 
-      {/* The redesign's nav: darker than the page, its own hairline, and the
-          active tab marked by the team's own primary→secondary gradient rather
-          than a tinted icon — the only place in the chrome the franchise color
-          appears once you've scrolled past a screen's hero. */}
       <View
         className="flex-row"
-        style={{ backgroundColor: COLORS.navBg, borderTopWidth: 1, borderTopColor: COLORS.navLine, paddingTop: 7, paddingBottom: 9 }}
+        style={{ backgroundColor: COLORS.navBg, borderTopWidth: 1, borderTopColor: COLORS.navLine, height: 64 }}
       >
         {primaryItems.map((item) => {
           const disabled = isDisabled(item.id);
@@ -150,15 +138,10 @@ const BottomNav: React.FC<BottomNavProps> = ({ view, onNavigate, hasSeason, faOp
               accessibilityRole="tab"
               accessibilityLabel={item.label}
               aria-disabled={disabled} aria-selected={active}
-              className={`flex-1 items-center justify-center gap-1.5 py-1 ${disabled ? 'opacity-30' : ''}`}
+              className="flex-1 items-center justify-center"
+              style={{ opacity: disabled ? 0.3 : 1, paddingHorizontal: 2 }}
             >
-              <NavChip active={active} icon={item.icon} accent={accent} />
-              <Text
-                className={active ? 'text-[10px] font-black' : 'text-[10px] font-semibold'}
-                style={{ color: active ? '#fff' : COLORS.navIdle }}
-              >
-                {item.label}
-              </Text>
+              <NavLabel active={active} label={item.label} color={accent.primary} />
             </Pressable>
           );
         })}
@@ -167,15 +150,9 @@ const BottomNav: React.FC<BottomNavProps> = ({ view, onNavigate, hasSeason, faOp
           accessibilityRole="tab"
           accessibilityLabel="Mais"
           aria-selected={moreActive}
-          className="flex-1 items-center justify-center gap-1.5 py-1"
+          className="flex-1 items-center justify-center"
         >
-          <NavChip active={moreActive} icon="menu" accent={accent} />
-          <Text
-            className={moreActive ? 'text-[10px] font-black' : 'text-[10px] font-semibold'}
-            style={{ color: moreActive ? '#fff' : COLORS.navIdle }}
-          >
-            Mais
-          </Text>
+          <NavLabel active={moreActive} label="Mais" color={accent.primary} />
         </Pressable>
       </View>
     </>

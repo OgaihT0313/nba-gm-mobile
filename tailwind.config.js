@@ -27,30 +27,33 @@ module.exports = {
         'accent-secondary': 'var(--accent-secondary)',
         // "Console MyGM" surface ramp (see src/theme/tokens.ts, which is the
         // source of truth — these mirror it for the class-based spots).
-        ink: '#06080f',
-        panel: '#0d1526',
-        line: '#1c2942',
-        sunken: '#0a1120',
-        ghost: '#0f172a',
-        cta: '#EF3B24',
+        // "Transmissão" surface ramp (src/theme/tokens.ts is the source of
+        // truth — these mirror it for the class-based spots).
+        ink: '#0B0B0D',
+        panel: '#141417',
+        line: '#1F1F23',
+        sunken: '#1B1B1F',
+        ghost: '#1B1B1F',
+        cta: '#E5484D',
       },
       borderRadius: {
         // 3-tier scale ported from the web app's --radius-control/card/hero.
         control: '12px',
-        card: '20px',
-        hero: '32px',
+        card: '16px',
+        hero: '20px',
       },
       fontFamily: {
-        // The web hero face is Inter 900 italic. In RN a custom family doesn't
-        // synthesize weight/style, so we load the exact Black-Italic file and
-        // expose it as `font-display` — used ONLY on hero text. Everything else
-        // stays on the system font, which handles font-bold/font-black properly.
-        display: ['Inter_900BlackItalic'],
-        // Same rule for the mono face: one loaded file per weight, so bold mono
-        // is its own token. Never write `font-mono font-black` — the weight
-        // class does nothing on a custom family and you'd get regular.
-        mono: ['JetBrainsMono_400Regular'],
-        'mono-bold': ['JetBrainsMono_700Bold'],
+        // Barlow Condensed for display/labels/numbers, Barlow for body. A
+        // custom family never synthesizes weight, so every weight is its own
+        // token — never write `font-mono font-black`, the weight class does
+        // nothing on a custom family. Old names (display, mono, mono-bold) are
+        // kept so every screen moved to the new faces at once.
+        display: ['BarlowCondensed_800ExtraBold'],
+        mono: ['BarlowCondensed_600SemiBold'],
+        'mono-bold': ['BarlowCondensed_700Bold'],
+        cond: ['BarlowCondensed_700Bold'],
+        'cond-black': ['BarlowCondensed_800ExtraBold'],
+        body: ['Barlow_500Medium'],
       },
     },
   },

@@ -1,79 +1,125 @@
-// "Console MyGM" design tokens — the system fixed by the redesign handoff
-// (design 1b, then applied to every other screen).
+// "Transmissão" design tokens — the redesign handed off from Claude Design
+// (design_handoff_redesign_transmissao, 2026-10-05), replacing "Console MyGM".
 //
 // The rules the whole app now follows:
-//   · page background #06080f, panels #0d1526 with a #1c2942 hairline, radius 20
-//   · every screen opens on a full-bleed hero: a gradient in the team's PRIMARY
-//     color, cut on the diagonal by its SECONDARY
-//   · labels are JetBrains Mono ~8.5px with wide tracking; every number is mono
-//   · a highlight panel carries a 3px bar on its left edge in the color of the
-//     datum it's about
-//   · exactly ONE red CTA per screen — the red is fixed (#EF3B24), NOT the team
-//     accent, so "the main action" always reads the same everywhere
+//   · a TV-scoreboard look: neutral black (#0B0B0D), surfaces #141417, no
+//     gradients anywhere — a franchise color is a FLAT block
+//   · type is Barlow Condensed for display, numbers and labels; Barlow for body
+//   · West = red (#E5484D), East = blue (#3E8BF0), everywhere in the app
+//   · exactly ONE main action per screen, and it is LIGHT (#F3F1EC on black
+//     ink). Secondary actions are surface2 fills or outlines
+//   · a highlight card carries a 3px inset on its left edge in the color of the
+//     datum it is about (gold on the MVP, team color on "your series")
 //
 // Everything here is a plain string/number because NativeWind's `bg-accent/40`
 // opacity shorthand silently fails against a runtime CSS variable (confirmed on
 // device) — alpha has to be baked into a concrete rgba() via `withAlpha`.
+//
+// Key names from the old system are kept (panel, line, sunken, cta...) so every
+// screen moved to the new palette at once; the new names are the ones to use.
 
 export const COLORS = {
   /** Page background. */
-  bg: '#06080f',
-  /** Standard panel fill. */
-  panel: '#0d1526',
-  /** Panel hairline. */
-  line: '#1c2942',
-  /** Inset wells inside a panel (rows, quotes, mini-tiles). */
-  sunken: '#0a1120',
-  /** Secondary/ghost button fill. */
-  ghost: '#0f172a',
+  bg: '#0B0B0D',
+  /** Cards and panels. */
+  surface: '#141417',
+  panel: '#141417',
+  /** Secondary buttons, inactive chips, wells. */
+  surface2: '#1B1B1F',
+  sunken: '#1B1B1F',
+  ghost: '#1B1B1F',
+  /** Main dividers. */
+  line: '#1F1F23',
+  /** List-row dividers. */
+  lineSoft: '#1C1C20',
+  /** Meter tracks, outline borders. */
+  lineStrong: '#26262B',
+  /** Outline (ghost) button border. */
+  ghostBorder: '#2F2F35',
 
-  /** Bottom nav. */
-  navBg: '#0a0f1c',
-  navLine: '#16203a',
-  navIdle: '#64748b',
-  navIdleChip: '#1b2740',
+  /** Bottom nav and the action dock above it. */
+  navBg: '#0E0E11',
+  navLine: '#1F1F23',
+  navIdle: '#77757F',
+  navIdleChip: '#1B1B1F',
+  dockBg: '#111114',
 
-  /** The fixed CTA red — one per screen. */
-  cta: '#EF3B24',
-  ctaDark: '#b8281a',
+  /** The ONE main action: light fill, black ink. */
+  ctaFill: '#F3F1EC',
+  ctaInk: '#0B0B0D',
+  /**
+   * Red. Kept under its old name because ~40 call sites use it to mean "red"
+   * (a rival, a blocking problem, a loss) — not the main action any more.
+   */
+  cta: '#E5484D',
+  ctaDark: '#B8383C',
 
-  /** Semantic data colors (match constants.attributeColor). */
-  good: '#22c55e',
-  goodSoft: '#4ade80',
-  neutral: '#a3a3a3',
-  warn: '#fbbf24',
-  bad: '#f87171',
-  badSoft: '#fca5a5',
-  info: '#7dd3fc',
+  /** Conferences. */
+  west: '#E5484D',
+  east: '#3E8BF0',
+  westLine: '#5A2A2D',
+  eastLine: '#253B5E',
 
+  /** Semantic data colors. */
+  good: '#3DD68C',
+  goodSoft: '#3DD68C',
+  neutral: '#9B9893',
+  warn: '#E8A13A',
+  bad: '#E5484D',
+  badSoft: '#E5484D',
+  info: '#3E8BF0',
+
+  /** Gold: MVP, the Finals, a champion. */
+  gold: '#E8C26A',
+  goldDeep: '#C9A24A',
   /** Champion screen — the one place that breaks the system. */
-  goldBg: '#0a0803',
-  goldPanel: '#141005',
-  goldLine: '#33280f',
-  gold: '#fbbf24',
-  goldDeep: '#ea9a08',
+  goldBg: '#0D0B07',
+  goldPanel: '#17130A',
+  goldLine: '#221D12',
+  goldMeta: '#9B8F70',
+  goldInk: '#1A1405',
 
-  text: '#ffffff',
-  textSoft: '#cbd5e1',
-  textDim: '#94a3b8',
+  text: '#F3F1EC',
+  textSoft: '#C9C6C0',
+  textDim: '#9B9893',
+  muted: '#9B9893',
+  dim: '#77757F',
+  faint: '#66645F',
 } as const;
 
-/** Text colors, as the alpha-on-white ramp the design uses throughout. */
+/** Text tiers. */
 export const INK = {
-  /** Body copy on a panel. */
-  body: 'rgba(255,255,255,0.5)',
-  /** Mono label inside a panel. */
-  label: 'rgba(255,255,255,0.42)',
-  /** Mono label over a hero gradient (needs more contrast). */
-  labelOnHero: 'rgba(255,255,255,0.65)',
+  /** Body copy. */
+  body: '#9B9893',
+  /** Section / field label. */
+  label: '#9B9893',
+  /** Label over a franchise-color block. */
+  labelOnHero: 'rgba(243,241,236,0.78)',
   /** Secondary metadata under a name. */
-  meta: 'rgba(255,255,255,0.4)',
-  /** The faintest tier — footnotes, axis ticks. */
-  faint: 'rgba(255,255,255,0.32)',
+  meta: '#77757F',
+  /** Axis ticks, footnotes, placeholders. */
+  faint: '#66645F',
 } as const;
+
+/** Font families (loaded in App.tsx). A custom family never synthesizes weight. */
+export const FONT = {
+  cond500: 'BarlowCondensed_500Medium',
+  cond600: 'BarlowCondensed_600SemiBold',
+  cond700: 'BarlowCondensed_700Bold',
+  cond800: 'BarlowCondensed_800ExtraBold',
+  body400: 'Barlow_400Regular',
+  body500: 'Barlow_500Medium',
+  body600: 'Barlow_600SemiBold',
+} as const;
+
+/** OVR color by band: >=85 good, 78-84 text, below muted. */
+export const ovrColor = (ovr: number): string => (ovr >= 85 ? COLORS.good : ovr >= 78 ? COLORS.text : COLORS.muted);
+
+/** Conference color. */
+export const confColor = (conference: string | undefined): string => (conference === 'East' ? COLORS.east : COLORS.west);
 
 /** Radii, mirroring the tailwind rounded-control/card/hero tokens. */
-export const RADIUS = { control: 12, card: 20, hero: 32, pill: 99 } as const;
+export const RADIUS = { control: 12, card: 16, hero: 20, tile: 14, chip: 10, tag: 6, pill: 99 } as const;
 
 /**
  * Letter-spacing, converted from the design's `em` values — RN's letterSpacing

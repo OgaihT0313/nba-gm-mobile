@@ -1,11 +1,9 @@
-import React, { useId, useState } from 'react';
+import React, { useState } from 'react';
 import { View, ScrollView, StyleSheet, ScrollViewProps } from 'react-native';
-import { LinearGradient } from 'expo-linear-gradient';
-import { Svg, Defs, LinearGradient as SvgGradient, Stop, Polygon } from 'react-native-svg';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { useTheme } from '../../src/theme/ThemeProvider';
-import { COLORS, heroPalette } from '../../src/theme/tokens';
+import { COLORS } from '../../src/theme/tokens';
 
 // The page chrome every screen is built on, per the redesign:
 //
@@ -29,40 +27,14 @@ export const HeroBackdrop: React.FC<{ height: number; primary: string; secondary
   height,
   primary,
   secondary,
-}) => {
-  // react-native-svg resolves url(#id) against a global table, so two heroes
-  // alive at once (a screen fading out under the next) would share one gradient
-  // and flash the wrong color. useId keeps them distinct; the strip drops the
-  // ":" React puts in the value, which is not a legal SVG id.
-  const gradId = `heroCut${useId().replace(/[^a-zA-Z0-9]/g, '')}`;
-  const { base, mid, cut } = heroPalette(primary, secondary);
-
-  return (
-    <View style={{ pointerEvents: 'none', position: 'absolute', left: 0, right: 0, top: 0, height }}>
-      <LinearGradient
-        colors={[base, mid, COLORS.bg]}
-        locations={[0, 0.46, 1]}
-        start={{ x: 0.08, y: 0 }}
-        end={{ x: 0.78, y: 1 }}
-        style={StyleSheet.absoluteFill}
-      />
-      {/* The diagonal wedge of secondary color across the top-right corner. A
-          polygon is the only way to get CSS's clip-path here — RN views can't
-          be clipped to an arbitrary shape. */}
-      <View style={{ position: 'absolute', top: 0, right: 0, width: 210, height }}>
-        <Svg width="100%" height="100%" viewBox="0 0 100 100" preserveAspectRatio="none">
-          <Defs>
-            <SvgGradient id={gradId} x1="1" y1="0" x2="0.12" y2="1">
-              <Stop offset="0" stopColor={cut} stopOpacity={0.55} />
-              <Stop offset="0.62" stopColor={cut} stopOpacity={0} />
-            </SvgGradient>
-          </Defs>
-          <Polygon points="38,0 100,0 100,100 0,100" fill={`url(#${gradId})`} />
-        </Svg>
-      </View>
-    </View>
-  );
-};
+}) => (
+  // "Transmissão": a franchise color is a FLAT block — no gradient, no diagonal.
+  // A 5px stripe of the secondary closes it at the base.
+  <View style={{ pointerEvents: 'none', position: 'absolute', left: 0, right: 0, top: 0, height }}>
+    <View style={{ flex: 1, backgroundColor: primary }} />
+    <View style={{ height: 5, backgroundColor: secondary }} />
+  </View>
+);
 
 interface ScreenProps extends Pick<ScrollViewProps, 'onScroll' | 'scrollEventThrottle'> {
   /** Height of the team-colored band, measured from the very top of the display. */
@@ -126,11 +98,10 @@ const Screen: React.FC<ScreenProps> = ({
             scroll container, so the backdrop's `top: 0` still means the top of
             the display and the gradient keeps bleeding under the clock. */}
         <View>
-          {backdrop === undefined ? (
-            <HeroBackdrop height={heroHeight + insets.top} primary={accent.primary} secondary={accent.secondary} />
-          ) : (
-            backdrop
-          )}
+          {/* No default band any more: the redesign is flat black, and only
+              the screens that own a team-color block (Meu Time, Confirmar)
+              pass one in. */}
+          {backdrop ?? null}
           <View style={{ paddingTop: insets.top + 6 }}>{children}</View>
         </View>
       </ScrollView>

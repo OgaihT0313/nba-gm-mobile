@@ -3,8 +3,11 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { View } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
-import { useFonts, Inter_900Black_Italic } from '@expo-google-fonts/inter';
-import { JetBrainsMono_400Regular, JetBrainsMono_700Bold } from '@expo-google-fonts/jetbrains-mono';
+import { useFonts } from 'expo-font';
+import {
+  BarlowCondensed_500Medium, BarlowCondensed_600SemiBold, BarlowCondensed_700Bold, BarlowCondensed_800ExtraBold,
+} from '@expo-google-fonts/barlow-condensed';
+import { Barlow_400Regular, Barlow_500Medium, Barlow_600SemiBold } from '@expo-google-fonts/barlow';
 
 import { Team, Player, Coach, SeasonState, LiveTactic, Notification as NotificationType } from './types';
 import { teamsData, playersData, picksOf, releaseWithDeadMoney } from './constants';
@@ -73,9 +76,8 @@ export default function App() {
   // numbers. Keys must match the tailwind fontFamily tokens (font-display,
   // font-mono, font-mono-bold).
   const [fontsLoaded] = useFonts({
-    Inter_900BlackItalic: Inter_900Black_Italic,
-    JetBrainsMono_400Regular,
-    JetBrainsMono_700Bold,
+    BarlowCondensed_500Medium, BarlowCondensed_600SemiBold, BarlowCondensed_700Bold, BarlowCondensed_800ExtraBold,
+    Barlow_400Regular, Barlow_500Medium, Barlow_600SemiBold,
   });
 
   const [view, setView] = useState<AppView>('home');
