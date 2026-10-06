@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { View, Text, Pressable } from 'react-native';
 import { Image } from 'expo-image';
 
@@ -15,6 +15,8 @@ import { Panel, MonoLabel, Eyebrow, HeroTitle, StatTile, SectionLabel } from '..
 import RosterRow from '../components/ui/RosterRow';
 import PickAssets from '../components/PickAssets';
 import CoachPanel from '../components/CoachPanel';
+import StartersCourt from '../components/StartersCourt';
+import PlayerDetailModal from '../components/PlayerDetailModal';
 
 const money = (v: number) => `$${(v / 1_000_000).toFixed(1)}M`;
 const NBA_FALLBACK = 'https://a.espncdn.com/i/teamlogos/nba/500/nba.png';
@@ -41,6 +43,7 @@ const TeamDetail: React.FC<{
   const titles = getTeamTitles(team.id);
   const coach = coachOf(team, coaches);
   const absences = team.playerAbsences ?? {};
+  const [viewing, setViewing] = useState<Player | null>(null);
 
   return (
     <Screen heroHeight={186}>
@@ -96,6 +99,9 @@ const TeamDetail: React.FC<{
           />
         </View>
 
+        {/* Their five, the way the sim will start them tonight. */}
+        <StartersCourt team={team} players={players} onPlayerPress={setViewing} />
+
         <CoachPanel team={team} coaches={coaches} />
 
         <Panel padding={14}>
@@ -113,14 +119,22 @@ const TeamDetail: React.FC<{
               badge={absence ? `Fora ${absence.duration}` : p.pos}
               badgeTone={absence ? 'danger' : 'info'}
               meta={`${p.age}a · ${money(p.salary)} · ${p.nextSalary !== undefined ? `estendido · ${p.contractYears} anos` : p.contractYears === 1 ? 'último ano' : `${p.contractYears} anos`}`}
+              onPress={() => setViewing(p)}
             />
           );
         })}
 
         <Text style={{ fontSize: 10.5, lineHeight: 15, color: INK.faint, paddingHorizontal: 4 }}>
-          Use a Central de Trocas para abrir conversa com o {getTeamNickname(team)}.
+          Toque num jogador para ver a ficha. Use a Central de Trocas para abrir conversa com o {getTeamNickname(team)}.
         </Text>
       </Body>
+      {viewing ? (
+        <PlayerDetailModal
+          player={viewing}
+          onClose={() => setViewing(null)}
+          status={absences[viewing.id] ? `Fora ${absences[viewing.id].duration} jogos · ${absences[viewing.id].reason === 'injury' ? 'lesionado' : 'suspenso'}` : undefined}
+        />
+      ) : null}
     </Screen>
   );
 };

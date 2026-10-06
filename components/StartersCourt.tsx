@@ -10,7 +10,10 @@ import { useTheme } from '../src/theme/ThemeProvider';
 interface StartersCourtProps {
   team: Team;
   players: { [key: string]: Player };
-  onSetStarter: (pos: string, playerId: string) => void;
+  // Absent = read-only: another franchise's five, looked at but not run.
+  // Tapping a player then opens him (onPlayerPress) instead of the picker.
+  onSetStarter?: (pos: string, playerId: string) => void;
+  onPlayerPress?: (player: Player) => void;
 }
 
 // Same percentage placement as the web over a half-court diagram. RN can't do
@@ -25,9 +28,15 @@ const SLOT_LAYOUT: { pos: string; top: string; left: string }[] = [
   { pos: 'PG', top: '8%', left: '50%' },
   { pos: 'SG', top: '34%', left: '84%' },
   { pos: 'SF', top: '34%', left: '16%' },
-  { pos: 'PF', top: '68%', left: '26%' },
-  { pos: 'C', top: '84%', left: '50%' },
+  { pos: 'PF', top: '64%', left: '26%' },
+  { pos: 'C', top: '79%', left: '50%' },
 ];
+
+// "Jaren Jackson Jr." reads as Jackson, not Jr.
+const surname = (name: string) => {
+  const parts = name.split(' ').filter((w) => !/^(Jr\.?|Sr\.?|II|III|IV|V)$/.test(w));
+  return parts[parts.length - 1] ?? name;
+};
 
 const substituteReason = (team: Team, slot: LineupSlot): string => {
   if (!slot.designatedId) return '';
@@ -37,7 +46,8 @@ const substituteReason = (team: Team, slot: LineupSlot): string => {
   return 'em queda de forma';
 };
 
-const StartersCourt: React.FC<StartersCourtProps> = ({ team, players, onSetStarter }) => {
+const StartersCourt: React.FC<StartersCourtProps> = ({ team, players, onSetStarter, onPlayerPress }) => {
+  const editable = !!onSetStarter;
   const [activePos, setActivePos] = useState<string | null>(null);
   const { accent } = useTheme();
 
@@ -55,8 +65,10 @@ const StartersCourt: React.FC<StartersCourtProps> = ({ team, players, onSetStart
   return (
     <View className="bg-panel rounded-card border border-line p-5 gap-5">
       <View className="flex-row items-center justify-between gap-2">
-        <Text className="text-lg font-bold text-white">Titulares</Text>
-        <Text className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Toque pra trocar</Text>
+        <Text className="text-lg font-bold text-white">{editable ? 'Titulares' : 'Quinteto titular'}</Text>
+        <Text className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">
+          {editable ? 'Toque pra trocar' : 'Toque pra ver o jogador'}
+        </Text>
       </View>
 
       <View className="w-full" style={{ aspectRatio: 4 / 3 }}>
@@ -76,7 +88,7 @@ const StartersCourt: React.FC<StartersCourtProps> = ({ team, players, onSetStart
           return (
             <Pressable accessibilityRole="button"
               key={pos}
-              onPress={() => setActivePos(isActive ? null : pos)}
+              onPress={() => (editable ? setActivePos(isActive ? null : pos) : player && onPlayerPress?.(player))}
               style={{ position: 'absolute', top: top as any, left: left as any, marginLeft: -SLOT / 2, marginTop: -SLOT / 2, alignItems: 'center' }}
             >
               <View
@@ -100,6 +112,11 @@ const StartersCourt: React.FC<StartersCourtProps> = ({ team, players, onSetStart
                 <Text className="text-[9px] font-black text-white">{player ? player.ovr : '-'}</Text>
               </View>
               <Text className="text-[9px] font-black uppercase tracking-widest text-slate-500 mt-0.5">{slot?.bucket ?? ''}</Text>
+              {player ? (
+                <Text className="text-[10px] font-bold text-white" style={{ maxWidth: 92 }} numberOfLines={1}>
+                  {surname(player.name)}
+                </Text>
+              ) : null}
             </Pressable>
           );
         })}
@@ -115,7 +132,7 @@ const StartersCourt: React.FC<StartersCourtProps> = ({ team, players, onSetStart
         </View>
       ) : null}
 
-      {activePos ? (
+      {editable && activePos ? (
         <View className="bg-sunken rounded-2xl border border-line p-4 gap-2">
           <Text className="text-[10px] font-black text-slate-500 uppercase tracking-widest">
             Escolher titular — {(activeBucket && POSITIONS[activeBucket]) || activeBucket}
@@ -125,7 +142,7 @@ const StartersCourt: React.FC<StartersCourtProps> = ({ team, players, onSetStart
             return (
               <Pressable accessibilityRole="button"
                 key={p.id}
-                onPress={() => { onSetStarter(activePos, p.id); setActivePos(null); }}
+                onPress={() => { onSetStarter?.(activePos, p.id); setActivePos(null); }}
                 className={`flex-row items-center justify-between gap-3 p-2 rounded-xl border ${isDesignated ? '' : 'bg-panel border-line'}`}
                 style={isDesignated ? { backgroundColor: `${accent.primary}33`, borderColor: accent.primary } : undefined}
               >

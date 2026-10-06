@@ -158,8 +158,8 @@ const EraSelect: React.FC<EraSelectProps> = ({ onSelect }) => {
       >
         <EraCard
           eyebrow="Temporada atual"
-          title="2026-27"
-          blurb="Elencos reais de hoje, com ratings das estatísticas de 2025-26 — a experiência padrão do jogo."
+          title="2025-26"
+          blurb="Elenco e ratings reais de hoje — a experiência padrão do jogo."
           onPress={() => onSelect(null)}
         />
 

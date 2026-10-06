@@ -21,6 +21,7 @@ import PickAssets from '../components/PickAssets';
 import CoachPanel from '../components/CoachPanel';
 import RotationPanel from '../components/RotationPanel';
 import Icon from '../components/Icon';
+import PlayerDetailModal from '../components/PlayerDetailModal';
 
 // Design 2a — elenco, rotação and técnico on one screen. The mockup shows three
 // segments doing exactly that; the real hub also carries draft capital, team
@@ -68,6 +69,7 @@ const MyTeamHub: React.FC<MyTeamHubProps> = ({
 }) => {
   const [tab, setTab] = useState<Tab>('roster');
   const [confirmWaive, setConfirmWaive] = useState<Player | null>(null);
+  const [viewing, setViewing] = useState<Player | null>(null);
   const [rivalId, setRivalId] = useState<string | null>(null);
   const [rivalPickerOpen, setRivalPickerOpen] = useState(false);
   const rival = allTeams.find((t) => t.id === rivalId) || null;
@@ -199,13 +201,13 @@ const MyTeamHub: React.FC<MyTeamHubProps> = ({
                   }
                   share={absence ? 0 : Math.min(1, mpg / MINUTES_IN_A_GAME)}
                   caption={mpg > 0 ? `${Math.round(mpg)} min` : '—'}
-                  onPress={canWaive ? () => setConfirmWaive(p) : undefined}
+                  onPress={() => setViewing(p)}
                 />
               );
             })}
 
             <Text style={{ fontSize: 10.5, lineHeight: 15, color: INK.faint, paddingHorizontal: 4, marginTop: 2 }}>
-              Toque num jogador para dispensá-lo. Mínimo de {MIN_ROSTER_SIZE} no elenco.
+              Toque num jogador para ver a ficha completa — estatísticas, carreira, atributos e contrato — ou dispensá-lo.
             </Text>
           </>
         ) : null}
@@ -311,6 +313,25 @@ const MyTeamHub: React.FC<MyTeamHubProps> = ({
       </Modal>
 
       {/* Waive confirmation */}
+      {viewing ? (
+        <PlayerDetailModal
+          player={players[viewing.id] ?? viewing}
+          onClose={() => setViewing(null)}
+          status={absences[viewing.id]
+            ? `Fora ${absences[viewing.id].duration} ${absences[viewing.id].duration === 1 ? 'jogo' : 'jogos'} · ${absences[viewing.id].reason === 'injury' ? 'lesionado' : 'suspenso'}`
+            : undefined}
+          actions={[{
+            label: 'Dispensar',
+            tone: 'danger',
+            disabled: !canWaive,
+            sub: canWaive
+              ? (viewing.contractYears > 0 ? `O salário dele vira dinheiro morto na folha (${money(viewing.salary)} por ${viewing.contractYears} ${viewing.contractYears === 1 ? 'ano' : 'anos'}).` : 'Sem contrato: não sobra nada na folha.')
+              : `O elenco precisa de no mínimo ${MIN_ROSTER_SIZE} jogadores.`,
+            onPress: () => { setConfirmWaive(viewing); setViewing(null); },
+          }]}
+        />
+      ) : null}
+
       <Modal visible={confirmWaive !== null} transparent animationType="fade" onRequestClose={() => setConfirmWaive(null)}>
         <Pressable accessible={false} className="flex-1 bg-black/70 items-center justify-center p-4" onPress={() => setConfirmWaive(null)}>
           <Pressable

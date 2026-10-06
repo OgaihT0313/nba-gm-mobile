@@ -30,7 +30,23 @@ const Tile: React.FC<{ label: string; value: React.ReactNode }> = ({ label, valu
   </View>
 );
 
-const PlayerDetailModal: React.FC<{ player: Player; onClose: () => void }> = ({ player, onClose }) => {
+/** A button at the foot of the sheet, for whoever opened it (e.g. waive). */
+export interface PlayerAction {
+  label: string;
+  onPress: () => void;
+  tone?: 'danger' | 'neutral';
+  disabled?: boolean;
+  /** Why it is disabled, or what it costs. Always shown under the label. */
+  sub?: string;
+}
+
+const PlayerDetailModal: React.FC<{
+  player: Player;
+  onClose: () => void;
+  /** One line above the name, e.g. "Fora 6 jogos · lesionado". */
+  status?: string;
+  actions?: PlayerAction[];
+}> = ({ player, onClose, status, actions }) => {
   const attrs = getPlayerAttributes(player);
   const ranked = [...ATTRIBUTE_META].sort((a, b) => attrs[b.key] - attrs[a.key]);
   const strengths = ranked.slice(0, 2);
@@ -39,10 +55,15 @@ const PlayerDetailModal: React.FC<{ player: Player; onClose: () => void }> = ({ 
 
   return (
     <Modal visible transparent animationType="slide" onRequestClose={onClose}>
-      <Pressable accessible={false} className="flex-1 bg-black/70 justify-end" onPress={onClose}>
-        <Pressable
-          className="bg-panel border border-line rounded-t-3xl max-h-[90%]"
-          onPress={(e) => e.stopPropagation()}
+      {/* The backdrop is a SIBLING of the sheet, not its parent. The sheet used
+          to be a Pressable nested in the backdrop Pressable, and on Android
+          that pair claimed every touch: the ScrollView inside never got the
+          drag, so the sheet could not be scrolled past the first screen. */}
+      <View className="flex-1 bg-black/70 justify-end">
+        <Pressable accessible={false} style={{ position: 'absolute', top: 0, right: 0, bottom: 0, left: 0 }} onPress={onClose} />
+        <View
+          className="bg-panel border border-line rounded-t-3xl"
+          style={{ maxHeight: '92%' }}
         >
           {/* Header */}
           <View className="h-36 bg-line rounded-t-3xl items-center justify-end overflow-hidden">
@@ -63,8 +84,16 @@ const PlayerDetailModal: React.FC<{ player: Player; onClose: () => void }> = ({ 
             </View>
           </View>
 
-          <ScrollView className="px-5" contentContainerStyle={{ paddingVertical: 20, gap: 20 }}>
+          <ScrollView
+            className="px-5"
+            style={{ flexGrow: 0, flexShrink: 1 }}
+            contentContainerStyle={{ paddingVertical: 20, gap: 20 }}
+            showsVerticalScrollIndicator
+          >
             <View className="items-center">
+              {status ? (
+                <Text className="text-[10px] font-black text-red-400 uppercase tracking-widest mb-1">{status}</Text>
+              ) : null}
               <Text className="font-black text-2xl uppercase tracking-tighter text-white text-center">{player.name}</Text>
               <Text className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mt-1.5">
                 {formatPositionsFull(player)} • {player.age} anos
@@ -236,8 +265,32 @@ const PlayerDetailModal: React.FC<{ player: Player; onClose: () => void }> = ({ 
               </View>
             </View>
           </ScrollView>
-        </Pressable>
-      </Pressable>
+
+          {actions && actions.length ? (
+            <View className="px-5 pt-3 pb-6 border-t border-line" style={{ gap: 8 }}>
+              {actions.map((a) => (
+                <Pressable
+                  key={a.label}
+                  accessibilityRole="button"
+                  aria-disabled={!!a.disabled}
+                  onPress={a.disabled ? undefined : a.onPress}
+                  className="rounded-2xl border px-4 py-3 active:opacity-80"
+                  style={{
+                    borderColor: a.tone === 'danger' && !a.disabled ? '#f8717166' : '#24344f',
+                    backgroundColor: a.tone === 'danger' && !a.disabled ? '#f8717114' : 'transparent',
+                    opacity: a.disabled ? 0.55 : 1,
+                  }}
+                >
+                  <Text className="text-xs font-black uppercase" style={{ color: a.tone === 'danger' && !a.disabled ? '#f87171' : '#cbd5e1' }}>
+                    {a.label}
+                  </Text>
+                  {a.sub ? <Text className="text-[11px] text-slate-400 mt-0.5">{a.sub}</Text> : null}
+                </Pressable>
+              ))}
+            </View>
+          ) : null}
+        </View>
+      </View>
     </Modal>
   );
 };
