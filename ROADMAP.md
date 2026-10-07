@@ -200,6 +200,27 @@ Medido em `scripts/check_milestones.ts`.
 
 ---
 
+## 4c. Correções do teste no celular (adb) — FEITO (2026-10-07)
+
+Percurso completo no Galaxy A57 pelo adb, sem nenhum erro de JS ou travamento.
+Corrigidos, na ordem de gravidade:
+1. Draft: o destaque troca de jogador depois de "Observar". Agora fica preso no observado, e o botão diz o nome.
+2. Câmeras na tela em pé seguem o centro da jogada e acompanham mais.
+3. Uniforme branco para o visitante quando as cores colidem.
+4. Salário do time atual, não do maior pagador (Clarkson: buyout do Utah).
+5. OVR ranqueado por BPM + uso + minutos (Booker voltou a titular); off/def continuam BPM puro.
+6. Calouro do Ano limitado a até 24 anos.
+7. Posição na conferência no Meu Time usa os mesmos desempates da Classificação.
+8. Motivo de troca bloqueada mostrado por inteiro.
+9. Pico de OVR coerente com o OVR atual.
+10. Sigla do piso desvirada no celular: o expo-gl ignora o `pixelStorei`.
+11. Seleção de franquia ordenada pelo número mostrado; escudos com fundo claro.
+12. Parceiros de troca com escudo e em ordem alfabética; botão "Pronto" na folha.
+13. Ritmo só depois de 5 jogos; barra de chance com cores distintas.
+14. Plural de "jogo", etiquetas de playoff só depois de 10 jogos, "Final/FIM" duplicado.
+
+`matchupStrength` 1,75. Backtest: vitórias r 0,80, força x reais 0,82, PPG 0,86, MPG 0,64.
+
 ## 5. Melhoria do 3D — PRÓXIMO (aprovado pelo usuário em 2026-10-06)
 
 Plano completo em [PLANO-3D.md](PLANO-3D.md), reescrito em cima do código atual

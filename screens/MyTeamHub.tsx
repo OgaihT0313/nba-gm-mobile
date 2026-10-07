@@ -2,7 +2,8 @@ import React, { useState } from 'react';
 import { View, Text, Pressable, ScrollView, Modal } from 'react-native';
 import { Image } from 'expo-image';
 
-import { Team, Player, Coach, GmLegacy, OwnerExpectation } from '../types';
+import { Team, Player, Coach, GmLegacy, OwnerExpectation, ScheduleGame } from '../types';
+import { sortStandings } from '../services/scheduleService';
 import {
   getTeamLogoUrl, getTeamSalary, SALARY_CAP, getTeamNickname, conferenceLabel, coachOf,
   getTeamCity, getPlayerImageUrl, PLAYER_PLACEHOLDER_SVG,
@@ -48,6 +49,8 @@ interface MyTeamHubProps {
   team: Team;
   players: { [key: string]: Player };
   allTeams: Team[];
+  /** For the standings tiebreak, so the header's rank matches Classificação. */
+  schedule?: ScheduleGame[];
   coaches: { [key: string]: Coach };
   gmLegacy: GmLegacy;
   owner: OwnerExpectation;
@@ -74,7 +77,7 @@ const surname = (name: string) =>
 const MINUTES_IN_A_GAME = 48;
 
 const MyTeamHub: React.FC<MyTeamHubProps> = ({
-  team, players, allTeams, coaches, gmLegacy, owner, currentDraft,
+  team, players, allTeams, schedule, coaches, gmLegacy, owner, currentDraft,
   onWaive, onSetStarter, onFireCoach, onHireCoach, onSetRotationSize, onToggleLoadManagement,
 }) => {
   const [tab, setTab] = useState<Tab>('roster');
@@ -111,8 +114,10 @@ const MyTeamHub: React.FC<MyTeamHubProps> = ({
   const teamOff = avg(rot.slice(0, 8).map((p) => p.off));
   const teamDef = avg(rot.slice(0, 8).map((p) => p.def));
   const gamesIn = (team.wins ?? 0) + (team.losses ?? 0);
-  const confRank = [...allTeams.filter((t) => t.conference === team.conference)]
-    .sort((a, b) => ((b.wins ?? 0) - (b.losses ?? 0)) - ((a.wins ?? 0) - (a.losses ?? 0)))
+  // Same tiebreak chain as Classificação and Simulação (win% -> head to
+  // head -> conference record -> point differential); a plain W-L sort put a
+  // 1-0 team 6th here and 1st there.
+  const confRank = sortStandings(allTeams.filter((t) => t.conference === team.conference), schedule ?? [])
     .findIndex((t) => t.id === team.id) + 1;
 
   // The five the sim starts tonight, then everyone else.

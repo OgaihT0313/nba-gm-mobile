@@ -1,12 +1,12 @@
 import React, { useMemo, useRef } from 'react';
-import { GestureResponderEvent, PanResponder, View } from 'react-native';
+import { GestureResponderEvent, PanResponder, Platform, View } from 'react-native';
 import { Canvas, useFrame, useThree } from '@react-three/fiber/native';
 import * as THREE from 'three';
 
 import type { CourtState } from '../../services/watchDirector';
 import Arena from './Arena';
 import { createRig, type Rig } from './PlayerRig';
-import { buildBallTexture, buildFloorTexture, buildShadowTexture, FLOOR_L, FLOOR_W } from './textures';
+import { buildBallTexture, buildFloorTexture, buildShadowTexture, hexToRgb, FLOOR_L, FLOOR_W } from './textures';
 
 // The 3D "Assistir ao Jogo" court, rendered natively through expo-gl by React
 // Three Fiber.
@@ -94,6 +94,16 @@ interface Court3DProps {
 
 const DEFAULT_FLOOR_COLOR = '#caa271'; // light maple
 
+/** The visitors' kit. Two blue teams (Orlando at the Knicks) read as one team
+ * of ten on a phone, so when the primaries are close the road side wears the
+ * white alternate with its own color as trim -- what the NBA does too. */
+const roadKit = (home: TeamVisual, away: TeamVisual): TeamVisual => {
+  const [r1, g1, b1] = hexToRgb(home.primary);
+  const [r2, g2, b2] = hexToRgb(away.primary);
+  const dist = Math.sqrt((r1 - r2) ** 2 + (g1 - g2) ** 2 + (b1 - b2) ** 2);
+  return dist < 120 ? { primary: '#eeeeea', secondary: away.primary } : away;
+};
+
 /* ------------------------------------------------------------------ */
 /* Camera rig -- drag to orbit, presets ease in.                       */
 /* ------------------------------------------------------------------ */
@@ -112,7 +122,7 @@ function CameraRig({
   courtRef: React.MutableRefObject<CourtState | null>;
 }) {
   const target = useMemo(() => new THREE.Vector3(0, 5, 0), []);
-  useFrame(({ camera }, dt) => {
+  useFrame(({ camera, size }, dt) => {
     const s = stateRef.current;
     const k = 1 - Math.pow(0.02, dt); // frame-rate independent easing
     if (!s.dragging) {
@@ -127,8 +137,22 @@ function CameraRig({
     const court = courtRef.current;
     if (court) {
       const f = 1 - Math.pow(preset.lag ?? 0.3, dt);
-      target.x = THREE.MathUtils.lerp(target.x, court.ball.x * preset.follow, f);
-      target.z = THREE.MathUtils.lerp(target.z, court.ball.z * preset.follow * (preset.lag ? 0.8 : 0.5), f);
+      // Aim at the action, not just the ball: half the ball, half the ten
+      // bodies' centroid, so a skip pass or a fast break doesn't leave the
+      // players out of frame while the ball is centered.
+      let px = 0, pz = 0;
+      court.players.forEach((pl) => { px += pl.x; pz += pl.z; });
+      const n = court.players.length || 1;
+      const ax = court.ball.x * 0.5 + (px / n) * 0.5;
+      const az = court.ball.z * 0.5 + (pz / n) * 0.5;
+      // A phone held upright sees a sliver of the court horizontally (vertical
+      // fov 38° at a 0.46 aspect is ~18° across): a wide shot that only
+      // half-follows the play films an empty floor. The taller the screen,
+      // the closer every framing gets to tracking the action fully.
+      const portrait = THREE.MathUtils.clamp((1.1 - size.width / Math.max(1, size.height)) / 0.6, 0, 1);
+      const follow = preset.follow + (1 - preset.follow) * portrait;
+      target.x = THREE.MathUtils.lerp(target.x, ax * follow, f);
+      target.z = THREE.MathUtils.lerp(target.z, az * follow * (preset.lag ? 0.8 : 0.5 + 0.4 * portrait), f);
       target.y = THREE.MathUtils.lerp(target.y, preset.targetY ?? 5, f);
     }
     camera.position.set(
@@ -147,7 +171,7 @@ function CameraRig({
 function Floor({ wood, primary, secondary, label }: { wood: string; primary: string; secondary: string; label: string }) {
   const gl = useThree((s) => s.gl);
   const material = useMemo(() => {
-    const map = buildFloorTexture({ wood, primary, secondary, label });
+    const map = buildFloorTexture({ wood, primary, secondary, label, flipRows: Platform.OS !== 'web' });
     // The floor is seen at a grazing angle almost all the time; anisotropic
     // filtering is what keeps the far lines crisp instead of smeared.
     map.anisotropy = Math.min(8, gl.capabilities.getMaxAnisotropy());
@@ -179,7 +203,10 @@ function PlayersAndBall({
   }), []);
 
   const rigs = useMemo<Rig[]>(
-    () => Array.from({ length: 10 }, (_, i) => createRig(i < HOME_COUNT ? home : away, shadowMat)),
+    () => {
+      const kit = roadKit(home, away);
+      return Array.from({ length: 10 }, (_, i) => createRig(i < HOME_COUNT ? home : kit, shadowMat));
+    },
     [home, away, shadowMat],
   );
   const bound = useRef<string[]>([]);

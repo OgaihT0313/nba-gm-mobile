@@ -122,7 +122,7 @@ const LiveGameScreen: React.FC<LiveGameScreenProps> = ({
           <View style={{ width: 84, alignItems: 'center', justifyContent: 'center', gap: 4 }}>
             <Text style={{ fontFamily: FONT.cond800, fontSize: 22, lineHeight: 22, color: COLORS.text }}>{periodLabel}</Text>
             <Text style={{ fontFamily: FONT.cond600, fontSize: 11, letterSpacing: 1.1, color: COLORS.muted }}>
-              {liveGame.complete ? 'FIM' : liveGame.quarterScores.length ? 'A SEGUIR' : 'BOLA AO ALTO'}
+              {liveGame.complete ? `${liveGame.quarterScores.length > 4 ? 'APÓS PRORROG.' : '4 QUARTOS'}` : liveGame.quarterScores.length ? 'A SEGUIR' : 'BOLA AO ALTO'}
             </Text>
             <View className="flex-row" style={{ gap: 3, marginTop: 4 }}>
               {Array.from({ length: TOTAL_TIMEOUTS }, (_, i) => (

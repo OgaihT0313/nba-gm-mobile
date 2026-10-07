@@ -55,7 +55,7 @@ const Column: React.FC<{
           >
             {on ? <View style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: 3, backgroundColor: '#fff' }} /> : null}
             <TeamBadge teamId={t.id} width={32} height={22} />
-            <TeamLogo teamId={t.id} size={22} />
+            <TeamLogo teamId={t.id} size={24} chip />
             <Text numberOfLines={1} style={{ flex: 1, minWidth: 0, fontFamily: FONT.cond600, fontSize: 15, color: COLORS.text }}>
               {getTeamNickname(t)}
             </Text>
@@ -71,7 +71,9 @@ const Column: React.FC<{
 
 const TeamSelect: React.FC<TeamSelectProps> = ({ teams, players, onSelect }) => {
   const insets = useSafeAreaInsets();
-  const byRank = useMemo(() => [...teams].sort((a, b) => a.powerRank - b.powerRank), [teams]);
+  // Sorted by the number the row shows (teamRating), not powerRank (top-8
+  // average): two different measures put an 85 below an 84.
+  const byRank = useMemo(() => [...teams].sort((a, b) => teamRating(b, players) - teamRating(a, players)), [teams, players]);
   const west = byRank.filter((t) => t.conference === 'West');
   const east = byRank.filter((t) => t.conference === 'East');
   const [selected, setSelected] = useState<string | null>(byRank[0]?.id ?? null);

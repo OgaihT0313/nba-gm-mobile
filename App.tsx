@@ -753,6 +753,7 @@ export default function App() {
           team={userTeam}
           players={season.players}
           allTeams={season.teams}
+          schedule={season.schedule}
           coaches={season.coaches}
           gmLegacy={season.gmLegacy}
           owner={season.owner}

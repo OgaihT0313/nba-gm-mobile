@@ -190,7 +190,7 @@ const PlayerDetailModal: React.FC<{
               {/* ------------------------------------------------- career */}
               {c ? (
                 <View style={{ gap: 8 }}>
-                  <SectionLabel right={<Text style={{ fontFamily: FONT.cond700, fontSize: 11, letterSpacing: 1.3, color: COLORS.dim }}>PICO {c.peakOvr} OVR</Text>}>
+                  <SectionLabel right={<Text style={{ fontFamily: FONT.cond700, fontSize: 11, letterSpacing: 1.3, color: COLORS.dim }}>PICO {Math.max(c.peakOvr, player.ovr)} OVR</Text>}>
                     Carreira · {c.seasons} {c.seasons === 1 ? 'temporada' : 'temporadas'}
                   </SectionLabel>
                   <View style={{ backgroundColor: COLORS.surface, borderRadius: 14, paddingVertical: 8 }}>

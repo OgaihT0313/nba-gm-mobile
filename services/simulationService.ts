@@ -616,7 +616,7 @@ export const computeExpectedPoints = (
     // 0.6 left the standings almost talent-blind (best record 58, league win
     // sd 8.7, talent-to-wins correlation 0.66). This is the signal side of the
     // signal-to-noise ratio the whole standings shape rests on.
-    const matchupStrength = 1.8;
+    const matchupStrength = 1.75;
 
     const expectedPointsA = baseScore
         + (ratingsA.offense - ratingsB.defense) * matchupStrength
@@ -1737,7 +1737,10 @@ const generateAwards = (teams: Team[], players: { [key: string]: Player }) => {
     // Stephon Castle in 2025-26. A save with no career data anywhere (an era's
     // first season) has nothing to test against, so it keeps the age proxy.
     const careersKnown = allPlayers.some(p => (p.career?.seasons ?? 0) > 0);
-    const isRookie = (p: Player) => careersKnown ? (p.career?.seasons ?? 0) === 0 : p.age <= 21;
+    // The age cap catches veterans the career seed has no history for
+    // (Malachi Smith, 26, won it with zero banked seasons): real rookies are
+    // 19-23, and an undrafted 24-year-old is about as old as one gets.
+    const isRookie = (p: Player) => careersKnown ? (p.career?.seasons ?? 0) === 0 && p.age <= 24 : p.age <= 21;
     const royPool = allPlayers.filter(p => isRookie(p) && played(p, ROOKIE_MIN_GP)).map(p => {
         const s = p.seasonStats!;
         return { id: p.id, score: s.ppg + 1.2 * s.apg + 1.0 * s.rpg };

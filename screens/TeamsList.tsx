@@ -32,7 +32,9 @@ const TeamsList: React.FC<{
     if (t.id === userTeamId) return { text: 'Você', color: COLORS.east };
     if (rivalIds.includes(t.id)) return { text: 'Rival', color: COLORS.west };
     if (t.tanking) return { text: 'Loteria', color: COLORS.warn };
-    if (!hasGames) return null;
+    // A playoff tag after one or two nights is a coin flip dressed as a
+    // projection: wait for ~10 games.
+    if (!hasGames || (t.wins ?? 0) + (t.losses ?? 0) < 10) return null;
     if (seed <= 6) return { text: 'Playoffs', color: COLORS.good };
     if (seed <= 10) return { text: 'Play-in', color: COLORS.muted };
     return null;
@@ -56,7 +58,7 @@ const TeamsList: React.FC<{
               style={{ height: 38, gap: 8, paddingLeft: 7, paddingRight: 8, borderBottomWidth: 1, borderBottomColor: COLORS.line }}
             >
               <TeamBadge teamId={t.id} width={32} height={22} />
-            <TeamLogo teamId={t.id} size={22} />
+            <TeamLogo teamId={t.id} size={24} chip />
               <View style={{ flex: 1, minWidth: 0 }}>
                 <Text numberOfLines={1} style={{ fontFamily: FONT.cond600, fontSize: 14, lineHeight: 15, color: COLORS.text }}>{getTeamNickname(t)}</Text>
                 {tag ? (

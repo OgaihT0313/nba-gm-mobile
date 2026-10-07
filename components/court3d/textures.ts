@@ -123,6 +123,10 @@ export const buildFloorTexture = (opts: {
   primary: string;
   secondary: string;
   label: string;
+  /** Rows run the other way on native: expo-gl ignores the pixelStorei
+   *  unpack flags three.js sets (it logs as much), so the same DataTexture
+   *  lands flipped along the floor's width on a phone vs. in a browser. */
+  flipRows?: boolean;
 }): THREE.DataTexture => {
   // 1536 x 768: ~14.5 px per foot, so a two-inch line is still ~2.4 px wide,
   // and it builds in about half the time of 2048 x 1024 -- this runs on the
@@ -154,7 +158,8 @@ export const buildFloorTexture = (opts: {
     // Row 0 lands at -z on the rotated plane. Worked out on paper it should
     // have been +z; on screen the tricode's N came out mirrored, so this is
     // what the renderer actually does.
-    const z = ((row + 0.5) / H) * FLOOR_W - FLOOR_W / 2;
+    const zRaw = ((row + 0.5) / H) * FLOOR_W - FLOOR_W / 2;
+    const z = opts.flipRows ? -zRaw : zRaw;
     const az = Math.abs(z);
     for (let col = 0; col < W; col++) {
       const x = ((col + 0.5) / W) * FLOOR_L - FLOOR_L / 2;

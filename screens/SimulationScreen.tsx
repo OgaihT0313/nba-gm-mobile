@@ -9,7 +9,7 @@ import { headlines } from '../services/headlineService';
 import { isRival, rivalryReason, revengePlayers, REVENGE_BOOST, RIVAL_WIN_MORALE, RIVAL_LOSS_MORALE } from '../services/rivalryService';
 import { currentStreak, nextGame, winProbability, teamResults } from '../services/formService';
 import { sortStandings } from '../services/scheduleService';
-import { COLORS, RADIUS, FONT, withAlpha, visibleTeamColor } from '../src/theme/tokens';
+import { COLORS, RADIUS, FONT, withAlpha, visibleTeamColor, colorDistance } from '../src/theme/tokens';
 import Screen, { Body } from '../components/ui/Screen';
 import {
   Panel, MonoLabel, Eyebrow, HeroTitle, Stat, Meter, CtaButton, GhostButton, SectionLabel,
@@ -114,6 +114,14 @@ const SimulationScreen: React.FC<SimulationScreenProps> = ({
   const results = userTeam ? teamResults(season.schedule, userTeam.id) : [];
   const strip: ('w' | 'l' | 'n')[] = Array.from({ length: 82 }, (_, i) =>
     i < results.length ? (results[i].won ? 'w' : 'l') : 'n');
+
+  // Win-chance bar colors. Two blue teams (Knicks vs Magic) made one solid
+  // bar, so the opponent falls back to its secondary, then to neutral grey.
+  const userBar = visibleTeamColor(getTeamAccent(userTeam?.id).primary, getTeamAccent(userTeam?.id).secondary);
+  const oppAccent = getTeamAccent(opponent?.id);
+  const oppMain = visibleTeamColor(oppAccent.primary, oppAccent.secondary);
+  const oppBar = colorDistance(userBar, oppMain) >= 110 ? oppMain
+    : colorDistance(userBar, oppAccent.secondary) >= 110 ? oppAccent.secondary : COLORS.muted;
 
   return (
     <Screen
@@ -233,8 +241,8 @@ const SimulationScreen: React.FC<SimulationScreenProps> = ({
             </View>
             <View style={{ gap: 5 }}>
               <View className="flex-row" style={{ height: 8, borderRadius: 4, overflow: 'hidden', gap: 2 }}>
-                <View style={{ width: `${Math.round(winPct * 100)}%`, backgroundColor: visibleTeamColor(getTeamAccent(userTeam.id).primary, getTeamAccent(userTeam.id).secondary) }} />
-                <View style={{ flex: 1, backgroundColor: visibleTeamColor(getTeamAccent(opponent.id).primary, getTeamAccent(opponent.id).secondary) }} />
+                <View style={{ width: `${Math.round(winPct * 100)}%`, backgroundColor: userBar }} />
+                <View style={{ flex: 1, backgroundColor: oppBar }} />
               </View>
               <View className="flex-row justify-between items-center">
                 <Text style={{ fontFamily: FONT.cond700, fontSize: 14, color: COLORS.text }}>{Math.round(winPct * 100)}%</Text>
@@ -267,7 +275,9 @@ const SimulationScreen: React.FC<SimulationScreenProps> = ({
         <View className="flex-row" style={{ gap: 8 }}>
           <Panel padding={13} className="flex-1" style={{ gap: 7 }}>
             <MonoLabel size={9}>Meta · {season.owner.targetWins} V</MonoLabel>
-            <Stat size={22} fit>{gp === 0 ? mandate.label : `Ritmo ${Math.round(paceWins)}`}</Stat>
+            {/* A pace off one or two games ("Ritmo 82" after a 1-0 start) is
+                noise; the mandate reads until there's a real sample. */}
+            <Stat size={22} fit>{gp < 5 ? mandate.label : `Ritmo ${Math.round(paceWins)}`}</Stat>
             <Meter
               value={gp === 0 ? 0 : targetProgress}
               height={5}

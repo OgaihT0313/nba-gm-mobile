@@ -202,3 +202,11 @@ export const heroPalette = (primary: string, secondary: string) => {
  */
 export const visibleTeamColor = (primary: string, secondary: string): string =>
   luminance(primary) < 0.06 ? secondary : primary;
+
+/** Euclidean RGB distance between two hex colors (0..441). Under ~110 two
+ *  team colors read as the same color at a glance. */
+export const colorDistance = (a: string, b: string): number => {
+  const p = (h: string) => { const x = h.replace('#', ''); return [0, 2, 4].map((i) => parseInt(x.slice(i, i + 2), 16) || 0); };
+  const [r1, g1, b1] = p(a); const [r2, g2, b2] = p(b);
+  return Math.sqrt((r1 - r2) ** 2 + (g1 - g2) ** 2 + (b1 - b2) ** 2);
+};

@@ -298,10 +298,15 @@ export const TeamBadge: React.FC<{
 /** The franchise crest (NBA CDN SVG), by team id. Logos never change during a
  *  save, so it is looked up in the opening data rather than threaded through. */
 const LOGO_BY_ID = new Map(teamsData.map((t) => [t.id, t.logoUrl]));
-export const TeamLogo: React.FC<{ teamId: string; size?: number; style?: StyleProp<any> }> = ({ teamId, size = 22, style }) => {
+export const TeamLogo: React.FC<{ teamId: string; size?: number; style?: StyleProp<any>; chip?: boolean }> = ({ teamId, size = 22, style, chip }) => {
   const uri = LOGO_BY_ID.get(teamId);
   if (!uri) return <View style={[{ width: size, height: size }, style]} />;
-  return <Image source={{ uri }} style={[{ width: size, height: size }, style]} contentFit="contain" />;
+  const img = <Image source={{ uri }} style={[{ width: chip ? size - 6 : size, height: chip ? size - 6 : size }, chip ? null : style]} contentFit="contain" />;
+  // `chip`: on a light disc, for small crests in dense lists -- the Spurs,
+  // Nets, Cavaliers and Jazz marks are near-black and vanish on the dark UI.
+  return chip ? (
+    <View style={[{ width: size, height: size, borderRadius: size / 2, backgroundColor: '#F3F1EC', alignItems: 'center', justifyContent: 'center' }, style]}>{img}</View>
+  ) : img;
 };
 
 /** A player's headshot on a square tinted with his team's color (neutral for a

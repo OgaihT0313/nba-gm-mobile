@@ -84,7 +84,7 @@ const LeagueLeaders: React.FC<{ players: { [key: string]: Player }; teams: Team[
   return (
     <Screen heroHeight={100}>
       <ScreenTitle title="Líderes da liga" />
-      <BodyText style={{ paddingHorizontal: 20, marginTop: -10 }}>Após {gamesIn} jogos · média por partida</BodyText>
+      <BodyText style={{ paddingHorizontal: 20, marginTop: -10 }}>Após {gamesIn} {gamesIn === 1 ? 'jogo' : 'jogos'} · média por partida</BodyText>
 
       <Body top={14} gap={14}>
         <View className="flex-row" style={{ gap: 6 }}>

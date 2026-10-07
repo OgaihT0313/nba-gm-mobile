@@ -17,7 +17,7 @@ import { COLORS, INK, RADIUS, FONT, withAlpha } from '../src/theme/tokens';
 import Screen, { Body } from '../components/ui/Screen';
 import {
   Panel, Well, MonoLabel, Eyebrow, HeroTitle, Stat, Chip, CtaButton, GhostButton, FilterRow,
-  ScreenTitle, Tag, TeamBadge, BodyText, Name, Dock, SectionLabel,
+  ScreenTitle, Tag, TeamBadge, TeamLogo, BodyText, Name, Dock, SectionLabel,
 } from '../components/ui/kit';
 import Icon from '../components/Icon';
 import PlayerDetailModal from '../components/PlayerDetailModal';
@@ -405,10 +405,15 @@ const TradeCenter: React.FC<TradeCenterProps> = ({
             ))}
           </View>
           {/* Salary match / roster minimum / value, live as you build. */}
+          {/* Why a trade is blocked is a sentence, not a label: on a phone a
+              one-line tag cut it to "...acima do teto salarial e não pode". */}
+          {legality && !legality.legal ? (
+            <View style={{ borderRadius: 10, borderWidth: 1, borderColor: withAlpha(COLORS.bad, 0.55), paddingHorizontal: 10, paddingVertical: 8 }}>
+              <Text style={{ fontFamily: FONT.body600, fontSize: 12.5, lineHeight: 17, color: COLORS.bad }}>{legality.reason}</Text>
+            </View>
+          ) : null}
           <View className="flex-row flex-wrap" style={{ gap: 6 }}>
-            {legality ? (
-              <Tag color={legality.legal ? COLORS.good : COLORS.bad}>{legality.legal ? 'Salários batem' : legality.reason}</Tag>
-            ) : null}
+            {legality?.legal ? <Tag color={COLORS.good}>Salários batem</Tag> : null}
             {hasPackage && userValueEval ? (
               <Tag color={valuePct > 5 ? COLORS.good : valuePct < -5 ? COLORS.warn : COLORS.textSoft}>
                 {valuePct > 5 ? `Você ganha ${valuePct}%` : valuePct < -5 ? `Você perde ${Math.abs(valuePct)}%` : 'Valor equilibrado'}
@@ -461,13 +466,14 @@ const TradeCenter: React.FC<TradeCenterProps> = ({
 
       {/* Partner picker */}
       <Sheet visible={pickerOpen} onClose={() => setPickerOpen(false)} title="Escolha o parceiro">
-        {teams.filter((t) => t.id !== userTeamId).map((t) => (
+        {teams.filter((t) => t.id !== userTeamId).sort((a, b) => a.name.localeCompare(b.name)).map((t) => (
           <Pressable accessibilityRole="button"
             key={t.id}
             onPress={() => { setPartnerTeamId(t.id); setPartnerAssets([]); setPartnerPickIds([]); setPickerOpen(false); }}
             className="flex-row items-center gap-3 p-3 rounded-xl active:opacity-70"
           >
             <TeamBadge teamId={t.id} width={34} height={22} />
+            <TeamLogo teamId={t.id} size={26} chip />
             <Name size={16}>{t.name}</Name>
           </Pressable>
         ))}
@@ -494,8 +500,8 @@ const TradeCenter: React.FC<TradeCenterProps> = ({
 
 /* -------------------------------------------------------------------------- */
 
-const Sheet: React.FC<{ visible: boolean; onClose: () => void; title: string; children: React.ReactNode }> = ({
-  visible, onClose, title, children,
+const Sheet: React.FC<{ visible: boolean; onClose: () => void; title: string; children: React.ReactNode; footer?: React.ReactNode }> = ({
+  visible, onClose, title, children, footer,
 }) => (
   <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
     {/* Backdrop as a SIBLING of the sheet: nested Pressables took the drag on
@@ -507,6 +513,7 @@ const Sheet: React.FC<{ visible: boolean; onClose: () => void; title: string; ch
         <View className="self-center mb-3" style={{ width: 40, height: 4, borderRadius: 2, backgroundColor: COLORS.lineStrong }} />
         <SectionLabel>{title}</SectionLabel>
         <ScrollView style={{ flexGrow: 0, flexShrink: 1, marginTop: 10 }}>{children}</ScrollView>
+        {footer ? <View style={{ paddingTop: 10 }}>{footer}</View> : null}
       </View>
     </View>
   </Modal>
@@ -534,7 +541,13 @@ const AssetSheet: React.FC<{
   const picks = [...picksOf(team)].sort((a, b) => a.draft - b.draft);
 
   return (
-    <Sheet visible onClose={onClose} title={side === 'user' ? 'O que você envia' : `O que pedir ao ${getTeamNickname(team)}`}>
+    <Sheet
+      visible
+      onClose={onClose}
+      title={side === 'user' ? 'O que você envia' : `O que pedir ao ${getTeamNickname(team)}`}
+      // A multi-select sheet needs a way out that isn't "tap the dimmed bit".
+      footer={<CtaButton label="Pronto" sub={`${selectedPlayers.length + selectedPicks.length} selecionado${selectedPlayers.length + selectedPicks.length === 1 ? '' : 's'}`} onPress={onClose} />}
+    >
       <FilterRow items={POSITION_FILTERS} value={pos} onChange={setPos} style={{ marginBottom: 12 }} />
 
       <View style={{ gap: 8 }}>

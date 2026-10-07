@@ -224,12 +224,15 @@ const Draft: React.FC<DraftProps> = ({ season, onPick, onAutoPick, onFinish, onS
                 <View className="flex-row" style={{ gap: 8 }}>
                   <GhostButton
                     label={focusReport?.potentialKnown ? 'Avaliado ✓' : draft.scoutBudget <= 0 ? 'Sem olheiros' : 'Observar (–1)'}
-                    onPress={() => onScout(focus.id)}
+                    // Pin the focus first: scouting moves his projected range,
+                    // the board re-sorts, and an unpinned focus (board #1)
+                    // would jump to someone else right under the Escolher button.
+                    onPress={() => { setFocusId(focus.id); onScout(focus.id); }}
                     disabled={draft.scoutBudget <= 0 || !!focusReport?.potentialKnown}
                     style={{ flex: 1 }}
                   />
                   <CtaButton
-                    label={userOnClock ? 'Escolher' : 'Aguarde a vez'}
+                    label={userOnClock ? `Escolher ${focus.name.split(' ').slice(-1)[0]}` : 'Aguarde a vez'}
                     onPress={() => onPick(focus.id)}
                     disabled={!userOnClock}
                     size={16}
