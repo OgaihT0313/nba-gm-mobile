@@ -200,6 +200,27 @@ Medido em `scripts/check_milestones.ts`.
 
 ---
 
+## 5. Melhoria do 3D — PRÓXIMO (aprovado pelo usuário em 2026-10-06)
+
+Plano completo em [PLANO-3D.md](PLANO-3D.md), reescrito em cima do código atual
+de `components/court3d/`. Etapas:
+- 0: branch `melhoria-3d` e medição de referência
+- 1: piso e marcações oficiais
+- 2: iluminação de arena simulada (APK #1)
+- 3: tabela, aro e rede
+- 4: jogadores com `action` vinda do `watchDirector` (APK #2)
+- 5: placar e relógios ao vivo
+- 6: bola
+- 7: câmeras
+- 8: desempenho
+
+Regras:
+- fora do 3D, só acréscimos opcionais em `watchDirector.ts` e na `WatchGameScreen`;
+- os 5 modos de câmera continuam;
+- nenhuma sombra em tempo real por padrão.
+
+**Começar pela Etapa 0** e confirmar com o usuário ao fim de cada etapa.
+
 ## Menor, ou fora de escopo por decisão
 
 - **Feed ainda é 62% lesão.** Não desce sem tornar sequência quente / má fase /
