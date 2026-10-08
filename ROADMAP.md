@@ -5,7 +5,8 @@ depois da rodada que calibrou o motor e construiu a fila de decisões — a list
 anterior tinha itens já entregues.
 
 Histórico e raciocínio das decisões já tomadas: [PLANO-V2.md](PLANO-V2.md) e
-[PLANO-DECISOES.md](PLANO-DECISOES.md). **Não iniciar nada daqui sem pedido
+[PLANO-DECISOES.md](PLANO-DECISOES.md). Sessão de 6 a 8/10/2026 (redesign, NBA Manager,
+dados reais, teste no celular): [SESSAO-2026-10-06.md](SESSAO-2026-10-06.md). **Não iniciar nada daqui sem pedido
 explícito do usuário.**
 
 ---
