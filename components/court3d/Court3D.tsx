@@ -93,6 +93,8 @@ interface Court3DProps {
 }
 
 const DEFAULT_FLOOR_COLOR = '#caa271'; // light maple
+/** Vertical field of view on a wide screen; portrait phones get more (CameraRig). */
+const BASE_FOV = 38;
 
 /** The visitors' kit. Two blue teams (Orlando at the Knicks) read as one team
  * of ten on a phone, so when the primaries are close the road side wears the
@@ -136,7 +138,13 @@ function CameraRig({
     }
     const court = courtRef.current;
     if (court) {
-      const f = 1 - Math.pow(preset.lag ?? 0.3, dt);
+      const portraitLag = THREE.MathUtils.clamp((1.1 - size.width / Math.max(1, size.height)) / 0.6, 0, 1);
+      // Possessions turn over every ~1.5 s of screen time; a lazy wide-shot
+      // follow (30% of the gap left after a second) never caught the play and
+      // parked at center court. A tall screen, which can't see both ends at
+      // once, pans like a broadcast camera: 8% left after a second.
+      const lag = preset.lag ?? THREE.MathUtils.lerp(0.3, 0.08, portraitLag);
+      const f = 1 - Math.pow(lag, dt);
       // Aim at the action, not just the ball: half the ball, half the ten
       // bodies' centroid, so a skip pass or a fast break doesn't leave the
       // players out of frame while the ball is centered.
@@ -151,9 +159,29 @@ function CameraRig({
       // the closer every framing gets to tracking the action fully.
       const portrait = THREE.MathUtils.clamp((1.1 - size.width / Math.max(1, size.height)) / 0.6, 0, 1);
       const follow = preset.follow + (1 - preset.follow) * portrait;
+      // A possession change moves all ten bodies 50+ ft in under half a
+      // second of screen time (measured): no pan keeps up, and the wide shot
+      // spent every transition filming an empty floor. A big jump is a CUT,
+      // the way a broadcast switches cameras, instead of a slide.
+      if (Math.abs(ax * follow - target.x) > 30 && !preset.lag) target.x = ax * follow;
       target.x = THREE.MathUtils.lerp(target.x, ax * follow, f);
       target.z = THREE.MathUtils.lerp(target.z, az * follow * (preset.lag ? 0.8 : 0.5 + 0.4 * portrait), f);
       target.y = THREE.MathUtils.lerp(target.y, preset.targetY ?? 5, f);
+    }
+    // Field of view sized to the screen. At the base 38° a phone held upright
+    // (aspect ~0.46) sees +-15 ft across at broadcast distance -- less than
+    // a half-court set spans, so the play kept sliding out of frame even with
+    // the camera centered on it. Wide shots open up until they cover +-24 ft;
+    // the close camera (which rides the ball) keeps the tight lens.
+    if (camera instanceof THREE.PerspectiveCamera) {
+      const aspect = size.width / Math.max(1, size.height);
+      const wantHalf = preset.lag ? 0 : 24 / Math.max(1, s.dist);
+      const vfov = wantHalf > 0 ? THREE.MathUtils.radToDeg(2 * Math.atan(wantHalf / aspect)) : BASE_FOV;
+      const fov = THREE.MathUtils.clamp(vfov, BASE_FOV, 60);
+      if (Math.abs(camera.fov - fov) > 0.05) {
+        camera.fov = THREE.MathUtils.lerp(camera.fov, fov, k);
+        camera.updateProjectionMatrix();
+      }
     }
     camera.position.set(
       target.x + Math.cos(s.angle) * s.dist * Math.cos(s.elev),
@@ -332,7 +360,7 @@ export default function Court3D({
 
   return (
     <View style={{ flex: 1 }} {...responder.panHandlers}>
-      <Canvas camera={{ fov: 38, near: 0.5, far: 1200 }} style={{ flex: 1 }}>
+      <Canvas camera={{ fov: BASE_FOV, near: 0.5, far: 1200 }} style={{ flex: 1 }}>
         <color attach="background" args={['#04060b']} />
         <fog attach="fog" args={['#04060b', 160, 520]} />
         <CameraRig stateRef={camState} preset={preset} courtRef={courtRef} />
