@@ -30,6 +30,23 @@ As props são `home`, `away` (cores), `visual` (tom da madeira por era), `camera
 
 ---
 
+### O que o teste no celular mostrou (2026-10-07)
+
+Medido no Galaxy A57 do usuário (tela de 120 Hz, 1080×2340) via adb, com prints em sequência e uma sonda nos valores da câmera:
+
+1. **O ritmo é o problema principal, não o visual.**
+   - Um quarto de 12 minutos passa em cerca de 2 minutos de tela, e as posses trocam a cada ~1,5 s.
+   - Na troca, os 10 jogadores atravessam 50+ pés em menos de meio segundo, praticamente teletransportados.
+   - Nenhuma animação ou câmera fica boa assim: quem assiste não acompanha o lance, e a câmera filma a quadra vazia nesse instante (1 de cada 4 a 6 quadros, mesmo com corte de câmera).
+2. **O celular em pé enxerga uma faixa estreita.**
+   - Com lente de 38°, a câmera de TV via só ±15 pés de largura. Hoje a lente abre até 60° (±24 pés), e os jogadores ficam pequenos.
+   - O HUD ocupa cerca de 35% da altura: placar e câmeras em cima, "Em quadra" e botões embaixo. A quadra útil é uma faixa no meio.
+3. **Desempenho tem folga.** Na interface, 95% dos quadros ficaram abaixo de 15 ms, com 6% de quadros atrasados. Há espaço para iluminação e animação, desde que se meça a cada etapa.
+4. **Textura no celular é diferente do navegador.** O `expo-gl` ignora o `pixelStorei` e o desenho sobe invertido. O piso já tem o `flipRows`; toda textura nova com texto ou assimetria precisa ser conferida no aparelho.
+5. **Avisos no log:** "Multiple instances of Three.js being imported" (o three é carregado duas vezes) e `THREE.Clock` obsoleto. Limpar na Etapa 0.
+6. **Uniformes:** o branco do visitante quando as cores colidem já existe e funciona; a Etapa 4 parte dele.
+7. **Instrumento de teste:** o adb permite instalar, abrir o jogo, tirar prints em sequência, ler o log e medir quadros sem o usuário. Toda etapa termina com essa checagem no aparelho.
+
 ## Regras do escopo
 
 1. **Mexer no 3D:** `components/court3d/`. Quando uma etapa precisar de dados novos, a mudança é **aditiva**:
@@ -59,6 +76,8 @@ As props são `home`, `away` (cores), `visual` (tom da madeira por era), `camera
 - Criar a branch `melhoria-3d`.
 - Medir o ponto de partida: contagem de draw calls e de triângulos (`gl.info`) e um APK de referência para comparar o FPS depois.
 - Conferir se o `dispose` de geometrias, materiais e texturas acontece ao sair da tela, e aplicar o teto de `devicePixelRatio` se ainda não existir.
+- Remover a segunda cópia do three (aviso "Multiple instances") e trocar o `THREE.Clock`.
+- Deixar pronto o roteiro de teste no aparelho via adb (instalar, abrir "Assistir ao jogo", prints em sequência por câmera, `dumpsys gfxinfo`).
 - Entregar um resumo curto com os números de base.
 
 ## Etapa 1 — Piso e marcações oficiais (`textures.ts`, `Court3D.tsx`)
@@ -117,6 +136,16 @@ As props são `home`, `away` (cores), `visual` (tom da madeira por era), `camera
 
 **APK de teste #2** (Etapas 3 e 4).
 
+## Etapa 4b — Ritmo da partida (`watchDirector.ts`, `WatchGameScreen.tsx`)
+
+**A causa nº 1 de o 3D parecer estranho no celular** (ver "O que o teste no celular mostrou").
+
+- **Transição com tempo mínimo:** depois de uma cesta ou de uma troca de posse, os jogadores levam um tempo real para atravessar a quadra, com velocidade máxima plausível (piques de ~25 pés/s em escala de tela). Hoje é quase instantâneo.
+- **Menos compressão, ou compressão inteligente:** em vez de mostrar todas as posses aceleradas, a velocidade normal mostra as posses inteiras e o diretor "pula" o miolo de algumas (corte para o próximo ataque), como um compacto de TV. O 4X continua para quem quer correr.
+- **Pausa curta depois da cesta:** cerca de 1 s com a bola passando pela rede (casa com a rede da Etapa 3) antes da reposição.
+- O placar, o relógio e o resultado não mudam: o diretor continua seguindo o mesmo roteiro de pontos, só com outro tempo de tela.
+- **Teste:** `check_watch_director` ganha uma checagem de velocidade máxima dos jogadores por quadro, e no aparelho medimos quantos quadros em sequência mostram a quadra vazia (a meta é nenhum).
+
 ## Etapa 5 — Placar e relógio ao vivo (`Arena.tsx`, `Court3D.tsx`, `WatchGameScreen.tsx`)
 
 - Nova prop opcional no `Court3D`: `scoreboard?: { home: number; away: number; quarter: number; clock: number; shotClock?: number }`, passada pela `WatchGameScreen`, que já tem esses números.
@@ -136,6 +165,16 @@ As props são `home`, `away` (cores), `visual` (tom da madeira por era), `camera
   - transição suave ao trocar de modo (hoje o movimento é de apenas uma parte do caminho por frame);
   - limite para a câmera não atravessar o piso nem a arquibancada.
 - **Câmera de ação:** no modo "Perto", seguir quem está com a bola e cortar para a cesta no arremesso. Usa a `action` da Etapa 4.
+- **Celular em pé (já feito em 2026-10-07):**
+  - a lente abre até 60°;
+  - a câmera segue o centro da jogada com atraso curto;
+  - um salto de mais de 30 pés vira corte.
+- **Ainda a fazer na tela em pé:**
+  - cortar assim que a jogada sair da área visível, sem esperar o salto de 30 pés;
+  - mirar no centro da faixa que o HUD deixa livre, e não no centro da tela;
+  - avaliar o "Perto" como câmera padrão no celular (mostra pessoas, não formação);
+  - avaliar um HUD que se recolhe durante o lance.
+- **Avaliar modo paisagem** só na tela do 3D: resolve o campo estreito de uma vez, mas exige liberar a rotação do app nessa tela.
 
 ## Etapa 8 — Desempenho e fechamento
 
@@ -164,4 +203,4 @@ As props são `home`, `away` (cores), `visual` (tom da madeira por era), `camera
 - [ ] Bola com giro e sombra de contato que reage à altura
 - [ ] FPS no APK final igual ou próximo da referência da Etapa 0
 
-**Ordem:** 0 → 1 → 2 → (APK #1) → 3 → 4 → (APK #2) → 5 → 6 → 7 → 8. Ao fim de cada etapa: resumo de 2 a 3 linhas, verificação ok e confirmação antes de avançar.
+**Ordem:** 0 → 4b → 1 → 2 → (APK #1) → 3 → 4 → (APK #2) → 5 → 6 → 7 → 8. A 4b vem logo depois da 0: sem ritmo jogável, as outras melhorias passam despercebidas. Ao fim de cada etapa: resumo de 2 a 3 linhas, verificação ok e confirmação antes de avançar.

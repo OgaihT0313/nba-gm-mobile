@@ -226,6 +226,7 @@ Corrigidos, na ordem de gravidade:
 Plano completo em [PLANO-3D.md](PLANO-3D.md), reescrito em cima do código atual
 de `components/court3d/`. Etapas:
 - 0: branch `melhoria-3d` e medição de referência
+- 4b: ritmo da partida (transições com tempo real, compacto de posses)
 - 1: piso e marcações oficiais
 - 2: iluminação de arena simulada (APK #1)
 - 3: tabela, aro e rede
@@ -239,6 +240,8 @@ Regras:
 - fora do 3D, só acréscimos opcionais em `watchDirector.ts` e na `WatchGameScreen`;
 - os 5 modos de câmera continuam;
 - nenhuma sombra em tempo real por padrão.
+
+Depois do teste no celular (2026-10-07), entrou a **Etapa 4b (ritmo da partida)**, logo depois da 0. Os jogadores atravessam a quadra em menos de meio segundo e a câmera filma o vazio; sem ritmo jogável, o resto passa despercebido. Também entrou o restante das câmeras na tela em pé (Etapa 7).
 
 **Começar pela Etapa 0** e confirmar com o usuário ao fim de cada etapa.
 
