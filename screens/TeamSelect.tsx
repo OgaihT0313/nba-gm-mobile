@@ -6,7 +6,7 @@ import { Team, Player } from '../types';
 import { getTeamNickname, getTeamAccent, TEAM_TITLES } from '../constants';
 import { teamRating } from '../services/formService';
 import { COLORS, FONT, withAlpha } from '../src/theme/tokens';
-import { Eyebrow, HeroTitle, TeamBadge, CtaButton, BodyText } from '../components/ui/kit';
+import { Eyebrow, HeroTitle, TeamBadge, TeamLogo, CtaButton, BodyText } from '../components/ui/kit';
 
 // Design 1a ("Transmissão"). The two conferences side by side — West red, East
 // blue, the colors they carry through the whole app — fifteen 36px rows each,
@@ -55,6 +55,7 @@ const Column: React.FC<{
           >
             {on ? <View style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: 3, backgroundColor: '#fff' }} /> : null}
             <TeamBadge teamId={t.id} width={32} height={22} />
+            <TeamLogo teamId={t.id} size={22} />
             <Text numberOfLines={1} style={{ flex: 1, minWidth: 0, fontFamily: FONT.cond600, fontSize: 15, color: COLORS.text }}>
               {getTeamNickname(t)}
             </Text>

@@ -58,7 +58,7 @@ const TeamsList: React.FC<{
               style={{ height: 38, gap: 8, paddingLeft: 7, paddingRight: 8, borderBottomWidth: 1, borderBottomColor: COLORS.line }}
             >
               <TeamBadge teamId={t.id} width={32} height={22} />
-            <TeamLogo teamId={t.id} size={24} chip />
+            <TeamLogo teamId={t.id} size={22} />
               <View style={{ flex: 1, minWidth: 0 }}>
                 <Text numberOfLines={1} style={{ fontFamily: FONT.cond600, fontSize: 14, lineHeight: 15, color: COLORS.text }}>{getTeamNickname(t)}</Text>
                 {tag ? (

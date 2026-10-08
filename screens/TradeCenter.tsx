@@ -473,7 +473,7 @@ const TradeCenter: React.FC<TradeCenterProps> = ({
             className="flex-row items-center gap-3 p-3 rounded-xl active:opacity-70"
           >
             <TeamBadge teamId={t.id} width={34} height={22} />
-            <TeamLogo teamId={t.id} size={26} chip />
+            <TeamLogo teamId={t.id} size={24} />
             <Name size={16}>{t.name}</Name>
           </Pressable>
         ))}
