@@ -1,0 +1,57 @@
+# Builds the browser version (Expo web export) and publishes it to the
+# `gh-pages` branch, served by GitHub Pages at
+# https://<owner>.github.io/nba-gm-mobile/
+#
+# One-time setup: Settings -> Pages -> Source: "Deploy from a branch",
+# branch `gh-pages`, folder `/ (root)`.
+name: Deploy web
+
+on:
+  push:
+    branches: [claude/game-web-pc-port-mtu0i1, redesign-console-mygm]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: deploy-web
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      # Pages serves the site under /<repo>/, not the domain root, so the
+      # bundle's asset URLs need that prefix. Only patched here -- the dev
+      # server and the native builds keep serving from /.
+      - name: Set web base URL
+        run: |
+          node -e "
+            const fs = require('fs');
+            const j = JSON.parse(fs.readFileSync('app.json', 'utf8'));
+            j.expo.experiments = { ...(j.expo.experiments || {}), baseUrl: '/${{ github.event.repository.name }}' };
+            fs.writeFileSync('app.json', JSON.stringify(j, null, 2));
+          "
+
+      - run: npx expo export --platform web
+
+      # Without this, Pages runs Jekyll, which drops the `_expo/` folder
+      # (underscore-prefixed) that holds the whole JS bundle.
+      - run: touch dist/.nojekyll
+
+      - uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./dist
+          publish_branch: gh-pages
+          force_orphan: true
