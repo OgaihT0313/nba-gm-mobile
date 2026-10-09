@@ -35,17 +35,20 @@ const Row: React.FC<{ id: string; players: PlayerMap; leagueTeams: Team[]; last:
   );
 };
 
-const AllNbaTeams: React.FC<{ teams: string[][]; players: PlayerMap; leagueTeams: Team[] }> = ({ teams, players, leagueTeams }) => (
+/** `columns`: the three teams side by side (PC). */
+const AllNbaTeams: React.FC<{ teams: string[][]; players: PlayerMap; leagueTeams: Team[]; columns?: boolean }> = ({ teams, players, leagueTeams, columns }) => (
   <View style={{ gap: 10 }}>
     <SectionLabel>All-NBA</SectionLabel>
+    <View style={{ flexDirection: columns ? 'row' : 'column', gap: 10 }}>
     {teams.map((team, i) => (
-      <View key={i} style={{ backgroundColor: COLORS.surface, borderRadius: 16, paddingHorizontal: 14, paddingTop: 12, paddingBottom: 4 }}>
+      <View key={i} style={{ flex: columns ? 1 : undefined, minWidth: 0, backgroundColor: COLORS.surface, borderRadius: 16, paddingHorizontal: 14, paddingTop: 12, paddingBottom: 4 }}>
         <Text style={{ fontFamily: FONT.cond700, fontSize: 11, letterSpacing: 1.5, color: TEAM_TONES[i] ?? COLORS.muted, textTransform: 'uppercase' }}>
           {TEAM_LABELS[i] ?? `${i + 1}º Time`}
         </Text>
         {team.map((id, j) => <Row key={id} id={id} players={players} leagueTeams={leagueTeams} last={j === team.length - 1} />)}
       </View>
     ))}
+    </View>
   </View>
 );
 

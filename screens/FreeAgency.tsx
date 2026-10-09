@@ -13,6 +13,8 @@ import { useTheme } from '../src/theme/ThemeProvider';
 import { COLORS, INK, RADIUS, FONT, ovrColor } from '../src/theme/tokens';
 import Screen, { Body } from '../components/ui/Screen';
 import { Panel, MonoLabel, Eyebrow, Stat, Meter, Chip, CtaButton, GhostButton, FilterRow, ScreenTitle, BodyText, Name, Dock } from '../components/ui/kit';
+import { useDesktop } from '../components/desktop/useDesktop';
+import { DPage, DDock, DCta, DTitle } from '../components/desktop/kit';
 
 // Design 3b. Two things are always on screen: how much room you actually have,
 // and whether the player would even come. The old version let you tap "Assinar"
@@ -54,6 +56,7 @@ const STANDING = {
 
 const FreeAgency: React.FC<FreeAgencyProps> = ({ season, onSign, onStartSeason }) => {
   const { accent } = useTheme();
+  const desktop = useDesktop();
   const [posFilter, setPosFilter] = useState('TODOS');
   const [sortKey, setSortKey] = useState<SortKey>('ovr');
   const [sortAsc, setSortAsc] = useState(false);
@@ -104,6 +107,136 @@ const FreeAgency: React.FC<FreeAgencyProps> = ({ season, onSign, onStartSeason }
     }
   };
 
+  const tiles = (
+    <View className="flex-row" style={{ gap: 8 }}>
+      <Panel padding={13} className="flex-1" style={{ gap: 3 }}>
+        <MonoLabel size={9}>Espaço no teto</MonoLabel>
+        <Stat size={24} color={capSpace >= 0 ? COLORS.good : COLORS.warn} fit>
+          {capSpace >= 0 ? money(capSpace) : `–${money(Math.abs(capSpace))}`}
+        </Stat>
+        <BodyText size={12} color={COLORS.dim}>
+          {capSpace >= 0 ? 'Livre para assinar' : salary > LUXURY_TAX ? 'Acima do imposto' : 'Só mínimo e exceção'}
+        </BodyText>
+      </Panel>
+      <Panel padding={13} className="flex-1" style={{ gap: 3 }}>
+        <MonoLabel size={9}>Buracos</MonoLabel>
+        <Stat size={24} fit>{holes.length > 0 ? holes.join(' · ') : 'Nenhum'}</Stat>
+        <BodyText size={12} color={belowMin || aboveMax ? COLORS.warn : COLORS.dim}>
+          {rosterCount} no elenco · mín {MIN_ROSTER_SIZE}
+        </BodyText>
+      </Panel>
+    </View>
+  );
+
+  const sortRow = (
+    <View className="flex-row items-center" style={{ gap: 6 }}>
+      <Text style={{ fontFamily: FONT.cond700, fontSize: 10.5, letterSpacing: 1.4, color: COLORS.dim, width: 58 }}>ORDENAR</Text>
+      {SORTS.map((so) => {
+        const active = sortKey === so.key;
+        return (
+          <Pressable accessibilityRole="button"
+            key={so.key}
+            onPress={() => onSortPress(so.key)}
+            className="flex-row items-center active:opacity-75"
+            style={{ gap: 4, paddingHorizontal: 10, height: 30, borderRadius: 9, backgroundColor: active ? COLORS.lineStrong : COLORS.surface2 }}
+          >
+            <Text style={{ fontFamily: FONT.cond700, fontSize: 12, letterSpacing: 0.8, color: active ? COLORS.text : COLORS.muted, textTransform: 'uppercase' }}>{so.label}</Text>
+            {active ? <Text style={{ fontSize: 8, color: COLORS.muted }}>{sortAsc ? '▲' : '▼'}</Text> : null}
+          </Pressable>
+        );
+      })}
+    </View>
+  );
+
+  const renderCard = (player: Player) => {
+    const legality = signFreeAgentLegality(userTeam, player, players);
+    const interest = evaluateSigningInterest(player, userTeam, teams, players);
+    const fillsHole = holes.some((h) => getPlayerPositions(player).includes(h));
+    const own = isOwn(player);
+    const route = legality.legal ? signingRoute(userTeam, player, players) : null;
+
+    const standing: Standing = !legality.legal
+      ? STANDING.noRoom
+      : !interest.willing
+        ? STANDING.refuses
+        : fillsHole
+          ? STANDING.wants
+          : STANDING.open;
+    const canSign = legality.legal && interest.willing;
+    // The blocking reason, whichever gate is actually closed.
+    const reason = !legality.legal ? legality.reason : !interest.willing ? interest.reason : undefined;
+
+    return (
+      <Panel key={player.id} bar={standing.color} padding={12} radius={14} style={{ gap: 8 }}>
+        <View className="flex-row items-center" style={{ gap: 12 }}>
+          <Text style={{ width: 30, fontFamily: FONT.cond800, fontSize: 24, lineHeight: 24, color: ovrColor(player.ovr) }}>{player.ovr}</Text>
+          <View style={{ flex: 1, minWidth: 0, gap: 2 }}>
+            <Name size={16}>{player.name}</Name>
+            <Text numberOfLines={1} style={{ fontFamily: FONT.body500, fontSize: 12, color: COLORS.dim }}>
+              {formatPositions(player)} · {player.age}a · pede {money(player.salary)}/{newContractYears(player)}a
+              {own ? ' · seu jogador' : ''}{fillsHole ? ' · lacuna' : ''}
+            </Text>
+          </View>
+          <Text style={{ fontFamily: FONT.cond700, fontSize: 11.5, letterSpacing: 0.9, color: standing.color, textTransform: 'uppercase' }}>{standing.label}</Text>
+        </View>
+        {reason ? <BodyText size={12} color={COLORS.dim}>{reason}</BodyText> : null}
+        {/* How the signing fits, when it is not plain cap room. */}
+        {canSign && route === 'mid_level' ? (
+          <BodyText size={12} color={COLORS.dim}>Usa a exceção de nível médio — só uma por verão.</BodyText>
+        ) : null}
+        {canSign && route === 'bird' && capSpace < player.salary ? (
+          <BodyText size={12} color={COLORS.dim}>Direito de renovação: pode passar do teto.</BodyText>
+        ) : null}
+        {canSign ? (
+          <GhostButton filled label={`Assinar por ${money(player.salary)}`} onPress={() => onSign(player.id)} color={COLORS.good} />
+        ) : null}
+      </Panel>
+    );
+  };
+
+  // PC: cap room and holes beside the title, the market as a grid of two.
+  if (desktop) {
+    return (
+      <DPage
+        footer={
+          <DDock
+            note={belowMin
+              ? `O elenco precisa de no mínimo ${MIN_ROSTER_SIZE} jogadores.`
+              : aboveMax
+                ? `Máximo de ${MAX_ROSTER_SIZE}: dispense ${rosterCount - MAX_ROSTER_SIZE} em Meu Time.`
+                : `Contratos expiraram pela liga inteira. Reforce o ${getTeamNickname(userTeam)} antes de começar.`}
+          >
+            <DCta
+              label="Começar temporada"
+              sub={belowMin ? `Faltam ${MIN_ROSTER_SIZE - rosterCount}` : aboveMax ? `Dispense ${rosterCount - MAX_ROSTER_SIZE}` : `${rosterCount} no elenco`}
+              onPress={onStartSeason}
+              disabled={belowMin || aboveMax}
+            />
+          </DDock>
+        }
+      >
+        <DTitle title="Agência livre" right={<View style={{ width: 560 }}>{tiles}</View>} />
+        <BodyText size={15} style={{ marginTop: 6 }}>Offseason · {freeAgents.length} jogadores no mercado</BodyText>
+        {ownCount > 0 ? (
+          <BodyText size={13} style={{ marginTop: 10, maxWidth: 820 }}>
+            {ownCount === 1 ? '1 jogador seu quer' : `${ownCount} jogadores seus querem`} renovar. Você tem a preferência e pode
+            passar do teto para mantê-los — quem você não assinar vai ao mercado quando a temporada começar.
+          </BodyText>
+        ) : null}
+        <View className="flex-row items-center justify-between" style={{ marginTop: 18, gap: 20 }}>
+          <FilterRow items={POSITION_FILTERS} value={posFilter} onChange={setPosFilter} />
+          {sortRow}
+        </View>
+        <View className="flex-row flex-wrap" style={{ gap: 12, marginTop: 16 }}>
+          {filtered.map((player) => (
+            <View key={player.id} style={{ width: '49%', flexGrow: 1 }}>{renderCard(player)}</View>
+          ))}
+        </View>
+        {filtered.length === 0 ? <BodyText color={COLORS.dim} style={{ marginTop: 12 }}>Nenhum agente livre nessa posição.</BodyText> : null}
+      </DPage>
+    );
+  }
+
   return (
     <Screen
       heroHeight={110}
@@ -131,24 +264,7 @@ const FreeAgency: React.FC<FreeAgencyProps> = ({ season, onSign, onStartSeason }
       </BodyText>
 
       <Body top={14} gap={12}>
-        <View className="flex-row" style={{ gap: 8 }}>
-          <Panel padding={13} className="flex-1" style={{ gap: 3 }}>
-            <MonoLabel size={9}>Espaço no teto</MonoLabel>
-            <Stat size={24} color={capSpace >= 0 ? COLORS.good : COLORS.warn} fit>
-              {capSpace >= 0 ? money(capSpace) : `–${money(Math.abs(capSpace))}`}
-            </Stat>
-            <BodyText size={12} color={COLORS.dim}>
-              {capSpace >= 0 ? 'Livre para assinar' : salary > LUXURY_TAX ? 'Acima do imposto' : 'Só mínimo e exceção'}
-            </BodyText>
-          </Panel>
-          <Panel padding={13} className="flex-1" style={{ gap: 3 }}>
-            <MonoLabel size={9}>Buracos</MonoLabel>
-            <Stat size={24} fit>{holes.length > 0 ? holes.join(' · ') : 'Nenhum'}</Stat>
-            <BodyText size={12} color={belowMin || aboveMax ? COLORS.warn : COLORS.dim}>
-              {rosterCount} no elenco · mín {MIN_ROSTER_SIZE}
-            </BodyText>
-          </Panel>
-        </View>
+        {tiles}
 
         {ownCount > 0 ? (
           <BodyText size={12.5}>
@@ -159,69 +275,9 @@ const FreeAgency: React.FC<FreeAgencyProps> = ({ season, onSign, onStartSeason }
 
         <FilterRow items={POSITION_FILTERS} value={posFilter} onChange={setPosFilter} />
 
-        <View className="flex-row items-center" style={{ gap: 6 }}>
-          <Text style={{ fontFamily: FONT.cond700, fontSize: 10.5, letterSpacing: 1.4, color: COLORS.dim, width: 58 }}>ORDENAR</Text>
-          {SORTS.map((so) => {
-            const active = sortKey === so.key;
-            return (
-              <Pressable accessibilityRole="button"
-                key={so.key}
-                onPress={() => onSortPress(so.key)}
-                className="flex-row items-center active:opacity-75"
-                style={{ gap: 4, paddingHorizontal: 10, height: 30, borderRadius: 9, backgroundColor: active ? COLORS.lineStrong : COLORS.surface2 }}
-              >
-                <Text style={{ fontFamily: FONT.cond700, fontSize: 12, letterSpacing: 0.8, color: active ? COLORS.text : COLORS.muted, textTransform: 'uppercase' }}>{so.label}</Text>
-                {active ? <Text style={{ fontSize: 8, color: COLORS.muted }}>{sortAsc ? '▲' : '▼'}</Text> : null}
-              </Pressable>
-            );
-          })}
-        </View>
+        {sortRow}
 
-        {filtered.map((player) => {
-          const legality = signFreeAgentLegality(userTeam, player, players);
-          const interest = evaluateSigningInterest(player, userTeam, teams, players);
-          const fillsHole = holes.some((h) => getPlayerPositions(player).includes(h));
-          const own = isOwn(player);
-          const route = legality.legal ? signingRoute(userTeam, player, players) : null;
-
-          const standing: Standing = !legality.legal
-            ? STANDING.noRoom
-            : !interest.willing
-              ? STANDING.refuses
-              : fillsHole
-                ? STANDING.wants
-                : STANDING.open;
-          const canSign = legality.legal && interest.willing;
-          // The blocking reason, whichever gate is actually closed.
-          const reason = !legality.legal ? legality.reason : !interest.willing ? interest.reason : undefined;
-
-          return (
-            <Panel key={player.id} bar={standing.color} padding={12} radius={14} style={{ gap: 8 }}>
-              <View className="flex-row items-center" style={{ gap: 12 }}>
-                <Text style={{ width: 30, fontFamily: FONT.cond800, fontSize: 24, lineHeight: 24, color: ovrColor(player.ovr) }}>{player.ovr}</Text>
-                <View style={{ flex: 1, minWidth: 0, gap: 2 }}>
-                  <Name size={16}>{player.name}</Name>
-                  <Text numberOfLines={1} style={{ fontFamily: FONT.body500, fontSize: 12, color: COLORS.dim }}>
-                    {formatPositions(player)} · {player.age}a · pede {money(player.salary)}/{newContractYears(player)}a
-                    {own ? ' · seu jogador' : ''}{fillsHole ? ' · lacuna' : ''}
-                  </Text>
-                </View>
-                <Text style={{ fontFamily: FONT.cond700, fontSize: 11.5, letterSpacing: 0.9, color: standing.color, textTransform: 'uppercase' }}>{standing.label}</Text>
-              </View>
-              {reason ? <BodyText size={12} color={COLORS.dim}>{reason}</BodyText> : null}
-              {/* How the signing fits, when it is not plain cap room. */}
-              {canSign && route === 'mid_level' ? (
-                <BodyText size={12} color={COLORS.dim}>Usa a exceção de nível médio — só uma por verão.</BodyText>
-              ) : null}
-              {canSign && route === 'bird' && capSpace < player.salary ? (
-                <BodyText size={12} color={COLORS.dim}>Direito de renovação: pode passar do teto.</BodyText>
-              ) : null}
-              {canSign ? (
-                <GhostButton filled label={`Assinar por ${money(player.salary)}`} onPress={() => onSign(player.id)} color={COLORS.good} />
-              ) : null}
-            </Panel>
-          );
-        })}
+        {filtered.map(renderCard)}
 
         {filtered.length === 0 ? (
           <BodyText color={COLORS.dim}>Nenhum agente livre nessa posição.</BodyText>

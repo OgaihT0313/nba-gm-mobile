@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { View, Text, Pressable, ScrollView } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useDesktop } from '../components/desktop/useDesktop';
 import { useAudioPlayer, type AudioPlayer } from 'expo-audio';
 
 import { Team, Player, Coach, WatchPlay } from '../types';
@@ -120,6 +121,7 @@ const WatchGameScreen: React.FC<WatchGameScreenProps> = ({
   home, away, players, coaches, userTeamId, onFinish, eraId,
 }) => {
   const insets = useSafeAreaInsets();
+  const desktop = useDesktop();
   const homeAccent = getTeamAccent(home.id);
   const awayAccent = getTeamAccent(away.id);
   // Memoized: a fresh object literal here would be a new prop on every
@@ -549,6 +551,160 @@ const WatchGameScreen: React.FC<WatchGameScreenProps> = ({
       : `${getTeamNickname(away)} vence`;
   }, [score, home, away]);
 
+  // The timeout huddle: a card at the foot on the phone, a 420px drawer on
+  // the right edge on PC.
+  const huddle = (
+    <View style={desktop
+      ? { position: 'absolute', top: 0, right: 0, bottom: 0, width: 420, backgroundColor: 'rgba(11,11,13,0.96)', borderLeftWidth: 1, borderLeftColor: COLORS.lineStrong, padding: 20, paddingTop: 24 }
+      : { backgroundColor: 'rgba(11,11,13,0.94)', borderRadius: 20, borderWidth: 1, borderColor: COLORS.lineStrong, padding: 14 }}>
+
+      <Text style={{ fontFamily: FONT.cond700, fontSize: 11, letterSpacing: 1.5, color: COLORS.warn, textTransform: 'uppercase' }}>{huddleTitle}</Text>
+      <Text style={{ fontFamily: FONT.cond800, fontSize: 22, lineHeight: 24, color: COLORS.text, textTransform: 'uppercase' }}>{huddleSub}</Text>
+
+      <View className="flex-row" style={{ gap: 4, marginTop: 10, padding: 3, borderRadius: 12, backgroundColor: COLORS.surface2 }}>
+        {([['play', 'Jogada'], ['lineup', 'Quinteto']] as [HuddleTab, string][]).map(([id, label]) => {
+          const active = huddleTab === id;
+          return (
+            <Pressable
+              key={id}
+              accessibilityRole="tab"
+              accessibilityLabel={label}
+              aria-selected={active}
+              onPress={() => { setHuddleTab(id); setSelectedSlot(null); }}
+              className="active:opacity-70"
+              style={{ flex: 1, alignItems: 'center', paddingVertical: 8, borderRadius: 9, backgroundColor: active ? COLORS.text : 'transparent' }}
+            >
+              <Text style={{ fontFamily: FONT.cond700, fontSize: 13, letterSpacing: 1.1, color: active ? COLORS.bg : COLORS.muted, textTransform: 'uppercase' }}>{label}</Text>
+            </Pressable>
+          );
+        })}
+      </View>
+
+      {huddleTab === 'lineup' ? (
+        <ScrollView style={desktop ? { flex: 1, marginTop: 10 } : { maxHeight: 262, marginTop: 10 }} showsVerticalScrollIndicator={false}>
+          <Pressable
+            accessibilityRole="switch"
+            accessibilityLabel="Rotação automática"
+            aria-checked={autoSubs}
+            onPress={toggleAuto}
+            className="flex-row items-center justify-between active:opacity-70"
+            style={{ paddingVertical: 9, paddingHorizontal: 12, borderRadius: 12, backgroundColor: COLORS.surface2 }}
+          >
+            <View style={{ flex: 1 }}>
+              <Text style={{ fontFamily: FONT.cond700, fontSize: 15, color: COLORS.text }}>Rotação automática</Text>
+              <Text style={{ fontFamily: FONT.body500, fontSize: 12, color: COLORS.muted }}>
+                {autoSubs ? 'O técnico tira quem cansa' : 'Ninguém sai sem você mandar'}
+              </Text>
+            </View>
+            <Text style={{ fontFamily: FONT.cond700, fontSize: 12, letterSpacing: 1.2, color: autoSubs ? COLORS.good : COLORS.dim }}>{autoSubs ? 'LIGADA' : 'DESLIGADA'}</Text>
+          </Pressable>
+
+          <Text style={{ fontFamily: FONT.cond700, fontSize: 11, letterSpacing: 1.5, color: COLORS.muted, textTransform: 'uppercase', marginTop: 12, marginBottom: 6 }}>
+            {selectedSlot === null ? 'Em quadra · toque em quem sai' : `Quem entra no lugar de ${lastName(myFive.players[selectedSlot].name)}?`}
+          </Text>
+          <View style={{ gap: 4 }}>
+            {myFive.players.map((cp, i) => {
+              const e = energyRef.current[cp.playerId] ?? 100;
+              const sel = selectedSlot === i;
+              return (
+                <Pressable
+                  key={cp.playerId}
+                  accessibilityRole="button"
+                  accessibilityLabel={`${cp.slot} ${cp.name}, energia ${Math.round(e)}`}
+                  aria-selected={sel}
+                  onPress={() => setSelectedSlot(sel ? null : i)}
+                  className="flex-row items-center active:opacity-70"
+                  style={{ gap: 8, paddingVertical: 8, paddingHorizontal: 12, borderRadius: 10, backgroundColor: sel ? COLORS.text : COLORS.surface2 }}
+                >
+                  <Text style={{ width: 24, fontFamily: FONT.cond700, fontSize: 12, color: sel ? COLORS.bg : COLORS.dim }}>{cp.slot}</Text>
+                  <Text style={{ flex: 1, fontFamily: FONT.cond700, fontSize: 15, color: sel ? COLORS.bg : COLORS.text }} numberOfLines={1}>{cp.name}</Text>
+                  <Meter value={e / 100} color={energyColor(e)} height={4} track={sel ? 'rgba(11,11,13,0.15)' : COLORS.lineStrong} style={{ width: 50 }} />
+                  <Text style={{ width: 24, textAlign: 'right', fontFamily: FONT.cond700, fontSize: 13, color: sel ? COLORS.bg : energyColor(e) }}>{Math.round(e)}</Text>
+                </Pressable>
+              );
+            })}
+          </View>
+
+          <Text style={{ fontFamily: FONT.cond700, fontSize: 11, letterSpacing: 1.5, color: COLORS.muted, textTransform: 'uppercase', marginTop: 12, marginBottom: 6 }}>Banco</Text>
+          <View style={{ gap: 4 }}>
+            {bench.map(({ p, e }) => (
+              <Pressable
+                key={p.id}
+                accessibilityRole="button"
+                accessibilityLabel={`${p.name}, ${formatPositions(p)}, ${p.ovr} de geral, energia ${Math.round(e)}`}
+                aria-disabled={selectedSlot === null}
+                onPress={() => swapIn(p.id)}
+                className="flex-row items-center active:opacity-70"
+                style={{ gap: 8, paddingVertical: 7, paddingHorizontal: 12, borderRadius: 10, backgroundColor: COLORS.surface, opacity: selectedSlot === null ? 0.6 : 1 }}
+              >
+                <Text style={{ width: 24, fontFamily: FONT.cond700, fontSize: 13, color: ovrColor(p.ovr) }}>{p.ovr}</Text>
+                <Text style={{ flex: 1, fontFamily: FONT.cond600, fontSize: 14.5, color: COLORS.textSoft }} numberOfLines={1}>
+                  {p.name} <Text style={{ fontFamily: FONT.cond600, color: COLORS.dim, fontSize: 12 }}>{formatPositions(p)}</Text>
+                </Text>
+                <Meter value={e / 100} color={energyColor(e)} height={4} track={COLORS.lineStrong} style={{ width: 50 }} />
+                <Text style={{ width: 24, textAlign: 'right', fontFamily: FONT.cond700, fontSize: 13, color: energyColor(e) }}>{Math.round(e)}</Text>
+              </Pressable>
+            ))}
+          </View>
+        </ScrollView>
+      ) : (
+      <ScrollView style={desktop ? { flex: 1, marginTop: 10 } : { maxHeight: 232, marginTop: 10 }} showsVerticalScrollIndicator={false}>
+        <View style={{ gap: 6 }}>
+          {PLAY_ORDER.map((id) => {
+            const meta = WATCH_PLAY_META[id];
+            const active = id === play;
+            return (
+              <Pressable accessibilityRole="button"
+                key={id}
+                aria-selected={active}
+                onPress={() => setPlay(id)}
+                className="active:opacity-70"
+                style={{ paddingVertical: 10, paddingHorizontal: 12, borderRadius: 12, backgroundColor: active ? COLORS.text : COLORS.surface2 }}
+              >
+                <View className="flex-row items-center justify-between">
+                  <Text style={{ fontFamily: FONT.cond800, fontSize: 17, color: active ? COLORS.bg : COLORS.text, textTransform: 'uppercase' }}>{meta.label}</Text>
+                  <Text style={{ fontFamily: FONT.cond700, fontSize: 11, letterSpacing: 1.2, color: active ? 'rgba(11,11,13,0.6)' : COLORS.dim }}>{meta.short}</Text>
+                </View>
+                <Text style={{ fontFamily: FONT.body500, fontSize: 12.5, lineHeight: 17, marginTop: 2, color: active ? 'rgba(11,11,13,0.72)' : COLORS.muted }}>{meta.blurb}</Text>
+              </Pressable>
+            );
+          })}
+        </View>
+      </ScrollView>
+      )}
+
+      <View style={{ marginTop: 10 }}>
+        <CtaButton
+          label={isTimeoutHuddle ? 'Voltar pra quadra' : `Começar ${periodLabel(quarter, 'huddle')}`}
+          sub={WATCH_PLAY_META[play].label}
+          onPress={() => startQuarter(play, isTimeoutHuddle)}
+        />
+      </View>
+    </View>
+  );
+
+  // Cameras: a column on the right edge (PC: pinned to the screen corner).
+  const cameras = (
+    <View style={{ position: 'absolute', top: desktop ? 20 : 58, right: desktop ? (phase === 'huddle' ? 440 : 20) : 0, gap: 4, padding: 4, borderRadius: 12, backgroundColor: 'rgba(11,11,13,0.82)' }}>
+      {CAMERA_VIEWS.map((v) => {
+        const active = v.id === cameraView;
+        return (
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={`Câmera ${v.label}`}
+            aria-selected={active}
+            key={v.id}
+            onPress={() => setCameraView(v.id)}
+            className="active:opacity-75"
+            style={{ height: 36, paddingHorizontal: 12, borderRadius: 9, justifyContent: 'center', backgroundColor: active ? COLORS.ctaFill : 'transparent' }}
+          >
+            <Text style={{ fontFamily: FONT.cond800, fontSize: 12.5, letterSpacing: 1, color: active ? COLORS.ctaInk : COLORS.textSoft, textTransform: 'uppercase' }}>{v.label}</Text>
+          </Pressable>
+        );
+      })}
+    </View>
+  );
+
   return (
     <View className="flex-1" style={{ backgroundColor: COLORS.bg }}>
       <Court3D
@@ -561,8 +717,10 @@ const WatchGameScreen: React.FC<WatchGameScreenProps> = ({
         numbers={jerseyNumbers}
       />
 
+      {desktop ? cameras : null}
+
       {banner && (
-        <View style={{ pointerEvents: 'none', position: 'absolute', top: insets.top + 68, left: 14, maxWidth: 220 }}>
+        <View style={{ pointerEvents: 'none', position: 'absolute', top: desktop ? 20 : insets.top + 68, left: desktop ? 20 : 14, maxWidth: desktop ? 280 : 220 }}>
           <View style={{ backgroundColor: 'rgba(11,11,13,0.82)', borderRadius: 12, paddingVertical: 9, paddingLeft: 15, paddingRight: 12, gap: 2, overflow: 'hidden' }}>
             <View style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: 3, backgroundColor: banner.color }} />
             <Text style={{ fontFamily: FONT.cond700, fontSize: 10.5, letterSpacing: 1.3, color: banner.color, textTransform: 'uppercase' }}>{banner.text}</Text>
@@ -572,13 +730,13 @@ const WatchGameScreen: React.FC<WatchGameScreenProps> = ({
       )}
 
       {/* Score bar: color blocks at the ends, the clock and possession in the middle. */}
-      <View style={{ pointerEvents: 'box-none', position: 'absolute', top: insets.top + 10, left: 14, right: 14 }}>
-        <View style={{ height: 48, borderRadius: 12, overflow: 'hidden', flexDirection: 'row', backgroundColor: 'rgba(11,11,13,0.88)', borderWidth: 1, borderColor: 'rgba(255,255,255,0.08)' }}>
-          <View style={{ width: 58, backgroundColor: homeAccent.primary, alignItems: 'center', justifyContent: 'center' }}>
-            <Text style={{ fontFamily: FONT.cond800, fontSize: 16, color: onAccent(homeAccent.primary) }}>{getTeamTricode(home)}</Text>
+      <View style={{ pointerEvents: 'box-none', position: 'absolute', top: insets.top + (desktop ? 20 : 10), ...(desktop ? { left: '50%', width: 640, marginLeft: -320 } : { left: 14, right: 14 }) }}>
+        <View style={{ height: desktop ? 60 : 48, borderRadius: 12, overflow: 'hidden', flexDirection: 'row', backgroundColor: 'rgba(11,11,13,0.88)', borderWidth: 1, borderColor: 'rgba(255,255,255,0.08)' }}>
+          <View style={{ width: desktop ? 90 : 58, backgroundColor: homeAccent.primary, alignItems: 'center', justifyContent: 'center' }}>
+            <Text style={{ fontFamily: FONT.cond800, fontSize: desktop ? 20 : 16, color: onAccent(homeAccent.primary) }}>{getTeamTricode(home)}</Text>
           </View>
-          <View style={{ width: 46, alignItems: 'center', justifyContent: 'center' }}>
-            <Text style={{ fontFamily: FONT.cond800, fontSize: 26, color: score.home >= score.away ? COLORS.text : COLORS.muted, fontVariant: ['tabular-nums'] }}>{score.home}</Text>
+          <View style={{ width: desktop ? 70 : 46, alignItems: 'center', justifyContent: 'center' }}>
+            <Text style={{ fontFamily: FONT.cond800, fontSize: desktop ? 34 : 26, color: score.home >= score.away ? COLORS.text : COLORS.muted, fontVariant: ['tabular-nums'] }}>{score.home}</Text>
           </View>
           <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', borderLeftWidth: 1, borderRightWidth: 1, borderColor: COLORS.lineStrong }}>
             <Text style={{ fontFamily: FONT.cond800, fontSize: 16, lineHeight: 17, color: COLORS.text }}>
@@ -588,165 +746,22 @@ const WatchGameScreen: React.FC<WatchGameScreenProps> = ({
               {phase === 'live' ? `${WATCH_PLAY_META[play].label} · ${timeoutsLeft} tempo${timeoutsLeft === 1 ? '' : 's'}` : 'Assistir ao jogo'}
             </Text>
           </View>
-          <View style={{ width: 46, alignItems: 'center', justifyContent: 'center' }}>
-            <Text style={{ fontFamily: FONT.cond800, fontSize: 26, color: score.away >= score.home ? COLORS.text : COLORS.muted, fontVariant: ['tabular-nums'] }}>{score.away}</Text>
+          <View style={{ width: desktop ? 70 : 46, alignItems: 'center', justifyContent: 'center' }}>
+            <Text style={{ fontFamily: FONT.cond800, fontSize: desktop ? 34 : 26, color: score.away >= score.home ? COLORS.text : COLORS.muted, fontVariant: ['tabular-nums'] }}>{score.away}</Text>
           </View>
-          <View style={{ width: 58, backgroundColor: awayAccent.primary, alignItems: 'center', justifyContent: 'center' }}>
-            <Text style={{ fontFamily: FONT.cond800, fontSize: 16, color: onAccent(awayAccent.primary) }}>{getTeamTricode(away)}</Text>
+          <View style={{ width: desktop ? 90 : 58, backgroundColor: awayAccent.primary, alignItems: 'center', justifyContent: 'center' }}>
+            <Text style={{ fontFamily: FONT.cond800, fontSize: desktop ? 20 : 16, color: onAccent(awayAccent.primary) }}>{getTeamTricode(away)}</Text>
           </View>
         </View>
 
-        {/* Cameras: a column on the right edge. */}
-        <View style={{ position: 'absolute', top: 58, right: 0, gap: 4, padding: 4, borderRadius: 12, backgroundColor: 'rgba(11,11,13,0.82)' }}>
-          {CAMERA_VIEWS.map((v) => {
-            const active = v.id === cameraView;
-            return (
-              <Pressable
-                accessibilityRole="button"
-                accessibilityLabel={`Câmera ${v.label}`}
-                aria-selected={active}
-                key={v.id}
-                onPress={() => setCameraView(v.id)}
-                className="active:opacity-75"
-                style={{ height: 36, paddingHorizontal: 12, borderRadius: 9, justifyContent: 'center', backgroundColor: active ? COLORS.ctaFill : 'transparent' }}
-              >
-                <Text style={{ fontFamily: FONT.cond800, fontSize: 12.5, letterSpacing: 1, color: active ? COLORS.ctaInk : COLORS.textSoft, textTransform: 'uppercase' }}>{v.label}</Text>
-              </Pressable>
-            );
-          })}
-        </View>
+        {desktop ? null : cameras}
       </View>
 
       {/* Bottom controls. The tab bar is hidden while watching, so this
           clears the home indicator itself. */}
-      <View style={{ position: 'absolute', left: 14, right: 14, bottom: insets.bottom + 14 }}>
-        {phase === 'huddle' && (
-          <View style={{ backgroundColor: 'rgba(11,11,13,0.94)', borderRadius: 20, borderWidth: 1, borderColor: COLORS.lineStrong, padding: 14 }}>
-            <Text style={{ fontFamily: FONT.cond700, fontSize: 11, letterSpacing: 1.5, color: COLORS.warn, textTransform: 'uppercase' }}>{huddleTitle}</Text>
-            <Text style={{ fontFamily: FONT.cond800, fontSize: 22, lineHeight: 24, color: COLORS.text, textTransform: 'uppercase' }}>{huddleSub}</Text>
-
-            <View className="flex-row" style={{ gap: 4, marginTop: 10, padding: 3, borderRadius: 12, backgroundColor: COLORS.surface2 }}>
-              {([['play', 'Jogada'], ['lineup', 'Quinteto']] as [HuddleTab, string][]).map(([id, label]) => {
-                const active = huddleTab === id;
-                return (
-                  <Pressable
-                    key={id}
-                    accessibilityRole="tab"
-                    accessibilityLabel={label}
-                    aria-selected={active}
-                    onPress={() => { setHuddleTab(id); setSelectedSlot(null); }}
-                    className="active:opacity-70"
-                    style={{ flex: 1, alignItems: 'center', paddingVertical: 8, borderRadius: 9, backgroundColor: active ? COLORS.text : 'transparent' }}
-                  >
-                    <Text style={{ fontFamily: FONT.cond700, fontSize: 13, letterSpacing: 1.1, color: active ? COLORS.bg : COLORS.muted, textTransform: 'uppercase' }}>{label}</Text>
-                  </Pressable>
-                );
-              })}
-            </View>
-
-            {huddleTab === 'lineup' ? (
-              <ScrollView style={{ maxHeight: 262, marginTop: 10 }} showsVerticalScrollIndicator={false}>
-                <Pressable
-                  accessibilityRole="switch"
-                  accessibilityLabel="Rotação automática"
-                  aria-checked={autoSubs}
-                  onPress={toggleAuto}
-                  className="flex-row items-center justify-between active:opacity-70"
-                  style={{ paddingVertical: 9, paddingHorizontal: 12, borderRadius: 12, backgroundColor: COLORS.surface2 }}
-                >
-                  <View style={{ flex: 1 }}>
-                    <Text style={{ fontFamily: FONT.cond700, fontSize: 15, color: COLORS.text }}>Rotação automática</Text>
-                    <Text style={{ fontFamily: FONT.body500, fontSize: 12, color: COLORS.muted }}>
-                      {autoSubs ? 'O técnico tira quem cansa' : 'Ninguém sai sem você mandar'}
-                    </Text>
-                  </View>
-                  <Text style={{ fontFamily: FONT.cond700, fontSize: 12, letterSpacing: 1.2, color: autoSubs ? COLORS.good : COLORS.dim }}>{autoSubs ? 'LIGADA' : 'DESLIGADA'}</Text>
-                </Pressable>
-
-                <Text style={{ fontFamily: FONT.cond700, fontSize: 11, letterSpacing: 1.5, color: COLORS.muted, textTransform: 'uppercase', marginTop: 12, marginBottom: 6 }}>
-                  {selectedSlot === null ? 'Em quadra · toque em quem sai' : `Quem entra no lugar de ${lastName(myFive.players[selectedSlot].name)}?`}
-                </Text>
-                <View style={{ gap: 4 }}>
-                  {myFive.players.map((cp, i) => {
-                    const e = energyRef.current[cp.playerId] ?? 100;
-                    const sel = selectedSlot === i;
-                    return (
-                      <Pressable
-                        key={cp.playerId}
-                        accessibilityRole="button"
-                        accessibilityLabel={`${cp.slot} ${cp.name}, energia ${Math.round(e)}`}
-                        aria-selected={sel}
-                        onPress={() => setSelectedSlot(sel ? null : i)}
-                        className="flex-row items-center active:opacity-70"
-                        style={{ gap: 8, paddingVertical: 8, paddingHorizontal: 12, borderRadius: 10, backgroundColor: sel ? COLORS.text : COLORS.surface2 }}
-                      >
-                        <Text style={{ width: 24, fontFamily: FONT.cond700, fontSize: 12, color: sel ? COLORS.bg : COLORS.dim }}>{cp.slot}</Text>
-                        <Text style={{ flex: 1, fontFamily: FONT.cond700, fontSize: 15, color: sel ? COLORS.bg : COLORS.text }} numberOfLines={1}>{cp.name}</Text>
-                        <Meter value={e / 100} color={energyColor(e)} height={4} track={sel ? 'rgba(11,11,13,0.15)' : COLORS.lineStrong} style={{ width: 50 }} />
-                        <Text style={{ width: 24, textAlign: 'right', fontFamily: FONT.cond700, fontSize: 13, color: sel ? COLORS.bg : energyColor(e) }}>{Math.round(e)}</Text>
-                      </Pressable>
-                    );
-                  })}
-                </View>
-
-                <Text style={{ fontFamily: FONT.cond700, fontSize: 11, letterSpacing: 1.5, color: COLORS.muted, textTransform: 'uppercase', marginTop: 12, marginBottom: 6 }}>Banco</Text>
-                <View style={{ gap: 4 }}>
-                  {bench.map(({ p, e }) => (
-                    <Pressable
-                      key={p.id}
-                      accessibilityRole="button"
-                      accessibilityLabel={`${p.name}, ${formatPositions(p)}, ${p.ovr} de geral, energia ${Math.round(e)}`}
-                      aria-disabled={selectedSlot === null}
-                      onPress={() => swapIn(p.id)}
-                      className="flex-row items-center active:opacity-70"
-                      style={{ gap: 8, paddingVertical: 7, paddingHorizontal: 12, borderRadius: 10, backgroundColor: COLORS.surface, opacity: selectedSlot === null ? 0.6 : 1 }}
-                    >
-                      <Text style={{ width: 24, fontFamily: FONT.cond700, fontSize: 13, color: ovrColor(p.ovr) }}>{p.ovr}</Text>
-                      <Text style={{ flex: 1, fontFamily: FONT.cond600, fontSize: 14.5, color: COLORS.textSoft }} numberOfLines={1}>
-                        {p.name} <Text style={{ fontFamily: FONT.cond600, color: COLORS.dim, fontSize: 12 }}>{formatPositions(p)}</Text>
-                      </Text>
-                      <Meter value={e / 100} color={energyColor(e)} height={4} track={COLORS.lineStrong} style={{ width: 50 }} />
-                      <Text style={{ width: 24, textAlign: 'right', fontFamily: FONT.cond700, fontSize: 13, color: energyColor(e) }}>{Math.round(e)}</Text>
-                    </Pressable>
-                  ))}
-                </View>
-              </ScrollView>
-            ) : (
-            <ScrollView style={{ maxHeight: 232, marginTop: 10 }} showsVerticalScrollIndicator={false}>
-              <View style={{ gap: 6 }}>
-                {PLAY_ORDER.map((id) => {
-                  const meta = WATCH_PLAY_META[id];
-                  const active = id === play;
-                  return (
-                    <Pressable accessibilityRole="button"
-                      key={id}
-                      aria-selected={active}
-                      onPress={() => setPlay(id)}
-                      className="active:opacity-70"
-                      style={{ paddingVertical: 10, paddingHorizontal: 12, borderRadius: 12, backgroundColor: active ? COLORS.text : COLORS.surface2 }}
-                    >
-                      <View className="flex-row items-center justify-between">
-                        <Text style={{ fontFamily: FONT.cond800, fontSize: 17, color: active ? COLORS.bg : COLORS.text, textTransform: 'uppercase' }}>{meta.label}</Text>
-                        <Text style={{ fontFamily: FONT.cond700, fontSize: 11, letterSpacing: 1.2, color: active ? 'rgba(11,11,13,0.6)' : COLORS.dim }}>{meta.short}</Text>
-                      </View>
-                      <Text style={{ fontFamily: FONT.body500, fontSize: 12.5, lineHeight: 17, marginTop: 2, color: active ? 'rgba(11,11,13,0.72)' : COLORS.muted }}>{meta.blurb}</Text>
-                    </Pressable>
-                  );
-                })}
-              </View>
-            </ScrollView>
-            )}
-
-            <View style={{ marginTop: 10 }}>
-              <CtaButton
-                label={isTimeoutHuddle ? 'Voltar pra quadra' : `Começar ${periodLabel(quarter, 'huddle')}`}
-                sub={WATCH_PLAY_META[play].label}
-                onPress={() => startQuarter(play, isTimeoutHuddle)}
-              />
-            </View>
-          </View>
-        )}
-
+      {phase === 'huddle' && desktop ? huddle : null}
+      <View style={{ position: 'absolute', bottom: insets.bottom + (desktop ? 24 : 14), ...(desktop ? { left: '50%', width: 760, marginLeft: -380 } : { left: 14, right: 14 }) }}>
+        {phase === 'huddle' && !desktop ? huddle : null}
         {phase === 'live' && (
           <View style={{ gap: 8 }}>
             {liveFive.length === 5 ? (
@@ -810,6 +825,7 @@ const WatchGameScreen: React.FC<WatchGameScreenProps> = ({
 
         {phase === 'final' && (
           <CtaButton
+            style={desktop ? { width: 420, alignSelf: 'center' } : undefined}
             label={winnerLine}
             sub={`${userWon ? 'Vitória' : 'Derrota'} ${score.home}-${score.away}`}
             onPress={() => onFinish(score.home, score.away, minutesRef.current)}

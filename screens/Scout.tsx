@@ -13,6 +13,8 @@ import { COLORS, FONT, withAlpha, ovrColor } from '../src/theme/tokens';
 import { ScreenTitle, BodyText, Name, PlayerFace } from '../components/ui/kit';
 import PlayerDetailModal from '../components/PlayerDetailModal';
 import ScoutAdvisor from '../components/ScoutAdvisor';
+import { useDesktop } from '../components/desktop/useDesktop';
+import { DTitle, DTh, Hover, PAGE_X, PAGE_Y } from '../components/desktop/kit';
 
 // Kept on FlatList rather than moved to <Screen>: this list is every player in
 // the league (~530 rows), and the virtualisation is the reason it scrolls at
@@ -58,6 +60,7 @@ const normalize = (s: string) => s.normalize('NFD').replace(DIACRITICS, '').toLo
 const Scout: React.FC<ScoutProps> = ({ players, teams, userTeamId }) => {
   const insets = useSafeAreaInsets();
   const { accent } = useTheme();
+  const desktop = useDesktop();
   const [query, setQuery] = useState('');
   const [posFilter, setPosFilter] = useState('TODOS');
   const [ageFilter, setAgeFilter] = useState('TODOS');
@@ -94,6 +97,82 @@ const Scout: React.FC<ScoutProps> = ({ players, teams, userTeamId }) => {
       .map(([id, p]) => ({ ...p, id, team: teamByPlayerId.get(id) }));
   }, [players, query, posFilter, ageFilter, ovrFilter, teamByPlayerId]);
 
+  const searchBox = (
+    <View className="flex-row items-center" style={{ height: 46, borderRadius: 12, backgroundColor: COLORS.surface, paddingHorizontal: 14, gap: 8 }}>
+      <TextInput
+        value={query}
+        onChangeText={setQuery}
+        placeholder="Buscar jogador…"
+        placeholderTextColor={COLORS.faint}
+        autoCorrect={false}
+        autoCapitalize="none"
+        style={{ flex: 1, fontFamily: FONT.body500, fontSize: 15, color: COLORS.text, paddingVertical: 10, outlineStyle: 'none' } as object}
+      />
+      {query.length > 0 ? (
+        <Pressable accessibilityRole="button" accessibilityLabel="Limpar busca" onPress={() => setQuery('')} hitSlop={8}>
+          <Text style={{ color: COLORS.dim, fontSize: 18 }}>×</Text>
+        </Pressable>
+      ) : null}
+    </View>
+  );
+
+  // PC: filters and the advisor (always open) in a 340px column; the league
+  // as a real table on the right.
+  if (desktop) {
+    const th = (label: string, width?: number, align: 'left' | 'right' = 'left') => <DTh width={width} flex={width ? undefined : 1} align={align}>{label}</DTh>;
+    return (
+      <View style={{ flex: 1, backgroundColor: COLORS.bg, paddingTop: PAGE_Y, paddingHorizontal: PAGE_X }}>
+        <DTitle title="Scout" />
+        <BodyText size={15} style={{ marginTop: 6 }}>Olho na liga · {activeCount} jogadores</BodyText>
+        <View style={{ flex: 1, minHeight: 0, flexDirection: 'row', gap: 24, marginTop: 20 }}>
+          <ScrollView style={{ width: 340, flexGrow: 0, flexShrink: 0 }} contentContainerStyle={{ gap: 14, paddingBottom: 28 }}>
+            {searchBox}
+            <View style={{ gap: 7 }}>
+              <FilterLine label="Posição" items={POSITION_FILTERS} value={posFilter} onChange={setPosFilter} />
+              <FilterLine label="Idade" items={AGE_FILTERS} value={ageFilter} onChange={setAgeFilter} />
+              <FilterLine label="Overall" items={OVR_FILTERS} value={ovrFilter} onChange={setOvrFilter} />
+            </View>
+            {userTeam ? <ScoutAdvisor userTeam={userTeam} teams={teams} players={players} onSelectPlayer={setSelected} alwaysOpen /> : null}
+          </ScrollView>
+          <View style={{ flex: 1, minWidth: 0 }}>
+            <View className="flex-row items-center" style={{ height: 30, gap: 12, borderBottomWidth: 1, borderBottomColor: COLORS.line, paddingHorizontal: 8 }}>
+              {th(`${results.length} ${results.length === 1 ? 'jogador' : 'jogadores'}`)}{th('Time', 70)}{th('Pos', 70)}{th('Idade', 56)}{th('Salário', 80)}{th('OVR', 40, 'right')}
+            </View>
+            <FlatList
+              data={results}
+              keyExtractor={(item) => item.id}
+              style={{ flex: 1 }}
+              contentContainerStyle={{ paddingBottom: 28 }}
+              initialNumToRender={20}
+              windowSize={10}
+              renderItem={({ item }) => (
+                <Hover
+                  onPress={() => setSelected(item)}
+                  hoverStyle={{ backgroundColor: COLORS.surface }}
+                  style={{ flexDirection: 'row', alignItems: 'center', height: 54, gap: 12, paddingHorizontal: 8, borderBottomWidth: 1, borderBottomColor: COLORS.lineSoft }}
+                >
+                  <View className="flex-row items-center" style={{ flex: 1, minWidth: 0, gap: 12 }}>
+                    <PlayerFace player={item} teamId={item.team?.id} size={36} />
+                    <Name size={16} style={{ flex: 1 }}>{item.name}</Name>
+                  </View>
+                  <Text style={{ width: 70, fontFamily: FONT.cond700, fontSize: 14, color: item.team ? COLORS.textSoft : COLORS.good }}>
+                    {item.team ? item.team.id.toUpperCase() : 'LIVRE'}
+                  </Text>
+                  <Text numberOfLines={1} style={{ width: 70, fontFamily: FONT.body500, fontSize: 13, color: COLORS.muted }}>{formatPositions(item)}</Text>
+                  <Text style={{ width: 56, fontFamily: FONT.body500, fontSize: 13, color: COLORS.muted }}>{item.age}</Text>
+                  <Text style={{ width: 80, fontFamily: FONT.body500, fontSize: 13, color: COLORS.muted }}>{money(item.salary)}</Text>
+                  <Text style={{ width: 40, textAlign: 'right', fontFamily: FONT.cond800, fontSize: 22, color: ovrColor(item.ovr) }}>{item.ovr}</Text>
+                </Hover>
+              )}
+              ListEmptyComponent={<BodyText color={COLORS.dim} style={{ paddingTop: 12 }}>Nenhum jogador encontrado.</BodyText>}
+            />
+          </View>
+        </View>
+        {selected ? <PlayerDetailModal player={selected} teamId={teamByPlayerId.get(selected.id)?.id} onClose={() => setSelected(null)} /> : null}
+      </View>
+    );
+  }
+
   const header = (
     <View style={{ paddingTop: insets.top + 4 }}>
       <ScreenTitle title="Scout" />
@@ -102,22 +181,7 @@ const Scout: React.FC<ScoutProps> = ({ players, teams, userTeamId }) => {
       <View style={{ paddingHorizontal: 14, marginTop: 12, gap: 10 }}>
         {userTeam ? <ScoutAdvisor userTeam={userTeam} teams={teams} players={players} onSelectPlayer={setSelected} /> : null}
 
-        <View className="flex-row items-center" style={{ height: 46, borderRadius: 12, backgroundColor: COLORS.surface, paddingHorizontal: 14, gap: 8 }}>
-          <TextInput
-            value={query}
-            onChangeText={setQuery}
-            placeholder="Buscar jogador…"
-            placeholderTextColor={COLORS.faint}
-            autoCorrect={false}
-            autoCapitalize="none"
-            style={{ flex: 1, fontFamily: FONT.body500, fontSize: 15, color: COLORS.text, paddingVertical: 10 }}
-          />
-          {query.length > 0 ? (
-            <Pressable accessibilityRole="button" accessibilityLabel="Limpar busca" onPress={() => setQuery('')} hitSlop={8}>
-              <Text style={{ color: COLORS.dim, fontSize: 18 }}>×</Text>
-            </Pressable>
-          ) : null}
-        </View>
+        {searchBox}
 
         <View style={{ gap: 7 }}>
           <FilterLine label="Posição" items={POSITION_FILTERS} value={posFilter} onChange={setPosFilter} />

@@ -17,7 +17,7 @@ import { teamRating } from '../services/formService';
 import Screen, { HeroBackdrop, Body } from '../components/ui/Screen';
 import {
   Panel, MonoLabel, Eyebrow, HeroTitle, Stat, Meter, CtaButton, GhostButton, SectionLabel, StatTile,
-  StatStrip, Dock, Name, BodyText, TeamBadge,
+  StatStrip, Dock, Name, BodyText, TeamBadge, PlayerFace,
 } from '../components/ui/kit';
 import RosterRow from '../components/ui/RosterRow';
 import StartersCourt from '../components/StartersCourt';
@@ -29,6 +29,8 @@ import RotationPanel from '../components/RotationPanel';
 import Icon from '../components/Icon';
 import PlayerDetailModal from '../components/PlayerDetailModal';
 import BottomSheet from '../components/ui/BottomSheet';
+import { useDesktop } from '../components/desktop/useDesktop';
+import { DPage, DDock, DCta, DTabs, DTh, Hover, Cols, Col, PAGE_X } from '../components/desktop/kit';
 
 // Design 1c of "Transmissão" (was design 2a) — elenco, rotação and técnico on one screen. The mockup shows three
 // segments doing exactly that; the real hub also carries draft capital, team
@@ -81,6 +83,7 @@ const MyTeamHub: React.FC<MyTeamHubProps> = ({
   onWaive, onSetStarter, onFireCoach, onHireCoach, onSetRotationSize, onToggleLoadManagement,
 }) => {
   const [tab, setTab] = useState<Tab>('roster');
+  const desktop = useDesktop();
   const insets = useSafeAreaInsets();
   const { accent } = useTheme();
   const heroInk = onAccent(accent.primary);
@@ -131,6 +134,343 @@ const MyTeamHub: React.FC<MyTeamHubProps> = ({
   const deadTotal = (team.deadMoney ?? []).reduce((sum, d) => sum + d.amount, 0);
   const scale = Math.max(salary, SALARY_CAP) * 1.04;
   const shades = [1, 0.82, 0.66, 0.52, 0.4, 0.3];
+
+  // Overlays both layouts share: the rival picker, the player sheet and the
+  // waive confirmation.
+  const overlays = (
+    <>
+      <BottomSheet visible={rivalPickerOpen} onClose={() => setRivalPickerOpen(false)} title="Comparar com">
+        {allTeams.filter((t) => t.id !== team.id).map((t) => (
+          <Pressable accessibilityRole="button"
+            key={t.id}
+            onPress={() => { setRivalId(t.id); setRivalPickerOpen(false); }}
+            className="flex-row items-center active:opacity-70"
+            style={{ gap: 12, minHeight: 44 }}
+          >
+            <TeamBadge teamId={t.id} width={34} height={22} />
+            <Name size={16}>{t.name}</Name>
+          </Pressable>
+        ))}
+      </BottomSheet>
+
+      {viewing ? (
+        <PlayerDetailModal
+          player={players[viewing.id] ?? viewing}
+          teamId={team.id}
+          onClose={() => setViewing(null)}
+          status={absences[viewing.id]
+            ? `Fora ${absences[viewing.id].duration} ${absences[viewing.id].duration === 1 ? 'jogo' : 'jogos'} · ${absences[viewing.id].reason === 'injury' ? 'lesionado' : 'suspenso'}`
+            : undefined}
+          actions={[{
+            label: 'Dispensar',
+            tone: 'danger',
+            disabled: !canWaive,
+            sub: canWaive
+              ? (viewing.contractYears > 0 ? `O salário dele vira dinheiro morto na folha (${money(viewing.salary)} por ${viewing.contractYears} ${viewing.contractYears === 1 ? 'ano' : 'anos'}).` : 'Sem contrato: não sobra nada na folha.')
+              : `O elenco precisa de no mínimo ${MIN_ROSTER_SIZE} jogadores.`,
+            onPress: () => { setConfirmWaive(viewing); setViewing(null); },
+          }]}
+        />
+      ) : null}
+
+      <Modal visible={confirmWaive !== null} transparent animationType="fade" onRequestClose={() => setConfirmWaive(null)}>
+        <Pressable accessible={false} className="flex-1 bg-black/70 items-center justify-center p-4" onPress={() => setConfirmWaive(null)}>
+          <Pressable
+            className="w-full max-w-sm"
+            style={{ backgroundColor: COLORS.panel, borderWidth: 1, borderColor: COLORS.line, borderRadius: RADIUS.hero, padding: 20, gap: 14 }}
+            onPress={(e) => e.stopPropagation()}
+          >
+            <HeroTitle size={19}>Dispensar jogador?</HeroTitle>
+            <Text style={{ fontSize: 12.5, lineHeight: 19, color: INK.body }}>
+              <Text className="font-bold text-white">{confirmWaive?.name}</Text> vira agente livre e abre uma vaga no elenco.
+              {confirmWaive && confirmWaive.contractYears > 0
+                ? ` O contrato continua sendo pago: ${money(confirmWaive.salary)} por ano fica na sua folha como dinheiro morto por mais ${confirmWaive.contractYears} ${confirmWaive.contractYears === 1 ? 'temporada' : 'temporadas'}.`
+                : ' Ele está sem contrato, então não sobra nada na folha.'}
+            </Text>
+            <View className="flex-row" style={{ gap: 10 }}>
+              <GhostButton label="Cancelar" onPress={() => setConfirmWaive(null)} style={{ flex: 1 }} />
+              <CtaButton
+                label="Dispensar"
+                onPress={() => { if (confirmWaive) onWaive(confirmWaive.id); setConfirmWaive(null); }}
+                size={13}
+                style={{ flex: 1 }}
+              />
+            </View>
+          </Pressable>
+        </Pressable>
+      </Modal>
+    </>
+  );
+
+  const ownerColor = owner.confidence >= 60 ? COLORS.good : owner.confidence >= 35 ? COLORS.warn : COLORS.bad;
+  const ownerPanel = (
+    <Panel bar={ownerColor} padding={desktop ? 16 : 14}>
+      <MonoLabel>Diretoria</MonoLabel>
+      <View className="flex-row items-baseline" style={{ gap: 8, marginTop: 6 }}>
+        <Stat size={desktop ? 26 : 24} color={ownerColor}>{owner.confidence}%</Stat>
+        <Text style={{ fontFamily: FONT.body600, fontSize: desktop ? 12 : 11, color: INK.body }}>de confiança</Text>
+      </View>
+      <Meter value={owner.confidence / 100} color={ownerColor} style={{ marginTop: 9 }} />
+      {owner.note ? (
+        <Text style={{ fontFamily: FONT.body500, fontSize: desktop ? 13 : 11, lineHeight: desktop ? 19 : 16, color: INK.body, marginTop: 10 }}>“{owner.note}”</Text>
+      ) : null}
+    </Panel>
+  );
+
+  const rivalButton = (
+    <Pressable accessibilityRole="button"
+      onPress={() => setRivalPickerOpen(true)}
+      className="flex-row items-center active:opacity-70"
+      style={{
+        gap: 6, paddingHorizontal: 11, paddingVertical: 6, borderRadius: RADIUS.control,
+        backgroundColor: COLORS.panel, borderWidth: 1, borderColor: COLORS.line,
+      }}
+    >
+      <Text style={{ fontFamily: FONT.cond700, fontSize: desktop ? 14 : 11, color: COLORS.text }}>
+        {rival ? getTeamNickname(rival) : 'Selecione'}
+      </Text>
+      <Icon name="chevron-down" size={13} color={COLORS.navIdle} />
+    </Pressable>
+  );
+
+  const payrollPanel = (
+    <Panel padding={desktop ? 16 : 14} style={{ gap: desktop ? 10 : 9 }}>
+      <View className="flex-row justify-between items-baseline">
+        <MonoLabel size={10}>Folha salarial</MonoLabel>
+        <Text style={{ fontFamily: FONT.cond800, fontSize: desktop ? 20 : 18, color: COLORS.text }}>
+          {money(salary)}{' '}
+          <Text style={{ fontFamily: FONT.cond600, fontSize: desktop ? 14 : 13, color: capSpace < 0 ? COLORS.warn : COLORS.good }}>
+            {capSpace < 0 ? `+${money(-capSpace)} acima do teto` : `${money(capSpace)} de espaço`}
+          </Text>
+        </Text>
+      </View>
+      <View style={{ height: 14, flexDirection: 'row', gap: 2 }}>
+        {contracts.map((p, i) => (
+          <View
+            key={p.id}
+            style={{
+              height: 14, borderRadius: 2, width: `${(p.salary / scale) * 100}%`,
+              backgroundColor: i < shades.length ? withAlpha(barColor, shades[i]) : '#2A2A30',
+            }}
+          />
+        ))}
+        {deadTotal > 0 ? (
+          <View style={{ height: 14, borderRadius: 2, width: `${(deadTotal / scale) * 100}%`, backgroundColor: withAlpha(COLORS.bad, 0.5) }} />
+        ) : null}
+        <View style={{ position: 'absolute', left: `${(SALARY_CAP / scale) * 100}%`, top: -4, bottom: -4, width: 2, backgroundColor: COLORS.text }} />
+      </View>
+      <View className="flex-row justify-between">
+        <BodyText size={12} numberOfLines={1} style={{ flex: 1 }}>
+          {contracts.slice(0, 3).map((p) => `${surname(p.name)} ${money(p.salary)}`).join(' · ')}
+        </BodyText>
+        <BodyText size={12}>teto ▏</BodyText>
+      </View>
+      {deadTotal > 0 ? (
+        <BodyText size={12} color={COLORS.warn}>
+          Dinheiro morto: {(team.deadMoney ?? []).map((d) => `${d.name} ${money(d.amount)} (${d.years}a)`).join(' · ')}
+        </BodyText>
+      ) : null}
+      {desktop ? (
+        <>
+          <View style={{ height: 1, backgroundColor: COLORS.line, marginVertical: 4 }} />
+          {contracts.slice(0, 5).map((p, i) => (
+            <View key={p.id} className="flex-row items-center" style={{ gap: 10 }}>
+              <View style={{ width: 10, height: 10, borderRadius: 2, backgroundColor: withAlpha(barColor, shades[i]) }} />
+              <Name size={14} style={{ flex: 1 }}>{p.name}</Name>
+              <BodyText size={12} color={COLORS.dim}>{p.contractYears === 1 ? 'último ano' : `${p.contractYears} anos`}</BodyText>
+              <Text style={{ width: 56, textAlign: 'right', fontFamily: FONT.cond700, fontSize: 14, color: COLORS.text }}>{money(p.salary)}</Text>
+            </View>
+          ))}
+        </>
+      ) : null}
+    </Panel>
+  );
+
+  if (desktop) {
+    const heroInkA = (a: number) => withAlpha(heroInk === '#ffffff' ? '#ffffff' : '#000000', a);
+    const th = (label: string, width?: number, align: 'left' | 'right' = 'left') => <DTh width={width} flex={width ? undefined : 1} align={align}>{label}</DTh>;
+    return (
+      <DPage
+        padding={0}
+        footer={tab === 'roster' ? (
+          <DDock note={`${team.roster.length} no elenco · mínimo ${MIN_ROSTER_SIZE}`}>
+            <DCta label="Editar rotação" sub={`${rotationSize} no giro`} onPress={() => setTab('rotation')} />
+          </DDock>
+        ) : undefined}
+      >
+        {/* ---------------------------------------------- franchise block */}
+        <View style={{ height: 200, overflow: 'hidden' }}>
+          <View style={{ position: 'absolute', left: 0, right: 0, top: 0, bottom: 5, backgroundColor: accent.primary }} />
+          <View style={{ position: 'absolute', left: 0, right: 0, bottom: 0, height: 5, backgroundColor: accent.secondary }} />
+          <Text style={{ position: 'absolute', right: -10, bottom: -62, fontFamily: FONT.cond800, fontSize: 240, lineHeight: 240, color: heroInkA(0.13) }}>
+            {team.id.toUpperCase()}
+          </Text>
+          <View style={{ position: 'absolute', left: PAGE_X, right: PAGE_X, bottom: 30 }}>
+            <Text style={{ fontFamily: FONT.cond700, fontSize: 13, letterSpacing: 2.6, color: heroInkA(0.8) }}>MEU TIME</Text>
+            <HeroTitle size={64} color={heroInk} numberOfLines={1} style={{ marginTop: 4 }}>{getTeamNickname(team)}</HeroTitle>
+            <Text style={{ fontFamily: FONT.body500, fontSize: 15, color: heroInkA(0.88), marginTop: 6 }} numberOfLines={1}>
+              {getTeamCity(team)} · {team.wins ?? 0}–{team.losses ?? 0}{gamesIn > 0 ? ` · ${confRank}º ${team.conference === 'East' ? 'Leste' : 'Oeste'}` : ''}
+            </Text>
+          </View>
+        </View>
+
+        <View style={{ borderBottomWidth: 1, borderBottomColor: COLORS.line, paddingVertical: 14, paddingHorizontal: 22 }}>
+          <StatStrip
+            size={33}
+            items={[
+              { label: 'Geral', value: teamRating(team, players) },
+              { label: 'Ataque', value: teamOff },
+              { label: 'Defesa', value: teamDef },
+              { label: 'Química', value: chemistry, color: chemColor },
+            ]}
+          />
+        </View>
+
+        <DTabs items={TABS} value={tab} onChange={(id) => setTab(id as Tab)} style={{ paddingHorizontal: 22 }} />
+
+        <View style={{ paddingTop: 22, paddingHorizontal: PAGE_X, paddingBottom: 28 }}>
+          {tab === 'roster' ? (
+            <View style={{ gap: 22 }}>
+              <View style={{ gap: 10 }}>
+                <SectionLabel right={
+                  <Hover onPress={() => setTab('rotation')} hoverStyle={{ opacity: 0.7 }}>
+                    <Text style={{ fontFamily: FONT.cond700, fontSize: 12, letterSpacing: 1.2, color: COLORS.east }}>EDITAR</Text>
+                  </Hover>
+                }>
+                  Quinteto titular
+                </SectionLabel>
+                <View className="flex-row" style={{ gap: 10 }}>
+                  {lineup.map((slot) => {
+                    const p = slot.playerId ? players[slot.playerId] : undefined;
+                    return (
+                      <Hover
+                        key={slot.pos}
+                        onPress={() => p && setViewing(p)}
+                        style={{ flex: 1, minWidth: 0, backgroundColor: COLORS.surface, borderRadius: 14, overflow: 'hidden' }}
+                      >
+                        <View style={{ height: 150, backgroundColor: COLORS.surface2, alignItems: 'center', justifyContent: 'flex-end', overflow: 'hidden' }}>
+                          {p ? (
+                            <Image source={{ uri: getPlayerImageUrl(p) }} placeholder={{ uri: PLAYER_PLACEHOLDER_SVG }} style={{ width: '100%', height: 140 }} contentFit="cover" contentPosition="top" />
+                          ) : null}
+                          <Text style={{ position: 'absolute', top: 8, left: 10, fontFamily: FONT.cond800, fontSize: 13, letterSpacing: 0.65, color: COLORS.muted }}>{slot.bucket}</Text>
+                        </View>
+                        <View className="flex-row items-end justify-between" style={{ paddingTop: 10, paddingHorizontal: 12, paddingBottom: 12, gap: 8 }}>
+                          <View style={{ flex: 1, minWidth: 0 }}>
+                            <Name size={16}>{p ? surname(p.name) : 'Vago'}</Name>
+                            {p ? <BodyText size={12} color={COLORS.dim} numberOfLines={1}>{p.age} anos · {money(p.salary)}</BodyText> : null}
+                          </View>
+                          <Text style={{ fontFamily: FONT.cond800, fontSize: 34, lineHeight: 30, color: p ? ovrColor(p.ovr) : COLORS.dim }}>{p?.ovr ?? '—'}</Text>
+                        </View>
+                      </Hover>
+                    );
+                  })}
+                </View>
+              </View>
+
+              <Cols>
+                <Col gap={0}>
+                  <SectionLabel>Banco · {bench.length} jogadores</SectionLabel>
+                  <View className="flex-row items-center" style={{ height: 30, gap: 12, borderBottomWidth: 1, borderBottomColor: COLORS.line, marginTop: 6 }}>
+                    {th('Pos', 28)}{th('Jogador')}{th('Idade', 60)}{th('Salário', 80)}{th('Contrato', 90)}{th('Minutos', 90, 'right')}{th('OVR', 36, 'right')}
+                  </View>
+                  {bench.map((p) => {
+                    const absence = absences[p.id];
+                    const mpg = p.seasonStats?.mpg ?? 0;
+                    const managed = loadManaged.has(p.id);
+                    return (
+                      <Hover
+                        key={p.id}
+                        onPress={() => setViewing(p)}
+                        hoverStyle={{ backgroundColor: COLORS.surface }}
+                        style={{ flexDirection: 'row', alignItems: 'center', height: 54, gap: 12, borderBottomWidth: 1, borderBottomColor: COLORS.lineSoft }}
+                      >
+                        <Text style={{ width: 28, fontFamily: FONT.cond800, fontSize: 12, color: COLORS.dim }}>{p.pos}</Text>
+                        <View className="flex-row items-center" style={{ flex: 1, minWidth: 0, gap: 10 }}>
+                          <PlayerFace player={p} size={34} style={{ borderRadius: 17 }} />
+                          <View style={{ flex: 1, minWidth: 0 }}>
+                            <Name size={16}>{p.name}</Name>
+                            {absence || managed ? (
+                              <Text numberOfLines={1} style={{ fontFamily: FONT.body500, fontSize: 12, color: absence ? COLORS.bad : COLORS.warn }}>
+                                {absence
+                                  ? `Fora ${absence.duration} ${absence.duration === 1 ? 'jogo' : 'jogos'} · ${absence.reason === 'injury' ? 'lesionado' : 'suspenso'}`
+                                  : 'Controle de carga'}
+                              </Text>
+                            ) : null}
+                          </View>
+                        </View>
+                        <Text style={{ width: 60, fontFamily: FONT.body500, fontSize: 13, color: COLORS.muted }}>{p.age}</Text>
+                        <Text style={{ width: 80, fontFamily: FONT.body500, fontSize: 13, color: COLORS.muted }}>{money(p.salary)}</Text>
+                        <Text style={{ width: 90, fontFamily: FONT.body500, fontSize: 13, color: COLORS.muted }}>
+                          {p.nextSalary !== undefined ? 'estendido' : p.contractYears === 1 ? 'último ano' : `${p.contractYears} anos`}
+                        </Text>
+                        <View style={{ width: 90, gap: 4, alignItems: 'flex-end' }}>
+                          <Text style={{ fontFamily: FONT.cond600, fontSize: 11, color: COLORS.muted }}>{mpg > 0 ? `${Math.round(mpg)} MIN` : '— MIN'}</Text>
+                          <View style={{ width: '100%', height: 3, borderRadius: 2, backgroundColor: COLORS.lineStrong }}>
+                            <View style={{ height: '100%', borderRadius: 2, backgroundColor: barColor, width: `${Math.min(1, mpg / MINUTES_IN_A_GAME) * 100}%` }} />
+                          </View>
+                        </View>
+                        <Text style={{ width: 36, textAlign: 'right', fontFamily: FONT.cond800, fontSize: 22, color: ovrColor(p.ovr) }}>{p.ovr}</Text>
+                      </Hover>
+                    );
+                  })}
+                  <BodyText size={12.5} color={COLORS.dim} style={{ marginTop: 12 }}>
+                    Clique num jogador para ver a ficha completa — estatísticas, carreira, atributos e contrato — ou dispensá-lo.
+                  </BodyText>
+                </Col>
+                <Col width={400}>{payrollPanel}</Col>
+              </Cols>
+            </View>
+          ) : null}
+
+          {tab === 'rotation' ? (
+            <Cols>
+              <Col><StartersCourt team={team} players={players} onSetStarter={onSetStarter} /></Col>
+              <Col width={460}>
+                <RotationPanel team={team} players={players} onSetRotationSize={onSetRotationSize} onToggleLoadManagement={onToggleLoadManagement} />
+              </Col>
+            </Cols>
+          ) : null}
+
+          {tab === 'coach' ? (
+            <Cols>
+              <Col><CoachPanel team={team} coaches={coaches} editable onFire={onFireCoach} onHire={onHireCoach} /></Col>
+              <Col gap={12}>
+                {ownerPanel}
+                {coach ? (
+                  <View className="flex-row" style={{ gap: 10 }}>
+                    <StatTile label="Ataque" value={coach.offense} bar={COLORS.info} />
+                    <StatTile label="Defesa" value={coach.defense} bar={COLORS.info} />
+                    <StatTile label="Desenv." value={coach.development} bar={COLORS.goodSoft} />
+                  </View>
+                ) : null}
+              </Col>
+            </Cols>
+          ) : null}
+
+          {tab === 'analysis' ? (
+            <Cols>
+              <Col gap={20}>
+                <TeamAnalytics team={team} players={players} />
+                <View style={{ gap: 10 }}>
+                  <View className="flex-row items-center justify-between" style={{ gap: 12 }}>
+                    <SectionLabel>Comparar com rival</SectionLabel>
+                    {rivalButton}
+                  </View>
+                  <TeamComparisonChart team1={team} team2={rival} players={players} />
+                </View>
+              </Col>
+              <Col width={420}>
+                <Panel padding={16}>
+                  <PickAssets team={team} teams={allTeams} currentDraft={currentDraft} title="Seu capital de draft" />
+                </Panel>
+              </Col>
+            </Cols>
+          ) : null}
+        </View>
+        {overlays}
+      </DPage>
+    );
+  }
 
   return (
     <Screen
@@ -246,43 +586,7 @@ const MyTeamHub: React.FC<MyTeamHubProps> = ({
             </View>
 
             {/* -------------------------------------------------- payroll */}
-            <Panel padding={14} style={{ gap: 9 }}>
-              <View className="flex-row justify-between items-baseline">
-                <MonoLabel size={10}>Folha salarial</MonoLabel>
-                <Text style={{ fontFamily: FONT.cond800, fontSize: 18, color: COLORS.text }}>
-                  {money(salary)}{' '}
-                  <Text style={{ fontFamily: FONT.cond600, fontSize: 13, color: capSpace < 0 ? COLORS.warn : COLORS.good }}>
-                    {capSpace < 0 ? `+${money(-capSpace)} acima do teto` : `${money(capSpace)} de espaço`}
-                  </Text>
-                </Text>
-              </View>
-              <View style={{ height: 14, flexDirection: 'row', gap: 2 }}>
-                {contracts.map((p, i) => (
-                  <View
-                    key={p.id}
-                    style={{
-                      height: 14, borderRadius: 2, width: `${(p.salary / scale) * 100}%`,
-                      backgroundColor: i < shades.length ? withAlpha(barColor, shades[i]) : '#2A2A30',
-                    }}
-                  />
-                ))}
-                {deadTotal > 0 ? (
-                  <View style={{ height: 14, borderRadius: 2, width: `${(deadTotal / scale) * 100}%`, backgroundColor: withAlpha(COLORS.bad, 0.5) }} />
-                ) : null}
-                <View style={{ position: 'absolute', left: `${(SALARY_CAP / scale) * 100}%`, top: -4, bottom: -4, width: 2, backgroundColor: COLORS.text }} />
-              </View>
-              <View className="flex-row justify-between">
-                <BodyText size={12} numberOfLines={1} style={{ flex: 1 }}>
-                  {contracts.slice(0, 3).map((p) => `${surname(p.name)} ${money(p.salary)}`).join(' · ')}
-                </BodyText>
-                <BodyText size={12}>teto ▏</BodyText>
-              </View>
-              {deadTotal > 0 ? (
-                <BodyText size={12} color={COLORS.warn}>
-                  Dinheiro morto: {(team.deadMoney ?? []).map((d) => `${d.name} ${money(d.amount)} (${d.years}a)`).join(' · ')}
-                </BodyText>
-              ) : null}
-            </Panel>
+            {payrollPanel}
 
             {/* ---------------------------------------------------- bench */}
             <View>
@@ -344,23 +648,7 @@ const MyTeamHub: React.FC<MyTeamHubProps> = ({
             <CoachPanel team={team} coaches={coaches} editable onFire={onFireCoach} onHire={onHireCoach} />
 
             {/* What the owner is measuring the coach — and you — against. */}
-            <Panel bar={owner.confidence >= 60 ? COLORS.goodSoft : owner.confidence >= 35 ? COLORS.warn : COLORS.cta} padding={14}>
-              <MonoLabel>Diretoria</MonoLabel>
-              <View className="flex-row items-baseline" style={{ gap: 8, marginTop: 6 }}>
-                <Stat size={24} color={owner.confidence >= 60 ? COLORS.goodSoft : owner.confidence >= 35 ? COLORS.warn : COLORS.bad}>
-                  {owner.confidence}%
-                </Stat>
-                <Text className="font-semibold" style={{ fontSize: 11, color: INK.body }}>de confiança</Text>
-              </View>
-              <Meter
-                value={owner.confidence / 100}
-                color={owner.confidence >= 60 ? COLORS.good : owner.confidence >= 35 ? COLORS.warn : COLORS.cta}
-                style={{ marginTop: 9 }}
-              />
-              {owner.note ? (
-                <Text style={{ fontSize: 11, lineHeight: 16, color: INK.body, marginTop: 10 }}>“{owner.note}”</Text>
-              ) : null}
-            </Panel>
+            {ownerPanel}
 
             {coach ? (
               <View className="flex-row" style={{ gap: 10 }}>
@@ -382,87 +670,14 @@ const MyTeamHub: React.FC<MyTeamHubProps> = ({
 
             <View className="flex-row items-center justify-between" style={{ gap: 12, marginTop: 4 }}>
               <SectionLabel>Comparar com rival</SectionLabel>
-              <Pressable accessibilityRole="button"
-                onPress={() => setRivalPickerOpen(true)}
-                className="flex-row items-center active:opacity-70"
-                style={{
-                  gap: 6, paddingHorizontal: 11, paddingVertical: 6, borderRadius: RADIUS.control,
-                  backgroundColor: COLORS.panel, borderWidth: 1, borderColor: COLORS.line,
-                }}
-              >
-                <Text className="font-bold text-white" style={{ fontSize: 11 }}>
-                  {rival ? getTeamNickname(rival) : 'Selecione'}
-                </Text>
-                <Icon name="chevron-down" size={13} color={COLORS.navIdle} />
-              </Pressable>
+              {rivalButton}
             </View>
             <TeamComparisonChart team1={team} team2={rival} players={players} />
           </>
         ) : null}
       </Body>
 
-      {/* Rival picker */}
-      <BottomSheet visible={rivalPickerOpen} onClose={() => setRivalPickerOpen(false)} title="Comparar com">
-        {allTeams.filter((t) => t.id !== team.id).map((t) => (
-          <Pressable accessibilityRole="button"
-            key={t.id}
-            onPress={() => { setRivalId(t.id); setRivalPickerOpen(false); }}
-            className="flex-row items-center active:opacity-70"
-            style={{ gap: 12, minHeight: 44 }}
-          >
-            <TeamBadge teamId={t.id} width={34} height={22} />
-            <Name size={16}>{t.name}</Name>
-          </Pressable>
-        ))}
-      </BottomSheet>
-
-      {/* Waive confirmation */}
-      {viewing ? (
-        <PlayerDetailModal
-          player={players[viewing.id] ?? viewing}
-          teamId={team.id}
-          onClose={() => setViewing(null)}
-          status={absences[viewing.id]
-            ? `Fora ${absences[viewing.id].duration} ${absences[viewing.id].duration === 1 ? 'jogo' : 'jogos'} · ${absences[viewing.id].reason === 'injury' ? 'lesionado' : 'suspenso'}`
-            : undefined}
-          actions={[{
-            label: 'Dispensar',
-            tone: 'danger',
-            disabled: !canWaive,
-            sub: canWaive
-              ? (viewing.contractYears > 0 ? `O salário dele vira dinheiro morto na folha (${money(viewing.salary)} por ${viewing.contractYears} ${viewing.contractYears === 1 ? 'ano' : 'anos'}).` : 'Sem contrato: não sobra nada na folha.')
-              : `O elenco precisa de no mínimo ${MIN_ROSTER_SIZE} jogadores.`,
-            onPress: () => { setConfirmWaive(viewing); setViewing(null); },
-          }]}
-        />
-      ) : null}
-
-      <Modal visible={confirmWaive !== null} transparent animationType="fade" onRequestClose={() => setConfirmWaive(null)}>
-        <Pressable accessible={false} className="flex-1 bg-black/70 items-center justify-center p-4" onPress={() => setConfirmWaive(null)}>
-          <Pressable
-            className="w-full max-w-sm"
-            style={{ backgroundColor: COLORS.panel, borderWidth: 1, borderColor: COLORS.line, borderRadius: RADIUS.hero, padding: 20, gap: 14 }}
-            onPress={(e) => e.stopPropagation()}
-          >
-            <HeroTitle size={19}>Dispensar jogador?</HeroTitle>
-            <Text style={{ fontSize: 12.5, lineHeight: 19, color: INK.body }}>
-              <Text className="font-bold text-white">{confirmWaive?.name}</Text> vira agente livre e abre uma vaga no elenco.
-              {confirmWaive && confirmWaive.contractYears > 0
-                ? ` O contrato continua sendo pago: ${money(confirmWaive.salary)} por ano fica na sua folha como dinheiro morto por mais ${confirmWaive.contractYears} ${confirmWaive.contractYears === 1 ? 'temporada' : 'temporadas'}.`
-                : ' Ele está sem contrato, então não sobra nada na folha.'}
-            </Text>
-            <View className="flex-row" style={{ gap: 10 }}>
-              <GhostButton label="Cancelar" onPress={() => setConfirmWaive(null)} style={{ flex: 1 }} />
-              <CtaButton
-                label="Dispensar"
-                onPress={() => { if (confirmWaive) onWaive(confirmWaive.id); setConfirmWaive(null); }}
-                size={13}
-                style={{ flex: 1 }}
-              />
-            </View>
-          </Pressable>
-        </Pressable>
-      </Modal>
+      {overlays}
     </Screen>
   );
 };

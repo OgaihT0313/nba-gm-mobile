@@ -1,50 +1,50 @@
 import React, { useMemo, useState } from 'react';
 import { View, Text, Pressable } from 'react-native';
-import { Image } from 'expo-image';
 import { Player, Team } from '../types';
-import { getPlayerImageUrl, PLAYER_PLACEHOLDER_SVG, formatPositions } from '../constants';
+import { formatPositions } from '../constants';
 import { buildScoutReport, Recommendation } from '../services/advisorService';
 import { useTheme } from '../src/theme/ThemeProvider';
-import Card from './Card';
+import { COLORS, FONT, RADIUS, withAlpha, ovrColor } from '../src/theme/tokens';
+import { Panel, MonoLabel, PlayerFace, BodyText } from './ui/kit';
 import Icon from './Icon';
 
-// Collapsed by default: the Scout screen's job is browsing, and the advisor is
-// a "tell me what to do" side-trip. The diagnosis line is always visible so the
-// GM knows whether it's worth opening.
+// Collapsed by default on the phone: the Scout screen's job is browsing, and
+// the advisor is a "tell me what to do" side-trip. The diagnosis line is always
+// visible so the GM knows whether it's worth opening. On PC it sits in its own
+// column and stays open (`alwaysOpen`).
 interface ScoutAdvisorProps {
   userTeam: Team;
   teams: Team[];
   players: { [key: string]: Player };
   onSelectPlayer: (p: Player) => void;
+  alwaysOpen?: boolean;
 }
 
 const RecRow: React.FC<{ rec: Recommendation; onPress: () => void }> = ({ rec, onPress }) => (
-  <Pressable accessibilityRole="button"
+  <Pressable
+    accessibilityRole="button"
     onPress={onPress}
-    className="flex-row items-center gap-2.5 p-2.5 bg-sunken rounded-xl border border-line active:border-slate-500"
+    className="flex-row items-center active:opacity-75"
+    style={{ gap: 10, padding: 10, backgroundColor: COLORS.surface2, borderRadius: RADIUS.control }}
   >
-    <Image
-      source={{ uri: getPlayerImageUrl(rec.player) }}
-      placeholder={{ uri: PLAYER_PLACEHOLDER_SVG }}
-      style={{ width: 32, height: 32, borderRadius: 16, backgroundColor: '#1e293b' }}
-      contentFit="cover"
-    />
-    <View className="flex-1 min-w-0">
-      <Text className="text-xs font-bold text-white" numberOfLines={1}>
+    <PlayerFace player={rec.player} size={32} style={{ borderRadius: 16 }} />
+    <View style={{ flex: 1, minWidth: 0 }}>
+      <Text numberOfLines={1} style={{ fontFamily: FONT.cond600, fontSize: 14.5, color: COLORS.text }}>
         {rec.player.name}
-        {rec.teamName ? <Text className="text-slate-500 font-normal"> · {rec.teamName}</Text> : null}
+        {rec.teamName ? <Text style={{ color: COLORS.dim }}> · {rec.teamName}</Text> : null}
       </Text>
-      <Text className="text-[10px] text-slate-500" numberOfLines={1}>
+      <Text numberOfLines={1} style={{ fontFamily: FONT.body500, fontSize: 11.5, color: COLORS.dim }}>
         {formatPositions(rec.player)} · {rec.reason}
       </Text>
     </View>
-    <Text className="font-mono-bold text-sm text-white">{rec.player.ovr}</Text>
+    <Text style={{ fontFamily: FONT.cond800, fontSize: 17, color: ovrColor(rec.player.ovr) }}>{rec.player.ovr}</Text>
   </Pressable>
 );
 
-const ScoutAdvisor: React.FC<ScoutAdvisorProps> = ({ userTeam, teams, players, onSelectPlayer }) => {
+const ScoutAdvisor: React.FC<ScoutAdvisorProps> = ({ userTeam, teams, players, onSelectPlayer, alwaysOpen }) => {
   const { accent } = useTheme();
-  const [open, setOpen] = useState(false);
+  const [toggled, setOpen] = useState(false);
+  const open = alwaysOpen || toggled;
 
   // The report walks every team's lineup — memo it so browsing/filtering the
   // 530-player list below doesn't recompute it on each keystroke.
@@ -56,37 +56,39 @@ const ScoutAdvisor: React.FC<ScoutAdvisorProps> = ({ userTeam, teams, players, o
       : report.needs.map((n) => n.label).join(' · ');
 
   return (
-    <Card padding="md" className="gap-3">
-      <Pressable accessibilityRole="button" onPress={() => setOpen((v) => !v)} className="flex-row items-center gap-2.5">
+    <Panel padding={14} style={{ gap: 12 }}>
+      <Pressable
+        accessibilityRole="button"
+        disabled={alwaysOpen}
+        onPress={() => setOpen((v) => !v)}
+        className="flex-row items-center"
+        style={{ gap: 10 }}
+      >
         <Icon name="scout" size={18} color={accent.primary} />
-        <View className="flex-1 min-w-0">
-          <Text className="font-bold text-sm text-white">Análise do Scout</Text>
-          <Text className="text-[10px] text-slate-500" numberOfLines={1}>{summary}</Text>
+        <View style={{ flex: 1, minWidth: 0 }}>
+          <Text style={{ fontFamily: FONT.cond800, fontSize: 17, color: COLORS.text, textTransform: 'uppercase' }}>Análise do Scout</Text>
+          <Text numberOfLines={alwaysOpen ? 3 : 1} style={{ fontFamily: FONT.body500, fontSize: 12, color: COLORS.dim }}>{summary}</Text>
         </View>
-        <Text className="text-slate-500 text-[10px] font-black uppercase tracking-widest">
-          {open ? 'Fechar' : 'Ver'}
-        </Text>
+        {alwaysOpen ? null : <MonoLabel size={9} color={COLORS.dim}>{open ? 'Fechar' : 'Ver'}</MonoLabel>}
       </Pressable>
 
       {open ? (
-        <View className="gap-4 pt-1">
+        <View style={{ gap: 14, paddingTop: 2 }}>
           {report.needs.length > 0 ? (
-            <View className="gap-1.5">
-              <Text className="text-[9px] font-black uppercase tracking-widest text-amber-500">Diagnóstico</Text>
+            <View style={{ gap: 6 }}>
+              <MonoLabel size={9} color={COLORS.warn}>Diagnóstico</MonoLabel>
               {report.needs.map((n) => (
-                <View key={n.label} className="bg-amber-500/10 border border-amber-500/20 rounded-xl px-3 py-2">
-                  <Text className="text-[11px] font-bold text-amber-300">{n.label}</Text>
-                  <Text className="text-[10px] text-slate-400 leading-4">{n.detail}</Text>
+                <View key={n.label} style={{ backgroundColor: withAlpha(COLORS.warn, 0.08), borderWidth: 1, borderColor: withAlpha(COLORS.warn, 0.25), borderRadius: RADIUS.control, paddingHorizontal: 12, paddingVertical: 8 }}>
+                  <Text style={{ fontFamily: FONT.cond700, fontSize: 14, color: COLORS.warn }}>{n.label}</Text>
+                  <BodyText size={12} color={COLORS.muted}>{n.detail}</BodyText>
                 </View>
               ))}
             </View>
           ) : null}
 
           {report.freeAgents.length > 0 ? (
-            <View className="gap-1.5">
-              <Text className="text-[9px] font-black uppercase tracking-widest text-emerald-500">
-                Agentes livres que encaixam
-              </Text>
+            <View style={{ gap: 6 }}>
+              <MonoLabel size={9} color={COLORS.good}>Agentes livres que encaixam</MonoLabel>
               {report.freeAgents.map((r) => (
                 <RecRow key={r.player.id} rec={r} onPress={() => onSelectPlayer(r.player)} />
               ))}
@@ -94,8 +96,8 @@ const ScoutAdvisor: React.FC<ScoutAdvisorProps> = ({ userTeam, teams, players, o
           ) : null}
 
           {report.tradeTargets.length > 0 ? (
-            <View className="gap-1.5">
-              <Text className="text-[9px] font-black uppercase tracking-widest text-sky-500">Alvos de troca</Text>
+            <View style={{ gap: 6 }}>
+              <MonoLabel size={9} color={COLORS.east}>Alvos de troca</MonoLabel>
               {report.tradeTargets.map((r) => (
                 <RecRow key={r.player.id} rec={r} onPress={() => onSelectPlayer(r.player)} />
               ))}
@@ -103,13 +105,11 @@ const ScoutAdvisor: React.FC<ScoutAdvisorProps> = ({ userTeam, teams, players, o
           ) : null}
 
           {report.needs.length > 0 && report.freeAgents.length === 0 && report.tradeTargets.length === 0 ? (
-            <Text className="text-[11px] text-slate-500 italic">
-              Nenhum jogador disponível encaixa nessas necessidades agora.
-            </Text>
+            <BodyText size={12} color={COLORS.dim}>Nenhum jogador disponível encaixa nessas necessidades agora.</BodyText>
           ) : null}
         </View>
       ) : null}
-    </Card>
+    </Panel>
   );
 };
 

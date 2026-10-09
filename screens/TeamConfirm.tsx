@@ -11,7 +11,9 @@ import { PICK_WINDOW } from '../services/draftService';
 import { teamRating } from '../services/formService';
 import { COLORS, FONT, withAlpha, onAccent, ovrColor } from '../src/theme/tokens';
 import Screen, { HeroBackdrop, Body } from '../components/ui/Screen';
-import { Panel, CtaButton, StatStrip, SectionLabel, BodyText, Name, Dock, TeamLogo } from '../components/ui/kit';
+import { Panel, CtaButton, StatStrip, SectionLabel, BodyText, Name, Dock, TeamLogo, PlayerFace } from '../components/ui/kit';
+import { useDesktop } from '../components/desktop/useDesktop';
+import { DPage, DDock, DCta, BackLink, Cols, Col } from '../components/desktop/kit';
 
 // Design 2c ("Transmissão"). The team color arrives here, as the reward for the
 // choice: a 300px flat block with the crest as a giant watermark, then the
@@ -30,6 +32,7 @@ const money = (v: number) => `$${Math.round(v / 1_000_000)}M`;
 
 const TeamConfirm: React.FC<TeamConfirmProps> = ({ team, players, teams, onBack, onConfirm }) => {
   const insets = useSafeAreaInsets();
+  const desktop = useDesktop();
   const accent = getTeamAccent(team.id);
   const ink = onAccent(accent.primary);
   const inkA = (a: number) => withAlpha(ink === '#ffffff' ? '#ffffff' : '#000000', a);
@@ -46,6 +49,69 @@ const TeamConfirm: React.FC<TeamConfirmProps> = ({ team, players, teams, onBack,
     .filter(Boolean)
     .sort((a, b) => b.ovr - a.ovr)
     .slice(0, 3);
+
+  if (desktop) {
+    return (
+      <DPage
+        padding={0}
+        footer={<DDock><DCta label="Assinar como GM" onPress={onConfirm} style={{ minHeight: 56 }} /></DDock>}
+      >
+        <View style={{ height: 380, overflow: 'hidden' }}>
+          <View style={{ position: 'absolute', left: 0, right: 0, top: 0, bottom: 5, backgroundColor: accent.primary }} />
+          <View style={{ position: 'absolute', left: 0, right: 0, bottom: 0, height: 5, backgroundColor: accent.secondary }} />
+          <TeamLogo teamId={team.id} size={460} style={{ position: 'absolute', right: 40, top: -40, opacity: 0.22 }} />
+          <View style={{ position: 'absolute', left: 64, top: 36 }}>
+            <BackLink onPress={onBack} color={ink} />
+          </View>
+          <View style={{ position: 'absolute', left: 64, right: 64, bottom: 40, gap: 6 }}>
+            <Text style={{ fontFamily: FONT.cond700, fontSize: 14, letterSpacing: 2.8, color: inkA(0.8) }}>
+              {getTeamCity(team).toUpperCase()} · {team.conference === 'East' ? 'LESTE' : 'OESTE'}
+            </Text>
+            <Text numberOfLines={1} style={{ fontFamily: FONT.cond800, fontSize: 112, lineHeight: 100, color: ink, textTransform: 'uppercase' }}>
+              {getTeamNickname(team)}
+            </Text>
+            <Text style={{ fontFamily: FONT.body500, fontSize: 16, color: inkA(0.9) }}>{titles} {titles === 1 ? 'título' : 'títulos'}</Text>
+          </View>
+        </View>
+
+        <View style={{ borderBottomWidth: 1, borderBottomColor: COLORS.line, paddingVertical: 14, paddingHorizontal: 54 }}>
+          <StatStrip
+            size={34}
+            items={[
+              { label: `Força · ${rank}º`, value: rating },
+              { label: 'Folha', value: money(salary), color: salary > SALARY_CAP ? COLORS.warn : COLORS.text },
+              { label: 'Escolhas', value: PICK_WINDOW },
+            ]}
+          />
+        </View>
+
+        <Cols gap={24} style={{ paddingVertical: 24, paddingHorizontal: 64 }}>
+          <Col>
+            <Panel bar={COLORS.gold} padding={0} style={{ paddingVertical: 18, paddingHorizontal: 20, gap: 8 }}>
+              <SectionLabel color={COLORS.gold}>Mandato da diretoria</SectionLabel>
+              <Text style={{ fontFamily: FONT.cond800, fontSize: 28, lineHeight: 28, color: COLORS.text, textTransform: 'uppercase' }}>{mandate.label}</Text>
+              <BodyText size={14}>Meta de {owner.targetWins} vitórias. {mandate.blurb}</BodyText>
+              <View className="flex-row justify-between items-center" style={{ paddingTop: 14, marginTop: 6, borderTopWidth: 1, borderTopColor: COLORS.line }}>
+                <SectionLabel>Técnico</SectionLabel>
+                <Name size={16}>{team.coach}</Name>
+              </View>
+            </Panel>
+          </Col>
+          <Col gap={0}>
+            <SectionLabel>Peças principais</SectionLabel>
+            {core.map((p) => (
+              <View key={p.id} className="flex-row items-center" style={{ height: 56, gap: 12, borderBottomWidth: 1, borderBottomColor: COLORS.lineSoft }}>
+                <Text style={{ width: 24, fontFamily: FONT.cond800, fontSize: 12, color: COLORS.dim }}>{p.pos}</Text>
+                <PlayerFace player={p} teamId={team.id} size={40} style={{ borderRadius: 20 }} />
+                <Name size={17} style={{ flex: 1 }}>{p.name}</Name>
+                <Text style={{ fontFamily: FONT.cond800, fontSize: 22, color: ovrColor(p.ovr) }}>{p.ovr}</Text>
+              </View>
+            ))}
+          </Col>
+        </Cols>
+      </DPage>
+    );
+  }
 
   return (
     <Screen

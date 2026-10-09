@@ -9,6 +9,8 @@ import Screen, { Body } from '../components/ui/Screen';
 import {
   Panel, MonoLabel, CtaButton, GhostButton, FilterRow, SectionLabel, ScreenTitle, Tag, TeamBadge, BodyText, Name, Dock, Well,
 } from '../components/ui/kit';
+import { useDesktop } from '../components/desktop/useDesktop';
+import { DPage, DDock, DCta, DStep, DTitle, Hover, Cols, Col } from '../components/desktop/kit';
 
 // Design 3c ("Transmissão"). Nobody knows what these kids become: the number is
 // a projection, not the truth. The prospect in focus gets the 60-99 rail with
@@ -85,6 +87,7 @@ const MiniRail: React.FC<{ report?: ScoutReport }> = ({ report }) => {
 };
 
 const Draft: React.FC<DraftProps> = ({ season, onPick, onAutoPick, onFinish, onScout }) => {
+  const desktop = useDesktop();
   const [posFilter, setPosFilter] = useState('TODOS');
   const [focusId, setFocusId] = useState<string | null>(null);
   const { teams, players, userTeamId, draft } = season;
@@ -131,6 +134,220 @@ const Draft: React.FC<DraftProps> = ({ season, onPick, onAutoPick, onFinish, onS
         ? 'Você não tem mais escolhas neste draft'
         : `Você escolhe na ${nextUserIndex + 1}ª · faltam ${picksAway}`;
 
+  // Who is on the clock, and who's next.
+  const queueChips = (
+    <>
+      <View className="flex-row flex-wrap" style={{ gap: 5 }}>
+        {queue.map(({ slot, number }) => {
+          const onClock = number === overallPick;
+          const mine = slot.teamId === userTeamId;
+          return (
+            <View
+              key={number}
+              className="flex-row items-center"
+              style={{
+                gap: 5, paddingHorizontal: 8, height: 28, borderRadius: 8,
+                backgroundColor: onClock ? COLORS.ctaFill : COLORS.surface2,
+                borderWidth: mine && !onClock ? 1 : 0, borderColor: getTeamAccent(userTeamId).primary,
+                opacity: number < overallPick ? 0.45 : 1,
+              }}
+            >
+              <Text style={{ fontFamily: FONT.cond700, fontSize: 12, color: onClock ? COLORS.ctaInk : COLORS.muted }}>{number}</Text>
+              <Text style={{ fontFamily: FONT.cond800, fontSize: 12, color: onClock ? COLORS.ctaInk : COLORS.text }}>{slot.teamId.toUpperCase()}</Text>
+            </View>
+          );
+        })}
+      </View>
+    </>
+  );
+
+  // The prospect under the microscope.
+  const focusCard = (
+    <>
+      {focus ? (
+        <Panel padding={16} radius={20} style={{ gap: 12 }}>
+          <View className="flex-row justify-between items-start" style={{ gap: 10 }}>
+            <View style={{ flex: 1, gap: 3 }}>
+              <MonoLabel size={9}>#{focusRank} no board · {formatPositions(focus)} · {focus.age} anos</MonoLabel>
+              <Text numberOfLines={2} style={{ fontFamily: FONT.cond800, fontSize: 28, lineHeight: 28, color: COLORS.text, textTransform: 'uppercase' }}>{focus.name}</Text>
+              <BodyText size={13}>
+                Potencial {focusReport?.potentialGuess ?? '?'}{focusReport?.potentialKnown ? '' : '?'}
+              </BodyText>
+            </View>
+            <Tag color={conf.color}>{conf.label}</Tag>
+          </View>
+
+          {focusReport ? (
+            <View style={{ gap: 6 }}>
+              <View className="flex-row justify-between items-baseline">
+                <MonoLabel size={9}>Projeção</MonoLabel>
+                <Text style={{ fontFamily: FONT.cond800, fontSize: 22, color: COLORS.text }}>{bandText(focusReport)}</Text>
+              </View>
+              <ProjectionRail report={focusReport} />
+            </View>
+          ) : null}
+
+          {focusReport?.notes.length ? (
+            <Well style={{ gap: 3 }}>
+              {focusReport.notes.map((n, i) => (
+                <BodyText key={i} size={12.5} color={COLORS.textSoft}>“{n}”</BodyText>
+              ))}
+            </Well>
+          ) : (
+            <BodyText size={12.5} color={COLORS.dim}>Nenhum olheiro foi vê-lo ainda. A faixa é o palpite do consenso.</BodyText>
+          )}
+
+          <View className="flex-row" style={{ gap: 8 }}>
+            <GhostButton
+              label={focusReport?.potentialKnown ? 'Avaliado ✓' : draft.scoutBudget <= 0 ? 'Sem olheiros' : 'Observar (–1)'}
+              // Pin the focus first: scouting moves his projected range,
+              // the board re-sorts, and an unpinned focus (board #1)
+              // would jump to someone else right under the Escolher button.
+              onPress={() => { setFocusId(focus.id); onScout(focus.id); }}
+              disabled={draft.scoutBudget <= 0 || !!focusReport?.potentialKnown}
+              style={{ flex: 1 }}
+            />
+            <CtaButton
+              label={userOnClock ? `Escolher ${focus.name.split(' ').slice(-1)[0]}` : 'Aguarde a vez'}
+              onPress={() => onPick(focus.id)}
+              disabled={!userOnClock}
+              size={16}
+              style={{ flex: 1.3, minHeight: 46 }}
+            />
+          </View>
+        </Panel>
+      ) : (
+        <BodyText color={COLORS.dim}>Nenhum recruta nessa posição.</BodyText>
+      )}
+    </>
+  );
+
+  // The board.
+  const boardList = (
+    <>
+      <View>
+        <SectionLabel>Board da liga · {available.length}</SectionLabel>
+        <View style={{ marginTop: 4 }}>
+          {filtered.map((p) => {
+            const r = draft.reports[p.id];
+            const on = p.id === focus?.id;
+            return (
+              <Pressable
+                key={p.id}
+                accessibilityRole="button"
+                onPress={() => setFocusId(p.id)}
+                className="flex-row items-center active:opacity-75"
+                style={{ height: 46, gap: 10, borderBottomWidth: 1, borderBottomColor: COLORS.lineSoft, backgroundColor: on ? COLORS.surface : 'transparent' }}
+              >
+                <Text style={{ width: 20, textAlign: 'right', fontFamily: FONT.cond800, fontSize: 14, color: COLORS.dim }}>
+                  {available.findIndex((x) => x.id === p.id) + 1}
+                </Text>
+                <View style={{ width: desktop ? 220 : 110, minWidth: 0, gap: 1 }}>
+                  <Name size={14.5}>{p.name}</Name>
+                  <Text style={{ fontFamily: FONT.body500, fontSize: 11.5, color: COLORS.dim }}>{formatPositions(p)} · {p.age}a</Text>
+                </View>
+                <MiniRail report={r} />
+                <Text style={{ width: 46, textAlign: 'right', fontFamily: FONT.cond700, fontSize: 14, color: COLORS.textSoft }}>{r ? bandText(r) : '—'}</Text>
+              </Pressable>
+            );
+          })}
+        </View>
+      </View>
+    </>
+  );
+
+  // The picks so far.
+  const picksList = (
+    <>
+      <View>
+        <SectionLabel>Escolhas · {draft.picks.length}/{draft.order.length}</SectionLabel>
+        <View style={{ marginTop: 4 }}>
+          {[...draft.picks].reverse().map((pick) => {
+            const p = players[pick.playerId];
+            const mine = pick.teamId === userTeamId;
+            const surprise = p?.draftInfo ? draftVerdict(p.ovr, p.draftInfo.projected, p.draftInfo.band) : null;
+            return (
+              <View
+                key={pick.pick}
+                className="flex-row items-center"
+                style={{
+                  height: 46, gap: 10, borderBottomWidth: 1, borderBottomColor: COLORS.lineSoft,
+                  backgroundColor: mine ? withAlpha(getTeamAccent(userTeamId).primary, 0.14) : 'transparent',
+                }}
+              >
+                <Text style={{ width: 20, textAlign: 'right', fontFamily: FONT.cond800, fontSize: 14, color: COLORS.dim }}>{pick.pick}</Text>
+                <TeamBadge teamId={pick.teamId} width={34} height={20} />
+                <View style={{ flex: 1, minWidth: 0, gap: 1 }}>
+                  <Name size={14.5}>{p?.name}</Name>
+                  <Text numberOfLines={1} style={{ fontFamily: FONT.body500, fontSize: 11.5, color: COLORS.dim }}>
+                    {p ? formatPositions(p) : ''}{p?.draftInfo ? ` · proj. ${p.draftInfo.projected}` : ''}{pick.viaTeamId ? ` · via ${pick.viaTeamId.toUpperCase()}` : ''}
+                  </Text>
+                </View>
+                {surprise === 'steal' ? <Tag color={COLORS.good}>Achado</Tag> : surprise === 'bust' ? <Tag color={COLORS.bad}>Furada</Tag> : null}
+                <Text style={{ width: 28, textAlign: 'right', fontFamily: FONT.cond800, fontSize: 18, color: COLORS.text }}>{p?.ovr}</Text>
+              </View>
+            );
+          })}
+          {draft.picks.length === 0 ? <BodyText color={COLORS.dim} style={{ paddingVertical: 10 }}>O draft ainda não começou.</BodyText> : null}
+        </View>
+      </View>
+    </>
+  );
+
+  // PC: the queue and the scouting budget up top; the board on the left, the
+  // prospect in focus and the picks so far in a 460px column.
+  if (desktop) {
+    return (
+      <DPage
+        footer={
+          <DDock note={subtitle}>
+            {draft.complete ? (
+              <DCta label="Agência livre" sub="Próxima fase" onPress={onFinish} />
+            ) : (
+              <DStep label="Deixar pra staff escolher" onPress={onAutoPick} disabled={!userOnClock} width={300} />
+            )}
+          </DDock>
+        }
+      >
+        <DTitle
+          title={`Draft · classe ${season.awardHistory.length || 1}`}
+          right={
+            !draft.complete ? (
+              <View className="flex-row items-end" style={{ gap: 24 }}>
+                {queueChips}
+                <View className="items-end">
+                  <Text style={{ fontFamily: FONT.cond800, fontSize: 36, lineHeight: 36, color: draft.scoutBudget > 0 ? COLORS.text : COLORS.bad }}>{draft.scoutBudget}</Text>
+                  <Text style={{ fontFamily: FONT.cond700, fontSize: 11, letterSpacing: 1.5, color: COLORS.muted }}>RELATÓRIOS</Text>
+                </View>
+              </View>
+            ) : undefined
+          }
+        />
+        <BodyText size={15} style={{ marginTop: 6 }}>{subtitle}</BodyText>
+        <Cols style={{ marginTop: 22 }}>
+          <Col>
+            {!draft.complete ? (
+              <>
+                <FilterRow items={POSITION_FILTERS} value={posFilter} onChange={setPosFilter} />
+                {boardList}
+              </>
+            ) : (
+              picksList
+            )}
+            <BodyText size={12.5} color={COLORS.dim}>
+              Ninguém sabe o que esses garotos vão virar — o número é projeção, não verdade. Cada relatório de olheiro
+              ({SCOUT_BUDGET} por draft) estreita a faixa de um recruta, e é nos nebulosos que moram os achados e as furadas.
+            </BodyText>
+          </Col>
+          <Col width={460}>
+            {!draft.complete ? focusCard : null}
+            {!draft.complete ? picksList : null}
+          </Col>
+        </Cols>
+      </DPage>
+    );
+  }
+
   return (
     <Screen
       heroHeight={110}
@@ -162,153 +379,17 @@ const Draft: React.FC<DraftProps> = ({ season, onPick, onAutoPick, onFinish, onS
       <Body top={14} gap={14}>
         {!draft.complete ? (
           <>
-            {/* Who is on the clock, and who's next. */}
-            <View className="flex-row flex-wrap" style={{ gap: 5 }}>
-              {queue.map(({ slot, number }) => {
-                const onClock = number === overallPick;
-                const mine = slot.teamId === userTeamId;
-                return (
-                  <View
-                    key={number}
-                    className="flex-row items-center"
-                    style={{
-                      gap: 5, paddingHorizontal: 8, height: 28, borderRadius: 8,
-                      backgroundColor: onClock ? COLORS.ctaFill : COLORS.surface2,
-                      borderWidth: mine && !onClock ? 1 : 0, borderColor: getTeamAccent(userTeamId).primary,
-                      opacity: number < overallPick ? 0.45 : 1,
-                    }}
-                  >
-                    <Text style={{ fontFamily: FONT.cond700, fontSize: 12, color: onClock ? COLORS.ctaInk : COLORS.muted }}>{number}</Text>
-                    <Text style={{ fontFamily: FONT.cond800, fontSize: 12, color: onClock ? COLORS.ctaInk : COLORS.text }}>{slot.teamId.toUpperCase()}</Text>
-                  </View>
-                );
-              })}
-            </View>
+            {queueChips}
 
             <FilterRow items={POSITION_FILTERS} value={posFilter} onChange={setPosFilter} />
 
-            {/* The prospect under the microscope. */}
-            {focus ? (
-              <Panel padding={16} radius={20} style={{ gap: 12 }}>
-                <View className="flex-row justify-between items-start" style={{ gap: 10 }}>
-                  <View style={{ flex: 1, gap: 3 }}>
-                    <MonoLabel size={9}>#{focusRank} no board · {formatPositions(focus)} · {focus.age} anos</MonoLabel>
-                    <Text numberOfLines={2} style={{ fontFamily: FONT.cond800, fontSize: 28, lineHeight: 28, color: COLORS.text, textTransform: 'uppercase' }}>{focus.name}</Text>
-                    <BodyText size={13}>
-                      Potencial {focusReport?.potentialGuess ?? '?'}{focusReport?.potentialKnown ? '' : '?'}
-                    </BodyText>
-                  </View>
-                  <Tag color={conf.color}>{conf.label}</Tag>
-                </View>
+            {focusCard}
 
-                {focusReport ? (
-                  <View style={{ gap: 6 }}>
-                    <View className="flex-row justify-between items-baseline">
-                      <MonoLabel size={9}>Projeção</MonoLabel>
-                      <Text style={{ fontFamily: FONT.cond800, fontSize: 22, color: COLORS.text }}>{bandText(focusReport)}</Text>
-                    </View>
-                    <ProjectionRail report={focusReport} />
-                  </View>
-                ) : null}
-
-                {focusReport?.notes.length ? (
-                  <Well style={{ gap: 3 }}>
-                    {focusReport.notes.map((n, i) => (
-                      <BodyText key={i} size={12.5} color={COLORS.textSoft}>“{n}”</BodyText>
-                    ))}
-                  </Well>
-                ) : (
-                  <BodyText size={12.5} color={COLORS.dim}>Nenhum olheiro foi vê-lo ainda. A faixa é o palpite do consenso.</BodyText>
-                )}
-
-                <View className="flex-row" style={{ gap: 8 }}>
-                  <GhostButton
-                    label={focusReport?.potentialKnown ? 'Avaliado ✓' : draft.scoutBudget <= 0 ? 'Sem olheiros' : 'Observar (–1)'}
-                    // Pin the focus first: scouting moves his projected range,
-                    // the board re-sorts, and an unpinned focus (board #1)
-                    // would jump to someone else right under the Escolher button.
-                    onPress={() => { setFocusId(focus.id); onScout(focus.id); }}
-                    disabled={draft.scoutBudget <= 0 || !!focusReport?.potentialKnown}
-                    style={{ flex: 1 }}
-                  />
-                  <CtaButton
-                    label={userOnClock ? `Escolher ${focus.name.split(' ').slice(-1)[0]}` : 'Aguarde a vez'}
-                    onPress={() => onPick(focus.id)}
-                    disabled={!userOnClock}
-                    size={16}
-                    style={{ flex: 1.3, minHeight: 46 }}
-                  />
-                </View>
-              </Panel>
-            ) : (
-              <BodyText color={COLORS.dim}>Nenhum recruta nessa posição.</BodyText>
-            )}
-
-            {/* The board. */}
-            <View>
-              <SectionLabel>Board da liga · {available.length}</SectionLabel>
-              <View style={{ marginTop: 4 }}>
-                {filtered.map((p) => {
-                  const r = draft.reports[p.id];
-                  const on = p.id === focus?.id;
-                  return (
-                    <Pressable
-                      key={p.id}
-                      accessibilityRole="button"
-                      onPress={() => setFocusId(p.id)}
-                      className="flex-row items-center active:opacity-75"
-                      style={{ height: 46, gap: 10, borderBottomWidth: 1, borderBottomColor: COLORS.lineSoft, backgroundColor: on ? COLORS.surface : 'transparent' }}
-                    >
-                      <Text style={{ width: 20, textAlign: 'right', fontFamily: FONT.cond800, fontSize: 14, color: COLORS.dim }}>
-                        {available.findIndex((x) => x.id === p.id) + 1}
-                      </Text>
-                      <View style={{ width: 110, minWidth: 0, gap: 1 }}>
-                        <Name size={14.5}>{p.name}</Name>
-                        <Text style={{ fontFamily: FONT.body500, fontSize: 11.5, color: COLORS.dim }}>{formatPositions(p)} · {p.age}a</Text>
-                      </View>
-                      <MiniRail report={r} />
-                      <Text style={{ width: 46, textAlign: 'right', fontFamily: FONT.cond700, fontSize: 14, color: COLORS.textSoft }}>{r ? bandText(r) : '—'}</Text>
-                    </Pressable>
-                  );
-                })}
-              </View>
-            </View>
+            {boardList}
           </>
         ) : null}
 
-        {/* The picks so far. */}
-        <View>
-          <SectionLabel>Escolhas · {draft.picks.length}/{draft.order.length}</SectionLabel>
-          <View style={{ marginTop: 4 }}>
-            {[...draft.picks].reverse().map((pick) => {
-              const p = players[pick.playerId];
-              const mine = pick.teamId === userTeamId;
-              const surprise = p?.draftInfo ? draftVerdict(p.ovr, p.draftInfo.projected, p.draftInfo.band) : null;
-              return (
-                <View
-                  key={pick.pick}
-                  className="flex-row items-center"
-                  style={{
-                    height: 46, gap: 10, borderBottomWidth: 1, borderBottomColor: COLORS.lineSoft,
-                    backgroundColor: mine ? withAlpha(getTeamAccent(userTeamId).primary, 0.14) : 'transparent',
-                  }}
-                >
-                  <Text style={{ width: 20, textAlign: 'right', fontFamily: FONT.cond800, fontSize: 14, color: COLORS.dim }}>{pick.pick}</Text>
-                  <TeamBadge teamId={pick.teamId} width={34} height={20} />
-                  <View style={{ flex: 1, minWidth: 0, gap: 1 }}>
-                    <Name size={14.5}>{p?.name}</Name>
-                    <Text numberOfLines={1} style={{ fontFamily: FONT.body500, fontSize: 11.5, color: COLORS.dim }}>
-                      {p ? formatPositions(p) : ''}{p?.draftInfo ? ` · proj. ${p.draftInfo.projected}` : ''}{pick.viaTeamId ? ` · via ${pick.viaTeamId.toUpperCase()}` : ''}
-                    </Text>
-                  </View>
-                  {surprise === 'steal' ? <Tag color={COLORS.good}>Achado</Tag> : surprise === 'bust' ? <Tag color={COLORS.bad}>Furada</Tag> : null}
-                  <Text style={{ width: 28, textAlign: 'right', fontFamily: FONT.cond800, fontSize: 18, color: COLORS.text }}>{p?.ovr}</Text>
-                </View>
-              );
-            })}
-            {draft.picks.length === 0 ? <BodyText color={COLORS.dim} style={{ paddingVertical: 10 }}>O draft ainda não começou.</BodyText> : null}
-          </View>
-        </View>
+        {picksList}
 
         <BodyText size={12} color={COLORS.dim}>
           Ninguém sabe o que esses garotos vão virar — o número é projeção, não verdade. Cada relatório de olheiro

@@ -22,9 +22,11 @@ interface StandingsTableProps {
   userTeamId?: string;
   /** Cap the rows shown (the season screen doesn't need all 15). */
   limit?: number;
+  /** Row height: 36 by default, 42 on the PC standings page. */
+  rowHeight?: number;
 }
 
-const StandingsTable: React.FC<StandingsTableProps> = ({ teams, conference, schedule, userTeamId, limit }) => {
+const StandingsTable: React.FC<StandingsTableProps> = ({ teams, conference, schedule, userTeamId, limit, rowHeight = 36 }) => {
   const confTeams = teams.filter((t) => t.conference === conference);
   const hasGames = confTeams.some((t) => (t.wins || 0) + (t.losses || 0) > 0);
 
@@ -73,7 +75,7 @@ const StandingsTable: React.FC<StandingsTableProps> = ({ teams, conference, sche
             key={t.id}
             className="flex-row items-center"
             style={{
-              height: 36, gap: 8,
+              height: rowHeight, gap: 8,
               borderBottomWidth: cut === COLORS.line ? 1 : 2, borderBottomColor: cut,
               backgroundColor: isUser ? withAlpha(getTeamAccent(t.id).primary, 0.22) : 'transparent',
             }}

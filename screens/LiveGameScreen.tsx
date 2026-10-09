@@ -9,6 +9,8 @@ import { useTheme } from '../src/theme/ThemeProvider';
 import { COLORS, INK, RADIUS, FONT, withAlpha, onAccent } from '../src/theme/tokens';
 import Screen, { HeroContent, Body } from '../components/ui/Screen';
 import { Panel, MonoLabel, Stat, CtaButton, GhostButton, HeroTitle, Dock, SectionLabel, BodyText } from '../components/ui/kit';
+import { useDesktop } from '../components/desktop/useDesktop';
+import { DPage, DDock, DCta, Cols, Col } from '../components/desktop/kit';
 
 // Design 2c — the tensest screen in the app, so the scoreboard takes the whole
 // hero and the three bench tactics sit directly under it as court decisions
@@ -55,6 +57,9 @@ const LiveGameScreen: React.FC<LiveGameScreenProps> = ({
   liveGame, teams, onAdvanceQuarter, onRequestTimeout, onSetTactic, onResolve,
 }) => {
   const { accent } = useTheme();
+  // PC: scoreboard at 120px, the table and tactics beside the narration.
+  const desktop = useDesktop();
+  const k = desktop ? 1 : 0;
   const teamA = teams.find((t) => t.id === liveGame.teamAId);
   const teamB = teams.find((t) => t.id === liveGame.teamBId);
   if (!teamA || !teamB) return null;
@@ -73,9 +78,9 @@ const LiveGameScreen: React.FC<LiveGameScreenProps> = ({
     const bg = getTeamAccent(team.id).primary;
     const ink = onAccent(bg);
     return (
-      <View style={{ flex: 1, backgroundColor: bg, padding: 14, gap: 2, alignItems: right ? 'flex-end' : 'flex-start' }}>
-        <Text style={{ fontFamily: FONT.cond800, fontSize: 18, color: ink }}>{team.id.toUpperCase()}</Text>
-        <Text style={{ fontFamily: FONT.cond800, fontSize: 64, lineHeight: 56, color: ink, opacity: lead || liveGame.quarterScores.length === 0 ? 1 : 0.7, fontVariant: ['tabular-nums'] }}>
+      <View style={{ flex: 1, backgroundColor: bg, padding: desktop ? 24 : 14, gap: 2, alignItems: right ? 'flex-end' : 'flex-start' }}>
+        <Text style={{ fontFamily: FONT.cond800, fontSize: desktop ? 26 : 18, color: ink }}>{team.id.toUpperCase()}</Text>
+        <Text style={{ fontFamily: FONT.cond800, fontSize: desktop ? 120 : 64, lineHeight: desktop ? 104 : 56, color: ink, opacity: lead || liveGame.quarterScores.length === 0 ? 1 : 0.7, fontVariant: ['tabular-nums'] }}>
           {score}
         </Text>
       </View>
@@ -83,6 +88,143 @@ const LiveGameScreen: React.FC<LiveGameScreenProps> = ({
   };
   // Quarter-by-quarter table: four quarters plus any overtime, then the total.
   const periods = Math.max(4, liveGame.quarterScores.length);
+
+  const scoreboard = (
+    <View style={{ borderRadius: 20, overflow: 'hidden', flexDirection: 'row', backgroundColor: COLORS.surface }}>
+      {block(teamA, liveGame.scoreA, false, liveGame.scoreA >= liveGame.scoreB)}
+      <View style={{ width: desktop ? 160 : 84, alignItems: 'center', justifyContent: 'center', gap: 4 }}>
+        <Text style={{ fontFamily: FONT.cond800, fontSize: desktop ? 34 : 22, lineHeight: desktop ? 34 : 22, color: COLORS.text }}>{periodLabel}</Text>
+        <Text style={{ fontFamily: FONT.cond600, fontSize: desktop ? 12 : 11, letterSpacing: 1.1, color: COLORS.muted }}>
+          {liveGame.complete ? `${liveGame.quarterScores.length > 4 ? 'APÓS PRORROG.' : '4 QUARTOS'}` : liveGame.quarterScores.length ? 'A SEGUIR' : 'BOLA AO ALTO'}
+        </Text>
+        <View className="flex-row" style={{ gap: 3, marginTop: 4 }}>
+          {Array.from({ length: TOTAL_TIMEOUTS }, (_, i) => (
+            <View key={i} style={{ width: desktop ? 8 : 6, height: desktop ? 8 : 6, borderRadius: 4, backgroundColor: i < liveGame.timeoutsLeft ? COLORS.text : COLORS.lineStrong }} />
+          ))}
+        </View>
+      </View>
+      {block(teamB, liveGame.scoreB, true, liveGame.scoreB >= liveGame.scoreA)}
+    </View>
+  );
+
+  const quarterTable = (
+    <View style={{ gap: 6 }}>
+      {[
+        { label: 'Time', vals: Array.from({ length: periods }, (_, i) => (i < 4 ? `${i + 1}Q` : `P${i - 3}`)), tot: 'TOT', head: true },
+        { label: teamA.id.toUpperCase(), vals: Array.from({ length: periods }, (_, i) => liveGame.quarterScores[i]?.a), tot: liveGame.scoreA, head: false, mine: liveGame.userIsTeamA },
+        { label: teamB.id.toUpperCase(), vals: Array.from({ length: periods }, (_, i) => liveGame.quarterScores[i]?.b), tot: liveGame.scoreB, head: false, mine: !liveGame.userIsTeamA },
+      ].map((row) => (
+        <View key={row.label} className="flex-row items-center">
+          <Text style={{ width: 44, fontFamily: FONT.cond700, fontSize: row.head ? 11 : 13 + k * 2, letterSpacing: row.head ? 1 : 0, color: row.head ? COLORS.faint : row.mine ? COLORS.text : COLORS.muted, textTransform: 'uppercase' }}>{row.label}</Text>
+          {row.vals.map((v, i) => (
+            <Text key={i} style={{ flex: 1, textAlign: 'center', fontFamily: FONT.cond700, fontSize: row.head ? 11 : 13 + k * 2, color: row.head ? COLORS.faint : v === undefined ? '#4A4950' : row.mine ? COLORS.text : COLORS.muted }}>
+              {v === undefined ? '—' : v}
+            </Text>
+          ))}
+          <Text style={{ width: 44, textAlign: 'center', fontFamily: FONT.cond800, fontSize: row.head ? 11 : 13 + k * 2, color: row.head ? COLORS.faint : row.mine ? COLORS.text : COLORS.muted }}>{row.tot}</Text>
+        </View>
+      ))}
+    </View>
+  );
+
+  const decisionPanel = liveGame.complete ? (
+    <Panel bar={won ? COLORS.good : COLORS.bad} style={{ gap: 6 }}>
+      <MonoLabel size={9} color={won ? COLORS.good : COLORS.bad}>{won ? 'Você venceu o jogo decisivo' : 'Derrota no jogo decisivo'}</MonoLabel>
+      <HeroTitle size={24}>{getTeamTricode(teamA)} {liveGame.scoreA} — {liveGame.scoreB} {getTeamTricode(teamB)}</HeroTitle>
+      <BodyText>{won ? 'A série é sua. O vestiário é seu.' : 'Acabou aqui. A diretoria vai querer explicações.'}</BodyText>
+    </Panel>
+  ) : (
+    <View style={{ gap: 8 }}>
+      <SectionLabel>Tática do banco · vale 1 quarto</SectionLabel>
+      <View className="flex-row" style={{ gap: 6 }}>
+        {TACTIC_ORDER.map((tactic) => {
+          const meta = TACTIC_META[tactic];
+          const on = liveGame.pendingTactic === tactic;
+          return (
+            <Pressable
+              key={tactic}
+              accessibilityRole="button"
+              aria-selected={on}
+              onPress={() => onSetTactic(on ? null : tactic)}
+              className="active:opacity-75"
+              style={{ flex: 1, borderRadius: 14, paddingVertical: desktop ? 16 : 12, paddingHorizontal: desktop ? 14 : 10, gap: 3, backgroundColor: on ? COLORS.ctaFill : COLORS.surface }}
+            >
+              <Text style={{ fontFamily: FONT.cond800, fontSize: desktop ? 19 : 16, lineHeight: desktop ? 19 : 16, color: on ? COLORS.ctaInk : COLORS.text, textTransform: 'uppercase' }}>{meta.label}</Text>
+              <Text style={{ fontFamily: FONT.body500, fontSize: 11.5, lineHeight: 15, color: on ? 'rgba(11,11,13,0.7)' : COLORS.muted }} numberOfLines={2}>
+                {on ? 'Ativa neste quarto' : desktop ? 'Clique para usar' : 'Toque para usar'}
+              </Text>
+            </Pressable>
+          );
+        })}
+      </View>
+      {liveGame.pendingTactic ? <BodyText size={12.5}>{TACTIC_META[liveGame.pendingTactic].blurb}</BodyText> : null}
+      <BodyText size={12.5} color={situation === 'ahead' ? COLORS.good : situation === 'behind' ? COLORS.warn : COLORS.muted}>
+        {situation === 'ahead' ? `Você está à frente por ${margin}.` : situation === 'behind' ? `Você está atrás por ${Math.abs(margin)}.` : 'Jogo empatado.'}
+      </BodyText>
+    </View>
+  );
+
+  const narration = (
+    <Panel style={{ gap: 9 }}>
+      <SectionLabel>Narração</SectionLabel>
+      {liveGame.log.length === 0 ? (
+        <BodyText>A bola ainda não subiu. Escolha uma tática e avance o primeiro quarto.</BodyText>
+      ) : (
+        liveGame.log.map((line, i) => (
+          <View key={i} className="flex-row" style={{ gap: 10 }}>
+            <View style={{ width: 3, borderRadius: 2, backgroundColor: i === 0 ? COLORS.text : COLORS.lineStrong }} />
+            <Text style={{ flex: 1, fontFamily: FONT.body500, fontSize: 13.5, lineHeight: 19, color: i === 0 ? COLORS.text : COLORS.muted }}>{line}</Text>
+          </View>
+        ))
+      )}
+    </Panel>
+  );
+
+  const liveTag = (
+    <View className="flex-row items-center" style={{ gap: 6 }}>
+      {!liveGame.complete ? <PulseDot color={COLORS.bad} /> : null}
+      <Text style={{ fontFamily: FONT.cond800, fontSize: 12 + k, letterSpacing: 1.7, color: liveGame.complete ? COLORS.muted : COLORS.bad }}>
+        {liveGame.complete ? 'FIM DE JOGO' : 'AO VIVO'}
+      </Text>
+    </View>
+  );
+
+  if (desktop) {
+    return (
+      <DPage
+        footer={
+          <DDock note={REF_LABEL(liveGame.ref)}>
+            {liveGame.complete ? (
+              <DCta label="Ver resultado" onPress={onResolve} />
+            ) : (
+              <>
+                <GhostButton
+                  label={liveGame.pendingTimeout ? 'Tempo pedido ✓' : 'Pedir tempo'}
+                  onPress={onRequestTimeout}
+                  disabled={liveGame.timeoutsLeft <= 0 || liveGame.pendingTimeout}
+                  style={{ width: 220, minHeight: 54 }}
+                />
+                <DCta label="Avançar quarto ›" onPress={onAdvanceQuarter} />
+              </>
+            )}
+          </DDock>
+        }
+      >
+        <View className="flex-row items-center justify-between">
+          <Text style={{ fontFamily: FONT.cond700, fontSize: 13, letterSpacing: 2, color: COLORS.muted, textTransform: 'uppercase' }}>{REF_LABEL(liveGame.ref)}</Text>
+          {liveTag}
+        </View>
+        <View style={{ marginTop: 16 }}>{scoreboard}</View>
+        <Cols style={{ marginTop: 22 }}>
+          <Col gap={20}>
+            <Panel>{quarterTable}</Panel>
+            {decisionPanel}
+          </Col>
+          <Col>{narration}</Col>
+        </Cols>
+      </DPage>
+    );
+  }
 
   return (
     <Screen
@@ -107,102 +249,14 @@ const LiveGameScreen: React.FC<LiveGameScreenProps> = ({
     >
       <View className="flex-row items-center justify-between" style={{ paddingHorizontal: 20, paddingTop: 4 }}>
         <Text style={{ fontFamily: FONT.cond700, fontSize: 12, letterSpacing: 1.9, color: COLORS.muted, textTransform: 'uppercase' }}>{REF_LABEL(liveGame.ref)}</Text>
-        <View className="flex-row items-center" style={{ gap: 6 }}>
-          {!liveGame.complete ? <PulseDot color={COLORS.bad} /> : null}
-          <Text style={{ fontFamily: FONT.cond800, fontSize: 12, letterSpacing: 1.7, color: liveGame.complete ? COLORS.muted : COLORS.bad }}>
-            {liveGame.complete ? 'FIM DE JOGO' : 'AO VIVO'}
-          </Text>
-        </View>
+        {liveTag}
       </View>
 
       <Body top={14} gap={14}>
-        {/* Scoreboard: team blocks at the ends, the period in the middle. */}
-        <View style={{ borderRadius: 20, overflow: 'hidden', flexDirection: 'row', backgroundColor: COLORS.surface }}>
-          {block(teamA, liveGame.scoreA, false, liveGame.scoreA >= liveGame.scoreB)}
-          <View style={{ width: 84, alignItems: 'center', justifyContent: 'center', gap: 4 }}>
-            <Text style={{ fontFamily: FONT.cond800, fontSize: 22, lineHeight: 22, color: COLORS.text }}>{periodLabel}</Text>
-            <Text style={{ fontFamily: FONT.cond600, fontSize: 11, letterSpacing: 1.1, color: COLORS.muted }}>
-              {liveGame.complete ? `${liveGame.quarterScores.length > 4 ? 'APÓS PRORROG.' : '4 QUARTOS'}` : liveGame.quarterScores.length ? 'A SEGUIR' : 'BOLA AO ALTO'}
-            </Text>
-            <View className="flex-row" style={{ gap: 3, marginTop: 4 }}>
-              {Array.from({ length: TOTAL_TIMEOUTS }, (_, i) => (
-                <View key={i} style={{ width: 6, height: 6, borderRadius: 3, backgroundColor: i < liveGame.timeoutsLeft ? COLORS.text : COLORS.lineStrong }} />
-              ))}
-            </View>
-          </View>
-          {block(teamB, liveGame.scoreB, true, liveGame.scoreB >= liveGame.scoreA)}
-        </View>
-
-        {/* Quarter by quarter. */}
-        <View style={{ gap: 6 }}>
-          {[
-            { label: 'Time', vals: Array.from({ length: periods }, (_, i) => (i < 4 ? `${i + 1}Q` : `P${i - 3}`)), tot: 'TOT', head: true },
-            { label: teamA.id.toUpperCase(), vals: Array.from({ length: periods }, (_, i) => liveGame.quarterScores[i]?.a), tot: liveGame.scoreA, head: false, mine: liveGame.userIsTeamA },
-            { label: teamB.id.toUpperCase(), vals: Array.from({ length: periods }, (_, i) => liveGame.quarterScores[i]?.b), tot: liveGame.scoreB, head: false, mine: !liveGame.userIsTeamA },
-          ].map((row) => (
-            <View key={row.label} className="flex-row items-center">
-              <Text style={{ width: 44, fontFamily: FONT.cond700, fontSize: row.head ? 11 : 13, letterSpacing: row.head ? 1 : 0, color: row.head ? COLORS.faint : row.mine ? COLORS.text : COLORS.muted, textTransform: 'uppercase' }}>{row.label}</Text>
-              {row.vals.map((v, i) => (
-                <Text key={i} style={{ flex: 1, textAlign: 'center', fontFamily: FONT.cond700, fontSize: row.head ? 11 : 13, color: row.head ? COLORS.faint : v === undefined ? '#4A4950' : row.mine ? COLORS.text : COLORS.muted }}>
-                  {v === undefined ? '—' : v}
-                </Text>
-              ))}
-              <Text style={{ width: 44, textAlign: 'center', fontFamily: FONT.cond800, fontSize: row.head ? 11 : 13, color: row.head ? COLORS.faint : row.mine ? COLORS.text : COLORS.muted }}>{row.tot}</Text>
-            </View>
-          ))}
-        </View>
-
-        {liveGame.complete ? (
-          <Panel bar={won ? COLORS.good : COLORS.bad} style={{ gap: 6 }}>
-            <MonoLabel size={9} color={won ? COLORS.good : COLORS.bad}>{won ? 'Você venceu o jogo decisivo' : 'Derrota no jogo decisivo'}</MonoLabel>
-            <HeroTitle size={24}>{getTeamTricode(teamA)} {liveGame.scoreA} — {liveGame.scoreB} {getTeamTricode(teamB)}</HeroTitle>
-            <BodyText>{won ? 'A série é sua. O vestiário é seu.' : 'Acabou aqui. A diretoria vai querer explicações.'}</BodyText>
-          </Panel>
-        ) : (
-          <View style={{ gap: 8 }}>
-            <SectionLabel>Tática do banco · vale 1 quarto</SectionLabel>
-            <View className="flex-row" style={{ gap: 6 }}>
-              {TACTIC_ORDER.map((tactic) => {
-                const meta = TACTIC_META[tactic];
-                const on = liveGame.pendingTactic === tactic;
-                return (
-                  <Pressable
-                    key={tactic}
-                    accessibilityRole="button"
-                    aria-selected={on}
-                    onPress={() => onSetTactic(on ? null : tactic)}
-                    className="active:opacity-75"
-                    style={{ flex: 1, borderRadius: 14, paddingVertical: 12, paddingHorizontal: 10, gap: 3, backgroundColor: on ? COLORS.ctaFill : COLORS.surface }}
-                  >
-                    <Text style={{ fontFamily: FONT.cond800, fontSize: 16, lineHeight: 16, color: on ? COLORS.ctaInk : COLORS.text, textTransform: 'uppercase' }}>{meta.label}</Text>
-                    <Text style={{ fontFamily: FONT.body500, fontSize: 11.5, lineHeight: 15, color: on ? 'rgba(11,11,13,0.7)' : COLORS.muted }} numberOfLines={2}>
-                      {on ? 'Ativa neste quarto' : 'Toque para usar'}
-                    </Text>
-                  </Pressable>
-                );
-              })}
-            </View>
-            {liveGame.pendingTactic ? <BodyText size={12.5}>{TACTIC_META[liveGame.pendingTactic].blurb}</BodyText> : null}
-            <BodyText size={12.5} color={situation === 'ahead' ? COLORS.good : situation === 'behind' ? COLORS.warn : COLORS.muted}>
-              {situation === 'ahead' ? `Você está à frente por ${margin}.` : situation === 'behind' ? `Você está atrás por ${Math.abs(margin)}.` : 'Jogo empatado.'}
-            </BodyText>
-          </View>
-        )}
-
-        {/* Narração: newest first, brighter. The sim has no clock, so recency is the only marker. */}
-        <Panel style={{ gap: 9 }}>
-          <SectionLabel>Narração</SectionLabel>
-          {liveGame.log.length === 0 ? (
-            <BodyText>A bola ainda não subiu. Escolha uma tática e avance o primeiro quarto.</BodyText>
-          ) : (
-            liveGame.log.map((line, i) => (
-              <View key={i} className="flex-row" style={{ gap: 10 }}>
-                <View style={{ width: 3, borderRadius: 2, backgroundColor: i === 0 ? COLORS.text : COLORS.lineStrong }} />
-                <Text style={{ flex: 1, fontFamily: FONT.body500, fontSize: 13.5, lineHeight: 19, color: i === 0 ? COLORS.text : COLORS.muted }}>{line}</Text>
-              </View>
-            ))
-          )}
-        </Panel>
+        {scoreboard}
+        {quarterTable}
+        {decisionPanel}
+        {narration}
       </Body>
     </Screen>
   );

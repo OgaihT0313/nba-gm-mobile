@@ -10,10 +10,10 @@ import {
 import { Barlow_400Regular, Barlow_500Medium, Barlow_600SemiBold } from '@expo-google-fonts/barlow';
 
 import { Team, Player, Coach, SeasonState, LiveTactic, Notification as NotificationType } from './types';
-import { teamsData, playersData, picksOf, releaseWithDeadMoney } from './constants';
+import { teamsData, playersData, picksOf, releaseWithDeadMoney, getTeamNickname } from './constants';
 import { ERAS, eraById } from './data/eras';
 import { simulationEngine, ROTATION_MIN, ROTATION_MAX } from './services/simulationService';
-import { buildSeasonOwner, evaluateSeasonOutcome } from './services/ownerService';
+import { buildSeasonOwner, evaluateSeasonOutcome, confidenceZone } from './services/ownerService';
 import { generateSchedule } from './services/scheduleService';
 import { simulateOneDay, SimEffect, ALL_STAR_GAME, PinnedGameResult } from './services/seasonRunner';
 import { MIN_ROSTER_SIZE, TRADE_DEADLINE_GAME } from './services/tradeService';
@@ -27,6 +27,8 @@ import { initCoaches, fireCoach, hireCoach } from './services/coachService';
 import { ThemeProvider } from './src/theme/ThemeProvider';
 import { COLORS } from './src/theme/tokens';
 import BottomNav from './components/BottomNav';
+import Sidebar from './components/desktop/Sidebar';
+import { useDesktop } from './components/desktop/useDesktop';
 import Home from './screens/Home';
 import EraSelect from './screens/EraSelect';
 import TeamSelect from './screens/TeamSelect';
@@ -80,6 +82,7 @@ export default function App() {
     Barlow_400Regular, Barlow_500Medium, Barlow_600SemiBold,
   });
 
+  const desktop = useDesktop();
   const [view, setView] = useState<AppView>('home');
   const [season, setSeason] = useState<SeasonState | null>(null);
   const [isSimulating, setIsSimulating] = useState(false);
@@ -690,6 +693,7 @@ export default function App() {
       return (
         <EraSelect
           onSelect={(eraId) => { setPendingEraId(eraId); setView('team-select'); }}
+          onBack={() => setView('home')}
         />
       );
     }
@@ -716,6 +720,8 @@ export default function App() {
           teams={activeTeamsData as Team[]}
           players={activePlayersData}
           onSelect={(id) => { setPendingTeamId(id); setView('team-confirm'); }}
+          onBack={season ? undefined : () => setView('era-select')}
+          seasonLabel={activeEra?.seasonLabel ?? '2025-26'}
         />
       );
     }
@@ -821,6 +827,13 @@ export default function App() {
     return <Placeholder title={ph?.title ?? view} icon={ph?.icon} />;
   };
 
+  const showSidebar = !['watch-game', 'home', 'era-select', 'team-select', 'team-confirm'].includes(view) && !season?.owner.fired;
+  const sidebarCaption = !season ? '' : season.status === 'active'
+    ? `Jogo ${season.gamesPlayed}/82`
+    : season.status === 'draft' ? 'Draft'
+      : season.status === 'free_agency' ? 'Agência livre'
+        : season.status === 'offseason' ? 'Offseason' : 'Playoffs';
+
   // Hold the first paint until the display face is ready — otherwise the hero
   // text pops from system font to Inter.
   if (!fontsLoaded) return null;
@@ -838,13 +851,32 @@ export default function App() {
         <SafeAreaView className="flex-1" style={{ backgroundColor: COLORS.bg }} edges={['bottom']}>
           <StatusBar style="light" />
 
-          {/* Screen. Keyed on `view` so each navigation remounts and fades in —
-              the RN stand-in for the web's AnimatePresence page transitions. */}
-          <View className="flex-1">
-            <FadeInView key={view} className="flex-1">
-              {renderScreen()}
-            </FadeInView>
-            <NotificationContainer notifications={notifications} onRemove={(id) => setNotifications((p) => p.filter((n) => n.id !== id))} />
+          <View style={{ flex: 1, flexDirection: desktop ? 'row' : 'column' }}>
+            {/* PC: the bottom nav becomes a fixed sidebar. It follows the same
+                visibility rule, plus the pre-season screens (Início, Era,
+                Escolher, Confirmar) that the PC design draws full-bleed. */}
+            {desktop && showSidebar && season && userTeam ? (
+              <Sidebar
+                view={view}
+                onNavigate={(v) => setView(v as AppView)}
+                hasSeason={!!season}
+                faOpen={season.status === 'free_agency'}
+                draftOpen={season.status === 'draft'}
+                teamId={userTeam.id}
+                nickname={getTeamNickname(userTeam)}
+                caption={sidebarCaption}
+                zoneColor={{ safe: COLORS.good, warm: COLORS.warn, hot: COLORS.bad }[confidenceZone(season.owner.confidence)]}
+              />
+            ) : null}
+
+            {/* Screen. Keyed on `view` so each navigation remounts and fades in —
+                the RN stand-in for the web's AnimatePresence page transitions. */}
+            <View className="flex-1" style={{ minWidth: 0 }}>
+              <FadeInView key={view} className="flex-1">
+                {renderScreen()}
+              </FadeInView>
+              <NotificationContainer notifications={notifications} onRemove={(id) => setNotifications((p) => p.filter((n) => n.id !== id))} />
+            </View>
           </View>
 
           {/* The decision queue. Rendered above the season screen and below the
@@ -871,7 +903,7 @@ export default function App() {
 
           {/* Bottom nav (only once a season exists) */}
           {/* Hidden while watching: the HUD is full-bleed, and a tab tap mid-game would drop the game. */}
-          {season && view !== 'watch-game' ? (
+          {!desktop && season && view !== 'watch-game' ? (
             <BottomNav
               view={view}
               onNavigate={(v) => setView(v as AppView)}

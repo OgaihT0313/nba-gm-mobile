@@ -18,6 +18,8 @@ import {
 import { currentEra } from '../data/eras';
 import CupPanel from '../components/CupPanel';
 import StandingsTable from '../components/StandingsTable';
+import { useDesktop } from '../components/desktop/useDesktop';
+import { DPage, DDock, DCta, DStep, DLabel, Cols, Col } from '../components/desktop/kit';
 
 // The season screen — design 1b of the "Transmissão" redesign. A TV
 // scoreboard: who you are and the record, all 82 games as a strip, the next
@@ -46,6 +48,7 @@ const surname = (name: string) =>
 const SimulationScreen: React.FC<SimulationScreenProps> = ({
   season, isSimulating, onAdvance, onWatchGame,
 }) => {
+  const desktop = useDesktop();
   const userTeam = season.teams.find((t) => t.id === season.userTeamId);
   const gp = season.gamesPlayed;
   const remaining = Math.max(0, 82 - gp);
@@ -122,6 +125,264 @@ const SimulationScreen: React.FC<SimulationScreenProps> = ({
   const oppMain = visibleTeamColor(oppAccent.primary, oppAccent.secondary);
   const oppBar = colorDistance(userBar, oppMain) >= 110 ? oppMain
     : colorDistance(userBar, oppAccent.secondary) >= 110 ? oppAccent.secondary : COLORS.muted;
+
+  // Cards both layouts share: one column on the phone, the left column on PC.
+  const eraPanel = justCrossedEra && era ? (
+    <Panel bar={COLORS.gold}>
+      <SectionLabel color={COLORS.gold}>Nova era</SectionLabel>
+      <Name size={18} style={{ marginTop: 6 }}>Começa a {era.label}</Name>
+      <BodyText style={{ marginTop: 4 }}>
+        {era.seasonLabel
+          ? `Sua carreira atravessou da ${previousEra?.label} para a ${era.label}. A liga entra em ${era.seasonLabel}, com os elencos reais daquela temporada.`
+          : `A história real acaba aqui. Daqui pra frente é a ${era.label}, e a liga segue só pelo que você fizer dela.`}
+      </BodyText>
+    </Panel>
+  ) : null;
+
+  const notesPanel = season.owner.note || season.owner.press?.promise || offerCount > 0 || injuredCount > 0 ? (
+    <Panel style={{ gap: 9 }}>
+      {season.owner.note ? <BodyText>{season.owner.note}</BodyText> : null}
+      {/* The one thing said at a press conference that outlives it. */}
+      {season.owner.press?.promise ? (
+        <View className="flex-row" style={{ gap: 10 }}>
+          <MonoLabel size={9} color={COLORS.warn}>Promessa</MonoLabel>
+          <BodyText size={12.5} style={{ flex: 1 }}>
+            Na coletiva do dia {season.owner.press.promise.day}, você prometeu {PROMISE_LABEL[season.owner.press.promise.kind]}.
+            {' '}Cumprida: +{PROMISE_KEPT} de confiança no fim; quebrada: {PROMISE_BROKEN}.
+          </BodyText>
+        </View>
+      ) : null}
+      {offerCount > 0 || injuredCount > 0 ? (
+        <View className="flex-row flex-wrap" style={{ gap: 6 }}>
+          {offerCount > 0 ? <Tag color={COLORS.east}>{offerCount} {offerCount === 1 ? 'oferta de troca' : 'ofertas de troca'}</Tag> : null}
+          {injuredCount > 0 ? <Tag color={COLORS.bad}>{injuredCount} {injuredCount === 1 ? 'lesionado' : 'lesionados'}</Tag> : null}
+        </View>
+      ) : null}
+    </Panel>
+  ) : null;
+
+  const movesPanel = offseasonMoves.length > 0 ? (
+    <Panel>
+      <SectionLabel>Offseason real · {offseasonMoves.length} movimentações</SectionLabel>
+      <View style={{ gap: 7, marginTop: 9 }}>
+        {offseasonMoves.slice(0, 8).map((m, i) => (
+          <View key={i} className="flex-row items-center" style={{ gap: 8 }}>
+            <Name size={14} style={{ flex: 1 }}>{m.playerName}</Name>
+            <TeamBadge teamId={m.fromTeamId} />
+            <Text style={{ color: COLORS.dim }}>›</Text>
+            <TeamBadge teamId={m.toTeamId} />
+          </View>
+        ))}
+      </View>
+      {offseasonMoves.length > 8 ? (
+        <BodyText size={12} color={COLORS.dim} style={{ marginTop: 8 }}>e mais {offseasonMoves.length - 8} pela liga.</BodyText>
+      ) : null}
+    </Panel>
+  ) : null;
+
+  const retirementsPanel = retirements.length > 0 ? (
+    <Panel>
+      <SectionLabel>Aposentadorias · {retirements.length}</SectionLabel>
+      <View style={{ gap: 7, marginTop: 9 }}>
+        {retirements.slice(0, 6).map((r) => (
+          <View key={r.playerId} className="flex-row items-center" style={{ gap: 8 }}>
+            <Name size={14} style={{ flex: 1 }}>{r.name}</Name>
+            <BodyText size={12} color={r.teamId === season.userTeamId ? COLORS.warn : COLORS.dim}>{r.age} anos · {r.ovr}</BodyText>
+            {r.teamId ? <TeamBadge teamId={r.teamId} /> : null}
+          </View>
+        ))}
+      </View>
+      {retirements.length > 6 ? (
+        <BodyText size={12} color={COLORS.dim} style={{ marginTop: 8 }}>e mais {retirements.length - 6}.</BodyText>
+      ) : null}
+    </Panel>
+  ) : null;
+
+  if (desktop) {
+    const winP = Math.round(winPct * 100);
+    return (
+      <DPage
+        footer={
+          <DDock note={over ? 'Temporada regular encerrada.' : opponent && fixture ? `Próximo: ${getTeamNickname(opponent)} ${atHome ? 'em casa' : 'fora'}, dia ${fixture.day}.` : undefined}>
+            <DStep label="+1 dia" onPress={() => onAdvance(gp + 1)} disabled={busy} />
+            <DStep label="+7 dias" onPress={() => onAdvance(Math.min(82, gp + 7))} disabled={busy} />
+            <DStep label={gp < 41 ? 'Metade' : 'Até o fim'} onPress={() => onAdvance(gp < 41 ? 41 : 82)} disabled={busy} />
+            <DCta
+              label={isSimulating ? 'Simulando…' : over ? 'Temporada encerrada' : 'Simular temporada'}
+              sub={over ? undefined : `${remaining} ${remaining === 1 ? 'jogo' : 'jogos'}`}
+              onPress={() => onAdvance(82)}
+              disabled={busy}
+            />
+          </DDock>
+        }
+      >
+        {/* ------------------------------------------------------- scoreboard */}
+        <View style={{ gap: 18 }}>
+          <View className="flex-row items-center justify-between">
+            <DLabel size={13} style={{ letterSpacing: 1.8 }}>Temporada {seasonNumber} · {yearLabel}</DLabel>
+            <View className="flex-row items-center" style={{ gap: 6, borderWidth: 1, borderColor: withAlpha(zoneColor, 0.35), paddingHorizontal: 12, paddingVertical: 4, borderRadius: RADIUS.pill }}>
+              <View style={{ width: 6, height: 6, borderRadius: 3, backgroundColor: zoneColor }} />
+              <DLabel size={12} color={zoneColor}>{ZONE_PILL[zone]}</DLabel>
+            </View>
+          </View>
+          <View className="flex-row items-end" style={{ gap: 18 }}>
+            {userTeam ? <TeamBadge teamId={userTeam.id} width={76} height={76} /> : null}
+            <View className="flex-1" style={{ gap: 4 }}>
+              <HeroTitle size={44} numberOfLines={1}>{getTeamNickname(userTeam)}</HeroTitle>
+              <BodyText size={15} numberOfLines={1}>
+                {gp > 0
+                  ? `${confRank}º no ${userTeam?.conference === 'East' ? 'Leste' : 'Oeste'}`
+                  : `${getTeamCity(userTeam)} · ${conferenceLabel(userTeam)}`}
+                {streak !== 0 ? (
+                  <Text style={{ fontFamily: FONT.body600, color: streak > 0 ? COLORS.good : COLORS.bad }}>
+                    {' · '}{Math.abs(streak)} {streak > 0 ? (streak === 1 ? 'vitória' : 'vitórias seguidas') : (streak === -1 ? 'derrota' : 'derrotas seguidas')}
+                  </Text>
+                ) : null}
+              </BodyText>
+            </View>
+            <Text style={{ fontFamily: FONT.cond800, fontSize: 84, lineHeight: 72, color: COLORS.text, fontVariant: ['tabular-nums'] }}>
+              {wins}–{losses}
+            </Text>
+          </View>
+          {/* All 82 games in one row. */}
+          <View style={{ gap: 8 }}>
+            <View className="flex-row justify-between">
+              <DLabel>Jogo {gp} de 82</DLabel>
+              <DLabel>{remaining} restantes</DLabel>
+            </View>
+            <View className="flex-row" style={{ gap: 3 }}>
+              {strip.map((r, i) => (
+                <View key={i} style={{ flex: 1, height: 18, borderRadius: 2, backgroundColor: r === 'w' ? COLORS.good : r === 'l' ? COLORS.bad : COLORS.line }} />
+              ))}
+            </View>
+          </View>
+        </View>
+
+        <Cols style={{ marginTop: 26 }}>
+          <Col>
+            {eraPanel}
+            {opponent && fixture && userTeam ? (
+              <Panel padding={20} radius={18} style={{ gap: 16 }}>
+                <View className="flex-row justify-between">
+                  <DLabel>Próximo jogo</DLabel>
+                  <DLabel>Dia {fixture.day} · {atHome ? 'Em casa' : 'Fora'}</DLabel>
+                </View>
+                <View className="flex-row items-center justify-between">
+                  <View className="flex-row items-center" style={{ gap: 14 }}>
+                    <TeamBadge teamId={userTeam.id} width={56} height={56} />
+                    <View>
+                      <HeroTitle size={24} style={{ lineHeight: 24 }}>{getTeamNickname(userTeam)}</HeroTitle>
+                      <Text style={{ fontFamily: FONT.cond700, fontSize: 16, color: COLORS.textSoft, marginTop: 2 }}>{wins}–{losses}</Text>
+                    </View>
+                  </View>
+                  <Text style={{ fontFamily: FONT.cond800, fontSize: 14, letterSpacing: 2.8, color: COLORS.faint }}>VS</Text>
+                  <View className="flex-row items-center" style={{ gap: 14 }}>
+                    <View style={{ alignItems: 'flex-end' }}>
+                      <HeroTitle size={24} style={{ lineHeight: 24 }}>{getTeamNickname(opponent)}</HeroTitle>
+                      <Text style={{ fontFamily: FONT.cond700, fontSize: 16, color: COLORS.textSoft, marginTop: 2 }}>{opponent.wins ?? 0}–{opponent.losses ?? 0}</Text>
+                    </View>
+                    <TeamBadge teamId={opponent.id} width={56} height={56} />
+                  </View>
+                </View>
+                <View style={{ gap: 6 }}>
+                  <View className="flex-row" style={{ height: 8, borderRadius: 4, overflow: 'hidden', gap: 2 }}>
+                    <View style={{ width: `${winP}%`, backgroundColor: userBar }} />
+                    <View style={{ flex: 1, backgroundColor: oppBar }} />
+                  </View>
+                  <View className="flex-row justify-between items-center">
+                    <Text style={{ fontFamily: FONT.cond700, fontSize: 15, color: COLORS.text }}>{winP}%</Text>
+                    <DLabel size={10} color={COLORS.faint}>Chance de vitória</DLabel>
+                    <Text style={{ fontFamily: FONT.cond700, fontSize: 15, color: COLORS.muted }}>{100 - winP}%</Text>
+                  </View>
+                </View>
+                <View className="flex-row items-center justify-between" style={{ gap: 16 }}>
+                  <View style={{ flex: 1, minWidth: 0, gap: 8 }}>
+                    {rival || revenge.length ? (
+                      <View className="flex-row flex-wrap" style={{ gap: 6 }}>
+                        {rival ? <Tag color={COLORS.west}>Rival · {rivalryReason(rival)}</Tag> : null}
+                        {revenge.map((p) => (
+                          <Tag key={p.id} color={COLORS.textSoft}>{surname(p.name)} volta · +{REVENGE_BOOST}</Tag>
+                        ))}
+                      </View>
+                    ) : null}
+                    {rival ? (
+                      <BodyText size={12.5} color={COLORS.dim}>
+                        Vencer o rival dá ânimo (+{RIVAL_WIN_MORALE}) e embalo; perder pesa ({RIVAL_LOSS_MORALE}).
+                      </BodyText>
+                    ) : null}
+                  </View>
+                  {onWatchGame ? (
+                    <GhostButton label="Assistir ao jogo" onPress={() => onWatchGame(opponent, !!atHome)} disabled={busy} style={{ minHeight: 42, paddingHorizontal: 20 }} />
+                  ) : null}
+                </View>
+              </Panel>
+            ) : null}
+
+            <View className="flex-row" style={{ gap: 14 }}>
+              <Panel padding={16} className="flex-1" style={{ gap: 8 }}>
+                <DLabel>Meta · {season.owner.targetWins} V</DLabel>
+                <Stat size={24}>{gp < 5 ? mandate.label : `Ritmo ${Math.round(paceWins)}`}</Stat>
+                <Meter
+                  value={gp === 0 ? 0 : targetProgress}
+                  height={5}
+                  color={gp === 0 ? COLORS.neutral : targetProgress >= 0.95 ? COLORS.good : targetProgress >= 0.7 ? COLORS.warn : COLORS.bad}
+                />
+              </Panel>
+              <Panel padding={16} className="flex-1" style={{ gap: 8 }}>
+                <DLabel>Confiança do dono</DLabel>
+                <Stat size={24}>{season.owner.confidence}%</Stat>
+                <Meter value={season.owner.confidence / 100} height={5} color={zoneColor} />
+              </Panel>
+            </View>
+
+            {notesPanel}
+
+            {front.length > 0 ? (
+              <Panel padding={0}>
+                {front.map((h, i) => (
+                  <View key={h.id} style={{ gap: 3, paddingHorizontal: 18, paddingVertical: 14, borderTopWidth: i ? 1 : 0, borderTopColor: COLORS.lineSoft }}>
+                    <DLabel color={HEADLINE_TONE[h.tone]} numberOfLines={1}>{h.kicker}</DLabel>
+                    <Text style={{ fontFamily: FONT.body600, fontSize: 15, lineHeight: 20, color: COLORS.text }}>{h.title}</Text>
+                    {h.sub ? <BodyText size={12.5} color={COLORS.dim}>{h.sub}</BodyText> : null}
+                  </View>
+                ))}
+              </Panel>
+            ) : null}
+
+            {movesPanel}
+            {retirementsPanel}
+
+            {season.events.length > 0 ? (
+              <Panel padding={0} style={{ paddingHorizontal: 18, paddingVertical: 16 }}>
+                <DLabel style={{ letterSpacing: 1.65 }}>Na liga</DLabel>
+                <View style={{ gap: 10, marginTop: 10 }}>
+                  {season.events.slice(0, 6).map((e, i) => (
+                    <View key={i} className="flex-row" style={{ gap: 10 }}>
+                      <View style={{ width: 3, borderRadius: 2, backgroundColor: e.type === 'injury' ? COLORS.warn : e.type === 'trade' ? COLORS.east : COLORS.good }} />
+                      <BodyText size={13} color={COLORS.textSoft} style={{ flex: 1 }}>{e.message}</BodyText>
+                    </View>
+                  ))}
+                </View>
+              </Panel>
+            ) : null}
+
+            <CupPanel cup={season.cup} teams={season.teams} />
+          </Col>
+
+          <Col width={440}>
+            <Panel padding={0} style={{ paddingHorizontal: 16, paddingVertical: 14 }}>
+              <DLabel color={COLORS.west} style={{ marginBottom: 8 }}>Oeste</DLabel>
+              <StandingsTable teams={season.teams} conference="West" schedule={season.schedule} userTeamId={season.userTeamId} limit={8} />
+            </Panel>
+            <Panel padding={0} style={{ paddingHorizontal: 16, paddingVertical: 14 }}>
+              <DLabel color={COLORS.east} style={{ marginBottom: 8 }}>Leste</DLabel>
+              <StandingsTable teams={season.teams} conference="East" schedule={season.schedule} userTeamId={season.userTeamId} limit={8} />
+            </Panel>
+          </Col>
+        </Cols>
+      </DPage>
+    );
+  }
 
   return (
     <Screen
@@ -207,17 +468,7 @@ const SimulationScreen: React.FC<SimulationScreenProps> = ({
       </View>
 
       <Body top={16} gap={14}>
-        {justCrossedEra && era ? (
-          <Panel bar={COLORS.gold}>
-            <SectionLabel color={COLORS.gold}>Nova era</SectionLabel>
-            <Name size={18} style={{ marginTop: 6 }}>Começa a {era.label}</Name>
-            <BodyText style={{ marginTop: 4 }}>
-              {era.seasonLabel
-                ? `Sua carreira atravessou da ${previousEra?.label} para a ${era.label}. A liga entra em ${era.seasonLabel}, com os elencos reais daquela temporada.`
-                : `A história real acaba aqui. Daqui pra frente é a ${era.label}, e a liga segue só pelo que você fizer dela.`}
-            </BodyText>
-          </Panel>
-        ) : null}
+        {eraPanel}
 
         {/* ------------------------------------------------------- next game */}
         {opponent && fixture && userTeam ? (
@@ -291,27 +542,7 @@ const SimulationScreen: React.FC<SimulationScreenProps> = ({
           </Panel>
         </View>
 
-        {season.owner.note || season.owner.press?.promise || offerCount > 0 || injuredCount > 0 ? (
-          <Panel style={{ gap: 9 }}>
-            {season.owner.note ? <BodyText>{season.owner.note}</BodyText> : null}
-            {/* The one thing said at a press conference that outlives it. */}
-            {season.owner.press?.promise ? (
-              <View className="flex-row" style={{ gap: 10 }}>
-                <MonoLabel size={9} color={COLORS.warn}>Promessa</MonoLabel>
-                <BodyText size={12.5} style={{ flex: 1 }}>
-                  Na coletiva do dia {season.owner.press.promise.day}, você prometeu {PROMISE_LABEL[season.owner.press.promise.kind]}.
-                  {' '}Cumprida: +{PROMISE_KEPT} de confiança no fim; quebrada: {PROMISE_BROKEN}.
-                </BodyText>
-              </View>
-            ) : null}
-            {offerCount > 0 || injuredCount > 0 ? (
-              <View className="flex-row flex-wrap" style={{ gap: 6 }}>
-                {offerCount > 0 ? <Tag color={COLORS.east}>{offerCount} {offerCount === 1 ? 'oferta de troca' : 'ofertas de troca'}</Tag> : null}
-                {injuredCount > 0 ? <Tag color={COLORS.bad}>{injuredCount} {injuredCount === 1 ? 'lesionado' : 'lesionados'}</Tag> : null}
-              </View>
-            ) : null}
-          </Panel>
-        ) : null}
+        {notesPanel}
 
         {/* ------------------------------------------------------ headlines */}
         {front.length > 0 ? (
@@ -331,42 +562,8 @@ const SimulationScreen: React.FC<SimulationScreenProps> = ({
           </Panel>
         ) : null}
 
-        {offseasonMoves.length > 0 ? (
-          <Panel>
-            <SectionLabel>Offseason real · {offseasonMoves.length} movimentações</SectionLabel>
-            <View style={{ gap: 7, marginTop: 9 }}>
-              {offseasonMoves.slice(0, 8).map((m, i) => (
-                <View key={i} className="flex-row items-center" style={{ gap: 8 }}>
-                  <Name size={14} style={{ flex: 1 }}>{m.playerName}</Name>
-                  <TeamBadge teamId={m.fromTeamId} />
-                  <Text style={{ color: COLORS.dim }}>›</Text>
-                  <TeamBadge teamId={m.toTeamId} />
-                </View>
-              ))}
-            </View>
-            {offseasonMoves.length > 8 ? (
-              <BodyText size={12} color={COLORS.dim} style={{ marginTop: 8 }}>e mais {offseasonMoves.length - 8} pela liga.</BodyText>
-            ) : null}
-          </Panel>
-        ) : null}
-
-        {retirements.length > 0 ? (
-          <Panel>
-            <SectionLabel>Aposentadorias · {retirements.length}</SectionLabel>
-            <View style={{ gap: 7, marginTop: 9 }}>
-              {retirements.slice(0, 6).map((r) => (
-                <View key={r.playerId} className="flex-row items-center" style={{ gap: 8 }}>
-                  <Name size={14} style={{ flex: 1 }}>{r.name}</Name>
-                  <BodyText size={12} color={r.teamId === season.userTeamId ? COLORS.warn : COLORS.dim}>{r.age} anos · {r.ovr}</BodyText>
-                  {r.teamId ? <TeamBadge teamId={r.teamId} /> : null}
-                </View>
-              ))}
-            </View>
-            {retirements.length > 6 ? (
-              <BodyText size={12} color={COLORS.dim} style={{ marginTop: 8 }}>e mais {retirements.length - 6}.</BodyText>
-            ) : null}
-          </Panel>
-        ) : null}
+        {movesPanel}
+        {retirementsPanel}
 
         {/* --------------------------------------------------- league chatter */}
         {season.events.length > 0 ? (

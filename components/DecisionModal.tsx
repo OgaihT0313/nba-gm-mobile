@@ -7,6 +7,7 @@ import type { Decision, DecisionOption, DecisionKind, Player } from '../types';
 import { getPlayerImageUrl, PLAYER_PLACEHOLDER_SVG } from '../constants';
 import { personalityOf } from '../services/personalityService';
 import { COLORS, FONT, ovrColor } from '../src/theme/tokens';
+import { useDesktop } from './desktop/useDesktop';
 
 // Design 5d ("Transmissão"). The decision queue's one screen, as an
 // INTERRUPTION: the season stays visible behind a dark veil — your record is
@@ -59,14 +60,16 @@ const OptionRow: React.FC<{ option: DecisionOption; onPress: () => void }> = ({ 
 
 const DecisionModal: React.FC<DecisionModalProps> = ({ decision, players, remaining, onChoose }) => {
   const insets = useSafeAreaInsets();
+  // PC: a 640px card centered over the season instead of pinned to the foot.
+  const desktop = useDesktop();
   const subject = decision?.subjectId ? players[decision.subjectId] : undefined;
 
   return (
     <Modal visible={!!decision} animationType="fade" transparent statusBarTranslucent>
       {decision ? (
-        <View className="flex-1 justify-end" style={{ backgroundColor: 'rgba(5,5,6,0.72)', paddingBottom: insets.bottom + 12, paddingTop: insets.top + 20 }}>
-          <View style={{ marginHorizontal: 12, maxHeight: '100%', backgroundColor: COLORS.surface, borderRadius: 24, borderWidth: 1, borderColor: '#2A2A2F', overflow: 'hidden' }}>
-            <ScrollView style={{ flexGrow: 0, flexShrink: 1 }} contentContainerStyle={{ paddingHorizontal: 16, paddingTop: 18, paddingBottom: 16, gap: 14 }} showsVerticalScrollIndicator={false}>
+        <View className="flex-1" style={{ justifyContent: desktop ? 'center' : 'flex-end', alignItems: desktop ? 'center' : 'stretch', backgroundColor: 'rgba(5,5,6,0.72)', paddingBottom: insets.bottom + (desktop ? 32 : 12), paddingTop: insets.top + (desktop ? 32 : 20) }}>
+          <View style={{ marginHorizontal: 12, width: desktop ? 640 : undefined, maxWidth: '100%', maxHeight: '100%', backgroundColor: COLORS.surface, borderRadius: 24, borderWidth: 1, borderColor: '#2A2A2F', overflow: 'hidden' }}>
+            <ScrollView style={{ flexGrow: 0, flexShrink: 1 }} contentContainerStyle={{ paddingHorizontal: desktop ? 24 : 16, paddingTop: desktop ? 24 : 18, paddingBottom: desktop ? 22 : 16, gap: 14 }} showsVerticalScrollIndicator={false}>
               <View className="flex-row items-center justify-between">
                 <Text style={{ fontFamily: FONT.cond700, fontSize: 11, letterSpacing: 1.5, color: COLORS.warn, textTransform: 'uppercase' }}>
                   {CATEGORY[decision.kind] ?? 'Decisão'} · dia {decision.day}
@@ -77,7 +80,7 @@ const DecisionModal: React.FC<DecisionModalProps> = ({ decision, players, remain
               </View>
 
               <View style={{ gap: 8 }}>
-                <Text style={{ fontFamily: FONT.cond800, fontSize: 28, lineHeight: 28, color: COLORS.text, textTransform: 'uppercase' }}>
+                <Text style={{ fontFamily: FONT.cond800, fontSize: desktop ? 34 : 28, lineHeight: desktop ? 34 : 28, color: COLORS.text, textTransform: 'uppercase' }}>
                   {decision.headline}
                 </Text>
                 {subject ? (

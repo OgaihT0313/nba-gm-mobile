@@ -8,6 +8,7 @@ import { sortStandings } from '../services/scheduleService';
 import { COLORS, FONT } from '../src/theme/tokens';
 import { CtaButton, GhostButton, TeamBadge, StatStrip, BodyText } from '../components/ui/kit';
 import BrandLogo from '../components/BrandLogo';
+import { useDesktop } from '../components/desktop/useDesktop';
 
 // Design 2a ("Transmissão"). No team color yet — black and white, with the two
 // conference strokes as the only color. A saved career gets its own card;
@@ -22,6 +23,7 @@ interface HomeProps {
 
 const Home: React.FC<HomeProps> = ({ onStart, onContinue, season }) => {
   const insets = useSafeAreaInsets();
+  const desktop = useDesktop();
   const userTeam = season?.teams.find((t) => t.id === season.userTeamId);
   const seasonNumber = (season?.gmLegacy.seasons ?? 0) + 1;
   const y = 2025 + seasonNumber - 1;
@@ -30,6 +32,77 @@ const Home: React.FC<HomeProps> = ({ onStart, onContinue, season }) => {
     ? sortStandings(season.teams.filter((t) => t.conference === userTeam.conference), season.schedule)
       .findIndex((t) => t.id === userTeam.id) + 1
     : 0;
+
+  const savedCard = season && userTeam ? (
+    <View style={{ backgroundColor: COLORS.surface, borderRadius: 20, overflow: 'hidden' }}>
+      <View className="flex-row justify-between items-center" style={{ paddingHorizontal: 16, paddingTop: 14, paddingBottom: 12, borderBottomWidth: 1, borderBottomColor: COLORS.line }}>
+        <Text style={{ fontFamily: FONT.cond700, fontSize: 11, letterSpacing: 1.5, color: COLORS.muted }}>CARREIRA SALVA</Text>
+        <Text style={{ fontFamily: FONT.cond700, fontSize: 11, letterSpacing: 1.5, color: COLORS.muted }}>
+          {yearLabel} · DIA {season.gamesPlayed}
+        </Text>
+      </View>
+      <View className="flex-row items-center" style={{ padding: desktop ? 18 : 16, gap: desktop ? 14 : 12 }}>
+        <TeamBadge teamId={userTeam.id} width={desktop ? 56 : 48} height={desktop ? 56 : 48} fill={COLORS.lineStrong} />
+        <View className="flex-1" style={{ gap: 2 }}>
+          <Text style={{ fontFamily: FONT.cond800, fontSize: desktop ? 30 : 24, lineHeight: desktop ? 30 : 24, color: COLORS.text, textTransform: 'uppercase' }}>
+            {getTeamNickname(userTeam)}
+          </Text>
+          <BodyText size={desktop ? 14 : 13}>
+            {userTeam.wins ?? 0}–{userTeam.losses ?? 0}
+            {rank ? ` · ${rank}º no ${userTeam.conference === 'East' ? 'Leste' : 'Oeste'}` : ` · temporada ${seasonNumber}`}
+          </BodyText>
+        </View>
+      </View>
+      <View style={{ borderTopWidth: 1, borderTopColor: COLORS.line, paddingVertical: desktop ? 10 : 8 }}>
+        <StatStrip
+          size={desktop ? 24 : 22}
+          items={[
+            { label: 'Títulos', value: season.gmLegacy.titles, color: season.gmLegacy.titles > 0 ? COLORS.gold : undefined },
+            { label: 'Temporadas', value: season.gmLegacy.seasons },
+            { label: 'Confiança', value: `${season.owner.confidence}%` },
+          ]}
+        />
+      </View>
+    </View>
+  ) : null;
+
+  const actions = season && userTeam && onContinue ? (
+    <>
+      <CtaButton label="Continuar" sub={getTeamNickname(userTeam)} onPress={onContinue} size={desktop ? 21 : 20} style={desktop ? { minHeight: 58 } : undefined} />
+      <GhostButton label="Nova carreira" onPress={onStart} style={desktop ? { minHeight: 48 } : undefined} />
+      <Text style={{ textAlign: 'center', fontFamily: FONT.body500, fontSize: desktop ? 12 : 11.5, color: COLORS.dim }}>Uma nova carreira apaga o save atual</Text>
+    </>
+  ) : (
+    <CtaButton label="Nova carreira" onPress={onStart} size={desktop ? 21 : 20} style={desktop ? { minHeight: 58 } : undefined} />
+  );
+
+  const leagueData = (
+    <View style={desktop ? { maxWidth: 440 } : undefined}>
+      <Text style={{ fontFamily: FONT.cond700, fontSize: 11, letterSpacing: 1.5, color: COLORS.dim, paddingBottom: 6 }}>DADOS DA LIGA</Text>
+      <Row label="Elencos e ratings" value="2025-26 reais" />
+      <Row label="Teto salarial" value={`$${(SALARY_CAP / 1_000_000).toFixed(1)}M`} />
+      <Row label="Franquias" value="30" last />
+    </View>
+  );
+
+  // PC: the brand on the left, the career on a 520px side panel.
+  if (desktop) {
+    return (
+      <View style={{ flex: 1, flexDirection: 'row', backgroundColor: COLORS.bg }}>
+        <View style={{ flex: 1, minWidth: 0, paddingTop: 96, paddingHorizontal: 96, paddingBottom: 72, justifyContent: 'space-between' }}>
+          <View>
+            <BrandLogo size={144} />
+            <BodyText size={20} style={{ marginTop: 28 }}>Monte a franquia. Aguente o dono. Ganhe o anel.</BodyText>
+          </View>
+          {leagueData}
+        </View>
+        <View style={{ width: 520, backgroundColor: COLORS.navBg, borderLeftWidth: 1, borderLeftColor: COLORS.line, paddingTop: 96, paddingHorizontal: 48, paddingBottom: 72, justifyContent: 'space-between' }}>
+          {savedCard ?? <View />}
+          <View style={{ gap: 8 }}>{actions}</View>
+        </View>
+      </View>
+    );
+  }
 
   return (
     <View className="flex-1" style={{ backgroundColor: COLORS.bg }}>
@@ -43,57 +116,12 @@ const Home: React.FC<HomeProps> = ({ onStart, onContinue, season }) => {
           <BodyText size={15} style={{ marginTop: 14 }}>Monte a franquia. Aguente o dono. Ganhe o anel.</BodyText>
         </View>
 
-        {season && userTeam ? (
-          <View style={{ backgroundColor: COLORS.surface, borderRadius: 20, overflow: 'hidden' }}>
-            <View className="flex-row justify-between items-center" style={{ paddingHorizontal: 16, paddingTop: 14, paddingBottom: 12, borderBottomWidth: 1, borderBottomColor: COLORS.line }}>
-              <Text style={{ fontFamily: FONT.cond700, fontSize: 11, letterSpacing: 1.5, color: COLORS.muted }}>CARREIRA SALVA</Text>
-              <Text style={{ fontFamily: FONT.cond700, fontSize: 11, letterSpacing: 1.5, color: COLORS.muted }}>
-                {yearLabel} · DIA {season.gamesPlayed}
-              </Text>
-            </View>
-            <View className="flex-row items-center" style={{ padding: 16, gap: 12 }}>
-              <TeamBadge teamId={userTeam.id} width={48} height={48} fill={COLORS.lineStrong} />
-              <View className="flex-1" style={{ gap: 2 }}>
-                <Text style={{ fontFamily: FONT.cond800, fontSize: 24, lineHeight: 24, color: COLORS.text, textTransform: 'uppercase' }}>
-                  {getTeamNickname(userTeam)}
-                </Text>
-                <BodyText size={13}>
-                  {userTeam.wins ?? 0}–{userTeam.losses ?? 0}
-                  {rank ? ` · ${rank}º no ${userTeam.conference === 'East' ? 'Leste' : 'Oeste'}` : ` · temporada ${seasonNumber}`}
-                </BodyText>
-              </View>
-            </View>
-            <View style={{ borderTopWidth: 1, borderTopColor: COLORS.line, paddingVertical: 8 }}>
-              <StatStrip
-                size={22}
-                items={[
-                  { label: 'Títulos', value: season.gmLegacy.titles, color: season.gmLegacy.titles > 0 ? COLORS.gold : undefined },
-                  { label: 'Temporadas', value: season.gmLegacy.seasons },
-                  { label: 'Confiança', value: `${season.owner.confidence}%` },
-                ]}
-              />
-            </View>
-          </View>
-        ) : null}
-
-        <View>
-          <Text style={{ fontFamily: FONT.cond700, fontSize: 11, letterSpacing: 1.5, color: COLORS.dim, paddingBottom: 6 }}>DADOS DA LIGA</Text>
-          <Row label="Elencos e ratings" value="2025-26 reais" />
-          <Row label="Teto salarial" value={`$${(SALARY_CAP / 1_000_000).toFixed(1)}M`} />
-          <Row label="Franquias" value="30" last />
-        </View>
+        {savedCard}
+        {leagueData}
       </ScrollView>
 
       <View style={{ paddingHorizontal: 16, paddingTop: 12, paddingBottom: 20, gap: 8 }}>
-        {season && userTeam && onContinue ? (
-          <>
-            <CtaButton label="Continuar" sub={getTeamNickname(userTeam)} onPress={onContinue} size={20} />
-            <GhostButton label="Nova carreira" onPress={onStart} />
-            <Text style={{ textAlign: 'center', fontFamily: FONT.body500, fontSize: 11.5, color: COLORS.dim }}>Uma nova carreira apaga o save atual</Text>
-          </>
-        ) : (
-          <CtaButton label="Nova carreira" onPress={onStart} size={20} />
-        )}
+        {actions}
       </View>
     </View>
   );

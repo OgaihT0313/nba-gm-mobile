@@ -8,6 +8,8 @@ import { useTheme } from '../src/theme/ThemeProvider';
 import Screen, { Body } from '../components/ui/Screen';
 import { Panel, CtaButton, ScreenTitle, SectionLabel, BodyText, TeamBadge, Name, Dock } from '../components/ui/kit';
 import PlayoffBracket, { seriesWins } from '../components/PlayoffBracket';
+import { useDesktop } from '../components/desktop/useDesktop';
+import { DPage, DDock, DCta, DTitle, Cols, Col } from '../components/desktop/kit';
 
 // Design 1d ("Transmissão"). The converging bracket (see PlayoffBracket), the
 // stage as chips, your current series as its own card, and your run so far —
@@ -59,6 +61,7 @@ const deriveStage = (season: SeasonState): PlayoffStage => {
 
 const PlayoffsScreen: React.FC<PlayoffsScreenProps> = ({ season, onAdvanceRound, onResumeLiveGame }) => {
   const { accent } = useTheme();
+  const desktop = useDesktop();
   const stage = deriveStage(season);
   const stageIndex = STAGE_ORDER.indexOf(stage as (typeof STAGE_ORDER)[number]);
 
@@ -109,6 +112,102 @@ const PlayoffsScreen: React.FC<PlayoffsScreenProps> = ({ season, onAdvanceRound,
   const oppWins = curIdx === 0 ? w1 : w0;
   const played = myWins + oppWins;
 
+  const stageChips = (
+    <View className="flex-row flex-wrap" style={{ gap: 6 }}>
+      {STAGE_ORDER.map((s, i) => {
+        const done = stageIndex > i;
+        const cur = stageIndex === i;
+        return (
+          <View
+            key={s}
+            style={{ paddingHorizontal: desktop ? 14 : 10, height: desktop ? 34 : 28, justifyContent: 'center', borderRadius: 9, backgroundColor: cur ? COLORS.ctaFill : COLORS.surface2 }}
+          >
+            <Text style={{ fontFamily: FONT.cond700, fontSize: desktop ? 13 : 12, letterSpacing: 1, color: cur ? COLORS.ctaInk : done ? COLORS.muted : COLORS.faint, textTransform: 'uppercase' }}>
+              {STAGE_SHORT[s]}{done ? ' ✓' : ''}
+            </Text>
+          </View>
+        );
+      })}
+    </View>
+  );
+
+  const bracket = season.playoff ? (
+    <PlayoffBracket playoffState={season.playoff} userTeamId={season.userTeamId} />
+  ) : (
+    <Panel>
+      <SectionLabel>Ainda não</SectionLabel>
+      <BodyText style={{ marginTop: 6 }}>Os playoffs começam depois dos 82 jogos da temporada regular.</BodyText>
+    </Panel>
+  );
+
+  const seriesCard = current && curOpp ? (
+    <Panel bar={accent.primary} padding={desktop ? 18 : 14} style={{ gap: 12 }}>
+      <SectionLabel>{current.w ? (current.w.id === season.userTeamId ? 'Sua série · vencida' : 'Sua série · eliminado') : 'Sua série'}</SectionLabel>
+      <View className="flex-row items-center" style={{ gap: desktop ? 14 : 10 }}>
+        <TeamBadge teamId={season.userTeamId} width={desktop ? 56 : 44} height={desktop ? 38 : 30} />
+        <Text style={{ fontFamily: FONT.cond800, fontSize: desktop ? 44 : 34, lineHeight: desktop ? 44 : 34, color: COLORS.text, fontVariant: ['tabular-nums'] }}>
+          {myWins}–{oppWins}
+        </Text>
+        <TeamBadge teamId={curOpp.id} width={desktop ? 56 : 44} height={desktop ? 38 : 30} />
+        {desktop ? <Name size={18} style={{ flex: 1 }}>vs {getTeamNickname(curOpp)}</Name> : <View className="flex-1" />}
+      </View>
+      <View className="flex-row" style={{ gap: 5 }}>
+        {Array.from({ length: 7 }, (_, i) => (
+          <View
+            key={i}
+            style={{
+              flex: 1, height: desktop ? 34 : 28, borderRadius: 6, alignItems: 'center', justifyContent: 'center',
+              backgroundColor: i < played ? COLORS.surface2 : 'transparent',
+              borderWidth: i === played && !current.w ? 1 : 0, borderColor: COLORS.text,
+            }}
+          >
+            <Text style={{ fontFamily: FONT.cond700, fontSize: 12, color: i < played ? COLORS.muted : COLORS.faint }}>{i + 1}</Text>
+          </View>
+        ))}
+      </View>
+    </Panel>
+  ) : null;
+
+  const pathCard = path.length > 0 ? (
+    <Panel padding={0}>
+      <View style={{ paddingHorizontal: 14, paddingTop: 12, paddingBottom: 4 }}>
+        <SectionLabel>Caminho até aqui</SectionLabel>
+      </View>
+      {path.map((p, i) => (
+        <View key={i} className="flex-row items-center" style={{ gap: 10, height: desktop ? 46 : 40, paddingHorizontal: 14, borderTopWidth: i ? 1 : 0, borderTopColor: COLORS.lineSoft }}>
+          <Text style={{ width: 90, fontFamily: FONT.cond700, fontSize: 12, letterSpacing: 0.8, color: COLORS.dim, textTransform: 'uppercase' }}>{p.round}</Text>
+          <Name size={15} style={{ flex: 1 }}>vs {p.opponent}</Name>
+          <Text style={{ fontFamily: FONT.cond800, fontSize: 17, color: p.won ? COLORS.good : COLORS.bad }}>{p.score}</Text>
+        </View>
+      ))}
+    </Panel>
+  ) : null;
+
+  if (desktop) {
+    return (
+      <DPage
+        footer={
+          season.liveGame ? (
+            <DDock note="Jogo decisivo em andamento."><DCta label="Jogar o jogo 7" sub="Ao vivo" onPress={onResumeLiveGame} /></DDock>
+          ) : season.status === 'playoffs_idle' ? (
+            <DDock><DCta label="Simular rodada" sub={STAGE_SHORT[stage as (typeof STAGE_ORDER)[number]] ?? ''} onPress={onAdvanceRound} /></DDock>
+          ) : undefined
+        }
+      >
+        <DTitle eyebrow={`Temporada ${season.gmLegacy.seasons + 1} · ${STAGE_LABEL[stage] ?? ''}`} title="Playoffs" right={stageChips} />
+        <View style={{ marginTop: 24, alignItems: 'center' }}>
+          <View style={{ width: '100%', maxWidth: 1098 }}>{bracket}</View>
+        </View>
+        {seriesCard || pathCard ? (
+          <Cols style={{ marginTop: 24 }}>
+            <Col>{seriesCard}</Col>
+            <Col>{pathCard}</Col>
+          </Cols>
+        ) : null}
+      </DPage>
+    );
+  }
+
   return (
     <Screen
       heroHeight={120}
@@ -121,75 +220,12 @@ const PlayoffsScreen: React.FC<PlayoffsScreenProps> = ({ season, onAdvanceRound,
       }
     >
       <ScreenTitle label={`Temporada ${season.gmLegacy.seasons + 1} · ${STAGE_LABEL[stage] ?? ''}`} title="Playoffs" />
-      <View className="flex-row flex-wrap" style={{ gap: 6, paddingHorizontal: 20, marginTop: -4 }}>
-        {STAGE_ORDER.map((s, i) => {
-          const done = stageIndex > i;
-          const cur = stageIndex === i;
-          return (
-            <View
-              key={s}
-              style={{ paddingHorizontal: 10, height: 28, justifyContent: 'center', borderRadius: 9, backgroundColor: cur ? COLORS.ctaFill : COLORS.surface2 }}
-            >
-              <Text style={{ fontFamily: FONT.cond700, fontSize: 12, letterSpacing: 1, color: cur ? COLORS.ctaInk : done ? COLORS.muted : COLORS.faint, textTransform: 'uppercase' }}>
-                {STAGE_SHORT[s]}{done ? ' ✓' : ''}
-              </Text>
-            </View>
-          );
-        })}
-      </View>
+      <View style={{ paddingHorizontal: 20, marginTop: -4 }}>{stageChips}</View>
 
       <Body top={16} gap={16}>
-        {season.playoff ? (
-          <PlayoffBracket playoffState={season.playoff} userTeamId={season.userTeamId} />
-        ) : (
-          <Panel>
-            <SectionLabel>Ainda não</SectionLabel>
-            <BodyText style={{ marginTop: 6 }}>Os playoffs começam depois dos 82 jogos da temporada regular.</BodyText>
-          </Panel>
-        )}
-
-        {current && curOpp ? (
-          <Panel bar={accent.primary} style={{ gap: 12 }}>
-            <SectionLabel>{current.w ? (current.w.id === season.userTeamId ? 'Sua série · vencida' : 'Sua série · eliminado') : 'Sua série'}</SectionLabel>
-            <View className="flex-row items-center" style={{ gap: 10 }}>
-              <TeamBadge teamId={season.userTeamId} width={44} height={30} />
-              <Text style={{ fontFamily: FONT.cond800, fontSize: 34, lineHeight: 34, color: COLORS.text, fontVariant: ['tabular-nums'] }}>
-                {myWins}–{oppWins}
-              </Text>
-              <TeamBadge teamId={curOpp.id} width={44} height={30} />
-              <View className="flex-1" />
-            </View>
-            <View className="flex-row" style={{ gap: 5 }}>
-              {Array.from({ length: 7 }, (_, i) => (
-                <View
-                  key={i}
-                  style={{
-                    flex: 1, height: 28, borderRadius: 6, alignItems: 'center', justifyContent: 'center',
-                    backgroundColor: i < played ? COLORS.surface2 : 'transparent',
-                    borderWidth: i === played && !current.w ? 1 : 0, borderColor: COLORS.text,
-                  }}
-                >
-                  <Text style={{ fontFamily: FONT.cond700, fontSize: 12, color: i < played ? COLORS.muted : COLORS.faint }}>{i + 1}</Text>
-                </View>
-              ))}
-            </View>
-          </Panel>
-        ) : null}
-
-        {path.length > 0 ? (
-          <Panel padding={0}>
-            <View style={{ paddingHorizontal: 14, paddingTop: 12, paddingBottom: 4 }}>
-              <SectionLabel>Caminho até aqui</SectionLabel>
-            </View>
-            {path.map((p, i) => (
-              <View key={i} className="flex-row items-center" style={{ gap: 10, height: 40, paddingHorizontal: 14, borderTopWidth: i ? 1 : 0, borderTopColor: COLORS.lineSoft }}>
-                <Text style={{ width: 74, fontFamily: FONT.cond700, fontSize: 12, letterSpacing: 0.8, color: COLORS.dim, textTransform: 'uppercase' }}>{p.round}</Text>
-                <Name size={15} style={{ flex: 1 }}>vs {p.opponent}</Name>
-                <Text style={{ fontFamily: FONT.cond800, fontSize: 17, color: p.won ? COLORS.good : COLORS.bad }}>{p.score}</Text>
-              </View>
-            ))}
-          </Panel>
-        ) : null}
+        {bracket}
+        {seriesCard}
+        {pathCard}
       </Body>
     </Screen>
   );

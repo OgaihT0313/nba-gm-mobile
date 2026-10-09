@@ -4,7 +4,9 @@ import { View, Text, Pressable } from 'react-native';
 import { SeasonState } from '../types';
 import { COLORS, FONT } from '../src/theme/tokens';
 import Screen, { Body } from '../components/ui/Screen';
-import { ScreenTitle, BodyText } from '../components/ui/kit';
+import { ScreenTitle, BodyText, Panel } from '../components/ui/kit';
+import { useDesktop } from '../components/desktop/useDesktop';
+import { DPage, DTitle, DLabel, Cols, Col } from '../components/desktop/kit';
 import StandingsTable from '../components/StandingsTable';
 import LeadersPanel from '../components/LeadersPanel';
 
@@ -21,6 +23,30 @@ const TABS: { id: 'West' | 'East' | 'leaders'; label: string; color: string }[] 
 const StandingsScreen: React.FC<{ season: SeasonState }> = ({ season }) => {
   const userTeam = season.teams.find((t) => t.id === season.userTeamId);
   const [tab, setTab] = useState<string>(userTeam?.conference ?? 'West');
+  const desktop = useDesktop();
+
+  // PC: West and East side by side; the segmented control goes away and the
+  // leaders keep their own page (Líderes in the sidebar).
+  if (desktop) {
+    return (
+      <DPage>
+        <DTitle eyebrow={`Jogo ${season.gamesPlayed} de 82`} title="Classificação" />
+        <Cols style={{ marginTop: 24 }}>
+          {(['West', 'East'] as const).map((conf) => (
+            <Col key={conf}>
+              <Panel padding={0} style={{ paddingHorizontal: 16, paddingVertical: 14 }}>
+                <DLabel size={12} color={conf === 'West' ? COLORS.west : COLORS.east} style={{ marginBottom: 8 }}>{conf === 'West' ? 'Oeste' : 'Leste'}</DLabel>
+                <StandingsTable teams={season.teams} conference={conf} schedule={season.schedule} userTeamId={season.userTeamId} rowHeight={42} />
+              </Panel>
+            </Col>
+          ))}
+        </Cols>
+        <BodyText size={12.5} color={COLORS.dim} style={{ marginTop: 16 }}>
+          Ordenada pelos critérios de desempate reais da NBA (confronto direto, campanha na conferência).
+        </BodyText>
+      </DPage>
+    );
+  }
 
   return (
     <Screen heroHeight={100}>

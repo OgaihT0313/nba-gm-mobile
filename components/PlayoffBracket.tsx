@@ -6,6 +6,8 @@ import { getTeamAccent } from '../constants';
 import { COLORS, FONT, withAlpha } from '../src/theme/tokens';
 import { SectionLabel } from './ui/kit';
 import Trophy from './Trophy';
+import { useDesktop } from './desktop/useDesktop';
+import { getTeamNickname } from '../constants';
 
 // Design 1d ("Transmissão"): a real converging bracket, laid out horizontally —
 // the West enters from the left, the East from the right, the Finals sit in the
@@ -29,6 +31,11 @@ const FIN_W = 54;
 const ROW_H = 20;
 const TROPHY_H = 56;
 const BOX_H = ROW_H * 2;
+// PC (design "PC Playoffs"): the same bracket at ~3x — 1098px wide, 29px
+// rows, vertical positions stretched by 1.3.
+const MAX_W_BIG = 1098;
+const ROW_H_BIG = 29;
+const VY_BIG = 1.3;
 
 const COL_X = { wR1: 0, wR2: 54, wR3: 108, fin: 156, eR3: 216, eR2: 270, eR1: 324 } as const;
 const Y_R1 = [52, 157, 262, 367];
@@ -62,7 +69,11 @@ const Box: React.FC<{
   seed: (teamId: string) => number | string;
   userTeamId?: string;
   live?: boolean;
-}> = ({ series, left, centerY, width, color, seed, userTeamId, live }) => {
+  /** PC: 29px rows with seed, tricode AND nickname. */
+  big?: boolean;
+}> = ({ series, left, centerY, width, color, seed, userTeamId, live, big }) => {
+  const rowH = big ? ROW_H_BIG : ROW_H;
+  const boxH = rowH * 2;
   const [a, b] = series?.m ?? [null, null];
   const [wa, wb] = series ? seriesWins(series) : [0, 0];
   const decided = !!series?.w;
@@ -73,7 +84,7 @@ const Box: React.FC<{
   const Row: React.FC<{ team: Team | null; wins: number; top: boolean }> = ({ team, wins, top }) => {
     if (!team) {
       return (
-        <View className="flex-row items-center justify-center" style={{ height: ROW_H, opacity: 0.45, borderTopWidth: top ? 0 : 1, borderTopColor: COLORS.line }}>
+        <View className="flex-row items-center justify-center" style={{ height: rowH, opacity: 0.45, borderTopWidth: top ? 0 : 1, borderTopColor: COLORS.line }}>
           <Text style={{ fontFamily: FONT.cond700, fontSize: 11.5, color: COLORS.dim }}>—</Text>
         </View>
       );
@@ -85,17 +96,20 @@ const Box: React.FC<{
       <View
         className="flex-row items-center"
         style={{
-          height: ROW_H, paddingLeft: 2, paddingRight: 3, gap: 1.5, opacity: lost ? 0.38 : 1,
+          height: rowH, paddingLeft: big ? 8 : 2, paddingRight: big ? 8 : 3, gap: big ? 6 : 1.5, opacity: lost ? 0.38 : 1,
           backgroundColor: isUser ? withAlpha(getTeamAccent(team.id).primary, 0.32) : 'transparent',
           borderTopWidth: top ? 0 : 1, borderTopColor: COLORS.line,
         }}
       >
-        <Text style={{ fontFamily: FONT.cond600, fontSize: 8.5, color: COLORS.dim, minWidth: 5 }}>{seed(team.id)}</Text>
+        <Text style={{ fontFamily: FONT.cond600, fontSize: big ? 11 : 8.5, color: COLORS.dim, minWidth: big ? 10 : 5 }}>{seed(team.id)}</Text>
         {/* Never ellipsized: a tricode is three letters, and "N…" names nobody. */}
-        <Text style={{ flex: 1, fontFamily: FONT.cond800, fontSize: 11, letterSpacing: -0.2, color: COLORS.text }}>
+        <Text style={{ flex: big ? 0 : 1, fontFamily: FONT.cond800, fontSize: big ? 14 : 11, letterSpacing: -0.2, color: COLORS.text }}>
           {team.id.toUpperCase()}
         </Text>
-        <Text style={{ fontFamily: FONT.cond800, fontSize: 12, color: won ? color : COLORS.textSoft, fontVariant: ['tabular-nums'] }}>
+        {big ? (
+          <Text numberOfLines={1} style={{ flex: 1, minWidth: 0, fontFamily: FONT.cond600, fontSize: 13, color: COLORS.muted }}>{getTeamNickname(team)}</Text>
+        ) : null}
+        <Text style={{ fontFamily: FONT.cond800, fontSize: big ? 16 : 12, color: won ? color : COLORS.textSoft, fontVariant: ['tabular-nums'] }}>
           {a && b ? wins : ''}
         </Text>
       </View>
@@ -105,8 +119,8 @@ const Box: React.FC<{
   return (
     <View
       style={{
-        position: 'absolute', left, top: centerY - BOX_H / 2, width, height: BOX_H,
-        backgroundColor: COLORS.surface, borderRadius: 7, borderWidth: 1, borderColor: outline, overflow: 'hidden',
+        position: 'absolute', left, top: centerY - boxH / 2, width, height: boxH,
+        backgroundColor: COLORS.surface, borderRadius: big ? 9 : 7, borderWidth: 1, borderColor: outline, overflow: 'hidden',
       }}
     >
       <Row team={a} wins={wa} top />
@@ -139,7 +153,9 @@ const PlayInColumn: React.FC<{
   conf: PlayoffState['east'];
   userTeamId?: string;
   width: number;
-}> = ({ label, color, playIn, conf, userTeamId, width }) => {
+  big?: boolean;
+}> = ({ label, color, playIn, conf, userTeamId, width, big }) => {
+  const boxH = (big ? ROW_H_BIG : ROW_H) * 2;
   const seed = (id: string) => {
     const i = conf.initialSeeds.findIndex((t) => t.id === id);
     return i !== -1 ? i + 1 : '?';
@@ -155,8 +171,8 @@ const PlayInColumn: React.FC<{
       ].map(([title, s]) => (
         <View key={title as string} style={{ gap: 4 }}>
           <Text style={{ fontFamily: FONT.cond700, fontSize: 10.5, letterSpacing: 1, color: COLORS.dim, textTransform: 'uppercase' }}>{title as string}</Text>
-          <View style={{ height: BOX_H }}>
-            <Box series={s as PlayoffSeries} left={0} centerY={BOX_H / 2} width={boxW} color={color} seed={seed} userTeamId={userTeamId} />
+          <View style={{ height: boxH }}>
+            <Box series={s as PlayoffSeries} left={0} centerY={boxH / 2} width={boxW} color={color} seed={seed} userTeamId={userTeamId} big={big} />
           </View>
         </View>
       ))}
@@ -168,8 +184,16 @@ const PlayoffBracket: React.FC<{ playoffState: PlayoffState | null; userTeamId?:
   playoffState,
   userTeamId,
 }) => {
-  const [width, setWidth] = useState(() => Math.max(0, Math.min(REF_W, Dimensions.get('window').width - 24)));
+  const big = useDesktop();
+  const maxW = big ? MAX_W_BIG : REF_W;
+  const [width, setWidth] = useState(() => Math.max(0, Math.min(maxW, Dimensions.get('window').width - 24)));
   if (!playoffState) return null;
+  const vy = big ? VY_BIG : 1;
+  const yR1 = Y_R1.map((v) => v * vy);
+  const yR2 = Y_R2.map((v) => v * vy);
+  const yMid = Y_MID * vy;
+  const boxH = (big ? ROW_H_BIG : ROW_H) * 2;
+  const trophyH = big ? 90 : TROPHY_H;
 
   const { east, west } = playoffState;
   const k = width / REF_W;
@@ -198,12 +222,12 @@ const PlayoffBracket: React.FC<{ playoffState: PlayoffState | null; userTeamId?:
     const colW = (width - 12) / 2;
     return (
       <View style={{ gap: 10 }} onLayout={(e) => {
-        const w = Math.min(REF_W, e.nativeEvent.layout.width);
+        const w = Math.min(maxW, e.nativeEvent.layout.width);
         if (w > 0 && Math.round(w) !== Math.round(width)) setWidth(w);
       }}>
         <View className="flex-row" style={{ gap: 12 }}>
-          {west.playIn ? <PlayInColumn label="Oeste · Play-in" color={COLORS.west} playIn={west.playIn} conf={west} userTeamId={userTeamId} width={colW} /> : null}
-          {east.playIn ? <PlayInColumn label="Leste · Play-in" color={COLORS.east} playIn={east.playIn} conf={east} userTeamId={userTeamId} width={colW} /> : null}
+          {west.playIn ? <PlayInColumn label="Oeste · Play-in" color={COLORS.west} playIn={west.playIn} conf={west} userTeamId={userTeamId} width={colW} big={big} /> : null}
+          {east.playIn ? <PlayInColumn label="Leste · Play-in" color={COLORS.east} playIn={east.playIn} conf={east} userTeamId={userTeamId} width={colW} big={big} /> : null}
         </View>
       </View>
     );
@@ -219,7 +243,7 @@ const PlayoffBracket: React.FC<{ playoffState: PlayoffState | null; userTeamId?:
     <View
       style={{ gap: 8, alignItems: 'center' }}
       onLayout={(e) => {
-        const w = Math.min(REF_W, e.nativeEvent.layout.width);
+        const w = Math.min(maxW, e.nativeEvent.layout.width);
         if (w > 0 && Math.round(w) !== Math.round(width)) setWidth(w);
       }}
     >
@@ -237,14 +261,14 @@ const PlayoffBracket: React.FC<{ playoffState: PlayoffState | null; userTeamId?:
       </View>
 
       {/* Round labels, one per column. */}
-      <View style={{ width, height: 14 }}>
+      <View style={{ width, height: big ? 18 : 14 }}>
         {LABELS.map(([lx, lw, text], i) => (
           <Text
             key={i}
             numberOfLines={1}
             style={{
               position: 'absolute', left: x(lx), width: lw * k, textAlign: 'center',
-              fontFamily: FONT.cond700, fontSize: 9.5, letterSpacing: 0.6, color: i === 3 ? COLORS.gold : COLORS.dim, textTransform: 'uppercase',
+              fontFamily: FONT.cond700, fontSize: big ? 12 : 9.5, letterSpacing: 0.6, color: i === 3 ? COLORS.gold : COLORS.dim, textTransform: 'uppercase',
             }}
           >
             {text}
@@ -252,57 +276,58 @@ const PlayoffBracket: React.FC<{ playoffState: PlayoffState | null; userTeamId?:
         ))}
       </View>
 
-      <View style={{ width, height: AREA_H + 20 }}>
+      <View style={{ width, height: AREA_H * vy + 20 }}>
         {/* West connectors: R1 → R2 → R3 → Finals. */}
         {[0, 1].map((p) => (
-          <Staple key={`w12${p}`} fromX={x(COL_X.wR1) + bw} dir={1} y1={Y_R1[p * 2]} y2={Y_R1[p * 2 + 1]} yT={Y_R2[p]} toX={x(COL_X.wR2)} color={COLORS.westLine} />
+          <Staple key={`w12${p}`} fromX={x(COL_X.wR1) + bw} dir={1} y1={yR1[p * 2]} y2={yR1[p * 2 + 1]} yT={yR2[p]} toX={x(COL_X.wR2)} color={COLORS.westLine} />
         ))}
-        <Staple fromX={x(COL_X.wR2) + bw} dir={1} y1={Y_R2[0]} y2={Y_R2[1]} yT={Y_MID} toX={x(COL_X.wR3)} color={COLORS.westLine} />
-        <View style={{ position: 'absolute', left: x(COL_X.wR3) + bw, top: Y_MID, width: x(COL_X.fin) - x(COL_X.wR3) - bw, height: 1, backgroundColor: COLORS.westLine }} />
+        <Staple fromX={x(COL_X.wR2) + bw} dir={1} y1={yR2[0]} y2={yR2[1]} yT={yMid} toX={x(COL_X.wR3)} color={COLORS.westLine} />
+        <View style={{ position: 'absolute', left: x(COL_X.wR3) + bw, top: yMid, width: x(COL_X.fin) - x(COL_X.wR3) - bw, height: 1, backgroundColor: COLORS.westLine }} />
         {/* East connectors, mirrored. */}
         {[0, 1].map((p) => (
-          <Staple key={`e12${p}`} fromX={x(COL_X.eR1)} dir={-1} y1={Y_R1[p * 2]} y2={Y_R1[p * 2 + 1]} yT={Y_R2[p]} toX={x(COL_X.eR2) + bw} color={COLORS.eastLine} />
+          <Staple key={`e12${p}`} fromX={x(COL_X.eR1)} dir={-1} y1={yR1[p * 2]} y2={yR1[p * 2 + 1]} yT={yR2[p]} toX={x(COL_X.eR2) + bw} color={COLORS.eastLine} />
         ))}
-        <Staple fromX={x(COL_X.eR2)} dir={-1} y1={Y_R2[0]} y2={Y_R2[1]} yT={Y_MID} toX={x(COL_X.eR3) + bw} color={COLORS.eastLine} />
-        <View style={{ position: 'absolute', left: x(COL_X.fin) + fw, top: Y_MID, width: x(COL_X.eR3) - x(COL_X.fin) - fw, height: 1, backgroundColor: COLORS.eastLine }} />
+        <Staple fromX={x(COL_X.eR2)} dir={-1} y1={yR2[0]} y2={yR2[1]} yT={yMid} toX={x(COL_X.eR3) + bw} color={COLORS.eastLine} />
+        <View style={{ position: 'absolute', left: x(COL_X.fin) + fw, top: yMid, width: x(COL_X.eR3) - x(COL_X.fin) - fw, height: 1, backgroundColor: COLORS.eastLine }} />
 
         {/* West boxes. */}
-        {Y_R1.map((cy, i) => (
-          <Box key={`wr1${i}`} series={west.bracket.round1[i]} left={x(COL_X.wR1)} centerY={cy} width={bw} color={COLORS.west} seed={seedOf(west)} userTeamId={userTeamId} live={isLive('west', 'round1', i)} />
+        {yR1.map((cy, i) => (
+          <Box key={`wr1${i}`} series={west.bracket.round1[i]} left={x(COL_X.wR1)} centerY={cy} width={bw} color={COLORS.west} seed={seedOf(west)} userTeamId={userTeamId} big={big} live={isLive('west', 'round1', i)} />
         ))}
-        {Y_R2.map((cy, i) => (
-          <Box key={`wr2${i}`} series={west.bracket.round2[i]} left={x(COL_X.wR2)} centerY={cy} width={bw} color={COLORS.west} seed={seedOf(west)} userTeamId={userTeamId} live={isLive('west', 'round2', i)} />
+        {yR2.map((cy, i) => (
+          <Box key={`wr2${i}`} series={west.bracket.round2[i]} left={x(COL_X.wR2)} centerY={cy} width={bw} color={COLORS.west} seed={seedOf(west)} userTeamId={userTeamId} big={big} live={isLive('west', 'round2', i)} />
         ))}
-        <Box series={west.bracket.round3[0]} left={x(COL_X.wR3)} centerY={Y_MID} width={bw} color={COLORS.west} seed={seedOf(west)} userTeamId={userTeamId} live={isLive('west', 'round3', 0)} />
+        <Box series={west.bracket.round3[0]} left={x(COL_X.wR3)} centerY={yMid} width={bw} color={COLORS.west} seed={seedOf(west)} userTeamId={userTeamId} big={big} live={isLive('west', 'round3', 0)} />
 
         {/* East boxes. */}
-        {Y_R1.map((cy, i) => (
-          <Box key={`er1${i}`} series={east.bracket.round1[i]} left={x(COL_X.eR1)} centerY={cy} width={bw} color={COLORS.east} seed={seedOf(east)} userTeamId={userTeamId} live={isLive('east', 'round1', i)} />
+        {yR1.map((cy, i) => (
+          <Box key={`er1${i}`} series={east.bracket.round1[i]} left={x(COL_X.eR1)} centerY={cy} width={bw} color={COLORS.east} seed={seedOf(east)} userTeamId={userTeamId} big={big} live={isLive('east', 'round1', i)} />
         ))}
-        {Y_R2.map((cy, i) => (
-          <Box key={`er2${i}`} series={east.bracket.round2[i]} left={x(COL_X.eR2)} centerY={cy} width={bw} color={COLORS.east} seed={seedOf(east)} userTeamId={userTeamId} live={isLive('east', 'round2', i)} />
+        {yR2.map((cy, i) => (
+          <Box key={`er2${i}`} series={east.bracket.round2[i]} left={x(COL_X.eR2)} centerY={cy} width={bw} color={COLORS.east} seed={seedOf(east)} userTeamId={userTeamId} big={big} live={isLive('east', 'round2', i)} />
         ))}
-        <Box series={east.bracket.round3[0]} left={x(COL_X.eR3)} centerY={Y_MID} width={bw} color={COLORS.east} seed={seedOf(east)} userTeamId={userTeamId} live={isLive('east', 'round3', 0)} />
+        <Box series={east.bracket.round3[0]} left={x(COL_X.eR3)} centerY={yMid} width={bw} color={COLORS.east} seed={seedOf(east)} userTeamId={userTeamId} big={big} live={isLive('east', 'round3', 0)} />
 
         {/* The Finals, under the trophy. */}
-        <View style={{ position: 'absolute', left: x(COL_X.fin) + fw / 2 - TROPHY_H * 20 / 64, top: Y_MID - BOX_H / 2 - TROPHY_H - 8 }}>
-          <Trophy size={TROPHY_H} />
+        <View style={{ position: 'absolute', left: x(COL_X.fin) + fw / 2 - trophyH * 20 / 64, top: yMid - boxH / 2 - trophyH - 8 }}>
+          <Trophy size={trophyH} />
         </View>
         <Box
           series={playoffState.finals ?? undefined}
           left={x(COL_X.fin)}
-          centerY={Y_MID}
+          centerY={yMid}
           width={fw}
           color={COLORS.gold}
           seed={finalsSeed}
           userTeamId={userTeamId}
+          big={big}
           live={pending?.scope === 'finals'}
         />
         {playoffState.champion ? (
           <Text
             numberOfLines={1}
             style={{
-              position: 'absolute', left: x(COL_X.fin) - 20, width: fw + 40, top: Y_MID + BOX_H / 2 + 6, textAlign: 'center',
+              position: 'absolute', left: x(COL_X.fin) - 20, width: fw + 40, top: yMid + boxH / 2 + 6, textAlign: 'center',
               fontFamily: FONT.cond800, fontSize: 11, letterSpacing: 1, color: COLORS.gold,
             }}
           >

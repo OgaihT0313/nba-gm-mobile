@@ -4,6 +4,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Notification as NotificationType } from '../types';
 import { COLORS, FONT } from '../src/theme/tokens';
 import FadeInView from './FadeInView';
+import { useDesktop } from './desktop/useDesktop';
 
 // Toast overlay for the sim's events (injuries, trades, deadline, owner
 // warnings). RN port: an absolutely-positioned stack near the top, above the
@@ -31,9 +32,12 @@ function split(message: string): { kicker?: string; body: string } {
 
 const NotificationContainer: React.FC<{ notifications: NotificationType[]; onRemove: (id: number) => void }> = ({ notifications, onRemove }) => {
   const insets = useSafeAreaInsets();
+  // PC: a 380px stack in the top-right corner instead of a full-width band
+  // over the page title.
+  const desktop = useDesktop();
   if (notifications.length === 0) return null;
   return (
-    <View style={{ pointerEvents: 'box-none', position: 'absolute', top: insets.top + 8, left: 12, right: 12, zIndex: 50, gap: 6 }}>
+    <View style={{ pointerEvents: 'box-none', position: 'absolute', top: insets.top + (desktop ? 20 : 8), ...(desktop ? { right: 24, width: 380 } : { left: 12, right: 12 }), zIndex: 50, gap: 6 }}>
       {notifications.slice(-3).map((n) => {
         const color = TONE[n.type] || TONE.info;
         const { kicker, body } = split(n.message);

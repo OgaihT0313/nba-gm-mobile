@@ -1,59 +1,53 @@
 import React, { useState } from 'react';
 import { View, Text, Pressable, Modal, ScrollView } from 'react-native';
 import { Team, Coach } from '../types';
-import { coachOf, getTeamAccent } from '../constants';
+import { coachOf } from '../constants';
 import { coachFit, reputation, generateCandidates } from '../services/coachService';
-import Card from './Card';
 import Icon from './Icon';
-import { MonoLabel } from './ui/kit';
-import { onAccent } from '../src/theme/tokens';
+import { MonoLabel, Panel, CtaButton, GhostButton, BodyText } from './ui/kit';
+import { COLORS, FONT, RADIUS, withAlpha } from '../src/theme/tokens';
 import BottomSheet from './ui/BottomSheet';
 
 const FIT_META: { min: number; label: string; color: string }[] = [
-  { min: 1, label: 'Encaixe perfeito', color: '#34d399' },
-  { min: 0.75, label: 'Bom encaixe', color: '#a3e635' },
-  { min: 0.6, label: 'Encaixe razoável', color: '#fbbf24' },
-  { min: 0, label: 'Fora do sistema', color: '#f87171' },
+  { min: 1, label: 'Encaixe perfeito', color: COLORS.good },
+  { min: 0.75, label: 'Bom encaixe', color: '#A3E635' },
+  { min: 0.6, label: 'Encaixe razoável', color: COLORS.warn },
+  { min: 0, label: 'Fora do sistema', color: COLORS.bad },
 ];
 const fitMeta = (fit: number) => FIT_META.find((f) => fit >= f.min)!;
 
 const AttrBar: React.FC<{ label: string; value: number; color: string }> = ({ label, value, color }) => (
-  <View className="flex-1 gap-1">
+  <View style={{ flex: 1, gap: 5 }}>
     <View className="flex-row items-center justify-between">
-      <Text className="text-[9px] font-bold uppercase tracking-widest text-slate-500">{label}</Text>
-      <Text className="text-[10px] font-mono-bold text-white">{value}</Text>
+      <Text style={{ fontFamily: FONT.cond700, fontSize: 11, letterSpacing: 1.3, color: COLORS.muted, textTransform: 'uppercase' }}>{label}</Text>
+      <Text style={{ fontFamily: FONT.cond700, fontSize: 13, color: COLORS.text }}>{value}</Text>
     </View>
-    <View className="h-1.5 rounded-full bg-line overflow-hidden">
-      <View className="h-full rounded-full" style={{ width: `${Math.min(100, value)}%`, backgroundColor: color }} />
+    <View style={{ height: 5, borderRadius: 2, backgroundColor: COLORS.lineStrong, overflow: 'hidden' }}>
+      <View style={{ height: '100%', borderRadius: 2, width: `${Math.min(100, value)}%`, backgroundColor: color }} />
     </View>
   </View>
 );
 
+// "Transmissão": the coach on a surface2 well — name in condensed 800, the
+// fit verdict in its color, the three ratings as flat bars.
 const CoachCard: React.FC<{ coach: Coach; team: Team; onPress?: () => void; actionLabel?: string }> = ({ coach, team, onPress, actionLabel }) => {
   const fit = coachFit(coach, team);
   const meta = fitMeta(fit);
-  const accent = getTeamAccent(team.id);
   return (
-    <View className="bg-sunken rounded-2xl p-4 border border-line gap-3">
-      <View className="flex-row items-start justify-between gap-3">
-        <View className="flex-1 min-w-0">
-          <Text className="text-base font-black text-white" numberOfLines={1}>{coach.name}</Text>
-          <Text className="text-[11px] text-slate-500">{coach.age} anos · {coach.style} · Reputação {reputation(coach)}</Text>
+    <View style={{ backgroundColor: COLORS.surface2, borderRadius: RADIUS.card, padding: 16, gap: 14 }}>
+      <View className="flex-row items-start justify-between" style={{ gap: 12 }}>
+        <View style={{ flex: 1, minWidth: 0 }}>
+          <Text numberOfLines={1} style={{ fontFamily: FONT.cond800, fontSize: 22, lineHeight: 22, color: COLORS.text }}>{coach.name}</Text>
+          <Text style={{ fontFamily: FONT.body500, fontSize: 12.5, color: COLORS.dim, marginTop: 4 }}>{coach.age} anos · {coach.style} · Reputação {reputation(coach)}</Text>
         </View>
-        <View className="items-end">
-          <Text className="text-[10px] font-black uppercase" style={{ color: meta.color }}>{meta.label}</Text>
-        </View>
+        <Text style={{ fontFamily: FONT.cond700, fontSize: 12, letterSpacing: 1, color: meta.color, textTransform: 'uppercase' }}>{meta.label}</Text>
       </View>
-      <View className="flex-row gap-3">
-        <AttrBar label="Ataque" value={coach.offense} color="#38bdf8" />
-        <AttrBar label="Defesa" value={coach.defense} color="#f87171" />
-        <AttrBar label="Desenv." value={coach.development} color="#a78bfa" />
+      <View className="flex-row" style={{ gap: 14 }}>
+        <AttrBar label="Ataque" value={coach.offense} color={COLORS.east} />
+        <AttrBar label="Defesa" value={coach.defense} color={COLORS.west} />
+        <AttrBar label="Desenv." value={coach.development} color={COLORS.good} />
       </View>
-      {onPress ? (
-        <Pressable accessibilityRole="button" onPress={onPress} className="mt-1 rounded-xl py-2.5 items-center" style={{ backgroundColor: accent.primary }}>
-          <Text className="text-xs font-black uppercase" style={{ color: onAccent(accent.primary) }}>{actionLabel}</Text>
-        </Pressable>
-      ) : null}
+      {onPress ? <CtaButton label={actionLabel ?? ''} onPress={onPress} size={16} style={{ minHeight: 44 }} /> : null}
     </View>
   );
 };
@@ -73,35 +67,31 @@ const CoachPanel: React.FC<CoachPanelProps> = ({ team, coaches, editable, onFire
   const [candidates, setCandidates] = useState<Coach[]>([]);
   const current = coachOf(team, coaches);
 
-  const accent = getTeamAccent(team.id);
-
   const openHiring = () => {
     setCandidates(generateCandidates(team, coaches, 4));
     setHiring(true);
   };
 
   return (
-    <Card padding="lg" className="gap-4">
-      <View className="flex-row items-center gap-2.5">
-        <Icon name="coach" size={16} color="#94a3b8" />
+    <Panel padding={18} style={{ gap: 14 }}>
+      <View className="flex-row items-center" style={{ gap: 10 }}>
+        <Icon name="coach" size={16} color={COLORS.muted} />
         <MonoLabel>Comissão técnica</MonoLabel>
       </View>
 
       {current ? (
-        <CoachCard team={team} coach={current} onPress={editable ? () => setConfirmFire(true) : undefined} actionLabel="Demitir técnico" />
+        <CoachCard team={team} coach={current} />
       ) : (
-        <Text className="text-[11px] text-slate-500 italic">Sem técnico no comando.</Text>
+        <BodyText size={12.5} color={COLORS.dim}>Sem técnico no comando.</BodyText>
       )}
 
-      {editable && !current ? (
-        <Pressable accessibilityRole="button" onPress={openHiring} className="rounded-xl py-2.5 items-center" style={{ backgroundColor: accent.primary }}>
-          <Text className="text-xs font-black uppercase" style={{ color: onAccent(accent.primary) }}>Contratar técnico</Text>
-        </Pressable>
-      ) : null}
-      {editable && current ? (
-        <Pressable accessibilityRole="button" onPress={openHiring} className="rounded-xl border border-line py-2.5 items-center">
-          <Text className="text-xs font-black uppercase text-slate-300">Ver candidatos</Text>
-        </Pressable>
+      {editable ? (
+        <View className="flex-row" style={{ gap: 10 }}>
+          {current ? <GhostButton label="Demitir técnico" color={COLORS.bad} onPress={() => setConfirmFire(true)} style={{ flex: 1, borderColor: withAlpha(COLORS.bad, 0.55) }} /> : null}
+          {current
+            ? <GhostButton label="Ver candidatos" onPress={openHiring} style={{ flex: 1 }} />
+            : <CtaButton label="Contratar técnico" onPress={openHiring} size={16} style={{ flex: 1, minHeight: 46 }} />}
+        </View>
       ) : null}
 
       {/* Fire confirmation */}
@@ -137,7 +127,7 @@ const CoachPanel: React.FC<CoachPanelProps> = ({ team, coaches, editable, onFire
           />
         ))}
       </BottomSheet>
-    </Card>
+    </Panel>
   );
 };
 

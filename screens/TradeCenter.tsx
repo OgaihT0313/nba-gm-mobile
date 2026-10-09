@@ -21,6 +21,8 @@ import {
 } from '../components/ui/kit';
 import Icon from '../components/Icon';
 import PlayerDetailModal from '../components/PlayerDetailModal';
+import { useDesktop } from '../components/desktop/useDesktop';
+import { DPage, DDock, DCta, DTitle, DLabel, Hover, PAGE_X, PAGE_Y } from '../components/desktop/kit';
 
 // Design 3a of "Transmissão" (was design 2b) — the value scale is the hero of this screen. The old version made
 // you build a package blind and only told you afterwards (via a confirm dialog)
@@ -161,6 +163,7 @@ const PackagePanel: React.FC<{
 const TradeCenter: React.FC<TradeCenterProps> = ({
   teams, players, userTeamId, gamesPlayed, currentDraft, onTradeExecute, offers, onAcceptOffer, onRejectOffer, initialPartnerId}) => {
   const { accent } = useTheme();
+  const desktop = useDesktop();
   const userTeam = useMemo(() => teams.find((t) => t.id === userTeamId) || null, [teams, userTeamId]);
   const [partnerTeamId, setPartnerTeamId] = useState<string | null>(initialPartnerId ?? null);
   const partnerTeam = useMemo(() => teams.find((t) => t.id === partnerTeamId) || null, [teams, partnerTeamId]);
@@ -329,6 +332,202 @@ const TradeCenter: React.FC<TradeCenterProps> = ({
         ? { label: 'Generoso', color: COLORS.warn }
         : { label: 'Justo', color: COLORS.good };
 
+  const balancePanel = (
+    <Panel style={{ gap: 10 }}>
+      <View className="flex-row justify-between items-baseline">
+        <MonoLabel size={9}>Balança de valor</MonoLabel>
+        <Text style={{ fontFamily: FONT.cond800, fontSize: 18, color: verdict?.color ?? COLORS.dim, textTransform: 'uppercase' }}>
+          {verdict ? verdict.label : 'Monte o pacote'}
+        </Text>
+      </View>
+      <View style={{ height: 10, flexDirection: 'row', gap: 2, opacity: hasPackage ? 1 : 0.4 }}>
+        <View style={{ flex: 1, borderTopLeftRadius: 3, borderBottomLeftRadius: 3, backgroundColor: '#5A2629' }} />
+        <View style={{ flex: 1, backgroundColor: '#4A3A20' }} />
+        <View style={{ flex: 1, backgroundColor: '#23402F' }} />
+        <View style={{ flex: 1, borderTopRightRadius: 3, borderBottomRightRadius: 3, backgroundColor: '#1F4A36' }} />
+        {hasPackage ? (
+          <View style={{ position: 'absolute', left: `${markerPos * 100}%`, top: -5, width: 4, height: 20, marginLeft: -2, borderRadius: 2, backgroundColor: COLORS.text }} />
+        ) : null}
+      </View>
+      <View className="flex-row justify-between">
+        {['Recusa', 'Justo', 'Generoso'].map((l) => (
+          <Text key={l} style={{ fontFamily: FONT.cond600, fontSize: 11, letterSpacing: 1.1, color: COLORS.faint, textTransform: 'uppercase' }}>{l}</Text>
+        ))}
+      </View>
+      {/* Salary match / roster minimum / value, live as you build. Why a
+          trade is blocked is a sentence, not a label: on a phone a one-line
+          tag cut it to "...acima do teto salarial e não pode". */}
+      {legality && !legality.legal ? (
+        <View style={{ borderRadius: 10, borderWidth: 1, borderColor: withAlpha(COLORS.bad, 0.55), paddingHorizontal: 10, paddingVertical: 8 }}>
+          <Text style={{ fontFamily: FONT.body600, fontSize: 12.5, lineHeight: 17, color: COLORS.bad }}>{legality.reason}</Text>
+        </View>
+      ) : null}
+      <View className="flex-row flex-wrap" style={{ gap: 6 }}>
+        {legality?.legal ? <Tag color={COLORS.good}>Salários batem</Tag> : null}
+        {hasPackage && userValueEval ? (
+          <Tag color={valuePct > 5 ? COLORS.good : valuePct < -5 ? COLORS.warn : COLORS.textSoft}>
+            {valuePct > 5 ? `Você ganha ${valuePct}%` : valuePct < -5 ? `Você perde ${Math.abs(valuePct)}%` : 'Valor equilibrado'}
+          </Tag>
+        ) : null}
+        {userTeam && outgoingCount > 0 ? (
+          <Tag color={COLORS.textSoft}>Elenco fica com {userTeam.roster.length - userAssets.length + partnerAssets.length}</Tag>
+        ) : null}
+      </View>
+    </Panel>
+  );
+
+  // Protections, only once there's an outgoing pick to protect.
+  const protectionPanel = userTeam && userPickIds.length > 0 ? (
+    <Panel style={{ gap: 8 }}>
+      <MonoLabel size={9}>Proteção das suas picks</MonoLabel>
+      {picksOf(userTeam).filter((pk) => userPickIds.includes(pk.id)).map((pick) => (
+        <View key={pick.id} className="flex-row items-center justify-between" style={{ minHeight: 40 }}>
+          <Name size={15}>1ª rodada {pick.originalTeamId.toUpperCase()} · draft {pick.draft}</Name>
+          <Chip tone={protections[pick.id] ? 'warn' : 'neutral'} onPress={() => toggleProtection(pick.id)}>
+            {protections[pick.id] ? `Top ${protections[pick.id]}` : 'Proteger'}
+          </Chip>
+        </View>
+      ))}
+    </Panel>
+  ) : null;
+
+  const reactionPanel = tradeStatus !== 'idle' ? (
+    <Panel bar={tradeStatus === 'accepted' ? COLORS.good : COLORS.bad} style={{ gap: 6 }}>
+      <MonoLabel size={9}>Resposta do GM</MonoLabel>
+      <HeroTitle size={26} color={tradeStatus === 'accepted' ? COLORS.good : COLORS.bad}>
+        {tradeStatus === 'accepted' ? 'Aceito' : 'Recusado'}
+      </HeroTitle>
+      <BodyText color={COLORS.textSoft}>“{gmReaction}”</BodyText>
+    </Panel>
+  ) : null;
+
+  const pickPartner = (id: string) => { setPartnerTeamId(id); setPartnerAssets([]); setPartnerPickIds([]); setPickerOpen(false); };
+  const offersInbox = (
+    <OffersInbox
+      offers={offers}
+      teams={teams}
+      players={players}
+      currentDraft={currentDraft}
+      gamesPlayed={gamesPlayed}
+      onAccept={onAcceptOffer}
+      onReject={onRejectOffer}
+      onSelectPlayer={setInspecting}
+      wide={desktop}
+    />
+  );
+
+  // PC: no sheets. Both rosters stay open as side columns (yours left, the
+  // partner's right) and the deal sits in the middle.
+  if (desktop) {
+    return (
+      <DPage
+        scroll={false}
+        padding={0}
+        footer={
+          <DDock note={hasPackage ? undefined : 'Clique nos jogadores e escolhas dos dois lados para montar o pacote.'}>
+            <DCta
+              label="Propor troca"
+              sub={hasPackage ? `${outgoingCount} saem · ${incomingCount} entram` : undefined}
+              onPress={executeTrade}
+              disabled={!canPropose}
+            />
+          </DDock>
+        }
+      >
+        <View style={{ paddingTop: PAGE_Y, paddingHorizontal: PAGE_X, paddingBottom: 16 }}>
+          <DTitle
+            title="Trocas"
+            right={offers.length > 0 ? <Tag color={COLORS.east}>{offers.length} {offers.length === 1 ? 'oferta' : 'ofertas'}</Tag> : undefined}
+          />
+          <BodyText size={15} style={{ marginTop: 6 }}>
+            {daysLeft > 0 ? `Prazo final em ${daysLeft} ${daysLeft === 1 ? 'dia' : 'dias'}` : 'Prazo de trocas encerrado'}
+          </BodyText>
+        </View>
+        <View style={{ flex: 1, minHeight: 0, flexDirection: 'row', gap: 16, paddingHorizontal: PAGE_X, paddingBottom: 20 }}>
+          {userTeam ? (
+            <RosterColumn
+              title="Seu elenco"
+              team={userTeam}
+              players={players}
+              teams={teams}
+              selectedPlayers={userAssets}
+              selectedPicks={userPickIds}
+              onTogglePlayer={(id) => toggleAsset(id, 'user')}
+              onTogglePick={(id) => togglePick(id, 'user')}
+              onInspect={setInspecting}
+              accent={accent.primary}
+            />
+          ) : null}
+
+          <ScrollView style={{ flex: 1, minWidth: 0 }} contentContainerStyle={{ gap: 14 }}>
+            <View className="flex-row" style={{ gap: 8 }}>
+              <PackagePanel
+                title="VOCÊ CEDE"
+                team={userTeam}
+                playerIds={userAssets}
+                pickIds={userPickIds}
+                players={players}
+                teams={teams}
+                protections={protections}
+                onRemovePlayer={(id) => toggleAsset(id, 'user')}
+                onRemovePick={(id) => togglePick(id, 'user')}
+                emptyHint="Clique no seu elenco, à esquerda."
+              />
+              <PackagePanel
+                title="VOCÊ RECEBE"
+                team={partnerTeam}
+                playerIds={partnerAssets}
+                pickIds={partnerPickIds}
+                players={players}
+                teams={teams}
+                protections={{}}
+                onRemovePlayer={(id) => toggleAsset(id, 'partner')}
+                onRemovePick={(id) => togglePick(id, 'partner')}
+                emptyHint={partnerTeam ? 'Clique no elenco deles, à direita.' : 'Escolha um parceiro à direita.'}
+              />
+            </View>
+            {balancePanel}
+            {protectionPanel}
+            {reactionPanel}
+            {offersInbox}
+          </ScrollView>
+
+          {partnerTeam ? (
+            <RosterColumn
+              title={getTeamNickname(partnerTeam)}
+              team={partnerTeam}
+              players={players}
+              teams={teams}
+              selectedPlayers={partnerAssets}
+              selectedPicks={partnerPickIds}
+              onTogglePlayer={(id) => toggleAsset(id, 'partner')}
+              onTogglePick={(id) => togglePick(id, 'partner')}
+              onInspect={setInspecting}
+              onSwitch={() => { setPartnerTeamId(null); setPartnerAssets([]); setPartnerPickIds([]); }}
+              accent={accent.primary}
+            />
+          ) : (
+            <View style={{ width: 300, backgroundColor: COLORS.surface, borderRadius: 16, overflow: 'hidden' }}>
+              <View style={{ paddingVertical: 12, paddingHorizontal: 14, borderBottomWidth: 1, borderBottomColor: COLORS.line }}>
+                <DLabel style={{ letterSpacing: 1.5 }}>Escolha o parceiro</DLabel>
+              </View>
+              <ScrollView style={{ flex: 1 }} contentContainerStyle={{ padding: 8, gap: 2 }}>
+                {teams.filter((t) => t.id !== userTeamId).sort((a, b) => a.name.localeCompare(b.name)).map((t) => (
+                  <Hover key={t.id} onPress={() => pickPartner(t.id)} accessibilityLabel={t.name} style={{ flexDirection: 'row', alignItems: 'center', gap: 10, paddingVertical: 8, paddingHorizontal: 8, borderRadius: 10 }}>
+                    <TeamBadge teamId={t.id} width={30} height={20} />
+                    <TeamLogo teamId={t.id} size={20} />
+                    <Name size={15} style={{ flex: 1 }}>{getTeamNickname(t)}</Name>
+                  </Hover>
+                ))}
+              </ScrollView>
+            </View>
+          )}
+        </View>
+        {inspecting ? <PlayerDetailModal player={inspecting} onClose={() => setInspecting(null)} /> : null}
+      </DPage>
+    );
+  }
+
   return (
     <Screen
       heroHeight={110}
@@ -382,86 +581,12 @@ const TradeCenter: React.FC<TradeCenterProps> = ({
           />
         </View>
 
-        {/* The balance: four flat segments and a white marker. */}
-        <Panel style={{ gap: 10 }}>
-          <View className="flex-row justify-between items-baseline">
-            <MonoLabel size={9}>Balança de valor</MonoLabel>
-            <Text style={{ fontFamily: FONT.cond800, fontSize: 18, color: verdict?.color ?? COLORS.dim, textTransform: 'uppercase' }}>
-              {verdict ? verdict.label : 'Monte o pacote'}
-            </Text>
-          </View>
-          <View style={{ height: 10, flexDirection: 'row', gap: 2, opacity: hasPackage ? 1 : 0.4 }}>
-            <View style={{ flex: 1, borderTopLeftRadius: 3, borderBottomLeftRadius: 3, backgroundColor: '#5A2629' }} />
-            <View style={{ flex: 1, backgroundColor: '#4A3A20' }} />
-            <View style={{ flex: 1, backgroundColor: '#23402F' }} />
-            <View style={{ flex: 1, borderTopRightRadius: 3, borderBottomRightRadius: 3, backgroundColor: '#1F4A36' }} />
-            {hasPackage ? (
-              <View style={{ position: 'absolute', left: `${markerPos * 100}%`, top: -5, width: 4, height: 20, marginLeft: -2, borderRadius: 2, backgroundColor: COLORS.text }} />
-            ) : null}
-          </View>
-          <View className="flex-row justify-between">
-            {['Recusa', 'Justo', 'Generoso'].map((l) => (
-              <Text key={l} style={{ fontFamily: FONT.cond600, fontSize: 11, letterSpacing: 1.1, color: COLORS.faint, textTransform: 'uppercase' }}>{l}</Text>
-            ))}
-          </View>
-          {/* Salary match / roster minimum / value, live as you build. */}
-          {/* Why a trade is blocked is a sentence, not a label: on a phone a
-              one-line tag cut it to "...acima do teto salarial e não pode". */}
-          {legality && !legality.legal ? (
-            <View style={{ borderRadius: 10, borderWidth: 1, borderColor: withAlpha(COLORS.bad, 0.55), paddingHorizontal: 10, paddingVertical: 8 }}>
-              <Text style={{ fontFamily: FONT.body600, fontSize: 12.5, lineHeight: 17, color: COLORS.bad }}>{legality.reason}</Text>
-            </View>
-          ) : null}
-          <View className="flex-row flex-wrap" style={{ gap: 6 }}>
-            {legality?.legal ? <Tag color={COLORS.good}>Salários batem</Tag> : null}
-            {hasPackage && userValueEval ? (
-              <Tag color={valuePct > 5 ? COLORS.good : valuePct < -5 ? COLORS.warn : COLORS.textSoft}>
-                {valuePct > 5 ? `Você ganha ${valuePct}%` : valuePct < -5 ? `Você perde ${Math.abs(valuePct)}%` : 'Valor equilibrado'}
-              </Tag>
-            ) : null}
-            {userTeam && outgoingCount > 0 ? (
-              <Tag color={COLORS.textSoft}>Elenco fica com {userTeam.roster.length - userAssets.length + partnerAssets.length}</Tag>
-            ) : null}
-          </View>
-        </Panel>
-
-        {/* Protections, only once there's an outgoing pick to protect. */}
-        {userTeam && userPickIds.length > 0 ? (
-          <Panel style={{ gap: 8 }}>
-            <MonoLabel size={9}>Proteção das suas picks</MonoLabel>
-            {picksOf(userTeam).filter((pk) => userPickIds.includes(pk.id)).map((pick) => (
-              <View key={pick.id} className="flex-row items-center justify-between" style={{ minHeight: 40 }}>
-                <Name size={15}>1ª rodada {pick.originalTeamId.toUpperCase()} · draft {pick.draft}</Name>
-                <Chip tone={protections[pick.id] ? 'warn' : 'neutral'} onPress={() => toggleProtection(pick.id)}>
-                  {protections[pick.id] ? `Top ${protections[pick.id]}` : 'Proteger'}
-                </Chip>
-              </View>
-            ))}
-          </Panel>
-        ) : null}
-
-        {/* GM reaction */}
-        {tradeStatus !== 'idle' ? (
-          <Panel bar={tradeStatus === 'accepted' ? COLORS.good : COLORS.bad} style={{ gap: 6 }}>
-            <MonoLabel size={9}>Resposta do GM</MonoLabel>
-            <HeroTitle size={26} color={tradeStatus === 'accepted' ? COLORS.good : COLORS.bad}>
-              {tradeStatus === 'accepted' ? 'Aceito' : 'Recusado'}
-            </HeroTitle>
-            <BodyText color={COLORS.textSoft}>“{gmReaction}”</BodyText>
-          </Panel>
-        ) : null}
+        {balancePanel}
+        {protectionPanel}
+        {reactionPanel}
 
         {/* Inbox */}
-        <OffersInbox
-          offers={offers}
-          teams={teams}
-          players={players}
-          currentDraft={currentDraft}
-          gamesPlayed={gamesPlayed}
-          onAccept={onAcceptOffer}
-          onReject={onRejectOffer}
-          onSelectPlayer={setInspecting}
-        />
+        {offersInbox}
       </Body>
 
       {/* Partner picker */}
@@ -469,7 +594,7 @@ const TradeCenter: React.FC<TradeCenterProps> = ({
         {teams.filter((t) => t.id !== userTeamId).sort((a, b) => a.name.localeCompare(b.name)).map((t) => (
           <Pressable accessibilityRole="button"
             key={t.id}
-            onPress={() => { setPartnerTeamId(t.id); setPartnerAssets([]); setPartnerPickIds([]); setPickerOpen(false); }}
+            onPress={() => pickPartner(t.id)}
             className="flex-row items-center gap-3 p-3 rounded-xl active:opacity-70"
           >
             <TeamBadge teamId={t.id} width={34} height={22} />
@@ -629,6 +754,93 @@ const AssetSheet: React.FC<{
   );
 };
 
+/** PC: one team's roster as an always-open side column (300px). */
+const RosterColumn: React.FC<{
+  title: string;
+  team: Team;
+  players: { [key: string]: Player };
+  teams: Team[];
+  selectedPlayers: string[];
+  selectedPicks: string[];
+  onTogglePlayer: (id: string) => void;
+  onTogglePick: (id: string) => void;
+  onInspect: (p: Player) => void;
+  onSwitch?: () => void;
+  accent: string;
+}> = ({ title, team, players, teams, selectedPlayers, selectedPicks, onTogglePlayer, onTogglePick, onInspect, onSwitch, accent }) => {
+  const [pos, setPos] = useState('TODOS');
+  const roster = team.roster
+    .map((id) => players[id])
+    .filter((p): p is Player => !!p && (pos === 'TODOS' || getPlayerPositions(p).includes(pos)))
+    .sort((a, b) => b.ovr - a.ovr);
+  const picks = [...picksOf(team)].sort((a, b) => a.draft - b.draft);
+  const rowStyle = (on: boolean) => ({
+    flexDirection: 'row' as const, alignItems: 'center' as const, gap: 10, paddingVertical: 8, paddingHorizontal: 10, borderRadius: RADIUS.control,
+    backgroundColor: on ? withAlpha(accent, 0.2) : COLORS.surface2, borderWidth: 1, borderColor: on ? accent : 'transparent',
+  });
+  return (
+    <View style={{ width: 300, backgroundColor: COLORS.surface, borderRadius: 16, overflow: 'hidden' }}>
+      <View className="flex-row items-center" style={{ paddingVertical: 12, paddingHorizontal: 14, gap: 8, borderBottomWidth: 1, borderBottomColor: COLORS.line }}>
+        <TeamBadge teamId={team.id} width={30} height={20} />
+        <Text numberOfLines={1} style={{ flex: 1, fontFamily: FONT.cond700, fontSize: 11, letterSpacing: 1.5, color: COLORS.muted, textTransform: 'uppercase' }}>{title}</Text>
+        {onSwitch ? (
+          <Pressable accessibilityRole="button" onPress={onSwitch} hitSlop={6}>
+            <Text style={{ fontFamily: FONT.cond600, fontSize: 12, color: COLORS.dim }}>trocar parceiro ›</Text>
+          </Pressable>
+        ) : null}
+      </View>
+      <View className="flex-row flex-wrap" style={{ gap: 6, paddingVertical: 10, paddingHorizontal: 12 }}>
+        {POSITION_FILTERS.map((f) => {
+          const on = f.id === pos;
+          return (
+            <Pressable key={f.id} accessibilityRole="tab" aria-selected={on} onPress={() => setPos(f.id)}
+              style={{ minHeight: 30, paddingHorizontal: 11, justifyContent: 'center', borderRadius: RADIUS.chip, backgroundColor: on ? COLORS.ctaFill : COLORS.surface2 }}>
+              <Text style={{ fontFamily: FONT.cond700, fontSize: 12.5, letterSpacing: 0.9, color: on ? COLORS.ctaInk : COLORS.muted, textTransform: 'uppercase' }}>{f.label}</Text>
+            </Pressable>
+          );
+        })}
+      </View>
+      <ScrollView style={{ flex: 1 }} contentContainerStyle={{ paddingHorizontal: 10, paddingBottom: 10, gap: 6 }}>
+        {roster.map((p) => {
+          const on = selectedPlayers.includes(p.id);
+          return (
+            <Pressable key={p.id} accessibilityRole="button" aria-selected={on} accessibilityLabel={p.name} onPress={() => onTogglePlayer(p.id)} onLongPress={() => onInspect(p)} style={rowStyle(on)}>
+              <Image source={{ uri: getPlayerImageUrl(p) }} placeholder={{ uri: PLAYER_PLACEHOLDER_SVG }} style={{ width: 32, height: 32, borderRadius: 16, backgroundColor: COLORS.line }} contentFit="cover" contentPosition="top" />
+              <View style={{ flex: 1, minWidth: 0 }}>
+                <Text numberOfLines={1} style={{ fontFamily: FONT.cond600, fontSize: 14.5, color: COLORS.text }}>{p.name}</Text>
+                <Text style={{ fontFamily: FONT.cond700, fontSize: 11, color: COLORS.dim }}>{formatPositions(p)} · {money(p.salary)}</Text>
+              </View>
+              <Text style={{ fontFamily: FONT.cond800, fontSize: 17, color: attributeColor(p.ovr) }}>{p.ovr}</Text>
+            </Pressable>
+          );
+        })}
+        {roster.length === 0 ? <BodyText size={12} color={COLORS.dim}>Nenhum jogador nessa posição.</BodyText> : null}
+        {picks.length > 0 ? (
+          <>
+            <Text style={{ fontFamily: FONT.cond700, fontSize: 11, letterSpacing: 1.5, color: COLORS.muted, marginTop: 8 }}>ESCOLHAS DE 1ª RODADA</Text>
+            {picks.map((pick) => {
+              const on = selectedPicks.includes(pick.id);
+              const slot = projectedPickSlot(pick.originalTeamId, teams);
+              return (
+                <Pressable key={pick.id} accessibilityRole="button" aria-selected={on} onPress={() => onTogglePick(pick.id)} style={rowStyle(on)}>
+                  <View style={{ width: 32, height: 32, borderRadius: RADIUS.control, backgroundColor: COLORS.line, alignItems: 'center', justifyContent: 'center' }}>
+                    <Text style={{ fontFamily: FONT.cond700, fontSize: 11, color: COLORS.warn }}>1ª</Text>
+                  </View>
+                  <View style={{ flex: 1 }}>
+                    <Text style={{ fontFamily: FONT.cond600, fontSize: 14.5, color: COLORS.text }}>1ª rodada {pick.originalTeamId.toUpperCase()}</Text>
+                    <Text style={{ fontFamily: FONT.cond700, fontSize: 11, color: COLORS.dim }}>Draft {pick.draft} · projetada ~#{slot + 1}</Text>
+                  </View>
+                </Pressable>
+              );
+            })}
+          </>
+        ) : null}
+        <BodyText size={11.5} color={COLORS.faint} style={{ marginTop: 6 }}>Segure o clique num jogador para abrir a ficha.</BodyText>
+      </ScrollView>
+    </View>
+  );
+};
+
 const OffersInbox: React.FC<{
   offers: TradeOffer[];
   teams: Team[];
@@ -638,7 +850,9 @@ const OffersInbox: React.FC<{
   onAccept: (id: string) => void;
   onReject: (id: string) => void;
   onSelectPlayer: (p: Player) => void;
-}> = ({ offers, teams, players, currentDraft, gamesPlayed, onAccept, onReject, onSelectPlayer }) => {
+  /** PC: one row per offer, verdict and buttons on the right. */
+  wide?: boolean;
+}> = ({ offers, teams, players, currentDraft, gamesPlayed, onAccept, onReject, onSelectPlayer, wide }) => {
   if (offers.length === 0) return null;
   const named = (ids: string[]) => ids.map((id) => players[id]).filter(Boolean);
 
@@ -680,17 +894,25 @@ const OffersInbox: React.FC<{
                     </Text>
                   ) : null}
                 </View>
-                <Text style={{ fontFamily: FONT.cond700, fontSize: 12, letterSpacing: 1, color: verdict.c, textTransform: 'uppercase' }}>{verdict.t}</Text>
+                <Text style={{ width: wide ? 44 : undefined, fontFamily: FONT.cond700, fontSize: 12, letterSpacing: 1, color: verdict.c, textTransform: 'uppercase' }}>{verdict.t}</Text>
+                {wide ? (
+                  <>
+                    <GhostButton label="Recusar" onPress={() => onReject(offer.id)} style={{ minHeight: 40, paddingHorizontal: 16 }} />
+                    <GhostButton filled label="Aceitar" color={COLORS.good} onPress={() => onAccept(offer.id)} style={{ minHeight: 40, paddingHorizontal: 16 }} />
+                  </>
+                ) : null}
               </View>
               <View className="flex-row flex-wrap" style={{ gap: 6 }}>
                 {[...give, ...get].map((pl) => (
                   <Chip key={pl.id} onPress={() => onSelectPlayer(pl)}>{pl.name} · {pl.ovr}</Chip>
                 ))}
               </View>
-              <View className="flex-row" style={{ gap: 8 }}>
-                <GhostButton label="Recusar" onPress={() => onReject(offer.id)} style={{ flex: 1 }} />
-                <GhostButton filled label="Aceitar" color={COLORS.good} onPress={() => onAccept(offer.id)} style={{ flex: 1 }} />
-              </View>
+              {wide ? null : (
+                <View className="flex-row" style={{ gap: 8 }}>
+                  <GhostButton label="Recusar" onPress={() => onReject(offer.id)} style={{ flex: 1 }} />
+                  <GhostButton filled label="Aceitar" color={COLORS.good} onPress={() => onAccept(offer.id)} style={{ flex: 1 }} />
+                </View>
+              )}
             </View>
           );
         })}

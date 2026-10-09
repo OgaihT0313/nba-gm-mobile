@@ -7,6 +7,7 @@ import { getPlayerImageUrl, PLAYER_PLACEHOLDER_SVG, getPlayerPositions, POSITION
 import { simulationEngine, LineupSlot } from '../services/simulationService';
 import { useTheme } from '../src/theme/ThemeProvider';
 import { FONT } from '../src/theme/tokens';
+import { useDesktop } from './desktop/useDesktop';
 
 interface StartersCourtProps {
   team: Team;
@@ -148,6 +149,9 @@ const StartersCourt: React.FC<StartersCourtProps> = ({ team, players, onSetStart
   const editable = !!onSetStarter;
   const [activePos, setActivePos] = useState<string | null>(null);
   const { accent } = useTheme();
+  // PC: the court is ~3× wider, so the slots grow from 56 to 72px.
+  const desktop = useDesktop();
+  const S = desktop ? 72 : SLOT;
 
   const { slots } = simulationEngine.getLineup(team, players);
   const slotByPos = new Map(slots.map((s) => [s.pos, s]));
@@ -180,13 +184,13 @@ const StartersCourt: React.FC<StartersCourtProps> = ({ team, players, onSetStart
             <Pressable accessibilityRole="button"
               key={pos}
               onPress={() => (editable ? setActivePos(isActive ? null : pos) : player && onPlayerPress?.(player))}
-              style={{ position: 'absolute', top: top as any, left: left as any, marginLeft: -SLOT / 2, marginTop: -SLOT / 2, alignItems: 'center' }}
+              style={{ position: 'absolute', top: top as any, left: left as any, marginLeft: -S / 2, marginTop: -S / 2, alignItems: 'center' }}
             >
               <View
                 className="rounded-full overflow-hidden bg-ink"
                 style={{
-                  width: SLOT,
-                  height: SLOT,
+                  width: S,
+                  height: S,
                   borderWidth: isActive ? 3 : 2,
                   borderColor: slot?.isSubstitute ? '#f59e0b' : accent.primary,
                 }}
@@ -200,12 +204,12 @@ const StartersCourt: React.FC<StartersCourtProps> = ({ team, players, onSetStart
                 )}
               </View>
               <View className="bg-ink border border-line rounded-full px-1.5" style={{ marginTop: -8 }}>
-                <Text className="text-[9px] font-black text-white">{player ? player.ovr : '-'}</Text>
+                <Text className="font-black text-white" style={{ fontSize: desktop ? 12 : 9 }}>{player ? player.ovr : '-'}</Text>
               </View>
               <View style={{ marginTop: 3, paddingHorizontal: 6, paddingVertical: 1, borderRadius: 6, backgroundColor: 'rgba(11,11,13,0.82)', alignItems: 'center' }}>
-                <Text style={{ fontFamily: FONT.cond700, fontSize: 9, letterSpacing: 1, color: '#C9C6C0' }}>{slot?.bucket ?? ''}</Text>
+                <Text style={{ fontFamily: FONT.cond700, fontSize: desktop ? 10 : 9, letterSpacing: 1, color: '#C9C6C0' }}>{slot?.bucket ?? ''}</Text>
                 {player ? (
-                  <Text style={{ fontFamily: FONT.cond700, fontSize: 11.5, lineHeight: 13, color: '#F3F1EC', maxWidth: 92 }} numberOfLines={1}>
+                  <Text style={{ fontFamily: FONT.cond700, fontSize: desktop ? 13 : 11.5, lineHeight: desktop ? 14 : 13, color: '#F3F1EC', maxWidth: desktop ? 120 : 92 }} numberOfLines={1}>
                     {surname(player.name)}
                   </Text>
                 ) : null}

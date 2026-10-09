@@ -12,6 +12,7 @@ import {
 } from '../constants';
 import { COLORS, FONT, withAlpha, onAccent } from '../src/theme/tokens';
 import { StatStrip, Tag, SectionLabel, BodyText } from './ui/kit';
+import { useDesktop } from './desktop/useDesktop';
 
 // Design 5c ("Transmissão"). A bottom sheet: the header is a flat block in the
 // player's team color (photo, "POS · # · AGE", name, OVR at 56px), then the
@@ -77,182 +78,235 @@ const PlayerDetailModal: React.FC<{
     add(c.mip, 'Evolução', false);
   }
 
+  // PC (design "PC Ficha do Jogador"): a centered 880px modal instead of the
+  // sheet — bigger header, and the body split in two columns.
+  const desktop = useDesktop();
+  const k = desktop ? 1 : 0;
+
+  const header = (
+    <View style={{ height: desktop ? 200 : 170, flexDirection: 'row', backgroundColor: accent.primary }}>
+      <View style={{ width: desktop ? 200 : 130, justifyContent: 'flex-end', backgroundColor: inkA(0.08) }}>
+        <Image source={{ uri: getPlayerImageUrl(player) }} placeholder={{ uri: PLAYER_PLACEHOLDER_SVG }} style={{ width: desktop ? 200 : 130, height: desktop ? 180 : 150 }} contentFit="cover" contentPosition="top" />
+      </View>
+      <View style={{ flex: 1, paddingVertical: desktop ? 20 : 16, paddingHorizontal: desktop ? 24 : 16, justifyContent: 'space-between' }}>
+        <View style={{ gap: desktop ? 4 : 3 }}>
+          {status ? <Text style={{ fontFamily: FONT.cond800, fontSize: 12, letterSpacing: 1.2, color: ink === '#ffffff' ? '#FFD2D3' : '#7A0F12' }}>{status.toUpperCase()}</Text> : null}
+          <Text style={{ fontFamily: FONT.cond700, fontSize: desktop ? 13 : 12, letterSpacing: desktop ? 2.1 : 1.9, color: inkA(0.85) }}>
+            {player.pos}{player.number ? ` · #${player.number}` : ''} · {player.age} ANOS
+          </Text>
+          <Text numberOfLines={2} style={{ fontFamily: FONT.cond800, fontSize: desktop ? 40 : 28, lineHeight: desktop ? 38 : 27, color: ink, textTransform: 'uppercase' }}>{player.name}</Text>
+        </View>
+        <View className="flex-row items-baseline" style={{ gap: desktop ? 10 : 8 }}>
+          <Text style={{ fontFamily: FONT.cond800, fontSize: desktop ? 72 : 56, lineHeight: desktop ? 62 : 50, color: ink }}>{player.ovr}</Text>
+          <Text style={{ fontFamily: FONT.cond700, fontSize: desktop ? 13 : 12, letterSpacing: desktop ? 1.6 : 1.4, color: inkA(0.85) }}>
+            OVR · POT {POTENTIAL_LABEL[player.potential]?.toUpperCase() ?? player.potential}
+          </Text>
+        </View>
+      </View>
+      <View style={{ position: 'absolute', left: 0, right: 0, bottom: 0, height: 4, backgroundColor: accent.secondary }} />
+      <Pressable
+        accessibilityRole="button"
+        accessibilityLabel="Fechar"
+        onPress={onClose}
+        hitSlop={10}
+        style={{ position: 'absolute', top: 10 + 2 * k, right: 10 + 2 * k, width: 30 + 2 * k, height: 30 + 2 * k, borderRadius: 16, backgroundColor: 'rgba(0,0,0,0.35)', alignItems: 'center', justifyContent: 'center' }}
+      >
+        <Text style={{ color: '#fff', fontSize: 18, lineHeight: 20 }}>×</Text>
+      </Pressable>
+    </View>
+  );
+
+  const seasonStrip = (
+    <View style={{ borderBottomWidth: 1, borderBottomColor: COLORS.line, paddingVertical: desktop ? 10 : 8, paddingHorizontal: desktop ? 14 : 0 }}>
+      <StatStrip
+        size={desktop ? 26 : 21}
+        items={s && s.gp > 0
+          ? [
+              { label: 'PTS', value: s.ppg.toFixed(1) },
+              { label: 'REB', value: s.rpg.toFixed(1) },
+              { label: 'AST', value: s.apg.toFixed(1) },
+              { label: 'ROU', value: s.spg.toFixed(1) },
+            ]
+          : [
+              { label: 'Ataque', value: player.off },
+              { label: 'Defesa', value: player.def },
+              { label: 'Idade', value: player.age },
+              { label: 'Jogos', value: c?.gp ?? 0 },
+            ]}
+      />
+    </View>
+  );
+
+  const seasonLine = s && s.gp > 0 ? (
+    <BodyText size={12} color={COLORS.dim} style={desktop ? undefined : { marginTop: -6 }}>
+      Temporada · {s.gp} {s.gp === 1 ? 'jogo' : 'jogos'} · {s.mpg.toFixed(1)} min · {s.bpg.toFixed(1)} tocos · {s.tpg.toFixed(1)} erros
+    </BodyText>
+  ) : null;
+
+  const attributes = (
+    <View style={{ gap: 8 }}>
+      <SectionLabel>Atributos</SectionLabel>
+      {ATTRIBUTE_META.map(({ key, label }) => {
+        const v = attrs[key];
+        const col = attrColor(v);
+        return (
+          <View key={key} className="flex-row items-center" style={{ gap: 10 }}>
+            <Text style={{ width: desktop ? 110 : 104, fontFamily: FONT.cond600, fontSize: 14, color: COLORS.textSoft }}>{label}</Text>
+            <View style={{ flex: 1, height: 6, borderRadius: 3, backgroundColor: COLORS.line }}>
+              <View style={{ height: '100%', borderRadius: 3, backgroundColor: col, width: `${Math.max(4, ((v - 55) / 44) * 100)}%` }} />
+            </View>
+            <Text style={{ width: 30, textAlign: 'right', fontFamily: FONT.cond800, fontSize: 16, color: col }}>{v}</Text>
+          </View>
+        );
+      })}
+    </View>
+  );
+
+  const contractMorale = (
+    <View className="flex-row" style={{ gap: 8 }}>
+      <View style={{ flex: 1, backgroundColor: COLORS.surface, borderRadius: 14, padding: 12, gap: 3 }}>
+        <Text style={{ fontFamily: FONT.cond700, fontSize: 10.5, letterSpacing: 1.5, color: COLORS.muted }}>CONTRATO</Text>
+        <Text style={{ fontFamily: FONT.cond800, fontSize: desktop ? 22 : 20, lineHeight: desktop ? 22 : 21, color: COLORS.text }}>{money(player.salary)}</Text>
+        <BodyText size={12} color={COLORS.dim}>
+          {player.contractYears === 1 ? 'último ano' : `${player.contractYears} anos`}
+          {player.nextSalary !== undefined ? ` · estendido, depois ${money(player.nextSalary)}` : ''}
+        </BodyText>
+      </View>
+      <View style={{ flex: 1, backgroundColor: COLORS.surface, borderRadius: 14, padding: 12, gap: 3 }}>
+        <Text style={{ fontFamily: FONT.cond700, fontSize: 10.5, letterSpacing: 1.5, color: COLORS.muted }}>MORAL</Text>
+        <Text style={{ fontFamily: FONT.cond800, fontSize: desktop ? 22 : 20, lineHeight: desktop ? 22 : 21, color: moraleColor }}>
+          {moraleLabel}{typeof m === 'number' ? ` · ${m}` : ''}
+        </Text>
+        <BodyText size={12} color={COLORS.dim}>{per.label} · {per.blurb}</BodyText>
+      </View>
+    </View>
+  );
+
+  const draftLine = player.draftInfo ? (
+    <BodyText size={12.5} color={COLORS.dim}>
+      Draftado na {player.draftInfo.pick}ª escolha · projetado {player.draftInfo.projected} OVR
+    </BodyText>
+  ) : null;
+
+  const career = c ? (
+    <View style={{ gap: 8 }}>
+      <SectionLabel right={<Text style={{ fontFamily: FONT.cond700, fontSize: 11, letterSpacing: 1.3, color: COLORS.dim }}>PICO {Math.max(c.peakOvr, player.ovr)} OVR</Text>}>
+        Carreira · {c.seasons} {c.seasons === 1 ? 'temporada' : 'temporadas'}
+      </SectionLabel>
+      <View style={{ backgroundColor: COLORS.surface, borderRadius: 14, paddingVertical: 8 }}>
+        {(() => {
+          const avg = careerAverages(c);
+          return (
+            <StatStrip
+              size={19}
+              items={[
+                { label: 'PTS', value: avg.ppg.toFixed(1) },
+                { label: 'REB', value: avg.rpg.toFixed(1) },
+                { label: 'AST', value: avg.apg.toFixed(1) },
+                { label: 'Jogos', value: c.gp },
+              ]}
+            />
+          );
+        })()}
+      </View>
+      <BodyText size={12.5}>
+        {c.pts.toLocaleString('pt-BR')} pontos · {c.reb.toLocaleString('pt-BR')} rebotes · {c.ast.toLocaleString('pt-BR')} assistências
+      </BodyText>
+      {next ? (
+        <BodyText size={12.5} color={COLORS.warn}>
+          Próximo marco: {next.mark.toLocaleString('pt-BR')} {MILESTONES[next.stat].label} · faltam {next.gap.toLocaleString('pt-BR')} (~{next.games} {next.games === 1 ? 'jogo' : 'jogos'})
+        </BodyText>
+      ) : null}
+    </View>
+  ) : null;
+
+  const honorTags = honors.length ? (
+    <View className="flex-row flex-wrap" style={{ gap: 6 }}>
+      {honors.map((h) => <Tag key={h.text} color={h.gold ? COLORS.gold : COLORS.textSoft}>{h.text}</Tag>)}
+    </View>
+  ) : null;
+
+  const position = <BodyText size={12} color={COLORS.dim}>Posição · {formatPositionsFull(player)}</BodyText>;
+
+  const actionBar = actions && actions.length ? (
+    <View
+      style={{
+        paddingHorizontal: desktop ? 24 : 14, paddingTop: desktop ? 12 : 10, paddingBottom: desktop ? 12 : 12 + insets.bottom,
+        borderTopWidth: 1, borderTopColor: COLORS.line, gap: 8, backgroundColor: COLORS.dockBg,
+        flexDirection: desktop ? 'row' : 'column', justifyContent: 'flex-end',
+      }}
+    >
+      {actions.map((a) => (
+        <Pressable
+          key={a.label}
+          accessibilityRole="button"
+          aria-disabled={!!a.disabled}
+          onPress={a.disabled ? undefined : a.onPress}
+          className="active:opacity-75"
+          style={{
+            minHeight: 48, borderRadius: 12, paddingHorizontal: 14, paddingVertical: desktop ? 8 : 9, justifyContent: 'center',
+            width: desktop ? 360 : undefined,
+            borderWidth: 1, borderColor: a.tone === 'danger' && !a.disabled ? withAlpha(COLORS.bad, 0.55) : COLORS.ghostBorder,
+            opacity: a.disabled ? 0.55 : 1,
+          }}
+        >
+          <Text style={{ fontFamily: FONT.cond800, fontSize: 15, letterSpacing: 1.1, color: a.tone === 'danger' && !a.disabled ? COLORS.bad : COLORS.textSoft, textTransform: 'uppercase' }}>
+            {a.label}
+          </Text>
+          {a.sub ? <BodyText size={12} color={COLORS.dim} style={{ marginTop: 1 }}>{a.sub}</BodyText> : null}
+        </Pressable>
+      ))}
+    </View>
+  ) : null;
+
+  if (desktop) {
+    return (
+      <Modal visible transparent animationType="fade" onRequestClose={onClose}>
+        <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', padding: 32, backgroundColor: 'rgba(5,5,6,0.72)' }}>
+          <Pressable accessible={false} style={{ position: 'absolute', top: 0, right: 0, bottom: 0, left: 0 }} onPress={onClose} />
+          <View style={{ width: 880, maxWidth: '100%', maxHeight: 820, backgroundColor: COLORS.bg, borderRadius: 24, overflow: 'hidden', borderWidth: 1, borderColor: COLORS.line }}>
+            {header}
+            {seasonStrip}
+            <ScrollView style={{ flexGrow: 0, flexShrink: 1 }} contentContainerStyle={{ flexDirection: 'row', gap: 24, paddingVertical: 18, paddingHorizontal: 24 }}>
+              <View style={{ flex: 1, minWidth: 0, gap: 10 }}>
+                {seasonLine}
+                {attributes}
+                {position}
+              </View>
+              <View style={{ flex: 1, minWidth: 0, gap: 14 }}>
+                {contractMorale}
+                {draftLine}
+                {career}
+                {honorTags}
+              </View>
+            </ScrollView>
+            {actionBar}
+          </View>
+        </View>
+      </Modal>
+    );
+  }
+
   return (
     <Modal visible transparent animationType="slide" onRequestClose={onClose}>
       <View className="flex-1 justify-end" style={{ backgroundColor: 'rgba(5,5,6,0.72)' }}>
         <Pressable accessible={false} style={{ position: 'absolute', top: 0, right: 0, bottom: 0, left: 0 }} onPress={onClose} />
         <View style={{ maxHeight: '94%', backgroundColor: COLORS.bg, borderTopLeftRadius: 28, borderTopRightRadius: 28, overflow: 'hidden' }}>
           <View className="self-center" style={{ width: 40, height: 4, borderRadius: 2, backgroundColor: '#3A3A40', marginVertical: 8 }} />
-
-          {/* ------------------------------------------------ header block */}
-          <View style={{ height: 170, flexDirection: 'row', backgroundColor: accent.primary }}>
-            <View style={{ width: 130, justifyContent: 'flex-end', backgroundColor: inkA(0.08) }}>
-              <Image source={{ uri: getPlayerImageUrl(player) }} placeholder={{ uri: PLAYER_PLACEHOLDER_SVG }} style={{ width: 130, height: 150 }} contentFit="cover" contentPosition="top" />
-            </View>
-            <View style={{ flex: 1, padding: 16, justifyContent: 'space-between' }}>
-              <View style={{ gap: 3 }}>
-                {status ? <Text style={{ fontFamily: FONT.cond800, fontSize: 12, letterSpacing: 1.2, color: ink === '#ffffff' ? '#FFD2D3' : '#7A0F12' }}>{status.toUpperCase()}</Text> : null}
-                <Text style={{ fontFamily: FONT.cond700, fontSize: 12, letterSpacing: 1.9, color: inkA(0.85) }}>
-                  {player.pos}{player.number ? ` · #${player.number}` : ''} · {player.age} ANOS
-                </Text>
-                <Text numberOfLines={2} style={{ fontFamily: FONT.cond800, fontSize: 28, lineHeight: 27, color: ink, textTransform: 'uppercase' }}>{player.name}</Text>
-              </View>
-              <View className="flex-row items-baseline" style={{ gap: 8 }}>
-                <Text style={{ fontFamily: FONT.cond800, fontSize: 56, lineHeight: 50, color: ink }}>{player.ovr}</Text>
-                <Text style={{ fontFamily: FONT.cond700, fontSize: 12, letterSpacing: 1.4, color: inkA(0.85) }}>
-                  OVR · POT {POTENTIAL_LABEL[player.potential]?.toUpperCase() ?? player.potential}
-                </Text>
-              </View>
-            </View>
-            <View style={{ position: 'absolute', left: 0, right: 0, bottom: 0, height: 4, backgroundColor: accent.secondary }} />
-            <Pressable
-              accessibilityRole="button"
-              accessibilityLabel="Fechar"
-              onPress={onClose}
-              hitSlop={10}
-              style={{ position: 'absolute', top: 10, right: 10, width: 30, height: 30, borderRadius: 15, backgroundColor: 'rgba(0,0,0,0.35)', alignItems: 'center', justifyContent: 'center' }}
-            >
-              <Text style={{ color: '#fff', fontSize: 18, lineHeight: 20 }}>×</Text>
-            </Pressable>
-          </View>
-
+          {header}
           <ScrollView style={{ flexGrow: 0, flexShrink: 1 }} contentContainerStyle={{ paddingBottom: 18 }} showsVerticalScrollIndicator>
-            {/* ------------------------------------------- the season line */}
-            <View style={{ borderBottomWidth: 1, borderBottomColor: COLORS.line, paddingVertical: 8 }}>
-              <StatStrip
-                size={21}
-                items={s && s.gp > 0
-                  ? [
-                      { label: 'PTS', value: s.ppg.toFixed(1) },
-                      { label: 'REB', value: s.rpg.toFixed(1) },
-                      { label: 'AST', value: s.apg.toFixed(1) },
-                      { label: 'ROU', value: s.spg.toFixed(1) },
-                    ]
-                  : [
-                      { label: 'Ataque', value: player.off },
-                      { label: 'Defesa', value: player.def },
-                      { label: 'Idade', value: player.age },
-                      { label: 'Jogos', value: c?.gp ?? 0 },
-                    ]}
-              />
-            </View>
-
+            {seasonStrip}
             <View style={{ padding: 14, gap: 16 }}>
-              {s && s.gp > 0 ? (
-                <BodyText size={12} color={COLORS.dim} style={{ marginTop: -6 }}>
-                  Temporada · {s.gp} {s.gp === 1 ? 'jogo' : 'jogos'} · {s.mpg.toFixed(1)} min · {s.bpg.toFixed(1)} tocos · {s.tpg.toFixed(1)} erros
-                </BodyText>
-              ) : null}
-
-              {/* ------------------------------------------- attributes */}
-              <View style={{ gap: 8 }}>
-                <SectionLabel>Atributos</SectionLabel>
-                {ATTRIBUTE_META.map(({ key, label }) => {
-                  const v = attrs[key];
-                  const col = attrColor(v);
-                  return (
-                    <View key={key} className="flex-row items-center" style={{ gap: 10 }}>
-                      <Text style={{ width: 104, fontFamily: FONT.cond600, fontSize: 14, color: COLORS.textSoft }}>{label}</Text>
-                      <View style={{ flex: 1, height: 6, borderRadius: 3, backgroundColor: COLORS.line }}>
-                        <View style={{ height: '100%', borderRadius: 3, backgroundColor: col, width: `${Math.max(4, ((v - 55) / 44) * 100)}%` }} />
-                      </View>
-                      <Text style={{ width: 30, textAlign: 'right', fontFamily: FONT.cond800, fontSize: 16, color: col }}>{v}</Text>
-                    </View>
-                  );
-                })}
-              </View>
-
-              {/* ------------------------------------ contract and morale */}
-              <View className="flex-row" style={{ gap: 8 }}>
-                <View style={{ flex: 1, backgroundColor: COLORS.surface, borderRadius: 14, padding: 12, gap: 3 }}>
-                  <Text style={{ fontFamily: FONT.cond700, fontSize: 10.5, letterSpacing: 1.5, color: COLORS.muted }}>CONTRATO</Text>
-                  <Text style={{ fontFamily: FONT.cond800, fontSize: 20, lineHeight: 21, color: COLORS.text }}>{money(player.salary)}</Text>
-                  <BodyText size={12} color={COLORS.dim}>
-                    {player.contractYears === 1 ? 'último ano' : `${player.contractYears} anos`}
-                    {player.nextSalary !== undefined ? ` · estendido, depois ${money(player.nextSalary)}` : ''}
-                  </BodyText>
-                </View>
-                <View style={{ flex: 1, backgroundColor: COLORS.surface, borderRadius: 14, padding: 12, gap: 3 }}>
-                  <Text style={{ fontFamily: FONT.cond700, fontSize: 10.5, letterSpacing: 1.5, color: COLORS.muted }}>MORAL</Text>
-                  <Text style={{ fontFamily: FONT.cond800, fontSize: 20, lineHeight: 21, color: moraleColor }}>
-                    {moraleLabel}{typeof m === 'number' ? ` · ${m}` : ''}
-                  </Text>
-                  <BodyText size={12} color={COLORS.dim}>{per.label} · {per.blurb}</BodyText>
-                </View>
-              </View>
-
-              {player.draftInfo ? (
-                <BodyText size={12.5} color={COLORS.dim}>
-                  Draftado na {player.draftInfo.pick}ª escolha · projetado {player.draftInfo.projected} OVR
-                </BodyText>
-              ) : null}
-
-              {/* ------------------------------------------------- career */}
-              {c ? (
-                <View style={{ gap: 8 }}>
-                  <SectionLabel right={<Text style={{ fontFamily: FONT.cond700, fontSize: 11, letterSpacing: 1.3, color: COLORS.dim }}>PICO {Math.max(c.peakOvr, player.ovr)} OVR</Text>}>
-                    Carreira · {c.seasons} {c.seasons === 1 ? 'temporada' : 'temporadas'}
-                  </SectionLabel>
-                  <View style={{ backgroundColor: COLORS.surface, borderRadius: 14, paddingVertical: 8 }}>
-                    {(() => {
-                      const avg = careerAverages(c);
-                      return (
-                        <StatStrip
-                          size={19}
-                          items={[
-                            { label: 'PTS', value: avg.ppg.toFixed(1) },
-                            { label: 'REB', value: avg.rpg.toFixed(1) },
-                            { label: 'AST', value: avg.apg.toFixed(1) },
-                            { label: 'Jogos', value: c.gp },
-                          ]}
-                        />
-                      );
-                    })()}
-                  </View>
-                  <BodyText size={12.5}>
-                    {c.pts.toLocaleString('pt-BR')} pontos · {c.reb.toLocaleString('pt-BR')} rebotes · {c.ast.toLocaleString('pt-BR')} assistências
-                  </BodyText>
-                  {next ? (
-                    <BodyText size={12.5} color={COLORS.warn}>
-                      Próximo marco: {next.mark.toLocaleString('pt-BR')} {MILESTONES[next.stat].label} · faltam {next.gap.toLocaleString('pt-BR')} (~{next.games} {next.games === 1 ? 'jogo' : 'jogos'})
-                    </BodyText>
-                  ) : null}
-                </View>
-              ) : null}
-
-              {honors.length ? (
-                <View className="flex-row flex-wrap" style={{ gap: 6 }}>
-                  {honors.map((h) => <Tag key={h.text} color={h.gold ? COLORS.gold : COLORS.textSoft}>{h.text}</Tag>)}
-                </View>
-              ) : null}
-
-              <BodyText size={12} color={COLORS.dim}>Posição · {formatPositionsFull(player)}</BodyText>
+              {seasonLine}
+              {attributes}
+              {contractMorale}
+              {draftLine}
+              {career}
+              {honorTags}
+              {position}
             </View>
           </ScrollView>
-
-          {actions && actions.length ? (
-            <View style={{ paddingHorizontal: 14, paddingTop: 10, paddingBottom: 12 + insets.bottom, borderTopWidth: 1, borderTopColor: COLORS.line, gap: 8, backgroundColor: COLORS.dockBg }}>
-              {actions.map((a) => (
-                <Pressable
-                  key={a.label}
-                  accessibilityRole="button"
-                  aria-disabled={!!a.disabled}
-                  onPress={a.disabled ? undefined : a.onPress}
-                  className="active:opacity-75"
-                  style={{
-                    minHeight: 48, borderRadius: 12, paddingHorizontal: 14, paddingVertical: 9, justifyContent: 'center',
-                    borderWidth: 1, borderColor: a.tone === 'danger' && !a.disabled ? withAlpha(COLORS.bad, 0.55) : COLORS.ghostBorder,
-                    opacity: a.disabled ? 0.55 : 1,
-                  }}
-                >
-                  <Text style={{ fontFamily: FONT.cond800, fontSize: 15, letterSpacing: 1.1, color: a.tone === 'danger' && !a.disabled ? COLORS.bad : COLORS.textSoft, textTransform: 'uppercase' }}>
-                    {a.label}
-                  </Text>
-                  {a.sub ? <BodyText size={12} color={COLORS.dim} style={{ marginTop: 1 }}>{a.sub}</BodyText> : null}
-                </Pressable>
-              ))}
-            </View>
-          ) : null}
+          {actionBar}
         </View>
       </View>
     </Modal>
