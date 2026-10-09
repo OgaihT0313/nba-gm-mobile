@@ -47,3 +47,5 @@ _logcat*.txt
 
 # scratch build dir used by scripts/check_watch_director.ts and scripts/diagnose_season.ts
 .check/
+dist-web/
+.firebase/
