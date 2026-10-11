@@ -1,11 +1,11 @@
 import React from 'react';
-import { View, Text, ScrollView } from 'react-native';
+import { View, Text, ScrollView, Pressable } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { SeasonState } from '../types';
 import { getTeamNickname, SALARY_CAP } from '../constants';
 import { sortStandings } from '../services/scheduleService';
-import { COLORS, FONT } from '../src/theme/tokens';
+import { COLORS, FONT, type ThemeMode } from '../src/theme/tokens';
 import { CtaButton, GhostButton, TeamBadge, StatStrip, BodyText } from '../components/ui/kit';
 import BrandLogo from '../components/BrandLogo';
 import { useDesktop } from '../components/desktop/useDesktop';
@@ -19,9 +19,11 @@ interface HomeProps {
   /** Present only when a save is in progress. */
   onContinue?: () => void;
   season: SeasonState | null;
+  themeMode: ThemeMode;
+  onThemeMode: (mode: ThemeMode) => void;
 }
 
-const Home: React.FC<HomeProps> = ({ onStart, onContinue, season }) => {
+const Home: React.FC<HomeProps> = ({ onStart, onContinue, season, themeMode, onThemeMode }) => {
   const insets = useSafeAreaInsets();
   const desktop = useDesktop();
   const userTeam = season?.teams.find((t) => t.id === season.userTeamId);
@@ -82,6 +84,8 @@ const Home: React.FC<HomeProps> = ({ onStart, onContinue, season }) => {
       <Row label="Elencos e ratings" value="2025-26 reais" />
       <Row label="Teto salarial" value={`$${(SALARY_CAP / 1_000_000).toFixed(1)}M`} />
       <Row label="Franquias" value="30" last />
+      <Text style={{ fontFamily: FONT.cond700, fontSize: 11, letterSpacing: 1.5, color: COLORS.dim, paddingTop: 18, paddingBottom: 8 }}>APARÊNCIA</Text>
+      <ModeSwitch mode={themeMode} onChange={onThemeMode} />
     </View>
   );
 
@@ -126,6 +130,28 @@ const Home: React.FC<HomeProps> = ({ onStart, onContinue, season }) => {
     </View>
   );
 };
+
+/** Escuro | Claro, a two-way segmented control. */
+const ModeSwitch: React.FC<{ mode: ThemeMode; onChange: (mode: ThemeMode) => void }> = ({ mode, onChange }) => (
+  <View className="flex-row" style={{ backgroundColor: COLORS.surface2, borderRadius: 12, padding: 4, gap: 4 }}>
+    {([['dark', 'Escuro'], ['light', 'Claro']] as const).map(([id, label]) => {
+      const active = mode === id;
+      return (
+        <Pressable
+          key={id}
+          accessibilityRole="button"
+          accessibilityLabel={`Modo ${label.toLowerCase()}`}
+          aria-selected={active}
+          onPress={() => onChange(id)}
+          className="active:opacity-75"
+          style={{ flex: 1, height: 40, borderRadius: 9, alignItems: 'center', justifyContent: 'center', backgroundColor: active ? COLORS.ctaFill : 'transparent' }}
+        >
+          <Text style={{ fontFamily: FONT.cond800, fontSize: 14, letterSpacing: 1, textTransform: 'uppercase', color: active ? COLORS.ctaInk : COLORS.muted }}>{label}</Text>
+        </Pressable>
+      );
+    })}
+  </View>
+);
 
 const Row: React.FC<{ label: string; value: string; last?: boolean }> = ({ label, value, last }) => (
   <View className="flex-row justify-between" style={{ paddingVertical: 9, borderBottomWidth: last ? 0 : 1, borderBottomColor: COLORS.lineSoft }}>

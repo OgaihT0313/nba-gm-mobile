@@ -34,3 +34,27 @@ export const removeSave = (): void => {
     console.warn('[save] remoção falhou', e);
   }
 };
+
+// Small preferences (the light/dark mode) live in their own file, apart from
+// the career: deleting a broken save must not reset them, and they're read
+// before anything else at startup.
+const PREFS_NAME = 'nba-manager-prefs.json';
+
+export const readPrefs = (): string | null => {
+  try {
+    const file = new File(Paths.document, PREFS_NAME);
+    return file.exists ? file.textSync() : null;
+  } catch {
+    return null;
+  }
+};
+
+export const writePrefs = (text: string): void => {
+  try {
+    const file = new File(Paths.document, PREFS_NAME);
+    if (!file.exists) file.create();
+    file.write(text);
+  } catch (e) {
+    console.warn('[prefs] gravação falhou', e);
+  }
+};

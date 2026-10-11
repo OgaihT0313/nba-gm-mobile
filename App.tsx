@@ -26,7 +26,8 @@ import { startOffseason, finishDraft, startSeason } from './services/offseasonSe
 import { initCoaches, fireCoach, hireCoach } from './services/coachService';
 
 import { ThemeProvider } from './src/theme/ThemeProvider';
-import { COLORS } from './src/theme/tokens';
+import { COLORS, applyThemeMode, themeMode as currentThemeMode, type ThemeMode } from './src/theme/tokens';
+import { saveThemeMode } from './services/prefsService';
 import BottomNav from './components/BottomNav';
 import Sidebar from './components/desktop/Sidebar';
 import { useDesktop } from './components/desktop/useDesktop';
@@ -90,6 +91,20 @@ export default function App() {
   // The saved career, if any, is the starting state — Home then offers
   // "Continuar" exactly as it does mid-session.
   const [season, setSeason] = useState<SeasonState | null>(() => loadGame());
+  // Light/dark. The saved mode was applied to the palette in index.ts, before
+  // the first render; switching applies the other one and re-keys the tree.
+  const [themeMode, setThemeMode] = useState<ThemeMode>(currentThemeMode);
+  // The watched game always runs dark: its HUD floats over the 3D arena (dark
+  // in either mode) on dark glass panels, and light ink there would vanish.
+  // The palette follows the screen; leaving it brings the user's mode back.
+  const paletteMode: ThemeMode = view === 'watch-game' ? 'dark' : themeMode;
+  if (currentThemeMode() !== paletteMode) applyThemeMode(paletteMode);
+  const changeThemeMode = (mode: ThemeMode) => {
+    if (mode === themeMode) return;
+    applyThemeMode(mode);
+    saveThemeMode(mode);
+    setThemeMode(mode);
+  };
   const [isSimulating, setIsSimulating] = useState(false);
   const [targetGames, setTargetGames] = useState(0);
   // The user's next fixture, pre-resolved for the 3D "Assistir ao Jogo"
@@ -709,7 +724,15 @@ export default function App() {
     // Home must be checked before the `!season` catch-all below, or the hero
     // would never render — it's the pre-season entry point.
     if (view === 'home') {
-      return <Home onStart={() => setView('era-select')} onContinue={season ? () => setView('simulation') : undefined} season={season} />;
+      return (
+        <Home
+          onStart={() => setView('era-select')}
+          onContinue={season ? () => setView('simulation') : undefined}
+          season={season}
+          themeMode={themeMode}
+          onThemeMode={changeThemeMode}
+        />
+      );
     }
     // Era choice — before the franchise picker, same "no season yet" reasoning
     // as team-confirm below.
@@ -868,13 +891,15 @@ export default function App() {
       {/* The confirmation screen already themes to the franchise being previewed:
           per the design, choosing the team is the exact moment the app gains
           color, so the accent lands one step before the season actually starts. */}
-      <ThemeProvider teamId={season?.userTeamId ?? (view === 'team-confirm' ? pendingTeamId : null)}>
+      {/* Keyed by the mode: switching it remounts the tree so every screen
+          re-reads the live palette (src/theme/tokens applyThemeMode). */}
+      <ThemeProvider key={paletteMode} teamId={season?.userTeamId ?? (view === 'team-confirm' ? pendingTeamId : null)}>
         {/* Only the bottom edge is inset. The redesign gives every screen a
             full-bleed hero in the team's colors that has to bleed UNDER the
             status bar, so the top inset is applied inside <Screen> (as padding
             over the gradient) rather than as a letterbox around it. */}
         <SafeAreaView className="flex-1" style={{ backgroundColor: COLORS.bg }} edges={['bottom']}>
-          <StatusBar style="light" />
+          <StatusBar style={paletteMode === 'light' ? 'dark' : 'light'} />
 
           <View style={{ flex: 1, flexDirection: desktop ? 'row' : 'column' }}>
             {/* PC: the bottom nav becomes a fixed sidebar. It follows the same

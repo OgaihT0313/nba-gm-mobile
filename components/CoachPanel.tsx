@@ -5,16 +5,17 @@ import { coachOf } from '../constants';
 import { coachFit, reputation, generateCandidates } from '../services/coachService';
 import Icon from './Icon';
 import { MonoLabel, Panel, CtaButton, GhostButton, BodyText } from './ui/kit';
-import { COLORS, FONT, RADIUS, withAlpha } from '../src/theme/tokens';
+import { COLORS, FONT, RADIUS, withAlpha, themeMode } from '../src/theme/tokens';
 import BottomSheet from './ui/BottomSheet';
 
-const FIT_META: { min: number; label: string; color: string }[] = [
+// A function, not a constant: COLORS changes with the light/dark mode.
+const fitTable = (): { min: number; label: string; color: string }[] => [
   { min: 1, label: 'Encaixe perfeito', color: COLORS.good },
-  { min: 0.75, label: 'Bom encaixe', color: '#A3E635' },
+  { min: 0.75, label: 'Bom encaixe', color: themeMode() === 'light' ? '#4D7C0F' : '#A3E635' },
   { min: 0.6, label: 'Encaixe razoável', color: COLORS.warn },
   { min: 0, label: 'Fora do sistema', color: COLORS.bad },
 ];
-const fitMeta = (fit: number) => FIT_META.find((f) => fit >= f.min)!;
+const fitMeta = (fit: number) => fitTable().find((f) => fit >= f.min)!;
 
 const AttrBar: React.FC<{ label: string; value: number; color: string }> = ({ label, value, color }) => (
   <View style={{ flex: 1, gap: 5 }}>
@@ -98,12 +99,12 @@ const CoachPanel: React.FC<CoachPanelProps> = ({ team, coaches, editable, onFire
       <Modal visible={confirmFire} transparent animationType="fade" onRequestClose={() => setConfirmFire(false)}>
         <Pressable accessible={false} className="flex-1 bg-black/70 items-center justify-center p-4" onPress={() => setConfirmFire(false)}>
           <Pressable className="bg-panel border border-line rounded-3xl p-6 w-full max-w-sm gap-4" onPress={(e) => e.stopPropagation()}>
-            <Text className="text-xl font-black uppercase italic tracking-tight text-white">Demitir técnico?</Text>
-            <Text className="text-sm text-slate-400 leading-5">
-              <Text className="font-bold text-white">{current?.name}</Text> deixa o comando do {team.name}. Você pode contratar um substituto na sequência.
+            <Text className="text-xl font-black uppercase italic tracking-tight text-fg">Demitir técnico?</Text>
+            <Text className="text-sm text-fg-dim leading-5">
+              <Text className="font-bold text-fg">{current?.name}</Text> deixa o comando do {team.name}. Você pode contratar um substituto na sequência.
             </Text>
             <View className="flex-row gap-3 justify-end">
-              <Pressable accessibilityRole="button" onPress={() => setConfirmFire(false)} className="px-4 py-2 rounded-xl"><Text className="text-sm font-bold text-slate-300">Cancelar</Text></Pressable>
+              <Pressable accessibilityRole="button" onPress={() => setConfirmFire(false)} className="px-4 py-2 rounded-xl"><Text className="text-sm font-bold text-fg-soft">Cancelar</Text></Pressable>
               <Pressable accessibilityRole="button"
                 onPress={() => { setConfirmFire(false); onFire?.(); openHiring(); }}
                 className="px-4 py-2 rounded-xl bg-red-600"

@@ -1,5 +1,6 @@
 import React from 'react';
 import { Svg, Path, Circle, Rect } from 'react-native-svg';
+import { COLORS } from '../src/theme/tokens';
 
 // RN port of the web line-icon set. Same 24x24 geometry and stroke language
 // (1.8 weight, round caps, no fill). On the web these stroked with `currentColor`
@@ -46,7 +47,7 @@ interface IconProps {
     strokeWidth?: number;
 }
 
-const Icon: React.FC<IconProps> = ({ name, size = 24, color = '#cbd5e1', strokeWidth = 1.8 }) => (
+const Icon: React.FC<IconProps> = ({ name, size = 24, color = COLORS.textSoft, strokeWidth = 1.8 }) => (
     <Svg
         viewBox="0 0 24 24"
         width={size}

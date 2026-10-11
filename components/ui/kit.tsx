@@ -2,7 +2,7 @@ import React from 'react';
 import { View, Text, Pressable, ViewStyle, TextStyle, StyleProp } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { COLORS, INK, RADIUS, FONT, tracking, withAlpha, onAccent } from '../../src/theme/tokens';
+import { COLORS, INK, RADIUS, FONT, tracking, withAlpha, onAccent, themeMode } from '../../src/theme/tokens';
 import { Image } from 'expo-image';
 import type { Player } from '../../types';
 import { getTeamAccent, teamsData, getPlayerImageUrl, PLAYER_PLACEHOLDER_SVG } from '../../constants';
@@ -300,9 +300,12 @@ export const TeamBadge: React.FC<{
 // The NBA CDN's "D" variant is drawn for dark backgrounds; the "L" one in the
 // data carries a light backing disc on several crests and leaves the Jazz
 // mark near-black, both wrong on this UI.
+// In the light mode the "L" crests are the right ones (they are drawn for a
+// light page); the backing disc that looked wrong on black is invisible there.
 const LOGO_BY_ID = new Map(teamsData.map((t) => [t.id, t.logoUrl?.replace('/global/L/', '/global/D/')]));
+const LOGO_LIGHT_BY_ID = new Map(teamsData.map((t) => [t.id, t.logoUrl?.replace('/global/D/', '/global/L/')]));
 export const TeamLogo: React.FC<{ teamId: string; size?: number; style?: StyleProp<any> }> = ({ teamId, size = 22, style }) => {
-  const uri = LOGO_BY_ID.get(teamId);
+  const uri = (themeMode() === 'light' ? LOGO_LIGHT_BY_ID : LOGO_BY_ID).get(teamId);
   if (!uri) return <View style={[{ width: size, height: size }, style]} />;
   return (
     <Image
@@ -356,14 +359,15 @@ export const Tag: React.FC<{
 
 export type ChipTone = 'good' | 'warn' | 'bad' | 'info' | 'neutral' | 'solid';
 
-const CHIP: Record<ChipTone, { bg: string; border: string; fg: string }> = {
+// A function, not a constant: COLORS changes with the light/dark mode.
+const chipColors = (): Record<ChipTone, { bg: string; border: string; fg: string }> => ({
   good: { bg: 'transparent', border: withAlpha(COLORS.good, 0.55), fg: COLORS.good },
   warn: { bg: 'transparent', border: withAlpha(COLORS.warn, 0.55), fg: COLORS.warn },
   bad: { bg: 'transparent', border: withAlpha(COLORS.bad, 0.55), fg: COLORS.bad },
   info: { bg: 'transparent', border: withAlpha(COLORS.east, 0.55), fg: COLORS.east },
   neutral: { bg: COLORS.surface2, border: COLORS.surface2, fg: COLORS.muted },
   solid: { bg: COLORS.ctaFill, border: COLORS.ctaFill, fg: COLORS.ctaInk },
-};
+});
 
 export const Chip: React.FC<{
   children: React.ReactNode;
@@ -373,7 +377,7 @@ export const Chip: React.FC<{
   mono?: boolean;
   style?: StyleProp<ViewStyle>;
 }> = ({ children, tone = 'neutral', onPress, size = 10, style }) => {
-  const c = CHIP[tone];
+  const c = chipColors()[tone];
   const fs = Math.max(11, size * 1.15);
   const inner = (
     <Text numberOfLines={1} style={{ fontFamily: FONT.cond700, fontSize: fs, color: c.fg, letterSpacing: 0.8, textTransform: 'uppercase' }}>

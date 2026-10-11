@@ -9,7 +9,8 @@ type PlayerMap = { [key: string]: Player };
 const TEAM_LABELS = ['1º Time', '2º Time', '3º Time'];
 // Gold, then the neutral ramp: gold is the trophy color, and only the first
 // team is a trophy.
-const TEAM_TONES = [COLORS.gold, COLORS.textSoft, COLORS.muted];
+// A function, not a constant: COLORS changes with the light/dark mode.
+const teamTones = () => [COLORS.gold, COLORS.textSoft, COLORS.muted];
 
 const Row: React.FC<{ id: string; players: PlayerMap; leagueTeams: Team[]; last: boolean }> = ({ id, players, leagueTeams, last }) => {
   const p = players[id];
@@ -42,7 +43,7 @@ const AllNbaTeams: React.FC<{ teams: string[][]; players: PlayerMap; leagueTeams
     <View style={{ flexDirection: columns ? 'row' : 'column', gap: 10 }}>
     {teams.map((team, i) => (
       <View key={i} style={{ flex: columns ? 1 : undefined, minWidth: 0, backgroundColor: COLORS.surface, borderRadius: 16, paddingHorizontal: 14, paddingTop: 12, paddingBottom: 4 }}>
-        <Text style={{ fontFamily: FONT.cond700, fontSize: 11, letterSpacing: 1.5, color: TEAM_TONES[i] ?? COLORS.muted, textTransform: 'uppercase' }}>
+        <Text style={{ fontFamily: FONT.cond700, fontSize: 11, letterSpacing: 1.5, color: teamTones()[i] ?? COLORS.muted, textTransform: 'uppercase' }}>
           {TEAM_LABELS[i] ?? `${i + 1}º Time`}
         </Text>
         {team.map((id, j) => <Row key={id} id={id} players={players} leagueTeams={leagueTeams} last={j === team.length - 1} />)}

@@ -6,7 +6,7 @@ import { Team, Player } from '../types';
 import { getPlayerImageUrl, PLAYER_PLACEHOLDER_SVG, getPlayerPositions, POSITIONS } from '../constants';
 import { simulationEngine, LineupSlot } from '../services/simulationService';
 import { useTheme } from '../src/theme/ThemeProvider';
-import { FONT } from '../src/theme/tokens';
+import { COLORS, FONT } from '../src/theme/tokens';
 import { useDesktop } from './desktop/useDesktop';
 
 interface StartersCourtProps {
@@ -167,8 +167,8 @@ const StartersCourt: React.FC<StartersCourtProps> = ({ team, players, onSetStart
   return (
     <View className="bg-panel rounded-card border border-line p-5 gap-5">
       <View className="flex-row items-center justify-between gap-2">
-        <Text className="text-lg font-bold text-white">{editable ? 'Titulares' : 'Quinteto titular'}</Text>
-        <Text className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">
+        <Text className="text-lg font-bold text-fg">{editable ? 'Titulares' : 'Quinteto titular'}</Text>
+        <Text className="text-[10px] font-bold text-fg-dim uppercase tracking-widest">
           {editable ? 'Toque pra trocar' : 'Toque pra ver o jogador'}
         </Text>
       </View>
@@ -199,12 +199,12 @@ const StartersCourt: React.FC<StartersCourtProps> = ({ team, players, onSetStart
                   <Image source={{ uri: getPlayerImageUrl(player) }} placeholder={{ uri: PLAYER_PLACEHOLDER_SVG }} style={{ width: '100%', height: '100%' }} contentFit="cover" />
                 ) : (
                   <View className="w-full h-full items-center justify-center">
-                    <Text className="text-slate-500 text-[10px] font-black">?</Text>
+                    <Text className="text-fg-dim text-[10px] font-black">?</Text>
                   </View>
                 )}
               </View>
               <View className="bg-ink border border-line rounded-full px-1.5" style={{ marginTop: -8 }}>
-                <Text className="font-black text-white" style={{ fontSize: desktop ? 12 : 9 }}>{player ? player.ovr : '-'}</Text>
+                <Text className="font-black text-fg" style={{ fontSize: desktop ? 12 : 9 }}>{player ? player.ovr : '-'}</Text>
               </View>
               <View style={{ marginTop: 3, paddingHorizontal: 6, paddingVertical: 1, borderRadius: 6, backgroundColor: 'rgba(11,11,13,0.82)', alignItems: 'center' }}>
                 <Text style={{ fontFamily: FONT.cond700, fontSize: desktop ? 10 : 9, letterSpacing: 1, color: '#C9C6C0' }}>{slot?.bucket ?? ''}</Text>
@@ -222,7 +222,7 @@ const StartersCourt: React.FC<StartersCourtProps> = ({ team, players, onSetStart
       {substitutes.length > 0 ? (
         <View className="gap-1 bg-amber-500/5 border border-amber-500/20 rounded-2xl p-3">
           {substitutes.map((s) => (
-            <Text key={s.pos} className="text-[10px] font-bold text-amber-500 uppercase tracking-wide">
+            <Text key={s.pos} className="text-[10px] font-bold uppercase tracking-wide" style={{ color: COLORS.warn }}>
               {s.bucket}: {players[s.designatedId!]?.name} {substituteReason(team, s)} — {players[s.playerId!]?.name} entra no lugar
             </Text>
           ))}
@@ -231,7 +231,7 @@ const StartersCourt: React.FC<StartersCourtProps> = ({ team, players, onSetStart
 
       {editable && activePos ? (
         <View className="bg-sunken rounded-2xl border border-line p-4 gap-2">
-          <Text className="text-[10px] font-black text-slate-500 uppercase tracking-widest">
+          <Text className="text-[10px] font-black text-fg-dim uppercase tracking-widest">
             Escolher titular — {(activeBucket && POSITIONS[activeBucket]) || activeBucket}
           </Text>
           {candidatesFor(activeBucket || '').map((p) => {
@@ -245,14 +245,14 @@ const StartersCourt: React.FC<StartersCourtProps> = ({ team, players, onSetStart
               >
                 <View className="flex-row items-center gap-2 flex-1 min-w-0">
                   <Image source={{ uri: getPlayerImageUrl(p) }} placeholder={{ uri: PLAYER_PLACEHOLDER_SVG }} style={{ width: 28, height: 28, borderRadius: 14, backgroundColor: '#1e293b' }} contentFit="cover" />
-                  <Text className="font-bold text-xs text-white flex-1" numberOfLines={1}>{p.name}</Text>
+                  <Text className="font-bold text-xs text-fg flex-1" numberOfLines={1}>{p.name}</Text>
                 </View>
                 <Text className="font-mono-bold text-xs text-accent">{p.ovr}</Text>
               </Pressable>
             );
           })}
           {candidatesFor(activeBucket || '').length === 0 ? (
-            <Text className="text-slate-500 text-xs italic">Nenhum jogador desse elenco joga nessa posição.</Text>
+            <Text className="text-fg-dim text-xs italic">Nenhum jogador desse elenco joga nessa posição.</Text>
           ) : null}
         </View>
       ) : null}

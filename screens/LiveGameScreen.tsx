@@ -150,7 +150,7 @@ const LiveGameScreen: React.FC<LiveGameScreenProps> = ({
               style={{ flex: 1, borderRadius: 14, paddingVertical: desktop ? 16 : 12, paddingHorizontal: desktop ? 14 : 10, gap: 3, backgroundColor: on ? COLORS.ctaFill : COLORS.surface }}
             >
               <Text style={{ fontFamily: FONT.cond800, fontSize: desktop ? 19 : 16, lineHeight: desktop ? 19 : 16, color: on ? COLORS.ctaInk : COLORS.text, textTransform: 'uppercase' }}>{meta.label}</Text>
-              <Text style={{ fontFamily: FONT.body500, fontSize: 11.5, lineHeight: 15, color: on ? 'rgba(11,11,13,0.7)' : COLORS.muted }} numberOfLines={2}>
+              <Text style={{ fontFamily: FONT.body500, fontSize: 11.5, lineHeight: 15, color: on ? withAlpha(COLORS.ctaInk, 0.7) : COLORS.muted }} numberOfLines={2}>
                 {on ? 'Ativa neste quarto' : desktop ? 'Clique para usar' : 'Toque para usar'}
               </Text>
             </Pressable>

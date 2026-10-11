@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { View, Text, Pressable } from 'react-native';
 
 import { SeasonState } from '../types';
-import { COLORS, FONT } from '../src/theme/tokens';
+import { COLORS, FONT, onAccent } from '../src/theme/tokens';
 import Screen, { Body } from '../components/ui/Screen';
 import { ScreenTitle, BodyText, Panel } from '../components/ui/kit';
 import { useDesktop } from '../components/desktop/useDesktop';
@@ -14,7 +14,8 @@ import LeadersPanel from '../components/LeadersPanel';
 // the active conference painted in its own color — over one table. Opens on the
 // user's own conference.
 
-const TABS: { id: 'West' | 'East' | 'leaders'; label: string; color: string }[] = [
+// A function, not a constant: COLORS changes with the light/dark mode.
+const standingsTabs = (): { id: 'West' | 'East' | 'leaders'; label: string; color: string }[] => [
   { id: 'West', label: 'Oeste', color: COLORS.west },
   { id: 'East', label: 'Leste', color: COLORS.east },
   { id: 'leaders', label: 'Líderes', color: COLORS.lineStrong },
@@ -54,7 +55,7 @@ const StandingsScreen: React.FC<{ season: SeasonState }> = ({ season }) => {
 
       <Body top={0} gap={12}>
         <View className="flex-row" style={{ gap: 4, backgroundColor: COLORS.surface, borderRadius: 12, padding: 4 }}>
-          {TABS.map((t) => {
+          {standingsTabs().map((t) => {
             const on = t.id === tab;
             return (
               <Pressable
@@ -65,7 +66,7 @@ const StandingsScreen: React.FC<{ season: SeasonState }> = ({ season }) => {
                 className="active:opacity-75"
                 style={{ flex: 1, height: 38, borderRadius: 9, alignItems: 'center', justifyContent: 'center', backgroundColor: on ? t.color : 'transparent' }}
               >
-                <Text style={{ fontFamily: FONT.cond800, fontSize: 14, letterSpacing: 1.4, color: on ? '#fff' : COLORS.dim, textTransform: 'uppercase' }}>{t.label}</Text>
+                <Text style={{ fontFamily: FONT.cond800, fontSize: 14, letterSpacing: 1.4, color: on ? onAccent(t.color) : COLORS.dim, textTransform: 'uppercase' }}>{t.label}</Text>
               </Pressable>
             );
           })}

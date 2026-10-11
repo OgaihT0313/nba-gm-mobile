@@ -2,6 +2,8 @@
 import type { Player, Team, PlayerAttributes, DraftPickAsset, Coach } from './types';
 import rawPlayersData from './data/players.json';
 import rawTeamsData from './data/teams.json';
+import { themeMode } from './src/theme/tokens';
+
 
 // --- ASSETS AND CONFIGURATION ---
 // Non-base64 (percent-encoded) data URIs decode fine in a browser, but Android's
@@ -68,12 +70,14 @@ export const getPlayerAttributes = (p: Player): PlayerAttributes =>
 
 // Green (strong) → slate (average) → red (weak) tint for an attribute value,
 // so the breakdown reads at a glance. Tuned to the 60-99 rating band.
+// Darker steps in the light mode: these were picked for a black page.
 export const attributeColor = (value: number): string => {
-    if (value >= 88) return '#22c55e';
-    if (value >= 80) return '#4ade80';
-    if (value >= 73) return '#a3a3a3';
-    if (value >= 66) return '#fbbf24';
-    return '#f87171';
+    const light = themeMode() === 'light';
+    if (value >= 88) return light ? '#15803d' : '#22c55e';
+    if (value >= 80) return light ? '#16a34a' : '#4ade80';
+    if (value >= 73) return light ? '#6b6b6b' : '#a3a3a3';
+    if (value >= 66) return light ? '#b45309' : '#fbbf24';
+    return light ? '#dc2626' : '#f87171';
 };
 
 // 2025-26 real NBA salary cap. Player salaries themselves are a synthetic

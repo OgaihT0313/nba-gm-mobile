@@ -18,7 +18,8 @@
 // Key names from the old system are kept (panel, line, sunken, cta...) so every
 // screen moved to the new palette at once; the new names are the ones to use.
 
-export const COLORS = {
+/** The dark palette — the "Transmissão" look, and the default. */
+const DARK_COLORS = {
   /** Page background. */
   bg: '#0B0B0D',
   /** Cards and panels. */
@@ -85,10 +86,69 @@ export const COLORS = {
   muted: '#9B9893',
   dim: '#77757F',
   faint: '#66645F',
-} as const;
+};
 
-/** Text tiers. */
-export const INK = {
+/**
+ * The light palette (2026-10-11). Same keys, same roles: warm off-white page,
+ * white cards, near-black main action, and the data colors darkened enough to
+ * read on white (the dark theme's #3DD68C green or #E8C26A gold wash out).
+ * Team colors are not here — they come from the franchises in either mode.
+ */
+const LIGHT_COLORS: typeof DARK_COLORS = {
+  bg: '#F4F2EE',
+  surface: '#FFFFFF',
+  panel: '#FFFFFF',
+  surface2: '#ECE9E3',
+  sunken: '#ECE9E3',
+  ghost: '#ECE9E3',
+  line: '#E2DED7',
+  lineSoft: '#ECE9E3',
+  lineStrong: '#D6D2CA',
+  ghostBorder: '#C9C5BD',
+  navBg: '#FFFFFF',
+  navLine: '#E2DED7',
+  navIdle: '#7A776F',
+  navIdleChip: '#ECE9E3',
+  dockBg: '#FAF9F6',
+  ctaFill: '#141417',
+  ctaInk: '#F7F5F1',
+  cta: '#D93A40',
+  ctaDark: '#B02E33',
+  west: '#D93A40',
+  east: '#2F78DB',
+  westLine: '#F2C9CA',
+  eastLine: '#C7DBF6',
+  good: '#127A45',
+  goodSoft: '#127A45',
+  neutral: '#6E6B65',
+  warn: '#A8690C',
+  bad: '#D93A40',
+  badSoft: '#D93A40',
+  info: '#2F78DB',
+  gold: '#9C7420',
+  goldDeep: '#9A7220',
+  goldBg: '#FBF6EA',
+  goldPanel: '#F5ECD6',
+  goldLine: '#E8DBBA',
+  goldMeta: '#8A7A55',
+  goldInk: '#1A1405',
+  text: '#141417',
+  textSoft: '#3A3A40',
+  textDim: '#6E6B65',
+  muted: '#6E6B65',
+  dim: '#7A776F',
+  faint: '#858178',
+};
+
+/**
+ * The live palette. Every screen reads COLORS.x at render time, so switching
+ * the mode copies the other palette into this object and re-renders the app
+ * (applyThemeMode + the root key in App.tsx). Never cache a COLORS value in a
+ * module-level constant: it would keep the old mode's color.
+ */
+export const COLORS: { -readonly [K in keyof typeof DARK_COLORS]: string } = { ...DARK_COLORS };
+
+const DARK_INK = {
   /** Body copy. */
   body: '#9B9893',
   /** Section / field label. */
@@ -99,7 +159,28 @@ export const INK = {
   meta: '#77757F',
   /** Axis ticks, footnotes, placeholders. */
   faint: '#66645F',
-} as const;
+};
+const LIGHT_INK: typeof DARK_INK = {
+  body: '#55524C',
+  label: '#6E6B65',
+  labelOnHero: 'rgba(255,255,255,0.82)',
+  meta: '#7A776F',
+  faint: '#858178',
+};
+
+/** Text tiers. Live, like COLORS. */
+export const INK: { -readonly [K in keyof typeof DARK_INK]: string } = { ...DARK_INK };
+
+export type ThemeMode = 'dark' | 'light';
+let currentMode: ThemeMode = 'dark';
+export const themeMode = (): ThemeMode => currentMode;
+
+/** Switches the live palette. The caller re-renders the tree (App.tsx). */
+export const applyThemeMode = (mode: ThemeMode) => {
+  currentMode = mode;
+  Object.assign(COLORS, mode === 'light' ? LIGHT_COLORS : DARK_COLORS);
+  Object.assign(INK, mode === 'light' ? LIGHT_INK : DARK_INK);
+};
 
 /** Font families (loaded in App.tsx). A custom family never synthesizes weight. */
 export const FONT = {
@@ -150,7 +231,9 @@ export const luminance = (hex: string): number => {
  * most of the rest are dark enough that near-black does — so the choice has to
  * be made per team, not once.
  */
-export const onAccent = (hex: string): string => (luminance(hex) > 0.6 ? COLORS.bg : '#ffffff');
+// Absolute black, not COLORS.bg: in the light mode the page background is
+// off-white, and a light team color needs dark ink in either mode.
+export const onAccent = (hex: string): string => (luminance(hex) > 0.6 ? '#0B0B0D' : '#ffffff');
 
 /** Lighten toward white by `amount` (0..1). */
 export const lighten = (hex: string, amount: number): string => {

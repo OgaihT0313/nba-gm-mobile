@@ -3,7 +3,7 @@ import { View, Text, Pressable, ScrollView } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { ERA_GROUPS, eraById, type EraGroup } from '../data/eras';
-import { COLORS, FONT } from '../src/theme/tokens';
+import { COLORS, FONT, withAlpha } from '../src/theme/tokens';
 import { Eyebrow, HeroTitle, BodyText } from '../components/ui/kit';
 import { useDesktop } from '../components/desktop/useDesktop';
 import { Hover, BackLink } from '../components/desktop/kit';
@@ -87,11 +87,11 @@ const EraSelect: React.FC<EraSelectProps> = ({ onSelect, onBack }) => {
           <ScrollView style={{ width: 560, flexGrow: 0, flexShrink: 0 }} contentContainerStyle={{ gap: 8 }}>
             <Hover onPress={() => onSelect(null)} accessibilityLabel="2025-26" hoverStyle={{ opacity: 0.9 }} style={{ backgroundColor: COLORS.ctaFill, borderRadius: 18, padding: 18, gap: 4 }}>
               <View className="flex-row justify-between">
-                <Text style={{ fontFamily: FONT.cond700, fontSize: 11, letterSpacing: 1.5, color: 'rgba(11,11,13,0.6)' }}>LIGA ATUAL</Text>
-                <Text style={{ fontFamily: FONT.cond700, fontSize: 11, letterSpacing: 1.5, color: 'rgba(11,11,13,0.6)' }}>PADRÃO</Text>
+                <Text style={{ fontFamily: FONT.cond700, fontSize: 11, letterSpacing: 1.5, color: withAlpha(COLORS.ctaInk, 0.6) }}>LIGA ATUAL</Text>
+                <Text style={{ fontFamily: FONT.cond700, fontSize: 11, letterSpacing: 1.5, color: withAlpha(COLORS.ctaInk, 0.6) }}>PADRÃO</Text>
               </View>
               <Text style={{ fontFamily: FONT.cond800, fontSize: 48, lineHeight: 48, color: COLORS.ctaInk }}>2025-26</Text>
-              <Text style={{ fontFamily: FONT.body500, fontSize: 13, color: 'rgba(11,11,13,0.7)' }}>Elencos reais de hoje</Text>
+              <Text style={{ fontFamily: FONT.body500, fontSize: 13, color: withAlpha(COLORS.ctaInk, 0.7) }}>Elencos reais de hoje</Text>
             </Hover>
             {ERA_GROUPS.map((group) => {
               const on = group.id === sel.id;
@@ -179,11 +179,11 @@ const EraSelect: React.FC<EraSelectProps> = ({ onSelect, onBack }) => {
         <Pressable accessibilityRole="button" accessibilityLabel="2025-26" onPress={() => onSelect(null)} className="active:opacity-80">
           <View style={{ backgroundColor: COLORS.ctaFill, borderRadius: 18, padding: 16, gap: 4 }}>
             <View className="flex-row justify-between">
-              <Text style={{ fontFamily: FONT.cond700, fontSize: 11, letterSpacing: 1.5, color: 'rgba(11,11,13,0.6)' }}>LIGA ATUAL</Text>
-              <Text style={{ fontFamily: FONT.cond700, fontSize: 11, letterSpacing: 1.5, color: 'rgba(11,11,13,0.6)' }}>PADRÃO</Text>
+              <Text style={{ fontFamily: FONT.cond700, fontSize: 11, letterSpacing: 1.5, color: withAlpha(COLORS.ctaInk, 0.6) }}>LIGA ATUAL</Text>
+              <Text style={{ fontFamily: FONT.cond700, fontSize: 11, letterSpacing: 1.5, color: withAlpha(COLORS.ctaInk, 0.6) }}>PADRÃO</Text>
             </View>
             <Text style={{ fontFamily: FONT.cond800, fontSize: 40, lineHeight: 40, color: COLORS.ctaInk }}>2025-26</Text>
-            <Text style={{ fontFamily: FONT.body500, fontSize: 13, color: 'rgba(11,11,13,0.7)' }}>Elencos reais de hoje</Text>
+            <Text style={{ fontFamily: FONT.body500, fontSize: 13, color: withAlpha(COLORS.ctaInk, 0.7) }}>Elencos reais de hoje</Text>
           </View>
         </Pressable>
 

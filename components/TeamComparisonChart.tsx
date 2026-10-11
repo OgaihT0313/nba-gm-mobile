@@ -61,7 +61,7 @@ const TeamComparisonChart: React.FC<TeamComparisonChartProps> = ({ team1, team2,
     return (
       <View className="w-full bg-panel p-4 rounded-2xl border border-line">
         <View className="h-32 items-center justify-center border-2 border-dashed border-line rounded-2xl px-6">
-          <Text className="text-slate-500 font-bold uppercase tracking-widest text-xs text-center">
+          <Text className="text-fg-dim font-bold uppercase tracking-widest text-xs text-center">
             Selecione um rival para comparar os elencos
           </Text>
         </View>
@@ -79,11 +79,11 @@ const TeamComparisonChart: React.FC<TeamComparisonChartProps> = ({ team1, team2,
       <View className="flex-row items-center justify-center gap-5 flex-wrap">
         <View className="flex-row items-center gap-2">
           <View className="w-3 h-3 rounded-full" style={{ backgroundColor: accent1.primary }} />
-          <Text className="text-xs font-bold text-white" numberOfLines={1}>{team1.name}</Text>
+          <Text className="text-xs font-bold text-fg" numberOfLines={1}>{team1.name}</Text>
         </View>
         <View className="flex-row items-center gap-2">
           <View className="w-3 h-3 rounded-full" style={{ backgroundColor: accent2.primary }} />
-          <Text className="text-xs font-bold text-white" numberOfLines={1}>{team2.name}</Text>
+          <Text className="text-xs font-bold text-fg" numberOfLines={1}>{team2.name}</Text>
         </View>
       </View>
 
@@ -93,7 +93,7 @@ const TeamComparisonChart: React.FC<TeamComparisonChartProps> = ({ team1, team2,
           const v2 = r2[cat.key];
           return (
             <View key={cat.key}>
-              <Text className="text-center text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-1.5">{cat.label}</Text>
+              <Text className="text-center text-[10px] font-bold uppercase tracking-widest text-fg-dim mb-1.5">{cat.label}</Text>
               <View className="flex-row items-center gap-2">
                 {/* left side grows right-to-left */}
                 <View className="flex-1 flex-row items-center justify-end gap-2">

@@ -2,6 +2,7 @@ import React, { createContext, useContext } from 'react';
 import { View } from 'react-native';
 import { vars } from 'nativewind';
 import { getTeamAccent, darkenHex } from '../../constants';
+import { COLORS } from './tokens';
 
 // Per-team dynamic theming, ported from the web app's `--accent` CSS custom
 // properties. NativeWind's `vars()` injects the same custom properties via a
@@ -32,6 +33,17 @@ export const ThemeProvider: React.FC<{ teamId: string | null; children: React.Re
     '--accent': accent.primary,
     '--accent-dark': accent.dark,
     '--accent-secondary': accent.secondary,
+    // The surface ramp the tailwind classes (bg-ink, bg-panel...) read; COLORS
+    // is the live palette, so these follow the light/dark mode.
+    '--c-ink': COLORS.bg,
+    '--c-panel': COLORS.panel,
+    '--c-line': COLORS.line,
+    '--c-sunken': COLORS.sunken,
+    '--c-ghost': COLORS.ghost,
+    '--c-cta': COLORS.cta,
+    '--c-text': COLORS.text,
+    '--c-text-soft': COLORS.textSoft,
+    '--c-dim': COLORS.dim,
   });
 
   return (

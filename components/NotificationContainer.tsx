@@ -16,11 +16,12 @@ import { useDesktop } from './desktop/useDesktop';
 //
 // "Transmissão" style: the same lower-third as the 3D HUD's play toast — a dark
 // card, a colored inset stroke, a condensed caps kicker over the sentence.
-const TONE: Record<string, string> = {
+// A function, not a constant: COLORS changes with the light/dark mode.
+const toneColors = (): Record<string, string> => ( {
   trade: COLORS.east,
   error: COLORS.bad,
   info: COLORS.muted,
-};
+});
 
 /** Messages arrive as "🔁 TRADE DEADLINE! Miami envia…": drop the emoji and lift
  *  the shouted lead-in into the kicker. Anything else is all body. */
@@ -39,7 +40,7 @@ const NotificationContainer: React.FC<{ notifications: NotificationType[]; onRem
   return (
     <View style={{ pointerEvents: 'box-none', position: 'absolute', top: insets.top + (desktop ? 20 : 8), ...(desktop ? { right: 24, width: 380 } : { left: 12, right: 12 }), zIndex: 50, gap: 6 }}>
       {notifications.slice(-3).map((n) => {
-        const color = TONE[n.type] || TONE.info;
+        const color = toneColors()[n.type] || toneColors().info;
         const { kicker, body } = split(n.message);
         return (
           <FadeInView key={n.id}>

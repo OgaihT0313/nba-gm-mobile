@@ -63,7 +63,7 @@ const RotationPanel: React.FC<RotationPanelProps> = ({ team, players, onSetRotat
                 {/* adjustsFontSizeToFit, not truncation: a rotation list where
                     two names both read "Shai Gilgeous-A…" is unusable. */}
                 <Text
-                  className="font-bold text-white"
+                  className="font-bold text-fg"
                   style={{ fontSize: 12.5 }}
                   numberOfLines={1}
                   adjustsFontSizeToFit
@@ -112,7 +112,7 @@ const Stepper: React.FC<{ label: string; disabled: boolean; onPress: () => void 
       backgroundColor: COLORS.line, opacity: disabled ? 0.4 : 1,
     }}
   >
-    <Text className="font-black" style={{ fontSize: 17, color: '#fff', lineHeight: 20 }}>{label}</Text>
+    <Text className="font-black" style={{ fontSize: 17, color: COLORS.text, lineHeight: 20 }}>{label}</Text>
   </Pressable>
 );
 

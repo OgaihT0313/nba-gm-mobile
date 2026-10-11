@@ -696,7 +696,7 @@ const AssetSheet: React.FC<{
                 contentFit="cover"
               />
               <View style={{ flex: 1 }}>
-                <Text className="font-bold text-white" style={{ fontSize: 12 }} numberOfLines={1}>{p.name}</Text>
+                <Text className="font-bold text-fg" style={{ fontSize: 12 }} numberOfLines={1}>{p.name}</Text>
                 <MonoLabel size={9.5} color={INK.meta} style={{ letterSpacing: 0, marginTop: 2 }}>
                   {formatPositions(p)} · {money(p.salary)}
                 </MonoLabel>
@@ -735,7 +735,7 @@ const AssetSheet: React.FC<{
                     <MonoLabel size={9} color={COLORS.warn} style={{ letterSpacing: 0 }}>1ª</MonoLabel>
                   </View>
                   <View style={{ flex: 1 }}>
-                    <Text className="font-bold text-white" style={{ fontSize: 12 }}>
+                    <Text className="font-bold text-fg" style={{ fontSize: 12 }}>
                       1ª rodada {pick.originalTeamId.toUpperCase()}
                     </Text>
                     <MonoLabel size={9.5} color={INK.meta} style={{ letterSpacing: 0, marginTop: 2 }}>
@@ -941,7 +941,7 @@ const OfferSide: React.FC<{
             backgroundColor: COLORS.panel, borderWidth: 1, borderColor: COLORS.line,
           }}
         >
-          <Text className="font-bold text-white" style={{ fontSize: 11 }} numberOfLines={1}>{p.name}</Text>
+          <Text className="font-bold text-fg" style={{ fontSize: 11 }} numberOfLines={1}>{p.name}</Text>
           <Stat size={10} color={attributeColor(p.ovr)}>{p.ovr}</Stat>
         </Pressable>
       ))}

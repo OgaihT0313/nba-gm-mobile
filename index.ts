@@ -3,6 +3,11 @@ import { registerRootComponent } from 'expo';
 
 import App from './App';
 import { ErrorBoundary } from './components/ErrorBoundary';
+import { applyThemeMode } from './src/theme/tokens';
+import { loadThemeMode } from './services/prefsService';
+
+// The saved light/dark mode goes into the live palette before anything renders.
+applyThemeMode(loadThemeMode());
 
 function Root() {
   return React.createElement(ErrorBoundary, null, React.createElement(App));

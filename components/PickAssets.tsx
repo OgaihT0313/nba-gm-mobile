@@ -3,17 +3,19 @@ import { View, Text, Pressable } from 'react-native';
 import { Team, DraftPickAsset } from '../types';
 import { picksOf } from '../constants';
 import { projectedPickSlot } from '../services/draftService';
+import { COLORS } from '../src/theme/tokens';
 
 // A team's draft-pick inventory. The number that matters isn't the pick itself
 // but where it would land TODAY (projectedPickSlot): a rebuilding team's future
 // first is a lottery ticket, a contender's is the 28th pick. Own picks read
 // plainly; acquired ones lead with the team whose record decides the slot.
 
+// Palette colors (read at render), so they hold up in the light mode too.
 const slotTint = (slot: number) =>
-  slot <= 3 ? { label: 'Loteria alta', color: '#34d399' }
-    : slot <= 13 ? { label: 'Loteria', color: '#38bdf8' }
-      : slot <= 22 ? { label: 'Meio', color: '#fbbf24' }
-        : { label: 'Fim', color: '#94a3b8' };
+  slot <= 3 ? { label: 'Loteria alta', color: COLORS.good }
+    : slot <= 13 ? { label: 'Loteria', color: COLORS.info }
+      : slot <= 22 ? { label: 'Meio', color: COLORS.warn }
+        : { label: 'Fim', color: COLORS.dim };
 
 export const PickChip: React.FC<{
   pick: DraftPickAsset;
@@ -39,14 +41,14 @@ export const PickChip: React.FC<{
       style={selected && accent ? { backgroundColor: `${accent}33`, borderColor: accent } : undefined}
     >
       <View className="items-center w-11">
-        <Text className="text-[11px] font-mono-bold text-white">#{slot + 1}</Text>
+        <Text className="text-[11px] font-mono-bold text-fg">#{slot + 1}</Text>
         <Text className="text-[7px] font-black uppercase tracking-widest" style={{ color: tint.color }}>proj.</Text>
       </View>
       <View className="flex-1 min-w-0">
-        <Text className="text-[11px] font-bold text-white" numberOfLines={1}>
+        <Text className="text-[11px] font-bold text-fg" numberOfLines={1}>
           {own ? 'Seu 1º round' : `1º round do ${origin?.name ?? pick.originalTeamId}`}
         </Text>
-        <Text className="text-[9px] font-bold text-slate-500" numberOfLines={1}>
+        <Text className="text-[9px] font-bold text-fg-dim" numberOfLines={1}>
           {yearsOut <= 0 ? 'este draft' : yearsOut === 1 ? 'próximo draft' : `em ${yearsOut} drafts`}
           {' · '}{tint.label}
           {pick.protection ? ` · top ${pick.protection} protegido` : ''}
@@ -68,11 +70,11 @@ const PickAssets: React.FC<{
   return (
     <View className="gap-2">
       <View className="flex-row items-center justify-between">
-        <Text className="text-xs font-black text-slate-500 uppercase tracking-[0.3em]">{title}</Text>
-        <Text className="text-[10px] font-mono-bold text-slate-500">{picks.length}</Text>
+        <Text className="text-xs font-black text-fg-dim uppercase tracking-[0.3em]">{title}</Text>
+        <Text className="text-[10px] font-mono-bold text-fg-dim">{picks.length}</Text>
       </View>
       {picks.length === 0 ? (
-        <Text className="text-[11px] text-slate-500 italic">
+        <Text className="text-[11px] text-fg-dim italic">
           Nenhum pick em mão — todos foram trocados.
         </Text>
       ) : (

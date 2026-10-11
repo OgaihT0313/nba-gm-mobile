@@ -2,6 +2,7 @@ import React from 'react';
 import { View, Text, Pressable, ScrollView } from 'react-native';
 
 import { deleteSave } from '../services/saveService';
+import { COLORS } from '../src/theme/tokens';
 
 interface Props {
   children: React.ReactNode;
@@ -33,7 +34,9 @@ export class ErrorBoundary extends React.Component<Props, State> {
     if (!error) return this.props.children;
 
     return (
-      <View className="flex-1 bg-ink items-center justify-center px-6">
+      // Rendered outside the ThemeProvider, so the bg-ink class variable isn't
+      // set here: the color comes straight from the live palette.
+      <View className="flex-1 items-center justify-center px-6" style={{ backgroundColor: COLORS.bg }}>
         <Text className="text-white font-display text-lg uppercase tracking-tight mb-2">
           Algo deu errado
         </Text>

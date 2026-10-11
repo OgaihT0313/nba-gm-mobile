@@ -47,12 +47,13 @@ const SORTS: { key: SortKey; label: string; value: (p: Player) => number }[] = [
 // never numeric — the sim's interest model is a yes/no, so showing a fake
 // percentage would be inventing precision that doesn't exist.
 type Standing = { label: string; color: string; fill: number };
-const STANDING = {
+// A function, not a constant: COLORS changes with the light/dark mode.
+const standingMeta = () => ( {
   wants: { label: 'Quer vir', color: COLORS.good, fill: 0.9 },
   open: { label: 'Disponível', color: COLORS.textSoft, fill: 0.55 },
   refuses: { label: 'Sem interesse', color: COLORS.dim, fill: 0.18 },
   noRoom: { label: 'Não cabe', color: COLORS.warn, fill: 0.12 },
-} satisfies Record<string, Standing>;
+} satisfies Record<string, Standing>);
 
 const FreeAgency: React.FC<FreeAgencyProps> = ({ season, onSign, onStartSeason }) => {
   const { accent } = useTheme();
@@ -156,12 +157,12 @@ const FreeAgency: React.FC<FreeAgencyProps> = ({ season, onSign, onStartSeason }
     const route = legality.legal ? signingRoute(userTeam, player, players) : null;
 
     const standing: Standing = !legality.legal
-      ? STANDING.noRoom
+      ? standingMeta().noRoom
       : !interest.willing
-        ? STANDING.refuses
+        ? standingMeta().refuses
         : fillsHole
-          ? STANDING.wants
-          : STANDING.open;
+          ? standingMeta().wants
+          : standingMeta().open;
     const canSign = legality.legal && interest.willing;
     // The blocking reason, whichever gate is actually closed.
     const reason = !legality.legal ? legality.reason : !interest.willing ? interest.reason : undefined;

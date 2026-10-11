@@ -75,7 +75,7 @@ const LeadersPanel: React.FC<LeadersPanelProps> = ({ players, teams, userTeamId,
                 contentFit="cover"
               />
               <View style={{ flex: 1 }} className="flex-row items-baseline">
-                <Text className="font-bold text-white" style={{ fontSize: 11.5, flexShrink: 1 }} numberOfLines={1}>
+                <Text className="font-bold text-fg" style={{ fontSize: 11.5, flexShrink: 1 }} numberOfLines={1}>
                   {leader.name}
                 </Text>
                 <MonoLabel size={9} color={mine ? COLORS.info : INK.meta} style={{ marginLeft: 6, letterSpacing: 0 }}>

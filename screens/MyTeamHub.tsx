@@ -182,7 +182,7 @@ const MyTeamHub: React.FC<MyTeamHubProps> = ({
           >
             <HeroTitle size={19}>Dispensar jogador?</HeroTitle>
             <Text style={{ fontSize: 12.5, lineHeight: 19, color: INK.body }}>
-              <Text className="font-bold text-white">{confirmWaive?.name}</Text> vira agente livre e abre uma vaga no elenco.
+              <Text className="font-bold text-fg">{confirmWaive?.name}</Text> vira agente livre e abre uma vaga no elenco.
               {confirmWaive && confirmWaive.contractYears > 0
                 ? ` O contrato continua sendo pago: ${money(confirmWaive.salary)} por ano fica na sua folha como dinheiro morto por mais ${confirmWaive.contractYears} ${confirmWaive.contractYears === 1 ? 'temporada' : 'temporadas'}.`
                 : ' Ele está sem contrato, então não sobra nada na folha.'}

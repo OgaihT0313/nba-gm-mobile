@@ -29,12 +29,19 @@ module.exports = {
         // source of truth — these mirror it for the class-based spots).
         // "Transmissão" surface ramp (src/theme/tokens.ts is the source of
         // truth — these mirror it for the class-based spots).
-        ink: '#0B0B0D',
-        panel: '#141417',
-        line: '#1F1F23',
-        sunken: '#1B1B1F',
-        ghost: '#1B1B1F',
-        cta: '#E5484D',
+        // Injected by the ThemeProvider from the live palette, so they follow
+        // the light/dark mode like the inline COLORS values do.
+        ink: 'var(--c-ink)',
+        panel: 'var(--c-panel)',
+        line: 'var(--c-line)',
+        sunken: 'var(--c-sunken)',
+        ghost: 'var(--c-ghost)',
+        cta: 'var(--c-cta)',
+        // Text tiers for the older class-styled components (they used
+        // text-white / text-slate-*, which stay light in the light mode).
+        fg: 'var(--c-text)',
+        'fg-soft': 'var(--c-text-soft)',
+        'fg-dim': 'var(--c-dim)',
       },
       borderRadius: {
         // 3-tier scale ported from the web app's --radius-control/card/hero.

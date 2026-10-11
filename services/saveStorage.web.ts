@@ -24,3 +24,22 @@ export const removeSave = (): void => {
     console.warn('[save] remoção falhou', e);
   }
 };
+
+// Small preferences (the light/dark mode), apart from the career.
+const PREFS_KEY = 'nba-manager-prefs';
+
+export const readPrefs = (): string | null => {
+  try {
+    return window.localStorage.getItem(PREFS_KEY);
+  } catch {
+    return null;
+  }
+};
+
+export const writePrefs = (text: string): void => {
+  try {
+    window.localStorage.setItem(PREFS_KEY, text);
+  } catch (e) {
+    console.warn('[prefs] gravação falhou', e);
+  }
+};

@@ -34,12 +34,14 @@ interface SimulationScreenProps {
   onWatchGame?: (opponent: Team, atHome: boolean) => void;
 }
 
-const ZONE_COLOR = { safe: COLORS.good, warm: COLORS.warn, hot: COLORS.bad } as const;
+// A function, not a constant: COLORS changes with the light/dark mode.
+const zoneColorOf = (zone: 'safe' | 'warm' | 'hot') => ({ safe: COLORS.good, warm: COLORS.warn, hot: COLORS.bad })[zone];
 const ZONE_PILL = { safe: 'Dono tranquilo', warm: 'Dono pressionando', hot: 'Dono na beira' } as const;
 
-const HEADLINE_TONE: Record<'good' | 'warn' | 'bad' | 'info', string> = {
+// A function, not a constant: COLORS changes with the light/dark mode.
+const headlineTone = (): Record<'good' | 'warn' | 'bad' | 'info', string> => ( {
   good: COLORS.good, warn: COLORS.warn, bad: COLORS.bad, info: COLORS.gold,
-};
+});
 
 /** "Jaren Jackson Jr." → "Jackson". */
 const surname = (name: string) =>
@@ -93,7 +95,7 @@ const SimulationScreen: React.FC<SimulationScreenProps> = ({
   const revenge = userTeam && opponent ? revengePlayers(season, userTeam, opponent).slice(0, 2) : [];
 
   const zone = confidenceZone(season.owner.confidence);
-  const zoneColor = ZONE_COLOR[zone];
+  const zoneColor = zoneColorOf(zone);
   const mandate = MANDATE_META[season.owner.mandate];
   const wins = userTeam?.wins ?? 0;
   const losses = userTeam?.losses ?? 0;
@@ -345,7 +347,7 @@ const SimulationScreen: React.FC<SimulationScreenProps> = ({
               <Panel padding={0}>
                 {front.map((h, i) => (
                   <View key={h.id} style={{ gap: 3, paddingHorizontal: 18, paddingVertical: 14, borderTopWidth: i ? 1 : 0, borderTopColor: COLORS.lineSoft }}>
-                    <DLabel color={HEADLINE_TONE[h.tone]} numberOfLines={1}>{h.kicker}</DLabel>
+                    <DLabel color={headlineTone()[h.tone]} numberOfLines={1}>{h.kicker}</DLabel>
                     <Text style={{ fontFamily: FONT.body600, fontSize: 15, lineHeight: 20, color: COLORS.text }}>{h.title}</Text>
                     {h.sub ? <BodyText size={12.5} color={COLORS.dim}>{h.sub}</BodyText> : null}
                   </View>
@@ -556,7 +558,7 @@ const SimulationScreen: React.FC<SimulationScreenProps> = ({
                 key={h.id}
                 style={{ gap: 2, paddingHorizontal: 14, paddingVertical: 12, borderTopWidth: i ? 1 : 0, borderTopColor: COLORS.lineSoft }}
               >
-                <MonoLabel size={9} color={HEADLINE_TONE[h.tone]} numberOfLines={1}>{h.kicker}</MonoLabel>
+                <MonoLabel size={9} color={headlineTone()[h.tone]} numberOfLines={1}>{h.kicker}</MonoLabel>
                 <View>
                   <Text style={{ fontFamily: FONT.body600, fontSize: 14, lineHeight: 19, color: COLORS.text }}>{h.title}</Text>
                   {h.sub ? <BodyText size={12} color={COLORS.dim} style={{ marginTop: 1 }}>{h.sub}</BodyText> : null}
