@@ -475,8 +475,8 @@ const updateMorale = (
     teams: Team[],
     players: { [key: string]: Player },
     userTeamId: string
-): { message: string; type: string }[] => {
-    const events: { message: string; type: string }[] = [];
+): Event[] => {
+    const events: Event[] = [];
     teams.forEach(team => {
         const gp = (team.wins || 0) + (team.losses || 0);
         const winPct = gp ? (team.wins || 0) / gp : 0.5;
@@ -1125,7 +1125,7 @@ const recordGameStats = (
 
 const handleRandomEvents = (currentTeams: Team[], players: { [key: string]: Player }, gamesPlayed: number, userTeamId?: string) => {
     let newTeams: Team[] = JSON.parse(JSON.stringify(currentTeams));
-    let event: { message: string, type: string } | null = null;
+    let event: Event | null = null;
 
     // Tick every active injury/suspension/hot-streak/slump down by one game,
     // dropping it once it hits zero. Without this, an absence or status
@@ -1190,7 +1190,7 @@ const handleRandomEvents = (currentTeams: Team[], players: { [key: string]: Play
                     // window (up to 35% of days). If both happen to fire the
                     // same day, both state changes apply; the later one wins
                     // the displayed message.
-                    event = { message: `TRADE DEADLINE! ${team1.name} envia ${players[p1Id].name} ao ${team2.name} e recebe ${players[p2Id].name} em troca.`, type: 'trade' };
+                    event = { message: `TRADE DEADLINE! ${team1.name} envia ${players[p1Id].name} ao ${team2.name} e recebe ${players[p2Id].name} em troca.`, type: 'trade', teamIds: [team1.id, team2.id] };
                 }
             }
         }
@@ -1208,7 +1208,7 @@ const handleRandomEvents = (currentTeams: Team[], players: { [key: string]: Play
     // Who gets hurt inside a team is still weighted by age + minutes load +
     // accumulated fatigue (injuryRisk), so it lands on someone who matters.
     // Severity runs from a minor tweak to a season-altering blow.
-    let worstInjury: { message: string; duration: number } | null = null;
+    let worstInjury: { message: string; duration: number; teamId: string; mine: boolean } | null = null;
     newTeams.forEach(t => {
         if (Math.random() >= INJURY_CHANCE_PER_TEAM) return;
         const eligible = t.roster
@@ -1236,15 +1236,24 @@ const handleRandomEvents = (currentTeams: Team[], players: { [key: string]: Play
         const mine = t.id === userTeamId && duration >= NEWSWORTHY_ABSENCE;
         const leagueNews = duration >= 18 && player.ovr >= STAR_OVR;
         if (!mine && !leagueNews) return;
-        if (!worstInjury || duration > worstInjury.duration) {
+        // The feed only shows the user's own team, so one of his own absences
+        // outranks a longer one elsewhere for the day's single slot.
+        const w = worstInjury as { duration: number; mine: boolean } | null;
+        if (!w || (mine && !w.mine) || (mine === w.mine && duration > w.duration)) {
             const severe = duration >= 18 ? ' Lesão séria — pode comprometer a temporada.' : '';
             worstInjury = {
                 duration,
+                teamId: t.id,
+                mine,
                 message: `❤️‍🩹 LESÃO! ${player.name} (${t.name}) sofreu ${label} e perderá ${duration} jogos.${severe}`,
             };
         }
     });
-    if (worstInjury) event = { message: (worstInjury as { message: string }).message, type: 'injury' };
+    if (worstInjury) { const w = worstInjury as { message: string; teamId: string }; event = { message: w.message, type: 'injury', teamIds: [w.teamId] }; }
+
+    // The roll below overwrites the day's message, but never one about the
+    // user's own team -- the feed shows nothing else.
+    const userNews = userTeamId && event?.teamIds?.includes(userTeamId) ? event : null;
 
     const eventRoll = Math.random();
     const teamIndex = Math.floor(Math.random() * newTeams.length);
@@ -1259,7 +1268,7 @@ const handleRandomEvents = (currentTeams: Team[], players: { [key: string]: Play
             const duration = Math.floor(Math.random() * 4) + 1; // 1-4 games
             if (!team.playerAbsences) team.playerAbsences = {};
             team.playerAbsences[pId] = { reason: 'suspension', duration };
-            event = { message: `SUSPENSÃO! ${player.name} (${team.name}) foi suspenso por ${duration} jogos.`, type: 'injury' }; // 'injury' for red color
+            event = { message: `SUSPENSÃO! ${player.name} (${team.name}) foi suspenso por ${duration} jogos.`, type: 'injury', teamIds: [team.id] }; // 'injury' for red color
         }
     }
     // HOT STREAK (1.5% chance)
@@ -1272,7 +1281,7 @@ const handleRandomEvents = (currentTeams: Team[], players: { [key: string]: Play
             const ovrChange = Math.floor(Math.random() * 3) + 2; // +2 to +4 OVR boost
             if (!team.playerStatusEffects) team.playerStatusEffects = {};
             team.playerStatusEffects[pId] = { type: 'hot', duration, ovrChange };
-            event = { message: `EM CHAMAS! ${player.name} (${team.name}) está numa sequência incrível e recebeu um bônus temporário (+${ovrChange} OVR).`, type: 'info' };
+            event = { message: `EM CHAMAS! ${player.name} (${team.name}) está numa sequência incrível e recebeu um bônus temporário (+${ovrChange} OVR).`, type: 'info', teamIds: [team.id] };
         }
     }
     // SLUMP (1.5% chance)
@@ -1285,7 +1294,7 @@ const handleRandomEvents = (currentTeams: Team[], players: { [key: string]: Play
             const ovrChange = -1 * (Math.floor(Math.random() * 3) + 2); // -2 to -4 OVR penalty
             if (!team.playerStatusEffects) team.playerStatusEffects = {};
             team.playerStatusEffects[pId] = { type: 'slump', duration, ovrChange };
-            event = { message: `MÁ FASE! ${player.name} (${team.name}) não está bem e recebeu uma penalidade temporária (${ovrChange} OVR).`, type: 'injury' }; // 'injury' for red color
+            event = { message: `MÁ FASE! ${player.name} (${team.name}) não está bem e recebeu uma penalidade temporária (${ovrChange} OVR).`, type: 'injury', teamIds: [team.id] }; // 'injury' for red color
         }
     }
     // TEAM CHEMISTRY (5% chance)
@@ -1294,12 +1303,12 @@ const handleRandomEvents = (currentTeams: Team[], players: { [key: string]: Play
         if (isGoodEvent) {
             if (!team.momentum || team.momentum < 3) {
                 team.momentum = (team.momentum || 0) + 1;
-                event = { message: `QUÍMICA EM ALTA! O ${team.name} parece estar em grande sintonia, recebendo um impulso de moral.`, type: 'info' };
+                event = { message: `QUÍMICA EM ALTA! O ${team.name} parece estar em grande sintonia, recebendo um impulso de moral.`, type: 'info', teamIds: [team.id] };
             }
         } else {
             if (!team.momentum || team.momentum > -3) {
                 team.momentum = (team.momentum || 0) - 1;
-                 event = { message: `PROBLEMAS NO VESTIÁRIO! Rumores indicam que a moral está baixa no ${team.name}.`, type: 'info' };
+                 event = { message: `PROBLEMAS NO VESTIÁRIO! Rumores indicam que a moral está baixa no ${team.name}.`, type: 'info', teamIds: [team.id] };
             }
         }
     }
@@ -1307,6 +1316,7 @@ const handleRandomEvents = (currentTeams: Team[], players: { [key: string]: Play
     if (event) {
         newTeams[newTeams.findIndex(t => t.id === team.id)] = team;
     }
+    if (userNews) event = userNews;
 
     return { teams: newTeams, event };
 };
@@ -1321,6 +1331,7 @@ const handleRandomEvents = (currentTeams: Team[], players: { [key: string]: Play
 const runPlayerProgression = (
     players: { [key: string]: Player },
     devBonus: { [playerId: string]: number } = {},
+    teamOf: { [playerId: string]: string } = {},
 ): { updatedPlayers: { [key: string]: Player }, progressionEvents: Event[] } => {
     const updatedPlayers = JSON.parse(JSON.stringify(players));
     const progressionEvents: Event[] = [];
@@ -1413,9 +1424,9 @@ const runPlayerProgression = (
         }
 
         if (player.ovr > oldOvr) {
-            progressionEvents.push({ message: `${player.name} (${player.age}) evoluiu! OVR: ${oldOvr} -> ${player.ovr} (+${player.ovr - oldOvr})`, type: 'info'});
+            progressionEvents.push({ message: `${player.name} (${player.age}) evoluiu! OVR: ${oldOvr} -> ${player.ovr} (+${player.ovr - oldOvr})`, type: 'info', teamIds: teamOf[pId] ? [teamOf[pId]] : undefined });
         } else if (player.ovr < oldOvr) {
-            progressionEvents.push({ message: `${player.name} (${player.age}) regrediu. OVR: ${oldOvr} -> ${player.ovr} (${player.ovr - oldOvr})`, type: 'injury'});
+            progressionEvents.push({ message: `${player.name} (${player.age}) regrediu. OVR: ${oldOvr} -> ${player.ovr} (${player.ovr - oldOvr})`, type: 'injury', teamIds: teamOf[pId] ? [teamOf[pId]] : undefined });
         }
     }
 

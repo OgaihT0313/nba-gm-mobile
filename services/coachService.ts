@@ -221,6 +221,7 @@ export const ageCoachesAndRetire = (
             events.push({
                 message: `🎓 ${coach.name} (${coach.age}) se aposentou do comando do ${team.name}. ${replacement.name} assume o time.`,
                 type: 'info',
+                teamIds: [team.id],
             });
             return { ...team, coachId: replacement.id };
         }

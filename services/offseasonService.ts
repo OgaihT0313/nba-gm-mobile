@@ -21,6 +21,14 @@ import { ageCoachesAndRetire, buildDevelopmentBonusMap } from './coachService';
 import { retirePlayers } from './retirementService';
 import { rivalriesAfterSeason } from './rivalryService';
 
+// The season screen's feed shows only the user's own team, so before each
+// category is cut to its share of the buffer, his events move to the front --
+// otherwise a cut made for league-wide variety drops the ones he can see.
+const mineFirst = (events: Event[], userTeamId: string): Event[] => [
+  ...events.filter((e) => e.teamIds?.includes(userTeamId)),
+  ...events.filter((e) => !e.teamIds?.includes(userTeamId)),
+];
+
 // Champion crowned -> progression, real NBA offseason moves replayed, contracts
 // tick down, then the rookie draft (BEFORE free agency, matching the real
 // calendar). CPU free agency waits until the draft finishes.
@@ -48,7 +56,9 @@ export const startOffseason = (prev: SeasonState): SeasonState => {
   // played (prev.teams/prev.coaches), captured before anyone below ages or
   // retires — see coachService.buildDevelopmentBonusMap.
   const devBonus = buildDevelopmentBonusMap(prev.teams, prev.coaches);
-  const { updatedPlayers, progressionEvents } = simulationEngine.runPlayerProgression(withCareers, devBonus);
+  const teamOf: { [playerId: string]: string } = {};
+  prev.teams.forEach((t) => t.roster.forEach((id) => { teamOf[id] = t.id; }));
+  const { updatedPlayers, progressionEvents } = simulationEngine.runPlayerProgression(withCareers, devBonus, teamOf);
   // Snapshot last season's OVR so next season's MIP can measure real growth.
   for (const id in updatedPlayers) {
     updatedPlayers[id].ovrLastSeason = prev.players[id]?.ovr ?? updatedPlayers[id].ovr;
@@ -117,7 +127,7 @@ export const startOffseason = (prev: SeasonState): SeasonState => {
       const toName = newTeams[toIdx].name;
       newTeams[fromIdx] = { ...newTeams[fromIdx], roster: newTeams[fromIdx].roster.filter((id) => id !== move.playerId) };
       newTeams[toIdx] = { ...newTeams[toIdx], roster: sortByOvr([...newTeams[toIdx].roster, move.playerId]) };
-      moveEvents.push({ message: `🏀 OFFSEASON: ${move.playerName} deixou o ${fromName} e agora joga pelo ${toName}.`, type: 'trade' });
+      moveEvents.push({ message: `🏀 OFFSEASON: ${move.playerName} deixou o ${fromName} e agora joga pelo ${toName}.`, type: 'trade', teamIds: [move.fromTeamId, move.toTeamId] });
       appliedMoves.push({ playerName: move.playerName, fromTeamId: move.fromTeamId, toTeamId: move.toTeamId });
     });
   };
@@ -211,12 +221,12 @@ export const startOffseason = (prev: SeasonState): SeasonState => {
     // routine bulk. Nothing is monopolised and nothing is wiped out.
     events: [
       ...eraEvents,
-      ...moveEvents.slice(0, 18),
-      ...advanced.events.slice(0, 12),
-      ...contracts.events.slice(0, 6),
+      ...mineFirst(moveEvents, prev.userTeamId).slice(0, 18),
+      ...mineFirst(advanced.events, prev.userTeamId).slice(0, 12),
+      ...mineFirst(contracts.events, prev.userTeamId).slice(0, 6),
       ...board.events,
-      ...coaching.events.slice(0, 4),
-      ...progressionEvents.slice(0, 8),
+      ...mineFirst(coaching.events, prev.userTeamId).slice(0, 4),
+      ...mineFirst(progressionEvents, prev.userTeamId).slice(0, 8),
       ...prev.events,
     ].slice(0, 60),
     playoff: null,
@@ -248,7 +258,7 @@ export const finishDraft = (prev: SeasonState): SeasonState => {
     // 60-slot buffer and wipes every earlier offseason headline out of
     // the save. Capped, the buffer keeps a mix instead of one stage's
     // worth of routine signings.
-    events: [...cpuFa.events.slice(0, 15), ...prev.events].slice(0, 60),
+    events: [...mineFirst(cpuFa.events, prev.userTeamId).slice(0, 15), ...prev.events].slice(0, 60),
     draft: undefined,
     };
 };
@@ -266,7 +276,7 @@ export const startSeason = (prev: SeasonState): SeasonState => {
     if (released[id].birdTeamId === prev.userTeamId) released[id] = { ...released[id], birdTeamId: undefined };
   }
   const lastCall = runCpuFreeAgency(prev.teams, released, prev.userTeamId);
-  prev = { ...prev, teams: lastCall.teams, players: lastCall.players, events: [...lastCall.events.slice(0, 6), ...prev.events].slice(0, 60) };
+  prev = { ...prev, teams: lastCall.teams, players: lastCall.players, events: [...mineFirst(lastCall.events, prev.userTeamId).slice(0, 6), ...prev.events].slice(0, 60) };
   const uTeam = prev.teams.find((t) => t.id === prev.userTeamId);
   // Wipe last season's box scores so leaders/awards start clean.
   const freshPlayers: { [key: string]: Player } = {};

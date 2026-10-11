@@ -592,7 +592,7 @@ export default function App() {
         coaches: fireCoach(prev.coaches, team),
         teams: prev.teams.map((t) => (t.id === team.id ? { ...t, coachId: undefined } : t)),
         events: firedName
-          ? [{ message: `🎓 ${firedName} foi demitido do comando do ${team.name}.`, type: 'info' }, ...prev.events].slice(0, 60)
+          ? [{ message: `🎓 ${firedName} foi demitido do comando do ${team.name}.`, type: 'info', teamIds: [team.id] }, ...prev.events].slice(0, 60)
           : prev.events,
       };
     });
@@ -611,7 +611,7 @@ export default function App() {
         ...prev,
         coaches: hireCoach(coaches, coach),
         teams: prev.teams.map((t) => (t.id === team.id ? { ...t, coachId: coach.id } : t)),
-        events: [{ message: `🎓 ${coach.name} é o novo técnico do ${team.name}.`, type: 'info' }, ...prev.events].slice(0, 60),
+        events: [{ message: `🎓 ${coach.name} é o novo técnico do ${team.name}.`, type: 'info', teamIds: [team.id] }, ...prev.events].slice(0, 60),
       };
     });
   };

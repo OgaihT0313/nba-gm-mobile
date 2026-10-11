@@ -444,11 +444,13 @@ export const buildDraftBoard = (
                 events.push({
                     message: `🔒 PROTEÇÃO: o pick do ${origName} caiu em #${slot + 1} (top ${protection} protegido) e ficou em casa. A dívida com o ${holderName} rola para o próximo draft, sem proteção.`,
                     type: 'trade',
+                    teamIds: [originalTeamId, held.teamId],
                 });
             } else {
                 events.push({
                     message: `🔒 PROTEÇÃO: o pick do ${origName} caiu em #${slot + 1} (top ${protection} protegido) e ficou em casa. Sem pick futuro livre para rolar, a dívida com o ${holderName} expirou.`,
                     type: 'trade',
+                    teamIds: [originalTeamId, held.teamId],
                 });
             }
             return { teamId: originalTeamId, originalTeamId };
@@ -548,6 +550,7 @@ const applyPick = (
     const event: Event = {
         message: `🎓 DRAFT (pick ${overall}${viaLabel}): ${teamName} seleciona ${p.name} (${p.pos}, ${p.ovr} OVR — projetado ${projected}, potencial ${p.potential}).${verdict}`,
         type: 'trade',
+        teamIds: [teamId],
     };
     return { draft: newDraft, teams: newTeams, players: newPlayers, event };
 };

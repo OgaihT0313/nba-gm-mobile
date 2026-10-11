@@ -260,6 +260,7 @@ export const processOffseasonContracts = (
                 ? `📄 ${p.name} chegou ao fim do contrato com o ${team.name} e virou agente livre.`
                 : `📄 ${p.name} não quis renovar com o ${team.name} e vai testar o mercado.`,
             type: 'trade',
+            teamIds: [team.id],
         });
     };
     const newTeams = teams.map(team => {
@@ -295,7 +296,7 @@ export const processOffseasonContracts = (
                     p.contractYears = newContractYears(p);
                     payroll += ask;
                     kept.push(p.id);
-                    events.push({ message: `🖊️ ${team.name} renovou com ${p.name} por $${(ask / 1_000_000).toFixed(1)}M/ano.`, type: 'trade' });
+                    events.push({ message: `🖊️ ${team.name} renovou com ${p.name} por $${(ask / 1_000_000).toFixed(1)}M/ano.`, type: 'trade', teamIds: [team.id] });
                 } else {
                     leaves(p, team, wouldStay);
                 }
@@ -338,7 +339,7 @@ export const trimCpuRosters = (
         cut.forEach(id => {
             const p = updatedPlayers[id];
             updatedPlayers[id] = { ...p, contractYears: 0, salary: askingSalary(p), birdTeamId: undefined, nextSalary: undefined };
-            events.push({ message: `✂️ ${team.name} dispensou ${p.name} para abrir vaga no elenco.`, type: 'trade' });
+            events.push({ message: `✂️ ${team.name} dispensou ${p.name} para abrir vaga no elenco.`, type: 'trade', teamIds: [team.id] });
         });
         const kept = team.roster.filter(id => !cut.includes(id));
         return { ...team, roster: kept, starters: pruneStarters(team.starters, kept), deadMoney };
@@ -397,7 +398,7 @@ export const runCpuFreeAgency = (
         workTeams[idx] = res.team;
         updatedPlayers[player.id] = res.player;
         pool = pool.filter(p => p.id !== player.id);
-        events.push({ message: `✍️ ${res.team.name} assinou ${player.name} (${player.ovr} OVR) por $${(player.salary / 1_000_000).toFixed(1)}M.`, type: 'trade' });
+        events.push({ message: `✍️ ${res.team.name} assinou ${player.name} (${player.ovr} OVR) por $${(player.salary / 1_000_000).toFixed(1)}M.`, type: 'trade', teamIds: [res.team.id] });
     };
 
     // Weaker teams (higher powerRank) pick first, for a bit of competitive balance.

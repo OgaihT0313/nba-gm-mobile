@@ -49,6 +49,10 @@ const SimulationScreen: React.FC<SimulationScreenProps> = ({
   season, isSimulating, onAdvance, onWatchGame,
 }) => {
   const desktop = useDesktop();
+  // The feed is the user's own team only: league-wide it was mostly other
+  // teams' injuries, and everything league-level that matters has its own panel.
+  // Era changes belong to every save, so they stay.
+  const myEvents = season.events.filter((e) => e.type === 'era' || e.teamIds?.includes(season.userTeamId));
   const userTeam = season.teams.find((t) => t.id === season.userTeamId);
   const gp = season.gamesPlayed;
   const remaining = Math.max(0, 82 - gp);
@@ -352,11 +356,11 @@ const SimulationScreen: React.FC<SimulationScreenProps> = ({
             {movesPanel}
             {retirementsPanel}
 
-            {season.events.length > 0 ? (
+            {myEvents.length > 0 ? (
               <Panel padding={0} style={{ paddingHorizontal: 18, paddingVertical: 16 }}>
-                <DLabel style={{ letterSpacing: 1.65 }}>Na liga</DLabel>
+                <DLabel style={{ letterSpacing: 1.65 }}>Seu time</DLabel>
                 <View style={{ gap: 10, marginTop: 10 }}>
-                  {season.events.slice(0, 6).map((e, i) => (
+                  {myEvents.slice(0, 6).map((e, i) => (
                     <View key={i} className="flex-row" style={{ gap: 10 }}>
                       <View style={{ width: 3, borderRadius: 2, backgroundColor: e.type === 'injury' ? COLORS.warn : e.type === 'trade' ? COLORS.east : COLORS.good }} />
                       <BodyText size={13} color={COLORS.textSoft} style={{ flex: 1 }}>{e.message}</BodyText>
@@ -565,12 +569,12 @@ const SimulationScreen: React.FC<SimulationScreenProps> = ({
         {movesPanel}
         {retirementsPanel}
 
-        {/* --------------------------------------------------- league chatter */}
-        {season.events.length > 0 ? (
+        {/* ------------------------------------------------ your team's news */}
+        {myEvents.length > 0 ? (
           <Panel>
-            <SectionLabel>Na liga</SectionLabel>
+            <SectionLabel>Seu time</SectionLabel>
             <View style={{ gap: 9, marginTop: 9 }}>
-              {season.events.slice(0, 6).map((e, i) => (
+              {myEvents.slice(0, 6).map((e, i) => (
                 <View key={i} className="flex-row" style={{ gap: 9 }}>
                   <View
                     style={{

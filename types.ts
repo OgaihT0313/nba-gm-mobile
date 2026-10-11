@@ -405,6 +405,10 @@ export type PlayoffStage = 'none' | 'playin' | 'round1' | 'semis' | 'confFinals'
 export interface Event {
   message: string;
   type: string;
+  // Teams the event is about. The season screen's feed shows only events that
+  // name the user's team (plus 'era' changes, which belong to every save), so
+  // an event without this never reaches the player.
+  teamIds?: string[];
 }
 
 export interface Notification extends Event {
