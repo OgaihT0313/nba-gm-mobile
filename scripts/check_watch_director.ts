@@ -157,6 +157,55 @@ for (const play of PLAYS) {
     + `${(cuts / quarterReal.length).toFixed(0)} cuts per quarter; shots on screen ${shotsSeen}/${shotsTotal}`);
 }
 
+// Actions (PLANO-3D Etapa 4): every basket has its finish on screen before the
+// ball reaches the rim -- the shooter in a shot/layup/dunk and his defender
+// contesting -- and every assisted-shape trip shows the pass. Also prints how
+// the made twos at the rim split between dunks and layups.
+{
+  let baskets = 0, finished = 0, contested = 0, passTrips = 0, passShown = 0;
+  const finishes: Record<string, number> = { shot: 0, layup: 0, dunk: 0 };
+  for (const play of PLAYS) {
+    for (let n = 0; n < 10; n++) {
+      const plan = planQuarter({
+        home, away, players, coaches: {}, fiveHome, fiveAway,
+        userSide: 'home', play, timeout: false, quarter: 1, from: 0,
+      });
+      for (const p of plan.possessions) {
+        const release = p.beats[p.beats.length - 3].t;
+        const gather = p.beats[p.beats.length - 4].t;
+        // Sample the gather and the flight.
+        const at = [gather + (release - gather) * 0.5, release + (p.shotAt - release) * 0.5];
+        const shooterIdx = (p.side === 'home' ? 0 : 5) + p.shooter;
+        const defIdx = (p.side === 'home' ? 5 : 0) + p.shooter;
+        if (p.made) {
+          baskets++;
+          finishes[p.finish ?? 'shot']++;
+          const ok = at.every((t) => {
+            const st = courtStateAt(plan, t, fiveHome, fiveAway)!;
+            return st.players[shooterIdx].action === (p.finish ?? 'shot');
+          });
+          if (ok) finished++;
+          const st = courtStateAt(plan, at[1], fiveHome, fiveAway)!;
+          if (st.players[defIdx].action === 'contest') contested++;
+        }
+        if (p.passer !== null && p.passer !== p.shooter) {
+          passTrips++;
+          const mid = p.beats[2].t + (p.beats[3].t - p.beats[2].t) * 0.5;
+          const st = courtStateAt(plan, mid, fiveHome, fiveAway)!;
+          if (st.players[(p.side === 'home' ? 0 : 5) + p.passer].action === 'pass') passShown++;
+        }
+      }
+    }
+  }
+  check('every basket shows its finish', finished === baskets, `${finished}/${baskets}`);
+  check('every basket is contested', contested === baskets, `${contested}/${baskets}`);
+  check('every pass is shown', passShown === passTrips, `${passShown}/${passTrips}`);
+  const rim = finishes.layup + finishes.dunk;
+  console.log(`actions: ${finished}/${baskets} baskets show their finish, ${passShown}/${passTrips} passes; `
+    + `made: ${finishes.shot} jumpers, ${finishes.layup} layups, ${finishes.dunk} dunks `
+    + `(${rim ? Math.round((100 * finishes.dunk) / rim) : 0}% of finishes at the rim)`);
+}
+
 // A timeout mid-quarter must not rewrite points already on the board.
 const plan = planQuarter({
   home, away, players, coaches: {}, fiveHome, fiveAway,

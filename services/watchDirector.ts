@@ -429,6 +429,10 @@ export interface Possession {
     assistName: string | null;
     shotAt: number; // absolute second the ball reaches the rim
     beats: Beat[];
+    /** How the shooter finishes: a jumper (threes, free throws, anything
+     * outside ~8 ft), a layup, or a dunk. Absent on plans from before this
+     * field existed -- read as 'shot'. */
+    finish?: Finish;
     /** Who was on the floor for this trip, both sides, and how fresh. */
     fiveHome?: FiveOnCourt;
     fiveAway?: FiveOnCourt;
@@ -446,6 +450,39 @@ export interface QuarterPlan {
     endFiveAway: FiveOnCourt;
     endEnergy: Energy;
 }
+
+export type Finish = 'shot' | 'layup' | 'dunk';
+
+/** Closer than this to the rim, a two is finished at the rim, not as a jumper. */
+const RIM_RANGE = 8;
+
+// The release beat's ball height and arc for each finish. A jumper leaves the
+// hand at ~7 ft and arcs high; a layup is laid up off the glass from ~9 ft; a
+// dunk is carried to the rim and barely leaves the hand.
+const RELEASE: Record<Finish, { y: number; arc: (kind: 1 | 2 | 3) => number }> = {
+    shot: { y: 7.2, arc: (kind) => (kind === 3 ? 9 : kind === 1 ? 7 : 5) },
+    layup: { y: 8.8, arc: () => 2 },
+    dunk: { y: 10.6, arc: () => 0.4 },
+};
+
+/**
+ * The chance a made shot at the rim is a dunk, from the shooter's athleticism
+ * and size: a springy big dunks most of his makes inside, a guard rarely.
+ */
+export const dunkChance = (p: Player | undefined): number => {
+    if (!p) return 0.1;
+    const athletic = ((p.attributes?.athleticism ?? 70) - 70) / 28;
+    const big = getPlayerPositions(p).some((s) => s === 'C' || s === 'PF') ? 0.25 : 0;
+    return Math.max(0.05, Math.min(0.75, 0.12 + athletic * 0.45 + big));
+};
+
+/** Turns a made finish at the rim into a dunk: the release beat moves up to the rim. */
+const makeDunk = (poss: Possession) => {
+    poss.finish = 'dunk';
+    const release = poss.beats[poss.beats.length - 3];
+    release.ball = { ...release.ball, y: RELEASE.dunk.y };
+    release.arc = RELEASE.dunk.arc(2);
+};
 
 const withShooter = (spots: Spot[], idx: number, spot: Spot): Spot[] =>
     spots.map((s, i) => (i === idx ? spot : s));
@@ -466,6 +503,7 @@ const buildPossession = (
 
     const action = PLAY_ACTION[play];
     const shotSpot = shotKind === 1 ? FT_SPOT : shotKind === 3 ? SHOT_SPOT[play].three : SHOT_SPOT[play].rim;
+    const finish: Finish = shotKind === 2 && Math.hypot(HOOP_AX - shotSpot.ax, shotSpot.az) < RIM_RANGE ? 'layup' : 'shot';
     const shotSet = withShooter(action, shooter, shotSpot);
     const hoop: Vec3 = { x: d * HOOP_AX, y: RIM_Y, z: 0 };
 
@@ -516,8 +554,8 @@ const buildPossession = (
     const release = held(shotSet, shooter);
     beats.push({
         t: at(0.86), off: offOf(shotSet), def: defOf(shotSet),
-        ball: { x: release.x, y: 7.2, z: release.z }, handler: null,
-        arc: shotKind === 3 ? 9 : shotKind === 1 ? 7 : 5,
+        ball: { x: release.x, y: RELEASE[finish].y, z: release.z }, handler: null,
+        arc: RELEASE[finish].arc(shotKind),
     });
 
     const shotAt = at(0.95);
@@ -539,7 +577,7 @@ const buildPossession = (
 
     return {
         side, play, start, end: start + duration, made, points,
-        shooter, passer, scorerName, assistName, shotAt, beats,
+        shooter, passer, scorerName, assistName, shotAt, beats, finish,
     };
 };
 
@@ -726,6 +764,10 @@ export const planQuarter = (args: PlanQuarterArgs): QuarterPlan => {
             poss.fiveHome = lineups[k].fiveHome;
             poss.fiveAway = lineups[k].fiveAway;
             poss.energy = lineups[k].energy;
+            // A make at the rim is a dunk as often as the shooter's legs allow.
+            if (made && poss.finish === 'layup' && Math.random() < dunkChance(players[five.players[shooter]?.playerId])) {
+                makeDunk(poss);
+            }
             possessions.push(poss);
         });
     }
@@ -785,6 +827,9 @@ const stitch = (possessions: Possession[]) => {
 /* ------------------------------------------------------------------ */
 /* Reading the plan at a point in time.                                */
 /* ------------------------------------------------------------------ */
+/** What a body is doing this instant -- the 3D picks the animation from it. */
+export type PlayerAction = 'dribble' | 'pass' | 'shot' | 'layup' | 'dunk' | 'contest' | 'idle';
+
 export interface PlayerState {
     playerId: string;
     name: string;
@@ -794,6 +839,9 @@ export interface PlayerState {
     z: number;
     rotY: number;
     hasBall: boolean;
+    /** Optional (PLANO-3D Etapa 4): the action, and how far into it (0-1). */
+    action?: PlayerAction;
+    actionT?: number;
 }
 
 export interface BallState {
@@ -1011,6 +1059,24 @@ export const courtStateAt = (
     const defFive = poss.side === 'home' ? fa : fh;
     const handler = a.handler;
 
+    // Actions, read off the beat in progress. The last three beats are always
+    // release -> rim -> aftermath, so the release beat is beats.length - 3.
+    //  - the shot spans the gather (the beat before release) and the flight:
+    //    0-0.4 gathering and rising, 0.4 the release, 0.4-1 the ball to the rim;
+    //  - the man guarding the shooter contests over the same window;
+    //  - a pass is the beat where the ball travels from the entry handler to
+    //    the shooter (beat 2, when the play has a passer).
+    const releaseIdx = beats.length - 3;
+    const shotT = i === releaseIdx - 1 ? 0.4 * u : i === releaseIdx ? 0.4 + 0.6 * u : -1;
+    const finish: Finish = poss.finish ?? 'shot';
+    const passing = poss.passer !== null && poss.passer !== poss.shooter && i === 2;
+    const actionOf = (idx: number, isOffense: boolean, hasBall: boolean): [PlayerAction, number] => {
+        if (shotT >= 0 && idx === poss.shooter) return [isOffense ? finish : 'contest', shotT];
+        if (isOffense && passing && idx === (poss.passer ?? 0)) return ['pass', u];
+        if (isOffense && hasBall) return ['dribble', u];
+        return ['idle', 0];
+    };
+
     const build = (five: FiveOnCourt, from: Vec2[], to: Vec2[], isOffense: boolean): PlayerState[] =>
         five.players.map((p, idx) => {
             const x = lerp(from[idx].x, to[idx].x, e);
@@ -1019,6 +1085,7 @@ export const courtStateAt = (
             // The ball handler squares up to the rim they're attacking;
             // everyone else — teammates and defenders alike — turns to the ball.
             const face = hasBall ? { x: dirOf(poss.side) * HOOP_AX, z: 0 } : { x: ball.x, z: ball.z };
+            const [action, actionT] = actionOf(idx, isOffense, hasBall);
             return {
                 playerId: p.playerId,
                 name: p.name,
@@ -1028,6 +1095,8 @@ export const courtStateAt = (
                 z,
                 rotY: Math.atan2(face.x - x, face.z - z),
                 hasBall,
+                action,
+                actionT,
             };
         });
 

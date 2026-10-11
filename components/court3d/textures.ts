@@ -385,6 +385,9 @@ export const paintJersey = (data: Uint8Array, W: number, H: number, primary: RGB
       const u = x / W;
       let c: RGB = primary;
       if (v < 0.08 || (v > 0.86 && v < 0.92)) c = secondary; // hem and collar trim
+      // Side panels: a stripe down each side seam (u 0 and 0.5, between the
+      // chest at 0.25 and the back at 0.75).
+      if (v >= 0.08 && v <= 0.86 && (Math.abs(u - 0.5) < 0.025 || u < 0.025 || u > 0.975)) c = secondary;
       if (text) {
         for (const centre of [0.25, 0.75]) {
           const nw = 0.13 * text.length;
@@ -397,6 +400,30 @@ export const paintJersey = (data: Uint8Array, W: number, H: number, primary: RGB
       data[i] = c[0]; data[i + 1] = c[1]; data[i + 2] = c[2]; data[i + 3] = 255;
     }
   }
+};
+
+/**
+ * A one-pixel-wide strip of horizontal bands, read by v (0 = bottom): the
+ * shorts' waistband and the shoe's sole are painted this way instead of being
+ * extra meshes (every mesh on a player is ten draw calls). Nearest filtering
+ * keeps the band edges hard.
+ */
+export const buildBandTexture = (base: string, bands: { from: number; to: number; color: string }[]): THREE.DataTexture => {
+  const H = 32;
+  const data = new Uint8Array(H * 4);
+  const baseRgb = hexToRgb(base);
+  const rgbs = bands.map((b) => ({ ...b, rgb: hexToRgb(b.color) }));
+  for (let y = 0; y < H; y++) {
+    const v = (y + 0.5) / H;
+    const c = rgbs.find((b) => v >= b.from && v < b.to)?.rgb ?? baseRgb;
+    data[y * 4] = c[0]; data[y * 4 + 1] = c[1]; data[y * 4 + 2] = c[2]; data[y * 4 + 3] = 255;
+  }
+  const tex = new THREE.DataTexture(data, 1, H, THREE.RGBAFormat);
+  tex.magFilter = THREE.NearestFilter;
+  tex.minFilter = THREE.NearestFilter;
+  tex.colorSpace = THREE.SRGBColorSpace;
+  tex.needsUpdate = true;
+  return tex;
 };
 
 /** Scrolling courtside LED: the wordmark and a stripe in the home colors. */

@@ -216,6 +216,32 @@ no material do piso:
 
 **APK de teste #2** (Etapas 3 e 4).
 
+**FEITO (2026-10-10), falta o APK #2.**
+- **Dados (aditivos):** `PlayerState.action`/`actionT` e `Possession.finish`
+  (`'shot' | 'layup' | 'dunk'`). Dois perto do aro (< 8 pés) são bandeja; uma bandeja
+  convertida vira enterrada com a chance de `dunkChance` (atletismo + ser pivô/ala-
+  pivô; 5%-75%), e a enterrada sobe o ponto de soltura da bola até o aro. A ação sai
+  da batida em curso: o arremesso cobre a preparação e o voo (soltura em 0,4), o
+  marcador do arremessador contesta na mesma janela, o passe é a batida em que a bola
+  vai do armador ao arremessador, e quem tem a bola dribla.
+- **Modelo:** friso lateral na regata; cós da bermuda e solado contrastante do tênis
+  pintados como faixas (`buildBandTexture`, 1x32 px, compartilhadas por time — 0 malha
+  nova, +4 texturas); faixa de cabeça (22%) e manguito (20%) fixos pelo id do jogador.
+- **Animações** (`PlayerRig.ts`, procedurais, misturadas com a pose de corrida):
+  arremesso (agacha, sobe, cotovelo estica na soltura, mão de apoio sai,
+  acompanhamento), bandeja (impulso de um pé, joelho esquerdo sobe, braço direito
+  alto), enterrada (2,8 pés de impulso, pendura com os joelhos dobrados) com o aro
+  puxado e voltando (pivô da Etapa 3), passe de peito, contestação com um braço reto,
+  drible com o outro braço protegendo. **Cabeça segue a bola** (pescoço próprio,
+  limite ±70°).
+- **Teste:** `check_watch_director` confere que toda cesta mostra a finalização antes
+  de a bola chegar ao aro (1.041/1.041), que toda cesta é contestada e todo passe
+  aparece (1.807/1.807). Feitas: 716 arremessos, 201 bandejas, 124 enterradas (38% das
+  finalizações perto do aro).
+- Cena na TV: 299 draw calls, ~244 mil triângulos, 21 texturas.
+- Ainda **não** feito do plano: punho quebrando (a mão é uma esfera, sem pulso) e a
+  câmera de ação (é a Etapa 7).
+
 ## Etapa 4b — Ritmo da partida (`watchDirector.ts`, `WatchGameScreen.tsx`)
 
 **A causa nº 1 de o 3D parecer estranho no celular** (ver "O que o teste no celular mostrou").

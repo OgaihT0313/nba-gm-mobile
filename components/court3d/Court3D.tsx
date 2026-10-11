@@ -323,6 +323,8 @@ function PlayersAndBall({
         onOffense: p.side === court.possession,
         ball: court.ball,
         snap,
+        action: p.action,
+        actionT: p.actionT,
       });
     });
 

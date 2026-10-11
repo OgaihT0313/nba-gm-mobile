@@ -498,6 +498,9 @@ function Hoop({ side, primary, courtRef }: {
       const inRing = Math.hypot(b.x - side * RIM_X, b.z) < 0.8;
       if (inRing && r.lastY > RIM_Y && b.y <= RIM_Y) r.t = 0;
       r.lastY = b.y;
+      // A dunk finishing at this end yanks the rim down (PLANO-3D Etapa 4).
+      const dunker = court.players.find((p) => p.action === 'dunk' && (p.actionT ?? 0) > 0.55 && Math.sign(p.x) === side);
+      if (dunker && kick.current < 0.2) kick.current = 1;
     }
     if (r.t < NET_SETTLE) {
       r.t += dt;

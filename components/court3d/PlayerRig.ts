@@ -1,31 +1,50 @@
 import * as THREE from 'three';
 
-import { buildJerseyTexture, paintJersey, hexToRgb } from './textures';
+import type { PlayerAction } from '../../services/watchDirector';
+import { buildBandTexture, buildJerseyTexture, paintJersey, hexToRgb } from './textures';
 
 // One basketball player: a jointed body, built once, posed every frame.
 //
 // The old dolls were thirteen rigid cylinders that slid around and bobbed.
-// This one has hips, knees, shoulders and elbows, and the pose comes from what
-// the player is doing -- running at his real speed, sitting in a defensive
-// stance, dribbling, rising up when the ball goes toward the rim near him.
-// Nothing here decides anything about the game: positions and possession still
-// come from services/watchDirector.ts, this only reads them.
+// This one has hips, knees, shoulders, elbows and a neck, and the pose comes
+// from what the player is doing -- running at his real speed, sitting in a
+// defensive stance, and, since PLANO-3D Etapa 4, the action the director says
+// he is in (dribble, pass, jumper, layup, dunk, contest). Nothing here decides
+// anything about the game: positions, possession and actions come from
+// services/watchDirector.ts, this only reads them.
 //
 // Units are feet, like the rest of the court: ~6'5" to the top of the head.
 
 const SKIN_TONES = ['#f1c7a3', '#d9a57c', '#b97a52', '#8d5a3b', '#6b4029', '#4a2c1d'];
 const HAIR = new THREE.MeshStandardMaterial({ color: '#16120f', roughness: 0.9 });
 const SOCK = new THREE.MeshStandardMaterial({ color: '#f2f2f2', roughness: 0.8 });
+const ACCESSORY = [
+  new THREE.MeshStandardMaterial({ color: '#f4f4f4', roughness: 0.85 }),
+  new THREE.MeshStandardMaterial({ color: '#15161a', roughness: 0.85 }),
+];
+
+/** v runs 0 (bottom) to 1 (top) up a box, on every face: the sole is a band. */
+const uvByHeight = (geo: THREE.BufferGeometry) => {
+  const pos = geo.getAttribute('position');
+  const uv = geo.getAttribute('uv');
+  geo.computeBoundingBox();
+  const { min, max } = geo.boundingBox!;
+  for (let i = 0; i < pos.count; i++) uv.setY(i, (pos.getY(i) - min.y) / (max.y - min.y));
+  uv.needsUpdate = true;
+  return geo;
+};
 
 const GEO = {
   torso: new THREE.CapsuleGeometry(0.58, 1.35, 6, 18),
   head: new THREE.SphereGeometry(0.4, 18, 14),
   hair: new THREE.SphereGeometry(0.42, 16, 10, 0, Math.PI * 2, 0, Math.PI * 0.42),
+  headband: new THREE.CylinderGeometry(0.415, 0.415, 0.14, 18, 1, true),
   neck: new THREE.CylinderGeometry(0.19, 0.22, 0.4, 10),
   // Limbs are deliberately thick and overlap at the joints, each joint capped
   // with a ball of the same radius: thinner and gapped (the first pass), up
   // close they read as a wooden artist's mannequin.
   upperArm: new THREE.CapsuleGeometry(0.21, 0.8, 4, 12),
+  sleeve: new THREE.CylinderGeometry(0.235, 0.235, 0.7, 12, 1, true),
   foreArm: new THREE.CapsuleGeometry(0.17, 0.88, 4, 12),
   hand: new THREE.SphereGeometry(0.2, 10, 8),
   shoulderJoint: new THREE.SphereGeometry(0.27, 12, 10),
@@ -35,7 +54,7 @@ const GEO = {
   thigh: new THREE.CapsuleGeometry(0.3, 0.95, 4, 12),
   shin: new THREE.CapsuleGeometry(0.22, 1.0, 4, 12),
   sock: new THREE.CylinderGeometry(0.205, 0.2, 0.55, 10),
-  shoe: new THREE.BoxGeometry(0.42, 0.32, 0.9),
+  shoe: uvByHeight(new THREE.BoxGeometry(0.42, 0.32, 0.9)),
   shadow: new THREE.PlaneGeometry(1, 1),
 };
 
@@ -44,6 +63,22 @@ const seeded = (id: string) => {
   let h = 2166136261;
   for (let i = 0; i < id.length; i++) h = Math.imul(h ^ id.charCodeAt(i), 16777619);
   return ((h >>> 0) % 10000) / 10000;
+};
+
+// The shorts' and shoes' band textures are the same for a whole team, so
+// they're shared across its five bodies (and the bench) by color.
+const bandCache = new Map<string, THREE.DataTexture>();
+const sharedBand = (base: string, bands: { from: number; to: number; color: string }[]) => {
+  const key = base + JSON.stringify(bands);
+  let tex = bandCache.get(key);
+  if (!tex) { tex = buildBandTexture(base, bands); bandCache.set(key, tex); }
+  return tex;
+};
+
+/** A light shoe gets a dark sole, any other a white one. */
+const soleFor = (shoe: string) => {
+  const c = new THREE.Color(shoe);
+  return 0.2126 * c.r + 0.7152 * c.g + 0.0722 * c.b > 0.6 ? '#1c1d22' : '#f2f2ee';
 };
 
 export interface Rig {
@@ -65,16 +100,30 @@ export interface PoseInput {
   ball: { x: number; y: number; z: number; inFlight: boolean };
   /** Playback just cut: the jump in position is an edit, not a sprint. */
   snap?: boolean;
+  /** What the director says he's doing, and how far into it (0-1). */
+  action?: PlayerAction;
+  actionT?: number;
 }
 
 interface Joints {
   body: THREE.Group;
   hips: THREE.Group;
+  neck: THREE.Group;
   shoulderL: THREE.Group; shoulderR: THREE.Group;
   elbowL: THREE.Group; elbowR: THREE.Group;
   hipL: THREE.Group; hipR: THREE.Group;
   kneeL: THREE.Group; kneeR: THREE.Group;
 }
+
+/** Every angle the pose writes, so a base pose and an action pose can be blended. */
+interface Pose {
+  lean: number;
+  hipLx: number; hipRx: number; hipLz: number; hipRz: number;
+  kneeL: number; kneeR: number;
+  shLx: number; shRx: number; shLz: number; shRz: number;
+  elL: number; elR: number;
+}
+const KEYS: (keyof Pose)[] = ['lean', 'hipLx', 'hipRx', 'hipLz', 'hipRz', 'kneeL', 'kneeR', 'shLx', 'shRx', 'shLz', 'shRz', 'elL', 'elR'];
 
 const at = (parent: THREE.Object3D, x: number, y: number, z = 0) => {
   const g = new THREE.Group();
@@ -90,6 +139,16 @@ const mesh = (parent: THREE.Object3D, geo: THREE.BufferGeometry, mat: THREE.Mate
   return m;
 };
 
+const clamp01 = (v: number) => Math.max(0, Math.min(1, v));
+/** 0 -> 1 -> 0 over [from, to], a smooth hump (sine). */
+const hump = (t: number, from: number, to: number) => Math.sin(Math.PI * clamp01((t - from) / (to - from)));
+const wrapAngle = (a: number) => Math.atan2(Math.sin(a), Math.cos(a));
+
+/** How high each finish leaves the floor, feet. */
+const LEAP: Record<string, number> = { shot: 1.25, layup: 1.8, dunk: 2.8, contest: 0.95 };
+/** The neck turns toward the ball this far, no further (~70 degrees). */
+const NECK_LIMIT = 1.22;
+
 export const createRig = (team: { primary: string; secondary: string }, shadowMat: THREE.Material): Rig => {
   const root = new THREE.Group();
 
@@ -97,8 +156,15 @@ export const createRig = (team: { primary: string; secondary: string }, shadowMa
   // comes in (no new GPU texture, just new pixels).
   const jerseyTex = buildJerseyTexture(team.primary, team.secondary, null);
   const jersey = new THREE.MeshStandardMaterial({ map: jerseyTex, roughness: 0.62 });
-  const shortsMat = new THREE.MeshStandardMaterial({ color: team.primary, roughness: 0.6, side: THREE.DoubleSide });
-  const shoeMat = new THREE.MeshStandardMaterial({ color: team.secondary, roughness: 0.45 });
+  // Shorts carry a waistband and shoes a sole as painted bands, not meshes.
+  const shortsMat = new THREE.MeshStandardMaterial({
+    map: sharedBand(team.primary, [{ from: 0.84, to: 1.01, color: team.secondary }]),
+    roughness: 0.6, side: THREE.DoubleSide,
+  });
+  const shoeMat = new THREE.MeshStandardMaterial({
+    map: sharedBand(team.secondary, [{ from: -0.01, to: 0.3, color: soleFor(team.secondary) }]),
+    roughness: 0.45,
+  });
   const skin = new THREE.MeshStandardMaterial({ color: SKIN_TONES[0], roughness: 0.55 });
 
   const shadow = new THREE.Mesh(GEO.shadow, shadowMat);
@@ -113,9 +179,12 @@ export const createRig = (team: { primary: string; secondary: string }, shadowMa
   // Torso, flattened front-to-back so it reads as a chest, not a barrel.
   const torso = mesh(hips, GEO.torso, jersey, 0, 1.05);
   torso.scale.set(1.15, 1, 0.72);
-  mesh(hips, GEO.neck, skin, 0, 2.15);
-  mesh(hips, GEO.head, skin, 0, 2.58);
-  const hair = mesh(hips, GEO.hair, HAIR, 0, 2.6);
+  // Head on its own pivot at the base of the neck, so it can follow the ball.
+  const neck = at(hips, 0, 1.95);
+  mesh(neck, GEO.neck, skin, 0, 0.2);
+  mesh(neck, GEO.head, skin, 0, 0.63);
+  const hair = mesh(neck, GEO.hair, HAIR, 0, 0.65);
+  const headband = mesh(neck, GEO.headband, ACCESSORY[0], 0, 0.72);
 
   const shoulderL = at(hips, -0.78, 1.82);
   const shoulderR = at(hips, 0.78, 1.82);
@@ -125,6 +194,8 @@ export const createRig = (team: { primary: string; secondary: string }, shadowMa
     mesh(s, GEO.shoulderJoint, skin);
     mesh(s, GEO.upperArm, skin, 0, -0.55);
   });
+  // A shooting sleeve on the right arm, for the players who wear one.
+  const sleeve = mesh(shoulderR, GEO.sleeve, ACCESSORY[1], 0, -0.62);
   [elbowL, elbowR].forEach((e) => {
     mesh(e, GEO.elbowJoint, skin);
     mesh(e, GEO.foreArm, skin, 0, -0.56);
@@ -146,7 +217,7 @@ export const createRig = (team: { primary: string; secondary: string }, shadowMa
     mesh(k, GEO.shoe, shoeMat, 0, -1.6, 0.16);
   });
 
-  const j: Joints = { body, hips, shoulderL, shoulderR, elbowL, elbowR, hipL, hipR, kneeL, kneeR };
+  const j: Joints = { body, hips, neck, shoulderL, shoulderR, elbowL, elbowR, hipL, hipR, kneeL, kneeR };
 
   // Animation state, all smoothed so a pose change is a motion, not a snap.
   let phase = Math.random() * Math.PI * 2;
@@ -155,15 +226,24 @@ export const createRig = (team: { primary: string; secondary: string }, shadowMa
   let lastZ = 0;
   let first = true;
   let jump = 0;
+  let actWeight = 0;
+  let neckYaw = 0;
   const pose = {
     crouch: 0, lean: 0, armsUp: 0, stance: 0, dribble: 0,
   };
+  const base = {} as Pose;
+  const act = {} as Pose;
   const approach = (cur: number, target: number, k: number) => cur + (target - cur) * k;
 
   const setPlayer = (playerId: string, number: number | null) => {
     const r = seeded(playerId);
     skin.color.set(SKIN_TONES[Math.floor(r * SKIN_TONES.length)]);
     hair.visible = r % 0.5 > 0.15;
+    // Accessories are the player's, not the game's: fixed by his id.
+    const hb = seeded(playerId + 'band');
+    headband.visible = hb < 0.22;
+    headband.material = ACCESSORY[hb < 0.14 ? 0 : 1];
+    sleeve.visible = seeded(playerId + 'sleeve') < 0.2;
     paintJersey(jerseyTex.image.data as Uint8Array, jerseyTex.image.width, jerseyTex.image.height,
       hexToRgb(team.primary), hexToRgb(team.secondary), number);
     jerseyTex.needsUpdate = true;
@@ -184,53 +264,146 @@ export const createRig = (team: { primary: string; secondary: string }, shadowMa
     const run = Math.min(1, speedSmooth / 18);
     phase += dt * (6 + speedSmooth * 0.45);
 
-    // Is this player going up for (or contesting) a shot right now?
+    const action: PlayerAction = p.action ?? 'idle';
+    const t = p.actionT ?? 0;
+    // A finish or a contest takes the body over; dribbling and passing are
+    // layered on the running pose below.
+    const big = action === 'shot' || action === 'layup' || action === 'dunk' || action === 'contest';
+
+    // Without director actions (an old plan), fall back to reading the ball:
+    // anyone under a ball in flight near the rim rises for it.
     const dxb = p.ball.x - p.x;
     const dzb = p.ball.z - p.z;
     const nearBall = Math.hypot(dxb, dzb);
-    const rising = p.ball.inFlight && p.ball.y > 7 && p.ball.y < 13 && nearBall < 5;
+    const rising = p.action === undefined && p.ball.inFlight && p.ball.y > 7 && p.ball.y < 13 && nearBall < 5;
 
-    const defending = !p.onOffense && run < 0.3;
+    const defending = !p.onOffense && run < 0.3 && !big;
     pose.stance = approach(pose.stance, defending ? 1 : 0, 0.08);
     pose.armsUp = approach(pose.armsUp, rising ? 1 : 0, 0.25);
-    pose.dribble = approach(pose.dribble, p.hasBall && !rising ? 1 : 0, 0.2);
+    pose.dribble = approach(pose.dribble, action === 'dribble' || (p.action === undefined && p.hasBall && !rising) ? 1 : 0, 0.2);
     pose.lean = approach(pose.lean, run * 0.22 + pose.stance * 0.18, 0.12);
-    const targetJump = rising && nearBall < 3.5 ? 1.6 : 0;
-    jump = approach(jump, targetJump, targetJump > jump ? 0.35 : 0.12);
+
+    // --- base pose: running, stance, dribble ---------------------------
+    const swing = Math.sin(phase) * run;
+    const bob = Math.abs(Math.cos(phase)) * run * 0.22;
+    const crouch = pose.stance * 0.55 + (1 - run) * 0.05;
+    const kneeFold = (s: number) => Math.max(0, s) * 1.3 * run + 0.12;
+    const dribbleBeat = Math.sin(p.time * 13);
+    const armUp = pose.armsUp * -2.9;
+    base.lean = pose.lean;
+    // Legs: alternate swing, knees fold on the recovery half of the stride;
+    // in a stance both thighs come forward, the knees bend and it goes wide.
+    base.hipLx = -swing * 0.85 - pose.stance * 0.55 - pose.lean * 0.6;
+    base.hipRx = swing * 0.85 - pose.stance * 0.55 - pose.lean * 0.6;
+    base.kneeL = kneeFold(Math.sin(phase + Math.PI / 2)) + pose.stance * 0.95;
+    base.kneeR = kneeFold(-Math.sin(phase + Math.PI / 2)) + pose.stance * 0.95;
+    base.hipLz = -pose.stance * 0.22;
+    base.hipRz = pose.stance * 0.22;
+    // Arms: counter-swing when running, out and low in a stance, the right
+    // hand working the ball on a dribble while the left arm comes across to
+    // shield it.
+    base.shLx = swing * 0.75 * (1 - pose.armsUp) * (1 - pose.dribble) + armUp - pose.stance * 0.6 - pose.dribble * 0.75;
+    base.shRx = -swing * 0.75 * (1 - pose.armsUp) * (1 - pose.dribble) + armUp
+      - pose.dribble * (0.55 + dribbleBeat * 0.12) - pose.stance * 0.6;
+    base.shLz = -0.1 - pose.stance * 0.42 * (1 - pose.armsUp) - pose.dribble * 0.5;
+    base.shRz = 0.1 + pose.stance * 0.42 * (1 - pose.armsUp) + pose.dribble * 0.18;
+    base.elL = -0.35 - run * 0.9 * (1 - pose.dribble) - pose.stance * 0.3 + pose.armsUp * 0.25 - pose.dribble * 1.0;
+    base.elR = -0.35 - run * 0.9 * (1 - pose.dribble) - pose.dribble * (0.75 + dribbleBeat * 0.35) + pose.armsUp * 0.25;
+
+    // --- action pose ----------------------------------------------------
+    let leap = 0;
+    let gather = 0;
+    if (action === 'shot') {
+      // Dip on the gather, rise, release at 0.4 with the shooting elbow
+      // snapping straight, guide hand peeling off, follow-through held.
+      gather = hump(t, 0, 0.3) * 0.5;
+      leap = hump(t, 0.22, 0.85) * LEAP.shot;
+      const released = clamp01((t - 0.36) / 0.1);
+      act.lean = -0.05;
+      act.hipLx = -0.15; act.hipRx = -0.15; act.hipLz = -0.05; act.hipRz = 0.05;
+      act.kneeL = 0.25 + gather * 1.4; act.kneeR = 0.25 + gather * 1.4;
+      act.shRx = -2.55 - released * 0.35; act.shRz = 0.12;
+      act.elR = -1.5 + released * 1.35;
+      act.shLx = -2.3 + released * 0.9; act.shLz = -0.35;
+      act.elL = -1.1 + released * 0.4;
+    } else if (action === 'layup') {
+      // Off one foot: the left knee drives up, the right arm lays it up high,
+      // the left arm out for balance.
+      gather = hump(t, 0, 0.25) * 0.35;
+      leap = hump(t, 0.18, 0.9) * LEAP.layup;
+      const drive = hump(t, 0.15, 0.95);
+      act.lean = 0.12;
+      act.hipLx = -1.35 * drive; act.hipRx = 0.25 * drive; act.hipLz = 0; act.hipRz = 0;
+      act.kneeL = 0.3 + 1.6 * drive; act.kneeR = 0.15 + gather;
+      act.shRx = -2.95 * clamp01(t / 0.4 + 0.2); act.shRz = 0.05;
+      act.elR = -0.25;
+      act.shLx = -0.7; act.shLz = -0.75; act.elL = -0.6;
+    } else if (action === 'dunk') {
+      // Two-foot gather, a big rise with the ball up over the rim, then the
+      // hang: knees tucked, both arms up and hauling down after the slam.
+      gather = hump(t, 0, 0.25) * 0.7;
+      leap = hump(t, 0.15, 1.05) * LEAP.dunk;
+      const hang = clamp01((t - 0.55) / 0.2);
+      act.lean = 0.08 - hang * 0.1;
+      act.hipLx = -0.5 - hang * 0.4; act.hipRx = -0.35 - hang * 0.4; act.hipLz = -0.08; act.hipRz = 0.08;
+      act.kneeL = 0.3 + gather * 1.6 + hang * 0.9; act.kneeR = 0.3 + gather * 1.6 + hang * 0.9;
+      act.shRx = -3.05 + hang * 0.25; act.shLx = -2.85 + hang * 0.2;
+      act.shRz = 0.15; act.shLz = -0.15;
+      act.elR = -0.15 - hang * 0.4; act.elL = -0.25 - hang * 0.4;
+    } else if (action === 'contest') {
+      // Late, and not as high: the hand goes straight up at the release, the
+      // other stays low and out.
+      leap = hump(t, 0.3, 0.95) * LEAP.contest;
+      act.lean = 0.02;
+      act.hipLx = -0.2; act.hipRx = -0.2; act.hipLz = -0.12; act.hipRz = 0.12;
+      act.kneeL = 0.35 + (1 - hump(t, 0.3, 0.95)) * 0.4; act.kneeR = act.kneeL;
+      act.shLx = -3.0 * clamp01(t / 0.35); act.shLz = -0.1; act.elL = -0.1;
+      act.shRx = -0.5; act.shRz = 0.55; act.elR = -0.5;
+    }
+
+    // A pass is layered on the running legs: both arms push out from the
+    // chest and snap straight at mid-beat.
+    if (action === 'pass') {
+      const push = hump(Math.min(1, t * 1.4), 0, 1);
+      base.shLx = -0.95 - push * 0.55; base.shRx = -0.95 - push * 0.55;
+      base.shLz = -0.25; base.shRz = 0.25;
+      base.elL = -1.7 + push * 1.5; base.elR = -1.7 + push * 1.5;
+    }
+
+    // Blend into a big action and back out of it, so a shot reads as a
+    // motion from the run and not a snap into a statue. On the way out `act`
+    // still holds the action's last pose, which is what it fades from.
+    actWeight = approach(actWeight, big ? 1 : 0, big ? 0.35 : 0.15);
+    const f = {} as Pose;
+    for (const k of KEYS) f[k] = base[k] + ((act[k] ?? base[k]) - base[k]) * actWeight;
+
+    const targetJump = big ? leap : rising && nearBall < 3.5 ? 1.6 : 0;
+    jump = big ? targetJump : approach(jump, targetJump, targetJump > jump ? 0.35 : 0.12);
 
     root.position.set(p.x, 0, p.z);
     root.rotation.y = p.rotY;
 
-    const swing = Math.sin(phase) * run;
-    const bob = Math.abs(Math.cos(phase)) * run * 0.22;
-    const crouch = pose.stance * 0.55 + (1 - run) * 0.05;
-    j.body.position.y = bob - crouch * 0.6 + jump;
-    j.hips.rotation.x = pose.lean;
+    j.body.position.y = bob - crouch * 0.6 - gather * 0.5 + jump;
+    j.hips.rotation.x = f.lean;
+    j.hipL.rotation.x = f.hipLx;
+    j.hipR.rotation.x = f.hipRx;
+    j.hipL.rotation.z = f.hipLz;
+    j.hipR.rotation.z = f.hipRz;
+    j.kneeL.rotation.x = f.kneeL + jump * 0.2;
+    j.kneeR.rotation.x = f.kneeR + jump * 0.2;
+    j.shoulderL.rotation.x = f.shLx;
+    j.shoulderR.rotation.x = f.shRx;
+    j.shoulderL.rotation.z = f.shLz;
+    j.shoulderR.rotation.z = f.shRz;
+    j.elbowL.rotation.x = f.elL;
+    j.elbowR.rotation.x = f.elR;
 
-    // Legs: alternate swing, knees fold on the recovery half of the stride;
-    // in a stance both thighs come forward and the knees bend.
-    const kneeFold = (s: number) => Math.max(0, s) * 1.3 * run + 0.12;
-    j.hipL.rotation.x = -swing * 0.85 - pose.stance * 0.55 - pose.lean * 0.6;
-    j.hipR.rotation.x = swing * 0.85 - pose.stance * 0.55 - pose.lean * 0.6;
-    j.kneeL.rotation.x = kneeFold(Math.sin(phase + Math.PI / 2)) + pose.stance * 0.95 + jump * 0.2;
-    j.kneeR.rotation.x = kneeFold(-Math.sin(phase + Math.PI / 2)) + pose.stance * 0.95 + jump * 0.2;
-    // Stance is wide.
-    j.hipL.rotation.z = -pose.stance * 0.22;
-    j.hipR.rotation.z = pose.stance * 0.22;
-
-    // Arms: counter-swing when running, wide in a stance, straight up on a
-    // shot or a contest, and the right hand working the ball on a dribble.
-    const dribbleBeat = Math.sin(p.time * 13);
-    const armUp = pose.armsUp * -2.9;
-    j.shoulderL.rotation.x = swing * 0.75 * (1 - pose.armsUp) + armUp - pose.stance * 0.6;
-    j.shoulderR.rotation.x = -swing * 0.75 * (1 - pose.armsUp) * (1 - pose.dribble) + armUp
-      - pose.dribble * (0.55 + dribbleBeat * 0.12) - pose.stance * 0.6;
-    // A real stance has the hands out and low, palms up to the ball -- not
-    // the arms straight out at shoulder height.
-    j.shoulderL.rotation.z = -0.1 - pose.stance * 0.42 * (1 - pose.armsUp);
-    j.shoulderR.rotation.z = 0.1 + pose.stance * 0.42 * (1 - pose.armsUp) + pose.dribble * 0.18;
-    j.elbowL.rotation.x = -0.35 - run * 0.9 - pose.stance * 0.3 + pose.armsUp * 0.25;
-    j.elbowR.rotation.x = -0.35 - run * 0.9 * (1 - pose.dribble) - pose.dribble * (0.75 + dribbleBeat * 0.35) + pose.armsUp * 0.25;
+    // The head follows the ball, as far as a neck turns. The body's own
+    // facing (rotY) is the director's; this is only the look.
+    const look = wrapAngle(Math.atan2(dxb, dzb) - p.rotY);
+    const want = Math.max(-NECK_LIMIT, Math.min(NECK_LIMIT, look));
+    neckYaw = approach(neckYaw, want, 0.18);
+    j.neck.rotation.y = neckYaw;
 
     // Contact shadow shrinks and fades as he leaves the floor.
     const s = 2.4 - jump * 0.35;
