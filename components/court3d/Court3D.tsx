@@ -4,9 +4,11 @@ import { Canvas, useFrame, useThree } from '@react-three/fiber/native';
 import * as THREE from 'three';
 
 import type { CourtState } from '../../services/watchDirector';
-import Arena from './Arena';
+import Arena, { type ScoreboardData } from './Arena';
 import { createRig, type Rig } from './PlayerRig';
 import { buildBallTexture, buildFloorTexture, buildShadowTexture, hexToRgb, FLOOR_L, FLOOR_W } from './textures';
+
+export type { ScoreboardData };
 
 // The 3D "Assistir ao Jogo" court, rendered natively through expo-gl by React
 // Three Fiber.
@@ -90,6 +92,9 @@ interface Court3DProps {
   homeLabel?: string;
   /** Jersey number by player id. */
   numbers?: { [playerId: string]: number };
+  /** The live score, period, game clock and shot clock for the arena's
+   *  scoreboard and shot clocks (PLANO-3D Etapa 5). Absent: the boards idle. */
+  scoreboard?: ScoreboardData;
 }
 
 const DEFAULT_FLOOR_COLOR = '#caa271'; // light maple
@@ -354,7 +359,7 @@ function PlayersAndBall({
 /* ------------------------------------------------------------------ */
 /* Scene root.                                                         */
 /* ------------------------------------------------------------------ */
-function Scene({ home, away, courtRef, visual, homeLabel, numbers }: Omit<Court3DProps, 'cameraView'>) {
+function Scene({ home, away, courtRef, visual, homeLabel, numbers, scoreboard }: Omit<Court3DProps, 'cameraView'>) {
   return (
     <>
       {/* Arena lighting: a warm key from the rig above, a cold rim light low
@@ -374,14 +379,21 @@ function Scene({ home, away, courtRef, visual, homeLabel, numbers }: Omit<Court3
         secondary={home.secondary}
         label={homeLabel ?? 'NBA'}
       />
-      <Arena primary={home.primary} secondary={home.secondary} courtRef={courtRef} />
+      <Arena
+        primary={home.primary}
+        secondary={home.secondary}
+        courtRef={courtRef}
+        board={scoreboard}
+        awayPrimary={away.primary}
+        homeLabel={homeLabel}
+      />
       <PlayersAndBall home={home} away={away} courtRef={courtRef} numbers={numbers} />
     </>
   );
 }
 
 export default function Court3D({
-  home, away, courtRef, visual, cameraView = 'iso', homeLabel, numbers,
+  home, away, courtRef, visual, cameraView = 'iso', homeLabel, numbers, scoreboard,
 }: Court3DProps) {
   const preset = CAMERA_PRESETS[cameraView];
   const camState = useRef<CameraDragState>({
@@ -417,7 +429,7 @@ export default function Court3D({
         <fog attach="fog" args={['#04060b', 160, 520]} />
         <CameraRig stateRef={camState} preset={preset} courtRef={courtRef} />
         {__DEV__ ? <RenderProbe /> : null}
-        <Scene home={home} away={away} courtRef={courtRef} visual={visual} homeLabel={homeLabel} numbers={numbers} />
+        <Scene home={home} away={away} courtRef={courtRef} visual={visual} homeLabel={homeLabel} numbers={numbers} scoreboard={scoreboard} />
       </Canvas>
     </View>
   );

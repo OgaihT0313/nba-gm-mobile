@@ -11,6 +11,7 @@ import {
   buildFive,
   courtStateAt,
   advanceClock,
+  possessionAt,
   planQuarter,
   quarterSeconds,
   tipOffState,
@@ -172,6 +173,9 @@ const WatchGameScreen: React.FC<WatchGameScreenProps> = ({
   const [quarter, setQuarter] = useState(1);
   const [clock, setClock] = useState(0);
   const [score, setScore] = useState({ home: 0, away: 0 });
+  // Seconds left on the shot clock of the trip in progress; undefined between
+  // trips and in the huddle. The trip's own start is when the clock reset.
+  const [shotClock, setShotClock] = useState<number | undefined>(undefined);
   const [speed, setSpeed] = useState(1);
   const [play, setPlay] = useState<WatchPlay>('pick_roll');
   const [timeoutsLeft, setTimeoutsLeft] = useState(STARTING_TIMEOUTS);
@@ -400,6 +404,8 @@ const WatchGameScreen: React.FC<WatchGameScreenProps> = ({
       if (phaseRef.current !== 'live') return;
       setClock(clockRef.current);
       setScore(scoreAt(clockRef.current));
+      const trip = planRef.current ? possessionAt(planRef.current, clockRef.current) : null;
+      setShotClock(trip && clockRef.current < trip.end ? Math.max(0, 24 - (clockRef.current - trip.start)) : undefined);
       const at = planRef.current ? rotationAt(planRef.current, clockRef.current) : null;
       if (at) {
         const five = userSide === 'home' ? at.fiveHome : at.fiveAway;
@@ -716,6 +722,15 @@ const WatchGameScreen: React.FC<WatchGameScreenProps> = ({
         cameraView={cameraView}
         homeLabel={getTeamTricode(home)}
         numbers={jerseyNumbers}
+        scoreboard={{
+          home: score.home,
+          away: score.away,
+          quarter,
+          clock: quarterSeconds(quarter) - clock,
+          shotClock: phase === 'live' ? shotClock : undefined,
+          homeLabel: getTeamTricode(home),
+          awayLabel: getTeamTricode(away),
+        }}
       />
 
       {desktop ? cameras : null}

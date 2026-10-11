@@ -1,9 +1,12 @@
-import React, { useMemo, useRef } from 'react';
+import React, { useEffect, useMemo, useRef } from 'react';
 import { useFrame } from '@react-three/fiber/native';
 import * as THREE from 'three';
 
 import type { CourtState } from '../../services/watchDirector';
-import { buildLedTexture, buildNetTexture, hexToRgb, LIGHT_POOLS } from './textures';
+import {
+  buildLedTexture, buildNetTexture, hexToRgb, LIGHT_POOLS,
+  buildScoreboardTexture, paintScoreboard, buildShotClockTexture, paintShotClock,
+} from './textures';
 
 // Everything around the court: the bowl and its crowd, courtside furniture,
 // the center-hung scoreboard, and the two baskets. Static except for the LED
@@ -19,6 +22,24 @@ interface ArenaProps {
   primary: string;
   secondary: string;
 }
+
+/** The live numbers the arena shows (PLANO-3D Etapa 5). `clock` is the time
+ *  left in the period, in seconds; `shotClock` is absent between possessions. */
+export interface ScoreboardData {
+  home: number;
+  away: number;
+  quarter: number;
+  clock: number;
+  shotClock?: number;
+  homeLabel?: string;
+  awayLabel?: string;
+}
+
+const periodLabel = (q: number) => (q <= 4 ? `Q${q}` : q === 5 ? 'OT' : `OT${q - 4}`);
+const clockLabel = (s: number) => {
+  const t = Math.max(0, Math.ceil(s));
+  return `${Math.floor(t / 60)}:${String(t % 60).padStart(2, '0')}`;
+};
 
 /**
  * Several geometries as one (one draw call): the named attributes
@@ -231,12 +252,22 @@ function Flashes({ spots }: { spots: THREE.Vector3[] }) {
 /* ------------------------------------------------------------------ */
 /* Courtside: LED ribbons, scorer's table, benches.                    */
 /* ------------------------------------------------------------------ */
-function Courtside({ primary, secondary }: ArenaProps) {
+// The ribbons flare and race for a moment after every basket.
+const LED_BASE = 1.1;
+const LED_FLASH = 1.2; // seconds
+
+function Courtside({ primary, secondary, label, scored }: ArenaProps & { label?: string; scored: number }) {
   const led = useMemo(() => {
-    const tex = buildLedTexture(primary, secondary);
+    const tex = buildLedTexture(primary, secondary, label);
     tex.repeat.set(6, 1);
-    return new THREE.MeshStandardMaterial({ color: '#000', emissive: '#ffffff', emissiveMap: tex, emissiveIntensity: 1.1, roughness: 0.4 });
-  }, [primary, secondary]);
+    return new THREE.MeshStandardMaterial({ color: '#000', emissive: '#ffffff', emissiveMap: tex, emissiveIntensity: LED_BASE, roughness: 0.4 });
+  }, [primary, secondary, label]);
+  const flash = useRef(0);
+  const lastScored = useRef(scored);
+  useEffect(() => {
+    if (scored > lastScored.current) flash.current = 1;
+    lastScored.current = scored;
+  }, [scored]);
   const ledEnd = useMemo(() => {
     const m = led.clone();
     m.emissiveMap = led.emissiveMap!.clone();
@@ -245,9 +276,15 @@ function Courtside({ primary, secondary }: ArenaProps) {
     return m;
   }, [led]);
 
-  useFrame((_, dt) => {
-    led.emissiveMap!.offset.x = (led.emissiveMap!.offset.x + dt * 0.04) % 1;
-    ledEnd.emissiveMap!.offset.x = (ledEnd.emissiveMap!.offset.x + dt * 0.04) % 1;
+  useFrame(({ clock }, dt) => {
+    const f = flash.current;
+    const speed = 0.04 + f * 0.6;
+    led.emissiveMap!.offset.x = (led.emissiveMap!.offset.x + dt * speed) % 1;
+    ledEnd.emissiveMap!.offset.x = (ledEnd.emissiveMap!.offset.x + dt * speed) % 1;
+    const glow = LED_BASE + f * 1.4 * (0.6 + 0.4 * Math.sin(clock.getElapsedTime() * 28));
+    led.emissiveIntensity = glow;
+    ledEnd.emissiveIntensity = glow;
+    flash.current = Math.max(0, f - dt / LED_FLASH);
   });
 
   const chairs = useMemo(() => {
@@ -292,12 +329,25 @@ function Courtside({ primary, secondary }: ArenaProps) {
 /* ------------------------------------------------------------------ */
 /* Center-hung scoreboard and the ceiling.                             */
 /* ------------------------------------------------------------------ */
-function Scoreboard({ primary, secondary }: ArenaProps) {
-  const screen = useMemo(() => {
-    const [r, g, b] = hexToRgb(primary);
-    const c = new THREE.Color(`rgb(${r},${g},${b})`).lerp(new THREE.Color('#ffffff'), 0.15);
-    return new THREE.MeshStandardMaterial({ color: '#05060a', emissive: c, emissiveIntensity: 0.75, roughness: 0.3 });
-  }, [primary]);
+function Scoreboard({ primary, secondary, board, awayPrimary }: ArenaProps & { board: ScoreboardData; awayPrimary: string }) {
+  // One texture on all four screens, repainted only when what it shows changes.
+  const tex = useMemo(() => buildScoreboardTexture(), []);
+  const screen = useMemo(
+    () => new THREE.MeshStandardMaterial({ color: '#05060a', emissive: '#ffffff', emissiveMap: tex, emissiveIntensity: 0.95, roughness: 0.3 }),
+    [tex],
+  );
+  const face = {
+    homeLabel: board.homeLabel ?? '',
+    awayLabel: board.awayLabel ?? '',
+    home: board.home,
+    away: board.away,
+    period: periodLabel(board.quarter),
+    clock: clockLabel(board.clock),
+    homeColor: primary,
+    awayColor: awayPrimary,
+  };
+  const key = JSON.stringify(face);
+  useEffect(() => { paintScoreboard(tex, face); }, [key]); // eslint-disable-line react-hooks/exhaustive-deps
   const trim = useMemo(() => new THREE.MeshStandardMaterial({ color: '#05060a', emissive: secondary, emissiveIntensity: 0.45 }), [secondary]);
 
   return (
@@ -431,10 +481,12 @@ const RIM_Y = 10;
 // from the director.
 const NET_SETTLE = 0.75;
 
-function Hoop({ side, primary, courtRef }: {
+function Hoop({ side, primary, courtRef, shotClockMat, violation }: {
   side: 1 | -1;
   primary: string;
   courtRef?: React.MutableRefObject<CourtState | null>;
+  shotClockMat: THREE.Material;
+  violation: boolean;
 }) {
   const net = useMemo(() => {
     const tex = buildNetTexture();
@@ -469,6 +521,10 @@ function Hoop({ side, primary, courtRef }: {
     m.name = 'shotClockEdge';
     return m;
   }, []);
+  // Lit when the shot clock runs out.
+  useEffect(() => {
+    (ledEdge.material as THREE.MeshStandardMaterial).emissiveIntensity = violation ? 2.2 : 0.12;
+  }, [violation, ledEdge]);
 
   // What holds the rim: a mounting plate on the glass, the arm out to the
   // ring, and the breakaway spring housing under it -- one mesh. Built in the
@@ -571,10 +627,13 @@ function Hoop({ side, primary, courtRef }: {
           {white}
         </mesh>
       ))}
-      {/* Shot clock on top. */}
+      {/* Shot clock on top, its face toward the court showing the live count. */}
       <mesh position={[boardX, 13.4, 0]}>
         <boxGeometry args={[0.8, 0.9, 2.6]} />
-        <meshStandardMaterial color="#0b0b0e" emissive="#ff2a1a" emissiveIntensity={0.55} />
+        <meshStandardMaterial color="#0b0b0e" roughness={0.5} />
+      </mesh>
+      <mesh position={[boardX - s * 0.42, 13.4, 0]} rotation={[0, s > 0 ? -Math.PI / 2 : Math.PI / 2, 0]} material={shotClockMat}>
+        <planeGeometry args={[2.4, 0.8]} />
       </mesh>
       <primitive object={ledEdge} position={[boardX - s * 0.02, 0, 0]} />
       {/* Rim, mount and net hang off one pivot at the glass. The inner group
@@ -597,9 +656,20 @@ function Hoop({ side, primary, courtRef }: {
   );
 }
 
-export default function Arena({ primary, secondary, courtRef }: ArenaProps & {
+const IDLE_BOARD: ScoreboardData = { home: 0, away: 0, quarter: 1, clock: 12 * 60 };
+
+export default function Arena({ primary, secondary, courtRef, board = IDLE_BOARD, awayPrimary, homeLabel }: ArenaProps & {
   courtRef?: React.MutableRefObject<CourtState | null>;
+  board?: ScoreboardData;
+  awayPrimary?: string;
+  homeLabel?: string;
 }) {
+  // Both shot clocks show the same count: one texture, repainted on change.
+  const shotTex = useMemo(() => buildShotClockTexture(), []);
+  const shotClockMat = useMemo(() => new THREE.MeshBasicMaterial({ map: shotTex }), [shotTex]);
+  const shot = board.shotClock === undefined ? null : Math.max(0, Math.ceil(board.shotClock));
+  useEffect(() => { paintShotClock(shotTex, shot); }, [shot, shotTex]);
+  const violation = shot === 0;
   return (
     <>
       {/* The arena floor around the hardwood. */}
@@ -608,12 +678,12 @@ export default function Arena({ primary, secondary, courtRef }: ArenaProps & {
         <meshStandardMaterial color="#101219" roughness={0.95} />
       </mesh>
       <Bowl primary={primary} secondary={secondary} />
-      <Courtside primary={primary} secondary={secondary} />
-      <Scoreboard primary={primary} secondary={secondary} />
+      <Courtside primary={primary} secondary={secondary} label={homeLabel} scored={board.home + board.away} />
+      <Scoreboard primary={primary} secondary={secondary} board={board} awayPrimary={awayPrimary ?? secondary} />
       <CeilingLights />
       <SpotBeams />
-      <Hoop side={1} primary={primary} courtRef={courtRef} />
-      <Hoop side={-1} primary={primary} courtRef={courtRef} />
+      <Hoop side={1} primary={primary} courtRef={courtRef} shotClockMat={shotClockMat} violation={violation} />
+      <Hoop side={-1} primary={primary} courtRef={courtRef} shotClockMat={shotClockMat} violation={violation} />
     </>
   );
 }

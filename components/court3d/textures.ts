@@ -87,6 +87,8 @@ const GLYPHS: { [ch: string]: string[] } = {
   Y: ['10001', '10001', '01010', '00100', '00100', '00100', '00100'],
   Z: ['11111', '00001', '00010', '00100', '01000', '10000', '11111'],
   ' ': ['00000', '00000', '00000', '00000', '00000', '00000', '00000'],
+  ':': ['00000', '01100', '01100', '00000', '01100', '01100', '00000'],
+  '.': ['00000', '00000', '00000', '00000', '00000', '01100', '01100'],
 };
 
 /**
@@ -426,8 +428,105 @@ export const buildBandTexture = (base: string, bands: { from: number; to: number
   return tex;
 };
 
+/* ------------------------------------------------------------------ */
+/* Live numbers: the center-hung scoreboard and the shot clocks.        */
+/* ------------------------------------------------------------------ */
+// Painted with the same 5x7 font, into DataTextures that are repainted only
+// when a number changes (PLANO-3D Etapa 5) -- never per frame.
+//
+// Rects are given in screen terms (x from the left, y from the TOP); row 0 of
+// a DataTexture is the bottom of the face, as on the jerseys and LED boards.
+
+const fillRect = (data: Uint8Array, W: number, H: number, x: number, yTop: number, w: number, h: number, c: RGB) => {
+  for (let sy = Math.max(0, yTop); sy < Math.min(H, yTop + h); sy++) {
+    const row = H - 1 - sy;
+    for (let sx = Math.max(0, x); sx < Math.min(W, x + w); sx++) {
+      const i = (row * W + sx) * 4;
+      data[i] = c[0]; data[i + 1] = c[1]; data[i + 2] = c[2]; data[i + 3] = 255;
+    }
+  }
+};
+
+/** `text` `h` pixels tall, centered on cx, its glyphs kept at their 5:7 shape. */
+const drawText = (data: Uint8Array, W: number, H: number, text: string, cx: number, yTop: number, h: number, c: RGB) => {
+  if (!text) return;
+  const w = Math.round((h * (text.length * 6 - 1)) / 7);
+  const x0 = Math.round(cx - w / 2);
+  for (let sy = Math.max(0, yTop); sy < Math.min(H, yTop + h); sy++) {
+    const row = H - 1 - sy;
+    for (let sx = Math.max(0, x0); sx < Math.min(W, x0 + w); sx++) {
+      if (!textCovers(text, (sx - x0 + 0.5) / w, (sy - yTop + 0.5) / h)) continue;
+      const i = (row * W + sx) * 4;
+      data[i] = c[0]; data[i + 1] = c[1]; data[i + 2] = c[2]; data[i + 3] = 255;
+    }
+  }
+};
+
+/** A team color made bright enough to read as lit text on a black screen. */
+const litColor = (hex: string): RGB => {
+  const c = hexToRgb(hex);
+  return luminance(c) < 0.35 ? mix(c, [255, 255, 255], 0.45) : c;
+};
+
+export interface ScoreboardFace {
+  homeLabel: string;
+  awayLabel: string;
+  home: number;
+  away: number;
+  period: string;
+  clock: string;
+  homeColor: string;
+  awayColor: string;
+}
+
+const SB_W = 256;
+const SB_H = 128;
+
+export const buildScoreboardTexture = (): THREE.DataTexture => {
+  const data = new Uint8Array(SB_W * SB_H * 4);
+  fillRect(data, SB_W, SB_H, 0, 0, SB_W, SB_H, [6, 7, 10]);
+  return finish(data, SB_W, SB_H);
+};
+
+/** Tricodes over a color bar on each side, the period between them, the two
+ *  scores big, and the game clock along the bottom. */
+export const paintScoreboard = (tex: THREE.DataTexture, f: ScoreboardFace) => {
+  const data = tex.image.data as Uint8Array;
+  const W = SB_W;
+  const H = SB_H;
+  const white: RGB = [250, 250, 246];
+  const amber: RGB = [255, 196, 64];
+  fillRect(data, W, H, 0, 0, W, H, [6, 7, 10]);
+  fillRect(data, W, H, 8, 6, 104, 5, hexToRgb(f.homeColor));
+  fillRect(data, W, H, 144, 6, 104, 5, hexToRgb(f.awayColor));
+  drawText(data, W, H, f.homeLabel, 60, 16, 18, litColor(f.homeColor));
+  drawText(data, W, H, f.awayLabel, 196, 16, 18, litColor(f.awayColor));
+  drawText(data, W, H, f.period, 128, 18, 14, amber);
+  drawText(data, W, H, String(f.home), 60, 44, 44, white);
+  drawText(data, W, H, String(f.away), 196, 44, 44, white);
+  drawText(data, W, H, f.clock, 128, 98, 22, amber);
+  tex.needsUpdate = true;
+};
+
+const SC_W = 64;
+const SC_H = 32;
+
+export const buildShotClockTexture = (): THREE.DataTexture => {
+  const data = new Uint8Array(SC_W * SC_H * 4);
+  fillRect(data, SC_W, SC_H, 0, 0, SC_W, SC_H, [4, 4, 6]);
+  return finish(data, SC_W, SC_H);
+};
+
+/** Red digits, as shot clocks are. Blank when there is no possession. */
+export const paintShotClock = (tex: THREE.DataTexture, seconds: number | null) => {
+  const data = tex.image.data as Uint8Array;
+  fillRect(data, SC_W, SC_H, 0, 0, SC_W, SC_H, [4, 4, 6]);
+  if (seconds !== null) drawText(data, SC_W, SC_H, String(seconds), SC_W / 2, 5, 22, [255, 46, 30]);
+  tex.needsUpdate = true;
+};
+
 /** Scrolling courtside LED: the wordmark and a stripe in the home colors. */
-export const buildLedTexture = (primary: string, secondary: string): THREE.DataTexture => {
+export const buildLedTexture = (primary: string, secondary: string, label?: string): THREE.DataTexture => {
   const W = 512;
   const H = 32;
   const data = new Uint8Array(W * H * 4);
@@ -442,6 +541,8 @@ export const buildLedTexture = (primary: string, secondary: string): THREE.DataT
       if (v < 0.1 || v > 0.9) c = bright;
       if (textCovers('NBA MANAGER', (u - 0.08) / 0.5, (v - 0.22) / 0.56)) c = [255, 255, 255];
       if (u > 0.66 && u < 0.92 && v > 0.3 && v < 0.7) c = mix(bright, [255, 255, 255], (Math.sin(u * 60) + 1) * 0.15);
+      // The home tricode over that block, as arena boards run it.
+      if (label && textCovers(label, (u - 0.69) / 0.2, (v - 0.34) / 0.32)) c = [255, 255, 255];
       const i = (y * W + x) * 4;
       data[i] = c[0]; data[i + 1] = c[1]; data[i + 2] = c[2]; data[i + 3] = 255;
     }

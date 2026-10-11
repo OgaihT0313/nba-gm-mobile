@@ -276,6 +276,23 @@ ganhou o campo opcional `cut`:
 - O placar central e os relógios de posse sobre as tabelas passam a mostrar os valores reais. As placas de LED mostram a sigla do time e uma animação simples ao fim de cada cesta.
 - A textura só é redesenhada quando um número muda, nunca a cada frame.
 
+**FEITO (2026-10-10), falta ver no aparelho.**
+- Prop `scoreboard?: ScoreboardData` no `Court3D` (`home`, `away`, `quarter`, `clock` =
+  segundos restantes no período, `shotClock?`, `homeLabel?`, `awayLabel?`). A
+  `WatchGameScreen` já atualizava placar e relógio a 5 Hz; o relógio de posse sai da
+  posse em curso (24 − tempo desde o início dela), só com o jogo rolando.
+- Placar central: as 4 telas mostram siglas sobre a cor de cada time, quarto (Q1-Q4,
+  OT, OT2…), os pontos e o relógio (`paintScoreboard`, 256x128). Relógio de posse em
+  dígitos vermelhos numa face virada para a quadra em cada tabela (uma textura 64x32
+  para as duas). Texturas repintadas por `useEffect` só quando o texto muda.
+- Borda de LED da tabela acende quando o relógio de posse zera (com posses de 13-18 s
+  na simulação, quase nunca).
+- Placas de LED: sigla da casa no letreiro, e a cada cesta brilham e correm por 1,2 s.
+- Fonte ganhou `:` e `.`.
+- Conferido no navegador desenhando as texturas vivas por cima da tela (a câmera não
+  enquadra o placar a 62 pés): NYK 5 × 6 BOS, Q1, 9:59, posse 9 — igual ao HUD.
+  Orientação do relógio de posse no aparelho ainda a confirmar de perto.
+
 ## Etapa 6 — Bola (`Court3D.tsx`, `textures.ts`)
 
 - Couro com mais textura e canais mais definidos.
