@@ -123,9 +123,9 @@ export const buildFloorTexture = (opts: {
   primary: string;
   secondary: string;
   label: string;
-  /** Rows run the other way on native: expo-gl ignores the pixelStorei
-   *  unpack flags three.js sets (it logs as much), so the same DataTexture
-   *  lands flipped along the floor's width on a phone vs. in a browser. */
+  /** Run the rows the other way along the floor's width. The floor needs it
+   *  on the phone and in the browser alike (Court3D passes true); without it
+   *  the tricode and the wordmarks read upside down. */
   flipRows?: boolean;
 }): THREE.DataTexture => {
   // 1536 x 768: ~14.5 px per foot, so a two-inch line is still ~2.4 px wide,
