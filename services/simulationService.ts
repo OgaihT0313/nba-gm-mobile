@@ -1768,8 +1768,12 @@ const generateAwards = (teams: Team[], players: { [key: string]: Player }) => {
     // which handed Sixth Man of the Year to Alperen Sengun, Houston's leading
     // scorer, in a live playthrough. The award judges the season as it was
     // PLAYED, and he started 55 of 82 games.
+    // Same for injuries: the rotation skips anyone absent today, so a starter
+    // hurt at the end of the season counted as a bench player -- Michael Porter
+    // Jr., Brooklyn's best player, won it that way (phone playthrough,
+    // 2026-10-11). Absences are cleared for this read too.
     const startersByTeam = new Map<string, Set<string>>();
-    teams.forEach(t => startersByTeam.set(t.id, new Set(getTeamRotation({ ...t, tanking: false }, players, 5))));
+    teams.forEach(t => startersByTeam.set(t.id, new Set(getTeamRotation({ ...t, tanking: false, playerAbsences: {} }, players, 5))));
     const smoyPool = allPlayers.filter(p => {
         const team = teamOf(p);
         return !!team && played(p, SIXTH_MAN_MIN_GP) && !startersByTeam.get(team.id)!.has(p.id);

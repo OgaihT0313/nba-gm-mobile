@@ -80,6 +80,29 @@ Medido no Galaxy A57 do usuário (tela de 120 Hz, 1080×2340) via adb, com print
 - Deixar pronto o roteiro de teste no aparelho via adb (instalar, abrir "Assistir ao jogo", prints em sequência por câmera, `dumpsys gfxinfo`).
 - Entregar um resumo curto com os números de base.
 
+**FEITO (2026-10-10), menos o APK de referência** (o usuário adiou o build):
+- **Base no navegador** (sonda `globalThis.__court3d`, só em modo dev, em `Court3D.tsx`):
+  288 draw calls, ~242 mil triângulos, 67 geometrias, 17 texturas. Quadro em 5,5 ms
+  (mediana) / 9,0 ms (p95) num PC — não vale para o celular, só para comparar etapas.
+  A sonda só mede com o painel do navegador visível (aba oculta pausa o
+  `requestAnimationFrame` e o canvas nem monta).
+- **Three duplicado: resolvido** no `metro.config.js`. O bundle Android tinha
+  `three.cjs` (pelo `require` do fiber) e `three.module.js` + `three.core.js` (pelo
+  nosso `import`); agora só `three.cjs`. Bundle dev Android: 27,6 MB → 25,0 MB. O web
+  já tinha uma cópia só.
+- **`THREE.Clock` obsoleto:** vem de dentro do `@react-three/fiber` 9.7 (o `clock` do
+  `useFrame`), não do nosso código. Some quando o fiber atualizar; não vale um patch.
+- **Teto de `devicePixelRatio`: não é possível** neste stack. O fiber nativo fixa
+  `dpr: PixelRatio.get()` ("expo-gl can only render at native dpr/resolution").
+  Reduzir resolução, se precisar na Etapa 8, teria que ser pelo tamanho da GLView.
+- **`dispose`:** ao desmontar, o fiber chama `forceContextLoss` e `dispose` na cena;
+  com o contexto GL destruído, a memória de GPU vai junto. Nada a acrescentar.
+- **Roteiro no aparelho:** `scripts/device_3d.sh` (install / start / measure: prints em
+  sequência, `gfxinfo` e avisos do three no logcat), saída em `.device-3d/`.
+- **Medida do ritmo** (`check_watch_director`): velocidade máxima de 2,4-2,8 pés por
+  0,1 s de jogo (~26 pés/s, realista). O teletransporte é a compressão de tela (~6×),
+  não o diretor — é o alvo da 4b.
+
 ## Etapa 1 — Piso e marcações oficiais (`textures.ts`, `Court3D.tsx`)
 
 - Tábuas com variação de tom, veios e emendas desencontradas (hoje são só faixas).
@@ -92,6 +115,28 @@ Medido no Galaxy A57 do usuário (tela de 120 Hz, 1080×2340) via adb, com print
 - Emblema da casa no círculo central. Não há imagem do escudo dentro do 3D: desenhar uma marca com a sigla e as cores do time na fonte de pixels.
 - **Resolução:** a quadra é uma única textura; aumentar a resolução só se não estourar a memória (medir no APK da Etapa 2).
 
+**FEITO (2026-10-10), falta ver no aparelho.** Tudo em `textures.ts` (`buildFloorTexture`) e
+no material do piso:
+- Madeira: emenda de topo entre tábuas (~1 px), desencontro por tira, veio com fase
+  por tábua, estrias em 1/4 das tábuas e tábuas levemente mais quentes ou frias.
+- Verniz pintado: o piso todo (madeira, tinta e linhas) clareia sobre a quadra e em
+  5 "poças" de luz, e escurece no apron. `roughness` 0,34 → 0,27. `envMap` não
+  testado — fica para a Etapa 2, junto da luz.
+- Marcações: canto do 3 pontos exato (14,20 pés, onde a reta encontra o arco de
+  23,75); área restrita com os trechos retos até a tabela; low block sólido (7-8
+  pés, 8 pol.) e marcas a 11 e 14 pés. Lance livre (6 pés, metade tracejada) e box
+  técnico (28 pés) já estavam certos.
+- Emblema: anel na cor secundária dentro do círculo central, com a sigla.
+- **Custo:** o piso sai em ~170-200 ms no Node (era ~195): as poças são tabeladas por
+  linha e coluna (gaussiana separável), os valores da tábua calculados uma vez por
+  tábua, e `Math.hypot` trocado por `Math.sqrt`. Cena igual à base (282 draw calls,
+  ~243 mil triângulos, 17 texturas).
+- **Bug antigo corrigido:** no navegador a sigla saía de cabeça para baixo ("BOS"
+  lia "BO2") desde que o celular passou a inverter as linhas (`0534f31`). Agora o
+  piso inverte em todas as plataformas; o celular não muda.
+- O tempo de quadro no navegador varia com o foco do painel (13-24 ms antes e
+  depois desta etapa, na mesma condição); não serve para comparar etapas.
+
 ## Etapa 2 — Iluminação de arena simulada (`Court3D.tsx`, `Arena.tsx`)
 
 - Quadra clara e torcida na penumbra, escurecendo a cor das camadas da arquibancada (já são instanciadas).
@@ -101,12 +146,47 @@ Medido no Galaxy A57 do usuário (tela de 120 Hz, 1080×2340) via adb, com print
 - **Opcional, desligado por padrão:** uma única luz com sombra (mapa de 1024), atrás de uma opção de qualidade.
 - **APK de teste #1** (Etapas 1 e 2): comparar o FPS com a referência da Etapa 0.
 
+**FEITO (2026-10-10), falta o APK #1.**
+- **Penumbra:** cor por instância das fileiras e da torcida escurece até 55% da
+  primeira para a última fileira (`dusk` no `Bowl`). Nenhuma luz nova.
+- **Fachos pintados:** `SpotBeams` em `Arena.tsx` — 5 cones abertos, uma geometria só
+  (1 draw call), `ShaderMaterial` aditivo que apaga as bordas da silhueta, o pé do
+  facho e os fachos perto da câmera. Caem sobre `LIGHT_POOLS`, as mesmas poças pintadas
+  no piso (exportadas de `textures.ts`). Intensidade 0,12: aparecem nos planos abertos
+  (Livre); na TV ficam quase todos fora do quadro. **Primeiro corte se faltar FPS.**
+- **Contraluz:** a luz fria de preenchimento (-45, 100, -35) virou contraluz baixa
+  (-20, 38, -110), do lado oposto às câmeras; ambiente 0,22 → 0,16. Continuam 5 luzes.
+- **Flashes:** `Flashes` — 36 pontos fixos na torcida, um `InstancedMesh` aditivo;
+  ~2 disparos por segundo, cada um ~0,09 s; só as instâncias que mudam são reescritas.
+- **Piso agora `MeshLambertMaterial` (sem especular).** Com a contraluz baixa, o piso
+  brilhante refletia a luz direto nas câmeras do lado de cá e lavava a quadra de cinza
+  (isolado ligando/desligando luz por luz pela sonda). O verniz fica só o pintado na
+  textura (Etapa 1); `roughness` 0,27 da Etapa 1 também dava um clarão na TV. Por isso
+  o `envMap` não foi testado: sem especular no piso, não tem efeito.
+- **Sombra opcional:** não feita — não existe opção de qualidade na tela; fica para a
+  Etapa 8 se o FPS sobrar.
+- Sonda dev ganhou `scene` (`__court3d.scene`) para ligar/desligar luz e malha pelo
+  console. Página recém-carregada: 17 texturas (igual à base), 69-72 geometrias (+2).
+
 ## Etapa 3 — Tabela, aro e rede (`Arena.tsx`)
 
 - Tabela com o quadrado-alvo branco (24 x 18 pol.) e borda de LED vermelha que acende no estouro do relógio de posse. Depende do dado da Etapa 5; até lá fica apagada.
 - Aro com suporte e mola visíveis, e acolchoamento na base da estrutura.
 - Rede afunilada com ondulação quando a bola passa. A animação é disparada no 3D: a bola atravessando a altura do aro perto dele. Não precisa de dado novo.
 - **Leve reação do aro em enterrada:** fica para a Etapa 4, que é quando o 3D passa a saber que o lance foi uma enterrada.
+
+**FEITO (2026-10-10).** Tudo em `Arena.tsx` (`Hoop`):
+- Borda de LED vermelha em volta do vidro (`shotClockEdge`), acesa de leve (0,12) até
+  a Etapa 5 ligar ao relógio de posse. Uma malha só (`mergeParts`, helper novo que os
+  fachos também usam).
+- Aro com placa no vidro, braço e caixa da mola — uma malha. Aro, suporte e rede
+  penduram num pivô no vidro: a Etapa 4 dá o puxão da enterrada, aqui ele já volta
+  com um quique amortecido.
+- Acolchoamento grosso na face da base virada para a quadra.
+- Rede mais afunilada (5 pontos, com a ponta solta) que estica, afina e balança por
+  0,75 s quando a bola cruza a altura do aro dentro dele — detectado no 3D lendo a
+  bola do `courtRef` (que agora também chega ao `Arena`).
+- Custo: +3 malhas por cesta (borda, suporte, acolchoamento).
 
 ## Etapa 4 — Jogadores: modelo e animações (`PlayerRig.ts`, `watchDirector.ts`)
 
@@ -136,6 +216,32 @@ Medido no Galaxy A57 do usuário (tela de 120 Hz, 1080×2340) via adb, com print
 
 **APK de teste #2** (Etapas 3 e 4).
 
+**FEITO (2026-10-10), falta o APK #2.**
+- **Dados (aditivos):** `PlayerState.action`/`actionT` e `Possession.finish`
+  (`'shot' | 'layup' | 'dunk'`). Dois perto do aro (< 8 pés) são bandeja; uma bandeja
+  convertida vira enterrada com a chance de `dunkChance` (atletismo + ser pivô/ala-
+  pivô; 5%-75%), e a enterrada sobe o ponto de soltura da bola até o aro. A ação sai
+  da batida em curso: o arremesso cobre a preparação e o voo (soltura em 0,4), o
+  marcador do arremessador contesta na mesma janela, o passe é a batida em que a bola
+  vai do armador ao arremessador, e quem tem a bola dribla.
+- **Modelo:** friso lateral na regata; cós da bermuda e solado contrastante do tênis
+  pintados como faixas (`buildBandTexture`, 1x32 px, compartilhadas por time — 0 malha
+  nova, +4 texturas); faixa de cabeça (22%) e manguito (20%) fixos pelo id do jogador.
+- **Animações** (`PlayerRig.ts`, procedurais, misturadas com a pose de corrida):
+  arremesso (agacha, sobe, cotovelo estica na soltura, mão de apoio sai,
+  acompanhamento), bandeja (impulso de um pé, joelho esquerdo sobe, braço direito
+  alto), enterrada (2,8 pés de impulso, pendura com os joelhos dobrados) com o aro
+  puxado e voltando (pivô da Etapa 3), passe de peito, contestação com um braço reto,
+  drible com o outro braço protegendo. **Cabeça segue a bola** (pescoço próprio,
+  limite ±70°).
+- **Teste:** `check_watch_director` confere que toda cesta mostra a finalização antes
+  de a bola chegar ao aro (1.041/1.041), que toda cesta é contestada e todo passe
+  aparece (1.807/1.807). Feitas: 716 arremessos, 201 bandejas, 124 enterradas (38% das
+  finalizações perto do aro).
+- Cena na TV: 299 draw calls, ~244 mil triângulos, 21 texturas.
+- Ainda **não** feito do plano: punho quebrando (a mão é uma esfera, sem pulso) e a
+  câmera de ação (é a Etapa 7).
+
 ## Etapa 4b — Ritmo da partida (`watchDirector.ts`, `WatchGameScreen.tsx`)
 
 **A causa nº 1 de o 3D parecer estranho no celular** (ver "O que o teste no celular mostrou").
@@ -146,11 +252,46 @@ Medido no Galaxy A57 do usuário (tela de 120 Hz, 1080×2340) via adb, com print
 - O placar, o relógio e o resultado não mudam: o diretor continua seguindo o mesmo roteiro de pontos, só com outro tempo de tela.
 - **Teste:** `check_watch_director` ganha uma checagem de velocidade máxima dos jogadores por quadro, e no aparelho medimos quantos quadros em sequência mostram a quadra vazia (a meta é nenhum).
 
+**FEITO (2026-10-10), falta o teste no aparelho.** `advanceClock` no `watchDirector.ts`
+(função pura, nova) decide quanto o relógio anda a cada quadro, e o `CourtState`
+ganhou o campo opcional `cut`:
+- Cada posse entra na tela já na chegada (30% da posse nas suas, na jogada — 52% —
+  nas do adversário); a corrida antes disso vira **corte**, e a câmera (todos os 5
+  modos, inclusive o Perto), os jogadores e a bola saltam junto, sem ler o salto
+  como pique.
+- A taxa é calculada **por batida**: o diretor sabe quanto cada jogador anda entre
+  duas batidas e limita a velocidade na tela a `SCREEN_SPRINT` = 34 pés/s; batidas
+  paradas passam a até 3,6 s de jogo por segundo.
+- Depois da cesta, ~1 s com a bola na rede; depois do erro, ~0,5 s no rebote.
+- Saiu a câmera lenta depois de chamar a jogada (existia porque a posse passava em
+  menos de 2 s). O 4X continua, multiplicando tudo.
+- **Medido** (`check_watch_director`, 40 quartos a 60 quadros/s): pico na tela 34
+  pés/s entre cortes (era ~250); 1.838 de 1.838 arremessos na tela; quarto em ~173 s
+  reais em 1x (157-199), ~46 cortes por quarto; placar idêntico ao do plano.
+  No navegador, 5 prints seguidos na câmera TV mostram os dez em quadra.
+
 ## Etapa 5 — Placar e relógio ao vivo (`Arena.tsx`, `Court3D.tsx`, `WatchGameScreen.tsx`)
 
 - Nova prop opcional no `Court3D`: `scoreboard?: { home: number; away: number; quarter: number; clock: number; shotClock?: number }`, passada pela `WatchGameScreen`, que já tem esses números.
 - O placar central e os relógios de posse sobre as tabelas passam a mostrar os valores reais. As placas de LED mostram a sigla do time e uma animação simples ao fim de cada cesta.
 - A textura só é redesenhada quando um número muda, nunca a cada frame.
+
+**FEITO (2026-10-10), falta ver no aparelho.**
+- Prop `scoreboard?: ScoreboardData` no `Court3D` (`home`, `away`, `quarter`, `clock` =
+  segundos restantes no período, `shotClock?`, `homeLabel?`, `awayLabel?`). A
+  `WatchGameScreen` já atualizava placar e relógio a 5 Hz; o relógio de posse sai da
+  posse em curso (24 − tempo desde o início dela), só com o jogo rolando.
+- Placar central: as 4 telas mostram siglas sobre a cor de cada time, quarto (Q1-Q4,
+  OT, OT2…), os pontos e o relógio (`paintScoreboard`, 256x128). Relógio de posse em
+  dígitos vermelhos numa face virada para a quadra em cada tabela (uma textura 64x32
+  para as duas). Texturas repintadas por `useEffect` só quando o texto muda.
+- Borda de LED da tabela acende quando o relógio de posse zera (com posses de 13-18 s
+  na simulação, quase nunca).
+- Placas de LED: sigla da casa no letreiro, e a cada cesta brilham e correm por 1,2 s.
+- Fonte ganhou `:` e `.`.
+- Conferido no navegador desenhando as texturas vivas por cima da tela (a câmera não
+  enquadra o placar a 62 pés): NYK 5 × 6 BOS, Q1, 9:59, posse 9 — igual ao HUD.
+  Orientação do relógio de posse no aparelho ainda a confirmar de perto.
 
 ## Etapa 6 — Bola (`Court3D.tsx`, `textures.ts`)
 
@@ -158,6 +299,17 @@ Medido no Galaxy A57 do usuário (tela de 120 Hz, 1080×2340) via adb, com print
 - **Giro para trás (backspin)** no arremesso, girando em torno do eixo perpendicular à trajetória enquanto a bola está no ar (`inFlight`).
 - A sombra de contato fica nítida e escura com a bola no chão e difusa e clara no alto (a escala pela altura já existe; falta ajustar a opacidade).
 - **Arco do arremesso:** o diretor já calcula a trajetória; revisar se a altura do arco está realista para cada distância, sem mudar o tempo do lance.
+
+**FEITO (2026-10-11), falta ver no aparelho.**
+- Couro 512x256 (era 256x128): granulado em pontinhos com luz de um lado, gomos com
+  sulco de borracha e a borda do couro escurecendo em direção a ele. ~25 ms no Node.
+- Giro de verdade: eixo = vertical × direção do movimento. No ar, backspin a ~2
+  voltas/s (o topo volta para o arremessador); no chão e no drible, rola para onde
+  anda. Antes girava num eixo fixo do mundo, qualquer que fosse a direção.
+- Sombra da bola: 0,9 → 2,5 de escala e opacidade 1 → 0,28 conforme sobe.
+- Arco do jump: 1 + 0,3 × distância (saída ~50°) em vez de fixo por tipo — antes o
+  lance livre subia mais que um arremesso de média. Agora ~8 pés acima da linha
+  mão-aro de três, ~5 no lance livre, ~4 de 10 pés. Tempo do lance igual.
 
 ## Etapa 7 — Câmeras (`Court3D.tsx`)
 
@@ -176,6 +328,23 @@ Medido no Galaxy A57 do usuário (tela de 120 Hz, 1080×2340) via adb, com print
   - avaliar um HUD que se recolhe durante o lance.
 - **Avaliar modo paisagem** só na tela do 3D: resolve o campo estreito de uma vez, mas exige liberar a rotação do app nessa tela.
 
+**FEITO (2026-10-11), falta ver no aparelho.** Tudo no `CameraRig` (`Court3D.tsx`):
+- Troca de modo numa curva de 0,9 s (smoothstep), em vez de uma fração do caminho por
+  quadro. O "Livre" continua girando; só altura e distância entram na curva.
+- Câmera nunca dentro do piso nem da arquibancada: `groundUnder` dá a altura do degrau
+  sob a câmera (mesmas medidas do `Bowl`), +4 pés de folga. Nos 5 modos não atua;
+  segura o arrasto.
+- **Câmera de ação no Perto:** segue quem tem a bola (70% ele, 30% o centro do grupo)
+  e, da soltura em diante, enquadra arremessador e aro juntos, com resposta rápida.
+- Corta assim que o centro da jogada sai dos 90% centrais do quadro (projeção da mira
+  pela câmera), além dos cortes da reprodução — não espera mais o salto de 30 pés.
+- **Mira no meio da faixa livre do HUD:** a `WatchGameScreen` mede a barra de cima e o
+  painel de baixo (`onLayout`) e passa `insets` ao `Court3D`; a câmera desloca o
+  centro da projeção (`setViewOffset`) pela metade da diferença. Conferido a 375x812:
+  faixa livre 58-668 px, centro 363, quadra aparecendo centrada em ~352.
+- **Para avaliar no teste do aparelho** (decisões de produto, não feitas): Perto como
+  câmera padrão no celular, HUD que se recolhe durante o lance, paisagem só no 3D.
+
 ## Etapa 8 — Desempenho e fechamento
 
 - **APK de teste final** com os números comparados à referência da Etapa 0.
@@ -187,6 +356,79 @@ Medido no Galaxy A57 do usuário (tela de 120 Hz, 1080×2340) via adb, com print
 - Resumo final:
   - arquivos alterados (`git diff --stat`), com confirmação de que fora de `components/court3d/` só houve os acréscimos previstos em `watchDirector.ts` e `WatchGameScreen.tsx`;
   - o que foi feito em cada etapa.
+
+**Situação em 2026-10-11:** etapas 0 a 7 feitas e conferidas no navegador; nenhum APK
+gerado desde a Etapa 0 (o usuário decidiu testar tudo de uma vez no fim). A Etapa 8 é
+esse teste.
+
+**Fora de `components/court3d/`**, o que mudou (`git diff --stat` da branch: 12
+arquivos, +1.613 / −188):
+- `services/watchDirector.ts`: aditivo nos tipos (`CourtState.cut`,
+  `PlayerState.action/actionT`, `Possession.finish`) e funções novas (`advanceClock`,
+  `dunkChance`). **Não é só acréscimo** em dois pontos, ambos de propósito: a altura
+  do arco do jump agora depende da distância (Etapa 6) e a bandeja/enterrada mudam o
+  ponto de soltura da bola (Etapa 4). Tempo dos lances e placar intactos.
+- `screens/WatchGameScreen.tsx`: o relógio passou a andar por `advanceClock` e **saiu
+  a câmera lenta** depois de chamar jogada (Etapa 4b); o resto é acréscimo (placar e
+  medidas do HUD para o 3D).
+- `metro.config.js` (three único), `scripts/check_watch_director.ts` (checagens de
+  ritmo e ações), `scripts/device_3d.sh`, `.gitignore`, docs.
+
+**Roteiro do teste no aparelho** (`scripts/device_3d.sh`):
+1. `install` o APK da branch, `start`, abrir "Assistir ao Jogo"; `measure` em cada uma
+   das 5 câmeras (prints + `gfxinfo` + avisos do three no logcat).
+2. Comparar com a base da Etapa 0 (que não teve APK: usar o APK atual do usuário,
+   `ab6933d3`, da branch principal, como referência de FPS).
+3. Por etapa, olhar:
+   - 4b: ninguém "teletransporta"; cortes limpos; quarto de ~3 min em 1x é aceitável?
+   - 1: sigla do piso legível (não espelhada) no celular; linhas nítidas ao longe.
+   - 2: torcida no escuro; fachos visíveis nos planos abertos sem lavar a quadra;
+     contorno nos jogadores; flashes.
+   - 3: rede balança na cesta; aro desce na enterrada.
+   - 4: arremesso, bandeja, enterrada, passe e contestação reconhecíveis; cabeça
+     seguindo a bola; tênis, cós, faixa e manguito.
+   - 5: placar, relógio e relógio de posse legíveis e **não espelhados** no aparelho
+     (o expo-gl já inverteu textura antes — Etapa 1).
+   - 6: bola girando para trás no arremesso; sombra mudando com a altura.
+   - 7: troca de câmera suave; Perto enquadrando arremessador e aro; jogada no meio
+     da faixa livre do HUD.
+4. Se faltar FPS, cortar na ordem acima (fachos → resolução do piso → flashes →
+   detalhes dos jogadores).
+5. Decidir os três "avaliar" da Etapa 7.
+
+**Teste no aparelho, 2026-10-11 (Galaxy A57, APK `8d84fdd5` da `melhoria-3d`).**
+`gfxinfo` em 20 s, mesmo caminho (carreira nova, Thunder, 1º jogo, 1º Q):
+
+| | APK antigo (instalado 07/10 21:50) | APK novo |
+|---|---|---|
+| TV: quadros / mediana / p95 / atrasados | 2.417 / 5 ms / 12 ms / 6% | 1.870 / 13 ms / 27 ms / 26% |
+| TV: GPU mediana | 4 ms | 12 ms |
+| Perto: mediana / p95 / atrasados | 5 ms / 11 ms / 7% | 7 ms / 10 ms / 10% |
+
+- **Regressão na TV, não no Perto.** O enquadramento da TV mudou: no APK antigo ela
+  estava bem fechada; no novo mostra meia quadra e muita arquibancada.
+- **A cena nova não é mais cara que a antiga.** Medido no Chrome do próprio celular
+  (`adb reverse tcp:3000` + console remoto via `adb forward tcp:9222
+  localabstract:chrome_devtools_remote`, cronometrando `gl.render` + `readPixels`
+  forçados pela sonda, dpr 2,81 como no app): cena nova 28-32 ms, antiga 27-29 ms
+  (cena vazia ~14-16 ms de custo fixo). Desligando peças na nova: fachos ~0, piso ~0,
+  torcida 3-4 ms, jogadores 5-6 ms, luzes ~7 ms. **Os fachos não são o problema.**
+- No Chrome, o 3D antigo da `redesign-console-mygm` também enquadra a TV aberta. A
+  suspeita é a lente mais aberta da TV no celular (`fcd0b41`, 07/10 21:16, já na
+  branch principal) — o APK antigo pode ser de antes dela.
+- **APK de comparação (`decc7481`, da `redesign-console-mygm`), mesma carreira e
+  jogo:** TV mediana 7 ms / p95 13 ms / 7% atrasados; Perto 6 / 11 / 9%. Com
+  `melhoria-3d` na mesma carreira: TV 15 / 24 / 22%. **Causa:** a lente aberta da TV
+  no celular (`fcd0b41`) nunca funcionou no aparelho — o teste `camera instanceof
+  THREE.PerspectiveCamera` falhava com dois three carregados. A Etapa 0 deixou um
+  three só e a lente passou a valer; a arquibancada perto da câmera é o que pesa. As
+  etapas em si não pioraram o custo.
+- **Decisão do usuário (2026-10-11): fica como está.** "O 3D roda de boa." Não
+  otimizar sem pedido. Se um dia precisar: material mais simples na torcida (Lambert)
+  ou limitar a lente da TV no celular a ~50°.
+- Visual no aparelho até aqui: LEDs com a sigla e o letreiro do apron legíveis; jogada
+  centrada na faixa livre do HUD. Não conferidos de perto ainda: placar central,
+  relógio de posse, sigla do piso pela TV.
 
 ---
 
@@ -204,3 +446,16 @@ Medido no Galaxy A57 do usuário (tela de 120 Hz, 1080×2340) via adb, com print
 - [ ] FPS no APK final igual ou próximo da referência da Etapa 0
 
 **Ordem:** 0 → 4b → 1 → 2 → (APK #1) → 3 → 4 → (APK #2) → 5 → 6 → 7 → 8. A 4b vem logo depois da 0: sem ritmo jogável, as outras melhorias passam despercebidas. Ao fim de cada etapa: resumo de 2 a 3 linhas, verificação ok e confirmação antes de avançar.
+
+---
+
+## Fechamento (2026-10-11)
+
+Etapas 0-8 concluídas na `melhoria-3d`. Etapa 8 = teste no aparelho acima, mais o
+percurso completo de QA no Galaxy (commit `d49c9fd`), que achou e corrigiu, dentro do
+3D: metade de baixo preta depois do pedido de tempo (os `insets` mediam o painel do
+huddle — agora só o painel do jogo) e a câmera escolhida não ser lembrada entre jogos.
+Conferidos no aparelho: sigla do piso, placas de LED, relógio de posse legível e não
+espelhado, rede e aro. Não conferido de perto no aparelho: o placar central (fora do
+quadro das câmeras). Os três "avaliar" da Etapa 7 ficam para quando o usuário quiser.
+**Falta:** gerar APK com `d49c9fd` e juntar a `melhoria-3d` na `redesign-console-mygm`.

@@ -429,6 +429,10 @@ export interface Possession {
     assistName: string | null;
     shotAt: number; // absolute second the ball reaches the rim
     beats: Beat[];
+    /** How the shooter finishes: a jumper (threes, free throws, anything
+     * outside ~8 ft), a layup, or a dunk. Absent on plans from before this
+     * field existed -- read as 'shot'. */
+    finish?: Finish;
     /** Who was on the floor for this trip, both sides, and how fresh. */
     fiveHome?: FiveOnCourt;
     fiveAway?: FiveOnCourt;
@@ -446,6 +450,46 @@ export interface QuarterPlan {
     endFiveAway: FiveOnCourt;
     endEnergy: Energy;
 }
+
+export type Finish = 'shot' | 'layup' | 'dunk';
+
+/** Closer than this to the rim, a two is finished at the rim, not as a jumper. */
+const RIM_RANGE = 8;
+
+// The release beat's ball height and arc for each finish. A jumper leaves the
+// hand at ~7 ft and arcs high; a layup is laid up off the glass from ~9 ft; a
+// dunk is carried to the rim and barely leaves the hand.
+//
+// A jumper's arc grows with the distance (PLANO-3D Etapa 6). Launched at ~50
+// degrees, the apex sits about 0.3 x the distance above the line from hand to
+// rim: ~8 ft over it from the corner three, ~5 on a free throw, ~4 from 10 ft.
+// It used to be fixed per kind, which sent free throws higher than threes.
+// The ball's timing is unchanged -- only the height of the arc.
+const jumperArc = (distance: number) => 1 + 0.3 * distance;
+const RELEASE: Record<Finish, { y: number; arc: (distance: number) => number }> = {
+    shot: { y: 7.2, arc: jumperArc },
+    layup: { y: 8.8, arc: () => 2 },
+    dunk: { y: 10.6, arc: () => 0.4 },
+};
+
+/**
+ * The chance a made shot at the rim is a dunk, from the shooter's athleticism
+ * and size: a springy big dunks most of his makes inside, a guard rarely.
+ */
+export const dunkChance = (p: Player | undefined): number => {
+    if (!p) return 0.1;
+    const athletic = ((p.attributes?.athleticism ?? 70) - 70) / 28;
+    const big = getPlayerPositions(p).some((s) => s === 'C' || s === 'PF') ? 0.25 : 0;
+    return Math.max(0.05, Math.min(0.75, 0.12 + athletic * 0.45 + big));
+};
+
+/** Turns a made finish at the rim into a dunk: the release beat moves up to the rim. */
+const makeDunk = (poss: Possession) => {
+    poss.finish = 'dunk';
+    const release = poss.beats[poss.beats.length - 3];
+    release.ball = { ...release.ball, y: RELEASE.dunk.y };
+    release.arc = RELEASE.dunk.arc(0);
+};
 
 const withShooter = (spots: Spot[], idx: number, spot: Spot): Spot[] =>
     spots.map((s, i) => (i === idx ? spot : s));
@@ -466,6 +510,7 @@ const buildPossession = (
 
     const action = PLAY_ACTION[play];
     const shotSpot = shotKind === 1 ? FT_SPOT : shotKind === 3 ? SHOT_SPOT[play].three : SHOT_SPOT[play].rim;
+    const finish: Finish = shotKind === 2 && Math.hypot(HOOP_AX - shotSpot.ax, shotSpot.az) < RIM_RANGE ? 'layup' : 'shot';
     const shotSet = withShooter(action, shooter, shotSpot);
     const hoop: Vec3 = { x: d * HOOP_AX, y: RIM_Y, z: 0 };
 
@@ -516,8 +561,8 @@ const buildPossession = (
     const release = held(shotSet, shooter);
     beats.push({
         t: at(0.86), off: offOf(shotSet), def: defOf(shotSet),
-        ball: { x: release.x, y: 7.2, z: release.z }, handler: null,
-        arc: shotKind === 3 ? 9 : shotKind === 1 ? 7 : 5,
+        ball: { x: release.x, y: RELEASE[finish].y, z: release.z }, handler: null,
+        arc: RELEASE[finish].arc(Math.hypot(hoop.x - release.x, hoop.z - release.z)),
     });
 
     const shotAt = at(0.95);
@@ -539,7 +584,7 @@ const buildPossession = (
 
     return {
         side, play, start, end: start + duration, made, points,
-        shooter, passer, scorerName, assistName, shotAt, beats,
+        shooter, passer, scorerName, assistName, shotAt, beats, finish,
     };
 };
 
@@ -726,6 +771,10 @@ export const planQuarter = (args: PlanQuarterArgs): QuarterPlan => {
             poss.fiveHome = lineups[k].fiveHome;
             poss.fiveAway = lineups[k].fiveAway;
             poss.energy = lineups[k].energy;
+            // A make at the rim is a dunk as often as the shooter's legs allow.
+            if (made && poss.finish === 'layup' && Math.random() < dunkChance(players[five.players[shooter]?.playerId])) {
+                makeDunk(poss);
+            }
             possessions.push(poss);
         });
     }
@@ -785,6 +834,9 @@ const stitch = (possessions: Possession[]) => {
 /* ------------------------------------------------------------------ */
 /* Reading the plan at a point in time.                                */
 /* ------------------------------------------------------------------ */
+/** What a body is doing this instant -- the 3D picks the animation from it. */
+export type PlayerAction = 'dribble' | 'pass' | 'shot' | 'layup' | 'dunk' | 'contest' | 'idle';
+
 export interface PlayerState {
     playerId: string;
     name: string;
@@ -794,6 +846,9 @@ export interface PlayerState {
     z: number;
     rotY: number;
     hasBall: boolean;
+    /** Optional (PLANO-3D Etapa 4): the action, and how far into it (0-1). */
+    action?: PlayerAction;
+    actionT?: number;
 }
 
 export interface BallState {
@@ -813,9 +868,114 @@ export interface CourtState {
     possession: CourtSide;
     handlerName: string | null;
     play: WatchPlay;
+    /** Bumped every time playback cuts past a stretch of the game (see
+     * advanceClock). Bodies jump on a cut, so the camera snaps to the new spot
+     * and the rigs don't read the jump as a sprint. Absent = never cuts. */
+    cut?: number;
 }
 
-const lerp = (a: number, b: number, t: number) => a + (b - a) * t;
+/* ------------------------------------------------------------------ */
+/* Screen pacing -- the TV "compacto".                                 */
+/* ------------------------------------------------------------------ */
+// Played back at one fixed rate (9.6 game-seconds per real second), a trip up
+// the floor -- 80 ft in ~5 game-seconds, a realistic ~26 ft/s sprint -- came
+// out at ~250 ft/s on screen: ten bodies teleporting and a camera filming an
+// empty floor (measured on the phone, 2026-10-07). No rate makes the WHOLE
+// game both watchable and short: real speed is 48 minutes a game.
+//
+// So playback edits it like a broadcast package. Each trip is picked up as
+// the offense arrives and is settling into its set (the tail of the run, at a
+// plausible speed), plays at a readable rate through the shot, and holds a
+// beat on the ball through the net. The run up the floor before that is a CUT.
+// The opponent's trips are picked up later, at the play itself: the user's own
+// offense is what he called and wants to see. Score, clock and results are
+// untouched -- this only decides how fast the plan's own seconds go by.
+//
+// The rate is set per beat, not fixed: a beat where the shooter sprints 40 ft
+// to his spot plays slower than one where the set just shifts, so no body ever
+// moves faster on screen than SCREEN_SPRINT, and the quiet beats go by quickly.
+/** Top on-screen speed of any player, ft per real second (a real sprint is
+ * ~25-30; a broadcast package tolerates a little more). */
+export const SCREEN_SPRINT = 34;
+/** Game-seconds per real second when little is moving -- the ceiling. */
+const SHOW_RATE_MAX = 3.6;
+/** Fraction of a trip where the screen picks it up: the user's offense... */
+const SHOW_FROM_OWN = 0.3;
+/** ...and the opponent's, at the play itself (the BASE_SET -> action beat). */
+const SHOW_FROM_THEIRS = 0.52;
+/** After a make, the ball dropping through the net: ~1 real second. */
+const NET_RATE = 0.75;
+/** After a miss, the carom: ~half a real second. */
+const MISS_RATE = 1.5;
+
+// Fastest any of the ten moves between two beats, in game ft/s. Positions ease
+// with smoothstep, whose peak speed is 1.5x the average over the leg.
+const beatPeakSpeed = (a: Beat, b: Beat): number => {
+    const span = b.t - a.t;
+    if (span <= 0) return 0;
+    let far = 0;
+    for (let i = 0; i < a.off.length; i++) {
+        far = Math.max(far, Math.hypot(b.off[i].x - a.off[i].x, b.off[i].z - a.off[i].z));
+        far = Math.max(far, Math.hypot(b.def[i].x - a.def[i].x, b.def[i].z - a.def[i].z));
+    }
+    return (1.5 * far) / span;
+};
+
+// Game-seconds per real second for the stretch of `p` containing `t`, and
+// where that stretch ends.
+const showRate = (p: Possession, t: number): [number, number] => {
+    if (t >= p.shotAt) return [p.made ? NET_RATE : MISS_RATE, p.end];
+    const beats = p.beats;
+    let i = 0;
+    while (i < beats.length - 2 && beats[i + 1].t <= t) i++;
+    const until = Math.min(beats[i + 1].t, p.shotAt);
+    const peak = beatPeakSpeed(beats[i], beats[i + 1]);
+    const rate = peak > 0 ? Math.min(SHOW_RATE_MAX, SCREEN_SPRINT / peak) : SHOW_RATE_MAX;
+    return [rate, until > t ? until : p.shotAt];
+};
+
+export interface ClockStep {
+    seconds: number;
+    /** True when this step jumped over part of the game. */
+    cut: boolean;
+}
+
+export const advanceClock = (
+    plan: QuarterPlan, seconds: number, realDt: number,
+    opts: { speed: number; userSide: CourtSide },
+): ClockStep => {
+    let t = seconds;
+    let budget = realDt;
+    let cut = false;
+    // A frame can cross a boundary (shot, end of trip, a cut) -- a handful of
+    // passes covers any frame time the screen allows (dt is capped at 0.1 s).
+    for (let pass = 0; pass < 8 && budget > 1e-9; pass++) {
+        const p = possessionAt(plan, t);
+        if (!p || t >= p.end) {
+            // Past the last planned trip (the quarter's tail): plain playback.
+            return { seconds: t + budget * SHOW_RATE_MAX * opts.speed, cut };
+        }
+        const from = p.start + (p.end - p.start) * (p.side === opts.userSide ? SHOW_FROM_OWN : SHOW_FROM_THEIRS);
+        if (t < from) {
+            t = from;
+            cut = true;
+            continue;
+        }
+        const [rate, until] = showRate(p, t);
+        const r = rate * opts.speed;
+        const need = (until - t) / r;
+        if (need > budget) {
+            t += budget * r;
+            budget = 0;
+        } else {
+            t = until;
+            budget -= need;
+        }
+    }
+    return { seconds: t, cut };
+};
+
+const lerp =(a: number, b: number, t: number) => a + (b - a) * t;
 // Ease in and out so players settle into a spot instead of sliding at constant
 // speed between beats — the single cheapest thing that makes it read as people
 // playing rather than markers interpolating.
@@ -906,6 +1066,24 @@ export const courtStateAt = (
     const defFive = poss.side === 'home' ? fa : fh;
     const handler = a.handler;
 
+    // Actions, read off the beat in progress. The last three beats are always
+    // release -> rim -> aftermath, so the release beat is beats.length - 3.
+    //  - the shot spans the gather (the beat before release) and the flight:
+    //    0-0.4 gathering and rising, 0.4 the release, 0.4-1 the ball to the rim;
+    //  - the man guarding the shooter contests over the same window;
+    //  - a pass is the beat where the ball travels from the entry handler to
+    //    the shooter (beat 2, when the play has a passer).
+    const releaseIdx = beats.length - 3;
+    const shotT = i === releaseIdx - 1 ? 0.4 * u : i === releaseIdx ? 0.4 + 0.6 * u : -1;
+    const finish: Finish = poss.finish ?? 'shot';
+    const passing = poss.passer !== null && poss.passer !== poss.shooter && i === 2;
+    const actionOf = (idx: number, isOffense: boolean, hasBall: boolean): [PlayerAction, number] => {
+        if (shotT >= 0 && idx === poss.shooter) return [isOffense ? finish : 'contest', shotT];
+        if (isOffense && passing && idx === (poss.passer ?? 0)) return ['pass', u];
+        if (isOffense && hasBall) return ['dribble', u];
+        return ['idle', 0];
+    };
+
     const build = (five: FiveOnCourt, from: Vec2[], to: Vec2[], isOffense: boolean): PlayerState[] =>
         five.players.map((p, idx) => {
             const x = lerp(from[idx].x, to[idx].x, e);
@@ -914,6 +1092,7 @@ export const courtStateAt = (
             // The ball handler squares up to the rim they're attacking;
             // everyone else — teammates and defenders alike — turns to the ball.
             const face = hasBall ? { x: dirOf(poss.side) * HOOP_AX, z: 0 } : { x: ball.x, z: ball.z };
+            const [action, actionT] = actionOf(idx, isOffense, hasBall);
             return {
                 playerId: p.playerId,
                 name: p.name,
@@ -923,6 +1102,8 @@ export const courtStateAt = (
                 z,
                 rotY: Math.atan2(face.x - x, face.z - z),
                 hasBall,
+                action,
+                actionT,
             };
         });
 

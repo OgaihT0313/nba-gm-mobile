@@ -170,7 +170,16 @@ const buildInjuryCover = (
         .filter(p => p && p.id !== hurt.id && p.age <= PROSPECT_MAX_AGE && !team.playerAbsences?.[p.id])
         .filter(p => getPlayerPositions(p).some(pos => positions.includes(pos)))
         .sort((a, b) => (b.potential.charCodeAt(0) < a.potential.charCodeAt(0) ? 1 : -1) || b.ovr - a.ovr)[0];
-    if (!youngster) {
+    // Promoting pins the youngster to a STARTING slot (resolveDecision), so it
+    // only makes sense when a starter went down. For a bench piece it used to
+    // bench a healthy starter instead -- an 84 OVR center sat behind a 71 OVR
+    // rookie all the next season (phone playthrough, 2026-10-11).
+    if (!wasStarter) {
+        options.push({
+            id: 'promote:none', label: 'Promover um jovem', detail: 'Ele saía do banco.',
+            disabled: true, disabledReason: 'Os minutos dele já vão para o próximo do banco; promover tiraria um titular.',
+        });
+    } else if (!youngster) {
         options.push({
             id: 'promote:none', label: 'Promover um jovem', detail: 'Nenhum jovem da posição no elenco.',
             disabled: true, disabledReason: 'Ninguém com até 24 anos joga essa posição no seu elenco.',
@@ -276,7 +285,9 @@ const buildTradeRequest = (season: SeasonState, team: Team, p: Player): Decision
 const buildDeadlineStance = (season: SeasonState, team: Team): Decision => {
     const conf = sortStandings(season.teams.filter(t => t.conference === team.conference), season.schedule);
     const rank = conf.findIndex(t => t.id === team.id) + 1;
-    const inPlayIn = rank <= 10;
+    // Top 6 go straight to the playoffs, 7-10 play in, the rest are out. (It
+    // used to say "zona de play-in" for anyone in the top 10, the leader too.)
+    const zone = rank <= 6 ? ', na zona de playoffs' : rank <= 10 ? ', na zona de play-in' : ', fora da zona de play-in';
     const hit = SELL_CONFIDENCE[season.owner.mandate] ?? -10;
 
     return {
@@ -285,7 +296,7 @@ const buildDeadlineStance = (season: SeasonState, team: Team): Decision => {
         day: season.gamesPlayed,
         headline: 'O prazo de trocas está chegando',
         body: `${team.name} é o ${rank}º do ${team.conference === 'East' ? 'Leste' : 'Oeste'} com ${team.wins}-${team.losses}`
-            + `${inPlayIn ? ', dentro da zona de play-in' : ', fora da zona de play-in'}. `
+            + `${zone}. `
             + `Faltam três jogos para o prazo. Você compra, segura ou vende?`,
         options: [
             {

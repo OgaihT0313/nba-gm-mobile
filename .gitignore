@@ -49,3 +49,6 @@ _logcat*.txt
 .check/
 dist-web/
 .firebase/
+
+# On-device 3D captures (scripts/device_3d.sh)
+.device-3d/

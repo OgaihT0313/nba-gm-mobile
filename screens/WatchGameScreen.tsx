@@ -10,6 +10,8 @@ import { WATCH_PLAY_META, STARTING_TIMEOUTS, getRotationWeights } from '../servi
 import {
   buildFive,
   courtStateAt,
+  advanceClock,
+  possessionAt,
   planQuarter,
   quarterSeconds,
   tipOffState,
@@ -59,17 +61,19 @@ const SHOT_LABEL: { [points in 1 | 2 | 3]: string } = {
 // is folded into it, and the final score handed to onFinish is the sum of the
 // baskets that actually went in on screen.
 
-// Game-seconds per real second: 48 game-minutes in about five real ones.
-const BASE_RATE = 9.6;
-// A possession is ~15 game-seconds — under two real seconds at full speed,
-// which is not long enough to read a pick & roll. The possession right after
-// a play is called runs at this fraction of speed so the user actually sees
-// the thing they asked for.
-const SLOW_MO_SCALE = 0.4;
-const SLOW_MO_SECONDS = 20; // game-seconds, i.e. roughly one possession
+// How fast the clock runs is the director's call (advanceClock in
+// services/watchDirector.ts): each trip is cut in as the offense sets up and
+// played at a pace where nobody outruns a sprint, ~3 real minutes a quarter.
+// That replaced a flat 9.6 game-seconds per real second, which moved players
+// at ~250 ft/s, and the slow-motion trip after a called play, which only
+// existed because a possession used to flash by in under two seconds.
 const MAX_QUARTER = 8; // 4 regulation + 4 OT, the same safety valve advanceLiveQuarter has
 
 type Phase = 'huddle' | 'live' | 'final';
+
+// The camera the user last picked, kept for the next game this session: it
+// reset to the overview every time (phone playthrough, 2026-10-11).
+let lastCameraView: CameraView = 'iso';
 type HuddleTab = 'play' | 'lineup';
 
 /** Below this the live panel calls a player out as spent. */
@@ -162,10 +166,10 @@ const WatchGameScreen: React.FC<WatchGameScreenProps> = ({
   const phaseRef = useRef<Phase>('huddle');
   const quarterRef = useRef(1);
   const clockRef = useRef(0); // seconds into the current quarter
+  const cutRef = useRef(0); // playback cuts so far (CourtState.cut)
   const completedRef = useRef({ home: 0, away: 0 }); // points from finished quarters
   const firedRef = useRef(0); // possessions already announced
   const speedRef = useRef(1);
-  const slowUntilRef = useRef(-1); // quarter-second until which playback is slowed
   const playRef = useRef<WatchPlay>('pick_roll');
 
   // --- State, updated a few times a second, never per frame. ---
@@ -173,11 +177,20 @@ const WatchGameScreen: React.FC<WatchGameScreenProps> = ({
   const [quarter, setQuarter] = useState(1);
   const [clock, setClock] = useState(0);
   const [score, setScore] = useState({ home: 0, away: 0 });
+  // Seconds left on the shot clock of the trip in progress; undefined between
+  // trips and in the huddle. The trip's own start is when the clock reset.
+  const [shotClock, setShotClock] = useState<number | undefined>(undefined);
+  // How much of the 3D the top bar and the bottom panel cover, measured from
+  // their layout, so the camera can frame the play in the strip between them.
+  const [hudTop, setHudTop] = useState(0);
+  const [livePanelH, setLivePanelH] = useState(0);
+  const [screenH, setScreenH] = useState(0);
   const [speed, setSpeed] = useState(1);
   const [play, setPlay] = useState<WatchPlay>('pick_roll');
   const [timeoutsLeft, setTimeoutsLeft] = useState(STARTING_TIMEOUTS);
   const [isTimeoutHuddle, setIsTimeoutHuddle] = useState(false);
-  const [cameraView, setCameraView] = useState<CameraView>('iso');
+  const [cameraView, setCameraViewState] = useState<CameraView>(lastCameraView);
+  const setCameraView = (v: CameraView) => { lastCameraView = v; setCameraViewState(v); };
   const [banner, setBanner] = useState<{ text: string; sub: string; color: string } | null>(null);
   const [huddleTab, setHuddleTab] = useState<HuddleTab>('play');
   const [autoSubs, setAutoSubs] = useState(true);
@@ -293,7 +306,6 @@ const WatchGameScreen: React.FC<WatchGameScreenProps> = ({
     setPlay(nextPlay);
     openPlan(nextPlay, spendTimeout);
     if (spendTimeout) setTimeoutsLeft((n) => Math.max(0, n - 1));
-    slowUntilRef.current = clockRef.current + SLOW_MO_SECONDS;
     phaseRef.current = 'live';
     setPhase('live');
     setIsTimeoutHuddle(false);
@@ -372,8 +384,9 @@ const WatchGameScreen: React.FC<WatchGameScreenProps> = ({
       last = now;
       if (phaseRef.current !== 'live' || !planRef.current) return;
 
-      const slow = clockRef.current < slowUntilRef.current ? SLOW_MO_SCALE : 1;
-      clockRef.current += dt * BASE_RATE * speedRef.current * slow;
+      const step = advanceClock(planRef.current, clockRef.current, dt, { speed: speedRef.current, userSide });
+      clockRef.current = step.seconds;
+      if (step.cut) cutRef.current++;
 
       const total = quarterSeconds(quarterRef.current);
       if (clockRef.current >= total) {
@@ -382,9 +395,11 @@ const WatchGameScreen: React.FC<WatchGameScreenProps> = ({
         endQuarter();
         return;
       }
-      courtRef.current = courtStateAt(
+      const court = courtStateAt(
         planRef.current, clockRef.current, fives.current.home, fives.current.away,
       );
+      if (court) court.cut = cutRef.current;
+      courtRef.current = court;
       announce();
     };
     raf = requestAnimationFrame(tick);
@@ -399,6 +414,8 @@ const WatchGameScreen: React.FC<WatchGameScreenProps> = ({
       if (phaseRef.current !== 'live') return;
       setClock(clockRef.current);
       setScore(scoreAt(clockRef.current));
+      const trip = planRef.current ? possessionAt(planRef.current, clockRef.current) : null;
+      setShotClock(trip && clockRef.current < trip.end ? Math.max(0, 24 - (clockRef.current - trip.start)) : undefined);
       const at = planRef.current ? rotationAt(planRef.current, clockRef.current) : null;
       if (at) {
         const five = userSide === 'home' ? at.fiveHome : at.fiveAway;
@@ -706,7 +723,7 @@ const WatchGameScreen: React.FC<WatchGameScreenProps> = ({
   );
 
   return (
-    <View className="flex-1" style={{ backgroundColor: COLORS.bg }}>
+    <View className="flex-1" style={{ backgroundColor: COLORS.bg }} onLayout={(e) => setScreenH(e.nativeEvent.layout.height)}>
       <Court3D
         home={homeAccent}
         away={awayAccent}
@@ -715,6 +732,16 @@ const WatchGameScreen: React.FC<WatchGameScreenProps> = ({
         cameraView={cameraView}
         homeLabel={getTeamTricode(home)}
         numbers={jerseyNumbers}
+        scoreboard={{
+          home: score.home,
+          away: score.away,
+          quarter,
+          clock: quarterSeconds(quarter) - clock,
+          shotClock: phase === 'live' ? shotClock : undefined,
+          homeLabel: getTeamTricode(home),
+          awayLabel: getTeamTricode(away),
+        }}
+        insets={screenH && livePanelH ? { top: hudTop, bottom: livePanelH + insets.bottom + (desktop ? 24 : 14) } : undefined}
       />
 
       {desktop ? cameras : null}
@@ -730,7 +757,10 @@ const WatchGameScreen: React.FC<WatchGameScreenProps> = ({
       )}
 
       {/* Score bar: color blocks at the ends, the clock and possession in the middle. */}
-      <View style={{ pointerEvents: 'box-none', position: 'absolute', top: insets.top + (desktop ? 20 : 10), ...(desktop ? { left: '50%', width: 640, marginLeft: -320 } : { left: 14, right: 14 }) }}>
+      <View
+        onLayout={(e) => { const l = e.nativeEvent.layout; setHudTop(l.y + l.height); }}
+        style={{ pointerEvents: 'box-none', position: 'absolute', top: insets.top + (desktop ? 20 : 10), ...(desktop ? { left: '50%', width: 640, marginLeft: -320 } : { left: 14, right: 14 }) }}
+      >
         <View style={{ height: desktop ? 60 : 48, borderRadius: 12, overflow: 'hidden', flexDirection: 'row', backgroundColor: 'rgba(11,11,13,0.88)', borderWidth: 1, borderColor: 'rgba(255,255,255,0.08)' }}>
           <View style={{ width: desktop ? 90 : 58, backgroundColor: homeAccent.primary, alignItems: 'center', justifyContent: 'center' }}>
             <Text style={{ fontFamily: FONT.cond800, fontSize: desktop ? 20 : 16, color: onAccent(homeAccent.primary) }}>{getTeamTricode(home)}</Text>
@@ -760,10 +790,21 @@ const WatchGameScreen: React.FC<WatchGameScreenProps> = ({
       {/* Bottom controls. The tab bar is hidden while watching, so this
           clears the home indicator itself. */}
       {phase === 'huddle' && desktop ? huddle : null}
-      <View style={{ position: 'absolute', bottom: insets.bottom + (desktop ? 24 : 14), ...(desktop ? { left: '50%', width: 760, marginLeft: -380 } : { left: 14, right: 14 }) }}>
+      <View
+        style={{ position: 'absolute', bottom: insets.bottom + (desktop ? 24 : 14), ...(desktop ? { left: '50%', width: 760, marginLeft: -380 } : { left: 14, right: 14 }) }}
+      >
         {phase === 'huddle' && !desktop ? huddle : null}
         {phase === 'live' && (
-          <View style={{ gap: 8 }}>
+          // Measured here, on the live panel only: the container above also
+          // holds the huddle sheet, which covers half the screen, and the
+          // camera kept that framing after play resumed -- the bottom of the
+          // 3D went black (phone playthrough, 2026-10-11). This panel remounts
+          // every time play resumes, so its onLayout always reports fresh; in
+          // the huddle the camera keeps the last live value.
+          <View
+            style={{ gap: 8 }}
+            onLayout={(e) => setLivePanelH(e.nativeEvent.layout.height)}
+          >
             {liveFive.length === 5 ? (
               <View style={{ backgroundColor: 'rgba(11,11,13,0.9)', borderRadius: 16, paddingHorizontal: 12, paddingVertical: 10, gap: 8 }}>
                 <View className="flex-row justify-between">

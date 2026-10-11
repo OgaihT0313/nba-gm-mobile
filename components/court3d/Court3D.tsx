@@ -4,9 +4,11 @@ import { Canvas, useFrame, useThree } from '@react-three/fiber/native';
 import * as THREE from 'three';
 
 import type { CourtState } from '../../services/watchDirector';
-import Arena from './Arena';
+import Arena, { RIM_X, type ScoreboardData } from './Arena';
 import { createRig, type Rig } from './PlayerRig';
 import { buildBallTexture, buildFloorTexture, buildShadowTexture, hexToRgb, FLOOR_L, FLOOR_W } from './textures';
+
+export type { ScoreboardData };
 
 // The 3D "Assistir ao Jogo" court, rendered natively through expo-gl by React
 // Three Fiber.
@@ -90,6 +92,12 @@ interface Court3DProps {
   homeLabel?: string;
   /** Jersey number by player id. */
   numbers?: { [playerId: string]: number };
+  /** The live score, period, game clock and shot clock for the arena's
+   *  scoreboard and shot clocks (PLANO-3D Etapa 5). Absent: the boards idle. */
+  scoreboard?: ScoreboardData;
+  /** Layout pixels the screen's own overlays cover at the top and bottom; the
+   *  camera centers the action in the strip between them (PLANO-3D Etapa 7). */
+  insets?: { top: number; bottom: number };
 }
 
 const DEFAULT_FLOOR_COLOR = '#caa271'; // light maple
@@ -116,56 +124,128 @@ export interface CameraDragState {
   dragging: boolean;
 }
 
+/** Seconds a switch between camera modes takes, eased in and out. */
+const MODE_BLEND = 0.9;
+/** The bowl, for keeping the camera out of it (see Arena.tsx's Bowl). */
+const BOWL = { insetL: 62, insetW: 37, rowDepth: 2.7, rowRise: 1.7, rows: 14 };
+/** Feet the camera keeps above whatever is under it: floor or stands. */
+const CAMERA_CLEARANCE = 4;
+
+/** Height of the stands (or the floor) under a point -- the bowl rises in
+ *  steps from its first row behind the court's edge. */
+const groundUnder = (x: number, z: number) => {
+  const out = Math.max(Math.abs(x) - BOWL.insetL, Math.abs(z) - BOWL.insetW);
+  if (out <= 0) return 0;
+  const row = Math.min(BOWL.rows - 1, Math.floor(out / BOWL.rowDepth));
+  return 1 + row * BOWL.rowRise + 3.5; // the row's step plus a seated fan
+};
+
+const smoothstep = (t: number) => t * t * (3 - 2 * t);
+
 function CameraRig({
-  stateRef, preset, courtRef,
+  stateRef, preset, courtRef, insets,
 }: {
   stateRef: React.MutableRefObject<CameraDragState>;
   preset: CameraPreset;
   courtRef: React.MutableRefObject<CourtState | null>;
+  insets?: { top: number; bottom: number };
 }) {
   const target = useMemo(() => new THREE.Vector3(0, 5, 0), []);
+  const lastCut = useRef<number | undefined>(undefined);
+  // A mode switch: where the orbit started and when, so it travels to the new
+  // framing along an eased curve of fixed length instead of covering a share
+  // of the remaining gap every frame (which crawled the last stretch).
+  const blend = useRef<{ preset: CameraPreset; from: { angle: number; elev: number; dist: number }; t: number } | null>(null);
+  const lastPreset = useRef(preset);
+  const probe = useMemo(() => new THREE.Vector3(), []);
+  const viewShift = useRef('');
+
   useFrame(({ camera, size }, dt) => {
     const s = stateRef.current;
     const k = 1 - Math.pow(0.02, dt); // frame-rate independent easing
+    if (lastPreset.current !== preset) {
+      blend.current = { preset, from: { angle: s.angle, elev: s.elev, dist: s.dist }, t: 0 };
+      lastPreset.current = preset;
+    }
     if (!s.dragging) {
+      const b = blend.current;
+      if (b) {
+        b.t += dt / MODE_BLEND;
+        const e = smoothstep(Math.min(1, b.t));
+        // The auto-rotating overview keeps turning; only its height and
+        // distance blend. Every other framing blends all three.
+        if (!preset.autoRotate) s.angle = b.from.angle + (preset.angle - b.from.angle) * e;
+        s.elev = b.from.elev + (preset.elev - b.from.elev) * e;
+        s.dist = b.from.dist + (preset.dist - b.from.dist) * e;
+        if (b.t >= 1) blend.current = null;
+      }
       if (preset.autoRotate) {
         s.angle += dt * 0.05;
-      } else {
+      } else if (!blend.current) {
         s.angle = THREE.MathUtils.lerp(s.angle, preset.angle, k);
         s.elev = THREE.MathUtils.lerp(s.elev, preset.elev, k);
         s.dist = THREE.MathUtils.lerp(s.dist, preset.dist, k);
       }
+    } else {
+      blend.current = null;
     }
+
     const court = courtRef.current;
     if (court) {
-      const portraitLag = THREE.MathUtils.clamp((1.1 - size.width / Math.max(1, size.height)) / 0.6, 0, 1);
-      // Possessions turn over every ~1.5 s of screen time; a lazy wide-shot
-      // follow (30% of the gap left after a second) never caught the play and
-      // parked at center court. A tall screen, which can't see both ends at
-      // once, pans like a broadcast camera: 8% left after a second.
-      const lag = preset.lag ?? THREE.MathUtils.lerp(0.3, 0.08, portraitLag);
-      const f = 1 - Math.pow(lag, dt);
+      const portrait = THREE.MathUtils.clamp((1.1 - size.width / Math.max(1, size.height)) / 0.6, 0, 1);
+      // Possessions turn over every few seconds of screen time; a lazy
+      // wide-shot follow (30% of the gap left after a second) never caught the
+      // play and parked at center court. A tall screen, which can't see both
+      // ends at once, pans like a broadcast camera: 8% left after a second.
+      let lag = preset.lag ?? THREE.MathUtils.lerp(0.3, 0.08, portrait);
       // Aim at the action, not just the ball: half the ball, half the ten
       // bodies' centroid, so a skip pass or a fast break doesn't leave the
       // players out of frame while the ball is centered.
       let px = 0, pz = 0;
       court.players.forEach((pl) => { px += pl.x; pz += pl.z; });
       const n = court.players.length || 1;
-      const ax = court.ball.x * 0.5 + (px / n) * 0.5;
-      const az = court.ball.z * 0.5 + (pz / n) * 0.5;
+      let ax = court.ball.x * 0.5 + (px / n) * 0.5;
+      let az = court.ball.z * 0.5 + (pz / n) * 0.5;
+      // The close camera is the action camera (PLANO-3D Etapa 7): it rides
+      // whoever has the ball, and once a shot is released it swings to frame
+      // the shooter and the rim together.
+      if (preset.lag) {
+        const holder = court.players.find((pl) => pl.hasBall);
+        if (holder) {
+          ax = holder.x * 0.7 + (px / n) * 0.3;
+          az = holder.z * 0.7 + (pz / n) * 0.3;
+        }
+        const shooter = court.players.find((pl) => (pl.action === 'shot' || pl.action === 'layup' || pl.action === 'dunk') && (pl.actionT ?? 0) >= 0.4);
+        if (shooter) {
+          const rimX = (shooter.side === 'home' ? 1 : -1) * RIM_X;
+          ax = shooter.x * 0.45 + rimX * 0.55;
+          az = shooter.z * 0.45;
+          lag = Math.min(lag, 0.005);
+        }
+      }
       // A phone held upright sees a sliver of the court horizontally (vertical
       // fov 38° at a 0.46 aspect is ~18° across): a wide shot that only
       // half-follows the play films an empty floor. The taller the screen,
       // the closer every framing gets to tracking the action fully.
-      const portrait = THREE.MathUtils.clamp((1.1 - size.width / Math.max(1, size.height)) / 0.6, 0, 1);
       const follow = preset.follow + (1 - preset.follow) * portrait;
-      // A possession change moves all ten bodies 50+ ft in under half a
-      // second of screen time (measured): no pan keeps up, and the wide shot
-      // spent every transition filming an empty floor. A big jump is a CUT,
-      // the way a broadcast switches cameras, instead of a slide.
-      if (Math.abs(ax * follow - target.x) > 30 && !preset.lag) target.x = ax * follow;
+      const zFollow = preset.lag ? 0.8 : 0.5 + 0.4 * portrait;
+      const f = 1 - Math.pow(lag, dt);
+      // Playback cuts past the trip up the floor (watchDirector advanceClock):
+      // every framing, the close one included, cuts with it.
+      const cut = court.cut !== lastCut.current;
+      lastCut.current = court.cut;
+      // And when the action has left the picture altogether -- outside the
+      // middle 90% of the frame -- a broadcast cuts rather than chase it:
+      // waiting for a 30 ft jump (the old rule) filmed empty floor meanwhile.
+      probe.set(ax * follow, 4, az * zFollow);
+      probe.project(camera);
+      const outOfFrame = Math.abs(probe.x) > 0.9 || Math.abs(probe.y) > 0.9;
+      if (cut || (outOfFrame && !blend.current)) {
+        target.x = ax * follow;
+        target.z = az * zFollow;
+      }
       target.x = THREE.MathUtils.lerp(target.x, ax * follow, f);
-      target.z = THREE.MathUtils.lerp(target.z, az * follow * (preset.lag ? 0.8 : 0.5 + 0.4 * portrait), f);
+      target.z = THREE.MathUtils.lerp(target.z, az * zFollow, f);
       target.y = THREE.MathUtils.lerp(target.y, preset.targetY ?? 5, f);
     }
     // Field of view sized to the screen. At the base 38° a phone held upright
@@ -182,12 +262,26 @@ function CameraRig({
         camera.fov = THREE.MathUtils.lerp(camera.fov, fov, k);
         camera.updateProjectionMatrix();
       }
+      // Aim at the middle of the strip the HUD leaves free, not the middle of
+      // the screen: the projection center moves down by half the difference
+      // between the top and bottom overlays.
+      const shift = insets ? Math.round((insets.top - insets.bottom) / 2) : 0;
+      const shiftKey = `${shift}:${size.width}x${size.height}`;
+      if (shiftKey !== viewShift.current) {
+        viewShift.current = shiftKey;
+        if (shift === 0) camera.clearViewOffset();
+        else camera.setViewOffset(size.width, size.height, 0, -shift, size.width, size.height);
+      }
     }
     camera.position.set(
       target.x + Math.cos(s.angle) * s.dist * Math.cos(s.elev),
       target.y + Math.sin(s.elev) * s.dist,
       target.z + Math.sin(s.angle) * s.dist * Math.cos(s.elev),
     );
+    // Never inside the floor or the stands: the camera stays a few feet above
+    // whatever is under it, however low a drag takes it.
+    const floor = groundUnder(camera.position.x, camera.position.z) + CAMERA_CLEARANCE;
+    if (camera.position.y < floor) camera.position.y = floor;
     camera.lookAt(target);
   });
   return null;
@@ -196,6 +290,35 @@ function CameraRig({
 /* ------------------------------------------------------------------ */
 /* The floor.                                                          */
 /* ------------------------------------------------------------------ */
+// Dev builds only: the renderer's counters (draw calls, triangles, live
+// geometries/textures), the last 240 frame times, and the scene, camera and
+// renderer themselves (to toggle a light or a mesh, or time a forced render,
+// from the console while tuning), on globalThis.__court3d, so each stage of
+// PLANO-3D can be measured.
+// useFrame runs before the render, so the counters describe the previous frame.
+function RenderProbe() {
+  const gl = useThree((s) => s.gl);
+  const scene = useThree((s) => s.scene);
+  const camera = useThree((s) => s.camera);
+  const frames = useRef<number[]>([]);
+  useFrame((_, dt) => {
+    const f = frames.current;
+    f.push(dt * 1000);
+    if (f.length > 240) f.shift();
+    (globalThis as any).__court3d = {
+      calls: gl.info.render.calls,
+      triangles: gl.info.render.triangles,
+      geometries: gl.info.memory.geometries,
+      textures: gl.info.memory.textures,
+      frameMs: f.slice(),
+      scene,
+      camera,
+      gl,
+    };
+  });
+  return null;
+}
+
 function Floor({ wood, primary, secondary, label }: { wood: string; primary: string; secondary: string; label: string }) {
   const gl = useThree((s) => s.gl);
   const material = useMemo(() => {
@@ -206,7 +329,13 @@ function Floor({ wood, primary, secondary, label }: { wood: string; primary: str
     // The floor is seen at a grazing angle almost all the time; anisotropic
     // filtering is what keeps the far lines crisp instead of smeared.
     map.anisotropy = Math.min(8, gl.capabilities.getMaxAnisotropy());
-    return new THREE.MeshStandardMaterial({ map, roughness: 0.34, metalness: 0.02 });
+    // Varnished maple, with the varnish painted in (the light pools in the
+    // texture) and no specular at all. The floor is a big flat mirror for any
+    // light low on the far side, and the rim light that outlines the players
+    // is exactly that: with a glossy floor it bounced straight into the
+    // near-side cameras and washed the court grey (seen in Etapa 2). Lambert
+    // is also the cheapest lit material.
+    return new THREE.MeshLambertMaterial({ map });
   }, [wood, primary, secondary, label, gl]);
   return (
     <mesh rotation={[-Math.PI / 2, 0, 0]} material={material}>
@@ -220,6 +349,9 @@ function Floor({ wood, primary, secondary, label }: { wood: string; primary: str
 /* ------------------------------------------------------------------ */
 const HOME_COUNT = 5;
 const BALL_R = 0.39; // 9.4-inch ball, in feet
+
+/** Backspin on a shot or a lob, radians per real second (~2 turns). */
+const BACKSPIN = Math.PI * 4;
 
 function PlayersAndBall({
   home, away, courtRef, numbers,
@@ -261,11 +393,15 @@ function PlayersAndBall({
     return m;
   }, [shadowMat]);
   const lastBall = useRef(new THREE.Vector3());
+  const lastCut = useRef<number | undefined>(undefined);
+  const spin = useMemo(() => ({ axis: new THREE.Vector3(), q: new THREE.Quaternion(), move: new THREE.Vector3(), up: new THREE.Vector3(0, 1, 0) }), []);
 
   useFrame(({ clock }, dt) => {
     const court = courtRef.current;
     if (!court) return;
     const t = clock.getElapsedTime();
+    const snap = court.cut !== lastCut.current;
+    lastCut.current = court.cut;
 
     court.players.forEach((p, i) => {
       const rig = rigs[i];
@@ -279,21 +415,35 @@ function PlayersAndBall({
         hasBall: p.hasBall,
         onOffense: p.side === court.possession,
         ball: court.ball,
+        snap,
+        action: p.action,
+        actionT: p.actionT,
       });
     });
 
-    // Lift the ball by its radius so it rests on the floor instead of in it,
-    // and let it spin the way it is travelling.
+    // Lift the ball by its radius so it rests on the floor instead of in it.
     const b = court.ball;
     ball.position.set(b.x, Math.max(BALL_R, b.y), b.z);
-    const moved = lastBall.current.distanceTo(ball.position);
-    if (b.inFlight) ball.rotation.z -= moved / BALL_R;
-    else ball.rotation.x += moved / BALL_R;
+    // Spin about the axis across the direction of travel (PLANO-3D Etapa 6):
+    // in the air that's backspin -- the top turning back toward the shooter,
+    // about two turns a second -- and on the floor or the bounce it rolls
+    // the way it moves.
+    spin.move.subVectors(ball.position, lastBall.current);
+    spin.move.y = 0;
+    const moved = snap ? 0 : spin.move.length();
+    if (moved > 1e-4) {
+      spin.axis.crossVectors(spin.up, spin.move).normalize();
+      const angle = b.inFlight ? -BACKSPIN * dt : moved / BALL_R;
+      spin.q.setFromAxisAngle(spin.axis, angle);
+      ball.quaternion.premultiply(spin.q);
+    }
     lastBall.current.copy(ball.position);
+    // Contact shadow: tight and dark with the ball on the floor, spread out
+    // and faint when it's up in the air.
     ballShadow.position.set(b.x, 0.05, b.z);
     const lift = Math.min(1, b.y / 14);
-    ballShadow.scale.setScalar(1.1 + lift * 0.8);
-    (ballShadow.material as THREE.MeshBasicMaterial).opacity = 1;
+    ballShadow.scale.setScalar(0.9 + lift * 1.6);
+    (ballShadow.material as THREE.MeshBasicMaterial).opacity = 1 - lift * 0.72;
   });
 
   return (
@@ -308,16 +458,19 @@ function PlayersAndBall({
 /* ------------------------------------------------------------------ */
 /* Scene root.                                                         */
 /* ------------------------------------------------------------------ */
-function Scene({ home, away, courtRef, visual, homeLabel, numbers }: Omit<Court3DProps, 'cameraView'>) {
+function Scene({ home, away, courtRef, visual, homeLabel, numbers, scoreboard }: Omit<Court3DProps, 'cameraView'>) {
   return (
     <>
-      {/* Arena lighting: a warm key from the rig above, a cooler fill, and a
-          low ambient so the stands fall away into the dark. */}
+      {/* Arena lighting: a warm key from the rig above, a cold rim light low
+          from the far side (the cameras mostly sit on the near, +z, side, so
+          it outlines the players against the dark stands -- it was a high
+          fill until PLANO-3D Etapa 2), a soft front fill, and a low ambient so
+          the stands fall away into the dark. Still five lights, no shadows. */}
       <hemisphereLight args={['#dfe6ff', '#24180c', 0.5]} />
-      <ambientLight intensity={0.22} color="#8090b0" />
+      <ambientLight intensity={0.16} color="#8090b0" />
       <directionalLight position={[30, 120, 45]} intensity={1.9} color="#fff3df" />
-      <directionalLight position={[-45, 100, -35]} intensity={0.9} color="#dfe8ff" />
-      <directionalLight position={[0, 60, 90]} intensity={0.45} color="#ffffff" />
+      <directionalLight position={[-20, 38, -110]} intensity={1.25} color="#cfe0ff" />
+      <directionalLight position={[0, 60, 90]} intensity={0.5} color="#ffffff" />
 
       <Floor
         wood={visual?.floorColor ?? DEFAULT_FLOOR_COLOR}
@@ -325,14 +478,21 @@ function Scene({ home, away, courtRef, visual, homeLabel, numbers }: Omit<Court3
         secondary={home.secondary}
         label={homeLabel ?? 'NBA'}
       />
-      <Arena primary={home.primary} secondary={home.secondary} />
+      <Arena
+        primary={home.primary}
+        secondary={home.secondary}
+        courtRef={courtRef}
+        board={scoreboard}
+        awayPrimary={away.primary}
+        homeLabel={homeLabel}
+      />
       <PlayersAndBall home={home} away={away} courtRef={courtRef} numbers={numbers} />
     </>
   );
 }
 
 export default function Court3D({
-  home, away, courtRef, visual, cameraView = 'iso', homeLabel, numbers,
+  home, away, courtRef, visual, cameraView = 'iso', homeLabel, numbers, scoreboard, insets,
 }: Court3DProps) {
   const preset = CAMERA_PRESETS[cameraView];
   const camState = useRef<CameraDragState>({
@@ -366,8 +526,9 @@ export default function Court3D({
       <Canvas camera={{ fov: BASE_FOV, near: 0.5, far: 1200 }} style={{ flex: 1 }}>
         <color attach="background" args={['#04060b']} />
         <fog attach="fog" args={['#04060b', 160, 520]} />
-        <CameraRig stateRef={camState} preset={preset} courtRef={courtRef} />
-        <Scene home={home} away={away} courtRef={courtRef} visual={visual} homeLabel={homeLabel} numbers={numbers} />
+        <CameraRig stateRef={camState} preset={preset} courtRef={courtRef} insets={insets} />
+        {__DEV__ ? <RenderProbe /> : null}
+        <Scene home={home} away={away} courtRef={courtRef} visual={visual} homeLabel={homeLabel} numbers={numbers} scoreboard={scoreboard} />
       </Canvas>
     </View>
   );
