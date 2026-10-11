@@ -20,14 +20,14 @@ sem o time do usuário). O resto, em ordem. **L** = lapidar algo que existe,
 
 | # | Item | Tipo | Tamanho | Por que nessa posição |
 |---|------|------|---------|------------------------|
-| 1 | Salvar e carregar a carreira | N | M | Sem isso nada mais importa: fechar o app perde a carreira inteira |
-| 2 | 3D — Etapas 0 e 4b (medição + ritmo da partida) | L | M | Já aprovado; sem ritmo, o resto do 3D passa despercebido |
+| 1 | Salvar e carregar a carreira — **FEITO** | N | M | Sem isso nada mais importa: fechar o app perde a carreira inteira |
+| 2 | 3D — Etapas 0 e 4b (medição + ritmo da partida) — **FEITO** | L | M | Já aprovado; sem ritmo, o resto do 3D passa despercebido |
 | 3 | Ratings de veteranos no pipeline | L | P | Erro de dado visível (McConnell OVR 88 aos 34) e barato de corrigir |
 | 4 | Redesign do celular (handoff do Claude Design) | L | G | O usuário está insatisfeito com a UI; o PC já recebeu o redesign |
 | 5 | Histórico da liga e da franquia | N | M | Dá peso aos saves longos, que o item 1 torna possíveis |
 | 6 | Eras no modelo do Basketball-Reference | L | M | 41 eras ainda com ratings antigos e salários sintéticos |
 | 7 | Desenvolvimento ativo de jogadores | N | M | Hoje a evolução é toda passiva; vira decisão de GM |
-| 8 | 3D — Etapas 1 a 8 restantes | L | G | Segue o PLANO-3D, uma etapa por vez |
+| 8 | 3D — Etapas 1 a 8 restantes — **FEITO** (2026-10-11) | L | G | Segue o PLANO-3D, uma etapa por vez |
 | 9 | Jogo decisivo dentro do 3D | L | M | Junta as duas telas de jogo; depende das etapas 4-5 do 3D |
 | 10 | Objetivos e conquistas de GM | N | P | Meta para saves longos além de "ganhar o título" |
 | 11 | Staff além do técnico | N | G | Profundidade, mas mexe em muitos sistemas calibrados |
@@ -62,8 +62,22 @@ vive num `useState` do `App.tsx`).
 
 ### 2. 3D — Etapas 0 e 4b (L) — FEITO na branch `melhoria-3d` (2026-10-10)
 
-Detalhes e números em [PLANO-3D.md](PLANO-3D.md). Falta o APK de referência da
-Etapa 0 e o teste da 4b no aparelho (`scripts/device_3d.sh`).
+Junto com o item 8: **todas as etapas do 3D (0-8) feitas e testadas no aparelho**
+(2026-10-11). Detalhes, números e a decisão do usuário de manter o desempenho atual em
+[PLANO-3D.md](PLANO-3D.md). Falta juntar a `melhoria-3d` na `redesign-console-mygm`.
+
+### QA no aparelho — FEITO (2026-10-11, commit `d49c9fd` na `melhoria-3d`)
+
+Percurso completo no Galaxy A57 por adb: todas as abas, trocas (proposta e recebida),
+temporada com decisões e coletivas, playoffs até o título, draft, agência livre, save
+fechando o app, jogo 3D com tempo, substituição, 4X e pular. Log sem erro de JS, ANR
+ou crash. Corrigidos: 6º homem indo para titular lesionado (229 de 240 sorteios),
+"promover jovem" em lesão de reserva tirando um titular, aviso do prazo chamando o
+líder de "zona de play-in", 3D com metade preta depois do pedido de tempo, câmera não
+lembrada entre jogos, folha salarial cortada em Meu Time, botões dos playoffs
+quebrando linha, nomes de calouros repetidos. Observação não corrigida: os efeitos
+sonoros aparecem como player de mídia no Android (não deveriam pausar música de outro
+app — `mixWithOthers` é o padrão —, mas não confirmado). Nenhuma correção em APK ainda.
 
 O item 5 abaixo e o [PLANO-3D.md](PLANO-3D.md), sem mudança: branch `melhoria-3d`,
 medição de referência e depois o ritmo (os jogadores atravessam a quadra em menos

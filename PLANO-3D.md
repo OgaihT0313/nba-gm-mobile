@@ -416,9 +416,16 @@ arquivos, +1.613 / −188):
 - No Chrome, o 3D antigo da `redesign-console-mygm` também enquadra a TV aberta. A
   suspeita é a lente mais aberta da TV no celular (`fcd0b41`, 07/10 21:16, já na
   branch principal) — o APK antigo pode ser de antes dela.
-- **Pendente (o usuário pediu para esperar):** gerar um APK da `redesign-console-mygm`
-  e medir a TV nas mesmas condições. ~13 ms → a causa é a lente, e o ajuste é fechar
-  a TV no celular; ~5 ms → a causa está nas etapas, e segue o corte peça por peça.
+- **APK de comparação (`decc7481`, da `redesign-console-mygm`), mesma carreira e
+  jogo:** TV mediana 7 ms / p95 13 ms / 7% atrasados; Perto 6 / 11 / 9%. Com
+  `melhoria-3d` na mesma carreira: TV 15 / 24 / 22%. **Causa:** a lente aberta da TV
+  no celular (`fcd0b41`) nunca funcionou no aparelho — o teste `camera instanceof
+  THREE.PerspectiveCamera` falhava com dois three carregados. A Etapa 0 deixou um
+  three só e a lente passou a valer; a arquibancada perto da câmera é o que pesa. As
+  etapas em si não pioraram o custo.
+- **Decisão do usuário (2026-10-11): fica como está.** "O 3D roda de boa." Não
+  otimizar sem pedido. Se um dia precisar: material mais simples na torcida (Lambert)
+  ou limitar a lente da TV no celular a ~50°.
 - Visual no aparelho até aqui: LEDs com a sigla e o letreiro do apron legíveis; jogada
   centrada na faixa livre do HUD. Não conferidos de perto ainda: placar central,
   relógio de posse, sigla do piso pela TV.
@@ -439,3 +446,16 @@ arquivos, +1.613 / −188):
 - [ ] FPS no APK final igual ou próximo da referência da Etapa 0
 
 **Ordem:** 0 → 4b → 1 → 2 → (APK #1) → 3 → 4 → (APK #2) → 5 → 6 → 7 → 8. A 4b vem logo depois da 0: sem ritmo jogável, as outras melhorias passam despercebidas. Ao fim de cada etapa: resumo de 2 a 3 linhas, verificação ok e confirmação antes de avançar.
+
+---
+
+## Fechamento (2026-10-11)
+
+Etapas 0-8 concluídas na `melhoria-3d`. Etapa 8 = teste no aparelho acima, mais o
+percurso completo de QA no Galaxy (commit `d49c9fd`), que achou e corrigiu, dentro do
+3D: metade de baixo preta depois do pedido de tempo (os `insets` mediam o painel do
+huddle — agora só o painel do jogo) e a câmera escolhida não ser lembrada entre jogos.
+Conferidos no aparelho: sigla do piso, placas de LED, relógio de posse legível e não
+espelhado, rede e aro. Não conferido de perto no aparelho: o placar central (fora do
+quadro das câmeras). Os três "avaliar" da Etapa 7 ficam para quando o usuário quiser.
+**Falta:** gerar APK com `d49c9fd` e juntar a `melhoria-3d` na `redesign-console-mygm`.
