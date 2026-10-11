@@ -300,6 +300,17 @@ ganhou o campo opcional `cut`:
 - A sombra de contato fica nítida e escura com a bola no chão e difusa e clara no alto (a escala pela altura já existe; falta ajustar a opacidade).
 - **Arco do arremesso:** o diretor já calcula a trajetória; revisar se a altura do arco está realista para cada distância, sem mudar o tempo do lance.
 
+**FEITO (2026-10-11), falta ver no aparelho.**
+- Couro 512x256 (era 256x128): granulado em pontinhos com luz de um lado, gomos com
+  sulco de borracha e a borda do couro escurecendo em direção a ele. ~25 ms no Node.
+- Giro de verdade: eixo = vertical × direção do movimento. No ar, backspin a ~2
+  voltas/s (o topo volta para o arremessador); no chão e no drible, rola para onde
+  anda. Antes girava num eixo fixo do mundo, qualquer que fosse a direção.
+- Sombra da bola: 0,9 → 2,5 de escala e opacidade 1 → 0,28 conforme sobe.
+- Arco do jump: 1 + 0,3 × distância (saída ~50°) em vez de fixo por tipo — antes o
+  lance livre subia mais que um arremesso de média. Agora ~8 pés acima da linha
+  mão-aro de três, ~5 no lance livre, ~4 de 10 pés. Tempo do lance igual.
+
 ## Etapa 7 — Câmeras (`Court3D.tsx`)
 
 - **Os 5 modos continuam.** Ajustes internos:

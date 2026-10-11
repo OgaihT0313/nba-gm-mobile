@@ -459,8 +459,15 @@ const RIM_RANGE = 8;
 // The release beat's ball height and arc for each finish. A jumper leaves the
 // hand at ~7 ft and arcs high; a layup is laid up off the glass from ~9 ft; a
 // dunk is carried to the rim and barely leaves the hand.
-const RELEASE: Record<Finish, { y: number; arc: (kind: 1 | 2 | 3) => number }> = {
-    shot: { y: 7.2, arc: (kind) => (kind === 3 ? 9 : kind === 1 ? 7 : 5) },
+//
+// A jumper's arc grows with the distance (PLANO-3D Etapa 6). Launched at ~50
+// degrees, the apex sits about 0.3 x the distance above the line from hand to
+// rim: ~8 ft over it from the corner three, ~5 on a free throw, ~4 from 10 ft.
+// It used to be fixed per kind, which sent free throws higher than threes.
+// The ball's timing is unchanged -- only the height of the arc.
+const jumperArc = (distance: number) => 1 + 0.3 * distance;
+const RELEASE: Record<Finish, { y: number; arc: (distance: number) => number }> = {
+    shot: { y: 7.2, arc: jumperArc },
     layup: { y: 8.8, arc: () => 2 },
     dunk: { y: 10.6, arc: () => 0.4 },
 };
@@ -481,7 +488,7 @@ const makeDunk = (poss: Possession) => {
     poss.finish = 'dunk';
     const release = poss.beats[poss.beats.length - 3];
     release.ball = { ...release.ball, y: RELEASE.dunk.y };
-    release.arc = RELEASE.dunk.arc(2);
+    release.arc = RELEASE.dunk.arc(0);
 };
 
 const withShooter = (spots: Spot[], idx: number, spot: Spot): Spot[] =>
@@ -555,7 +562,7 @@ const buildPossession = (
     beats.push({
         t: at(0.86), off: offOf(shotSet), def: defOf(shotSet),
         ball: { x: release.x, y: RELEASE[finish].y, z: release.z }, handler: null,
-        arc: RELEASE[finish].arc(shotKind),
+        arc: RELEASE[finish].arc(Math.hypot(hoop.x - release.x, hoop.z - release.z)),
     });
 
     const shotAt = at(0.95);

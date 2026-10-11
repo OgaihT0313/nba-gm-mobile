@@ -266,6 +266,9 @@ function Floor({ wood, primary, secondary, label }: { wood: string; primary: str
 const HOME_COUNT = 5;
 const BALL_R = 0.39; // 9.4-inch ball, in feet
 
+/** Backspin on a shot or a lob, radians per real second (~2 turns). */
+const BACKSPIN = Math.PI * 4;
+
 function PlayersAndBall({
   home, away, courtRef, numbers,
 }: {
@@ -307,6 +310,7 @@ function PlayersAndBall({
   }, [shadowMat]);
   const lastBall = useRef(new THREE.Vector3());
   const lastCut = useRef<number | undefined>(undefined);
+  const spin = useMemo(() => ({ axis: new THREE.Vector3(), q: new THREE.Quaternion(), move: new THREE.Vector3(), up: new THREE.Vector3(0, 1, 0) }), []);
 
   useFrame(({ clock }, dt) => {
     const court = courtRef.current;
@@ -333,18 +337,29 @@ function PlayersAndBall({
       });
     });
 
-    // Lift the ball by its radius so it rests on the floor instead of in it,
-    // and let it spin the way it is travelling.
+    // Lift the ball by its radius so it rests on the floor instead of in it.
     const b = court.ball;
     ball.position.set(b.x, Math.max(BALL_R, b.y), b.z);
-    const moved = snap ? 0 : lastBall.current.distanceTo(ball.position);
-    if (b.inFlight) ball.rotation.z -= moved / BALL_R;
-    else ball.rotation.x += moved / BALL_R;
+    // Spin about the axis across the direction of travel (PLANO-3D Etapa 6):
+    // in the air that's backspin -- the top turning back toward the shooter,
+    // about two turns a second -- and on the floor or the bounce it rolls
+    // the way it moves.
+    spin.move.subVectors(ball.position, lastBall.current);
+    spin.move.y = 0;
+    const moved = snap ? 0 : spin.move.length();
+    if (moved > 1e-4) {
+      spin.axis.crossVectors(spin.up, spin.move).normalize();
+      const angle = b.inFlight ? -BACKSPIN * dt : moved / BALL_R;
+      spin.q.setFromAxisAngle(spin.axis, angle);
+      ball.quaternion.premultiply(spin.q);
+    }
     lastBall.current.copy(ball.position);
+    // Contact shadow: tight and dark with the ball on the floor, spread out
+    // and faint when it's up in the air.
     ballShadow.position.set(b.x, 0.05, b.z);
     const lift = Math.min(1, b.y / 14);
-    ballShadow.scale.setScalar(1.1 + lift * 0.8);
-    (ballShadow.material as THREE.MeshBasicMaterial).opacity = 1;
+    ballShadow.scale.setScalar(0.9 + lift * 1.6);
+    (ballShadow.material as THREE.MeshBasicMaterial).opacity = 1 - lift * 0.72;
   });
 
   return (

@@ -307,22 +307,42 @@ export const buildFloorTexture = (opts: {
 
 /** Orange pebbled leather with the eight black channels of a real ball. */
 export const buildBallTexture = (): THREE.DataTexture => {
-  const W = 256;
-  const H = 128;
+  // 512 x 256 (was 256 x 128): the close camera fills a good part of the
+  // screen with the ball now, and the pebbling and channels need the pixels.
+  const W = 512;
+  const H = 256;
   const data = new Uint8Array(W * H * 4);
+  const CH = 0.026; // channel half-width, in units of the radius
   for (let y = 0; y < H; y++) {
     const lat = (y / H) * Math.PI - Math.PI / 2;
+    const cl = Math.cos(lat);
     for (let x = 0; x < W; x++) {
       const lon = (x / W) * Math.PI * 2;
-      const pebble = 0.9 + hash(x, y) * 0.14;
-      let c: RGB = [214 * pebble, 104 * pebble, 40 * pebble];
-      // A great circle through the poles, the equator, and the two curved
-      // seams: where the point's distance along x sits at ~0.7 of the radius.
-      const px = Math.cos(lat) * Math.cos(lon);
-      const seam = Math.abs(Math.sin(lon)) * Math.cos(lat) < 0.03
-        || Math.abs(lat) < 0.03
-        || Math.abs(Math.abs(px) - 0.7) < 0.03;
-      if (seam) c = [28, 20, 18];
+      // Pebbled leather: a grain of small raised dots (lit on one side, the
+      // way a pebble catches light), over fine noise.
+      const cell = hash(x >> 1, y >> 1);
+      const dot = ((x + (y & 2)) & 3) < 2 && ((y & 3) < 2) ? 0.06 : -0.02;
+      const pebble = 0.88 + cell * 0.1 + dot;
+      // Distance to the nearest of the eight channels: a great circle through
+      // the poles, the equator, and the two curved seams where the point's
+      // distance along x sits at ~0.7 of the radius.
+      const px = cl * Math.cos(lon);
+      const d = Math.min(
+        Math.abs(Math.sin(lon)) * cl,
+        Math.abs(lat),
+        Math.abs(Math.abs(px) - 0.7),
+      );
+      let c: RGB = [206 * pebble, 98 * pebble, 36 * pebble];
+      if (d < CH) {
+        // The groove: black rubber, a touch lighter toward its middle where
+        // it is worn.
+        const g = 1 - d / CH;
+        c = [24 + g * 10, 18 + g * 6, 16 + g * 4];
+      } else if (d < CH * 2.2) {
+        // The leather dips into the channel: darker at the lip.
+        const k = (d - CH) / (CH * 1.2);
+        c = [c[0] * (0.7 + 0.3 * k), c[1] * (0.7 + 0.3 * k), c[2] * (0.7 + 0.3 * k)];
+      }
       const i = (y * W + x) * 4;
       data[i] = c[0]; data[i + 1] = c[1]; data[i + 2] = c[2]; data[i + 3] = 255;
     }
