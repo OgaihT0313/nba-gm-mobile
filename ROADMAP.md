@@ -11,6 +11,116 @@ explícito do usuário.**
 
 ---
 
+## Prioridades a partir de 2026-10-10
+
+Feito depois da análise "o que é inútil / o que lapidar / o que falta". Os cortes
+já entraram (código morto, feed só do seu time, avisos filtrados, troca da CPU
+sem o time do usuário). O resto, em ordem. **L** = lapidar algo que existe,
+**N** = coisa nova.
+
+| # | Item | Tipo | Tamanho | Por que nessa posição |
+|---|------|------|---------|------------------------|
+| 1 | Salvar e carregar a carreira | N | M | Sem isso nada mais importa: fechar o app perde a carreira inteira |
+| 2 | 3D — Etapas 0 e 4b (medição + ritmo da partida) | L | M | Já aprovado; sem ritmo, o resto do 3D passa despercebido |
+| 3 | Ratings de veteranos no pipeline | L | P | Erro de dado visível (McConnell OVR 88 aos 34) e barato de corrigir |
+| 4 | Redesign do celular (handoff do Claude Design) | L | G | O usuário está insatisfeito com a UI; o PC já recebeu o redesign |
+| 5 | Histórico da liga e da franquia | N | M | Dá peso aos saves longos, que o item 1 torna possíveis |
+| 6 | Eras no modelo do Basketball-Reference | L | M | 41 eras ainda com ratings antigos e salários sintéticos |
+| 7 | Desenvolvimento ativo de jogadores | N | M | Hoje a evolução é toda passiva; vira decisão de GM |
+| 8 | 3D — Etapas 1 a 8 restantes | L | G | Segue o PLANO-3D, uma etapa por vez |
+| 9 | Jogo decisivo dentro do 3D | L | M | Junta as duas telas de jogo; depende das etapas 4-5 do 3D |
+| 10 | Objetivos e conquistas de GM | N | P | Meta para saves longos além de "ganhar o título" |
+| 11 | Staff além do técnico | N | G | Profundidade, mas mexe em muitos sistemas calibrados |
+| 12 | Ajustes técnicos menores | L | P | Erosão da liga e `diagnose_season` |
+
+Tamanho: P = um dia ou menos, M = alguns dias, G = uma semana ou mais.
+
+### 1. Salvar e carregar a carreira (N)
+
+O app não guarda nada: o `expo-file-system` já está nas dependências, mas nenhum
+arquivo do jogo usa. `SeasonState` já é um objeto serializável (o estado inteiro
+vive num `useState` do `App.tsx`).
+- Salvamento automático ao fim de cada dia simulado (com intervalo mínimo) e em cada
+  etapa da offseason; "Continuar" na tela inicial.
+- 1 a 3 espaços de save, com time, temporada e campanha no card.
+- `saveVersion` no arquivo, com migração, porque o formato vai mudar com os próximos
+  itens.
+- Web: `localStorage` (ou IndexedDB, se o tamanho estourar); celular: arquivo via
+  `expo-file-system`. Medir o tamanho do JSON numa carreira de 10 anos antes de
+  escolher.
+- Não salvar no meio do jogo ao vivo ou do 3D: salvar no estado anterior ao jogo.
+
+### 2. 3D — Etapas 0 e 4b (L)
+
+O item 5 abaixo e o [PLANO-3D.md](PLANO-3D.md), sem mudança: branch `melhoria-3d`,
+medição de referência e depois o ritmo (os jogadores atravessam a quadra em menos
+de meio segundo e a câmera filma o vazio).
+
+### 3. Ratings de veteranos (L)
+
+No `nba-gm-simulator/pipeline`: veteranos de pouco minuto saem com OVR alto demais
+(T.J. McConnell 88 aos 34). Revisar a regressão por minutos e a idade no
+`apply_bbref.py`, gerar de novo e conferir com `backtest_season` e
+`diagnose_season`.
+
+### 4. Redesign do celular (L)
+
+Aplicar no celular o que o handoff do Claude Design definir, reaproveitando o padrão
+do PC (`useDesktop`, painéis compartilhados). Não refazer a navegação inteira: a
+tentativa de paisagem já foi descartada (ver "O que eu não faria").
+
+### 5. Histórico da liga e da franquia (N)
+
+Hoje existe só o `awardHistory` (prêmios por temporada) e as carreiras. Falta:
+- campeões e vices ano a ano, com a campanha;
+- recordes da franquia e da liga (temporada e carreira), alimentados pelos totais que
+  `careerService` já acumula;
+- Hall da Fama na aposentadoria (`retirementService`), com critério de títulos,
+  prêmios e totais;
+- camisas aposentadas no time do usuário, como decisão dele.
+
+### 6. Eras no modelo novo (L)
+
+Levar o `fetch_bbref.py` → `apply_bbref.py` às temporadas das eras (o BBRef tem BPM
+desde 1973-74), com salários reais ou derivados do teto da época. Conferir com
+`scripts/check_eras.ts`.
+
+### 7. Desenvolvimento ativo (N)
+
+Foco de treino por jogador (arremesso, defesa, físico), minutos prometidos a um
+jovem que viram promessa cobrada como a da coletiva, e o técnico de desenvolvimento
+pesando mais. Precisa passar pelo mesmo teste da imprensa: tem que virar número que
+o motor lê. Re-medir a curva de evolução com `check_contracts`.
+
+### 8. 3D — Etapas 1 a 8 restantes (L)
+
+Ver [PLANO-3D.md](PLANO-3D.md). Confirmar com o usuário ao fim de cada etapa.
+
+### 9. Jogo decisivo no 3D (L)
+
+O jogo decisivo dos playoffs usa a `LiveGameScreen` (por quartos), e os outros jogos
+usam a `WatchGameScreen` (3D). Levar timeouts e as 3 táticas do decisivo para o
+huddle do 3D e apagar a tela por quartos. Decidido em 2026-10-10: só depois do 3D.
+
+### 10. Objetivos e conquistas de GM (N)
+
+Metas de carreira derivadas do estado (dinastia, reconstrução em X anos, MVP
+draftado por você, título com folha abaixo do teto) e uma tela de conquistas.
+Tudo derivado; nada pelo feed.
+
+### 11. Staff além do técnico (N)
+
+Assistentes, preparador físico (risco de lesão e carga) e olheiros (precisão do
+relatório do draft). É grande porque cada um mexe num sistema já calibrado:
+re-medir `check_coaches` e `diagnose_season`.
+
+### 12. Ajustes técnicos menores (L)
+
+- Erosão lenta do OVR do topo da liga depois do 7º ano (ver "Aposentadoria" abaixo).
+- `diagnose_season.ts` não responde às decisões.
+
+---
+
 ## 0. Rodar um APK — FEITO (2026-10-04)
 
 Último APK testado pelo usuário: `609f0b0c` (tudo até `3e07c3f` — item 4
@@ -248,10 +358,10 @@ Depois do teste no celular (2026-10-07), entrou a **Etapa 4b (ritmo da partida)*
 
 ## Menor, ou fora de escopo por decisão
 
-- **Feed ainda é 62% lesão.** Não desce sem tornar sequência quente / má fase /
-  vestiário eventos **por time** (hoje é um time sorteado por dia). Isso os
-  tornaria ~30× mais comuns e eles mexem em rating e momentum — é mudança de
-  balanceamento, pede re-medir o `diagnose_season`.
+- **Feed ainda é 62% lesão — RESOLVIDO de outro jeito (2026-10-10).** O feed e os
+  avisos na tela passaram a mostrar só o time do usuário (`Event.teamIds`), então o
+  ruído de lesão da liga sumiu sem mexer no balanceamento. De quebra: as trocas
+  aleatórias de prazo da CPU não pegam mais o time do usuário (`5befd04`, `3522743`).
 - **Aposentadoria + curva de evolução — FEITO (2026-10-04).** Não havia
   aposentadoria e a liga envelhecia: o top-8 médio caía 4,5 de OVR em 10 anos.
   Medindo por faixa de idade apareceu a causa real — os calouros chegavam a ~68
