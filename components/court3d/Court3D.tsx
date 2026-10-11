@@ -4,7 +4,7 @@ import { Canvas, useFrame, useThree } from '@react-three/fiber/native';
 import * as THREE from 'three';
 
 import type { CourtState } from '../../services/watchDirector';
-import Arena, { type ScoreboardData } from './Arena';
+import Arena, { RIM_X, type ScoreboardData } from './Arena';
 import { createRig, type Rig } from './PlayerRig';
 import { buildBallTexture, buildFloorTexture, buildShadowTexture, hexToRgb, FLOOR_L, FLOOR_W } from './textures';
 
@@ -95,6 +95,9 @@ interface Court3DProps {
   /** The live score, period, game clock and shot clock for the arena's
    *  scoreboard and shot clocks (PLANO-3D Etapa 5). Absent: the boards idle. */
   scoreboard?: ScoreboardData;
+  /** Layout pixels the screen's own overlays cover at the top and bottom; the
+   *  camera centers the action in the strip between them (PLANO-3D Etapa 7). */
+  insets?: { top: number; bottom: number };
 }
 
 const DEFAULT_FLOOR_COLOR = '#caa271'; // light maple
@@ -121,65 +124,128 @@ export interface CameraDragState {
   dragging: boolean;
 }
 
+/** Seconds a switch between camera modes takes, eased in and out. */
+const MODE_BLEND = 0.9;
+/** The bowl, for keeping the camera out of it (see Arena.tsx's Bowl). */
+const BOWL = { insetL: 62, insetW: 37, rowDepth: 2.7, rowRise: 1.7, rows: 14 };
+/** Feet the camera keeps above whatever is under it: floor or stands. */
+const CAMERA_CLEARANCE = 4;
+
+/** Height of the stands (or the floor) under a point -- the bowl rises in
+ *  steps from its first row behind the court's edge. */
+const groundUnder = (x: number, z: number) => {
+  const out = Math.max(Math.abs(x) - BOWL.insetL, Math.abs(z) - BOWL.insetW);
+  if (out <= 0) return 0;
+  const row = Math.min(BOWL.rows - 1, Math.floor(out / BOWL.rowDepth));
+  return 1 + row * BOWL.rowRise + 3.5; // the row's step plus a seated fan
+};
+
+const smoothstep = (t: number) => t * t * (3 - 2 * t);
+
 function CameraRig({
-  stateRef, preset, courtRef,
+  stateRef, preset, courtRef, insets,
 }: {
   stateRef: React.MutableRefObject<CameraDragState>;
   preset: CameraPreset;
   courtRef: React.MutableRefObject<CourtState | null>;
+  insets?: { top: number; bottom: number };
 }) {
   const target = useMemo(() => new THREE.Vector3(0, 5, 0), []);
   const lastCut = useRef<number | undefined>(undefined);
+  // A mode switch: where the orbit started and when, so it travels to the new
+  // framing along an eased curve of fixed length instead of covering a share
+  // of the remaining gap every frame (which crawled the last stretch).
+  const blend = useRef<{ preset: CameraPreset; from: { angle: number; elev: number; dist: number }; t: number } | null>(null);
+  const lastPreset = useRef(preset);
+  const probe = useMemo(() => new THREE.Vector3(), []);
+  const viewShift = useRef('');
+
   useFrame(({ camera, size }, dt) => {
     const s = stateRef.current;
     const k = 1 - Math.pow(0.02, dt); // frame-rate independent easing
+    if (lastPreset.current !== preset) {
+      blend.current = { preset, from: { angle: s.angle, elev: s.elev, dist: s.dist }, t: 0 };
+      lastPreset.current = preset;
+    }
     if (!s.dragging) {
+      const b = blend.current;
+      if (b) {
+        b.t += dt / MODE_BLEND;
+        const e = smoothstep(Math.min(1, b.t));
+        // The auto-rotating overview keeps turning; only its height and
+        // distance blend. Every other framing blends all three.
+        if (!preset.autoRotate) s.angle = b.from.angle + (preset.angle - b.from.angle) * e;
+        s.elev = b.from.elev + (preset.elev - b.from.elev) * e;
+        s.dist = b.from.dist + (preset.dist - b.from.dist) * e;
+        if (b.t >= 1) blend.current = null;
+      }
       if (preset.autoRotate) {
         s.angle += dt * 0.05;
-      } else {
+      } else if (!blend.current) {
         s.angle = THREE.MathUtils.lerp(s.angle, preset.angle, k);
         s.elev = THREE.MathUtils.lerp(s.elev, preset.elev, k);
         s.dist = THREE.MathUtils.lerp(s.dist, preset.dist, k);
       }
+    } else {
+      blend.current = null;
     }
+
     const court = courtRef.current;
     if (court) {
-      const portraitLag = THREE.MathUtils.clamp((1.1 - size.width / Math.max(1, size.height)) / 0.6, 0, 1);
-      // Possessions turn over every ~1.5 s of screen time; a lazy wide-shot
-      // follow (30% of the gap left after a second) never caught the play and
-      // parked at center court. A tall screen, which can't see both ends at
-      // once, pans like a broadcast camera: 8% left after a second.
-      const lag = preset.lag ?? THREE.MathUtils.lerp(0.3, 0.08, portraitLag);
-      const f = 1 - Math.pow(lag, dt);
+      const portrait = THREE.MathUtils.clamp((1.1 - size.width / Math.max(1, size.height)) / 0.6, 0, 1);
+      // Possessions turn over every few seconds of screen time; a lazy
+      // wide-shot follow (30% of the gap left after a second) never caught the
+      // play and parked at center court. A tall screen, which can't see both
+      // ends at once, pans like a broadcast camera: 8% left after a second.
+      let lag = preset.lag ?? THREE.MathUtils.lerp(0.3, 0.08, portrait);
       // Aim at the action, not just the ball: half the ball, half the ten
       // bodies' centroid, so a skip pass or a fast break doesn't leave the
       // players out of frame while the ball is centered.
       let px = 0, pz = 0;
       court.players.forEach((pl) => { px += pl.x; pz += pl.z; });
       const n = court.players.length || 1;
-      const ax = court.ball.x * 0.5 + (px / n) * 0.5;
-      const az = court.ball.z * 0.5 + (pz / n) * 0.5;
+      let ax = court.ball.x * 0.5 + (px / n) * 0.5;
+      let az = court.ball.z * 0.5 + (pz / n) * 0.5;
+      // The close camera is the action camera (PLANO-3D Etapa 7): it rides
+      // whoever has the ball, and once a shot is released it swings to frame
+      // the shooter and the rim together.
+      if (preset.lag) {
+        const holder = court.players.find((pl) => pl.hasBall);
+        if (holder) {
+          ax = holder.x * 0.7 + (px / n) * 0.3;
+          az = holder.z * 0.7 + (pz / n) * 0.3;
+        }
+        const shooter = court.players.find((pl) => (pl.action === 'shot' || pl.action === 'layup' || pl.action === 'dunk') && (pl.actionT ?? 0) >= 0.4);
+        if (shooter) {
+          const rimX = (shooter.side === 'home' ? 1 : -1) * RIM_X;
+          ax = shooter.x * 0.45 + rimX * 0.55;
+          az = shooter.z * 0.45;
+          lag = Math.min(lag, 0.005);
+        }
+      }
       // A phone held upright sees a sliver of the court horizontally (vertical
       // fov 38° at a 0.46 aspect is ~18° across): a wide shot that only
       // half-follows the play films an empty floor. The taller the screen,
       // the closer every framing gets to tracking the action fully.
-      const portrait = THREE.MathUtils.clamp((1.1 - size.width / Math.max(1, size.height)) / 0.6, 0, 1);
       const follow = preset.follow + (1 - preset.follow) * portrait;
-      // A possession change moves all ten bodies 50+ ft in under half a
-      // second of screen time (measured): no pan keeps up, and the wide shot
-      // spent every transition filming an empty floor. A big jump is a CUT,
-      // the way a broadcast switches cameras, instead of a slide.
+      const zFollow = preset.lag ? 0.8 : 0.5 + 0.4 * portrait;
+      const f = 1 - Math.pow(lag, dt);
       // Playback cuts past the trip up the floor (watchDirector advanceClock):
       // every framing, the close one included, cuts with it.
       const cut = court.cut !== lastCut.current;
       lastCut.current = court.cut;
-      if (cut) {
+      // And when the action has left the picture altogether -- outside the
+      // middle 90% of the frame -- a broadcast cuts rather than chase it:
+      // waiting for a 30 ft jump (the old rule) filmed empty floor meanwhile.
+      probe.set(ax * follow, 4, az * zFollow);
+      probe.project(camera);
+      const outOfFrame = Math.abs(probe.x) > 0.9 || Math.abs(probe.y) > 0.9;
+      if (cut || (outOfFrame && !blend.current)) {
         target.x = ax * follow;
-        target.z = az * follow * (preset.lag ? 0.8 : 0.5 + 0.4 * portrait);
+        target.z = az * zFollow;
       }
-      if (Math.abs(ax * follow - target.x) > 30 && !preset.lag) target.x = ax * follow;
       target.x = THREE.MathUtils.lerp(target.x, ax * follow, f);
-      target.z = THREE.MathUtils.lerp(target.z, az * follow * (preset.lag ? 0.8 : 0.5 + 0.4 * portrait), f);
+      target.z = THREE.MathUtils.lerp(target.z, az * zFollow, f);
       target.y = THREE.MathUtils.lerp(target.y, preset.targetY ?? 5, f);
     }
     // Field of view sized to the screen. At the base 38° a phone held upright
@@ -196,12 +262,26 @@ function CameraRig({
         camera.fov = THREE.MathUtils.lerp(camera.fov, fov, k);
         camera.updateProjectionMatrix();
       }
+      // Aim at the middle of the strip the HUD leaves free, not the middle of
+      // the screen: the projection center moves down by half the difference
+      // between the top and bottom overlays.
+      const shift = insets ? Math.round((insets.top - insets.bottom) / 2) : 0;
+      const shiftKey = `${shift}:${size.width}x${size.height}`;
+      if (shiftKey !== viewShift.current) {
+        viewShift.current = shiftKey;
+        if (shift === 0) camera.clearViewOffset();
+        else camera.setViewOffset(size.width, size.height, 0, -shift, size.width, size.height);
+      }
     }
     camera.position.set(
       target.x + Math.cos(s.angle) * s.dist * Math.cos(s.elev),
       target.y + Math.sin(s.elev) * s.dist,
       target.z + Math.sin(s.angle) * s.dist * Math.cos(s.elev),
     );
+    // Never inside the floor or the stands: the camera stays a few feet above
+    // whatever is under it, however low a drag takes it.
+    const floor = groundUnder(camera.position.x, camera.position.z) + CAMERA_CLEARANCE;
+    if (camera.position.y < floor) camera.position.y = floor;
     camera.lookAt(target);
   });
   return null;
@@ -408,7 +488,7 @@ function Scene({ home, away, courtRef, visual, homeLabel, numbers, scoreboard }:
 }
 
 export default function Court3D({
-  home, away, courtRef, visual, cameraView = 'iso', homeLabel, numbers, scoreboard,
+  home, away, courtRef, visual, cameraView = 'iso', homeLabel, numbers, scoreboard, insets,
 }: Court3DProps) {
   const preset = CAMERA_PRESETS[cameraView];
   const camState = useRef<CameraDragState>({
@@ -442,7 +522,7 @@ export default function Court3D({
       <Canvas camera={{ fov: BASE_FOV, near: 0.5, far: 1200 }} style={{ flex: 1 }}>
         <color attach="background" args={['#04060b']} />
         <fog attach="fog" args={['#04060b', 160, 520]} />
-        <CameraRig stateRef={camState} preset={preset} courtRef={courtRef} />
+        <CameraRig stateRef={camState} preset={preset} courtRef={courtRef} insets={insets} />
         {__DEV__ ? <RenderProbe /> : null}
         <Scene home={home} away={away} courtRef={courtRef} visual={visual} homeLabel={homeLabel} numbers={numbers} scoreboard={scoreboard} />
       </Canvas>

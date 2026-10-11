@@ -176,6 +176,11 @@ const WatchGameScreen: React.FC<WatchGameScreenProps> = ({
   // Seconds left on the shot clock of the trip in progress; undefined between
   // trips and in the huddle. The trip's own start is when the clock reset.
   const [shotClock, setShotClock] = useState<number | undefined>(undefined);
+  // How much of the 3D the top bar and the bottom panel cover, measured from
+  // their layout, so the camera can frame the play in the strip between them.
+  const [hudTop, setHudTop] = useState(0);
+  const [hudBottomY, setHudBottomY] = useState(0);
+  const [screenH, setScreenH] = useState(0);
   const [speed, setSpeed] = useState(1);
   const [play, setPlay] = useState<WatchPlay>('pick_roll');
   const [timeoutsLeft, setTimeoutsLeft] = useState(STARTING_TIMEOUTS);
@@ -713,7 +718,7 @@ const WatchGameScreen: React.FC<WatchGameScreenProps> = ({
   );
 
   return (
-    <View className="flex-1" style={{ backgroundColor: COLORS.bg }}>
+    <View className="flex-1" style={{ backgroundColor: COLORS.bg }} onLayout={(e) => setScreenH(e.nativeEvent.layout.height)}>
       <Court3D
         home={homeAccent}
         away={awayAccent}
@@ -731,6 +736,7 @@ const WatchGameScreen: React.FC<WatchGameScreenProps> = ({
           homeLabel: getTeamTricode(home),
           awayLabel: getTeamTricode(away),
         }}
+        insets={screenH && hudBottomY ? { top: hudTop, bottom: Math.max(0, screenH - hudBottomY) } : undefined}
       />
 
       {desktop ? cameras : null}
@@ -746,7 +752,10 @@ const WatchGameScreen: React.FC<WatchGameScreenProps> = ({
       )}
 
       {/* Score bar: color blocks at the ends, the clock and possession in the middle. */}
-      <View style={{ pointerEvents: 'box-none', position: 'absolute', top: insets.top + (desktop ? 20 : 10), ...(desktop ? { left: '50%', width: 640, marginLeft: -320 } : { left: 14, right: 14 }) }}>
+      <View
+        onLayout={(e) => { const l = e.nativeEvent.layout; setHudTop(l.y + l.height); }}
+        style={{ pointerEvents: 'box-none', position: 'absolute', top: insets.top + (desktop ? 20 : 10), ...(desktop ? { left: '50%', width: 640, marginLeft: -320 } : { left: 14, right: 14 }) }}
+      >
         <View style={{ height: desktop ? 60 : 48, borderRadius: 12, overflow: 'hidden', flexDirection: 'row', backgroundColor: 'rgba(11,11,13,0.88)', borderWidth: 1, borderColor: 'rgba(255,255,255,0.08)' }}>
           <View style={{ width: desktop ? 90 : 58, backgroundColor: homeAccent.primary, alignItems: 'center', justifyContent: 'center' }}>
             <Text style={{ fontFamily: FONT.cond800, fontSize: desktop ? 20 : 16, color: onAccent(homeAccent.primary) }}>{getTeamTricode(home)}</Text>
@@ -776,7 +785,10 @@ const WatchGameScreen: React.FC<WatchGameScreenProps> = ({
       {/* Bottom controls. The tab bar is hidden while watching, so this
           clears the home indicator itself. */}
       {phase === 'huddle' && desktop ? huddle : null}
-      <View style={{ position: 'absolute', bottom: insets.bottom + (desktop ? 24 : 14), ...(desktop ? { left: '50%', width: 760, marginLeft: -380 } : { left: 14, right: 14 }) }}>
+      <View
+        onLayout={(e) => setHudBottomY(e.nativeEvent.layout.y)}
+        style={{ position: 'absolute', bottom: insets.bottom + (desktop ? 24 : 14), ...(desktop ? { left: '50%', width: 760, marginLeft: -380 } : { left: 14, right: 14 }) }}
+      >
         {phase === 'huddle' && !desktop ? huddle : null}
         {phase === 'live' && (
           <View style={{ gap: 8 }}>

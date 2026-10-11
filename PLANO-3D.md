@@ -328,6 +328,23 @@ ganhou o campo opcional `cut`:
   - avaliar um HUD que se recolhe durante o lance.
 - **Avaliar modo paisagem** só na tela do 3D: resolve o campo estreito de uma vez, mas exige liberar a rotação do app nessa tela.
 
+**FEITO (2026-10-11), falta ver no aparelho.** Tudo no `CameraRig` (`Court3D.tsx`):
+- Troca de modo numa curva de 0,9 s (smoothstep), em vez de uma fração do caminho por
+  quadro. O "Livre" continua girando; só altura e distância entram na curva.
+- Câmera nunca dentro do piso nem da arquibancada: `groundUnder` dá a altura do degrau
+  sob a câmera (mesmas medidas do `Bowl`), +4 pés de folga. Nos 5 modos não atua;
+  segura o arrasto.
+- **Câmera de ação no Perto:** segue quem tem a bola (70% ele, 30% o centro do grupo)
+  e, da soltura em diante, enquadra arremessador e aro juntos, com resposta rápida.
+- Corta assim que o centro da jogada sai dos 90% centrais do quadro (projeção da mira
+  pela câmera), além dos cortes da reprodução — não espera mais o salto de 30 pés.
+- **Mira no meio da faixa livre do HUD:** a `WatchGameScreen` mede a barra de cima e o
+  painel de baixo (`onLayout`) e passa `insets` ao `Court3D`; a câmera desloca o
+  centro da projeção (`setViewOffset`) pela metade da diferença. Conferido a 375x812:
+  faixa livre 58-668 px, centro 363, quadra aparecendo centrada em ~352.
+- **Para avaliar no teste do aparelho** (decisões de produto, não feitas): Perto como
+  câmera padrão no celular, HUD que se recolhe durante o lance, paisagem só no 3D.
+
 ## Etapa 8 — Desempenho e fechamento
 
 - **APK de teste final** com os números comparados à referência da Etapa 0.
