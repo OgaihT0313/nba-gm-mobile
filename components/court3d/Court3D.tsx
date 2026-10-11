@@ -291,13 +291,15 @@ function CameraRig({
 /* The floor.                                                          */
 /* ------------------------------------------------------------------ */
 // Dev builds only: the renderer's counters (draw calls, triangles, live
-// geometries/textures), the last 240 frame times and the scene itself (to
-// toggle a light or a mesh from the console while tuning), on
-// globalThis.__court3d, so each stage of PLANO-3D can be measured.
+// geometries/textures), the last 240 frame times, and the scene, camera and
+// renderer themselves (to toggle a light or a mesh, or time a forced render,
+// from the console while tuning), on globalThis.__court3d, so each stage of
+// PLANO-3D can be measured.
 // useFrame runs before the render, so the counters describe the previous frame.
 function RenderProbe() {
   const gl = useThree((s) => s.gl);
   const scene = useThree((s) => s.scene);
+  const camera = useThree((s) => s.camera);
   const frames = useRef<number[]>([]);
   useFrame((_, dt) => {
     const f = frames.current;
@@ -310,6 +312,8 @@ function RenderProbe() {
       textures: gl.info.memory.textures,
       frameMs: f.slice(),
       scene,
+      camera,
+      gl,
     };
   });
   return null;
