@@ -146,6 +146,28 @@ no material do piso:
 - **Opcional, desligado por padrão:** uma única luz com sombra (mapa de 1024), atrás de uma opção de qualidade.
 - **APK de teste #1** (Etapas 1 e 2): comparar o FPS com a referência da Etapa 0.
 
+**FEITO (2026-10-10), falta o APK #1.**
+- **Penumbra:** cor por instância das fileiras e da torcida escurece até 55% da
+  primeira para a última fileira (`dusk` no `Bowl`). Nenhuma luz nova.
+- **Fachos pintados:** `SpotBeams` em `Arena.tsx` — 5 cones abertos, uma geometria só
+  (1 draw call), `ShaderMaterial` aditivo que apaga as bordas da silhueta, o pé do
+  facho e os fachos perto da câmera. Caem sobre `LIGHT_POOLS`, as mesmas poças pintadas
+  no piso (exportadas de `textures.ts`). Intensidade 0,12: aparecem nos planos abertos
+  (Livre); na TV ficam quase todos fora do quadro. **Primeiro corte se faltar FPS.**
+- **Contraluz:** a luz fria de preenchimento (-45, 100, -35) virou contraluz baixa
+  (-20, 38, -110), do lado oposto às câmeras; ambiente 0,22 → 0,16. Continuam 5 luzes.
+- **Flashes:** `Flashes` — 36 pontos fixos na torcida, um `InstancedMesh` aditivo;
+  ~2 disparos por segundo, cada um ~0,09 s; só as instâncias que mudam são reescritas.
+- **Piso agora `MeshLambertMaterial` (sem especular).** Com a contraluz baixa, o piso
+  brilhante refletia a luz direto nas câmeras do lado de cá e lavava a quadra de cinza
+  (isolado ligando/desligando luz por luz pela sonda). O verniz fica só o pintado na
+  textura (Etapa 1); `roughness` 0,27 da Etapa 1 também dava um clarão na TV. Por isso
+  o `envMap` não foi testado: sem especular no piso, não tem efeito.
+- **Sombra opcional:** não feita — não existe opção de qualidade na tela; fica para a
+  Etapa 8 se o FPS sobrar.
+- Sonda dev ganhou `scene` (`__court3d.scene`) para ligar/desligar luz e malha pelo
+  console. Página recém-carregada: 17 texturas (igual à base), 69-72 geometrias (+2).
+
 ## Etapa 3 — Tabela, aro e rede (`Arena.tsx`)
 
 - Tabela com o quadrado-alvo branco (24 x 18 pol.) e borda de LED vermelha que acende no estouro do relógio de posse. Depende do dado da Etapa 5; até lá fica apagada.

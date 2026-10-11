@@ -206,11 +206,13 @@ function CameraRig({
 /* The floor.                                                          */
 /* ------------------------------------------------------------------ */
 // Dev builds only: the renderer's counters (draw calls, triangles, live
-// geometries/textures) and the last 240 frame times, on globalThis.__court3d,
-// so each stage of PLANO-3D can be measured from the browser console.
+// geometries/textures), the last 240 frame times and the scene itself (to
+// toggle a light or a mesh from the console while tuning), on
+// globalThis.__court3d, so each stage of PLANO-3D can be measured.
 // useFrame runs before the render, so the counters describe the previous frame.
 function RenderProbe() {
   const gl = useThree((s) => s.gl);
+  const scene = useThree((s) => s.scene);
   const frames = useRef<number[]>([]);
   useFrame((_, dt) => {
     const f = frames.current;
@@ -222,6 +224,7 @@ function RenderProbe() {
       geometries: gl.info.memory.geometries,
       textures: gl.info.memory.textures,
       frameMs: f.slice(),
+      scene,
     };
   });
   return null;
@@ -237,9 +240,13 @@ function Floor({ wood, primary, secondary, label }: { wood: string; primary: str
     // The floor is seen at a grazing angle almost all the time; anisotropic
     // filtering is what keeps the far lines crisp instead of smeared.
     map.anisotropy = Math.min(8, gl.capabilities.getMaxAnisotropy());
-    // Varnished maple: a little glossier than before so the key lights catch
-    // it. The pools of light themselves are painted into the texture.
-    return new THREE.MeshStandardMaterial({ map, roughness: 0.27, metalness: 0.02 });
+    // Varnished maple, with the varnish painted in (the light pools in the
+    // texture) and no specular at all. The floor is a big flat mirror for any
+    // light low on the far side, and the rim light that outlines the players
+    // is exactly that: with a glossy floor it bounced straight into the
+    // near-side cameras and washed the court grey (seen in Etapa 2). Lambert
+    // is also the cheapest lit material.
+    return new THREE.MeshLambertMaterial({ map });
   }, [wood, primary, secondary, label, gl]);
   return (
     <mesh rotation={[-Math.PI / 2, 0, 0]} material={material}>
@@ -348,13 +355,16 @@ function PlayersAndBall({
 function Scene({ home, away, courtRef, visual, homeLabel, numbers }: Omit<Court3DProps, 'cameraView'>) {
   return (
     <>
-      {/* Arena lighting: a warm key from the rig above, a cooler fill, and a
-          low ambient so the stands fall away into the dark. */}
+      {/* Arena lighting: a warm key from the rig above, a cold rim light low
+          from the far side (the cameras mostly sit on the near, +z, side, so
+          it outlines the players against the dark stands -- it was a high
+          fill until PLANO-3D Etapa 2), a soft front fill, and a low ambient so
+          the stands fall away into the dark. Still five lights, no shadows. */}
       <hemisphereLight args={['#dfe6ff', '#24180c', 0.5]} />
-      <ambientLight intensity={0.22} color="#8090b0" />
+      <ambientLight intensity={0.16} color="#8090b0" />
       <directionalLight position={[30, 120, 45]} intensity={1.9} color="#fff3df" />
-      <directionalLight position={[-45, 100, -35]} intensity={0.9} color="#dfe8ff" />
-      <directionalLight position={[0, 60, 90]} intensity={0.45} color="#ffffff" />
+      <directionalLight position={[-20, 38, -110]} intensity={1.25} color="#cfe0ff" />
+      <directionalLight position={[0, 60, 90]} intensity={0.5} color="#ffffff" />
 
       <Floor
         wood={visual?.floorColor ?? DEFAULT_FLOOR_COLOR}

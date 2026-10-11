@@ -2,7 +2,7 @@ import React, { useMemo } from 'react';
 import { useFrame } from '@react-three/fiber/native';
 import * as THREE from 'three';
 
-import { buildLedTexture, buildNetTexture, hexToRgb } from './textures';
+import { buildLedTexture, buildNetTexture, hexToRgb, LIGHT_POOLS } from './textures';
 
 // Everything around the court: the bowl and its crowd, courtside furniture,
 // the center-hung scoreboard, and the two baskets. Static except for the LED
@@ -64,7 +64,7 @@ const ringPoints = (hx: number, hz: number, r: number, pitch: number) => {
 };
 
 function Bowl({ primary, secondary }: ArenaProps) {
-  const { risers, fans, heads } = useMemo(() => {
+  const { risers, fans, heads, flashSpots } = useMemo(() => {
     const seats: { x: number; z: number; rot: number; row: number }[] = [];
     for (let r = 0; r < ROWS; r++) {
       const off = r * ROW_DEPTH;
@@ -93,6 +93,7 @@ function Bowl({ primary, secondary }: ArenaProps) {
     const skins = ['#f1c7a3', '#d9a57c', '#b97a52', '#8d5a3b', '#5c3826'];
     let seed = 7;
     const rnd = () => { seed = (seed * 16807) % 2147483647; return seed / 2147483647; };
+    const flashSpots: THREE.Vector3[] = [];
 
     seats.forEach((s, i) => {
       const top = 1 + s.row * ROW_RISE;
@@ -100,7 +101,7 @@ function Bowl({ primary, secondary }: ArenaProps) {
       // Riser: a solid step from the floor to this row's height.
       m.compose(new THREE.Vector3(s.x, top / 2, s.z), q, new THREE.Vector3(SEAT_PITCH * 1.02, top, ROW_DEPTH * 1.02));
       risers.setMatrixAt(i, m);
-      c.set(s.row % 2 ? '#161a24' : '#1b2030');
+      c.set(s.row % 2 ? '#161a24' : '#1b2030').multiplyScalar(1 - (s.row / (ROWS - 1)) * 0.5);
       risers.setColorAt(i, c);
       // A few empty seats keep it from reading as wallpaper.
       const empty = rnd() < 0.07;
@@ -108,20 +109,26 @@ function Bowl({ primary, secondary }: ArenaProps) {
       m.compose(new THREE.Vector3(s.x, top + 0.95 * h, s.z), q, new THREE.Vector3(1, h, 1));
       fans.setMatrixAt(i, m);
       // Darker than their real colors: the house lights are on the court, and
-      // a crowd lit like the floor fights it for attention.
-      c.set(shirts[Math.floor(rnd() * shirts.length)]).multiplyScalar(0.38 + rnd() * 0.2);
+      // a crowd lit like the floor fights it for attention. Each row up sits
+      // further from the light, so the bowl fades into the dark toward the
+      // back (PLANO-3D Etapa 2: the penumbra, without a single extra light).
+      const dusk = 1 - (s.row / (ROWS - 1)) * 0.55;
+      c.set(shirts[Math.floor(rnd() * shirts.length)]).multiplyScalar((0.38 + rnd() * 0.2) * dusk);
       fans.setColorAt(i, c);
       m.compose(new THREE.Vector3(s.x, top + 1.9 * h + 0.4, s.z), q, new THREE.Vector3(h, h, h));
       heads.setMatrixAt(i, m);
-      c.set(skins[Math.floor(rnd() * skins.length)]).multiplyScalar(0.55);
+      c.set(skins[Math.floor(rnd() * skins.length)]).multiplyScalar(0.55 * dusk);
       heads.setColorAt(i, c);
+      if (!empty && flashSpots.length < FLASH_SPOTS && rnd() < 0.012) {
+        flashSpots.push(new THREE.Vector3(s.x, top + 1.9 * h + 0.9, s.z));
+      }
     });
     [risers, fans, heads].forEach((im) => {
       im.instanceMatrix.needsUpdate = true;
       if (im.instanceColor) im.instanceColor.needsUpdate = true;
       im.frustumCulled = false;
     });
-    return { risers, fans, heads };
+    return { risers, fans, heads, flashSpots };
   }, [primary, secondary]);
 
   return (
@@ -129,8 +136,68 @@ function Bowl({ primary, secondary }: ArenaProps) {
       <primitive object={risers} />
       <primitive object={fans} />
       <primitive object={heads} />
+      <Flashes spots={flashSpots} />
     </>
   );
+}
+
+/* ------------------------------------------------------------------ */
+/* Phone flashes in the crowd.                                         */
+/* ------------------------------------------------------------------ */
+// A few dozen fixed spots in the stands, one InstancedMesh of tiny additive
+// squares; each fires now and then for a few frames. Only the instances that
+// change get a new matrix, and nothing is lit -- it's paint, not light.
+const FLASH_SPOTS = 36;
+const FLASH_LIFE = 0.09; // seconds a flash stays up
+const FLASH_RATE = 2.2; // flashes per second across the whole bowl
+
+function Flashes({ spots }: { spots: THREE.Vector3[] }) {
+  const mesh = useMemo(() => {
+    const geo = new THREE.PlaneGeometry(1.1, 1.1);
+    const mat = new THREE.MeshBasicMaterial({
+      color: '#fffaf0', transparent: true, opacity: 0.95,
+      blending: THREE.AdditiveBlending, depthWrite: false, side: THREE.DoubleSide,
+    });
+    const im = new THREE.InstancedMesh(geo, mat, Math.max(1, spots.length));
+    const hidden = new THREE.Matrix4().makeScale(0, 0, 0);
+    for (let i = 0; i < im.count; i++) im.setMatrixAt(i, hidden);
+    im.instanceMatrix.needsUpdate = true;
+    im.frustumCulled = false;
+    return im;
+  }, [spots]);
+  const until = useMemo(() => new Float32Array(spots.length), [spots]);
+  const tmp = useMemo(() => ({ m: new THREE.Matrix4(), q: new THREE.Quaternion(), s: new THREE.Vector3() }), []);
+
+  useFrame(({ clock, camera }, dt) => {
+    if (spots.length === 0) return;
+    const now = clock.getElapsedTime();
+    let dirty = false;
+    // Start new flashes at FLASH_RATE per second on average.
+    if (Math.random() < FLASH_RATE * dt) {
+      const i = Math.floor(Math.random() * spots.length);
+      until[i] = now + FLASH_LIFE;
+    }
+    for (let i = 0; i < spots.length; i++) {
+      const on = until[i] > now;
+      const was = until[i] > 0;
+      if (on) {
+        // Face the camera so the square reads as a point of light.
+        tmp.q.copy(camera.quaternion);
+        tmp.s.setScalar(0.8 + Math.random() * 0.5);
+        tmp.m.compose(spots[i], tmp.q, tmp.s);
+        mesh.setMatrixAt(i, tmp.m);
+        dirty = true;
+      } else if (was) {
+        until[i] = 0;
+        tmp.m.makeScale(0, 0, 0);
+        mesh.setMatrixAt(i, tmp.m);
+        dirty = true;
+      }
+    }
+    if (dirty) mesh.instanceMatrix.needsUpdate = true;
+  });
+
+  return <primitive object={mesh} />;
 }
 
 /* ------------------------------------------------------------------ */
@@ -246,6 +313,103 @@ function CeilingLights() {
 }
 
 /* ------------------------------------------------------------------ */
+/* Spotlight beams, painted.                                            */
+/* ------------------------------------------------------------------ */
+// No real spotlights (no shadow maps, no extra lights -- PLANO-3D's budget):
+// open cones from the rig down to each light pool painted into the floor, in
+// additive blending. The shader fades a cone's silhouette edges (where the
+// surface turns away from the camera) and its foot, so it reads as light
+// through haze rather than as a plastic funnel. All cones are one geometry:
+// one draw call.
+const BEAM_TOP = 112;
+const BEAM_UNDER_SCOREBOARD = 54; // the center pool's beam starts below the scoreboard
+
+const beamVertex = `
+  varying vec3 vN;
+  varying vec3 vV;
+  varying float vH;
+  varying float vDist;
+  attribute float height01;
+  void main() {
+    vec4 mv = modelViewMatrix * vec4(position, 1.0);
+    vN = normalize(normalMatrix * normal);
+    vV = normalize(-mv.xyz);
+    vH = height01;
+    vDist = length(mv.xyz);
+    gl_Position = projectionMatrix * mv;
+  }
+`;
+const beamFragment = `
+  uniform vec3 uColor;
+  uniform float uStrength;
+  varying vec3 vN;
+  varying vec3 vV;
+  varying float vH;
+  varying float vDist;
+  void main() {
+    float facing = abs(dot(normalize(vN), normalize(vV)));
+    float body = facing * facing;
+    // Bright near the rig, thinning toward the floor and gone well before it,
+    // so a beam never lays haze over the paint (the center emblem).
+    float fade = smoothstep(0.05, 0.45, vH) * (0.2 + 0.8 * vH);
+    // A beam the camera is inside of, or looking straight down the length
+    // of, piles both faces over a big patch of screen: fade the near ones out.
+    float near = smoothstep(40.0, 95.0, vDist);
+    gl_FragColor = vec4(uColor * (uStrength * body * fade * near), 1.0);
+  }
+`;
+
+function SpotBeams() {
+  const mesh = useMemo(() => {
+    const parts = LIGHT_POOLS.map(([x, z]) => {
+      const top = x === 0 && z === 0 ? BEAM_UNDER_SCOREBOARD : BEAM_TOP;
+      const g = new THREE.CylinderGeometry(1.6, 11, top, 24, 1, true);
+      g.translate(x, top / 2, z);
+      // 0 at the floor, 1 at the rig, whatever the cone's height.
+      const pos = g.getAttribute('position');
+      const h = new Float32Array(pos.count);
+      for (let i = 0; i < pos.count; i++) h[i] = pos.getY(i) / top;
+      g.setAttribute('height01', new THREE.BufferAttribute(h, 1));
+      return g;
+    });
+    // Merge by hand: concatenate the attributes, offset the indices.
+    const merged = new THREE.BufferGeometry();
+    const names = ['position', 'normal', 'height01'] as const;
+    names.forEach((name) => {
+      const size = parts[0].getAttribute(name).itemSize;
+      const total = parts.reduce((n, g) => n + g.getAttribute(name).count, 0);
+      const out = new Float32Array(total * size);
+      let o = 0;
+      parts.forEach((g) => { const a = g.getAttribute(name).array as Float32Array; out.set(a, o); o += a.length; });
+      merged.setAttribute(name, new THREE.BufferAttribute(out, size));
+    });
+    const indices: number[] = [];
+    let base = 0;
+    parts.forEach((g) => {
+      const idx = g.getIndex()!;
+      for (let i = 0; i < idx.count; i++) indices.push(idx.getX(i) + base);
+      base += g.getAttribute('position').count;
+      g.dispose();
+    });
+    merged.setIndex(indices);
+    const mat = new THREE.ShaderMaterial({
+      vertexShader: beamVertex,
+      fragmentShader: beamFragment,
+      uniforms: { uColor: { value: new THREE.Color('#fff1d6') }, uStrength: { value: 0.12 } },
+      transparent: true,
+      depthWrite: false,
+      blending: THREE.AdditiveBlending,
+      side: THREE.DoubleSide,
+    });
+    const m = new THREE.Mesh(merged, mat);
+    m.frustumCulled = false;
+    m.name = 'spotBeams';
+    return m;
+  }, []);
+  return <primitive object={mesh} />;
+}
+
+/* ------------------------------------------------------------------ */
 /* A basket: padded stanchion, glass, rim, net, shot clock.            */
 /* ------------------------------------------------------------------ */
 const BOARD_FACE = HALF_L - 4; // backboard plane, 4 ft inside the baseline
@@ -345,6 +509,7 @@ export default function Arena({ primary, secondary }: ArenaProps) {
       <Courtside primary={primary} secondary={secondary} />
       <Scoreboard primary={primary} secondary={secondary} />
       <CeilingLights />
+      <SpotBeams />
       <Hoop side={1} primary={primary} />
       <Hoop side={-1} primary={primary} />
     </>

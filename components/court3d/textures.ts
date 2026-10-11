@@ -106,6 +106,11 @@ const textCovers = (text: string, u: number, v: number): boolean => {
 /* ------------------------------------------------------------------ */
 /* The floor.                                                          */
 /* ------------------------------------------------------------------ */
+/** Where the arena's lights pool on the floor (x, z in feet): painted brighter
+ * into the floor here, and the spotlight beams in Arena.tsx fall on the same
+ * spots, so the light and where it lands agree. */
+export const LIGHT_POOLS: [number, number][] = [[-30, -10], [-30, 10], [0, 0], [30, -10], [30, 10]];
+
 /** Floor extents in feet: the 94x50 court plus a painted apron on every side. */
 export const FLOOR_L = 106;
 export const FLOOR_W = 62;
@@ -164,7 +169,7 @@ export const buildFloorTexture = (opts: {
   // Every term is a product of an x part and a z part (a gaussian pool is
   // exp(-dx^2) * exp(-dz^2)), so they're tabled per column and per row once
   // instead of costing five exp() calls on each of the ~1.2M pixels.
-  const POOLS: [number, number][] = [[-30, -10], [-30, 10], [0, 0], [30, -10], [30, 10]];
+  const POOLS = LIGHT_POOLS;
   const xOf = (col: number) => ((col + 0.5) / W) * FLOOR_L - FLOOR_L / 2;
   const zOf = (row: number) => {
     const zRaw = ((row + 0.5) / H) * FLOOR_W - FLOOR_W / 2;
