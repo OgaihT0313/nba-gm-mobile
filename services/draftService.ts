@@ -16,6 +16,13 @@ const FIRST_NAMES = [
     'Trey', 'Dariq', 'Zion', 'Isaiah', 'Marcus', 'Elijah', 'Xavier', 'Devin',
     'Bronny', 'Cooper', 'Ace', 'Kel', 'Jaxon', 'Omar', 'Nasir', 'Tariq',
     'Emoni', 'Dante', 'Rashad', 'Julian', 'Kobe', 'Bilal',
+    // Widened (2026-10-11): with 30 first names a 30-pick class repeated them
+    // constantly -- three DeShawns in one draft on the phone playthrough.
+    'Andre', 'Brandon', 'Caleb', 'Darius', 'Ethan', 'Gabriel', 'Hakeem', 'Ivan',
+    'Jordan', 'Kevin', 'Lucas', 'Mateo', 'Nikola', 'Oscar', 'Quentin', 'Rafael',
+    'Samuel', 'Theo', 'Victor', 'Wesley', 'Yusuf', 'Aaron', 'Bryce', 'Collin',
+    'Damian', 'Evan', 'Felipe', 'Grant', 'Hugo', 'Jamal', 'Kendall', 'Luka',
+    'Mason', 'Noah', 'Olivier', 'Paolo', 'Reed', 'Sekou', 'Tristan', 'Ulrich',
 ];
 const LAST_NAMES = [
     'Williams', 'Johnson', 'Carter', 'Bell', 'Freeman', 'Okafor', 'Mensah',
@@ -23,6 +30,11 @@ const LAST_NAMES = [
     'Silva', 'Adeyemi', 'Kovač', 'Vasquez', 'Booker', 'Kline', 'Whitmore',
     'Ndiaye', 'Osei', 'Bogdan', 'Reyes', 'Fontaine', 'Ivić', 'Cho', 'Abara',
     'Yamamoto',
+    'Anderson', 'Baptiste', 'Coleman', 'Dlamini', 'Edwards', 'Fischer', 'Garcia',
+    'Holloway', 'Iwu', 'Jovanović', 'Kamara', 'Lindqvist', 'Moreau', 'Nwosu',
+    'Ortega', 'Pereira', 'Quinn', 'Rossi', 'Sato', 'Thompson', 'Umeh', 'Varga',
+    'Walker', 'Young', 'Zubac', 'Banda', 'Castillo', 'Dumont', 'Eze', 'Fofana',
+    'Gomes', 'Hartley', 'Jensen', 'Keita', 'Lopes', 'Mbeki', 'Novak', 'Owusu',
 ];
 
 const rand = (lo: number, hi: number) => lo + Math.random() * (hi - lo);

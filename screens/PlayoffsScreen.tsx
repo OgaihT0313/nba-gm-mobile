@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text } from 'react-native';
+import { View, Text, ScrollView } from 'react-native';
 
 import { SeasonState, PlayoffSeries, PlayoffStage } from '../types';
 import { getTeamNickname } from '../constants';
@@ -112,8 +112,10 @@ const PlayoffsScreen: React.FC<PlayoffsScreenProps> = ({ season, onAdvanceRound,
   const oppWins = curIdx === 0 ? w1 : w0;
   const played = myWins + oppWins;
 
+  // One line, scrolled sideways on a phone: wrapped, the checkmarks pushed
+  // "Finais" alone onto a second row (phone playthrough, 2026-10-11).
   const stageChips = (
-    <View className="flex-row flex-wrap" style={{ gap: 6 }}>
+    <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 6 }} style={{ flexGrow: 0 }}>
       {STAGE_ORDER.map((s, i) => {
         const done = stageIndex > i;
         const cur = stageIndex === i;
@@ -128,7 +130,7 @@ const PlayoffsScreen: React.FC<PlayoffsScreenProps> = ({ season, onAdvanceRound,
           </View>
         );
       })}
-    </View>
+    </ScrollView>
   );
 
   const bracket = season.playoff ? (

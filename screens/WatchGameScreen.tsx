@@ -70,6 +70,10 @@ const SHOT_LABEL: { [points in 1 | 2 | 3]: string } = {
 const MAX_QUARTER = 8; // 4 regulation + 4 OT, the same safety valve advanceLiveQuarter has
 
 type Phase = 'huddle' | 'live' | 'final';
+
+// The camera the user last picked, kept for the next game this session: it
+// reset to the overview every time (phone playthrough, 2026-10-11).
+let lastCameraView: CameraView = 'iso';
 type HuddleTab = 'play' | 'lineup';
 
 /** Below this the live panel calls a player out as spent. */
@@ -179,13 +183,14 @@ const WatchGameScreen: React.FC<WatchGameScreenProps> = ({
   // How much of the 3D the top bar and the bottom panel cover, measured from
   // their layout, so the camera can frame the play in the strip between them.
   const [hudTop, setHudTop] = useState(0);
-  const [hudBottomY, setHudBottomY] = useState(0);
+  const [livePanelH, setLivePanelH] = useState(0);
   const [screenH, setScreenH] = useState(0);
   const [speed, setSpeed] = useState(1);
   const [play, setPlay] = useState<WatchPlay>('pick_roll');
   const [timeoutsLeft, setTimeoutsLeft] = useState(STARTING_TIMEOUTS);
   const [isTimeoutHuddle, setIsTimeoutHuddle] = useState(false);
-  const [cameraView, setCameraView] = useState<CameraView>('iso');
+  const [cameraView, setCameraViewState] = useState<CameraView>(lastCameraView);
+  const setCameraView = (v: CameraView) => { lastCameraView = v; setCameraViewState(v); };
   const [banner, setBanner] = useState<{ text: string; sub: string; color: string } | null>(null);
   const [huddleTab, setHuddleTab] = useState<HuddleTab>('play');
   const [autoSubs, setAutoSubs] = useState(true);
@@ -736,7 +741,7 @@ const WatchGameScreen: React.FC<WatchGameScreenProps> = ({
           homeLabel: getTeamTricode(home),
           awayLabel: getTeamTricode(away),
         }}
-        insets={screenH && hudBottomY ? { top: hudTop, bottom: Math.max(0, screenH - hudBottomY) } : undefined}
+        insets={screenH && livePanelH ? { top: hudTop, bottom: livePanelH + insets.bottom + (desktop ? 24 : 14) } : undefined}
       />
 
       {desktop ? cameras : null}
@@ -786,12 +791,20 @@ const WatchGameScreen: React.FC<WatchGameScreenProps> = ({
           clears the home indicator itself. */}
       {phase === 'huddle' && desktop ? huddle : null}
       <View
-        onLayout={(e) => setHudBottomY(e.nativeEvent.layout.y)}
         style={{ position: 'absolute', bottom: insets.bottom + (desktop ? 24 : 14), ...(desktop ? { left: '50%', width: 760, marginLeft: -380 } : { left: 14, right: 14 }) }}
       >
         {phase === 'huddle' && !desktop ? huddle : null}
         {phase === 'live' && (
-          <View style={{ gap: 8 }}>
+          // Measured here, on the live panel only: the container above also
+          // holds the huddle sheet, which covers half the screen, and the
+          // camera kept that framing after play resumed -- the bottom of the
+          // 3D went black (phone playthrough, 2026-10-11). This panel remounts
+          // every time play resumes, so its onLayout always reports fresh; in
+          // the huddle the camera keeps the last live value.
+          <View
+            style={{ gap: 8 }}
+            onLayout={(e) => setLivePanelH(e.nativeEvent.layout.height)}
+          >
             {liveFive.length === 5 ? (
               <View style={{ backgroundColor: 'rgba(11,11,13,0.9)', borderRadius: 16, paddingHorizontal: 12, paddingVertical: 10, gap: 8 }}>
                 <View className="flex-row justify-between">

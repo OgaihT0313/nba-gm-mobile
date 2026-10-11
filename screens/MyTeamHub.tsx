@@ -259,11 +259,14 @@ const MyTeamHub: React.FC<MyTeamHubProps> = ({
         ) : null}
         <View style={{ position: 'absolute', left: `${(SALARY_CAP / scale) * 100}%`, top: -4, bottom: -4, width: 2, backgroundColor: COLORS.text }} />
       </View>
-      <View className="flex-row justify-between">
+      {/* The three biggest contracts, then the legend for the white tick on
+          the bar. They were run together on one line, so on a phone the names
+          cut off straight into the legend ("Dort …teto |"). */}
+      <View className="flex-row justify-between" style={{ gap: 12 }}>
         <BodyText size={12} numberOfLines={1} style={{ flex: 1 }}>
           {contracts.slice(0, 3).map((p) => `${surname(p.name)} ${money(p.salary)}`).join(' · ')}
         </BodyText>
-        <BodyText size={12}>teto ▏</BodyText>
+        <BodyText size={12} color={COLORS.dim}>│ = teto</BodyText>
       </View>
       {deadTotal > 0 ? (
         <BodyText size={12} color={COLORS.warn}>
