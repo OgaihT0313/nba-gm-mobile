@@ -10,6 +10,7 @@ import { WATCH_PLAY_META, STARTING_TIMEOUTS, getRotationWeights } from '../servi
 import {
   buildFive,
   courtStateAt,
+  advanceClock,
   planQuarter,
   quarterSeconds,
   tipOffState,
@@ -59,14 +60,12 @@ const SHOT_LABEL: { [points in 1 | 2 | 3]: string } = {
 // is folded into it, and the final score handed to onFinish is the sum of the
 // baskets that actually went in on screen.
 
-// Game-seconds per real second: 48 game-minutes in about five real ones.
-const BASE_RATE = 9.6;
-// A possession is ~15 game-seconds — under two real seconds at full speed,
-// which is not long enough to read a pick & roll. The possession right after
-// a play is called runs at this fraction of speed so the user actually sees
-// the thing they asked for.
-const SLOW_MO_SCALE = 0.4;
-const SLOW_MO_SECONDS = 20; // game-seconds, i.e. roughly one possession
+// How fast the clock runs is the director's call (advanceClock in
+// services/watchDirector.ts): each trip is cut in as the offense sets up and
+// played at a pace where nobody outruns a sprint, ~3 real minutes a quarter.
+// That replaced a flat 9.6 game-seconds per real second, which moved players
+// at ~250 ft/s, and the slow-motion trip after a called play, which only
+// existed because a possession used to flash by in under two seconds.
 const MAX_QUARTER = 8; // 4 regulation + 4 OT, the same safety valve advanceLiveQuarter has
 
 type Phase = 'huddle' | 'live' | 'final';
@@ -162,10 +161,10 @@ const WatchGameScreen: React.FC<WatchGameScreenProps> = ({
   const phaseRef = useRef<Phase>('huddle');
   const quarterRef = useRef(1);
   const clockRef = useRef(0); // seconds into the current quarter
+  const cutRef = useRef(0); // playback cuts so far (CourtState.cut)
   const completedRef = useRef({ home: 0, away: 0 }); // points from finished quarters
   const firedRef = useRef(0); // possessions already announced
   const speedRef = useRef(1);
-  const slowUntilRef = useRef(-1); // quarter-second until which playback is slowed
   const playRef = useRef<WatchPlay>('pick_roll');
 
   // --- State, updated a few times a second, never per frame. ---
@@ -293,7 +292,6 @@ const WatchGameScreen: React.FC<WatchGameScreenProps> = ({
     setPlay(nextPlay);
     openPlan(nextPlay, spendTimeout);
     if (spendTimeout) setTimeoutsLeft((n) => Math.max(0, n - 1));
-    slowUntilRef.current = clockRef.current + SLOW_MO_SECONDS;
     phaseRef.current = 'live';
     setPhase('live');
     setIsTimeoutHuddle(false);
@@ -372,8 +370,9 @@ const WatchGameScreen: React.FC<WatchGameScreenProps> = ({
       last = now;
       if (phaseRef.current !== 'live' || !planRef.current) return;
 
-      const slow = clockRef.current < slowUntilRef.current ? SLOW_MO_SCALE : 1;
-      clockRef.current += dt * BASE_RATE * speedRef.current * slow;
+      const step = advanceClock(planRef.current, clockRef.current, dt, { speed: speedRef.current, userSide });
+      clockRef.current = step.seconds;
+      if (step.cut) cutRef.current++;
 
       const total = quarterSeconds(quarterRef.current);
       if (clockRef.current >= total) {
@@ -382,9 +381,11 @@ const WatchGameScreen: React.FC<WatchGameScreenProps> = ({
         endQuarter();
         return;
       }
-      courtRef.current = courtStateAt(
+      const court = courtStateAt(
         planRef.current, clockRef.current, fives.current.home, fives.current.away,
       );
+      if (court) court.cut = cutRef.current;
+      courtRef.current = court;
       announce();
     };
     raf = requestAnimationFrame(tick);

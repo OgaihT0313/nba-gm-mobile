@@ -11,7 +11,7 @@
 //   npx tsc scripts/check_watch_director.ts --ignoreConfig --ignoreDeprecations 6.0 //     --outDir .check --module commonjs --target es2020 --moduleResolution node //     --esModuleInterop --resolveJsonModule --skipLibCheck
 //   cp -r data .check/data && node .check/scripts/check_watch_director.js
 import { teamsData, playersData } from '../constants';
-import { buildFive, planQuarter, courtStateAt, quarterSeconds, breakRecovery, rotationAt, type Energy, type FiveOnCourt } from '../services/watchDirector';
+import { buildFive, planQuarter, courtStateAt, quarterSeconds, breakRecovery, rotationAt, advanceClock, SCREEN_SPRINT, type Energy, type FiveOnCourt } from '../services/watchDirector';
 import type { WatchPlay, Player } from '../types';
 import { simulationEngine, getRotationWeights } from '../services/simulationService';
 
@@ -97,6 +97,64 @@ for (const play of PLAYS) {
   const top = [...scorers.entries()].sort((a, b) => b[1] - a[1]).slice(0, 3);
   console.log(`${play.padEnd(10)} avg Q pts ${avg.toFixed(1)} (min ${Math.min(...totals)}, max ${Math.max(...totals)})`);
   console.log(`           top scorers: ${top.map(([n, p]) => `${n} ${(p / 40).toFixed(1)}`).join(', ')}`);
+}
+
+// Screen pacing (PLANO-3D Etapa 4b), driven the way WatchGameScreen drives it:
+// 60 fps frames through advanceClock. Between cuts nobody may move faster on
+// screen than the director's SCREEN_SPRINT (ft per REAL second, 5% slack for
+// frame sampling); every shot must be on screen; and a quarter has to fit a
+// watchable length at normal speed.
+{
+  const FRAME = 1 / 60;
+  let worstSpeed = 0;
+  let worstAt = '';
+  const quarterReal: number[] = [];
+  let shotsSeen = 0;
+  let shotsTotal = 0;
+  let cuts = 0;
+  for (const play of PLAYS) {
+    for (let n = 0; n < 10; n++) {
+      const plan = planQuarter({
+        home, away, players, coaches: {}, fiveHome, fiveAway,
+        userSide: 'home', play, timeout: false, quarter: 1, from: 0,
+      });
+      const total = quarterSeconds(1);
+      let t = 0;
+      let real = 0;
+      let prev = courtStateAt(plan, 0, fiveHome, fiveAway)!;
+      const seen = new Set<number>();
+      while (t < total && real < 3600) {
+        const step = advanceClock(plan, t, FRAME, { speed: 1, userSide: 'home' });
+        real += FRAME;
+        t = Math.min(total, step.seconds);
+        // A shot is on screen when some frame shows the ball in its last
+        // game-second before the rim.
+        plan.possessions.forEach((p, i) => {
+          if (t >= p.shotAt - 1 && t <= p.shotAt) seen.add(i);
+        });
+        const st = courtStateAt(plan, t, fiveHome, fiveAway);
+        if (!st) break;
+        if (step.cut) cuts++;
+        else {
+          for (let i = 0; i < 10; i++) {
+            const v = Math.hypot(st.players[i].x - prev.players[i].x, st.players[i].z - prev.players[i].z) / FRAME;
+            if (v > worstSpeed) { const ps = plan.possessions.find((q) => q.start <= t && t < q.end); worstSpeed = v; worstAt = `${play} ${st.players[i].name} t=${t.toFixed(1)}s` + (ps ? ` frac ${((t - ps.start) / (ps.end - ps.start)).toFixed(2)} ${ps.side} ${ps.end - ps.start}s` : ''); }
+          }
+        }
+        prev = st;
+      }
+      quarterReal.push(real);
+      shotsTotal += plan.possessions.filter((p) => p.shotAt < total).length;
+      shotsSeen += seen.size;
+    }
+  }
+  const avgQ = quarterReal.reduce((a, b) => a + b, 0) / quarterReal.length;
+  check('screen speed is a sprint, not a teleport', worstSpeed <= SCREEN_SPRINT * 1.05, `${worstSpeed.toFixed(1)} ft/s (${worstAt})`);
+  check('every shot is on screen', shotsSeen === shotsTotal, `${shotsSeen}/${shotsTotal}`);
+  check('quarter fits a watchable length', avgQ >= 90 && avgQ <= 240, `${avgQ.toFixed(0)} s`);
+  console.log(`pacing: max on-screen speed ${worstSpeed.toFixed(1)} ft/s between cuts (limit ${SCREEN_SPRINT}); `
+    + `quarter ${avgQ.toFixed(0)} s real at 1x (${Math.min(...quarterReal).toFixed(0)}-${Math.max(...quarterReal).toFixed(0)}); `
+    + `${(cuts / quarterReal.length).toFixed(0)} cuts per quarter; shots on screen ${shotsSeen}/${shotsTotal}`);
 }
 
 // A timeout mid-quarter must not rewrite points already on the board.

@@ -60,7 +60,10 @@ vive num `useState` do `App.tsx`).
   escolher.
 - Não salvar no meio do jogo ao vivo ou do 3D: salvar no estado anterior ao jogo.
 
-### 2. 3D — Etapas 0 e 4b (L)
+### 2. 3D — Etapas 0 e 4b (L) — FEITO na branch `melhoria-3d` (2026-10-10)
+
+Detalhes e números em [PLANO-3D.md](PLANO-3D.md). Falta o APK de referência da
+Etapa 0 e o teste da 4b no aparelho (`scripts/device_3d.sh`).
 
 O item 5 abaixo e o [PLANO-3D.md](PLANO-3D.md), sem mudança: branch `melhoria-3d`,
 medição de referência e depois o ritmo (os jogadores atravessam a quadra em menos

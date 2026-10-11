@@ -169,6 +169,24 @@ Medido no Galaxy A57 do usuário (tela de 120 Hz, 1080×2340) via adb, com print
 - O placar, o relógio e o resultado não mudam: o diretor continua seguindo o mesmo roteiro de pontos, só com outro tempo de tela.
 - **Teste:** `check_watch_director` ganha uma checagem de velocidade máxima dos jogadores por quadro, e no aparelho medimos quantos quadros em sequência mostram a quadra vazia (a meta é nenhum).
 
+**FEITO (2026-10-10), falta o teste no aparelho.** `advanceClock` no `watchDirector.ts`
+(função pura, nova) decide quanto o relógio anda a cada quadro, e o `CourtState`
+ganhou o campo opcional `cut`:
+- Cada posse entra na tela já na chegada (30% da posse nas suas, na jogada — 52% —
+  nas do adversário); a corrida antes disso vira **corte**, e a câmera (todos os 5
+  modos, inclusive o Perto), os jogadores e a bola saltam junto, sem ler o salto
+  como pique.
+- A taxa é calculada **por batida**: o diretor sabe quanto cada jogador anda entre
+  duas batidas e limita a velocidade na tela a `SCREEN_SPRINT` = 34 pés/s; batidas
+  paradas passam a até 3,6 s de jogo por segundo.
+- Depois da cesta, ~1 s com a bola na rede; depois do erro, ~0,5 s no rebote.
+- Saiu a câmera lenta depois de chamar a jogada (existia porque a posse passava em
+  menos de 2 s). O 4X continua, multiplicando tudo.
+- **Medido** (`check_watch_director`, 40 quartos a 60 quadros/s): pico na tela 34
+  pés/s entre cortes (era ~250); 1.838 de 1.838 arremessos na tela; quarto em ~173 s
+  reais em 1x (157-199), ~46 cortes por quarto; placar idêntico ao do plano.
+  No navegador, 5 prints seguidos na câmera TV mostram os dez em quadra.
+
 ## Etapa 5 — Placar e relógio ao vivo (`Arena.tsx`, `Court3D.tsx`, `WatchGameScreen.tsx`)
 
 - Nova prop opcional no `Court3D`: `scoreboard?: { home: number; away: number; quarter: number; clock: number; shotClock?: number }`, passada pela `WatchGameScreen`, que já tem esses números.

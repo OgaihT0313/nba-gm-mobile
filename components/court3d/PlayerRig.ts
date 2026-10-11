@@ -63,6 +63,8 @@ export interface PoseInput {
   hasBall: boolean;
   onOffense: boolean;
   ball: { x: number; y: number; z: number; inFlight: boolean };
+  /** Playback just cut: the jump in position is an edit, not a sprint. */
+  snap?: boolean;
 }
 
 interface Joints {
@@ -171,14 +173,14 @@ export const createRig = (team: { primary: string; secondary: string }, shadowMa
 
   const update = (p: PoseInput) => {
     const dt = Math.max(1 / 240, Math.min(0.1, p.dt));
-    if (first) { lastX = p.x; lastZ = p.z; first = false; }
+    if (first || p.snap) { lastX = p.x; lastZ = p.z; first = false; }
     const speed = Math.hypot(p.x - lastX, p.z - lastZ) / dt; // feet per real second
     lastX = p.x;
     lastZ = p.z;
     speedSmooth = approach(speedSmooth, Math.min(speed, 40), 0.15);
 
-    // Playback runs the game at ~10x real time, so on-screen speed is a
-    // reading of game speed; 4 ft/s on screen is a jog, 20+ a sprint.
+    // Playback paces each beat so nobody passes ~34 ft/s on screen
+    // (watchDirector SCREEN_SPRINT); 4 ft/s on screen is a jog, 20+ a sprint.
     const run = Math.min(1, speedSmooth / 18);
     phase += dt * (6 + speedSmooth * 0.45);
 

@@ -124,6 +124,7 @@ function CameraRig({
   courtRef: React.MutableRefObject<CourtState | null>;
 }) {
   const target = useMemo(() => new THREE.Vector3(0, 5, 0), []);
+  const lastCut = useRef<number | undefined>(undefined);
   useFrame(({ camera, size }, dt) => {
     const s = stateRef.current;
     const k = 1 - Math.pow(0.02, dt); // frame-rate independent easing
@@ -163,6 +164,14 @@ function CameraRig({
       // second of screen time (measured): no pan keeps up, and the wide shot
       // spent every transition filming an empty floor. A big jump is a CUT,
       // the way a broadcast switches cameras, instead of a slide.
+      // Playback cuts past the trip up the floor (watchDirector advanceClock):
+      // every framing, the close one included, cuts with it.
+      const cut = court.cut !== lastCut.current;
+      lastCut.current = court.cut;
+      if (cut) {
+        target.x = ax * follow;
+        target.z = az * follow * (preset.lag ? 0.8 : 0.5 + 0.4 * portrait);
+      }
       if (Math.abs(ax * follow - target.x) > 30 && !preset.lag) target.x = ax * follow;
       target.x = THREE.MathUtils.lerp(target.x, ax * follow, f);
       target.z = THREE.MathUtils.lerp(target.z, az * follow * (preset.lag ? 0.8 : 0.5 + 0.4 * portrait), f);
@@ -280,11 +289,14 @@ function PlayersAndBall({
     return m;
   }, [shadowMat]);
   const lastBall = useRef(new THREE.Vector3());
+  const lastCut = useRef<number | undefined>(undefined);
 
   useFrame(({ clock }, dt) => {
     const court = courtRef.current;
     if (!court) return;
     const t = clock.getElapsedTime();
+    const snap = court.cut !== lastCut.current;
+    lastCut.current = court.cut;
 
     court.players.forEach((p, i) => {
       const rig = rigs[i];
@@ -298,6 +310,7 @@ function PlayersAndBall({
         hasBall: p.hasBall,
         onOffense: p.side === court.possession,
         ball: court.ball,
+        snap,
       });
     });
 
@@ -305,7 +318,7 @@ function PlayersAndBall({
     // and let it spin the way it is travelling.
     const b = court.ball;
     ball.position.set(b.x, Math.max(BALL_R, b.y), b.z);
-    const moved = lastBall.current.distanceTo(ball.position);
+    const moved = snap ? 0 : lastBall.current.distanceTo(ball.position);
     if (b.inFlight) ball.rotation.z -= moved / BALL_R;
     else ball.rotation.x += moved / BALL_R;
     lastBall.current.copy(ball.position);

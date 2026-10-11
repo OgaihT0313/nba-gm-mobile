@@ -813,9 +813,114 @@ export interface CourtState {
     possession: CourtSide;
     handlerName: string | null;
     play: WatchPlay;
+    /** Bumped every time playback cuts past a stretch of the game (see
+     * advanceClock). Bodies jump on a cut, so the camera snaps to the new spot
+     * and the rigs don't read the jump as a sprint. Absent = never cuts. */
+    cut?: number;
 }
 
-const lerp = (a: number, b: number, t: number) => a + (b - a) * t;
+/* ------------------------------------------------------------------ */
+/* Screen pacing -- the TV "compacto".                                 */
+/* ------------------------------------------------------------------ */
+// Played back at one fixed rate (9.6 game-seconds per real second), a trip up
+// the floor -- 80 ft in ~5 game-seconds, a realistic ~26 ft/s sprint -- came
+// out at ~250 ft/s on screen: ten bodies teleporting and a camera filming an
+// empty floor (measured on the phone, 2026-10-07). No rate makes the WHOLE
+// game both watchable and short: real speed is 48 minutes a game.
+//
+// So playback edits it like a broadcast package. Each trip is picked up as
+// the offense arrives and is settling into its set (the tail of the run, at a
+// plausible speed), plays at a readable rate through the shot, and holds a
+// beat on the ball through the net. The run up the floor before that is a CUT.
+// The opponent's trips are picked up later, at the play itself: the user's own
+// offense is what he called and wants to see. Score, clock and results are
+// untouched -- this only decides how fast the plan's own seconds go by.
+//
+// The rate is set per beat, not fixed: a beat where the shooter sprints 40 ft
+// to his spot plays slower than one where the set just shifts, so no body ever
+// moves faster on screen than SCREEN_SPRINT, and the quiet beats go by quickly.
+/** Top on-screen speed of any player, ft per real second (a real sprint is
+ * ~25-30; a broadcast package tolerates a little more). */
+export const SCREEN_SPRINT = 34;
+/** Game-seconds per real second when little is moving -- the ceiling. */
+const SHOW_RATE_MAX = 3.6;
+/** Fraction of a trip where the screen picks it up: the user's offense... */
+const SHOW_FROM_OWN = 0.3;
+/** ...and the opponent's, at the play itself (the BASE_SET -> action beat). */
+const SHOW_FROM_THEIRS = 0.52;
+/** After a make, the ball dropping through the net: ~1 real second. */
+const NET_RATE = 0.75;
+/** After a miss, the carom: ~half a real second. */
+const MISS_RATE = 1.5;
+
+// Fastest any of the ten moves between two beats, in game ft/s. Positions ease
+// with smoothstep, whose peak speed is 1.5x the average over the leg.
+const beatPeakSpeed = (a: Beat, b: Beat): number => {
+    const span = b.t - a.t;
+    if (span <= 0) return 0;
+    let far = 0;
+    for (let i = 0; i < a.off.length; i++) {
+        far = Math.max(far, Math.hypot(b.off[i].x - a.off[i].x, b.off[i].z - a.off[i].z));
+        far = Math.max(far, Math.hypot(b.def[i].x - a.def[i].x, b.def[i].z - a.def[i].z));
+    }
+    return (1.5 * far) / span;
+};
+
+// Game-seconds per real second for the stretch of `p` containing `t`, and
+// where that stretch ends.
+const showRate = (p: Possession, t: number): [number, number] => {
+    if (t >= p.shotAt) return [p.made ? NET_RATE : MISS_RATE, p.end];
+    const beats = p.beats;
+    let i = 0;
+    while (i < beats.length - 2 && beats[i + 1].t <= t) i++;
+    const until = Math.min(beats[i + 1].t, p.shotAt);
+    const peak = beatPeakSpeed(beats[i], beats[i + 1]);
+    const rate = peak > 0 ? Math.min(SHOW_RATE_MAX, SCREEN_SPRINT / peak) : SHOW_RATE_MAX;
+    return [rate, until > t ? until : p.shotAt];
+};
+
+export interface ClockStep {
+    seconds: number;
+    /** True when this step jumped over part of the game. */
+    cut: boolean;
+}
+
+export const advanceClock = (
+    plan: QuarterPlan, seconds: number, realDt: number,
+    opts: { speed: number; userSide: CourtSide },
+): ClockStep => {
+    let t = seconds;
+    let budget = realDt;
+    let cut = false;
+    // A frame can cross a boundary (shot, end of trip, a cut) -- a handful of
+    // passes covers any frame time the screen allows (dt is capped at 0.1 s).
+    for (let pass = 0; pass < 8 && budget > 1e-9; pass++) {
+        const p = possessionAt(plan, t);
+        if (!p || t >= p.end) {
+            // Past the last planned trip (the quarter's tail): plain playback.
+            return { seconds: t + budget * SHOW_RATE_MAX * opts.speed, cut };
+        }
+        const from = p.start + (p.end - p.start) * (p.side === opts.userSide ? SHOW_FROM_OWN : SHOW_FROM_THEIRS);
+        if (t < from) {
+            t = from;
+            cut = true;
+            continue;
+        }
+        const [rate, until] = showRate(p, t);
+        const r = rate * opts.speed;
+        const need = (until - t) / r;
+        if (need > budget) {
+            t += budget * r;
+            budget = 0;
+        } else {
+            t = until;
+            budget -= need;
+        }
+    }
+    return { seconds: t, cut };
+};
+
+const lerp =(a: number, b: number, t: number) => a + (b - a) * t;
 // Ease in and out so players settle into a spot instead of sliding at constant
 // speed between beats — the single cheapest thing that makes it read as people
 // playing rather than markers interpolating.
