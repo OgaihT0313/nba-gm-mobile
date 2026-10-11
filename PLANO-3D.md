@@ -396,6 +396,33 @@ arquivos, +1.613 / −188):
    detalhes dos jogadores).
 5. Decidir os três "avaliar" da Etapa 7.
 
+**Teste no aparelho, 2026-10-11 (Galaxy A57, APK `8d84fdd5` da `melhoria-3d`).**
+`gfxinfo` em 20 s, mesmo caminho (carreira nova, Thunder, 1º jogo, 1º Q):
+
+| | APK antigo (instalado 07/10 21:50) | APK novo |
+|---|---|---|
+| TV: quadros / mediana / p95 / atrasados | 2.417 / 5 ms / 12 ms / 6% | 1.870 / 13 ms / 27 ms / 26% |
+| TV: GPU mediana | 4 ms | 12 ms |
+| Perto: mediana / p95 / atrasados | 5 ms / 11 ms / 7% | 7 ms / 10 ms / 10% |
+
+- **Regressão na TV, não no Perto.** O enquadramento da TV mudou: no APK antigo ela
+  estava bem fechada; no novo mostra meia quadra e muita arquibancada.
+- **A cena nova não é mais cara que a antiga.** Medido no Chrome do próprio celular
+  (`adb reverse tcp:3000` + console remoto via `adb forward tcp:9222
+  localabstract:chrome_devtools_remote`, cronometrando `gl.render` + `readPixels`
+  forçados pela sonda, dpr 2,81 como no app): cena nova 28-32 ms, antiga 27-29 ms
+  (cena vazia ~14-16 ms de custo fixo). Desligando peças na nova: fachos ~0, piso ~0,
+  torcida 3-4 ms, jogadores 5-6 ms, luzes ~7 ms. **Os fachos não são o problema.**
+- No Chrome, o 3D antigo da `redesign-console-mygm` também enquadra a TV aberta. A
+  suspeita é a lente mais aberta da TV no celular (`fcd0b41`, 07/10 21:16, já na
+  branch principal) — o APK antigo pode ser de antes dela.
+- **Pendente (o usuário pediu para esperar):** gerar um APK da `redesign-console-mygm`
+  e medir a TV nas mesmas condições. ~13 ms → a causa é a lente, e o ajuste é fechar
+  a TV no celular; ~5 ms → a causa está nas etapas, e segue o corte peça por peça.
+- Visual no aparelho até aqui: LEDs com a sigla e o letreiro do apron legíveis; jogada
+  centrada na faixa livre do HUD. Não conferidos de perto ainda: placar central,
+  relógio de posse, sigla do piso pela TV.
+
 ---
 
 ## Critérios de aceite
