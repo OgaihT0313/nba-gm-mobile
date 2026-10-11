@@ -357,6 +357,45 @@ ganhou o campo opcional `cut`:
   - arquivos alterados (`git diff --stat`), com confirmação de que fora de `components/court3d/` só houve os acréscimos previstos em `watchDirector.ts` e `WatchGameScreen.tsx`;
   - o que foi feito em cada etapa.
 
+**Situação em 2026-10-11:** etapas 0 a 7 feitas e conferidas no navegador; nenhum APK
+gerado desde a Etapa 0 (o usuário decidiu testar tudo de uma vez no fim). A Etapa 8 é
+esse teste.
+
+**Fora de `components/court3d/`**, o que mudou (`git diff --stat` da branch: 12
+arquivos, +1.613 / −188):
+- `services/watchDirector.ts`: aditivo nos tipos (`CourtState.cut`,
+  `PlayerState.action/actionT`, `Possession.finish`) e funções novas (`advanceClock`,
+  `dunkChance`). **Não é só acréscimo** em dois pontos, ambos de propósito: a altura
+  do arco do jump agora depende da distância (Etapa 6) e a bandeja/enterrada mudam o
+  ponto de soltura da bola (Etapa 4). Tempo dos lances e placar intactos.
+- `screens/WatchGameScreen.tsx`: o relógio passou a andar por `advanceClock` e **saiu
+  a câmera lenta** depois de chamar jogada (Etapa 4b); o resto é acréscimo (placar e
+  medidas do HUD para o 3D).
+- `metro.config.js` (three único), `scripts/check_watch_director.ts` (checagens de
+  ritmo e ações), `scripts/device_3d.sh`, `.gitignore`, docs.
+
+**Roteiro do teste no aparelho** (`scripts/device_3d.sh`):
+1. `install` o APK da branch, `start`, abrir "Assistir ao Jogo"; `measure` em cada uma
+   das 5 câmeras (prints + `gfxinfo` + avisos do three no logcat).
+2. Comparar com a base da Etapa 0 (que não teve APK: usar o APK atual do usuário,
+   `ab6933d3`, da branch principal, como referência de FPS).
+3. Por etapa, olhar:
+   - 4b: ninguém "teletransporta"; cortes limpos; quarto de ~3 min em 1x é aceitável?
+   - 1: sigla do piso legível (não espelhada) no celular; linhas nítidas ao longe.
+   - 2: torcida no escuro; fachos visíveis nos planos abertos sem lavar a quadra;
+     contorno nos jogadores; flashes.
+   - 3: rede balança na cesta; aro desce na enterrada.
+   - 4: arremesso, bandeja, enterrada, passe e contestação reconhecíveis; cabeça
+     seguindo a bola; tênis, cós, faixa e manguito.
+   - 5: placar, relógio e relógio de posse legíveis e **não espelhados** no aparelho
+     (o expo-gl já inverteu textura antes — Etapa 1).
+   - 6: bola girando para trás no arremesso; sombra mudando com a altura.
+   - 7: troca de câmera suave; Perto enquadrando arremessador e aro; jogada no meio
+     da faixa livre do HUD.
+4. Se faltar FPS, cortar na ordem acima (fachos → resolução do piso → flashes →
+   detalhes dos jogadores).
+5. Decidir os três "avaliar" da Etapa 7.
+
 ---
 
 ## Critérios de aceite
