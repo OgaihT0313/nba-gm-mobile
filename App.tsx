@@ -1,5 +1,5 @@
 import './global.css';
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { View } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
@@ -16,6 +16,7 @@ import { simulationEngine, ROTATION_MIN, ROTATION_MAX } from './services/simulat
 import { buildSeasonOwner, evaluateSeasonOutcome, confidenceZone } from './services/ownerService';
 import { generateSchedule } from './services/scheduleService';
 import { simulateOneDay, SimEffect, ALL_STAR_GAME, PinnedGameResult } from './services/seasonRunner';
+import { loadGame, saveGame } from './services/saveService';
 import { MIN_ROSTER_SIZE, TRADE_DEADLINE_GAME } from './services/tradeService';
 import { initialPickAssets, PICK_WINDOW, makeUserPick, scoutProspect, consensusValue } from './services/draftService';
 import { signFreeAgentLegality, evaluateSigningInterest, signPlayer, askingSalary } from './services/freeAgencyService';
@@ -59,6 +60,8 @@ type AppView =
   | 'era-select' | 'team-select' | 'team-confirm' | 'home' | 'teams' | 'team-detail' | 'scout' | 'my-team' | 'draft' | 'free-agency'
   | 'simulation' | 'standings' | 'leaders' | 'trade' | 'awards' | 'allstar' | 'playoffs' | 'live-game' | 'watch-game';
 
+const SIM_SAVE_INTERVAL = 5000;
+
 const PLACEHOLDERS: Record<string, { title: string; icon: IconName }> = {
   teams: { title: 'Franquias', icon: 'teams' },
   scout: { title: 'Scout', icon: 'scout' },
@@ -84,7 +87,9 @@ export default function App() {
 
   const desktop = useDesktop();
   const [view, setView] = useState<AppView>('home');
-  const [season, setSeason] = useState<SeasonState | null>(null);
+  // The saved career, if any, is the starting state — Home then offers
+  // "Continuar" exactly as it does mid-session.
+  const [season, setSeason] = useState<SeasonState | null>(() => loadGame());
   const [isSimulating, setIsSimulating] = useState(false);
   const [targetGames, setTargetGames] = useState(0);
   // The user's next fixture, pre-resolved for the 3D "Assistir ao Jogo"
@@ -121,6 +126,25 @@ export default function App() {
     if (effect.kind === 'view') setView(effect.view);
     else if (effect.kind === 'notification') addNotification(effect.message, effect.type);
   };
+
+  // Autosave. Every change to the season is written, debounced so a burst of
+  // taps writes once; while the clock runs (a new state every day) it writes at
+  // most every SIM_SAVE_INTERVAL, and once more when the run stops. A watched
+  // game isn't part of SeasonState, so closing the app mid-game resumes before
+  // tip-off.
+  const lastSimSaveRef = useRef(0);
+  useEffect(() => {
+    if (!season) return;
+    if (isSimulating) {
+      const now = Date.now();
+      if (now - lastSimSaveRef.current < SIM_SAVE_INTERVAL) return;
+      lastSimSaveRef.current = now;
+      saveGame(season);
+      return;
+    }
+    const t = setTimeout(() => saveGame(season), 400);
+    return () => clearTimeout(t);
+  }, [season, isSimulating]);
 
   // Day-by-day simulation loop. RN has no Web Worker, so the ported seasonRunner
   // runs on the JS thread — but advancing ONE day per tick (setTimeout) keeps
@@ -710,6 +734,7 @@ export default function App() {
             teams={activeTeamsData as Team[]}
             onBack={() => setView('team-select')}
             onConfirm={() => initSeason(t.id)}
+            replacesSave={!!season}
           />
         );
       }

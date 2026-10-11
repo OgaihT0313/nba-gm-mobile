@@ -35,7 +35,17 @@ sem o time do usuário). O resto, em ordem. **L** = lapidar algo que existe,
 
 Tamanho: P = um dia ou menos, M = alguns dias, G = uma semana ou mais.
 
-### 1. Salvar e carregar a carreira (N)
+### 1. Salvar e carregar a carreira (N) — FEITO, 1 espaço (2026-10-10)
+
+`services/saveService.ts` (formato, versão, migrações) sobre `saveStorage.ts`
+(celular: arquivo em `Paths.document`, gravado via arquivo temporário) e
+`saveStorage.web.ts` (`localStorage`). O `App.tsx` carrega o save ao abrir e grava
+a cada mudança (400 ms de espera; durante a simulação, no máximo a cada 5 s e ao
+parar). A Home já mostrava "Carreira salva" / "Continuar"; "Assinar como GM" avisa
+que substitui o save, e a tela de erro ganhou "Apagar carreira salva e recomeçar".
+Medido: ~0,55 MB por save; duas temporadas com ida e volta pelo JSON a cada dia e
+em cada etapa da offseason sem perda. **Falta:** testar no APK (só o web foi
+testado) e, se quiser, 2-3 espaços. Notas originais abaixo.
 
 O app não guarda nada: o `expo-file-system` já está nas dependências, mas nenhum
 arquivo do jogo usa. `SeasonState` já é um objeto serializável (o estado inteiro

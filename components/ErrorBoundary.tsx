@@ -1,6 +1,8 @@
 import React from 'react';
 import { View, Text, Pressable, ScrollView } from 'react-native';
 
+import { deleteSave } from '../services/saveService';
+
 interface Props {
   children: React.ReactNode;
 }
@@ -46,6 +48,14 @@ export class ErrorBoundary extends React.Component<Props, State> {
           onPress={() => this.setState({ error: null })}
         >
           <Text className="text-white font-bold">TENTAR NOVAMENTE</Text>
+        </Pressable>
+        {/* The way out when the saved career itself is what breaks the screen:
+            retrying would just load it again. */}
+        <Pressable accessibilityRole="button"
+          className="mt-3 px-8 py-3 items-center"
+          onPress={() => { deleteSave(); this.setState({ error: null }); }}
+        >
+          <Text className="text-slate-400 text-xs">APAGAR CARREIRA SALVA E RECOMEÇAR</Text>
         </Pressable>
       </View>
     );

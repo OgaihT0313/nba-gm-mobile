@@ -25,12 +25,15 @@ interface TeamConfirmProps {
   teams: Team[];
   onBack: () => void;
   onConfirm: () => void;
+  // A career is already saved: signing here starts over on top of it.
+  replacesSave?: boolean;
 }
 
 const HERO = 300;
 const money = (v: number) => `$${Math.round(v / 1_000_000)}M`;
 
-const TeamConfirm: React.FC<TeamConfirmProps> = ({ team, players, teams, onBack, onConfirm }) => {
+const TeamConfirm: React.FC<TeamConfirmProps> = ({ team, players, teams, onBack, onConfirm, replacesSave }) => {
+  const ctaSub = replacesSave ? 'Substitui a carreira salva' : undefined;
   const insets = useSafeAreaInsets();
   const desktop = useDesktop();
   const accent = getTeamAccent(team.id);
@@ -54,7 +57,7 @@ const TeamConfirm: React.FC<TeamConfirmProps> = ({ team, players, teams, onBack,
     return (
       <DPage
         padding={0}
-        footer={<DDock><DCta label="Assinar como GM" onPress={onConfirm} style={{ minHeight: 56 }} /></DDock>}
+        footer={<DDock><DCta label="Assinar como GM" sub={ctaSub} onPress={onConfirm} style={{ minHeight: 56 }} /></DDock>}
       >
         <View style={{ height: 380, overflow: 'hidden' }}>
           <View style={{ position: 'absolute', left: 0, right: 0, top: 0, bottom: 5, backgroundColor: accent.primary }} />
@@ -117,7 +120,7 @@ const TeamConfirm: React.FC<TeamConfirmProps> = ({ team, players, teams, onBack,
     <Screen
       heroHeight={HERO}
       backdrop={<HeroBackdrop height={HERO + insets.top} primary={accent.primary} secondary={accent.secondary} />}
-      footer={<Dock><CtaButton label="Assinar como GM" onPress={onConfirm} size={20} /></Dock>}
+      footer={<Dock><CtaButton label="Assinar como GM" sub={ctaSub} onPress={onConfirm} size={20} /></Dock>}
     >
       <View style={{ height: HERO - 6, paddingHorizontal: 20, paddingTop: 4, overflow: 'hidden' }}>
         {/* The crest, oversized and half-transparent over the flat team color:
