@@ -1,7 +1,8 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useRef } from 'react';
 import { useFrame } from '@react-three/fiber/native';
 import * as THREE from 'three';
 
+import type { CourtState } from '../../services/watchDirector';
 import { buildLedTexture, buildNetTexture, hexToRgb, LIGHT_POOLS } from './textures';
 
 // Everything around the court: the bowl and its crowd, courtside furniture,
@@ -18,6 +19,33 @@ interface ArenaProps {
   primary: string;
   secondary: string;
 }
+
+/**
+ * Several geometries as one (one draw call): the named attributes
+ * concatenated, indices offset. Every part must carry the same attributes.
+ * The parts are disposed.
+ */
+const mergeParts = (parts: THREE.BufferGeometry[], names: string[]): THREE.BufferGeometry => {
+  const merged = new THREE.BufferGeometry();
+  names.forEach((name) => {
+    const size = parts[0].getAttribute(name).itemSize;
+    const total = parts.reduce((n, g) => n + g.getAttribute(name).count, 0);
+    const out = new Float32Array(total * size);
+    let o = 0;
+    parts.forEach((g) => { const a = g.getAttribute(name).array as Float32Array; out.set(a, o); o += a.length; });
+    merged.setAttribute(name, new THREE.BufferAttribute(out, size));
+  });
+  const indices: number[] = [];
+  let base = 0;
+  parts.forEach((g) => {
+    const idx = g.getIndex()!;
+    for (let i = 0; i < idx.count; i++) indices.push(idx.getX(i) + base);
+    base += g.getAttribute('position').count;
+    g.dispose();
+  });
+  merged.setIndex(indices);
+  return merged;
+};
 
 /* ------------------------------------------------------------------ */
 /* The bowl: stepped rows all the way round, a fan in every seat.      */
@@ -372,26 +400,7 @@ function SpotBeams() {
       g.setAttribute('height01', new THREE.BufferAttribute(h, 1));
       return g;
     });
-    // Merge by hand: concatenate the attributes, offset the indices.
-    const merged = new THREE.BufferGeometry();
-    const names = ['position', 'normal', 'height01'] as const;
-    names.forEach((name) => {
-      const size = parts[0].getAttribute(name).itemSize;
-      const total = parts.reduce((n, g) => n + g.getAttribute(name).count, 0);
-      const out = new Float32Array(total * size);
-      let o = 0;
-      parts.forEach((g) => { const a = g.getAttribute(name).array as Float32Array; out.set(a, o); o += a.length; });
-      merged.setAttribute(name, new THREE.BufferAttribute(out, size));
-    });
-    const indices: number[] = [];
-    let base = 0;
-    parts.forEach((g) => {
-      const idx = g.getIndex()!;
-      for (let i = 0; i < idx.count; i++) indices.push(idx.getX(i) + base);
-      base += g.getAttribute('position').count;
-      g.dispose();
-    });
-    merged.setIndex(indices);
+    const merged = mergeParts(parts, ['position', 'normal', 'height01']);
     const mat = new THREE.ShaderMaterial({
       vertexShader: beamVertex,
       fragmentShader: beamFragment,
@@ -416,20 +425,95 @@ const BOARD_FACE = HALF_L - 4; // backboard plane, 4 ft inside the baseline
 export const RIM_X = 41.75;
 const RIM_Y = 10;
 
-function Hoop({ side, primary }: { side: 1 | -1; primary: string }) {
+// The net whips when the ball drops through: stretched long and pinched,
+// swinging back and forth, settling over NET_SETTLE seconds. Triggered here in
+// the 3D (the ball crossing rim height inside the ring), so it needs no data
+// from the director.
+const NET_SETTLE = 0.75;
+
+function Hoop({ side, primary, courtRef }: {
+  side: 1 | -1;
+  primary: string;
+  courtRef?: React.MutableRefObject<CourtState | null>;
+}) {
   const net = useMemo(() => {
     const tex = buildNetTexture();
     tex.repeat.set(1, 1);
+    // Tapered: wide at the rim, pinching in toward the bottom, a slight
+    // flare at the very end where the cords hang free.
     const pts = [
       new THREE.Vector2(0.75, 0),
-      new THREE.Vector2(0.62, -0.6),
-      new THREE.Vector2(0.48, -1.2),
-      new THREE.Vector2(0.46, -1.5),
+      new THREE.Vector2(0.66, -0.4),
+      new THREE.Vector2(0.54, -0.85),
+      new THREE.Vector2(0.44, -1.3),
+      new THREE.Vector2(0.47, -1.55),
     ];
     const geo = new THREE.LatheGeometry(pts, 20);
     const mat = new THREE.MeshStandardMaterial({ map: tex, alphaTest: 0.5, side: THREE.DoubleSide, roughness: 0.9 });
     return new THREE.Mesh(geo, mat);
   }, []);
+
+  // LED edge around the glass, red, that lights on a shot-clock violation. Its
+  // trigger is the live shot clock (PLANO-3D Etapa 5); until then it sits dark.
+  const ledEdge = useMemo(() => {
+    const t = 0.1;
+    const parts = [
+      new THREE.BoxGeometry(0.14, t, 6).translate(0, 12.5 + t / 2, 0),
+      new THREE.BoxGeometry(0.14, t, 6).translate(0, 9.0 - t / 2, 0),
+      new THREE.BoxGeometry(0.14, 3.5 + 2 * t, t).translate(0, 10.75, 3 + t / 2),
+      new THREE.BoxGeometry(0.14, 3.5 + 2 * t, t).translate(0, 10.75, -3 - t / 2),
+    ];
+    const geo = mergeParts(parts, ['position', 'normal', 'uv']);
+    const mat = new THREE.MeshStandardMaterial({ color: '#2a0806', emissive: '#ff2a1a', emissiveIntensity: 0.12, roughness: 0.4 });
+    const m = new THREE.Mesh(geo, mat);
+    m.name = 'shotClockEdge';
+    return m;
+  }, []);
+
+  // What holds the rim: a mounting plate on the glass, the arm out to the
+  // ring, and the breakaway spring housing under it -- one mesh. Built in the
+  // rim's own frame (+x toward the glass).
+  const mount = useMemo(() => {
+    const toBoard = BOARD_FACE - RIM_X;
+    const arm = toBoard - 0.7;
+    const parts = [
+      new THREE.BoxGeometry(0.1, 0.9, 1.0).translate(toBoard - 0.12, -0.2, 0),
+      new THREE.BoxGeometry(arm, 0.14, 0.42).translate(0.7 + arm / 2, 0, 0),
+      new THREE.CylinderGeometry(0.13, 0.13, 0.42, 10).rotateZ(Math.PI / 2).translate(toBoard - 0.45, -0.26, 0),
+    ];
+    const geo = mergeParts(parts, ['position', 'normal', 'uv']);
+    return new THREE.Mesh(geo, new THREE.MeshStandardMaterial({ color: '#ff4f12', roughness: 0.35, metalness: 0.5 }));
+  }, []);
+
+  // The rim assembly pivots at the glass, so a dunk pulls it down and lets it
+  // spring back (Etapa 4 sets the kick, this eases it).
+  const pivot = useMemo(() => new THREE.Group(), []);
+  const ripple = useRef({ t: NET_SETTLE, lastY: 20 });
+  const kick = useRef(0);
+  useFrame((_, dt) => {
+    const court = courtRef?.current;
+    const r = ripple.current;
+    if (court) {
+      const b = court.ball;
+      const inRing = Math.hypot(b.x - side * RIM_X, b.z) < 0.8;
+      if (inRing && r.lastY > RIM_Y && b.y <= RIM_Y) r.t = 0;
+      r.lastY = b.y;
+    }
+    if (r.t < NET_SETTLE) {
+      r.t += dt;
+      const env = Math.max(0, 1 - r.t / NET_SETTLE);
+      const k = r.t * 16;
+      net.scale.set(1 - 0.16 * env, 1 + 0.32 * env * Math.abs(Math.sin(k)), 1 - 0.16 * env);
+      net.rotation.x = 0.1 * env * Math.sin(k * 0.8);
+      net.rotation.z = 0.06 * env * Math.cos(k * 0.6);
+    } else if (net.scale.y !== 1) {
+      net.scale.set(1, 1, 1);
+      net.rotation.set(0, 0, 0);
+    }
+    kick.current = Math.max(0, kick.current - dt * 1.6);
+    // Pulled down, then a damped bounce back up.
+    pivot.rotation.z = side * 0.16 * kick.current * Math.cos((1 - kick.current) * 18);
+  });
 
   const s = side;
   const boardX = s * BOARD_FACE;
@@ -449,6 +533,12 @@ function Hoop({ side, primary }: { side: 1 | -1; primary: string }) {
       <mesh position={[s * (HALF_L + 6.5), 2.2, 0]}>
         <boxGeometry args={[6, 4.4, 6.5]} />
         <meshStandardMaterial color={primary} roughness={0.75} />
+      </mesh>
+      {/* The pad on the court-facing side of the base: a thick slab proud of
+          the frame, the part players actually run into. */}
+      <mesh position={[s * (HALF_L + 3.2), 2.35, 0]}>
+        <boxGeometry args={[0.7, 4.7, 6.9]} />
+        <meshStandardMaterial color={primary} roughness={0.95} />
       </mesh>
       <mesh position={[s * (HALF_L + 4.2), 2.2, 0]}>
         <boxGeometry args={[1.4, 4.4, 5.2]} />
@@ -483,21 +573,30 @@ function Hoop({ side, primary }: { side: 1 | -1; primary: string }) {
         <boxGeometry args={[0.8, 0.9, 2.6]} />
         <meshStandardMaterial color="#0b0b0e" emissive="#ff2a1a" emissiveIntensity={0.55} />
       </mesh>
-      {/* Rim and its bracket. */}
-      <mesh position={[s * RIM_X, RIM_Y, 0]} rotation={[Math.PI / 2, 0, 0]}>
-        <torusGeometry args={[0.75, 0.055, 10, 32]} />
-        <meshStandardMaterial color="#ff4f12" roughness={0.35} metalness={0.5} />
-      </mesh>
-      <mesh position={[s * (RIM_X + 0.92), RIM_Y, 0]}>
-        <boxGeometry args={[0.5, 0.18, 0.5]} />
-        <meshStandardMaterial color="#ff4f12" roughness={0.35} metalness={0.5} />
-      </mesh>
-      <primitive object={net} position={[s * RIM_X, RIM_Y, 0]} />
+      <primitive object={ledEdge} position={[boardX - s * 0.02, 0, 0]} />
+      {/* Rim, mount and net hang off one pivot at the glass. The inner group
+          turns the rim's own frame (+x toward the glass) to face this end. */}
+      <group position={[s * BOARD_FACE, RIM_Y, 0]}>
+        <primitive object={pivot}>
+          <group rotation={[0, s > 0 ? 0 : Math.PI, 0]}>
+            <group position={[-(BOARD_FACE - RIM_X), 0, 0]}>
+              <mesh rotation={[Math.PI / 2, 0, 0]}>
+                <torusGeometry args={[0.75, 0.055, 10, 32]} />
+                <meshStandardMaterial color="#ff4f12" roughness={0.35} metalness={0.5} />
+              </mesh>
+              <primitive object={mount} />
+              <primitive object={net} />
+            </group>
+          </group>
+        </primitive>
+      </group>
     </group>
   );
 }
 
-export default function Arena({ primary, secondary }: ArenaProps) {
+export default function Arena({ primary, secondary, courtRef }: ArenaProps & {
+  courtRef?: React.MutableRefObject<CourtState | null>;
+}) {
   return (
     <>
       {/* The arena floor around the hardwood. */}
@@ -510,8 +609,8 @@ export default function Arena({ primary, secondary }: ArenaProps) {
       <Scoreboard primary={primary} secondary={secondary} />
       <CeilingLights />
       <SpotBeams />
-      <Hoop side={1} primary={primary} />
-      <Hoop side={-1} primary={primary} />
+      <Hoop side={1} primary={primary} courtRef={courtRef} />
+      <Hoop side={-1} primary={primary} courtRef={courtRef} />
     </>
   );
 }

@@ -372,7 +372,7 @@ function Scene({ home, away, courtRef, visual, homeLabel, numbers }: Omit<Court3
         secondary={home.secondary}
         label={homeLabel ?? 'NBA'}
       />
-      <Arena primary={home.primary} secondary={home.secondary} />
+      <Arena primary={home.primary} secondary={home.secondary} courtRef={courtRef} />
       <PlayersAndBall home={home} away={away} courtRef={courtRef} numbers={numbers} />
     </>
   );

@@ -175,6 +175,19 @@ no material do piso:
 - Rede afunilada com ondulação quando a bola passa. A animação é disparada no 3D: a bola atravessando a altura do aro perto dele. Não precisa de dado novo.
 - **Leve reação do aro em enterrada:** fica para a Etapa 4, que é quando o 3D passa a saber que o lance foi uma enterrada.
 
+**FEITO (2026-10-10).** Tudo em `Arena.tsx` (`Hoop`):
+- Borda de LED vermelha em volta do vidro (`shotClockEdge`), acesa de leve (0,12) até
+  a Etapa 5 ligar ao relógio de posse. Uma malha só (`mergeParts`, helper novo que os
+  fachos também usam).
+- Aro com placa no vidro, braço e caixa da mola — uma malha. Aro, suporte e rede
+  penduram num pivô no vidro: a Etapa 4 dá o puxão da enterrada, aqui ele já volta
+  com um quique amortecido.
+- Acolchoamento grosso na face da base virada para a quadra.
+- Rede mais afunilada (5 pontos, com a ponta solta) que estica, afina e balança por
+  0,75 s quando a bola cruza a altura do aro dentro dele — detectado no 3D lendo a
+  bola do `courtRef` (que agora também chega ao `Arena`).
+- Custo: +3 malhas por cesta (borda, suporte, acolchoamento).
+
 ## Etapa 4 — Jogadores: modelo e animações (`PlayerRig.ts`, `watchDirector.ts`)
 
 **A etapa de maior impacto e de maior trabalho.**
