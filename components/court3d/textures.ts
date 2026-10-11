@@ -123,9 +123,9 @@ export const buildFloorTexture = (opts: {
   primary: string;
   secondary: string;
   label: string;
-  /** Rows run the other way on native: expo-gl ignores the pixelStorei
-   *  unpack flags three.js sets (it logs as much), so the same DataTexture
-   *  lands flipped along the floor's width on a phone vs. in a browser. */
+  /** Run the rows the other way along the floor's width. The floor needs it
+   *  on the phone and in the browser alike (Court3D passes true); without it
+   *  the tricode and the wordmarks read upside down. */
   flipRows?: boolean;
 }): THREE.DataTexture => {
   // 1536 x 768: ~14.5 px per foot, so a two-inch line is still ~2.4 px wide,
@@ -151,8 +151,35 @@ export const buildFloorTexture = (opts: {
   const LANE_LEN = 19;
   const THREE_R = 23.75;
   const CORNER_Z = 22;
-  const CORNER_LEN = 14;
+  // The corner three runs straight from the baseline to where it meets the
+  // arc: the hoop's 5.25 ft off the baseline plus sqrt(23.75^2 - 22^2).
+  const CORNER_LEN = HALF_L - HOOP + Math.sqrt(THREE_R * THREE_R - CORNER_Z * CORNER_Z);
+  const BACKBOARD = HALF_L - 4; // the backboard's face, 4 ft in from the baseline
   const STRIP = 0.5; // visual maple strip width
+  const BOARD = 6.5; // board length; ends are staggered strip to strip
+  // Varnish under the lights, painted in rather than lit (PLANO-3D Etapa 1: no
+  // extra light cost): arena lighting pools on the playing surface and falls
+  // off over the apron. A few broad soft pools over each half and the center,
+  // on top of a court-wide lift.
+  // Every term is a product of an x part and a z part (a gaussian pool is
+  // exp(-dx^2) * exp(-dz^2)), so they're tabled per column and per row once
+  // instead of costing five exp() calls on each of the ~1.2M pixels.
+  const POOLS: [number, number][] = [[-30, -10], [-30, 10], [0, 0], [30, -10], [30, 10]];
+  const xOf = (col: number) => ((col + 0.5) / W) * FLOOR_L - FLOOR_L / 2;
+  const zOf = (row: number) => {
+    const zRaw = ((row + 0.5) / H) * FLOOR_W - FLOOR_W / 2;
+    return opts.flipRows ? -zRaw : zRaw;
+  };
+  const gauss = (d: number) => Math.exp(-(d * d) / (2 * 15 * 15));
+  const poolX = POOLS.map(([px]) => Float32Array.from({ length: W }, (_, c) => gauss(xOf(c) - px)));
+  const poolZ = POOLS.map(([, pz]) => Float32Array.from({ length: H }, (_, r) => gauss(zOf(r) - pz)));
+  const floorX = Float32Array.from({ length: W }, (_, c) => Math.max(0, 1 - Math.max(0, Math.abs(xOf(c)) - 44) / 9));
+  const floorZ = Float32Array.from({ length: H }, (_, r) => Math.max(0, 1 - Math.max(0, Math.abs(zOf(r)) - 22) / 9));
+  const sheen = (col: number, row: number) => {
+    let s = 0;
+    for (let p = 0; p < POOLS.length; p++) s += poolX[p][col] * poolZ[p][row];
+    return 0.93 + 0.07 * floorX[col] * floorZ[row] + 0.06 * Math.min(1, s);
+  };
 
   for (let row = 0; row < H; row++) {
     // Row 0 lands at -z on the rotated plane. Worked out on paper it should
@@ -161,19 +188,37 @@ export const buildFloorTexture = (opts: {
     const zRaw = ((row + 0.5) / H) * FLOOR_W - FLOOR_W / 2;
     const z = opts.flipRows ? -zRaw : zRaw;
     const az = Math.abs(z);
+    // A row lies along one strip, so the strip, its board stagger and its long
+    // seam are per row; the board's own look is worked out once per board.
+    const strip = Math.floor((z + 100) / STRIP);
+    const stagger = hash(strip, 11) * BOARD;
+    const stripSeam = ((z + 100) / STRIP) % 1 < 0.06;
+    let board = Number.NaN;
+    let tone = 1, ph = 0, streak = 0, warm = 0;
     for (let col = 0; col < W; col++) {
       const x = ((col + 0.5) / W) * FLOOR_L - FLOOR_L / 2;
       const ax = Math.abs(x);
 
       // --- wood -------------------------------------------------------
-      const strip = Math.floor((z + 100) / STRIP);
-      const board = Math.floor((x + 100 + (strip % 7) * 1.7) / 6.5); // staggered board ends
-      const tone = 0.86 + hash(strip, board) * 0.22;
-      // Grain: a slow wave along each strip (phase from the strip) plus fine speckle.
-      const grain = Math.sin(x * 2.3 + hash(strip, 3) * 40) * 0.035
-        + (hash(col >> 1, row >> 1) - 0.5) * 0.05;
-      const seam = ((z + 100) / STRIP) % 1 < 0.06 ? 0.86 : 1;
-      let c: RGB = [wood[0] * (tone + grain) * seam, wood[1] * (tone + grain) * seam, wood[2] * (tone + grain) * seam];
+      const along = (x + 100 + stagger) / BOARD; // staggered board ends
+      const b = Math.floor(along);
+      if (b !== board) {
+        board = b;
+        tone = 0.86 + hash(strip, board) * 0.22;
+        ph = hash(board, strip) * 40;
+        // Streaks across a quarter of the boards.
+        streak = hash(strip, board + 7) < 0.25 ? Math.sin(z * 40 + ph) * 0.03 : 0;
+        // A board is a touch warmer or cooler than its neighbors.
+        warm = (hash(board + 3, strip) - 0.5) * 0.06;
+      }
+      // Grain: a slow wave along each board, phased per board so no two
+      // match, the board's streak, and fine speckle.
+      const grain = Math.sin(x * 2.3 + ph) * 0.035 + streak + (hash(col >> 1, row >> 1) - 0.5) * 0.05;
+      // Seams: the long joint between strips and the butt joint where one
+      // board ends and the next begins (~1 px, darker).
+      const seam = stripSeam || (along - b) * BOARD < 0.07 ? 0.84 : 1;
+      const lit = (tone + grain) * seam;
+      let c: RGB = [wood[0] * lit * (1 + warm), wood[1] * lit, wood[2] * lit * (1 - warm)];
 
       // --- painted areas ---------------------------------------------
       const onCourt = ax <= HALF_L && az <= HALF_W;
@@ -181,7 +226,7 @@ export const buildFloorTexture = (opts: {
       const sx = x >= 0 ? 1 : -1;
       const dLane = HALF_L - ax; // distance in from the baseline
       if (onCourt && dLane <= LANE_LEN && az <= LANE_HALF) c = mix(c, primary, paintAlpha);
-      const rCenter = Math.hypot(x, z);
+      const rCenter = Math.sqrt(x * x + z * z);
       if (rCenter <= 6) c = mix(c, primary, paintAlpha);
 
       // Wordmark on the apron behind each baseline, facing the court.
@@ -201,43 +246,48 @@ export const buildFloorTexture = (opts: {
       if (Math.abs(rCenter - 6) <= LINE / 2 || Math.abs(rCenter - 2) <= LINE / 2) line = true;
       if (!line && onCourt) {
         const hx = sx * HOOP;
-        const toHoop = Math.hypot(x - hx, z);
+        const toHoop = Math.sqrt((x - hx) * (x - hx) + z * z);
         // Lane.
         if (dLane <= LANE_LEN && Math.abs(az - LANE_HALF) <= LINE / 2) line = true;
         if (az <= LANE_HALF && Math.abs(dLane - LANE_LEN) <= LINE / 2) line = true;
         // Free-throw circle: solid toward midcourt, dashed inside the lane.
-        const ft = Math.hypot(x - sx * (HALF_L - LANE_LEN), z);
+        const ft = Math.sqrt((x - sx * (HALF_L - LANE_LEN)) ** 2 + z * z);
         if (Math.abs(ft - 6) <= LINE / 2) {
           const inside = dLane > LANE_LEN;
           if (inside || Math.floor(Math.atan2(z, x) * 6) % 2 === 0) line = true;
         }
-        // Restricted area.
+        // Restricted area: a 4 ft arc toward midcourt, then straight back to
+        // the backboard's face on both sides.
         if (Math.abs(toHoop - 4) <= LINE / 2 && sx * (hx - x) >= 0) line = true;
-        // Lane hash marks.
-        if (Math.abs(az - LANE_HALF - 0.5) <= 0.5 && dLane > 7 && dLane < 11.3) {
-          const mark = dLane - 7;
-          if ((mark >= 0 && mark <= LINE * 2) || (Math.abs(mark - 1) <= LINE) || (Math.abs(mark - 4.2) <= LINE)) line = true;
-        }
+        if (Math.abs(az - 4) <= LINE / 2 && ax >= HOOP && ax <= BACKBOARD) line = true;
+        // Lane space marks, outside the lane: the low block (solid, 7-8 ft up
+        // from the baseline, 8 in deep) and the hash marks at 11 and 14 ft.
+        if (az > LANE_HALF && az <= LANE_HALF + 0.67 && dLane >= 7 && dLane <= 8) line = true;
+        if (az > LANE_HALF && az <= LANE_HALF + 0.5 && (Math.abs(dLane - 11) <= LINE / 2 || Math.abs(dLane - 14) <= LINE / 2)) line = true;
         // Three-point line.
         if (dLane <= CORNER_LEN && Math.abs(az - CORNER_Z) <= LINE / 2) line = true;
-        if (dLane > CORNER_LEN - 0.1 && Math.abs(toHoop - THREE_R) <= LINE / 2 && az <= CORNER_Z + 0.1) line = true;
+        if (dLane >= CORNER_LEN && Math.abs(toHoop - THREE_R) <= LINE / 2 && az <= CORNER_Z + LINE / 2) line = true;
         // Coaching box ticks on the sidelines.
         if (Math.abs(ax - 28) <= LINE / 2 && az >= HALF_W - 3 && az <= HALF_W) line = true;
       }
       if (line) c = onCourt || az <= HALF_W + LINE ? lineColor : white;
 
-      // Tricode across the center circle, painted over the midcourt line the
+      // The home emblem: a ring in the secondary color inside the center
+      // circle, and the tricode across it, painted over the midcourt line the
       // way a logo is. Read from the near (+z) sideline: the far edge is the top.
+      if (rCenter >= 4.75 && rCenter <= 5.35) c = mix(c, secondary, 0.92);
       if (rCenter <= 5.2) {
         const tw = 8.4;
         const th = tw * 7 / (opts.label.length * 6 - 1);
         if (textCovers(opts.label, (x + tw / 2) / tw, (z + th / 2) / th)) c = textColor;
       }
 
+      // The varnish is over everything -- wood, paint and lines alike.
+      const v = sheen(col, row);
       const i = (row * W + col) * 4;
-      data[i] = Math.max(0, Math.min(255, c[0]));
-      data[i + 1] = Math.max(0, Math.min(255, c[1]));
-      data[i + 2] = Math.max(0, Math.min(255, c[2]));
+      data[i] = Math.max(0, Math.min(255, c[0] * v));
+      data[i + 1] = Math.max(0, Math.min(255, c[1] * v));
+      data[i + 2] = Math.max(0, Math.min(255, c[2] * v));
       data[i + 3] = 255;
     }
   }

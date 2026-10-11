@@ -1,5 +1,5 @@
 import React, { useMemo, useRef } from 'react';
-import { GestureResponderEvent, PanResponder, Platform, View } from 'react-native';
+import { GestureResponderEvent, PanResponder, View } from 'react-native';
 import { Canvas, useFrame, useThree } from '@react-three/fiber/native';
 import * as THREE from 'three';
 
@@ -230,11 +230,16 @@ function RenderProbe() {
 function Floor({ wood, primary, secondary, label }: { wood: string; primary: string; secondary: string; label: string }) {
   const gl = useThree((s) => s.gl);
   const material = useMemo(() => {
-    const map = buildFloorTexture({ wood, primary, secondary, label, flipRows: Platform.OS !== 'web' });
+    // Flipped on every platform. The phone was checked on the device
+    // (2026-10-07); the browser was left unflipped and drew the tricode upside
+    // down ("BOS" read "BO2", seen 2026-10-10).
+    const map = buildFloorTexture({ wood, primary, secondary, label, flipRows: true });
     // The floor is seen at a grazing angle almost all the time; anisotropic
     // filtering is what keeps the far lines crisp instead of smeared.
     map.anisotropy = Math.min(8, gl.capabilities.getMaxAnisotropy());
-    return new THREE.MeshStandardMaterial({ map, roughness: 0.34, metalness: 0.02 });
+    // Varnished maple: a little glossier than before so the key lights catch
+    // it. The pools of light themselves are painted into the texture.
+    return new THREE.MeshStandardMaterial({ map, roughness: 0.27, metalness: 0.02 });
   }, [wood, primary, secondary, label, gl]);
   return (
     <mesh rotation={[-Math.PI / 2, 0, 0]} material={material}>

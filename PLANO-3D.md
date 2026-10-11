@@ -115,6 +115,28 @@ Medido no Galaxy A57 do usuário (tela de 120 Hz, 1080×2340) via adb, com print
 - Emblema da casa no círculo central. Não há imagem do escudo dentro do 3D: desenhar uma marca com a sigla e as cores do time na fonte de pixels.
 - **Resolução:** a quadra é uma única textura; aumentar a resolução só se não estourar a memória (medir no APK da Etapa 2).
 
+**FEITO (2026-10-10), falta ver no aparelho.** Tudo em `textures.ts` (`buildFloorTexture`) e
+no material do piso:
+- Madeira: emenda de topo entre tábuas (~1 px), desencontro por tira, veio com fase
+  por tábua, estrias em 1/4 das tábuas e tábuas levemente mais quentes ou frias.
+- Verniz pintado: o piso todo (madeira, tinta e linhas) clareia sobre a quadra e em
+  5 "poças" de luz, e escurece no apron. `roughness` 0,34 → 0,27. `envMap` não
+  testado — fica para a Etapa 2, junto da luz.
+- Marcações: canto do 3 pontos exato (14,20 pés, onde a reta encontra o arco de
+  23,75); área restrita com os trechos retos até a tabela; low block sólido (7-8
+  pés, 8 pol.) e marcas a 11 e 14 pés. Lance livre (6 pés, metade tracejada) e box
+  técnico (28 pés) já estavam certos.
+- Emblema: anel na cor secundária dentro do círculo central, com a sigla.
+- **Custo:** o piso sai em ~170-200 ms no Node (era ~195): as poças são tabeladas por
+  linha e coluna (gaussiana separável), os valores da tábua calculados uma vez por
+  tábua, e `Math.hypot` trocado por `Math.sqrt`. Cena igual à base (282 draw calls,
+  ~243 mil triângulos, 17 texturas).
+- **Bug antigo corrigido:** no navegador a sigla saía de cabeça para baixo ("BOS"
+  lia "BO2") desde que o celular passou a inverter as linhas (`0534f31`). Agora o
+  piso inverte em todas as plataformas; o celular não muda.
+- O tempo de quadro no navegador varia com o foco do painel (13-24 ms antes e
+  depois desta etapa, na mesma condição); não serve para comparar etapas.
+
 ## Etapa 2 — Iluminação de arena simulada (`Court3D.tsx`, `Arena.tsx`)
 
 - Quadra clara e torcida na penumbra, escurecendo a cor das camadas da arquibancada (já são instanciadas).
