@@ -1157,7 +1157,9 @@ const handleRandomEvents = (currentTeams: Team[], players: { [key: string]: Play
     const tradeChance = gamesPlayed >= TRADE_DEADLINE_GAME ? 0 : (isTradeDeadlineWindow ? 0.35 : 0.02);
 
     if (Math.random() < tradeChance) {
-        const teamsToTrade = newTeams.filter(t => t.roster.length > 8 && ((t.wins || 0) / ((t.wins || 0) + (t.losses || 0) || 1)) < 0.6);
+        // Never the user's team: his roster only changes through moves he makes
+        // (Trade Center, offers in the decision queue).
+        const teamsToTrade = newTeams.filter(t => t.id !== userTeamId && t.roster.length > 8 && ((t.wins || 0) / ((t.wins || 0) + (t.losses || 0) || 1)) < 0.6);
         if (teamsToTrade.length >= 2) {
             let team1Index = Math.floor(Math.random() * teamsToTrade.length);
             let team2Index = Math.floor(Math.random() * teamsToTrade.length);

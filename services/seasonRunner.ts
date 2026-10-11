@@ -144,7 +144,8 @@ export function simulateOneDay(season: SeasonState, pinnedResult?: PinnedGameRes
     const { teams: teamsAfterEvents, event } = simulationEngine.handleRandomEvents(newTeams, newPlayers, season.gamesPlayed + 1, season.userTeamId);
     if (event) {
         newEvents.unshift(event);
-        notify(event.message, event.type);
+        // League-wide news stays off the toasts too, same as the feed.
+        if (event.teamIds?.includes(season.userTeamId)) notify(event.message, event.type);
     }
 
     // Update player morale from each team's situation (record, role, being
