@@ -80,6 +80,29 @@ Medido no Galaxy A57 do usuário (tela de 120 Hz, 1080×2340) via adb, com print
 - Deixar pronto o roteiro de teste no aparelho via adb (instalar, abrir "Assistir ao jogo", prints em sequência por câmera, `dumpsys gfxinfo`).
 - Entregar um resumo curto com os números de base.
 
+**FEITO (2026-10-10), menos o APK de referência** (o usuário adiou o build):
+- **Base no navegador** (sonda `globalThis.__court3d`, só em modo dev, em `Court3D.tsx`):
+  288 draw calls, ~242 mil triângulos, 67 geometrias, 17 texturas. Quadro em 5,5 ms
+  (mediana) / 9,0 ms (p95) num PC — não vale para o celular, só para comparar etapas.
+  A sonda só mede com o painel do navegador visível (aba oculta pausa o
+  `requestAnimationFrame` e o canvas nem monta).
+- **Three duplicado: resolvido** no `metro.config.js`. O bundle Android tinha
+  `three.cjs` (pelo `require` do fiber) e `three.module.js` + `three.core.js` (pelo
+  nosso `import`); agora só `three.cjs`. Bundle dev Android: 27,6 MB → 25,0 MB. O web
+  já tinha uma cópia só.
+- **`THREE.Clock` obsoleto:** vem de dentro do `@react-three/fiber` 9.7 (o `clock` do
+  `useFrame`), não do nosso código. Some quando o fiber atualizar; não vale um patch.
+- **Teto de `devicePixelRatio`: não é possível** neste stack. O fiber nativo fixa
+  `dpr: PixelRatio.get()` ("expo-gl can only render at native dpr/resolution").
+  Reduzir resolução, se precisar na Etapa 8, teria que ser pelo tamanho da GLView.
+- **`dispose`:** ao desmontar, o fiber chama `forceContextLoss` e `dispose` na cena;
+  com o contexto GL destruído, a memória de GPU vai junto. Nada a acrescentar.
+- **Roteiro no aparelho:** `scripts/device_3d.sh` (install / start / measure: prints em
+  sequência, `gfxinfo` e avisos do three no logcat), saída em `.device-3d/`.
+- **Medida do ritmo** (`check_watch_director`): velocidade máxima de 2,4-2,8 pés por
+  0,1 s de jogo (~26 pés/s, realista). O teletransporte é a compressão de tela (~6×),
+  não o diretor — é o alvo da 4b.
+
 ## Etapa 1 — Piso e marcações oficiais (`textures.ts`, `Court3D.tsx`)
 
 - Tábuas com variação de tom, veios e emendas desencontradas (hoje são só faixas).

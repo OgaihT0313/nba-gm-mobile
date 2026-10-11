@@ -196,6 +196,28 @@ function CameraRig({
 /* ------------------------------------------------------------------ */
 /* The floor.                                                          */
 /* ------------------------------------------------------------------ */
+// Dev builds only: the renderer's counters (draw calls, triangles, live
+// geometries/textures) and the last 240 frame times, on globalThis.__court3d,
+// so each stage of PLANO-3D can be measured from the browser console.
+// useFrame runs before the render, so the counters describe the previous frame.
+function RenderProbe() {
+  const gl = useThree((s) => s.gl);
+  const frames = useRef<number[]>([]);
+  useFrame((_, dt) => {
+    const f = frames.current;
+    f.push(dt * 1000);
+    if (f.length > 240) f.shift();
+    (globalThis as any).__court3d = {
+      calls: gl.info.render.calls,
+      triangles: gl.info.render.triangles,
+      geometries: gl.info.memory.geometries,
+      textures: gl.info.memory.textures,
+      frameMs: f.slice(),
+    };
+  });
+  return null;
+}
+
 function Floor({ wood, primary, secondary, label }: { wood: string; primary: string; secondary: string; label: string }) {
   const gl = useThree((s) => s.gl);
   const material = useMemo(() => {
@@ -364,6 +386,7 @@ export default function Court3D({
         <color attach="background" args={['#04060b']} />
         <fog attach="fog" args={['#04060b', 160, 520]} />
         <CameraRig stateRef={camState} preset={preset} courtRef={courtRef} />
+        {__DEV__ ? <RenderProbe /> : null}
         <Scene home={home} away={away} courtRef={courtRef} visual={visual} homeLabel={homeLabel} numbers={numbers} />
       </Canvas>
     </View>
