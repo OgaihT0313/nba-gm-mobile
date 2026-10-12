@@ -157,6 +157,8 @@ for (let y = 0; y < N; y++) {
   s = playoffs(s);
   const h = s.seasonHistory![s.seasonHistory!.length - 1];
   console.log(`T${h.season} ${h.userTeamId} ${h.wins}-${h.losses} seed ${h.seed ?? '-'} ${RESULT_LABEL[h.result]} | campeão ${h.championId} x ${h.runnerUpId} | melhor ${h.bestRecord.teamId} ${h.bestRecord.wins} | pts ${s.players[h.leaders.pts!.playerId].name} ${h.leaders.pts!.value.toFixed(1)} | folha ${(h.payroll / 1e6).toFixed(0)}M`);
+  const roy = s.players[s.awardHistory[s.awardHistory.length - 1].roy];
+  console.log(`   ROY ${roy?.name} ${roy?.seasonStats?.ppg.toFixed(1)} pts (${roy?.ovr} OVR${roy?.draftInfo ? `, pick ${roy.draftInfo.pick}` : ''})`);
   check('o vice existe e não é o campeão', !!h.runnerUpId && h.runnerUpId !== h.championId);
   check('o campeão bate com o awardHistory', s.awardHistory[s.awardHistory.length - 1].championId === h.championId);
   check('a melhor campanha tem as vitórias máximas', h.bestRecord.wins === Math.max(...s.teams.map(t => t.wins || 0)));

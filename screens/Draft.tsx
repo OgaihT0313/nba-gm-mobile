@@ -40,8 +40,8 @@ const CONFIDENCE = (u: number) =>
       : u <= 6 ? { label: 'Incerto', color: COLORS.warn }
         : { label: 'Nebuloso', color: COLORS.bad };
 
-const lo = (r: ScoutReport) => r.estimate - r.uncertainty;
-const hi = (r: ScoutReport) => r.estimate + r.uncertainty;
+const lo = (r: ScoutReport) => Math.max(PROJECTION_FLOOR, r.estimate - r.uncertainty);
+const hi = (r: ScoutReport) => Math.min(PROJECTION_CEIL, r.estimate + r.uncertainty);
 const bandText = (r: ScoutReport) => (r.uncertainty === 0 ? `${r.estimate}` : `${lo(r)}–${hi(r)}`);
 const pct = (v: number) => Math.max(0, Math.min(1, (v - RAIL_MIN) / (RAIL_MAX - RAIL_MIN)));
 

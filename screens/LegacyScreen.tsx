@@ -9,7 +9,7 @@ import { Panel, ScreenTitle, SectionLabel, BodyText, FilterRow, TeamLogo, Tag, G
 import { useDesktop } from '../components/desktop/useDesktop';
 import { DPage, DTitle, DTabs, Cols, Col } from '../components/desktop/kit';
 import {
-  RESULT_LABEL, evaluateAchievements, franchiseRecords, hallOfFame, hallOfFameScore, jerseyCandidates, leagueRecords,
+  RESULT_LABEL, evaluateAchievements, seasonEntries, franchiseRecords, hallOfFame, hallOfFameScore, jerseyCandidates, leagueRecords,
 } from '../services/historyService';
 
 // Legado: the save's memory. Achievements, the season-by-season ledger, league
@@ -45,7 +45,6 @@ const LegacyScreen: React.FC<Props> = ({ season, onRetireJersey }) => {
     return `${start}-${String(start + 1).slice(2)}`;
   };
 
-  const history = season.seasonHistory ?? [];
   const achievements = evaluateAchievements(season);
   const unlocked = achievements.filter((a) => a.unlocked).length;
 
@@ -71,35 +70,43 @@ const LegacyScreen: React.FC<Props> = ({ season, onRetireJersey }) => {
     </View>
   );
 
+  const entries = seasonEntries(season);
   const seasonList = (
     <View style={{ gap: 8 }}>
       <SectionLabel>Temporada a temporada</SectionLabel>
-      {history.length === 0 ? (
+      {entries.length === 0 ? (
         <Panel><BodyText>O histórico começa quando a primeira temporada desta carreira terminar.</BodyText></Panel>
-      ) : [...history].reverse().map((h) => {
-        const champ = h.result === 'champion';
-        const mvp = season.awardHistory.find((a) => a.season === h.season)?.mvp;
+      ) : [...entries].reverse().map((e) => {
+        const h = e.record;
+        // Seasons from before the history was kept: only the title is known.
+        const champ = h ? h.result === 'champion' : e.championId === season.userTeamId;
         return (
-          <Panel key={h.season} padding={13} bar={champ ? COLORS.gold : undefined}>
+          <Panel key={e.season} padding={13} bar={champ ? COLORS.gold : undefined}>
             <View className="flex-row items-center" style={{ gap: 10 }}>
               <View style={{ width: 62 }}>
-                <Text style={{ fontFamily: FONT.cond800, fontSize: 16, color: COLORS.text }}>T{h.season}</Text>
-                <Text style={{ fontFamily: FONT.body500, fontSize: 11.5, color: COLORS.dim }}>{yearOf(h.season)}</Text>
+                <Text style={{ fontFamily: FONT.cond800, fontSize: 16, color: COLORS.text }}>T{e.season}</Text>
+                <Text style={{ fontFamily: FONT.body500, fontSize: 11.5, color: COLORS.dim }}>{yearOf(e.season)}</Text>
               </View>
               <View style={{ flex: 1 }}>
-                <Text style={{ fontFamily: FONT.cond800, fontSize: 20, color: COLORS.text }}>
-                  {h.wins}-{h.losses}
-                  {h.seed ? <Text style={{ fontFamily: FONT.cond700, fontSize: 14, color: COLORS.muted }}>  {h.seed}º</Text> : null}
-                </Text>
+                {h ? (
+                  <Text style={{ fontFamily: FONT.cond800, fontSize: 20, color: COLORS.text }}>
+                    {h.wins}-{h.losses}
+                    {h.seed ? <Text style={{ fontFamily: FONT.cond700, fontSize: 14, color: COLORS.muted }}>  {h.seed}º</Text> : null}
+                  </Text>
+                ) : (
+                  <BodyText size={12.5}>Campanha não registrada</BodyText>
+                )}
               </View>
-              <Tag color={champ ? COLORS.gold : h.result === 'missed' ? COLORS.muted : COLORS.good} filled={champ}>{RESULT_LABEL[h.result]}</Tag>
+              {h ? (
+                <Tag color={champ ? COLORS.gold : h.result === 'missed' ? COLORS.muted : COLORS.good} filled={champ}>{RESULT_LABEL[h.result]}</Tag>
+              ) : champ ? <Tag color={COLORS.gold} filled>Campeão</Tag> : null}
             </View>
             <View className="flex-row items-center" style={{ gap: 6, marginTop: 8, flexWrap: 'wrap' }}>
-              <TeamLogo teamId={h.championId} size={18} />
+              {e.championId ? <TeamLogo teamId={e.championId} size={18} /> : null}
               <Text style={{ fontFamily: FONT.body600, fontSize: 13, color: COLORS.textSoft }}>
-                {nick(h.championId)}{h.runnerUpId ? ` venceu ${nick(h.runnerUpId)}` : ' campeão'}
+                {nick(e.championId ?? undefined)}{h?.runnerUpId ? ` venceu ${nick(h.runnerUpId)}` : ' campeão'}
               </Text>
-              {mvp ? <Text style={{ fontFamily: FONT.body500, fontSize: 13, color: COLORS.muted }}>· MVP {name(mvp)}</Text> : null}
+              {e.mvp ? <Text style={{ fontFamily: FONT.body500, fontSize: 13, color: COLORS.muted }}>· MVP {name(e.mvp)}</Text> : null}
             </View>
           </Panel>
         );

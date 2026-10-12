@@ -3,7 +3,7 @@
 // Like the press promise, it only matters because it turns into numbers the
 // game reads: a kept promise speeds his development and lifts his morale, a
 // broken one sinks his morale far enough to put a trade request in play.
-import type { Event, Player, SeasonState } from '../types';
+import type { Player, SeasonState } from '../types';
 
 type PlayerMap = { [key: string]: Player };
 
@@ -40,7 +40,7 @@ export const canPromiseMinutes = (season: SeasonState, p: Player): { ok: boolean
   return { ok: true };
 };
 
-export interface SettledPromise { playerId: string; kept: boolean; mpg: number; event: Event }
+export interface SettledPromise { playerId: string; kept: boolean; mpg: number }
 
 export const settleMinutesPromise = (
   prev: SeasonState, teamOf: { [playerId: string]: string },
@@ -56,13 +56,6 @@ export const settleMinutesPromise = (
     playerId: p.id,
     kept,
     mpg,
-    event: {
-      message: kept
-        ? `🤝 Promessa cumprida: ${p.name} jogou ${mpg.toFixed(1)} min por jogo. Ele chega mais motivado e evolui mais rápido.`
-        : `💢 Promessa quebrada: ${p.name} jogou só ${mpg.toFixed(1)} min por jogo (prometido: ${PROMISE_MPG}). A moral dele despencou.`,
-      type: kept ? 'info' : 'injury',
-      teamIds: [prev.userTeamId],
-    },
   };
 };
 

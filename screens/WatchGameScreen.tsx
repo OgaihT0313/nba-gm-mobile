@@ -811,7 +811,7 @@ const WatchGameScreen: React.FC<WatchGameScreenProps> = ({
               {phase === 'final' ? 'FINAL' : `${periodLabel(quarter, phase)} · ${clockLabel(clock, quarter)}`}
             </Text>
             <Text numberOfLines={1} style={{ fontFamily: FONT.cond600, fontSize: 10.5, letterSpacing: 1, color: COLORS.muted, textTransform: 'uppercase' }}>
-              {phase === 'live' ? `${WATCH_PLAY_META[play].label} · ${timeoutsLeft} tempo${timeoutsLeft === 1 ? '' : 's'}` : 'Assistir ao jogo'}
+              {phase === 'live' ? `${WATCH_PLAY_META[play].label} · ${timeoutsLeft} tempo${timeoutsLeft === 1 ? '' : 's'}` : decider ? decider.split(' · ')[0] : 'Assistir ao jogo'}
             </Text>
           </View>
           <View style={{ width: desktop ? 70 : 46, alignItems: 'center', justifyContent: 'center' }}>

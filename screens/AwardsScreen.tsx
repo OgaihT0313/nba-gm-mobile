@@ -35,7 +35,9 @@ const AwardsScreen: React.FC<AwardsScreenProps> = ({ season, onGoToPlayoffs, onS
   const hasPlayoffAwards = !!(playoffAwards?.eastConfFinalsMVP || playoffAwards?.westConfFinalsMVP || playoffAwards?.finalsMVP);
   const isChampionScreen = !!champion;
   const userWon = champion?.id === season.userTeamId;
-  const seasonNumber = season.gmLegacy.seasons || season.awardHistory.length || 1;
+  // awardHistory only grows when the champion is crowned, so until then the
+  // season being played is one past it (it said "Temporada 1" in season 2).
+  const seasonNumber = season.awardHistory.length + (champion ? 0 : 1);
 
   // "4-2" from the user's side of the Finals, when the Finals resolved.
   const finalsScore = season.playoff?.finals?.s;

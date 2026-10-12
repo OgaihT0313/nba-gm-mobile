@@ -134,7 +134,7 @@ const promiseOption = (season: SeasonState, kind: PressPromise['kind'], label: s
     };
 };
 
-const buildSlumpConference = (season: SeasonState, team: Team): Decision => {
+const buildSlumpConference = (season: SeasonState, team: Team, again = false): Decision => {
     const target = calloutTarget(team, season.players);
     const options: DecisionOption[] = [
         {
@@ -160,14 +160,20 @@ const buildSlumpConference = (season: SeasonState, team: Team): Decision => {
         id: `press_conference:slump:${season.gamesPlayed}`,
         kind: 'press_conference',
         day: season.gamesPlayed,
-        headline: `${SLUMP_STREAK} derrotas seguidas`,
-        body: `A sala de imprensa está cheia. O ${team.name} perdeu os últimos ${SLUMP_STREAK} e está ${team.wins}-${team.losses}. `
-            + `A primeira pergunta é se o problema está no elenco. O que você responde?`,
+        headline: again ? `Mais ${SLUMP_STREAK} derrotas seguidas` : `${SLUMP_STREAK} derrotas seguidas`,
+        body: again
+            ? `De novo a sala cheia: o ${team.name} perdeu mais ${SLUMP_STREAK} e está ${team.wins}-${team.losses}. `
+                + `Agora a pergunta é se o problema é você. O que você responde?`
+            : `A sala de imprensa está cheia. O ${team.name} perdeu os últimos ${SLUMP_STREAK} e está ${team.wins}-${team.losses}. `
+                + `A primeira pergunta é se o problema está no elenco. O que você responde?`,
         options,
     };
 };
 
-const buildHotConference = (season: SeasonState, team: Team): Decision => {
+// `again`: the team already faced the press this season. The same opening
+// question, word for word, on day 11 and day 41 read as a glitch (phone
+// playthrough, 2026-10-12).
+const buildHotConference = (season: SeasonState, team: Team, again = false): Decision => {
     const target = praiseTarget(team, season.players);
     const star = target ? jealousStar(team, season.players, target.id) : undefined;
     const options: DecisionOption[] = [
@@ -193,9 +199,12 @@ const buildHotConference = (season: SeasonState, team: Team): Decision => {
         id: `press_conference:hot:${season.gamesPlayed}`,
         kind: 'press_conference',
         day: season.gamesPlayed,
-        headline: `${HOT_STREAK} vitórias seguidas`,
-        body: `O ${team.name} venceu os últimos ${HOT_STREAK} e está ${team.wins}-${team.losses}. `
-            + `A pergunta é inevitável: o time é candidato ao título?`,
+        headline: again ? `Mais ${HOT_STREAK} vitórias seguidas` : `${HOT_STREAK} vitórias seguidas`,
+        body: again
+            ? `De volta à sala de imprensa: o ${team.name} emendou mais ${HOT_STREAK} vitórias e está ${team.wins}-${team.losses}. `
+                + `Já ninguém pergunta se o time é bom; perguntam se é o favorito ao título.`
+            : `O ${team.name} venceu os últimos ${HOT_STREAK} e está ${team.wins}-${team.losses}. `
+                + `A pergunta é inevitável: o time é candidato ao título?`,
         options,
     };
 };
@@ -216,8 +225,9 @@ export const pressConferenceFor = (after: SeasonState): Decision | undefined => 
     if (!team) return undefined;
 
     const streak = currentStreak(after.schedule, team.id);
-    if (streak === -SLUMP_STREAK) return buildSlumpConference(after, team);
-    if (streak === HOT_STREAK) return buildHotConference(after, team);
+    const again = held.length > 0;
+    if (streak === -SLUMP_STREAK) return buildSlumpConference(after, team, again);
+    if (streak === HOT_STREAK) return buildHotConference(after, team, again);
     return undefined;
 };
 

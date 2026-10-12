@@ -142,13 +142,24 @@ export const leagueRecords = (season: SeasonState) => {
   };
 };
 
+// Every finished season, oldest first, with whatever the save remembers of it:
+// the full SeasonRecord when one was kept, and always the champion and MVP.
+// awardHistory reaches back to season 1; seasonHistory only to the update
+// that added it, and a save's earlier titles must still count.
+export interface SeasonEntry { season: number; championId: string | null; mvp?: string; record?: SeasonRecord }
+export const seasonEntries = (season: SeasonState): SeasonEntry[] => {
+  const recs = new Map((season.seasonHistory ?? []).map((h) => [h.season, h]));
+  return season.awardHistory.map((a) => ({ season: a.season, championId: a.championId, mvp: a.mvp, record: recs.get(a.season) }));
+};
+const userTitle = (season: SeasonState) => (e: SeasonEntry) => e.championId === season.userTeamId;
+
 export const franchiseRecords = (season: SeasonState) => {
   const mine = (season.seasonHistory ?? []).filter((h) => h.userTeamId === season.userTeamId);
   const best = mine.reduce<SeasonRecord | undefined>((acc, h) => (!acc || h.wins > acc.wins ? h : acc), undefined);
   const worst = mine.reduce<SeasonRecord | undefined>((acc, h) => (!acc || h.wins < acc.wins ? h : acc), undefined);
   return {
     seasons: mine.length,
-    titles: mine.filter((h) => h.result === 'champion').length,
+    titles: seasonEntries(season).filter(userTitle(season)).length,
     finals: mine.filter((h) => resultAtLeast(h.result, 'finals')).length,
     playoffs: mine.filter((h) => resultAtLeast(h.result, 'round1')).length,
     wins: mine.reduce((a, h) => a + h.wins, 0),
@@ -173,7 +184,7 @@ export interface Achievement {
 
 // The longest run of consecutive seasons satisfying `ok`, and the season it
 // first reached `target` (if it did).
-const streak = (mine: SeasonRecord[], ok: (h: SeasonRecord) => boolean, target: number) => {
+const streak = <T extends { season: number }>(mine: T[], ok: (h: T) => boolean, target: number) => {
   let run = 0;
   let best = 0;
   let at: number | undefined;
@@ -187,18 +198,21 @@ const streak = (mine: SeasonRecord[], ok: (h: SeasonRecord) => boolean, target: 
 
 export const evaluateAchievements = (season: SeasonState): Achievement[] => {
   const mine = (season.seasonHistory ?? []).filter((h) => h.userTeamId === season.userTeamId);
-  const titles = mine.filter((h) => h.result === 'champion');
+  // Titles come from every season, not only the recorded ones (see seasonEntries).
+  const entries = seasonEntries(season);
+  const won = userTitle(season);
+  const titles = entries.filter(won);
   const firstWhere = (ok: (h: SeasonRecord) => boolean) => mine.find(ok)?.season;
   const draftedByUs = (id?: string) => !!id && season.players[id]?.draftInfo?.teamId === season.userTeamId;
 
   // Three titles inside any five-season window.
   let dynastyAt: number | undefined;
   let dynastyBest = 0;
-  mine.forEach((_, i) => {
-    const window = mine.slice(Math.max(0, i - 4), i + 1);
-    const n = window.filter((h) => h.result === 'champion').length;
+  entries.forEach((_, i) => {
+    const window = entries.slice(Math.max(0, i - 4), i + 1);
+    const n = window.filter(won).length;
     dynastyBest = Math.max(dynastyBest, n);
-    if (dynastyAt === undefined && n >= 3) dynastyAt = mine[i].season;
+    if (dynastyAt === undefined && n >= 3) dynastyAt = entries[i].season;
   });
 
   // A bottom season (30 wins or fewer) turned into a conference final within
@@ -212,7 +226,7 @@ export const evaluateAchievements = (season: SeasonState): Achievement[] => {
 
   const homegrownMvp = season.awardHistory.find((a) => draftedByUs(a.mvp));
   const homegrownRoy = season.awardHistory.find((a) => draftedByUs(a.roy));
-  const backToBack = streak(mine, (h) => h.result === 'champion', 2);
+  const backToBack = streak(entries, won, 2);
   const playoffRun = streak(mine, (h) => resultAtLeast(h.result, 'round1'), 5);
   const bestRecordAt = firstWhere((h) => h.bestRecord.teamId === season.userTeamId);
 
@@ -236,8 +250,8 @@ export const evaluateAchievements = (season: SeasonState): Achievement[] => {
     },
     {
       id: 'bargain_title', title: 'Título econômico', description: 'Ser campeão com a folha abaixo do teto salarial.',
-      unlocked: titles.some((h) => h.payroll <= SALARY_CAP),
-      season: titles.find((h) => h.payroll <= SALARY_CAP)?.season,
+      unlocked: mine.some((h) => h.result === 'champion' && h.payroll <= SALARY_CAP),
+      season: mine.find((h) => h.result === 'champion' && h.payroll <= SALARY_CAP)?.season,
     },
     {
       id: 'homegrown_mvp', title: 'Cria da casa', description: 'Um jogador draftado por você ganha o MVP.',

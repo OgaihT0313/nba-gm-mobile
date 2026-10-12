@@ -65,7 +65,6 @@ export const startOffseason = (prev: SeasonState): SeasonState => {
   if (promise?.kept) devBonus[promise.playerId] = (devBonus[promise.playerId] ?? 1) * PROMISE_DEV_BONUS;
   const { updatedPlayers: progressed, progressionEvents } = simulationEngine.runPlayerProgression(withCareers, devBonus, teamOf, prev.userTeamId);
   const updatedPlayers = promise ? applyPromiseMorale(progressed, promise) : progressed;
-  if (promise) progressionEvents.unshift(promise.event);
   // Snapshot last season's OVR so next season's MIP can measure real growth.
   for (const id in updatedPlayers) {
     updatedPlayers[id].ovrLastSeason = prev.players[id]?.ovr ?? updatedPlayers[id].ovr;
@@ -215,6 +214,9 @@ export const startOffseason = (prev: SeasonState): SeasonState => {
     draft: advanced.draft,
     // Settled above, whatever the outcome: one promise covers one season.
     minutesPromise: undefined,
+    lastMinutesPromise: promise
+      ? { playerId: promise.playerId, name: prev.players[promise.playerId]?.name ?? '', kept: promise.kept, mpg: promise.mpg }
+      : undefined,
     coaches: coaching.coaches,
     // One offseason generates several HUNDRED events against a 60-slot
     // buffer, so this array is a budget, not a list. It used to be plain

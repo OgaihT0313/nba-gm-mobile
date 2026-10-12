@@ -10,6 +10,7 @@ import { isRival, rivalryReason, revengePlayers, REVENGE_BOOST, RIVAL_WIN_MORALE
 import { currentStreak, nextGame, winProbability, teamResults } from '../services/formService';
 import { sortStandings } from '../services/scheduleService';
 import { COLORS, RADIUS, FONT, withAlpha, visibleTeamColor, colorDistance } from '../src/theme/tokens';
+import { PROMISE_MPG } from '../services/developmentService';
 import Screen, { Body } from '../components/ui/Screen';
 import {
   Panel, MonoLabel, Eyebrow, HeroTitle, Stat, Meter, CtaButton, GhostButton, SectionLabel,
@@ -186,6 +187,19 @@ const SimulationScreen: React.FC<SimulationScreenProps> = ({
     </Panel>
   ) : null;
 
+  // Last season's minutes promise, settled in the offseason.
+  const promise = season.gamesPlayed === 0 ? season.lastMinutesPromise : undefined;
+  const promisePanel = promise ? (
+    <Panel bar={promise.kept ? COLORS.good : COLORS.bad}>
+      <SectionLabel color={promise.kept ? COLORS.good : COLORS.bad}>{promise.kept ? 'Promessa cumprida' : 'Promessa quebrada'}</SectionLabel>
+      <BodyText style={{ marginTop: 6 }}>
+        {promise.kept
+          ? `${promise.name} jogou ${promise.mpg.toFixed(1)} min por jogo, como você prometeu. Chega mais motivado e evoluiu mais rápido nas férias.`
+          : `${promise.name} jogou só ${promise.mpg.toFixed(1)} min por jogo; você prometeu ${PROMISE_MPG}. A moral dele despencou e um pedido de troca pode vir.`}
+      </BodyText>
+    </Panel>
+  ) : null;
+
   const retirementsPanel = retirements.length > 0 ? (
     <Panel>
       <SectionLabel>Aposentadorias · {retirements.length}</SectionLabel>
@@ -355,6 +369,7 @@ const SimulationScreen: React.FC<SimulationScreenProps> = ({
               </Panel>
             ) : null}
 
+            {promisePanel}
             {movesPanel}
             {retirementsPanel}
 
@@ -568,6 +583,7 @@ const SimulationScreen: React.FC<SimulationScreenProps> = ({
           </Panel>
         ) : null}
 
+        {promisePanel}
         {movesPanel}
         {retirementsPanel}
 

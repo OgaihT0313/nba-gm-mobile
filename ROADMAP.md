@@ -80,6 +80,30 @@ sonoros aparecem como player de mídia no Android (não deveriam pausar música 
 app — `mixWithOthers` é o padrão —, mas não confirmado). As correções e o modo
 claro/escuro (`11f8cb3`) entraram no APK de 2026-10-12 (build EAS `fbeae856`).
 
+### QA no aparelho 2 — FEITO (2026-10-12, APK `6aac76ad`)
+
+Percurso no Galaxy com a carreira de teste do Thunder: modo claro, Treino/promessa,
+Legado, temporada inteira com decisões e coletivas, playoffs com **Jogo 7 das Finais
+no 3D** (tática, pular, coroação), draft, mercado. Log sem crash, ANR ou erro de JS
+(só avisos de biblioteca: `THREE.Clock`, `pixelStorei` do EXGL). Corrigido depois:
+- Legado ignorava as temporadas de antes do histórico (bicampeão aparecia 1/2):
+  títulos agora vêm do `awardHistory` (`seasonEntries`), e a aba Temporadas lista as
+  antigas como "campanha não registrada".
+- Prêmios dizia "Temporada 1" na temporada 2.
+- Draft: classes geradas fracas demais (o nº 1 abaixo do 9º calouro real de 2025) —
+  calouro do ano com 5,6 pts. Curva nova `66 + 15·e^(−slot/8)` (~81 no nº 1, ~71 no
+  10º); o reforço de evolução jovem do item 7 foi desfeito na mesma medida (top-100
+  estável em 12 anos, 86,2 → 86,0-86,7; calouro do ano 11-17 pts). Faixa de projeção
+  presa a 60-99 (mostrava "43-67").
+- Resultado da promessa de minutos ia para o feed e sumia: agora é painel na tela da
+  temporada (`lastMinutesPromise`), e o cartão mostra o progresso (min/jogo até agora)
+  e como cumprir.
+- Placar do 3D dizia "Assistir ao jogo" no Jogo 7; coletiva repetida na mesma
+  temporada tinha o mesmo texto palavra por palavra.
+Observações sem correção: trocar o modo claro/escuro volta a tela pro topo; o melhor
+time da liga fica perto do teto real (~67 vitórias) desde o item 12, e a carreira de
+teste (folha de $249M montada com trocas) fez 74-8.
+
 ### 3. Ratings de veteranos (L) — FEITO (2026-10-12)
 
 O caso que abriu o item (T.J. McConnell 88 aos 34) já tinha sido corrigido pela

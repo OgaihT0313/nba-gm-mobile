@@ -493,6 +493,9 @@ export interface SeasonState {
   // awardHistory.length + 1 of the season it covers). Settled by
   // startOffseason: 24+ mpg keeps it. One a season, like the press promise.
   minutesPromise?: { playerId: string; season: number };
+  // How last season's promise ended, shown on the season screen before the
+  // first game (the event feed buries anything an offseason says).
+  lastMinutesPromise?: { playerId: string; name: string; kept: boolean; mpg: number };
   // The owner's mandate + the user's job security for the current season (see
   // ownerService.ts). Re-derived at each season start, updated as games are
   // played, and judged when a champion is crowned.

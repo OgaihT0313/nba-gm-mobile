@@ -266,7 +266,14 @@ const PlayerDetailModal: React.FC<{
         promised ? (
           <View style={{ gap: 4, marginTop: 4 }}>
             <Tag color={COLORS.good}>Minutos prometidos · {PROMISE_MPG}+</Tag>
-            <BodyText size={12.5} color={COLORS.muted}>Cumprida, ele evolui mais rápido e chega mais motivado. Quebrada, a moral dele despenca e ele pode pedir para sair.</BodyText>
+            {player.seasonStats && player.seasonStats.gp > 0 ? (
+              <BodyText size={12.5} color={player.seasonStats.mpg >= PROMISE_MPG ? COLORS.good : COLORS.warn}>
+                Até agora: {player.seasonStats.mpg.toFixed(1)} min por jogo em {player.seasonStats.gp} jogos.
+              </BodyText>
+            ) : null}
+            <BodyText size={12.5} color={COLORS.muted}>
+              Para cumprir, ele precisa estar no quinteto ou no topo da rotação (Editar rotação). Cumprida, ele evolui mais rápido e chega mais motivado. Quebrada, a moral dele despenca e ele pode pedir para sair.
+            </BodyText>
           </View>
         ) : (
           <View style={{ gap: 4, marginTop: 4 }}>
@@ -276,7 +283,7 @@ const PlayerDetailModal: React.FC<{
               onPress={() => development.onPromise(player.id)}
             />
             <BodyText size={12} color={COLORS.dim}>
-              {promise?.ok ? 'Uma promessa por temporada. Ele cobra no fim do ano.' : promise?.why}
+              {promise?.ok ? `Uma promessa por temporada, cobrada no fim do ano: ele precisa terminar com ${PROMISE_MPG}+ min por jogo.` : promise?.why}
             </BodyText>
           </View>
         )

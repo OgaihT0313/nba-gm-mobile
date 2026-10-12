@@ -1310,14 +1310,14 @@ const runPlayerProgression = (
         const youngOpportunity = 0.45 + opportunity * 0.55; // minutes help, but a kid still grows on the bench
         if (player.age < 24) { // Peak development
             if (Math.random() < (0.72 + potential * 0.07) * youngOpportunity * physicalGrowth) {
-                change = Math.floor(Math.random() * (potential / 2 + 2.6) * youngOpportunity) + 1;
+                change = Math.floor(Math.random() * (potential / 2 + 2) * youngOpportunity) + 1;
             }
         } else if (player.age < 28) { // Late development — the good ones keep climbing
             // 0.50, was 0.42: over twelve simulated years the 24-28 band sank
             // from 76.4 to ~74 OVR and the top hundred eroded with it (86.4 ->
             // 85.2); nobody grew into the stars' places fast enough.
-            if (Math.random() < (0.55 + potential * 0.08) * opportunity * physicalGrowth) {
-                change = Math.random() < 0.82 ? (Math.random() < potential * 0.1 ? 2 : 1) : -1;
+            if (Math.random() < (0.45 + potential * 0.08) * opportunity * physicalGrowth) {
+                change = Math.random() < 0.8 ? (Math.random() < potential * 0.06 ? 2 : 1) : -1;
             }
         } else if (player.age < 31) { // Prime plateau
             if (Math.random() < 0.38) {

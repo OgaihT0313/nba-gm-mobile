@@ -48,7 +48,12 @@ const POS: Player['pos'][] = LINEUP_POSITIONS;
 
 // A prospect's projected slot (0-indexed) drives their rating band and how
 // likely they are to have elite potential.
-const projectedOvr = (slot: number) => clamp(Math.round(76 - slot * 0.5 + rand(-2.5, 2.5)), 61, 77);
+// Steep at the top, flat at the bottom, like a real class: ~84 at #1, ~78 at
+// #5, ~73 at #10, ~67 at #30. It used to be 76 - 0.5/slot capped at 77, which
+// put the best rookie of every generated class below the ninth-best real one
+// (2025's: 86, 86, 82, 81, 79...) -- rookies never earned minutes and Rookie
+// of the Year went to a 5.6-point scorer.
+const projectedOvr = (slot: number) => clamp(Math.round(66 + 15 * Math.exp(-slot / 8) + rand(-2.5, 2.5)), 62, 86);
 
 const projectedPotential = (slot: number): Player['potential'] => {
     const roll = Math.random();
@@ -84,9 +89,9 @@ const makeProspect = (slot: number, usedIds: Set<string>, idPrefix = 'rookie_'):
     const pos = pick(POS);
     // Spread the headline into off/def + a full attribute breakdown centred on
     // ovr, so rookies flow through the same sim/UI code paths as everyone else.
-    const spread = () => clamp(ovr + randInt(-6, 6), 58, 82);
-    const off = clamp(ovr + randInt(-3, 3), 58, 82);
-    const def = clamp(ovr + randInt(-3, 3), 58, 82);
+    const spread = () => clamp(ovr + randInt(-6, 6), 58, 90);
+    const off = clamp(ovr + randInt(-3, 3), 58, 90);
+    const def = clamp(ovr + randInt(-3, 3), 58, 90);
 
     return {
         id,
@@ -134,7 +139,6 @@ const SCOUT_STEP = 0.55;
 // A wider band means less film and more disagreement. Correlating it with age
 // is safe (age is public) and reads true — an 19-year-old is a projection, not
 // a known quantity.
-const MAX_UNCERTAINTY = 12; // randInt(3,10) at its top, +2 for a teenager
 const initialUncertainty = (p: Player) => randInt(3, 10) + (p.age <= 19 ? 2 : 0);
 
 // Triangular noise (mean of two uniforms): usually a small miss, occasionally a
@@ -142,18 +146,18 @@ const initialUncertainty = (p: Player) => randInt(3, 10) + (p.age <= 19 ? 2 : 0)
 const evaluationError = (uncertainty: number) =>
     Math.round(((rand(-1, 1) + rand(-1, 1)) / 2) * uncertainty * 1.4);
 
-const ESTIMATE_FLOOR = 55;
-const ESTIMATE_CEIL = 85;
+// The board never projects outside the ratings the game can actually hold.
+const ESTIMATE_FLOOR = 60;
+const ESTIMATE_CEIL = 92;
 
 const noisyEstimate = (p: Player, uncertainty: number) =>
     clamp(p.ovr + evaluationError(uncertainty), ESTIMATE_FLOOR, ESTIMATE_CEIL);
 
-// The widest a projected band can ever be plotted. The draft screen draws its
-// rail from these rather than from a guessed 60-99: a band is estimate ±
-// uncertainty, so it reaches below the rating floor, and hardcoding the axis
-// produced a card reading "46-66" against a rail labelled "60 … 99".
-export const PROJECTION_FLOOR = ESTIMATE_FLOOR - MAX_UNCERTAINTY;
-export const PROJECTION_CEIL = ESTIMATE_CEIL + MAX_UNCERTAINTY;
+// The range a projected band is shown in: the rating scale itself. A band is
+// estimate ± uncertainty and can reach past it; the draft screen clips it here
+// rather than read "43-67" for a league whose floor is 60.
+export const PROJECTION_FLOOR = 60;
+export const PROJECTION_CEIL = 99;
 
 // Potential is a tier, so its fog is a chance of being off by one tier either
 // way rather than a numeric band.
