@@ -27,7 +27,9 @@
     "salary": 2648000,
     "contractYears": 1,
     "usage": 18.0,
-    "ts": 0.504
+    "ts": 0.504,
+    "heightCm": 211,
+    "weightKg": 114
   },
   "johnny_davis": {
     "id": "johnny_davis",
@@ -58,7 +60,9 @@
     "salary": 20104000,
     "contractYears": 1,
     "usage": 22.6,
-    "ts": 0.524
+    "ts": 0.524,
+    "heightCm": 188,
+    "weightKg": 86
   },
   "keith_edmonson": {
     "id": "keith_edmonson",
@@ -88,7 +92,9 @@
     "salary": 1820000,
     "contractYears": 5,
     "usage": 21.5,
-    "ts": 0.412
+    "ts": 0.412,
+    "heightCm": 196,
+    "weightKg": 93
   },
   "mike_glenn": {
     "id": "mike_glenn",
@@ -118,7 +124,9 @@
     "salary": 14691000,
     "contractYears": 5,
     "usage": 19.2,
-    "ts": 0.561
+    "ts": 0.561,
+    "heightCm": 196,
+    "weightKg": 93
   },
   "scott_hastings": {
     "id": "scott_hastings",
@@ -148,7 +156,9 @@
     "salary": 2648000,
     "contractYears": 2,
     "usage": 16.9,
-    "ts": 0.455
+    "ts": 0.455,
+    "heightCm": 201,
+    "weightKg": 99
   },
   "eddie_johnson": {
     "id": "eddie_johnson",
@@ -178,7 +188,9 @@
     "salary": 29383000,
     "contractYears": 5,
     "usage": 23.0,
-    "ts": 0.53
+    "ts": 0.53,
+    "heightCm": 196,
+    "weightKg": 93
   },
   "george_johnson": {
     "id": "george_johnson",
@@ -208,7 +220,9 @@
     "salary": 11173000,
     "contractYears": 3,
     "usage": 17.0,
-    "ts": 0.509
+    "ts": 0.509,
+    "heightCm": 211,
+    "weightKg": 114
   },
   "rudy_macklin": {
     "id": "rudy_macklin",
@@ -238,7 +252,9 @@
     "salary": 3489000,
     "contractYears": 5,
     "usage": 18.4,
-    "ts": 0.516
+    "ts": 0.516,
+    "heightCm": 201,
+    "weightKg": 99
   },
   "wes_matthews": {
     "id": "wes_matthews",
@@ -268,7 +284,9 @@
     "salary": 8042000,
     "contractYears": 2,
     "usage": 20.6,
-    "ts": 0.476
+    "ts": 0.476,
+    "heightCm": 196,
+    "weightKg": 93
   },
   "tom_mcmillen": {
     "id": "tom_mcmillen",
@@ -298,7 +316,9 @@
     "salary": 9859000,
     "contractYears": 3,
     "usage": 17.8,
-    "ts": 0.537
+    "ts": 0.537,
+    "heightCm": 201,
+    "weightKg": 99
   },
   "tree_rollins": {
     "id": "tree_rollins",
@@ -328,7 +348,9 @@
     "salary": 24744000,
     "contractYears": 5,
     "usage": 11.1,
-    "ts": 0.559
+    "ts": 0.559,
+    "heightCm": 211,
+    "weightKg": 114
   },
   "dan_roundfield": {
     "id": "dan_roundfield",
@@ -358,7 +380,9 @@
     "salary": 34950000,
     "contractYears": 1,
     "usage": 24.1,
-    "ts": 0.527
+    "ts": 0.527,
+    "heightCm": 201,
+    "weightKg": 99
   },
   "randy_smith": {
     "id": "randy_smith",
@@ -388,7 +412,9 @@
     "salary": 7756000,
     "contractYears": 3,
     "usage": 19.5,
-    "ts": 0.521
+    "ts": 0.521,
+    "heightCm": 196,
+    "weightKg": 93
   },
   "dominique_wilkins": {
     "id": "dominique_wilkins",
@@ -418,7 +444,10 @@
     "salary": 19795000,
     "contractYears": 4,
     "usage": 23.7,
-    "ts": 0.525
+    "ts": 0.525,
+    "heightCm": 201,
+    "weightKg": 99,
+    "skinTone": "#88583c"
   },
   "danny_ainge": {
     "id": "danny_ainge",
@@ -448,7 +477,9 @@
     "salary": 12990000,
     "contractYears": 2,
     "usage": 17.1,
-    "ts": 0.511
+    "ts": 0.511,
+    "heightCm": 196,
+    "weightKg": 93
   },
   "nate_archibald": {
     "id": "nate_archibald",
@@ -478,7 +509,10 @@
     "salary": 12488000,
     "contractYears": 1,
     "usage": 18.1,
-    "ts": 0.522
+    "ts": 0.522,
+    "heightCm": 196,
+    "weightKg": 93,
+    "skinTone": "#5c3b2d"
   },
   "larry_bird": {
     "id": "larry_bird",
@@ -508,7 +542,10 @@
     "salary": 50724000,
     "contractYears": 1,
     "usage": 24.9,
-    "ts": 0.559
+    "ts": 0.559,
+    "heightCm": 201,
+    "weightKg": 99,
+    "skinTone": "#bc7763"
   },
   "charles_bradley": {
     "id": "charles_bradley",
@@ -538,7 +575,9 @@
     "salary": 3068000,
     "contractYears": 5,
     "usage": 19.4,
-    "ts": 0.458
+    "ts": 0.458,
+    "heightCm": 196,
+    "weightKg": 93
   },
   "quinn_buckner": {
     "id": "quinn_buckner",
@@ -568,7 +607,9 @@
     "salary": 16238000,
     "contractYears": 1,
     "usage": 19.7,
-    "ts": 0.484
+    "ts": 0.484,
+    "heightCm": 196,
+    "weightKg": 93
   },
   "m_l_carr": {
     "id": "m_l_carr",
@@ -598,7 +639,9 @@
     "salary": 5389000,
     "contractYears": 2,
     "usage": 17.8,
-    "ts": 0.487
+    "ts": 0.487,
+    "heightCm": 201,
+    "weightKg": 99
   },
   "gerald_henderson": {
     "id": "gerald_henderson",
@@ -629,7 +672,9 @@
     "salary": 11599000,
     "contractYears": 3,
     "usage": 20.1,
-    "ts": 0.511
+    "ts": 0.511,
+    "heightCm": 196,
+    "weightKg": 93
   },
   "cedric_maxwell": {
     "id": "cedric_maxwell",
@@ -659,7 +704,9 @@
     "salary": 22424000,
     "contractYears": 4,
     "usage": 17.1,
-    "ts": 0.59
+    "ts": 0.59,
+    "heightCm": 201,
+    "weightKg": 99
   },
   "kevin_mchale": {
     "id": "kevin_mchale",
@@ -689,7 +736,10 @@
     "salary": 19795000,
     "contractYears": 5,
     "usage": 19.4,
-    "ts": 0.57
+    "ts": 0.57,
+    "heightCm": 201,
+    "weightKg": 99,
+    "skinTone": "#b36d5d"
   },
   "robert_parish": {
     "id": "robert_parish",
@@ -719,7 +769,10 @@
     "salary": 40518000,
     "contractYears": 2,
     "usage": 24.1,
-    "ts": 0.577
+    "ts": 0.577,
+    "heightCm": 211,
+    "weightKg": 114,
+    "skinTone": "#6b4437"
   },
   "rick_robey": {
     "id": "rick_robey",
@@ -749,7 +802,9 @@
     "salary": 3309000,
     "contractYears": 4,
     "usage": 16.2,
-    "ts": 0.503
+    "ts": 0.503,
+    "heightCm": 211,
+    "weightKg": 114
   },
   "scott_wedman": {
     "id": "scott_wedman",
@@ -779,7 +834,9 @@
     "salary": 13145000,
     "contractYears": 4,
     "usage": 20.6,
-    "ts": 0.496
+    "ts": 0.496,
+    "heightCm": 201,
+    "weightKg": 99
   },
   "john_bagley": {
     "id": "john_bagley",
@@ -809,7 +866,9 @@
     "salary": 5072000,
     "contractYears": 1,
     "usage": 21.9,
-    "ts": 0.477
+    "ts": 0.477,
+    "heightCm": 196,
+    "weightKg": 93
   },
   "jeff_cook": {
     "id": "jeff_cook",
@@ -839,7 +898,9 @@
     "salary": 7268000,
     "contractYears": 5,
     "usage": 14.8,
-    "ts": 0.515
+    "ts": 0.515,
+    "heightCm": 201,
+    "weightKg": 99
   },
   "bruce_flowers": {
     "id": "bruce_flowers",
@@ -869,7 +930,9 @@
     "salary": 9124000,
     "contractYears": 4,
     "usage": 16.5,
-    "ts": 0.565
+    "ts": 0.565,
+    "heightCm": 201,
+    "weightKg": 99
   },
   "world_free": {
     "id": "world_free",
@@ -899,7 +962,9 @@
     "salary": 29383000,
     "contractYears": 4,
     "usage": 28.8,
-    "ts": 0.518
+    "ts": 0.518,
+    "heightCm": 196,
+    "weightKg": 93
   },
   "steve_hayes": {
     "id": "steve_hayes",
@@ -929,7 +994,9 @@
     "salary": 3309000,
     "contractYears": 2,
     "usage": 12.0,
-    "ts": 0.503
+    "ts": 0.503,
+    "heightCm": 211,
+    "weightKg": 114
   },
   "phil_hubbard": {
     "id": "phil_hubbard",
@@ -959,7 +1026,9 @@
     "salary": 11599000,
     "contractYears": 1,
     "usage": 19.4,
-    "ts": 0.536
+    "ts": 0.536,
+    "heightCm": 201,
+    "weightKg": 99
   },
   "geoff_huston": {
     "id": "geoff_huston",
@@ -989,7 +1058,9 @@
     "salary": 12990000,
     "contractYears": 1,
     "usage": 17.1,
-    "ts": 0.522
+    "ts": 0.522,
+    "heightCm": 196,
+    "weightKg": 93
   },
   "larry_kenon": {
     "id": "larry_kenon",
@@ -1019,7 +1090,9 @@
     "salary": 7268000,
     "contractYears": 1,
     "usage": 19.1,
-    "ts": 0.494
+    "ts": 0.494,
+    "heightCm": 201,
+    "weightKg": 99
   },
   "sam_lacey": {
     "id": "sam_lacey",
@@ -1049,7 +1122,9 @@
     "salary": 2151000,
     "contractYears": 1,
     "usage": 13.3,
-    "ts": 0.461
+    "ts": 0.461,
+    "heightCm": 211,
+    "weightKg": 114
   },
   "dave_magley": {
     "id": "dave_magley",
@@ -1079,7 +1154,9 @@
     "salary": 2648000,
     "contractYears": 5,
     "usage": 16.7,
-    "ts": 0.456
+    "ts": 0.456,
+    "heightCm": 201,
+    "weightKg": 99
   },
   "carl_nicks": {
     "id": "carl_nicks",
@@ -1109,7 +1186,9 @@
     "salary": 3489000,
     "contractYears": 1,
     "usage": 21.4,
-    "ts": 0.481
+    "ts": 0.481,
+    "heightCm": 196,
+    "weightKg": 93
   },
   "cliff_t_robinson": {
     "id": "cliff_t_robinson",
@@ -1139,7 +1218,9 @@
     "salary": 19795000,
     "contractYears": 4,
     "usage": 25.7,
-    "ts": 0.505
+    "ts": 0.505,
+    "heightCm": 201,
+    "weightKg": 99
   },
   "darren_tillis": {
     "id": "darren_tillis",
@@ -1169,7 +1250,9 @@
     "salary": 2648000,
     "contractYears": 5,
     "usage": 17.0,
-    "ts": 0.452
+    "ts": 0.452,
+    "heightCm": 211,
+    "weightKg": 114
   },
   "bob_wilkerson": {
     "id": "bob_wilkerson",
@@ -1199,7 +1282,9 @@
     "salary": 8196000,
     "contractYears": 3,
     "usage": 18.7,
-    "ts": 0.466
+    "ts": 0.466,
+    "heightCm": 196,
+    "weightKg": 93
   },
   "dudley_bradley": {
     "id": "dudley_bradley",
@@ -1229,7 +1314,9 @@
     "salary": 8196000,
     "contractYears": 5,
     "usage": 15.2,
-    "ts": 0.537
+    "ts": 0.537,
+    "heightCm": 196,
+    "weightKg": 93
   },
   "mike_bratz": {
     "id": "mike_bratz",
@@ -1259,7 +1346,9 @@
     "salary": 7268000,
     "contractYears": 2,
     "usage": 18.5,
-    "ts": 0.488
+    "ts": 0.488,
+    "heightCm": 196,
+    "weightKg": 93
   },
   "dave_corzine": {
     "id": "dave_corzine",
@@ -1289,7 +1378,9 @@
     "salary": 17784000,
     "contractYears": 3,
     "usage": 18.7,
-    "ts": 0.546
+    "ts": 0.546,
+    "heightCm": 211,
+    "weightKg": 114
   },
   "quintin_dailey": {
     "id": "quintin_dailey",
@@ -1319,7 +1410,9 @@
     "salary": 8931000,
     "contractYears": 3,
     "usage": 24.4,
-    "ts": 0.509
+    "ts": 0.509,
+    "heightCm": 196,
+    "weightKg": 93
   },
   "david_greenwood": {
     "id": "david_greenwood",
@@ -1349,7 +1442,9 @@
     "salary": 14691000,
     "contractYears": 4,
     "usage": 15.6,
-    "ts": 0.502
+    "ts": 0.502,
+    "heightCm": 201,
+    "weightKg": 99
   },
   "rod_higgins": {
     "id": "rod_higgins",
@@ -1379,7 +1474,9 @@
     "salary": 12990000,
     "contractYears": 4,
     "usage": 16.6,
-    "ts": 0.522
+    "ts": 0.522,
+    "heightCm": 201,
+    "weightKg": 99
   },
   "tracy_jackson": {
     "id": "tracy_jackson",
@@ -1409,7 +1506,9 @@
     "salary": 6557000,
     "contractYears": 5,
     "usage": 17.0,
-    "ts": 0.512
+    "ts": 0.512,
+    "heightCm": 196,
+    "weightKg": 93
   },
   "ronnie_lester": {
     "id": "ronnie_lester",
@@ -1439,7 +1538,9 @@
     "salary": 10516000,
     "contractYears": 5,
     "usage": 17.7,
-    "ts": 0.532
+    "ts": 0.532,
+    "heightCm": 196,
+    "weightKg": 93
   },
   "mark_olberding": {
     "id": "mark_olberding",
@@ -1469,7 +1570,9 @@
     "salary": 10052000,
     "contractYears": 2,
     "usage": 17.5,
-    "ts": 0.552
+    "ts": 0.552,
+    "heightCm": 201,
+    "weightKg": 99
   },
   "jawann_oldham": {
     "id": "jawann_oldham",
@@ -1499,7 +1602,9 @@
     "salary": 3909000,
     "contractYears": 4,
     "usage": 17.4,
-    "ts": 0.518
+    "ts": 0.518,
+    "heightCm": 211,
+    "weightKg": 114
   },
   "larry_spriggs": {
     "id": "larry_spriggs",
@@ -1529,7 +1634,9 @@
     "salary": 3909000,
     "contractYears": 3,
     "usage": 19.0,
-    "ts": 0.525
+    "ts": 0.525,
+    "heightCm": 201,
+    "weightKg": 99
   },
   "reggie_theus": {
     "id": "reggie_theus",
@@ -1559,7 +1666,9 @@
     "salary": 23506000,
     "contractYears": 3,
     "usage": 27.2,
-    "ts": 0.541
+    "ts": 0.541,
+    "heightCm": 196,
+    "weightKg": 93
   },
   "orlando_woolridge": {
     "id": "orlando_woolridge",
@@ -1589,7 +1698,9 @@
     "salary": 16083000,
     "contractYears": 5,
     "usage": 21.6,
-    "ts": 0.594
+    "ts": 0.594,
+    "heightCm": 201,
+    "weightKg": 99
   },
   "mark_aguirre": {
     "id": "mark_aguirre",
@@ -1619,7 +1730,9 @@
     "salary": 27960000,
     "contractYears": 1,
     "usage": 29.6,
-    "ts": 0.531
+    "ts": 0.531,
+    "heightCm": 201,
+    "weightKg": 99
   },
   "rolando_blackman": {
     "id": "rolando_blackman",
@@ -1649,7 +1762,9 @@
     "salary": 19795000,
     "contractYears": 2,
     "usage": 22.3,
-    "ts": 0.551
+    "ts": 0.551,
+    "heightCm": 196,
+    "weightKg": 93
   },
   "allan_bristow": {
     "id": "allan_bristow",
@@ -1679,7 +1794,9 @@
     "salary": 4601000,
     "contractYears": 5,
     "usage": 14.9,
-    "ts": 0.503
+    "ts": 0.503,
+    "heightCm": 201,
+    "weightKg": 99
   },
   "pat_cummings": {
     "id": "pat_cummings",
@@ -1709,7 +1826,9 @@
     "salary": 14691000,
     "contractYears": 4,
     "usage": 19.5,
-    "ts": 0.529
+    "ts": 0.529,
+    "heightCm": 211,
+    "weightKg": 114
   },
   "brad_davis": {
     "id": "brad_davis",
@@ -1739,7 +1858,9 @@
     "salary": 22424000,
     "contractYears": 1,
     "usage": 15.3,
-    "ts": 0.607
+    "ts": 0.607,
+    "heightCm": 196,
+    "weightKg": 93
   },
   "bill_garnett": {
     "id": "bill_garnett",
@@ -1769,7 +1890,9 @@
     "salary": 10516000,
     "contractYears": 1,
     "usage": 13.6,
-    "ts": 0.589
+    "ts": 0.589,
+    "heightCm": 201,
+    "weightKg": 99
   },
   "scott_lloyd": {
     "id": "scott_lloyd",
@@ -1799,7 +1922,9 @@
     "salary": 3309000,
     "contractYears": 2,
     "usage": 14.6,
-    "ts": 0.449
+    "ts": 0.449,
+    "heightCm": 211,
+    "weightKg": 114
   },
   "kurt_nimphius": {
     "id": "kurt_nimphius",
@@ -1829,7 +1954,9 @@
     "salary": 7299000,
     "contractYears": 5,
     "usage": 13.5,
-    "ts": 0.507
+    "ts": 0.507,
+    "heightCm": 211,
+    "weightKg": 114
   },
   "kelvin_ransey": {
     "id": "kelvin_ransey",
@@ -1859,7 +1986,9 @@
     "salary": 12990000,
     "contractYears": 3,
     "usage": 24.0,
-    "ts": 0.506
+    "ts": 0.506,
+    "heightCm": 196,
+    "weightKg": 93
   },
   "jim_spanarkel": {
     "id": "jim_spanarkel",
@@ -1889,7 +2018,9 @@
     "salary": 14691000,
     "contractYears": 4,
     "usage": 17.9,
-    "ts": 0.567
+    "ts": 0.567,
+    "heightCm": 196,
+    "weightKg": 93
   },
   "corny_thompson": {
     "id": "corny_thompson",
@@ -1919,7 +2050,9 @@
     "salary": 2648000,
     "contractYears": 1,
     "usage": 14.7,
-    "ts": 0.413
+    "ts": 0.413,
+    "heightCm": 201,
+    "weightKg": 99
   },
   "elston_turner": {
     "id": "elston_turner",
@@ -1949,7 +2082,9 @@
     "salary": 3909000,
     "contractYears": 1,
     "usage": 15.6,
-    "ts": 0.455
+    "ts": 0.455,
+    "heightCm": 196,
+    "weightKg": 93
   },
   "jay_vincent": {
     "id": "jay_vincent",
@@ -1979,7 +2114,9 @@
     "salary": 19795000,
     "contractYears": 1,
     "usage": 24.9,
-    "ts": 0.532
+    "ts": 0.532,
+    "heightCm": 201,
+    "weightKg": 99
   },
   "dwight_anderson": {
     "id": "dwight_anderson",
@@ -2009,7 +2146,9 @@
     "salary": 2977000,
     "contractYears": 1,
     "usage": 19.3,
-    "ts": 0.548
+    "ts": 0.548,
+    "heightCm": 196,
+    "weightKg": 93
   },
   "t_r_dunn": {
     "id": "t_r_dunn",
@@ -2039,7 +2178,9 @@
     "salary": 17784000,
     "contractYears": 1,
     "usage": 10.5,
-    "ts": 0.535
+    "ts": 0.535,
+    "heightCm": 196,
+    "weightKg": 93
   },
   "alex_english": {
     "id": "alex_english",
@@ -2069,7 +2210,9 @@
     "salary": 45776000,
     "contractYears": 3,
     "usage": 27.5,
-    "ts": 0.572
+    "ts": 0.572,
+    "heightCm": 201,
+    "weightKg": 99
   },
   "mike_evans": {
     "id": "mike_evans",
@@ -2099,7 +2242,9 @@
     "salary": 3309000,
     "contractYears": 4,
     "usage": 17.7,
-    "ts": 0.498
+    "ts": 0.498,
+    "heightCm": 196,
+    "weightKg": 93
   },
   "glen_gondrezick": {
     "id": "glen_gondrezick",
@@ -2129,7 +2274,9 @@
     "salary": 11599000,
     "contractYears": 1,
     "usage": 14.1,
-    "ts": 0.53
+    "ts": 0.53,
+    "heightCm": 201,
+    "weightKg": 99
   },
   "bill_hanzlik": {
     "id": "bill_hanzlik",
@@ -2159,7 +2306,9 @@
     "salary": 5815000,
     "contractYears": 4,
     "usage": 14.0,
-    "ts": 0.514
+    "ts": 0.514,
+    "heightCm": 201,
+    "weightKg": 99
   },
   "dan_issel": {
     "id": "dan_issel",
@@ -2189,7 +2338,9 @@
     "salary": 24975000,
     "contractYears": 3,
     "usage": 25.4,
-    "ts": 0.584
+    "ts": 0.584,
+    "heightCm": 211,
+    "weightKg": 114
   },
   "billy_mckinney": {
     "id": "billy_mckinney",
@@ -2219,7 +2370,9 @@
     "salary": 10052000,
     "contractYears": 2,
     "usage": 17.1,
-    "ts": 0.549
+    "ts": 0.549,
+    "heightCm": 196,
+    "weightKg": 93
   },
   "jamesearl_ray": {
     "id": "jamesearl_ray",
@@ -2249,7 +2402,9 @@
     "salary": 2648000,
     "contractYears": 2,
     "usage": 18.8,
-    "ts": 0.502
+    "ts": 0.502,
+    "heightCm": 201,
+    "weightKg": 99
   },
   "dave_robisch": {
     "id": "dave_robisch",
@@ -2279,7 +2434,9 @@
     "salary": 2813000,
     "contractYears": 5,
     "usage": 18.4,
-    "ts": 0.488
+    "ts": 0.488,
+    "heightCm": 211,
+    "weightKg": 114
   },
   "dan_schayes": {
     "id": "dan_schayes",
@@ -2309,7 +2466,9 @@
     "salary": 8042000,
     "contractYears": 3,
     "usage": 19.0,
-    "ts": 0.52
+    "ts": 0.52,
+    "heightCm": 211,
+    "weightKg": 114
   },
   "kiki_vandeweghe": {
     "id": "kiki_vandeweghe",
@@ -2339,7 +2498,9 @@
     "salary": 25733000,
     "contractYears": 5,
     "usage": 23.9,
-    "ts": 0.611
+    "ts": 0.611,
+    "heightCm": 201,
+    "weightKg": 99
   },
   "rob_williams": {
     "id": "rob_williams",
@@ -2369,7 +2530,9 @@
     "salary": 2109000,
     "contractYears": 4,
     "usage": 18.6,
-    "ts": 0.477
+    "ts": 0.477,
+    "heightCm": 196,
+    "weightKg": 93
   },
   "ron_brewer": {
     "id": "ron_brewer",
@@ -2399,7 +2562,9 @@
     "salary": 16238000,
     "contractYears": 2,
     "usage": 21.8,
-    "ts": 0.493
+    "ts": 0.493,
+    "heightCm": 196,
+    "weightKg": 93
   },
   "joe_barry_carroll": {
     "id": "joe_barry_carroll",
@@ -2429,7 +2594,9 @@
     "salary": 23506000,
     "contractYears": 2,
     "usage": 24.6,
-    "ts": 0.551
+    "ts": 0.551,
+    "heightCm": 211,
+    "weightKg": 114
   },
   "lester_conner": {
     "id": "lester_conner",
@@ -2459,7 +2626,9 @@
     "salary": 11753000,
     "contractYears": 2,
     "usage": 12.8,
-    "ts": 0.524
+    "ts": 0.524,
+    "heightCm": 196,
+    "weightKg": 93
   },
   "terry_duerod": {
     "id": "terry_duerod",
@@ -2489,7 +2658,9 @@
     "salary": 6341000,
     "contractYears": 4,
     "usage": 20.2,
-    "ts": 0.492
+    "ts": 0.492,
+    "heightCm": 196,
+    "weightKg": 93
   },
   "chris_engler": {
     "id": "chris_engler",
@@ -2519,7 +2690,9 @@
     "salary": 2648000,
     "contractYears": 5,
     "usage": 14.1,
-    "ts": 0.431
+    "ts": 0.431,
+    "heightCm": 211,
+    "weightKg": 114
   },
   "sleepy_floyd": {
     "id": "sleepy_floyd",
@@ -2549,7 +2722,9 @@
     "salary": 9279000,
     "contractYears": 4,
     "usage": 22.0,
-    "ts": 0.508
+    "ts": 0.508,
+    "heightCm": 196,
+    "weightKg": 93
   },
   "joey_hassett": {
     "id": "joey_hassett",
@@ -2579,7 +2754,9 @@
     "salary": 6341000,
     "contractYears": 5,
     "usage": 15.8,
-    "ts": 0.484
+    "ts": 0.484,
+    "heightCm": 196,
+    "weightKg": 93
   },
   "mickey_johnson": {
     "id": "mickey_johnson",
@@ -2609,7 +2786,9 @@
     "salary": 22424000,
     "contractYears": 1,
     "usage": 24.4,
-    "ts": 0.52
+    "ts": 0.52,
+    "heightCm": 201,
+    "weightKg": 99
   },
   "lewis_lloyd": {
     "id": "lewis_lloyd",
@@ -2639,7 +2818,9 @@
     "salary": 14228000,
     "contractYears": 2,
     "usage": 21.6,
-    "ts": 0.548
+    "ts": 0.548,
+    "heightCm": 196,
+    "weightKg": 93
   },
   "lorenzo_romar": {
     "id": "lorenzo_romar",
@@ -2669,7 +2850,9 @@
     "salary": 11753000,
     "contractYears": 3,
     "usage": 14.8,
-    "ts": 0.513
+    "ts": 0.513,
+    "heightCm": 196,
+    "weightKg": 93
   },
   "purvis_short": {
     "id": "purvis_short",
@@ -2699,7 +2882,9 @@
     "salary": 23506000,
     "contractYears": 1,
     "usage": 25.2,
-    "ts": 0.533
+    "ts": 0.533,
+    "heightCm": 201,
+    "weightKg": 99
   },
   "derek_smith": {
     "id": "derek_smith",
@@ -2729,7 +2914,9 @@
     "salary": 1820000,
     "contractYears": 2,
     "usage": 18.0,
-    "ts": 0.501
+    "ts": 0.501,
+    "heightCm": 196,
+    "weightKg": 93
   },
   "larry_smith": {
     "id": "larry_smith",
@@ -2759,7 +2946,9 @@
     "salary": 9279000,
     "contractYears": 1,
     "usage": 11.5,
-    "ts": 0.571
+    "ts": 0.571,
+    "heightCm": 201,
+    "weightKg": 99
   },
   "samuel_williams": {
     "id": "samuel_williams",
@@ -2789,7 +2978,9 @@
     "salary": 10516000,
     "contractYears": 5,
     "usage": 16.8,
-    "ts": 0.564
+    "ts": 0.564,
+    "heightCm": 201,
+    "weightKg": 99
   },
   "james_bailey": {
     "id": "james_bailey",
@@ -2819,7 +3010,9 @@
     "salary": 11599000,
     "contractYears": 5,
     "usage": 23.5,
-    "ts": 0.544
+    "ts": 0.544,
+    "heightCm": 201,
+    "weightKg": 99
   },
   "joe_bryant": {
     "id": "joe_bryant",
@@ -2849,7 +3042,9 @@
     "salary": 9124000,
     "contractYears": 5,
     "usage": 19.9,
-    "ts": 0.505
+    "ts": 0.505,
+    "heightCm": 201,
+    "weightKg": 99
   },
   "calvin_garrett": {
     "id": "calvin_garrett",
@@ -2879,7 +3074,9 @@
     "salary": 3309000,
     "contractYears": 5,
     "usage": 14.7,
-    "ts": 0.467
+    "ts": 0.467,
+    "heightCm": 201,
+    "weightKg": 99
   },
   "elvin_hayes": {
     "id": "elvin_hayes",
@@ -2909,7 +3106,10 @@
     "salary": 10555000,
     "contractYears": 4,
     "usage": 20.6,
-    "ts": 0.515
+    "ts": 0.515,
+    "heightCm": 201,
+    "weightKg": 99,
+    "skinTone": "#533427"
   },
   "tom_henderson": {
     "id": "tom_henderson",
@@ -2939,7 +3139,9 @@
     "salary": 4154000,
     "contractYears": 5,
     "usage": 15.4,
-    "ts": 0.481
+    "ts": 0.481,
+    "heightCm": 196,
+    "weightKg": 93
   },
   "caldwell_jones": {
     "id": "caldwell_jones",
@@ -2969,7 +3171,9 @@
     "salary": 9859000,
     "contractYears": 2,
     "usage": 14.4,
-    "ts": 0.527
+    "ts": 0.527,
+    "heightCm": 211,
+    "weightKg": 114
   },
   "major_jones": {
     "id": "major_jones",
@@ -2999,7 +3203,9 @@
     "salary": 3309000,
     "contractYears": 2,
     "usage": 18.8,
-    "ts": 0.501
+    "ts": 0.501,
+    "heightCm": 201,
+    "weightKg": 99
   },
   "allen_leavell": {
     "id": "allen_leavell",
@@ -3029,7 +3235,9 @@
     "salary": 27063000,
     "contractYears": 3,
     "usage": 20.6,
-    "ts": 0.496
+    "ts": 0.496,
+    "heightCm": 196,
+    "weightKg": 93
   },
   "calvin_murphy": {
     "id": "calvin_murphy",
@@ -3059,7 +3267,9 @@
     "salary": 9549000,
     "contractYears": 2,
     "usage": 25.4,
-    "ts": 0.492
+    "ts": 0.492,
+    "heightCm": 196,
+    "weightKg": 93
   },
   "chuck_nevitt": {
     "id": "chuck_nevitt",
@@ -3089,7 +3299,9 @@
     "salary": 3909000,
     "contractYears": 3,
     "usage": 16.1,
-    "ts": 0.597
+    "ts": 0.597,
+    "heightCm": 211,
+    "weightKg": 114
   },
   "jeff_taylor": {
     "id": "jeff_taylor",
@@ -3119,7 +3331,9 @@
     "salary": 2648000,
     "contractYears": 1,
     "usage": 12.9,
-    "ts": 0.45
+    "ts": 0.45,
+    "heightCm": 201,
+    "weightKg": 99
   },
   "terry_teagle": {
     "id": "terry_teagle",
@@ -3149,7 +3363,9 @@
     "salary": 5072000,
     "contractYears": 5,
     "usage": 22.4,
-    "ts": 0.463
+    "ts": 0.463,
+    "heightCm": 196,
+    "weightKg": 93
   },
   "wally_walker": {
     "id": "wally_walker",
@@ -3179,7 +3395,9 @@
     "salary": 9124000,
     "contractYears": 1,
     "usage": 17.5,
-    "ts": 0.479
+    "ts": 0.479,
+    "heightCm": 201,
+    "weightKg": 99
   },
   "richard_anderson": {
     "id": "richard_anderson",
@@ -3209,7 +3427,9 @@
     "salary": 2977000,
     "contractYears": 4,
     "usage": 16.9,
-    "ts": 0.444
+    "ts": 0.444,
+    "heightCm": 201,
+    "weightKg": 99
   },
   "jim_brogan": {
     "id": "jim_brogan",
@@ -3239,7 +3459,9 @@
     "salary": 5072000,
     "contractYears": 4,
     "usage": 20.6,
-    "ts": 0.491
+    "ts": 0.491,
+    "heightCm": 196,
+    "weightKg": 93
   },
   "michael_brooks": {
     "id": "michael_brooks",
@@ -3269,7 +3491,9 @@
     "salary": 16083000,
     "contractYears": 4,
     "usage": 18.8,
-    "ts": 0.531
+    "ts": 0.531,
+    "heightCm": 201,
+    "weightKg": 99
   },
   "tom_chambers": {
     "id": "tom_chambers",
@@ -3299,7 +3523,9 @@
     "salary": 14228000,
     "contractYears": 2,
     "usage": 22.4,
-    "ts": 0.537
+    "ts": 0.537,
+    "heightCm": 201,
+    "weightKg": 99
   },
   "joe_cooper": {
     "id": "joe_cooper",
@@ -3329,7 +3555,9 @@
     "salary": 3909000,
     "contractYears": 3,
     "usage": 14.5,
-    "ts": 0.533
+    "ts": 0.533,
+    "heightCm": 211,
+    "weightKg": 114
   },
   "terry_cummings": {
     "id": "terry_cummings",
@@ -3359,7 +3587,9 @@
     "salary": 22285000,
     "contractYears": 3,
     "usage": 25.7,
-    "ts": 0.556
+    "ts": 0.556,
+    "heightCm": 201,
+    "weightKg": 99
   },
   "john_douglas": {
     "id": "john_douglas",
@@ -3389,7 +3619,9 @@
     "salary": 5413000,
     "contractYears": 5,
     "usage": 20.2,
-    "ts": 0.516
+    "ts": 0.516,
+    "heightCm": 196,
+    "weightKg": 93
   },
   "bob_gross": {
     "id": "bob_gross",
@@ -3419,7 +3651,9 @@
     "salary": 9124000,
     "contractYears": 5,
     "usage": 13.3,
-    "ts": 0.538
+    "ts": 0.538,
+    "heightCm": 201,
+    "weightKg": 99
   },
   "craig_hodges": {
     "id": "craig_hodges",
@@ -3449,7 +3683,9 @@
     "salary": 5815000,
     "contractYears": 1,
     "usage": 17.7,
-    "ts": 0.495
+    "ts": 0.495,
+    "heightCm": 196,
+    "weightKg": 93
   },
   "lionel_hollins": {
     "id": "lionel_hollins",
@@ -3479,7 +3715,9 @@
     "salary": 16238000,
     "contractYears": 1,
     "usage": 20.1,
-    "ts": 0.49
+    "ts": 0.49,
+    "heightCm": 196,
+    "weightKg": 93
   },
   "willie_jones": {
     "id": "willie_jones",
@@ -3509,7 +3747,9 @@
     "salary": 5072000,
     "contractYears": 5,
     "usage": 17.0,
-    "ts": 0.54
+    "ts": 0.54,
+    "heightCm": 201,
+    "weightKg": 99
   },
   "lowes_moore": {
     "id": "lowes_moore",
@@ -3539,7 +3779,9 @@
     "salary": 3309000,
     "contractYears": 3,
     "usage": 16.5,
-    "ts": 0.498
+    "ts": 0.498,
+    "heightCm": 196,
+    "weightKg": 93
   },
   "swen_nater": {
     "id": "swen_nater",
@@ -3569,7 +3811,9 @@
     "salary": 4601000,
     "contractYears": 5,
     "usage": 18.1,
-    "ts": 0.576
+    "ts": 0.576,
+    "heightCm": 211,
+    "weightKg": 114
   },
   "bill_walton": {
     "id": "bill_walton",
@@ -3599,7 +3843,10 @@
     "salary": 24744000,
     "contractYears": 1,
     "usage": 18.7,
-    "ts": 0.54
+    "ts": 0.54,
+    "heightCm": 211,
+    "weightKg": 114,
+    "skinTone": "#bc9069"
   },
   "jerome_whitehead": {
     "id": "jerome_whitehead",
@@ -3629,7 +3876,9 @@
     "salary": 11599000,
     "contractYears": 1,
     "usage": 17.7,
-    "ts": 0.588
+    "ts": 0.588,
+    "heightCm": 211,
+    "weightKg": 114
   },
   "al_wood": {
     "id": "al_wood",
@@ -3659,7 +3908,9 @@
     "salary": 10516000,
     "contractYears": 3,
     "usage": 20.1,
-    "ts": 0.513
+    "ts": 0.513,
+    "heightCm": 196,
+    "weightKg": 93
   },
   "kareem_abdul_jabbar": {
     "id": "kareem_abdul_jabbar",
@@ -3689,7 +3940,10 @@
     "salary": 28146000,
     "contractYears": 1,
     "usage": 24.7,
-    "ts": 0.613
+    "ts": 0.613,
+    "heightCm": 211,
+    "weightKg": 114,
+    "skinTone": "#c07142"
   },
   "billyray_bates": {
     "id": "billyray_bates",
@@ -3719,7 +3973,9 @@
     "salary": 13145000,
     "contractYears": 1,
     "usage": 26.2,
-    "ts": 0.492
+    "ts": 0.492,
+    "heightCm": 196,
+    "weightKg": 93
   },
   "michael_cooper": {
     "id": "michael_cooper",
@@ -3749,7 +4005,9 @@
     "salary": 20104000,
     "contractYears": 2,
     "usage": 14.3,
-    "ts": 0.569
+    "ts": 0.569,
+    "heightCm": 196,
+    "weightKg": 93
   },
   "clay_johnson": {
     "id": "clay_johnson",
@@ -3779,7 +4037,9 @@
     "salary": 3309000,
     "contractYears": 4,
     "usage": 16.3,
-    "ts": 0.48
+    "ts": 0.48,
+    "heightCm": 196,
+    "weightKg": 93
   },
   "magic_johnson": {
     "id": "magic_johnson",
@@ -3809,7 +4069,10 @@
     "salary": 38600000,
     "contractYears": 2,
     "usage": 19.3,
-    "ts": 0.597
+    "ts": 0.597,
+    "heightCm": 196,
+    "weightKg": 93,
+    "skinTone": "#8c5a37"
   },
   "dwight_jones": {
     "id": "dwight_jones",
@@ -3839,7 +4102,9 @@
     "salary": 2813000,
     "contractYears": 5,
     "usage": 16.6,
-    "ts": 0.533
+    "ts": 0.533,
+    "heightCm": 201,
+    "weightKg": 99
   },
   "eddie_jordan": {
     "id": "eddie_jordan",
@@ -3869,7 +4134,9 @@
     "salary": 3309000,
     "contractYears": 5,
     "usage": 20.7,
-    "ts": 0.423
+    "ts": 0.423,
+    "heightCm": 196,
+    "weightKg": 93
   },
   "mark_landsberger": {
     "id": "mark_landsberger",
@@ -3899,7 +4166,9 @@
     "salary": 3309000,
     "contractYears": 1,
     "usage": 14.7,
-    "ts": 0.453
+    "ts": 0.453,
+    "heightCm": 201,
+    "weightKg": 99
   },
   "bob_mcadoo": {
     "id": "bob_mcadoo",
@@ -3929,7 +4198,9 @@
     "salary": 13802000,
     "contractYears": 5,
     "usage": 25.5,
-    "ts": 0.542
+    "ts": 0.542,
+    "heightCm": 211,
+    "weightKg": 114
   },
   "mike_mcgee": {
     "id": "mike_mcgee",
@@ -3959,7 +4230,9 @@
     "salary": 2648000,
     "contractYears": 4,
     "usage": 21.5,
-    "ts": 0.475
+    "ts": 0.475,
+    "heightCm": 201,
+    "weightKg": 99
   },
   "steve_mix": {
     "id": "steve_mix",
@@ -3989,7 +4262,9 @@
     "salary": 9549000,
     "contractYears": 3,
     "usage": 18.4,
-    "ts": 0.554
+    "ts": 0.554,
+    "heightCm": 201,
+    "weightKg": 99
   },
   "norm_nixon": {
     "id": "norm_nixon",
@@ -4019,7 +4294,9 @@
     "salary": 17784000,
     "contractYears": 2,
     "usage": 20.9,
-    "ts": 0.508
+    "ts": 0.508,
+    "heightCm": 196,
+    "weightKg": 93
   },
   "kurt_rambis": {
     "id": "kurt_rambis",
@@ -4049,7 +4326,9 @@
     "salary": 11753000,
     "contractYears": 3,
     "usage": 13.6,
-    "ts": 0.582
+    "ts": 0.582,
+    "heightCm": 201,
+    "weightKg": 99
   },
   "jamaal_wilkes": {
     "id": "jamaal_wilkes",
@@ -4079,7 +4358,9 @@
     "salary": 22424000,
     "contractYears": 3,
     "usage": 23.8,
-    "ts": 0.556
+    "ts": 0.556,
+    "heightCm": 201,
+    "weightKg": 99
   },
   "james_worthy": {
     "id": "james_worthy",
@@ -4109,7 +4390,10 @@
     "salary": 11057000,
     "contractYears": 4,
     "usage": 20.8,
-    "ts": 0.591
+    "ts": 0.591,
+    "heightCm": 201,
+    "weightKg": 99,
+    "skinTone": "#5e4232"
   },
   "junior_bridgeman": {
     "id": "junior_bridgeman",
@@ -4139,7 +4423,9 @@
     "salary": 20104000,
     "contractYears": 4,
     "usage": 23.5,
-    "ts": 0.534
+    "ts": 0.534,
+    "heightCm": 201,
+    "weightKg": 99
   },
   "harvey_catchings": {
     "id": "harvey_catchings",
@@ -4169,7 +4455,9 @@
     "salary": 8544000,
     "contractYears": 2,
     "usage": 9.0,
-    "ts": 0.492
+    "ts": 0.492,
+    "heightCm": 211,
+    "weightKg": 114
   },
   "dave_cowens": {
     "id": "dave_cowens",
@@ -4199,7 +4487,10 @@
     "salary": 11173000,
     "contractYears": 5,
     "usage": 15.5,
-    "ts": 0.49
+    "ts": 0.49,
+    "heightCm": 211,
+    "weightKg": 114,
+    "skinTone": "#b15f56"
   },
   "charlie_criss": {
     "id": "charlie_criss",
@@ -4229,7 +4520,9 @@
     "salary": 8544000,
     "contractYears": 1,
     "usage": 19.8,
-    "ts": 0.514
+    "ts": 0.514,
+    "heightCm": 196,
+    "weightKg": 93
   },
   "phil_ford": {
     "id": "phil_ford",
@@ -4259,7 +4552,9 @@
     "salary": 6341000,
     "contractYears": 1,
     "usage": 17.3,
-    "ts": 0.514
+    "ts": 0.514,
+    "heightCm": 196,
+    "weightKg": 93
   },
   "armond_hill": {
     "id": "armond_hill",
@@ -4289,7 +4584,9 @@
     "salary": 3309000,
     "contractYears": 3,
     "usage": 12.9,
-    "ts": 0.535
+    "ts": 0.535,
+    "heightCm": 196,
+    "weightKg": 93
   },
   "marques_johnson": {
     "id": "marques_johnson",
@@ -4319,7 +4616,9 @@
     "salary": 43301000,
     "contractYears": 5,
     "usage": 24.6,
-    "ts": 0.549
+    "ts": 0.549,
+    "heightCm": 201,
+    "weightKg": 99
   },
   "bob_lanier": {
     "id": "bob_lanier",
@@ -4349,7 +4648,9 @@
     "salary": 19060000,
     "contractYears": 1,
     "usage": 20.2,
-    "ts": 0.564
+    "ts": 0.564,
+    "heightCm": 211,
+    "weightKg": 114
   },
   "alton_lister": {
     "id": "alton_lister",
@@ -4379,7 +4680,9 @@
     "salary": 11753000,
     "contractYears": 4,
     "usage": 17.4,
-    "ts": 0.54
+    "ts": 0.54,
+    "heightCm": 211,
+    "weightKg": 114
   },
   "paul_mokeski": {
     "id": "paul_mokeski",
@@ -4409,7 +4712,9 @@
     "salary": 3309000,
     "contractYears": 4,
     "usage": 13.3,
-    "ts": 0.497
+    "ts": 0.497,
+    "heightCm": 211,
+    "weightKg": 114
   },
   "sidney_moncrief": {
     "id": "sidney_moncrief",
@@ -4439,7 +4744,9 @@
     "salary": 36620000,
     "contractYears": 3,
     "usage": 23.2,
-    "ts": 0.6
+    "ts": 0.6,
+    "heightCm": 196,
+    "weightKg": 93
   },
   "sam_pellom": {
     "id": "sam_pellom",
@@ -4469,7 +4776,9 @@
     "salary": 2813000,
     "contractYears": 1,
     "usage": 15.2,
-    "ts": 0.505
+    "ts": 0.505,
+    "heightCm": 201,
+    "weightKg": 99
   },
   "paul_pressey": {
     "id": "paul_pressey",
@@ -4499,7 +4808,9 @@
     "salary": 12990000,
     "contractYears": 1,
     "usage": 19.0,
-    "ts": 0.492
+    "ts": 0.492,
+    "heightCm": 196,
+    "weightKg": 93
   },
   "brian_winters": {
     "id": "brian_winters",
@@ -4529,7 +4840,9 @@
     "salary": 13802000,
     "contractYears": 4,
     "usage": 21.6,
-    "ts": 0.513
+    "ts": 0.513,
+    "heightCm": 196,
+    "weightKg": 93
   },
   "otis_birdsong": {
     "id": "otis_birdsong",
@@ -4559,7 +4872,9 @@
     "salary": 22424000,
     "contractYears": 3,
     "usage": 21.4,
-    "ts": 0.515
+    "ts": 0.515,
+    "heightCm": 196,
+    "weightKg": 93
   },
   "darwin_cook": {
     "id": "darwin_cook",
@@ -4589,7 +4904,9 @@
     "salary": 21651000,
     "contractYears": 5,
     "usage": 19.9,
-    "ts": 0.501
+    "ts": 0.501,
+    "heightCm": 196,
+    "weightKg": 93
   },
   "darryl_dawkins": {
     "id": "darryl_dawkins",
@@ -4619,7 +4936,9 @@
     "salary": 16238000,
     "contractYears": 5,
     "usage": 19.9,
-    "ts": 0.612
+    "ts": 0.612,
+    "heightCm": 211,
+    "weightKg": 114
   },
   "len_elmore": {
     "id": "len_elmore",
@@ -4649,7 +4968,9 @@
     "salary": 4601000,
     "contractYears": 4,
     "usage": 15.6,
-    "ts": 0.478
+    "ts": 0.478,
+    "heightCm": 211,
+    "weightKg": 114
   },
   "mike_gminski": {
     "id": "mike_gminski",
@@ -4679,7 +5000,9 @@
     "salary": 14228000,
     "contractYears": 5,
     "usage": 20.2,
-    "ts": 0.559
+    "ts": 0.559,
+    "heightCm": 211,
+    "weightKg": 114
   },
   "albert_king": {
     "id": "albert_king",
@@ -4709,7 +5032,9 @@
     "salary": 17939000,
     "contractYears": 2,
     "usage": 24.9,
-    "ts": 0.511
+    "ts": 0.511,
+    "heightCm": 201,
+    "weightKg": 99
   },
   "mike_o_koren": {
     "id": "mike_o_koren",
@@ -4739,7 +5064,9 @@
     "salary": 11753000,
     "contractYears": 3,
     "usage": 18.4,
-    "ts": 0.538
+    "ts": 0.538,
+    "heightCm": 201,
+    "weightKg": 99
   },
   "eddie_phillips": {
     "id": "eddie_phillips",
@@ -4769,7 +5096,9 @@
     "salary": 1820000,
     "contractYears": 2,
     "usage": 19.6,
-    "ts": 0.479
+    "ts": 0.479,
+    "heightCm": 201,
+    "weightKg": 99
   },
   "micheal_ray_richardson": {
     "id": "micheal_ray_richardson",
@@ -4799,7 +5128,9 @@
     "salary": 22424000,
     "contractYears": 4,
     "usage": 21.2,
-    "ts": 0.458
+    "ts": 0.458,
+    "heightCm": 196,
+    "weightKg": 93
   },
   "jan_van_breda_kolff": {
     "id": "jan_van_breda_kolff",
@@ -4829,7 +5160,9 @@
     "salary": 2813000,
     "contractYears": 4,
     "usage": 13.8,
-    "ts": 0.574
+    "ts": 0.574,
+    "heightCm": 201,
+    "weightKg": 99
   },
   "foots_walker": {
     "id": "foots_walker",
@@ -4859,7 +5192,9 @@
     "salary": 9859000,
     "contractYears": 4,
     "usage": 12.2,
-    "ts": 0.526
+    "ts": 0.526,
+    "heightCm": 196,
+    "weightKg": 93
   },
   "buck_williams": {
     "id": "buck_williams",
@@ -4889,7 +5224,9 @@
     "salary": 23506000,
     "contractYears": 2,
     "usage": 18.3,
-    "ts": 0.607
+    "ts": 0.607,
+    "heightCm": 201,
+    "weightKg": 99
   },
   "bill_willoughby": {
     "id": "bill_willoughby",
@@ -4919,7 +5256,9 @@
     "salary": 7268000,
     "contractYears": 5,
     "usage": 15.0,
-    "ts": 0.513
+    "ts": 0.513,
+    "heightCm": 201,
+    "weightKg": 99
   },
   "bill_cartwright": {
     "id": "bill_cartwright",
@@ -4949,7 +5288,9 @@
     "salary": 23506000,
     "contractYears": 4,
     "usage": 20.9,
-    "ts": 0.621
+    "ts": 0.621,
+    "heightCm": 211,
+    "weightKg": 114
   },
   "michael_davis": {
     "id": "michael_davis",
@@ -4979,7 +5320,9 @@
     "salary": 6341000,
     "contractYears": 1,
     "usage": 17.0,
-    "ts": 0.54
+    "ts": 0.54,
+    "heightCm": 201,
+    "weightKg": 99
   },
   "ernie_grunfeld": {
     "id": "ernie_grunfeld",
@@ -5009,7 +5352,9 @@
     "salary": 14691000,
     "contractYears": 4,
     "usage": 18.2,
-    "ts": 0.52
+    "ts": 0.52,
+    "heightCm": 196,
+    "weightKg": 93
   },
   "bernard_king": {
     "id": "bernard_king",
@@ -5039,7 +5384,10 @@
     "salary": 40518000,
     "contractYears": 5,
     "usage": 27.3,
-    "ts": 0.578
+    "ts": 0.578,
+    "heightCm": 201,
+    "weightKg": 99,
+    "skinTone": "#7a5335"
   },
   "louis_orr": {
     "id": "louis_orr",
@@ -5069,7 +5417,9 @@
     "salary": 12990000,
     "contractYears": 2,
     "usage": 19.8,
-    "ts": 0.528
+    "ts": 0.528,
+    "heightCm": 201,
+    "weightKg": 99
   },
   "truck_robinson": {
     "id": "truck_robinson",
@@ -5099,7 +5449,9 @@
     "salary": 13802000,
     "contractYears": 4,
     "usage": 19.1,
-    "ts": 0.509
+    "ts": 0.509,
+    "heightCm": 201,
+    "weightKg": 99
   },
   "edmund_sherod": {
     "id": "edmund_sherod",
@@ -5129,7 +5481,9 @@
     "salary": 14228000,
     "contractYears": 1,
     "usage": 14.8,
-    "ts": 0.439
+    "ts": 0.439,
+    "heightCm": 196,
+    "weightKg": 93
   },
   "rory_sparrow": {
     "id": "rory_sparrow",
@@ -5159,7 +5513,9 @@
     "salary": 14228000,
     "contractYears": 1,
     "usage": 17.7,
-    "ts": 0.528
+    "ts": 0.528,
+    "heightCm": 196,
+    "weightKg": 93
   },
   "vince_taylor": {
     "id": "vince_taylor",
@@ -5189,7 +5545,9 @@
     "salary": 2399000,
     "contractYears": 2,
     "usage": 18.8,
-    "ts": 0.44
+    "ts": 0.44,
+    "heightCm": 196,
+    "weightKg": 93
   },
   "trent_tucker": {
     "id": "trent_tucker",
@@ -5219,7 +5577,9 @@
     "salary": 11753000,
     "contractYears": 5,
     "usage": 17.3,
-    "ts": 0.488
+    "ts": 0.488,
+    "heightCm": 196,
+    "weightKg": 93
   },
   "marvin_webster": {
     "id": "marvin_webster",
@@ -5249,7 +5609,9 @@
     "salary": 9859000,
     "contractYears": 2,
     "usage": 14.0,
-    "ts": 0.535
+    "ts": 0.535,
+    "heightCm": 211,
+    "weightKg": 114
   },
   "paul_westphal": {
     "id": "paul_westphal",
@@ -5279,7 +5641,9 @@
     "salary": 17088000,
     "contractYears": 2,
     "usage": 21.0,
-    "ts": 0.514
+    "ts": 0.514,
+    "heightCm": 196,
+    "weightKg": 93
   },
   "sly_williams": {
     "id": "sly_williams",
@@ -5309,7 +5673,9 @@
     "salary": 19795000,
     "contractYears": 3,
     "usage": 25.2,
-    "ts": 0.551
+    "ts": 0.551,
+    "heightCm": 201,
+    "weightKg": 99
   },
   "brad_branson": {
     "id": "brad_branson",
@@ -5339,7 +5705,9 @@
     "salary": 5815000,
     "contractYears": 2,
     "usage": 21.7,
-    "ts": 0.481
+    "ts": 0.481,
+    "heightCm": 201,
+    "weightKg": 99
   },
   "marty_byrnes": {
     "id": "marty_byrnes",
@@ -5369,7 +5737,9 @@
     "salary": 3309000,
     "contractYears": 1,
     "usage": 13.6,
-    "ts": 0.475
+    "ts": 0.475,
+    "heightCm": 201,
+    "weightKg": 99
   },
   "butch_carter": {
     "id": "butch_carter",
@@ -5399,7 +5769,9 @@
     "salary": 10516000,
     "contractYears": 3,
     "usage": 20.1,
-    "ts": 0.54
+    "ts": 0.54,
+    "heightCm": 196,
+    "weightKg": 93
   },
   "john_duren": {
     "id": "john_duren",
@@ -5429,7 +5801,9 @@
     "salary": 2648000,
     "contractYears": 1,
     "usage": 13.4,
-    "ts": 0.483
+    "ts": 0.483,
+    "heightCm": 196,
+    "weightKg": 93
   },
   "george_johnson_77148": {
     "id": "george_johnson_77148",
@@ -5459,7 +5833,9 @@
     "salary": 13145000,
     "contractYears": 4,
     "usage": 17.0,
-    "ts": 0.509
+    "ts": 0.509,
+    "heightCm": 201,
+    "weightKg": 99
   },
   "clark_kellogg": {
     "id": "clark_kellogg",
@@ -5489,7 +5865,9 @@
     "salary": 16161000,
     "contractYears": 4,
     "usage": 25.2,
-    "ts": 0.517
+    "ts": 0.517,
+    "heightCm": 201,
+    "weightKg": 99
   },
   "billy_knight": {
     "id": "billy_knight",
@@ -5519,7 +5897,9 @@
     "salary": 21032000,
     "contractYears": 1,
     "usage": 23.4,
-    "ts": 0.58
+    "ts": 0.58,
+    "heightCm": 201,
+    "weightKg": 99
   },
   "guy_morgan": {
     "id": "guy_morgan",
@@ -5549,7 +5929,9 @@
     "salary": 2688000,
     "contractYears": 3,
     "usage": 19.1,
-    "ts": 0.462
+    "ts": 0.462,
+    "heightCm": 196,
+    "weightKg": 93
   },
   "russ_schoene": {
     "id": "russ_schoene",
@@ -5579,7 +5961,9 @@
     "salary": 2648000,
     "contractYears": 2,
     "usage": 17.7,
-    "ts": 0.508
+    "ts": 0.508,
+    "heightCm": 201,
+    "weightKg": 99
   },
   "jerry_sichting": {
     "id": "jerry_sichting",
@@ -5609,7 +5993,9 @@
     "salary": 10052000,
     "contractYears": 4,
     "usage": 13.7,
-    "ts": 0.513
+    "ts": 0.513,
+    "heightCm": 196,
+    "weightKg": 93
   },
   "jose_slaughter": {
     "id": "jose_slaughter",
@@ -5639,7 +6025,9 @@
     "salary": 1820000,
     "contractYears": 5,
     "usage": 22.3,
-    "ts": 0.445
+    "ts": 0.445,
+    "heightCm": 196,
+    "weightKg": 93
   },
   "herb_williams": {
     "id": "herb_williams",
@@ -5669,7 +6057,9 @@
     "salary": 19795000,
     "contractYears": 3,
     "usage": 22.0,
-    "ts": 0.517
+    "ts": 0.517,
+    "heightCm": 211,
+    "weightKg": 114
   },
   "maurice_cheeks": {
     "id": "maurice_cheeks",
@@ -5699,7 +6089,9 @@
     "salary": 37734000,
     "contractYears": 4,
     "usage": 16.4,
-    "ts": 0.577
+    "ts": 0.577,
+    "heightCm": 196,
+    "weightKg": 93
   },
   "earl_cureton": {
     "id": "earl_cureton",
@@ -5729,7 +6121,9 @@
     "salary": 2648000,
     "contractYears": 3,
     "usage": 15.5,
-    "ts": 0.461
+    "ts": 0.461,
+    "heightCm": 201,
+    "weightKg": 99
   },
   "franklin_edwards": {
     "id": "franklin_edwards",
@@ -5759,7 +6153,9 @@
     "salary": 10516000,
     "contractYears": 2,
     "usage": 20.5,
-    "ts": 0.507
+    "ts": 0.507,
+    "heightCm": 196,
+    "weightKg": 93
   },
   "julius_erving": {
     "id": "julius_erving",
@@ -5789,7 +6185,10 @@
     "salary": 41012000,
     "contractYears": 1,
     "usage": 26.2,
-    "ts": 0.575
+    "ts": 0.575,
+    "heightCm": 201,
+    "weightKg": 99,
+    "skinTone": "#a56d4b"
   },
   "marc_iavaroni": {
     "id": "marc_iavaroni",
@@ -5819,7 +6218,9 @@
     "salary": 3835000,
     "contractYears": 2,
     "usage": 13.4,
-    "ts": 0.504
+    "ts": 0.504,
+    "heightCm": 201,
+    "weightKg": 99
   },
   "clemon_johnson": {
     "id": "clemon_johnson",
@@ -5849,7 +6250,9 @@
     "salary": 17784000,
     "contractYears": 2,
     "usage": 16.8,
-    "ts": 0.53
+    "ts": 0.53,
+    "heightCm": 211,
+    "weightKg": 114
   },
   "reggie_johnson": {
     "id": "reggie_johnson",
@@ -5879,7 +6282,9 @@
     "salary": 8196000,
     "contractYears": 1,
     "usage": 17.2,
-    "ts": 0.536
+    "ts": 0.536,
+    "heightCm": 201,
+    "weightKg": 99
   },
   "bobby_jones": {
     "id": "bobby_jones",
@@ -5909,7 +6314,9 @@
     "salary": 24975000,
     "contractYears": 5,
     "usage": 16.8,
-    "ts": 0.607
+    "ts": 0.607,
+    "heightCm": 201,
+    "weightKg": 99
   },
   "moses_malone": {
     "id": "moses_malone",
@@ -5939,7 +6346,10 @@
     "salary": 45776000,
     "contractYears": 3,
     "usage": 27.2,
-    "ts": 0.576
+    "ts": 0.576,
+    "heightCm": 211,
+    "weightKg": 114,
+    "skinTone": "#88453f"
   },
   "mark_mcnamara": {
     "id": "mark_mcnamara",
@@ -5969,7 +6379,9 @@
     "salary": 2648000,
     "contractYears": 2,
     "usage": 22.9,
-    "ts": 0.492
+    "ts": 0.492,
+    "heightCm": 211,
+    "weightKg": 114
   },
   "clint_richardson": {
     "id": "clint_richardson",
@@ -5999,7 +6411,9 @@
     "salary": 13145000,
     "contractYears": 3,
     "usage": 16.3,
-    "ts": 0.491
+    "ts": 0.491,
+    "heightCm": 196,
+    "weightKg": 93
   },
   "andrew_toney": {
     "id": "andrew_toney",
@@ -6029,7 +6443,9 @@
     "salary": 21651000,
     "contractYears": 5,
     "usage": 27.5,
-    "ts": 0.561
+    "ts": 0.561,
+    "heightCm": 196,
+    "weightKg": 93
   },
   "alvan_adams": {
     "id": "alvan_adams",
@@ -6059,7 +6475,9 @@
     "salary": 32167000,
     "contractYears": 3,
     "usage": 22.1,
-    "ts": 0.528
+    "ts": 0.528,
+    "heightCm": 211,
+    "weightKg": 114
   },
   "walter_davis": {
     "id": "walter_davis",
@@ -6089,7 +6507,9 @@
     "salary": 29383000,
     "contractYears": 3,
     "usage": 26.1,
-    "ts": 0.549
+    "ts": 0.549,
+    "heightCm": 196,
+    "weightKg": 93
   },
   "james_edwards": {
     "id": "james_edwards",
@@ -6119,7 +6539,9 @@
     "salary": 13145000,
     "contractYears": 5,
     "usage": 21.8,
-    "ts": 0.538
+    "ts": 0.538,
+    "heightCm": 211,
+    "weightKg": 114
   },
   "johnny_high": {
     "id": "johnny_high",
@@ -6149,7 +6571,9 @@
     "salary": 7268000,
     "contractYears": 2,
     "usage": 13.8,
-    "ts": 0.482
+    "ts": 0.482,
+    "heightCm": 196,
+    "weightKg": 93
   },
   "dennis_johnson": {
     "id": "dennis_johnson",
@@ -6179,7 +6603,9 @@
     "salary": 27063000,
     "contractYears": 5,
     "usage": 21.0,
-    "ts": 0.536
+    "ts": 0.536,
+    "heightCm": 196,
+    "weightKg": 93
   },
   "joel_kramer": {
     "id": "joel_kramer",
@@ -6209,7 +6635,9 @@
     "salary": 3309000,
     "contractYears": 4,
     "usage": 13.0,
-    "ts": 0.473
+    "ts": 0.473,
+    "heightCm": 201,
+    "weightKg": 99
   },
   "maurice_lucas": {
     "id": "maurice_lucas",
@@ -6239,7 +6667,9 @@
     "salary": 21032000,
     "contractYears": 1,
     "usage": 21.7,
-    "ts": 0.535
+    "ts": 0.535,
+    "heightCm": 201,
+    "weightKg": 99
   },
   "kyle_macy": {
     "id": "kyle_macy",
@@ -6269,7 +6699,9 @@
     "salary": 22424000,
     "contractYears": 5,
     "usage": 17.1,
-    "ts": 0.573
+    "ts": 0.573,
+    "heightCm": 196,
+    "weightKg": 93
   },
   "larry_nance": {
     "id": "larry_nance",
@@ -6300,7 +6732,9 @@
     "salary": 27960000,
     "contractYears": 2,
     "usage": 19.5,
-    "ts": 0.567
+    "ts": 0.567,
+    "heightCm": 206,
+    "weightKg": 107
   },
   "charlie_pittman": {
     "id": "charlie_pittman",
@@ -6330,7 +6764,9 @@
     "salary": 2648000,
     "contractYears": 1,
     "usage": 18.1,
-    "ts": 0.553
+    "ts": 0.553,
+    "heightCm": 201,
+    "weightKg": 99
   },
   "alvin_scott": {
     "id": "alvin_scott",
@@ -6360,7 +6796,9 @@
     "salary": 11599000,
     "contractYears": 1,
     "usage": 13.3,
-    "ts": 0.54
+    "ts": 0.54,
+    "heightCm": 201,
+    "weightKg": 99
   },
   "david_thirdkill": {
     "id": "david_thirdkill",
@@ -6390,7 +6828,9 @@
     "salary": 2648000,
     "contractYears": 5,
     "usage": 19.3,
-    "ts": 0.485
+    "ts": 0.485,
+    "heightCm": 201,
+    "weightKg": 99
   },
   "rory_white": {
     "id": "rory_white",
@@ -6420,7 +6860,9 @@
     "salary": 5815000,
     "contractYears": 5,
     "usage": 21.1,
-    "ts": 0.57
+    "ts": 0.57,
+    "heightCm": 201,
+    "weightKg": 99
   },
   "don_buse": {
     "id": "don_buse",
@@ -6450,7 +6892,9 @@
     "salary": 15117000,
     "contractYears": 1,
     "usage": 14.1,
-    "ts": 0.52
+    "ts": 0.52,
+    "heightCm": 196,
+    "weightKg": 93
   },
   "kenny_carr": {
     "id": "kenny_carr",
@@ -6480,7 +6924,9 @@
     "salary": 14691000,
     "contractYears": 3,
     "usage": 19.1,
-    "ts": 0.554
+    "ts": 0.554,
+    "heightCm": 201,
+    "weightKg": 99
   },
   "wayne_cooper": {
     "id": "wayne_cooper",
@@ -6510,7 +6956,9 @@
     "salary": 11599000,
     "contractYears": 1,
     "usage": 18.7,
-    "ts": 0.476
+    "ts": 0.476,
+    "heightCm": 211,
+    "weightKg": 114
   },
   "jeff_judkins": {
     "id": "jeff_judkins",
@@ -6540,7 +6988,9 @@
     "salary": 3309000,
     "contractYears": 4,
     "usage": 15.9,
-    "ts": 0.501
+    "ts": 0.501,
+    "heightCm": 196,
+    "weightKg": 93
   },
   "jeff_lamp": {
     "id": "jeff_lamp",
@@ -6570,7 +7020,9 @@
     "salary": 2648000,
     "contractYears": 2,
     "usage": 18.1,
-    "ts": 0.5
+    "ts": 0.5,
+    "heightCm": 196,
+    "weightKg": 93
   },
   "lafayette_lever": {
     "id": "lafayette_lever",
@@ -6600,7 +7052,9 @@
     "salary": 11057000,
     "contractYears": 2,
     "usage": 16.1,
-    "ts": 0.48
+    "ts": 0.48,
+    "heightCm": 196,
+    "weightKg": 93
   },
   "hank_mcdowell": {
     "id": "hank_mcdowell",
@@ -6630,7 +7084,9 @@
     "salary": 2648000,
     "contractYears": 5,
     "usage": 15.5,
-    "ts": 0.519
+    "ts": 0.519,
+    "heightCm": 201,
+    "weightKg": 99
   },
   "calvin_natt": {
     "id": "calvin_natt",
@@ -6660,7 +7116,9 @@
     "salary": 29383000,
     "contractYears": 2,
     "usage": 21.2,
-    "ts": 0.601
+    "ts": 0.601,
+    "heightCm": 201,
+    "weightKg": 99
   },
   "audie_norris": {
     "id": "audie_norris",
@@ -6690,7 +7148,9 @@
     "salary": 1820000,
     "contractYears": 1,
     "usage": 15.0,
-    "ts": 0.459
+    "ts": 0.459,
+    "heightCm": 211,
+    "weightKg": 114
   },
   "jim_paxson": {
     "id": "jim_paxson",
@@ -6720,7 +7180,9 @@
     "salary": 30187000,
     "contractYears": 4,
     "usage": 24.2,
-    "ts": 0.568
+    "ts": 0.568,
+    "heightCm": 196,
+    "weightKg": 93
   },
   "mychal_thompson": {
     "id": "mychal_thompson",
@@ -6750,7 +7212,9 @@
     "salary": 29383000,
     "contractYears": 4,
     "usage": 21.0,
-    "ts": 0.53
+    "ts": 0.53,
+    "heightCm": 211,
+    "weightKg": 114
   },
   "linton_townes": {
     "id": "linton_townes",
@@ -6780,7 +7244,9 @@
     "salary": 3909000,
     "contractYears": 1,
     "usage": 21.4,
-    "ts": 0.501
+    "ts": 0.501,
+    "heightCm": 201,
+    "weightKg": 99
   },
   "darnell_valentine": {
     "id": "darnell_valentine",
@@ -6810,7 +7276,9 @@
     "salary": 16083000,
     "contractYears": 3,
     "usage": 20.7,
-    "ts": 0.516
+    "ts": 0.516,
+    "heightCm": 196,
+    "weightKg": 93
   },
   "peter_verhoeven": {
     "id": "peter_verhoeven",
@@ -6840,7 +7308,9 @@
     "salary": 3068000,
     "contractYears": 5,
     "usage": 17.3,
-    "ts": 0.53
+    "ts": 0.53,
+    "heightCm": 201,
+    "weightKg": 99
   },
   "kenny_dennard": {
     "id": "kenny_dennard",
@@ -6870,7 +7340,9 @@
     "salary": 2648000,
     "contractYears": 2,
     "usage": 11.0,
-    "ts": 0.479
+    "ts": 0.479,
+    "heightCm": 201,
+    "weightKg": 99
   },
   "leon_douglas": {
     "id": "leon_douglas",
@@ -6900,7 +7372,9 @@
     "salary": 3309000,
     "contractYears": 1,
     "usage": 9.5,
-    "ts": 0.5
+    "ts": 0.5,
+    "heightCm": 211,
+    "weightKg": 114
   },
   "larry_drew": {
     "id": "larry_drew",
@@ -6930,7 +7404,9 @@
     "salary": 23506000,
     "contractYears": 5,
     "usage": 22.8,
-    "ts": 0.538
+    "ts": 0.538,
+    "heightCm": 196,
+    "weightKg": 93
   },
   "eddie_johnson_698": {
     "id": "eddie_johnson_698",
@@ -6960,7 +7436,9 @@
     "salary": 23506000,
     "contractYears": 3,
     "usage": 23.0,
-    "ts": 0.53
+    "ts": 0.53,
+    "heightCm": 201,
+    "weightKg": 99
   },
   "steve_johnson": {
     "id": "steve_johnson",
@@ -6990,7 +7468,9 @@
     "salary": 14228000,
     "contractYears": 3,
     "usage": 22.7,
-    "ts": 0.628
+    "ts": 0.628,
+    "heightCm": 211,
+    "weightKg": 114
   },
   "reggie_king": {
     "id": "reggie_king",
@@ -7020,7 +7500,9 @@
     "salary": 10052000,
     "contractYears": 5,
     "usage": 14.8,
-    "ts": 0.54
+    "ts": 0.54,
+    "heightCm": 201,
+    "weightKg": 99
   },
   "kevin_loder": {
     "id": "kevin_loder",
@@ -7050,7 +7532,9 @@
     "salary": 5072000,
     "contractYears": 2,
     "usage": 19.2,
-    "ts": 0.501
+    "ts": 0.501,
+    "heightCm": 201,
+    "weightKg": 99
   },
   "joe_meriweather": {
     "id": "joe_meriweather",
@@ -7080,7 +7564,9 @@
     "salary": 11599000,
     "contractYears": 2,
     "usage": 14.6,
-    "ts": 0.585
+    "ts": 0.585,
+    "heightCm": 211,
+    "weightKg": 114
   },
   "ed_nealy": {
     "id": "ed_nealy",
@@ -7110,7 +7596,9 @@
     "salary": 9279000,
     "contractYears": 5,
     "usage": 8.6,
-    "ts": 0.608
+    "ts": 0.608,
+    "heightCm": 201,
+    "weightKg": 99
   },
   "brook_steppe": {
     "id": "brook_steppe",
@@ -7140,7 +7628,9 @@
     "salary": 3909000,
     "contractYears": 4,
     "usage": 17.3,
-    "ts": 0.555
+    "ts": 0.555,
+    "heightCm": 196,
+    "weightKg": 93
   },
   "lasalle_thompson": {
     "id": "lasalle_thompson",
@@ -7170,7 +7660,9 @@
     "salary": 4508000,
     "contractYears": 2,
     "usage": 17.3,
-    "ts": 0.55
+    "ts": 0.55,
+    "heightCm": 211,
+    "weightKg": 114
   },
   "ray_williams": {
     "id": "ray_williams",
@@ -7200,7 +7692,9 @@
     "salary": 27063000,
     "contractYears": 3,
     "usage": 27.2,
-    "ts": 0.486
+    "ts": 0.486,
+    "heightCm": 196,
+    "weightKg": 93
   },
   "mike_woodson": {
     "id": "mike_woodson",
@@ -7230,7 +7724,9 @@
     "salary": 27960000,
     "contractYears": 3,
     "usage": 23.5,
-    "ts": 0.554
+    "ts": 0.554,
+    "heightCm": 196,
+    "weightKg": 93
   },
   "gene_banks": {
     "id": "gene_banks",
@@ -7260,7 +7756,9 @@
     "salary": 19795000,
     "contractYears": 2,
     "usage": 18.2,
-    "ts": 0.563
+    "ts": 0.563,
+    "heightCm": 201,
+    "weightKg": 99
   },
   "jeffrey_crompton": {
     "id": "jeffrey_crompton",
@@ -7290,7 +7788,9 @@
     "salary": 3309000,
     "contractYears": 5,
     "usage": 12.8,
-    "ts": 0.441
+    "ts": 0.441,
+    "heightCm": 211,
+    "weightKg": 114
   },
   "coby_dietrick": {
     "id": "coby_dietrick",
@@ -7320,7 +7820,9 @@
     "salary": 4154000,
     "contractYears": 3,
     "usage": 11.9,
-    "ts": 0.485
+    "ts": 0.485,
+    "heightCm": 211,
+    "weightKg": 114
   },
   "mike_dunleavy": {
     "id": "mike_dunleavy",
@@ -7352,7 +7854,9 @@
     "salary": 14691000,
     "contractYears": 1,
     "usage": 18.1,
-    "ts": 0.529
+    "ts": 0.529,
+    "heightCm": 196,
+    "weightKg": 93
   },
   "george_gervin": {
     "id": "george_gervin",
@@ -7382,7 +7886,10 @@
     "salary": 34440000,
     "contractYears": 5,
     "usage": 30.7,
-    "ts": 0.561
+    "ts": 0.561,
+    "heightCm": 196,
+    "weightKg": 93,
+    "skinTone": "#7f4b2c"
   },
   "artis_gilmore": {
     "id": "artis_gilmore",
@@ -7412,7 +7919,10 @@
     "salary": 32074000,
     "contractYears": 5,
     "usage": 19.4,
-    "ts": 0.676
+    "ts": 0.676,
+    "heightCm": 211,
+    "weightKg": 114,
+    "skinTone": "#d0836b"
   },
   "paul_griffin": {
     "id": "paul_griffin",
@@ -7442,7 +7952,9 @@
     "salary": 6341000,
     "contractYears": 2,
     "usage": 10.0,
-    "ts": 0.568
+    "ts": 0.568,
+    "heightCm": 201,
+    "weightKg": 99
   },
   "edgar_jones": {
     "id": "edgar_jones",
@@ -7472,7 +7984,9 @@
     "salary": 14691000,
     "contractYears": 1,
     "usage": 17.8,
-    "ts": 0.565
+    "ts": 0.565,
+    "heightCm": 201,
+    "weightKg": 99
   },
   "mike_mitchell": {
     "id": "mike_mitchell",
@@ -7502,7 +8016,9 @@
     "salary": 22424000,
     "contractYears": 1,
     "usage": 22.7,
-    "ts": 0.539
+    "ts": 0.539,
+    "heightCm": 201,
+    "weightKg": 99
   },
   "johnny_moore": {
     "id": "johnny_moore",
@@ -7532,7 +8048,9 @@
     "salary": 23506000,
     "contractYears": 5,
     "usage": 17.4,
-    "ts": 0.505
+    "ts": 0.505,
+    "heightCm": 196,
+    "weightKg": 93
   },
   "billy_paultz": {
     "id": "billy_paultz",
@@ -7562,7 +8080,9 @@
     "salary": 2813000,
     "contractYears": 1,
     "usage": 15.0,
-    "ts": 0.448
+    "ts": 0.448,
+    "heightCm": 211,
+    "weightKg": 114
   },
   "roger_phegley": {
     "id": "roger_phegley",
@@ -7592,7 +8112,9 @@
     "salary": 5413000,
     "contractYears": 2,
     "usage": 21.6,
-    "ts": 0.499
+    "ts": 0.499,
+    "heightCm": 196,
+    "weightKg": 93
   },
   "ed_rains": {
     "id": "ed_rains",
@@ -7622,7 +8144,9 @@
     "salary": 3309000,
     "contractYears": 4,
     "usage": 16.0,
-    "ts": 0.477
+    "ts": 0.477,
+    "heightCm": 201,
+    "weightKg": 99
   },
   "oliver_robinson": {
     "id": "oliver_robinson",
@@ -7652,7 +8176,9 @@
     "salary": 4330000,
     "contractYears": 5,
     "usage": 27.8,
-    "ts": 0.476
+    "ts": 0.476,
+    "heightCm": 196,
+    "weightKg": 93
   },
   "mike_sanders": {
     "id": "mike_sanders",
@@ -7682,7 +8208,9 @@
     "salary": 6557000,
     "contractYears": 1,
     "usage": 19.9,
-    "ts": 0.524
+    "ts": 0.524,
+    "heightCm": 201,
+    "weightKg": 99
   },
   "robert_smith": {
     "id": "robert_smith",
@@ -7712,7 +8240,9 @@
     "salary": 3309000,
     "contractYears": 5,
     "usage": 17.5,
-    "ts": 0.494
+    "ts": 0.494,
+    "heightCm": 196,
+    "weightKg": 93
   },
   "fred_brown": {
     "id": "fred_brown",
@@ -7742,7 +8272,9 @@
     "salary": 17088000,
     "contractYears": 5,
     "usage": 23.5,
-    "ts": 0.529
+    "ts": 0.529,
+    "heightCm": 196,
+    "weightKg": 93
   },
   "james_donaldson": {
     "id": "james_donaldson",
@@ -7772,7 +8304,9 @@
     "salary": 14228000,
     "contractYears": 3,
     "usage": 16.0,
-    "ts": 0.617
+    "ts": 0.617,
+    "heightCm": 211,
+    "weightKg": 114
   },
   "john_greig": {
     "id": "john_greig",
@@ -7802,7 +8336,9 @@
     "salary": 2399000,
     "contractYears": 3,
     "usage": 19.1,
-    "ts": 0.554
+    "ts": 0.554,
+    "heightCm": 201,
+    "weightKg": 99
   },
   "steve_hawes": {
     "id": "steve_hawes",
@@ -7832,7 +8368,9 @@
     "salary": 6967000,
     "contractYears": 5,
     "usage": 16.1,
-    "ts": 0.489
+    "ts": 0.489,
+    "heightCm": 211,
+    "weightKg": 114
   },
   "greg_kelser": {
     "id": "greg_kelser",
@@ -7862,7 +8400,9 @@
     "salary": 9279000,
     "contractYears": 1,
     "usage": 19.6,
-    "ts": 0.571
+    "ts": 0.571,
+    "heightCm": 201,
+    "weightKg": 99
   },
   "mark_radford": {
     "id": "mark_radford",
@@ -7892,7 +8432,9 @@
     "salary": 4330000,
     "contractYears": 5,
     "usage": 22.7,
-    "ts": 0.517
+    "ts": 0.517,
+    "heightCm": 196,
+    "weightKg": 93
   },
   "lonnie_shelton": {
     "id": "lonnie_shelton",
@@ -7922,7 +8464,9 @@
     "salary": 20104000,
     "contractYears": 4,
     "usage": 19.1,
-    "ts": 0.514
+    "ts": 0.514,
+    "heightCm": 201,
+    "weightKg": 99
   },
   "jack_sikma": {
     "id": "jack_sikma",
@@ -7952,7 +8496,9 @@
     "salary": 37734000,
     "contractYears": 1,
     "usage": 22.4,
-    "ts": 0.551
+    "ts": 0.551,
+    "heightCm": 211,
+    "weightKg": 114
   },
   "phil_smith": {
     "id": "phil_smith",
@@ -7982,7 +8528,9 @@
     "salary": 6967000,
     "contractYears": 5,
     "usage": 19.0,
-    "ts": 0.496
+    "ts": 0.496,
+    "heightCm": 196,
+    "weightKg": 93
   },
   "david_thompson": {
     "id": "david_thompson",
@@ -8012,7 +8560,9 @@
     "salary": 20104000,
     "contractYears": 3,
     "usage": 24.2,
-    "ts": 0.55
+    "ts": 0.55,
+    "heightCm": 196,
+    "weightKg": 93
   },
   "danny_vranes": {
     "id": "danny_vranes",
@@ -8042,7 +8592,9 @@
     "salary": 9279000,
     "contractYears": 2,
     "usage": 12.9,
-    "ts": 0.55
+    "ts": 0.55,
+    "heightCm": 201,
+    "weightKg": 99
   },
   "gus_williams": {
     "id": "gus_williams",
@@ -8072,7 +8624,9 @@
     "salary": 45776000,
     "contractYears": 4,
     "usage": 26.5,
-    "ts": 0.521
+    "ts": 0.521,
+    "heightCm": 196,
+    "weightKg": 93
   },
   "mitchell_anderson": {
     "id": "mitchell_anderson",
@@ -8102,7 +8656,9 @@
     "salary": 3487000,
     "contractYears": 2,
     "usage": 17.0,
-    "ts": 0.54
+    "ts": 0.54,
+    "heightCm": 201,
+    "weightKg": 99
   },
   "adrian_dantley": {
     "id": "adrian_dantley",
@@ -8132,7 +8688,10 @@
     "salary": 43301000,
     "contractYears": 5,
     "usage": 26.9,
-    "ts": 0.638
+    "ts": 0.638,
+    "heightCm": 201,
+    "weightKg": 99,
+    "skinTone": "#7d3b3c"
   },
   "john_drew": {
     "id": "john_drew",
@@ -8162,7 +8721,9 @@
     "salary": 22424000,
     "contractYears": 3,
     "usage": 29.8,
-    "ts": 0.552
+    "ts": 0.552,
+    "heightCm": 201,
+    "weightKg": 99
   },
   "mark_eaton": {
     "id": "mark_eaton",
@@ -8192,7 +8753,9 @@
     "salary": 10052000,
     "contractYears": 5,
     "usage": 13.8,
-    "ts": 0.453
+    "ts": 0.453,
+    "heightCm": 211,
+    "weightKg": 114
   },
   "jerry_eaves": {
     "id": "jerry_eaves",
@@ -8222,7 +8785,9 @@
     "salary": 6557000,
     "contractYears": 5,
     "usage": 20.4,
-    "ts": 0.556
+    "ts": 0.556,
+    "heightCm": 196,
+    "weightKg": 93
   },
   "rickey_green": {
     "id": "rickey_green",
@@ -8252,7 +8817,9 @@
     "salary": 29383000,
     "contractYears": 3,
     "usage": 18.1,
-    "ts": 0.533
+    "ts": 0.533,
+    "heightCm": 196,
+    "weightKg": 93
   },
   "darrell_griffith": {
     "id": "darrell_griffith",
@@ -8282,7 +8849,9 @@
     "salary": 17939000,
     "contractYears": 3,
     "usage": 26.6,
-    "ts": 0.514
+    "ts": 0.514,
+    "heightCm": 196,
+    "weightKg": 93
   },
   "rich_kelley": {
     "id": "rich_kelley",
@@ -8312,7 +8881,9 @@
     "salary": 10052000,
     "contractYears": 3,
     "usage": 15.8,
-    "ts": 0.538
+    "ts": 0.538,
+    "heightCm": 211,
+    "weightKg": 114
   },
   "kenny_natt": {
     "id": "kenny_natt",
@@ -8342,7 +8913,9 @@
     "salary": 2648000,
     "contractYears": 2,
     "usage": 18.2,
-    "ts": 0.538
+    "ts": 0.538,
+    "heightCm": 196,
+    "weightKg": 93
   },
   "ben_poquette": {
     "id": "ben_poquette",
@@ -8372,7 +8945,9 @@
     "salary": 17784000,
     "contractYears": 4,
     "usage": 14.5,
-    "ts": 0.531
+    "ts": 0.531,
+    "heightCm": 201,
+    "weightKg": 99
   },
   "jeff_wilkins": {
     "id": "jeff_wilkins",
@@ -8402,7 +8977,9 @@
     "salary": 7268000,
     "contractYears": 1,
     "usage": 17.8,
-    "ts": 0.506
+    "ts": 0.506,
+    "heightCm": 211,
+    "weightKg": 114
   },
   "freeman_williams": {
     "id": "freeman_williams",
@@ -8432,7 +9009,9 @@
     "salary": 6341000,
     "contractYears": 2,
     "usage": 28.6,
-    "ts": 0.492
+    "ts": 0.492,
+    "heightCm": 196,
+    "weightKg": 93
   },
   "rickey_williams": {
     "id": "rickey_williams",
@@ -8462,7 +9041,9 @@
     "salary": 3309000,
     "contractYears": 4,
     "usage": 21.0,
-    "ts": 0.481
+    "ts": 0.481,
+    "heightCm": 196,
+    "weightKg": 93
   },
   "greg_ballard": {
     "id": "greg_ballard",
@@ -8492,7 +9073,9 @@
     "salary": 37734000,
     "contractYears": 4,
     "usage": 22.1,
-    "ts": 0.513
+    "ts": 0.513,
+    "heightCm": 201,
+    "weightKg": 99
   },
   "dave_batton": {
     "id": "dave_batton",
@@ -8522,7 +9105,9 @@
     "salary": 4887000,
     "contractYears": 3,
     "usage": 16.8,
-    "ts": 0.462
+    "ts": 0.462,
+    "heightCm": 211,
+    "weightKg": 114
   },
   "don_collins": {
     "id": "don_collins",
@@ -8552,7 +9137,9 @@
     "salary": 17939000,
     "contractYears": 1,
     "usage": 22.0,
-    "ts": 0.547
+    "ts": 0.547,
+    "heightCm": 196,
+    "weightKg": 93
   },
   "john_cox": {
     "id": "john_cox",
@@ -8582,7 +9169,9 @@
     "salary": 5413000,
     "contractYears": 5,
     "usage": 20.9,
-    "ts": 0.464
+    "ts": 0.464,
+    "heightCm": 196,
+    "weightKg": 93
   },
   "charlie_davis": {
     "id": "charlie_davis",
@@ -8612,7 +9201,9 @@
     "salary": 9279000,
     "contractYears": 2,
     "usage": 23.2,
-    "ts": 0.493
+    "ts": 0.493,
+    "heightCm": 201,
+    "weightKg": 99
   },
   "kevin_grevey": {
     "id": "kevin_grevey",
@@ -8642,7 +9233,9 @@
     "salary": 9124000,
     "contractYears": 3,
     "usage": 19.6,
-    "ts": 0.487
+    "ts": 0.487,
+    "heightCm": 196,
+    "weightKg": 93
   },
   "spencer_haywood": {
     "id": "spencer_haywood",
@@ -8672,7 +9265,9 @@
     "salary": 6967000,
     "contractYears": 2,
     "usage": 22.1,
-    "ts": 0.5
+    "ts": 0.5,
+    "heightCm": 201,
+    "weightKg": 99
   },
   "frank_johnson": {
     "id": "frank_johnson",
@@ -8702,7 +9297,9 @@
     "salary": 16083000,
     "contractYears": 1,
     "usage": 20.7,
-    "ts": 0.473
+    "ts": 0.473,
+    "heightCm": 196,
+    "weightKg": 93
   },
   "joe_kopicki": {
     "id": "joe_kopicki",
@@ -8732,7 +9329,9 @@
     "salary": 4330000,
     "contractYears": 1,
     "usage": 15.3,
-    "ts": 0.54
+    "ts": 0.54,
+    "heightCm": 201,
+    "weightKg": 99
   },
   "steve_lingenfelter": {
     "id": "steve_lingenfelter",
@@ -8762,7 +9361,9 @@
     "salary": 2648000,
     "contractYears": 4,
     "usage": 14.6,
-    "ts": 0.531
+    "ts": 0.531,
+    "heightCm": 201,
+    "weightKg": 99
   },
   "john_lucas": {
     "id": "john_lucas",
@@ -8793,7 +9394,9 @@
     "salary": 14691000,
     "contractYears": 2,
     "usage": 19.0,
-    "ts": 0.485
+    "ts": 0.485,
+    "heightCm": 188,
+    "weightKg": 86
   },
   "rick_mahorn": {
     "id": "rick_mahorn",
@@ -8823,7 +9426,9 @@
     "salary": 16083000,
     "contractYears": 5,
     "usage": 15.2,
-    "ts": 0.517
+    "ts": 0.517,
+    "heightCm": 201,
+    "weightKg": 99
   },
   "kevin_porter": {
     "id": "kevin_porter",
@@ -8854,7 +9459,9 @@
     "salary": 4601000,
     "contractYears": 4,
     "usage": 14.0,
-    "ts": 0.547
+    "ts": 0.547,
+    "heightCm": 188,
+    "weightKg": 86
   },
   "jeff_ruland": {
     "id": "jeff_ruland",
@@ -8884,7 +9491,9 @@
     "salary": 27960000,
     "contractYears": 3,
     "usage": 22.7,
-    "ts": 0.601
+    "ts": 0.601,
+    "heightCm": 211,
+    "weightKg": 114
   },
   "ricky_sobers": {
     "id": "ricky_sobers",
@@ -8914,7 +9523,9 @@
     "salary": 17784000,
     "contractYears": 4,
     "usage": 22.7,
-    "ts": 0.521
+    "ts": 0.521,
+    "heightCm": 196,
+    "weightKg": 93
   },
   "carlos_terry": {
     "id": "carlos_terry",
@@ -8944,7 +9555,9 @@
     "salary": 3309000,
     "contractYears": 5,
     "usage": 11.9,
-    "ts": 0.408
+    "ts": 0.408,
+    "heightCm": 196,
+    "weightKg": 93
   },
   "bryan_warrick": {
     "id": "bryan_warrick",
@@ -8974,7 +9587,9 @@
     "salary": 2648000,
     "contractYears": 4,
     "usage": 15.4,
-    "ts": 0.451
+    "ts": 0.451,
+    "heightCm": 196,
+    "weightKg": 93
   },
   "kent_benson": {
     "id": "kent_benson",
@@ -9004,7 +9619,9 @@
     "salary": 16238000,
     "contractYears": 1,
     "usage": 16.1,
-    "ts": 0.53
+    "ts": 0.53,
+    "heightCm": 211,
+    "weightKg": 114
   },
   "vinnie_johnson": {
     "id": "vinnie_johnson",
@@ -9034,7 +9651,9 @@
     "salary": 27063000,
     "contractYears": 4,
     "usage": 19.6,
-    "ts": 0.557
+    "ts": 0.557,
+    "heightCm": 196,
+    "weightKg": 93
   },
   "jim_johnstone": {
     "id": "jim_johnstone",
@@ -9064,7 +9683,9 @@
     "salary": 1820000,
     "contractYears": 5,
     "usage": 13.1,
-    "ts": 0.447
+    "ts": 0.447,
+    "heightCm": 211,
+    "weightKg": 114
   },
   "bill_laimbeer": {
     "id": "bill_laimbeer",
@@ -9094,7 +9715,9 @@
     "salary": 24744000,
     "contractYears": 3,
     "usage": 16.2,
-    "ts": 0.554
+    "ts": 0.554,
+    "heightCm": 211,
+    "weightKg": 114
   },
   "cliff_levingston": {
     "id": "cliff_levingston",
@@ -9124,7 +9747,9 @@
     "salary": 3487000,
     "contractYears": 3,
     "usage": 17.8,
-    "ts": 0.519
+    "ts": 0.519,
+    "heightCm": 201,
+    "weightKg": 99
   },
   "john_long": {
     "id": "john_long",
@@ -9154,7 +9779,9 @@
     "salary": 10052000,
     "contractYears": 5,
     "usage": 25.0,
-    "ts": 0.509
+    "ts": 0.509,
+    "heightCm": 196,
+    "weightKg": 93
   },
   "scott_may": {
     "id": "scott_may",
@@ -9184,7 +9811,9 @@
     "salary": 13145000,
     "contractYears": 5,
     "usage": 19.7,
-    "ts": 0.561
+    "ts": 0.561,
+    "heightCm": 201,
+    "weightKg": 99
   },
   "tom_owens": {
     "id": "tom_owens",
@@ -9214,7 +9843,9 @@
     "salary": 4154000,
     "contractYears": 4,
     "usage": 18.6,
-    "ts": 0.503
+    "ts": 0.503,
+    "heightCm": 211,
+    "weightKg": 114
   },
   "ricky_pierce": {
     "id": "ricky_pierce",
@@ -9244,7 +9875,9 @@
     "salary": 2648000,
     "contractYears": 4,
     "usage": 17.4,
-    "ts": 0.45
+    "ts": 0.45,
+    "heightCm": 196,
+    "weightKg": 93
   },
   "walker_russell": {
     "id": "walker_russell",
@@ -9274,7 +9907,9 @@
     "salary": 1531000,
     "contractYears": 5,
     "usage": 15.6,
-    "ts": 0.449
+    "ts": 0.449,
+    "heightCm": 196,
+    "weightKg": 93
   },
   "jim_smith": {
     "id": "jim_smith",
@@ -9304,7 +9939,9 @@
     "salary": 2648000,
     "contractYears": 3,
     "usage": 12.9,
-    "ts": 0.522
+    "ts": 0.522,
+    "heightCm": 201,
+    "weightKg": 99
   },
   "isiah_thomas": {
     "id": "isiah_thomas",
@@ -9334,7 +9971,10 @@
     "salary": 16161000,
     "contractYears": 3,
     "usage": 25.6,
-    "ts": 0.515
+    "ts": 0.515,
+    "heightCm": 196,
+    "weightKg": 93,
+    "skinTone": "#cd8c81"
   },
   "ray_tolbert": {
     "id": "ray_tolbert",
@@ -9364,7 +10004,9 @@
     "salary": 3489000,
     "contractYears": 2,
     "usage": 16.3,
-    "ts": 0.51
+    "ts": 0.51,
+    "heightCm": 201,
+    "weightKg": 99
   },
   "kelly_tripucka": {
     "id": "kelly_tripucka",
@@ -9394,7 +10036,9 @@
     "salary": 23506000,
     "contractYears": 2,
     "usage": 25.0,
-    "ts": 0.566
+    "ts": 0.566,
+    "heightCm": 201,
+    "weightKg": 99
   },
   "terry_tyler": {
     "id": "terry_tyler",
@@ -9424,7 +10068,9 @@
     "salary": 27063000,
     "contractYears": 3,
     "usage": 16.6,
-    "ts": 0.526
+    "ts": 0.526,
+    "heightCm": 201,
+    "weightKg": 99
   },
   "james_wilkes": {
     "id": "james_wilkes",
@@ -9454,7 +10100,9 @@
     "salary": 4330000,
     "contractYears": 4,
     "usage": 16.8,
-    "ts": 0.504
+    "ts": 0.504,
+    "heightCm": 201,
+    "weightKg": 99
   },
   "jim_zoet": {
     "id": "jim_zoet",
@@ -9484,6 +10132,8 @@
     "salary": 3309000,
     "contractYears": 2,
     "usage": 15.8,
-    "ts": 0.462
+    "ts": 0.462,
+    "heightCm": 211,
+    "weightKg": 114
   }
 }
