@@ -275,7 +275,14 @@ const ROTATION_WEIGHTS = [6.0, 5.67, 5.33, 5.0, 4.67, 4.0, 3.33, 2.67, 2.0, 1.33
 const LOAD_MANAGED_FACTOR = 0.6;
 
 export const getRotationWeights = (team: Team, players: { [key: string]: Player }): { ids: string[]; weights: number[] } => {
-    const ids = getTeamRotation(team, players, rotationSize(team));
+    const rotation = getTeamRotation(team, players, rotationSize(team));
+    // The starters arrive in court order (PG..C). Handing out the curve in
+    // that order gave every center the fifth share, 28 minutes: Jokić 28.2
+    // (real 34.8), Embiid and Wembanyama 28. Minutes follow quality instead;
+    // only the starters are re-sorted, the bench already is.
+    const starters = rotation.slice(0, 5)
+        .sort((a, b) => effectiveOvr(team, b, players) - effectiveOvr(team, a, players));
+    const ids = [...starters, ...rotation.slice(5)];
     const weights = ids.map((pId, i) => {
         const base = ROTATION_WEIGHTS[i] ?? 0.5;
         return team.loadManagedIds?.includes(pId) ? base * LOAD_MANAGED_FACTOR : base;
@@ -1072,7 +1079,7 @@ const recordGameStats = (
         // floor. The old weight, (off - 58)^1.9, read efficiency as volume and
         // handed a bench gunner like Cam Spencer 27.7 a night (real: 11.1).
         ptsW.push(usageOf(p) * tsOf(p) * m);
-        rebW.push(pow(a.rebounding - 58, 1.0) * m);
+        rebW.push(pow(a.rebounding - 58, 0.8) * m);
         astW.push(pow(a.playmaking - 58, 1.3) * m);
         // Below 1 on purpose: steals spread wide in real basketball, and at 1.1
         // a 93-perimeterD specialist handed starter minutes (Dru Smith on the

@@ -31,7 +31,7 @@ sem o time do usuário). O resto, em ordem. **L** = lapidar algo que existe,
 | 9 | Jogo decisivo dentro do 3D | L | M | Junta as duas telas de jogo; depende das etapas 4-5 do 3D |
 | 10 | Objetivos e conquistas de GM | N | P | Meta para saves longos além de "ganhar o título" |
 | 11 | Staff além do técnico | N | G | Profundidade, mas mexe em muitos sistemas calibrados |
-| 12 | Ajustes técnicos menores | L | P | Erosão da liga e `diagnose_season` |
+| 12 | Ajustes técnicos menores — **FEITO em parte** (2026-10-12) | L | P | Erosão da liga e `diagnose_season` |
 
 Tamanho: P = um dia ou menos, M = alguns dias, G = uma semana ou mais.
 
@@ -145,16 +145,26 @@ Assistentes, preparador físico (risco de lesão e carga) e olheiros (precisão 
 relatório do draft). É grande porque cada um mexe num sistema já calibrado:
 re-medir `check_coaches` e `diagnose_season`.
 
-### 12. Ajustes técnicos menores (L)
+### 12. Ajustes técnicos menores (L) — FEITO em parte (2026-10-12)
 
-- Erosão lenta do OVR do topo da liga depois do 7º ano (ver "Aposentadoria" abaixo).
-- `diagnose_season.ts` não responde às decisões.
-- Pontuação achatada: a NBA real de 2025-26 teve **46** jogadores com 20+ PPG e
-  cestinha com 33,5; a sim dá ~29,5 e ~30. Os pontos são usage × TS × minutos, então
-  a causa é a divisão de minutos (MPG viés −1,3, líder 36 vs 38), não os ratings. O
-  portão do `diagnose_season` (piso 30) está falhando por ~0,5 desde o item 3.
-- `check_decisions` é instável: com 12 temporadas, o p95 é o máximo, e "pedido de
-  troca dispara" falha às vezes também nos dados antigos.
+- **Pontuação achatada — FEITO.** A NBA real de 2025-26 teve 46 jogadores com
+  20+ PPG; a sim dava ~30. A fórmula (usage × TS × minutos) bate com a realidade
+  (expoente 1,01 nos dois), então eram duas entradas erradas:
+  - os titulares recebiam a curva de minutos na ordem da quadra (PG..C), e todo
+    pivô ficava com 28 min (Jokić 28,2, real 34,8). `getRotationWeights` agora
+    ordena os titulares por qualidade;
+  - o `apply_bbref.py` puxava o usage dos astros para 17% (`K_RATE` 300 → 100;
+    Dončić 38,1 → 35,2 antes).
+  Os pivôs jogando mais levaram o líder de rebotes a 16; o expoente de rebote caiu
+  de 1,0 para 0,8. Resultado: 20+ PPG 41,8, todos os 23 itens do `diagnose_season`
+  na faixa, backtest vitórias r 0,855 e força x reais 0,887, PPG por jogador 0,895.
+- **Erosão do topo — passa para o item 7.** Em 12 anos o top-100 vai de 86,4 a
+  ~85,2. A causa é a curva de evolução: a faixa 24-28 cai de 76,4 para ~74 e os 34+
+  bons crescem de 24 para ~58. Mexer nela duas vezes não faz sentido; o
+  desenvolvimento ativo é que vai reescrever essa curva.
+- `diagnose_season.ts` não responde às decisões (só simula). Sem mudança.
+- `check_personality` ("elenco com líder termina com moral mais alta") e
+  `check_decisions` são instáveis: falham ~1 vez em 2 com ou sem mudança.
 
 ---
 
