@@ -1,11 +1,12 @@
-import React, { useMemo, useRef } from 'react';
+import React, { useEffect, useMemo, useRef } from 'react';
 import { GestureResponderEvent, PanResponder, View } from 'react-native';
 import { Canvas, useFrame, useThree } from '@react-three/fiber/native';
 import * as THREE from 'three';
 
 import type { CourtState } from '../../services/watchDirector';
 import Arena, { RIM_X, type ScoreboardData } from './Arena';
-import { createRig, type Rig } from './PlayerRig';
+import { createRig, type Rig, type RigPlayer } from './PlayerRig';
+import { loadPainterFont } from './painter';
 import { buildBallTexture, buildFloorTexture, buildShadowTexture, hexToRgb, FLOOR_L, FLOOR_W } from './textures';
 
 export type { ScoreboardData };
@@ -91,7 +92,9 @@ interface Court3DProps {
   /** Painted at center court -- the home tricode. */
   homeLabel?: string;
   /** Jersey number by player id. */
-  numbers?: { [playerId: string]: number };
+  bodies?: { [playerId: string]: RigPlayer };
+  /** The home team's title years, hung in the rafters. */
+  banners?: number[];
   /** The live score, period, game clock and shot clock for the arena's
    *  scoreboard and shot clocks (PLANO-3D Etapa 5). Absent: the boards idle. */
   scoreboard?: ScoreboardData;
@@ -354,12 +357,12 @@ const BALL_R = 0.39; // 9.4-inch ball, in feet
 const BACKSPIN = Math.PI * 4;
 
 function PlayersAndBall({
-  home, away, courtRef, numbers,
+  home, away, courtRef, bodies,
 }: {
   home: TeamVisual;
   away: TeamVisual;
   courtRef: React.MutableRefObject<CourtState | null>;
-  numbers?: { [playerId: string]: number };
+  bodies?: { [playerId: string]: RigPlayer };
 }) {
   const shadowMat = useMemo(() => new THREE.MeshBasicMaterial({
     map: buildShadowTexture(), transparent: true, depthWrite: false,
@@ -408,7 +411,7 @@ function PlayersAndBall({
       if (!rig) return;
       if (bound.current[i] !== p.playerId) {
         bound.current[i] = p.playerId;
-        rig.setPlayer(p.playerId, numbers?.[p.playerId] ?? null);
+        rig.setPlayer(p.playerId, bodies?.[p.playerId] ?? { number: null });
       }
       rig.update({
         x: p.x, z: p.z, rotY: p.rotY, dt, time: t,
@@ -458,7 +461,7 @@ function PlayersAndBall({
 /* ------------------------------------------------------------------ */
 /* Scene root.                                                         */
 /* ------------------------------------------------------------------ */
-function Scene({ home, away, courtRef, visual, homeLabel, numbers, scoreboard }: Omit<Court3DProps, 'cameraView'>) {
+function Scene({ home, away, courtRef, visual, homeLabel, bodies, scoreboard, banners }: Omit<Court3DProps, 'cameraView'>) {
   return (
     <>
       {/* Arena lighting: a warm key from the rig above, a cold rim light low
@@ -485,15 +488,19 @@ function Scene({ home, away, courtRef, visual, homeLabel, numbers, scoreboard }:
         board={scoreboard}
         awayPrimary={away.primary}
         homeLabel={homeLabel}
+        banners={banners}
       />
-      <PlayersAndBall home={home} away={away} courtRef={courtRef} numbers={numbers} />
+      <PlayersAndBall home={home} away={away} courtRef={courtRef} bodies={bodies} />
     </>
   );
 }
 
 export default function Court3D({
-  home, away, courtRef, visual, cameraView = 'iso', homeLabel, numbers, scoreboard, insets,
+  home, away, courtRef, visual, cameraView = 'iso', homeLabel, bodies, scoreboard, insets, banners,
 }: Court3DProps) {
+  // The rich jerseys and banners need the brush's font; start it now, the
+  // bodies wear the pixel-font jersey until it lands (painter.ts).
+  useEffect(() => { loadPainterFont(); }, []);
   const preset = CAMERA_PRESETS[cameraView];
   const camState = useRef<CameraDragState>({
     angle: CAMERA_PRESETS.iso.angle, elev: CAMERA_PRESETS.iso.elev, dist: CAMERA_PRESETS.iso.dist, dragging: false,
@@ -528,7 +535,7 @@ export default function Court3D({
         <fog attach="fog" args={['#04060b', 160, 520]} />
         <CameraRig stateRef={camState} preset={preset} courtRef={courtRef} insets={insets} />
         {__DEV__ ? <RenderProbe /> : null}
-        <Scene home={home} away={away} courtRef={courtRef} visual={visual} homeLabel={homeLabel} numbers={numbers} scoreboard={scoreboard} />
+        <Scene home={home} away={away} courtRef={courtRef} visual={visual} homeLabel={homeLabel} bodies={bodies} scoreboard={scoreboard} banners={banners} />
       </Canvas>
     </View>
   );

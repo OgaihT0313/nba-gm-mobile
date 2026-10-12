@@ -2,6 +2,8 @@ import * as THREE from 'three';
 
 import type { PlayerAction } from '../../services/watchDirector';
 import { buildBandTexture, buildJerseyTexture, paintJersey, hexToRgb } from './textures';
+import { createJerseyDataTexture, paintRichJersey } from './richTextures';
+import { onPainterReady, painterReady } from './painter';
 
 // One basketball player: a jointed body, built once, posed every frame.
 //
@@ -81,10 +83,26 @@ const soleFor = (shoe: string) => {
   return 0.2126 * c.r + 0.7152 * c.g + 0.0722 * c.b > 0.6 ? '#1c1d22' : '#f2f2ee';
 };
 
+/** What the body needs to know about the man wearing it. */
+export interface RigPlayer {
+  number: number | null;
+  name?: string;
+  /** Real height and weight (pipeline/sync_physical.py); absent = average build. */
+  heightCm?: number;
+  weightKg?: number;
+  /** Sampled from his official photo; absent = a stable tone from his id. */
+  skinTone?: string;
+}
+
+/** The model's own height at scale 1: ~6'5". */
+const BASE_HEIGHT_CM = 196;
+/** NBA average BMI; heavier than this reads thicker, lighter reads leaner. */
+const BASE_BMI = 24.5;
+
 export interface Rig {
   root: THREE.Group;
   /** Rebinds the body to a different player (a substitution). */
-  setPlayer: (playerId: string, number: number | null) => void;
+  setPlayer: (playerId: string, info: RigPlayer) => void;
   /** Poses the body for this frame. */
   update: (input: PoseInput) => void;
 }
@@ -154,8 +172,27 @@ export const createRig = (team: { primary: string; secondary: string }, shadowMa
 
   // Jersey: its own texture per body, repainted in place when a substitute
   // comes in (no new GPU texture, just new pixels).
+  // Two jerseys: the rich one (real type, collar, piping -- richTextures.ts)
+  // once the platform brush and its font are in, the pixel-font one until
+  // then and wherever the brush is unavailable.
   const jerseyTex = buildJerseyTexture(team.primary, team.secondary, null);
+  const richTex = createJerseyDataTexture();
   const jersey = new THREE.MeshStandardMaterial({ map: jerseyTex, roughness: 0.62 });
+  let shirt: { number: number | null; name?: string } = { number: null };
+  let waitingForFont = false;
+  const paintShirt = () => {
+    if (painterReady() && paintRichJersey(richTex, team.primary, team.secondary, shirt.number, shirt.name)) {
+      if (jersey.map !== richTex) { jersey.map = richTex; jersey.needsUpdate = true; }
+      return;
+    }
+    paintJersey(jerseyTex.image.data as Uint8Array, jerseyTex.image.width, jerseyTex.image.height,
+      hexToRgb(team.primary), hexToRgb(team.secondary), shirt.number);
+    jerseyTex.needsUpdate = true;
+    if (!painterReady() && !waitingForFont) {
+      waitingForFont = true;
+      onPainterReady(() => { waitingForFont = false; paintShirt(); });
+    }
+  };
   // Shorts carry a waistband and shoes a sole as painted bands, not meshes.
   const shortsMat = new THREE.MeshStandardMaterial({
     map: sharedBand(team.primary, [{ from: 0.84, to: 1.01, color: team.secondary }]),
@@ -179,6 +216,8 @@ export const createRig = (team: { primary: string; secondary: string }, shadowMa
   // Torso, flattened front-to-back so it reads as a chest, not a barrel.
   const torso = mesh(hips, GEO.torso, jersey, 0, 1.05);
   torso.scale.set(1.15, 1, 0.72);
+  // Everything that gets thicker on a heavier body (not the head, hands or feet).
+  const bulky: THREE.Mesh[] = [];
   // Head on its own pivot at the base of the neck, so it can follow the ball.
   const neck = at(hips, 0, 1.95);
   mesh(neck, GEO.neck, skin, 0, 0.2);
@@ -191,14 +230,14 @@ export const createRig = (team: { primary: string; secondary: string }, shadowMa
   const elbowL = at(shoulderL, 0, -1.1);
   const elbowR = at(shoulderR, 0, -1.1);
   [shoulderL, shoulderR].forEach((s) => {
-    mesh(s, GEO.shoulderJoint, skin);
-    mesh(s, GEO.upperArm, skin, 0, -0.55);
+    bulky.push(mesh(s, GEO.shoulderJoint, skin));
+    bulky.push(mesh(s, GEO.upperArm, skin, 0, -0.55));
   });
   // A shooting sleeve on the right arm, for the players who wear one.
   const sleeve = mesh(shoulderR, GEO.sleeve, ACCESSORY[1], 0, -0.62);
   [elbowL, elbowR].forEach((e) => {
-    mesh(e, GEO.elbowJoint, skin);
-    mesh(e, GEO.foreArm, skin, 0, -0.56);
+    bulky.push(mesh(e, GEO.elbowJoint, skin));
+    bulky.push(mesh(e, GEO.foreArm, skin, 0, -0.56));
     mesh(e, GEO.hand, skin, 0, -1.18);
   });
 
@@ -209,10 +248,10 @@ export const createRig = (team: { primary: string; secondary: string }, shadowMa
   const hipR = at(hips, 0.32, -0.22);
   const kneeL = at(hipL, 0, -1.55);
   const kneeR = at(hipR, 0, -1.55);
-  [hipL, hipR].forEach((h) => mesh(h, GEO.thigh, skin, 0, -0.75));
+  [hipL, hipR].forEach((h) => bulky.push(mesh(h, GEO.thigh, skin, 0, -0.75)));
   [kneeL, kneeR].forEach((k) => {
-    mesh(k, GEO.kneeJoint, skin);
-    mesh(k, GEO.shin, skin, 0, -0.72);
+    bulky.push(mesh(k, GEO.kneeJoint, skin));
+    bulky.push(mesh(k, GEO.shin, skin, 0, -0.72));
     mesh(k, GEO.sock, SOCK, 0, -1.2);
     mesh(k, GEO.shoe, shoeMat, 0, -1.6, 0.16);
   });
@@ -235,20 +274,28 @@ export const createRig = (team: { primary: string; secondary: string }, shadowMa
   const act = {} as Pose;
   const approach = (cur: number, target: number, k: number) => cur + (target - cur) * k;
 
-  const setPlayer = (playerId: string, number: number | null) => {
+  const setPlayer = (playerId: string, info: RigPlayer) => {
+    const { number } = info;
     const r = seeded(playerId);
-    skin.color.set(SKIN_TONES[Math.floor(r * SKIN_TONES.length)]);
+    skin.color.set(info.skinTone ?? SKIN_TONES[Math.floor(r * SKIN_TONES.length)]);
     hair.visible = r % 0.5 > 0.15;
     // Accessories are the player's, not the game's: fixed by his id.
     const hb = seeded(playerId + 'band');
     headband.visible = hb < 0.22;
     headband.material = ACCESSORY[hb < 0.14 ? 0 : 1];
     sleeve.visible = seeded(playerId + 'sleeve') < 0.2;
-    paintJersey(jerseyTex.image.data as Uint8Array, jerseyTex.image.width, jerseyTex.image.height,
-      hexToRgb(team.primary), hexToRgb(team.secondary), number);
-    jerseyTex.needsUpdate = true;
-    // Height varies a little: guards to bigs.
-    root.scale.setScalar(0.94 + seeded(playerId + 'h') * 0.12);
+    shirt = { number, name: info.name };
+    paintShirt();
+    // His real height (Curry 188 cm to Wembanyama 224: the old random spread
+    // was +-6%, the real one 19%), and his weight as width: BMI against the
+    // league average, softened so a heavy man reads sturdy, not inflated.
+    const h = info.heightCm ? info.heightCm / BASE_HEIGHT_CM : 0.94 + seeded(playerId + 'h') * 0.12;
+    root.scale.setScalar(Math.max(0.85, Math.min(1.16, h)));
+    const bmi = info.heightCm && info.weightKg ? info.weightKg / (info.heightCm / 100) ** 2 : BASE_BMI;
+    const bulk = Math.max(0.86, Math.min(1.2, 1 + (bmi / BASE_BMI - 1) * 0.8));
+    torso.scale.set(1.15 * bulk, 1, 0.72 * bulk);
+    shorts.scale.set(bulk, 1, 0.78 * bulk);
+    bulky.forEach((m) => m.scale.set(bulk, 1, bulk));
   };
 
   const update = (p: PoseInput) => {

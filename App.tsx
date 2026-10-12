@@ -17,7 +17,7 @@ import { buildSeasonOwner, evaluateSeasonOutcome, confidenceZone } from './servi
 import { generateSchedule } from './services/scheduleService';
 import { simulateOneDay, SimEffect, ALL_STAR_GAME, PinnedGameResult } from './services/seasonRunner';
 import { loadGame, saveGame } from './services/saveService';
-import { buildSeasonRecord } from './services/historyService';
+import { buildSeasonRecord, bannerYears } from './services/historyService';
 import { canPromiseMinutes, promiseSeason, PROMISE_MPG } from './services/developmentService';
 import { MIN_ROSTER_SIZE, TRADE_DEADLINE_GAME } from './services/tradeService';
 import { initialPickAssets, PICK_WINDOW, makeUserPick, scoutProspect, consensusValue } from './services/draftService';
@@ -823,6 +823,7 @@ export default function App() {
           onFinish={finishWatchGame}
           eraId={watchEraId}
           decider={watchGame.decider}
+          homeBanners={bannerYears(season, watchGame.home.id)}
         />
       );
     }

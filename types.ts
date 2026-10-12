@@ -107,6 +107,11 @@ export interface Player {
   // any, and the season number (awardHistory.length) of that offseason. Feeds
   // the jersey-retirement choice on the Legado screen.
   retiredFrom?: { teamId?: string; season: number };
+  // Real height/weight and a skin tone sampled from his official photo
+  // (pipeline/sync_physical.py). Read only by the 3D court's bodies.
+  heightCm?: number;
+  weightKg?: number;
+  skinTone?: string;
   // The user's training focus for him. Only read while he is on the user's
   // team; a CPU club never sets one.
   trainingFocus?: TrainingFocus;

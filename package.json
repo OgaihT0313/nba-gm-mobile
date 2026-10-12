@@ -9,6 +9,7 @@
     "@expo-google-fonts/jetbrains-mono": "^0.4.1",
     "@expo/metro-runtime": "~57.0.3",
     "@react-three/fiber": "^9.7.0",
+    "@shopify/react-native-skia": "2.6.2",
     "babel-preset-expo": "~57.0.0",
     "expo": "~57.0.26",
     "expo-asset": "~57.0.11",
@@ -25,6 +26,7 @@
     "react": "19.2.3",
     "react-dom": "19.2.3",
     "react-native": "0.86.3",
+    "react-native-audio-api": "^0.13.6",
     "react-native-safe-area-context": "~5.7.0",
     "react-native-svg": "15.15.4",
     "react-native-web": "^0.21.2",
@@ -42,5 +44,8 @@
     "ios": "expo start --ios",
     "web": "expo start --web"
   },
-  "private": true
+  "private": true,
+  "allowScripts": {
+    "@shopify/react-native-skia@2.6.2": true
+  }
 }

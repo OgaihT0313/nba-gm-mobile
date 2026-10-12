@@ -3,6 +3,7 @@ import { useFrame } from '@react-three/fiber/native';
 import * as THREE from 'three';
 
 import type { CourtState } from '../../services/watchDirector';
+import { buildBannerTexture } from './richTextures';
 import {
   buildLedTexture, buildNetTexture, hexToRgb, LIGHT_POOLS,
   buildScoreboardTexture, paintScoreboard, buildShotClockTexture, paintShotClock,
@@ -112,7 +113,7 @@ const ringPoints = (hx: number, hz: number, r: number, pitch: number) => {
   return out;
 };
 
-function Bowl({ primary, secondary }: ArenaProps) {
+function Bowl({ primary, secondary, awayPrimary }: ArenaProps & { awayPrimary?: string }) {
   const { risers, fans, heads, flashSpots } = useMemo(() => {
     const seats: { x: number; z: number; rot: number; row: number }[] = [];
     for (let r = 0; r < ROWS; r++) {
@@ -138,7 +139,17 @@ function Bowl({ primary, secondary }: ArenaProps) {
     const q = new THREE.Quaternion();
     const up = new THREE.Vector3(0, 1, 0);
     const c = new THREE.Color();
-    const shirts = [primary, primary, primary, secondary, '#f2f2f2', '#1b1d24', '#2b3a55', '#7a1f2b', '#d9d2c3'];
+    // A home crowd: three in four in the home colors, a few away fans, the
+    // rest in street clothes. It was a third in the primary color, which on
+    // screen read as a neutral building rather than a home floor.
+    const neutral = ['#f2f2f2', '#1b1d24', '#2b3a55', '#d9d2c3'];
+    const shirtFor = () => {
+      const r = rnd();
+      if (r < 0.55) return primary;
+      if (r < 0.75) return secondary;
+      if (r < 0.85) return awayPrimary ?? '#7a1f2b';
+      return neutral[Math.floor(rnd() * neutral.length)];
+    };
     const skins = ['#f1c7a3', '#d9a57c', '#b97a52', '#8d5a3b', '#5c3826'];
     let seed = 7;
     const rnd = () => { seed = (seed * 16807) % 2147483647; return seed / 2147483647; };
@@ -162,7 +173,7 @@ function Bowl({ primary, secondary }: ArenaProps) {
       // further from the light, so the bowl fades into the dark toward the
       // back (PLANO-3D Etapa 2: the penumbra, without a single extra light).
       const dusk = 1 - (s.row / (ROWS - 1)) * 0.55;
-      c.set(shirts[Math.floor(rnd() * shirts.length)]).multiplyScalar((0.38 + rnd() * 0.2) * dusk);
+      c.set(shirtFor()).multiplyScalar((0.38 + rnd() * 0.2) * dusk);
       fans.setColorAt(i, c);
       m.compose(new THREE.Vector3(s.x, top + 1.9 * h + 0.4, s.z), q, new THREE.Vector3(h, h, h));
       heads.setMatrixAt(i, m);
@@ -178,7 +189,7 @@ function Bowl({ primary, secondary }: ArenaProps) {
       im.frustumCulled = false;
     });
     return { risers, fans, heads, flashSpots };
-  }, [primary, secondary]);
+  }, [primary, secondary, awayPrimary]);
 
   return (
     <>
@@ -371,6 +382,39 @@ function Scoreboard({ primary, secondary, board, awayPrimary }: ArenaProps & { b
           <meshStandardMaterial color="#20232b" />
         </mesh>
       ))}
+    </group>
+  );
+}
+
+/* ------------------------------------------------------------------ */
+/* Championship banners in the rafters.                                 */
+/* ------------------------------------------------------------------ */
+// Over the far sideline's top rows (the TV camera sits at +z), facing the
+// floor: one quad per title, all reading from one texture
+// (richTextures.buildBannerTexture), up to 10 to a row.
+const BANNER_W_FT = 6;
+const BANNER_H_FT = 12;
+const BANNER_GAP = 1.6;
+const BANNERS_PER_ROW = 10;
+
+function Banners({ years, primary, secondary }: { years: number[]; primary: string; secondary: string }) {
+  const tex = useMemo(() => buildBannerTexture(years, primary, secondary), [years, primary, secondary]);
+  const mat = useMemo(() => (tex ? new THREE.MeshBasicMaterial({ map: tex, color: '#c9c9c9' }) : null), [tex]);
+  const quads = useMemo(() => years.map((_, i) => {
+    const g = new THREE.PlaneGeometry(BANNER_W_FT, BANNER_H_FT);
+    const uv = g.getAttribute('uv');
+    for (let k = 0; k < uv.count; k++) uv.setX(k, (i + uv.getX(k)) / years.length);
+    const row = Math.floor(i / BANNERS_PER_ROW);
+    const inRow = Math.min(BANNERS_PER_ROW, years.length - row * BANNERS_PER_ROW);
+    const col = i % BANNERS_PER_ROW;
+    const x = (col - (inRow - 1) / 2) * (BANNER_W_FT + BANNER_GAP);
+    return { g, x, y: 44 - row * (BANNER_H_FT + 2) };
+  }), [years]);
+  if (!mat) return null;
+  const z = -(BOWL_INSET_W + ROWS * ROW_DEPTH - 4);
+  return (
+    <group position={[0, 0, z]}>
+      {quads.map((q, i) => <mesh key={i} geometry={q.g} material={mat} position={[q.x, q.y, 0]} />)}
     </group>
   );
 }
@@ -658,7 +702,9 @@ function Hoop({ side, primary, courtRef, shotClockMat, violation }: {
 
 const IDLE_BOARD: ScoreboardData = { home: 0, away: 0, quarter: 1, clock: 12 * 60 };
 
-export default function Arena({ primary, secondary, courtRef, board = IDLE_BOARD, awayPrimary, homeLabel }: ArenaProps & {
+export default function Arena({ primary, secondary, courtRef, board = IDLE_BOARD, awayPrimary, homeLabel, banners }: ArenaProps & {
+  /** The home team's title years, for the rafters. */
+  banners?: number[];
   courtRef?: React.MutableRefObject<CourtState | null>;
   board?: ScoreboardData;
   awayPrimary?: string;
@@ -677,11 +723,12 @@ export default function Arena({ primary, secondary, courtRef, board = IDLE_BOARD
         <planeGeometry args={[420, 320]} />
         <meshStandardMaterial color="#101219" roughness={0.95} />
       </mesh>
-      <Bowl primary={primary} secondary={secondary} />
+      <Bowl primary={primary} secondary={secondary} awayPrimary={awayPrimary} />
       <Courtside primary={primary} secondary={secondary} label={homeLabel} scored={board.home + board.away} />
       <Scoreboard primary={primary} secondary={secondary} board={board} awayPrimary={awayPrimary ?? secondary} />
       <CeilingLights />
       <SpotBeams />
+      {banners && banners.length ? <Banners years={banners} primary={primary} secondary={secondary} /> : null}
       <Hoop side={1} primary={primary} courtRef={courtRef} shotClockMat={shotClockMat} violation={violation} />
       <Hoop side={-1} primary={primary} courtRef={courtRef} shotClockMat={shotClockMat} violation={violation} />
     </>

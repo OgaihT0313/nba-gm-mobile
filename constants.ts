@@ -219,6 +219,37 @@ export const TEAM_TITLES: { [key: string]: number } = {
 
 export const getTeamTitles = (teamId?: string | null) => (teamId && TEAM_TITLES[teamId]) || 0;
 
+// The years behind TEAM_TITLES (the end year of each title season), for the
+// banners in the 3D arena's rafters. Relocated franchises keep their old
+// titles, as their banners do: Minneapolis for the Lakers, Rochester for the
+// Kings, Syracuse for the 76ers, St. Louis for the Hawks, Seattle for OKC.
+export const TEAM_TITLE_YEARS: { [key: string]: number[] } = {
+    atl: [1958],
+    bos: [1957, 1959, 1960, 1961, 1962, 1963, 1964, 1965, 1966, 1968, 1969, 1974, 1976, 1981, 1984, 1986, 2008, 2024],
+    chi: [1991, 1992, 1993, 1996, 1997, 1998],
+    cle: [2016],
+    dal: [2011],
+    den: [2023],
+    det: [1989, 1990, 2004],
+    gsw: [1947, 1956, 1975, 2015, 2017, 2018, 2022],
+    hou: [1994, 1995],
+    lal: [1949, 1950, 1952, 1953, 1954, 1972, 1980, 1982, 1985, 1987, 1988, 2000, 2001, 2002, 2009, 2010, 2020],
+    mia: [2006, 2012, 2013],
+    mil: [1971, 2021],
+    nyk: [1970, 1973, 2026],
+    okc: [1979, 2025],
+    phi: [1955, 1967, 1983],
+    por: [1977],
+    sac: [1951],
+    sas: [1999, 2003, 2005, 2007, 2014],
+    tor: [2019],
+    was: [1978],
+};
+// The two tables must agree; a mismatch is a data bug, caught at load.
+Object.entries(TEAM_TITLES).forEach(([id, n]) => {
+    if ((TEAM_TITLE_YEARS[id]?.length ?? 0) !== n) console.warn(`[TEAM_TITLE_YEARS] ${id}: ${TEAM_TITLE_YEARS[id]?.length ?? 0} years for ${n} titles`);
+});
+
 // Darkens a hex color for hover/pressed states, so we don't need a hand-picked
 // third shade per franchise on top of primary/secondary.
 export const darkenHex = (hex: string, factor = 0.7) => {

@@ -2,7 +2,6 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { View, Text, Pressable, ScrollView } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useDesktop } from '../components/desktop/useDesktop';
-import { useAudioPlayer, type AudioPlayer } from 'expo-audio';
 
 import { Team, Player, Coach, WatchPlay, LiveTactic } from '../types';
 import { getTeamAccent, getTeamNickname, getTeamTricode, formatPositions } from '../constants';
@@ -30,6 +29,8 @@ import { getEraVisual } from '../src/theme/eraVisuals';
 import { COLORS, INK, RADIUS, FONT, withAlpha, onAccent, ovrColor } from '../src/theme/tokens';
 import { Panel, MonoLabel, Stat, CtaButton, GhostButton, Meter } from '../components/ui/kit';
 import Court3D, { CameraView } from '../components/court3d/Court3D';
+import type { RigPlayer } from '../components/court3d/PlayerRig';
+import { createSoundEngine, type SoundEngine } from '../components/court3d/sound/soundEngine';
 
 const CAMERA_VIEWS: { id: CameraView; label: string }[] = [
   { id: 'iso', label: 'Livre' },
@@ -123,10 +124,12 @@ interface WatchGameScreenProps {
   /** Set when this is the user's Game 7 ("Jogo 7 · Final do Leste"): the
    * huddle adds the quarter tactics and the game can't end tied. */
   decider?: string;
+  /** The home team's title years for the arena's rafters (historyService.bannerYears). */
+  homeBanners?: number[];
 }
 
 const WatchGameScreen: React.FC<WatchGameScreenProps> = ({
-  home, away, players, coaches, userTeamId, onFinish, eraId, decider,
+  home, away, players, coaches, userTeamId, onFinish, eraId, decider, homeBanners,
 }) => {
   const insets = useSafeAreaInsets();
   const desktop = useDesktop();
@@ -139,11 +142,18 @@ const WatchGameScreen: React.FC<WatchGameScreenProps> = ({
     return v ? { floorColor: v.floorTone } : undefined;
   }, [eraId]);
   const userSide: CourtSide = home.id === userTeamId ? 'home' : 'away';
+  // Stable across renders (the parent rebuilds the array): the banner texture
+  // is drawn once, not on every scoreboard tick.
+  const bannerKey = (homeBanners ?? []).join(',');
+  const banners = useMemo(() => homeBanners, [bannerKey]); // eslint-disable-line react-hooks/exhaustive-deps
   // Jersey numbers for Court3D, both rosters. Memoized for the same reason as
   // courtVisual: the 3D scene must not see a new object every scoreboard tick.
   const jerseyNumbers = useMemo(() => {
-    const out: { [id: string]: number } = {};
-    [...home.roster, ...away.roster].forEach((id) => { if (players[id]) out[id] = players[id].number; });
+    const out: { [id: string]: RigPlayer } = {};
+    [...home.roster, ...away.roster].forEach((id) => {
+      const p = players[id];
+      if (p) out[id] = { number: p.number, name: p.name, heightCm: p.heightCm, weightKg: p.weightKg, skinTone: p.skinTone };
+    });
     return out;
   }, [home, away, players]);
 
@@ -207,40 +217,25 @@ const WatchGameScreen: React.FC<WatchGameScreenProps> = ({
   // The user's five and their energy as of the last scoreboard refresh.
   const [liveFive, setLiveFive] = useState<{ id: string; name: string; energy: number }[]>([]);
 
-  // Synthesized placeholder SFX (assets/sfx — see scripts/generate_sfx.js).
-  // .seekTo(0) before each play() so a basket landing mid-decay of the
-  // previous one restarts cleanly instead of no-op'ing on an already-playing
-  // player.
-  const swishSound = useAudioPlayer(require('../assets/sfx/swish.wav'));
-  const buzzerSound = useAudioPlayer(require('../assets/sfx/buzzer.wav'));
-  const whistleSound = useAudioPlayer(require('../assets/sfx/whistle.wav'));
-  const dribbleSound = useAudioPlayer(require('../assets/sfx/dribble.wav'));
-  const crowdSound = useAudioPlayer(require('../assets/sfx/crowd.wav'));
-  const playSound = (player: AudioPlayer) => {
-    try {
-      player.seekTo(0);
-      player.play();
-    } catch {
-      // Best-effort — a missing/unready audio device should never block the game.
-    }
-  };
-  const sfx = useRef({ swishSound, buzzerSound, whistleSound, dribbleSound, crowdSound });
-  sfx.current = { swishSound, buzzerSound, whistleSound, dribbleSound, crowdSound };
-
-  // Tip-off whistle, once, when the screen mounts.
+  // Live-synthesized sound (components/court3d/sound): one engine for the
+  // screen, opened on mount and closed on the way out.
+  const sound = useRef<SoundEngine | null>(null);
   useEffect(() => {
-    playSound(whistleSound);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    const engine = createSoundEngine();
+    sound.current = engine;
+    engine.whistle(); // tip-off
+    return () => { sound.current = null; engine.close(); };
   }, []);
 
-  // Ambient dribble bounce during live possession — idea borrowed from the
-  // Gemini-prototype zip (fills the silence between plays instead of dead
-  // air); a soft loop, not synced to any specific event.
+  // The floor during live play: the bounce, and now and then a sneaker
+  // squeak off a cut, never on the beat of the bounce.
   useEffect(() => {
     if (phase !== 'live') return;
-    const id = setInterval(() => playSound(sfx.current.dribbleSound), 1800 / speed);
+    const id = setInterval(() => {
+      sound.current?.dribble();
+      if (Math.random() < 0.35) setTimeout(() => sound.current?.squeak(), 150 + Math.random() * 500);
+    }, 1800 / speed);
     return () => clearInterval(id);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [phase, speed]);
 
   /* ---------------------------------------------------------------- */
@@ -338,9 +333,10 @@ const WatchGameScreen: React.FC<WatchGameScreenProps> = ({
     setScore(final);
     planRef.current = null;
     firedRef.current = 0;
-    playSound(sfx.current.buzzerSound);
+    sound.current?.buzzer();
 
     if (decided || q >= MAX_QUARTER) {
+      if (final.home > final.away) sound.current?.crowd(1, 4.5);
       phaseRef.current = 'final';
       setPhase('final');
       return;
@@ -364,15 +360,23 @@ const WatchGameScreen: React.FC<WatchGameScreenProps> = ({
     while (firedRef.current < list.length && list[firedRef.current].shotAt <= clockRef.current) {
       const p = list[firedRef.current];
       firedRef.current++;
-      if (!p.made) continue;
+      if (!p.made) {
+        // A miss rings the rim; a free throw that misses is no event.
+        if (p.points !== 1) sound.current?.rim();
+        continue;
+      }
       const pts = Math.min(3, Math.max(1, p.points)) as 1 | 2 | 3;
       setBanner({
         text: `${SHOT_LABEL[pts]}${p.points > 3 ? ` (+${p.points})` : ''}`,
         sub: p.assistName ? `${p.scorerName} · passe de ${p.assistName}` : p.scorerName,
         color: p.side === userSide ? COLORS.good : COLORS.textDim,
       });
-      playSound(sfx.current.swishSound);
-      if (pts === 3) playSound(sfx.current.crowdSound);
+      // The building is the home team's: its baskets get the noise, a
+      // dunk or a three the most; the visitors' get a murmur.
+      const dunk = p.finish === 'dunk';
+      if (dunk) sound.current?.dunk(); else sound.current?.swish();
+      if (p.side === 'home') sound.current?.crowd(dunk || pts === 3 ? 0.85 : pts === 2 ? 0.4 : 0.2, dunk || pts === 3 ? 2.4 : 1.4);
+      else if (pts >= 2) sound.current?.crowd(0.04, 0.8);
     }
   };
 
@@ -443,7 +447,7 @@ const WatchGameScreen: React.FC<WatchGameScreenProps> = ({
 
   const callTimeout = () => {
     if (timeoutsLeft <= 0 || phaseRef.current !== 'live') return;
-    playSound(whistleSound);
+    sound.current?.whistle();
     // The huddle edits the five that is actually out there, with the legs it
     // has right now. Minutes up to the whistle are banked; the rest of the
     // quarter is replanned from here.
@@ -513,7 +517,7 @@ const WatchGameScreen: React.FC<WatchGameScreenProps> = ({
     setScore({ home: h, away: a });
     setQuarter(q);
     setPhase('final');
-    playSound(buzzerSound);
+    sound.current?.buzzer();
   };
 
   const toggleSpeed = () => {
@@ -769,7 +773,8 @@ const WatchGameScreen: React.FC<WatchGameScreenProps> = ({
         visual={courtVisual}
         cameraView={cameraView}
         homeLabel={getTeamTricode(home)}
-        numbers={jerseyNumbers}
+        bodies={jerseyNumbers}
+        banners={banners}
         scoreboard={{
           home: score.home,
           away: score.away,

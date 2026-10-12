@@ -5,7 +5,7 @@
 import {
   Player, PlayerCareer, PlayoffState, SeasonLeader, SeasonRecord, SeasonResult, SeasonState, Team,
 } from '../types';
-import { SALARY_CAP, getTeamSalary } from '../constants';
+import { SALARY_CAP, TEAM_TITLE_YEARS, getTeamSalary } from '../constants';
 
 type PlayerMap = { [key: string]: Player };
 
@@ -167,6 +167,20 @@ export const franchiseRecords = (season: SeasonState) => {
     best,
     worst,
   };
+};
+
+// --------------------------------------------------------------------- banners
+
+/**
+ * The title years the team hangs in its rafters: its real titles from before
+ * the save began (an era save branches off history there), plus those it won
+ * inside this save. End years of the title seasons, oldest first.
+ */
+export const bannerYears = (season: SeasonState, teamId: string): number[] => {
+  const base = season.era?.seasonLabel ? parseInt(season.era.seasonLabel.slice(0, 4), 10) : 2025;
+  const real = (TEAM_TITLE_YEARS[teamId] ?? []).filter((y) => y <= base);
+  const won = season.awardHistory.filter((a) => a.championId === teamId).map((a) => base + a.season);
+  return [...new Set([...real, ...won])].sort((a, b) => a - b);
 };
 
 // ---------------------------------------------------------------- achievements
