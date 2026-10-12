@@ -23,7 +23,7 @@ sem o time do usuário). O resto, em ordem. **L** = lapidar algo que existe,
 | 1 | Salvar e carregar a carreira — **FEITO** | N | M | Sem isso nada mais importa: fechar o app perde a carreira inteira |
 | 2 | 3D — Etapas 0 e 4b (medição + ritmo da partida) — **FEITO** | L | M | Já aprovado; sem ritmo, o resto do 3D passa despercebido |
 | 3 | Ratings de veteranos no pipeline — **FEITO** (2026-10-12) | L | P | Erro de dado visível (McConnell OVR 88 aos 34) e barato de corrigir |
-| 4 | Redesign do celular (handoff do Claude Design) | L | G | O usuário está insatisfeito com a UI; o PC já recebeu o redesign |
+| 4 | ~~Redesign do celular~~ — **RISCADO** (2026-10-12) | L | G | Já tinha acontecido: redesign "Transmissão" em 5-6/10 (`1705823`..`7171561`) |
 | 5 | Histórico da liga e da franquia — **FEITO** (2026-10-12) | N | M | Dá peso aos saves longos, que o item 1 torna possíveis |
 | 6 | Eras no modelo do Basketball-Reference — **FEITO** (2026-10-12) | L | M | 41 eras ainda com ratings antigos e salários sintéticos |
 | 7 | Desenvolvimento ativo de jogadores — **FEITO** (2026-10-12) | N | M | Hoje a evolução é toda passiva; vira decisão de GM |
@@ -126,11 +126,13 @@ Backtest: força do elenco x vitórias reais r 0,818 → 0,879, vitórias simula
 pretendido: menos peso para BPM de pouca amostra). Ficou exposto um limite do motor,
 ver item 12: jogadores com 20+ PPG caíram de ~30,5 para ~29,5 (piso do portão 30).
 
-### 4. Redesign do celular (L)
+### 4. Redesign do celular — RISCADO (2026-10-12)
 
-Aplicar no celular o que o handoff do Claude Design definir, reaproveitando o padrão
-do PC (`useDesktop`, painéis compartilhados). Não refazer a navegação inteira: a
-tentativa de paisagem já foi descartada (ver "O que eu não faria").
+O item veio de uma anotação de 5/10 ("usuário insatisfeito com a UI, vai levar ao
+Claude Design") que já tinha sido resolvida: o celular recebeu o redesign
+"Transmissão" do handoff em 5-6/10 (commits `1705823`..`7171561`) e o PC o seu
+layout em 8/10 (`9608dd2`). Não havia handoff novo pendente. Riscado pelo usuário.
+Se o visual voltar a incomodar, entra como item novo e concreto.
 
 ### 5. Histórico da liga e da franquia (N) — FEITO junto com o 10 (2026-10-12)
 
