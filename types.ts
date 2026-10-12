@@ -98,7 +98,11 @@ export interface Player {
   // Stamped when drafted, so a bust or a steal stays legible afterwards: what
   // the board projected, how sure it claimed to be (`band`, the error bar at
   // pick time), and — in `ovr` — what the team actually got. See draftVerdict.
-  draftInfo?: { pick: number; projected: number; band: number };
+  draftInfo?: { pick: number; projected: number; band: number; teamId?: string };
+  // Set at retirement (retirementService): the team he left the game from, if
+  // any, and the season number (awardHistory.length) of that offseason. Feeds
+  // the jersey-retirement choice on the Legado screen.
+  retiredFrom?: { teamId?: string; season: number };
   espnId: number | null;
   nbaId?: number | null;
   photoUrl?: string;
@@ -304,6 +308,31 @@ export interface SeasonAwardRecord {
   finalsMvp?: string;
 }
 
+// How the user's franchise finished a season, furthest stage reached.
+export type SeasonResult = 'missed' | 'playin' | 'round1' | 'round2' | 'conf_finals' | 'finals' | 'champion';
+
+// One single-season leader line, frozen at the end of the regular season.
+export interface SeasonLeader { playerId: string; teamId?: string; value: number }
+
+// One finished season, as the save remembers it (services/historyService.ts
+// builds it the moment a champion is crowned, before the offseason wipes the
+// standings and the stat lines). Everything the Legado screen shows -- season
+// list, records, achievements -- is derived from these plus awardHistory.
+export interface SeasonRecord {
+  season: number;
+  userTeamId: string;
+  wins: number;
+  losses: number;
+  seed?: number;                 // conference seed 1-10; absent below the play-in
+  result: SeasonResult;
+  payroll: number;
+  mandate: OwnerMandate;
+  championId: string;
+  runnerUpId?: string;
+  bestRecord: { teamId: string; wins: number; losses: number };
+  leaders: { pts?: SeasonLeader; reb?: SeasonLeader; ast?: SeasonLeader };
+}
+
 // Points at the exact series slot a paused Game 7 belongs to, so the result
 // can be written back to the right spot in the bracket once the live game
 // resolves (see applyDeciderResult in simulationService.ts) without having to
@@ -470,6 +499,12 @@ export interface SeasonState {
   // appended when a champion is crowned (advancePlayoffs). Powers the award
   // history / hall of honors on the Prêmios screen. Carried across seasons.
   awardHistory: SeasonAwardRecord[];
+  // One record per finished season of this save, oldest first. Optional: saves
+  // from before it simply start counting from their next finished season.
+  seasonHistory?: SeasonRecord[];
+  // Jerseys the user's franchise has retired, a decision taken on the Legado
+  // screen, in the order they went up to the rafters.
+  retiredJerseys?: { playerId: string; season: number }[];
   // The owner's mandate + the user's job security for the current season (see
   // ownerService.ts). Re-derived at each season start, updated as games are
   // played, and judged when a champion is crowned.

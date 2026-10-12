@@ -51,6 +51,7 @@ const MORE_ITEMS: NavItem[] = [
   { id: 'standings', label: 'Classificação', icon: 'standings' },
   { id: 'leaders', label: 'Líderes', icon: 'leaders' },
   { id: 'awards', label: 'Prêmios', icon: 'awards' },
+  { id: 'legacy', label: 'Legado', icon: 'legacy' },
   { id: 'allstar', label: 'All-Star', icon: 'all-star' },
 ];
 

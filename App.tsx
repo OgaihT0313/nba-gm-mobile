@@ -17,6 +17,7 @@ import { buildSeasonOwner, evaluateSeasonOutcome, confidenceZone } from './servi
 import { generateSchedule } from './services/scheduleService';
 import { simulateOneDay, SimEffect, ALL_STAR_GAME, PinnedGameResult } from './services/seasonRunner';
 import { loadGame, saveGame } from './services/saveService';
+import { buildSeasonRecord } from './services/historyService';
 import { MIN_ROSTER_SIZE, TRADE_DEADLINE_GAME } from './services/tradeService';
 import { initialPickAssets, PICK_WINDOW, makeUserPick, scoutProspect, consensusValue } from './services/draftService';
 import { signFreeAgentLegality, evaluateSigningInterest, signPlayer, askingSalary } from './services/freeAgencyService';
@@ -40,6 +41,7 @@ import WatchGameScreen from './screens/WatchGameScreen';
 import MyTeamHub from './screens/MyTeamHub';
 import Scout from './screens/Scout';
 import AwardsScreen from './screens/AwardsScreen';
+import LegacyScreen from './screens/LegacyScreen';
 import PlayoffsScreen from './screens/PlayoffsScreen';
 import LiveGameScreen from './screens/LiveGameScreen';
 import TradeCenter from './screens/TradeCenter';
@@ -59,7 +61,7 @@ import { IconName } from './components/Icon';
 
 type AppView =
   | 'era-select' | 'team-select' | 'team-confirm' | 'home' | 'teams' | 'team-detail' | 'scout' | 'my-team' | 'draft' | 'free-agency'
-  | 'simulation' | 'standings' | 'leaders' | 'trade' | 'awards' | 'allstar' | 'playoffs' | 'live-game' | 'watch-game';
+  | 'simulation' | 'standings' | 'leaders' | 'trade' | 'awards' | 'allstar' | 'playoffs' | 'live-game' | 'watch-game' | 'legacy';
 
 const SIM_SAVE_INTERVAL = 5000;
 
@@ -73,6 +75,7 @@ const PLACEHOLDERS: Record<string, { title: string; icon: IconName }> = {
   leaders: { title: 'Líderes', icon: 'leaders' },
   trade: { title: 'Trocas', icon: 'trade' },
   awards: { title: 'Prêmios', icon: 'awards' },
+  legacy: { title: 'Legado', icon: 'legacy' },
   allstar: { title: 'All-Star', icon: 'all-star' },
   playoffs: { title: 'Playoffs', icon: 'playoffs' },
 };
@@ -298,10 +301,14 @@ export default function App() {
           },
         ];
       }
+      const seasonHistory = newChampion
+        ? [...(prev.seasonHistory ?? []), buildSeasonRecord(prev, updatedPlayoff, newChampion)]
+        : prev.seasonHistory;
       return {
         ...prev,
         playoff: updatedPlayoff,
         liveGame: undefined,
+        seasonHistory,
         status: newChampion ? 'offseason' : prev.status,
         owner: ownerAfter,
         awardHistory,
@@ -580,6 +587,14 @@ export default function App() {
 
   // Waive a player off the user roster → free-agent pool. Guarded so the roster
   // can't drop below the legal minimum.
+  // Raising a retired player's jersey: the franchise's call, made once.
+  const handleRetireJersey = (playerId: string) => {
+    setSeason((prev) => {
+      if (!prev || prev.retiredJerseys?.some((j) => j.playerId === playerId)) return prev;
+      return { ...prev, retiredJerseys: [...(prev.retiredJerseys ?? []), { playerId, season: prev.awardHistory.length }] };
+    });
+  };
+
   const handleWaivePlayer = (playerId: string) => {
     let error: string | null = null;
     let waivedName: string | null = null;
@@ -852,6 +867,7 @@ export default function App() {
     if (view === 'awards') {
       return <AwardsScreen season={season} onGoToPlayoffs={() => setView('playoffs')} onStartNewSeason={handleStartNewSeason} />;
     }
+    if (view === 'legacy') return <LegacyScreen season={season} onRetireJersey={handleRetireJersey} />;
     if (view === 'playoffs') return <PlayoffsScreen season={season} onAdvanceRound={advancePlayoffs} onResumeLiveGame={() => setView('live-game')} />;
     if (view === 'live-game' && season.liveGame) {
       return (

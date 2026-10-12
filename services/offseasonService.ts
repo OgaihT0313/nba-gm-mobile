@@ -91,7 +91,7 @@ export const startOffseason = (prev: SeasonState): SeasonState => {
 
   // Retirement comes right after aging, before real moves and contracts: a
   // player who hangs it up must not be re-signed or replayed into a trade.
-  const retiring = retirePlayers(newTeams, updatedPlayers);
+  const retiring = retirePlayers(newTeams, updatedPlayers, Math.random, draftNumber);
   newTeams.splice(0, newTeams.length, ...retiring.teams);
   const rosterPlayers = retiring.players;
 

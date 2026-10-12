@@ -51,6 +51,7 @@ export const retirePlayers = (
   teams: Team[],
   players: PlayerMap,
   rand: () => number = Math.random,
+  seasonNumber = 0,
 ): { teams: Team[]; players: PlayerMap; retired: Retirement[] } => {
   const teamOf = new Map<string, string>();
   teams.forEach((t) => t.roster.forEach((id) => teamOf.set(id, t.id)));
@@ -63,7 +64,10 @@ export const retirePlayers = (
     if (rand() >= retirementChance(p, !!teamId)) continue;
     // Kept in `players`, flagged: award history and career records still
     // point at him. He just leaves every roster and the market.
-    out[id] = { ...p, retired: true, contractYears: 0, nextSalary: undefined, birdTeamId: undefined };
+    out[id] = {
+      ...p, retired: true, contractYears: 0, nextSalary: undefined, birdTeamId: undefined,
+      retiredFrom: { teamId, season: seasonNumber },
+    };
     retired.push({ playerId: id, name: p.name, age: p.age, ovr: p.ovr, teamId });
   }
 

@@ -10,7 +10,7 @@ export type IconName =
     | 'home' | 'teams' | 'scout' | 'my-team' | 'draft' | 'free-agency'
     | 'simulation' | 'standings' | 'leaders' | 'trade' | 'awards' | 'all-star'
     | 'playoffs' | 'commentary' | 'cup' | 'offers' | 'trending' | 'menu'
-    | 'chevron-down' | 'lock' | 'calendar' | 'waive' | 'medical' | 'coach' | 'battery';
+    | 'chevron-down' | 'lock' | 'calendar' | 'waive' | 'medical' | 'coach' | 'battery' | 'legacy';
 
 const PATHS: Record<IconName, React.ReactNode> = {
     home: <><Path d="M4 10.5 12 4l8 6.5" /><Path d="M6 9.8V20h12V9.8" /><Path d="M10 20v-5h4v5" /></>,
@@ -37,6 +37,7 @@ const PATHS: Record<IconName, React.ReactNode> = {
     waive: <><Path d="M4 7h16" /><Path d="M9 7V5a1.5 1.5 0 0 1 1.5-1.5h3A1.5 1.5 0 0 1 15 5v2" /><Path d="M6.5 7l.9 12.1a1.5 1.5 0 0 0 1.5 1.4h6.2a1.5 1.5 0 0 0 1.5-1.4L17.5 7" /><Path d="M10 11v5M14 11v5" /></>,
     medical: <><Rect x="4" y="4" width="16" height="16" rx="4.5" /><Path d="M12 8.5v7M8.5 12h7" /></>,
     coach: <><Rect x="6" y="4" width="12" height="17" rx="2" /><Rect x="9" y="2.5" width="6" height="3" rx="1" /><Path d="M9 11h6M9 14.5h4.5M9 8h3" /></>,
+    legacy: <><Path d="M3 3.5h18" /><Path d="M7 3.5v15.5l5-3 5 3V3.5" /><Path d="M10 8.5h4M12 8.5v4.5" /></>,
     battery: <><Rect x="3" y="8" width="15.5" height="8.5" rx="2" /><Path d="M21 10.5v3.5" /><Path d="M8 8v8.5" /></>,
 };
 

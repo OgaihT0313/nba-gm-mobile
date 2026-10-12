@@ -540,7 +540,7 @@ const applyPick = (
     // Drafted means in the building: the truth about this player becomes public,
     // and what the board had projected is kept alongside it so a bust or a steal
     // stays legible long after the draft.
-    const p: Player = { ...players[playerId], prospect: undefined, draftInfo: { pick: overall, projected, band } };
+    const p: Player = { ...players[playerId], prospect: undefined, draftInfo: { pick: overall, projected, band, teamId } };
     const newPlayers = { ...players, [playerId]: p };
     const newTeams = teams.map(t =>
         t.id === teamId

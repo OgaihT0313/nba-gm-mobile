@@ -29,6 +29,7 @@ const MORE: Item[] = [
   { id: 'standings', label: 'Classificação' },
   { id: 'leaders', label: 'Líderes' },
   { id: 'awards', label: 'Prêmios' },
+  { id: 'legacy', label: 'Legado' },
   { id: 'allstar', label: 'All-Star' },
 ];
 

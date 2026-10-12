@@ -24,12 +24,12 @@ sem o time do usuário). O resto, em ordem. **L** = lapidar algo que existe,
 | 2 | 3D — Etapas 0 e 4b (medição + ritmo da partida) — **FEITO** | L | M | Já aprovado; sem ritmo, o resto do 3D passa despercebido |
 | 3 | Ratings de veteranos no pipeline — **FEITO** (2026-10-12) | L | P | Erro de dado visível (McConnell OVR 88 aos 34) e barato de corrigir |
 | 4 | Redesign do celular (handoff do Claude Design) | L | G | O usuário está insatisfeito com a UI; o PC já recebeu o redesign |
-| 5 | Histórico da liga e da franquia | N | M | Dá peso aos saves longos, que o item 1 torna possíveis |
+| 5 | Histórico da liga e da franquia — **FEITO** (2026-10-12) | N | M | Dá peso aos saves longos, que o item 1 torna possíveis |
 | 6 | Eras no modelo do Basketball-Reference | L | M | 41 eras ainda com ratings antigos e salários sintéticos |
 | 7 | Desenvolvimento ativo de jogadores | N | M | Hoje a evolução é toda passiva; vira decisão de GM |
 | 8 | 3D — Etapas 1 a 8 restantes — **FEITO** (2026-10-11) | L | G | Segue o PLANO-3D, uma etapa por vez |
 | 9 | Jogo decisivo dentro do 3D | L | M | Junta as duas telas de jogo; depende das etapas 4-5 do 3D |
-| 10 | Objetivos e conquistas de GM | N | P | Meta para saves longos além de "ganhar o título" |
+| 10 | Objetivos e conquistas de GM — **FEITO** (2026-10-12) | N | P | Meta para saves longos além de "ganhar o título" |
 | 11 | Staff além do técnico | N | G | Profundidade, mas mexe em muitos sistemas calibrados |
 | 12 | Ajustes técnicos menores — **FEITO em parte** (2026-10-12) | L | P | Erosão da liga e `diagnose_season` |
 
@@ -100,15 +100,26 @@ Aplicar no celular o que o handoff do Claude Design definir, reaproveitando o pa
 do PC (`useDesktop`, painéis compartilhados). Não refazer a navegação inteira: a
 tentativa de paisagem já foi descartada (ver "O que eu não faria").
 
-### 5. Histórico da liga e da franquia (N)
+### 5. Histórico da liga e da franquia (N) — FEITO junto com o 10 (2026-10-12)
 
-Hoje existe só o `awardHistory` (prêmios por temporada) e as carreiras. Falta:
-- campeões e vices ano a ano, com a campanha;
-- recordes da franquia e da liga (temporada e carreira), alimentados pelos totais que
-  `careerService` já acumula;
-- Hall da Fama na aposentadoria (`retirementService`), com critério de títulos,
-  prêmios e totais;
-- camisas aposentadas no time do usuário, como decisão dele.
+Tela nova **Legado** (menu Mais / barra lateral), com quatro abas: Conquistas,
+Temporadas, Recordes e Hall da Fama. A base é `SeasonState.seasonHistory`: um
+`SeasonRecord` por temporada, gravado quando o campeão é coroado (campanha, seed,
+até onde o usuário foi, folha, mandato, campeão e vice, melhor campanha da liga e os
+líderes de PTS/REB/AST com 50+ jogos). Saves antigos começam a contar da próxima
+temporada. Também novos: `draftInfo.teamId` (quem draftou) e `retiredFrom` (de qual
+time ele se aposentou). Tudo em `services/historyService.ts`, derivado, nada pelo feed.
+- **Recordes:** da franquia com o usuário, de uma temporada (liga) e de carreira
+  (top 5 de PTS/REB/AST entre os jogadores da liga, com as carreiras reais semeadas).
+- **Hall da Fama:** derivado na hora; entra o aposentado com pontuação ≥ 25 (MVP 10,
+  MVP das Finais 6, DPOY 4, All-NBA 3, All-Star 1,5, título 2, prêmios menores 1,
+  1 a cada 2.000 pontos). Em 10 temporadas simuladas entram ~20 (LeBron 191, Curry 99);
+  Lowry (22) e Horford (20) ficam de fora.
+- **Camisas aposentadas:** decisão do usuário. Candidato = quem se aposentou com a
+  camisa do time dele.
+- `scripts/check_history.ts [time] [temporadas] [save.json]` roda uma carreira com
+  playoffs de verdade e confere o histórico; com o terceiro argumento grava um save
+  pronto para o preview web.
 
 ### 6. Eras no modelo novo (L)
 
@@ -133,11 +144,14 @@ O jogo decisivo dos playoffs usa a `LiveGameScreen` (por quartos), e os outros j
 usam a `WatchGameScreen` (3D). Levar timeouts e as 3 táticas do decisivo para o
 huddle do 3D e apagar a tela por quartos. Decidido em 2026-10-10: só depois do 3D.
 
-### 10. Objetivos e conquistas de GM (N)
+### 10. Objetivos e conquistas de GM (N) — FEITO (2026-10-12)
 
-Metas de carreira derivadas do estado (dinastia, reconstrução em X anos, MVP
-draftado por você, título com folha abaixo do teto) e uma tela de conquistas.
-Tudo derivado; nada pelo feed.
+12 conquistas derivadas do `seasonHistory`/`awardHistory`, com progresso quando dá:
+Primeiro anel, Bicampeão, Dinastia (3 em 5), Reconstrução (≤30 vitórias → final de
+conferência em até 3 temporadas), Título econômico (folha ≤ teto), Cria da casa (MVP
+draftado por você), Olho bom (ROY draftado por você), 60 vitórias, Melhor campanha,
+Zebra (Finais saindo do 5º ou pior), Presença garantida (5 playoffs seguidos),
+Longevidade (10 temporadas). Na aba Conquistas da tela Legado.
 
 ### 11. Staff além do técnico (N)
 
