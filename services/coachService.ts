@@ -132,12 +132,13 @@ export const coachDefenseMod = (coach: Coach | undefined, team: Team): number =>
 
 // Multiplier applied to a young player's development opportunity in
 // runPlayerProgression. 75 development (average) is neutral (1.0); a 99 dev
-// coach at full fit tops out around 1.29, a 55 at full fit bottoms around
-// 0.84 — meaningful over a career, never enough to make a bad prospect a star
-// on its own.
+// coach at full fit tops out at 1.4, a 55 at full fit bottoms around 0.67.
+// Was /100 (1.29..0.84): three offseasons with a 95 coach gave a young player
+// +0.45 OVR over a neutral one -- invisible, so hiring for development was
+// never a real decision.
 export const developmentMultiplier = (coach: Coach | undefined, team: Team): number => {
     if (!coach) return 1;
-    return clamp(1 + ((coach.development - 75) / 100) * coachFit(coach, team), 0.75, 1.3);
+    return clamp(1 + ((coach.development - 75) / 60) * coachFit(coach, team), 0.65, 1.4);
 };
 
 // One multiplier per rostered player, precomputed once per offseason so

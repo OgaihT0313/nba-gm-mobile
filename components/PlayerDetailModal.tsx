@@ -3,7 +3,7 @@ import { View, Text, Pressable, ScrollView, Modal } from 'react-native';
 import { Image } from 'expo-image';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { Player } from '../types';
+import { Player, TrainingFocus } from '../types';
 import { careerAverages } from '../services/careerService';
 import { nextMilestone, MILESTONES } from '../services/milestoneService';
 import { personalityOf } from '../services/personalityService';
@@ -11,7 +11,8 @@ import {
   getPlayerImageUrl, PLAYER_PLACEHOLDER_SVG, formatPositionsFull, ATTRIBUTE_META, getPlayerAttributes, getTeamAccent,
 } from '../constants';
 import { COLORS, FONT, withAlpha, onAccent } from '../src/theme/tokens';
-import { StatStrip, Tag, SectionLabel, BodyText } from './ui/kit';
+import { StatStrip, Tag, SectionLabel, BodyText, FilterRow, GhostButton } from './ui/kit';
+import { PROMISE_MAX_AGE, PROMISE_MPG } from '../services/developmentService';
 import { useDesktop } from './desktop/useDesktop';
 
 // Design 5c ("Transmissão"). A bottom sheet: the header is a flat block in the
@@ -42,6 +43,28 @@ export interface PlayerAction {
   sub?: string;
 }
 
+/** The user's levers on one of his own players' development (Meu Time only). */
+export interface PlayerDevelopment {
+  /** Whoever holds this season's minutes promise, if anyone. */
+  promisedId?: string;
+  canPromise: (p: Player) => { ok: boolean; why?: string };
+  onPromise: (playerId: string) => void;
+  onFocus: (playerId: string, focus: TrainingFocus | undefined) => void;
+}
+
+const FOCUS_ITEMS: { id: string; label: string }[] = [
+  { id: 'balanced', label: 'Equilibrado' },
+  { id: 'shooting', label: 'Arremesso' },
+  { id: 'defense', label: 'Defesa' },
+  { id: 'physical', label: 'Físico' },
+];
+const FOCUS_NOTE: Record<string, string> = {
+  balanced: 'A evolução se divide entre ataque e defesa, como o jogo dele pede.',
+  shooting: 'O que ele evoluir vai quase todo para o ataque e o arremesso. A defesa fica parada.',
+  defense: 'O que ele evoluir vai quase todo para a defesa. O ataque fica parado.',
+  physical: 'Depois dos 28, envelhece mais devagar. Antes disso, evolui um pouco menos.',
+};
+
 const PlayerDetailModal: React.FC<{
   player: Player;
   onClose: () => void;
@@ -50,7 +73,8 @@ const PlayerDetailModal: React.FC<{
   /** One line above the name, e.g. "Fora 6 jogos · lesionado". */
   status?: string;
   actions?: PlayerAction[];
-}> = ({ player, onClose, teamId, status, actions }) => {
+  development?: PlayerDevelopment;
+}> = ({ player, onClose, teamId, status, actions, development }) => {
   const insets = useSafeAreaInsets();
   const attrs = getPlayerAttributes(player);
   const accent = teamId ? getTeamAccent(teamId) : { primary: COLORS.lineStrong, secondary: COLORS.ghostBorder };
@@ -226,6 +250,40 @@ const PlayerDetailModal: React.FC<{
     </View>
   ) : null;
 
+  const focusId = player.trainingFocus ?? 'balanced';
+  const promise = development ? development.canPromise(player) : null;
+  const promised = development?.promisedId === player.id;
+  const developmentPanel = development && !player.retired ? (
+    <View style={{ gap: 8 }}>
+      <SectionLabel>Treino</SectionLabel>
+      <FilterRow
+        items={FOCUS_ITEMS}
+        value={focusId}
+        onChange={(id) => development.onFocus(player.id, id === 'balanced' ? undefined : (id as TrainingFocus))}
+      />
+      <BodyText size={12.5} color={COLORS.muted}>{FOCUS_NOTE[focusId]}</BodyText>
+      {player.age <= PROMISE_MAX_AGE ? (
+        promised ? (
+          <View style={{ gap: 4, marginTop: 4 }}>
+            <Tag color={COLORS.good}>Minutos prometidos · {PROMISE_MPG}+</Tag>
+            <BodyText size={12.5} color={COLORS.muted}>Cumprida, ele evolui mais rápido e chega mais motivado. Quebrada, a moral dele despenca e ele pode pedir para sair.</BodyText>
+          </View>
+        ) : (
+          <View style={{ gap: 4, marginTop: 4 }}>
+            <GhostButton
+              label={`Prometer ${PROMISE_MPG}+ minutos`}
+              disabled={!promise?.ok}
+              onPress={() => development.onPromise(player.id)}
+            />
+            <BodyText size={12} color={COLORS.dim}>
+              {promise?.ok ? 'Uma promessa por temporada. Ele cobra no fim do ano.' : promise?.why}
+            </BodyText>
+          </View>
+        )
+      ) : null}
+    </View>
+  ) : null;
+
   const position = <BodyText size={12} color={COLORS.dim}>Posição · {formatPositionsFull(player)}</BodyText>;
 
   const actionBar = actions && actions.length ? (
@@ -275,6 +333,7 @@ const PlayerDetailModal: React.FC<{
               </View>
               <View style={{ flex: 1, minWidth: 0, gap: 14 }}>
                 {contractMorale}
+                {developmentPanel}
                 {draftLine}
                 {career}
                 {honorTags}
@@ -300,6 +359,7 @@ const PlayerDetailModal: React.FC<{
               {seasonLine}
               {attributes}
               {contractMorale}
+              {developmentPanel}
               {draftLine}
               {career}
               {honorTags}

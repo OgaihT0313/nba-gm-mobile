@@ -27,7 +27,7 @@ import PickAssets from '../components/PickAssets';
 import CoachPanel from '../components/CoachPanel';
 import RotationPanel from '../components/RotationPanel';
 import Icon from '../components/Icon';
-import PlayerDetailModal from '../components/PlayerDetailModal';
+import PlayerDetailModal, { PlayerDevelopment } from '../components/PlayerDetailModal';
 import BottomSheet from '../components/ui/BottomSheet';
 import { useDesktop } from '../components/desktop/useDesktop';
 import { DPage, DDock, DCta, DTabs, DTh, Hover, Cols, Col, PAGE_X } from '../components/desktop/kit';
@@ -65,6 +65,7 @@ interface MyTeamHubProps {
   onHireCoach: (coach: Coach) => void;
   onSetRotationSize: (size: number) => void;
   onToggleLoadManagement: (playerId: string) => void;
+  development: PlayerDevelopment;
 }
 
 const money = (v: number) => `$${(v / 1_000_000).toFixed(1)}M`;
@@ -80,7 +81,7 @@ const MINUTES_IN_A_GAME = 48;
 
 const MyTeamHub: React.FC<MyTeamHubProps> = ({
   team, players, allTeams, schedule, coaches, gmLegacy, owner, currentDraft,
-  onWaive, onSetStarter, onFireCoach, onHireCoach, onSetRotationSize, onToggleLoadManagement,
+  onWaive, onSetStarter, onFireCoach, onHireCoach, onSetRotationSize, onToggleLoadManagement, development,
 }) => {
   const [tab, setTab] = useState<Tab>('roster');
   const desktop = useDesktop();
@@ -157,6 +158,7 @@ const MyTeamHub: React.FC<MyTeamHubProps> = ({
         <PlayerDetailModal
           player={players[viewing.id] ?? viewing}
           teamId={team.id}
+          development={development}
           onClose={() => setViewing(null)}
           status={absences[viewing.id]
             ? `Fora ${absences[viewing.id].duration} ${absences[viewing.id].duration === 1 ? 'jogo' : 'jogos'} · ${absences[viewing.id].reason === 'injury' ? 'lesionado' : 'suspenso'}`

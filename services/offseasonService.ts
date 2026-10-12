@@ -20,6 +20,7 @@ import { accumulateCareers, championRosterOf } from './careerService';
 import { ageCoachesAndRetire, buildDevelopmentBonusMap } from './coachService';
 import { retirePlayers } from './retirementService';
 import { rivalriesAfterSeason } from './rivalryService';
+import { settleMinutesPromise, applyPromiseMorale, PROMISE_DEV_BONUS } from './developmentService';
 
 // The season screen's feed shows only the user's own team, so before each
 // category is cut to its share of the buffer, his events move to the front --
@@ -58,7 +59,13 @@ export const startOffseason = (prev: SeasonState): SeasonState => {
   const devBonus = buildDevelopmentBonusMap(prev.teams, prev.coaches);
   const teamOf: { [playerId: string]: string } = {};
   prev.teams.forEach((t) => t.roster.forEach((id) => { teamOf[id] = t.id; }));
-  const { updatedPlayers, progressionEvents } = simulationEngine.runPlayerProgression(withCareers, devBonus, teamOf);
+  // The minutes promise for the season just played, judged on the minutes he
+  // actually got, before progression reads them.
+  const promise = settleMinutesPromise(prev, teamOf);
+  if (promise?.kept) devBonus[promise.playerId] = (devBonus[promise.playerId] ?? 1) * PROMISE_DEV_BONUS;
+  const { updatedPlayers: progressed, progressionEvents } = simulationEngine.runPlayerProgression(withCareers, devBonus, teamOf, prev.userTeamId);
+  const updatedPlayers = promise ? applyPromiseMorale(progressed, promise) : progressed;
+  if (promise) progressionEvents.unshift(promise.event);
   // Snapshot last season's OVR so next season's MIP can measure real growth.
   for (const id in updatedPlayers) {
     updatedPlayers[id].ovrLastSeason = prev.players[id]?.ovr ?? updatedPlayers[id].ovr;
@@ -206,6 +213,8 @@ export const startOffseason = (prev: SeasonState): SeasonState => {
     // fog on those prospects (applyPick returns an updated map).
     players: advanced.players,
     draft: advanced.draft,
+    // Settled above, whatever the outcome: one promise covers one season.
+    minutesPromise: undefined,
     coaches: coaching.coaches,
     // One offseason generates several HUNDRED events against a 60-slot
     // buffer, so this array is a budget, not a list. It used to be plain

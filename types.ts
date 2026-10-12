@@ -62,6 +62,10 @@ export interface PlayerCareer {
   seeded?: boolean;
 }
 
+// What the user's staff works on with a player over the season (see
+// runPlayerProgression). Undefined = balanced.
+export type TrainingFocus = 'shooting' | 'defense' | 'physical';
+
 export interface Player {
   id: string;
   name: string;
@@ -103,6 +107,9 @@ export interface Player {
   // any, and the season number (awardHistory.length) of that offseason. Feeds
   // the jersey-retirement choice on the Legado screen.
   retiredFrom?: { teamId?: string; season: number };
+  // The user's training focus for him. Only read while he is on the user's
+  // team; a CPU club never sets one.
+  trainingFocus?: TrainingFocus;
   espnId: number | null;
   nbaId?: number | null;
   photoUrl?: string;
@@ -505,6 +512,10 @@ export interface SeasonState {
   // Jerseys the user's franchise has retired, a decision taken on the Legado
   // screen, in the order they went up to the rafters.
   retiredJerseys?: { playerId: string; season: number }[];
+  // Minutes promised to one young player for the season `season` (number =
+  // awardHistory.length + 1 of the season it covers). Settled by
+  // startOffseason: 24+ mpg keeps it. One a season, like the press promise.
+  minutesPromise?: { playerId: string; season: number };
   // The owner's mandate + the user's job security for the current season (see
   // ownerService.ts). Re-derived at each season start, updated as games are
   // played, and judged when a champion is crowned.

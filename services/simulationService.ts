@@ -1341,6 +1341,7 @@ const runPlayerProgression = (
     players: { [key: string]: Player },
     devBonus: { [playerId: string]: number } = {},
     teamOf: { [playerId: string]: string } = {},
+    userTeamId?: string,
 ): { updatedPlayers: { [key: string]: Player }, progressionEvents: Event[] } => {
     const updatedPlayers = JSON.parse(JSON.stringify(players));
     const progressionEvents: Event[] = [];
@@ -1354,6 +1355,11 @@ const runPlayerProgression = (
 
         const potential = potentialMap[player.potential] || 1;
         let change = 0;
+        // The user's training focus, only while he wears the user's jersey.
+        const focus = userTeamId && teamOf[pId] === userTeamId ? player.trainingFocus : undefined;
+        // Gym work instead of skill work: a young player grows a little less
+        // often, a veteran ages more slowly (see the decline branches).
+        const physicalGrowth = focus === 'physical' ? 0.88 : 1;
 
         // Opportunity from last season's minutes: young players develop by
         // *playing*, not by sitting. A starter's workload (~30+ mpg) unlocks
@@ -1377,12 +1383,15 @@ const runPlayerProgression = (
         // Real players climb until ~26 and plateau before they fade.
         const youngOpportunity = 0.45 + opportunity * 0.55; // minutes help, but a kid still grows on the bench
         if (player.age < 24) { // Peak development
-            if (Math.random() < (0.72 + potential * 0.07) * youngOpportunity) {
-                change = Math.floor(Math.random() * (potential / 2 + 2) * youngOpportunity) + 1;
+            if (Math.random() < (0.72 + potential * 0.07) * youngOpportunity * physicalGrowth) {
+                change = Math.floor(Math.random() * (potential / 2 + 2.6) * youngOpportunity) + 1;
             }
         } else if (player.age < 28) { // Late development — the good ones keep climbing
-            if (Math.random() < (0.42 + potential * 0.08) * opportunity) {
-                change = Math.random() < 0.8 ? (Math.random() < potential * 0.06 ? 2 : 1) : -1;
+            // 0.50, was 0.42: over twelve simulated years the 24-28 band sank
+            // from 76.4 to ~74 OVR and the top hundred eroded with it (86.4 ->
+            // 85.2); nobody grew into the stars' places fast enough.
+            if (Math.random() < (0.55 + potential * 0.08) * opportunity * physicalGrowth) {
+                change = Math.random() < 0.82 ? (Math.random() < potential * 0.1 ? 2 : 1) : -1;
             }
         } else if (player.age < 31) { // Prime plateau
             if (Math.random() < 0.38) {
@@ -1393,16 +1402,39 @@ const runPlayerProgression = (
                 change = -1 * (Math.floor(Math.random() * 2) + 1); // -1 or -2
             }
         } else { // Veteran decline
-             if (Math.random() < 0.6 + (player.age - 34) * 0.08) {
-                change = -1 * (Math.floor(Math.random() * 3) + 1); // -1 to -3
+            // Steeper than it was (-1..-3 at 0.6+): 34+ players kept ~80 OVR
+            // and their number grew from 24 to ~58 in twelve years, still
+            // holding jobs the next generation should have taken.
+            if (Math.random() < 0.7 + (player.age - 34) * 0.08) {
+                change = -1 * (Math.floor(Math.random() * 4) + 1); // -1 to -4
             }
+        }
+        // Conditioning keeps a veteran on the floor: past 28 a physical focus
+        // takes a point off half of his declines. It is gym time, not skill
+        // time, so the prime plateau's occasional +1 is gone too. (Softening
+        // every decline made it the free answer for every veteran: -1.7 a
+        // year became -0.6.)
+        if (focus === 'physical' && player.age >= 28) {
+            if (change > 0) change = 0;
+            else if (change < 0 && Math.random() < 0.5) change += 1;
         }
 
         if (change !== 0) {
             player.ovr = Math.min(99, Math.max(60, player.ovr + change));
             const ratio = (player.off + player.def) > 0 ? player.off / (player.off + player.def) : 0.5;
-            player.off += Math.round(change * ratio * 1.5);
-            player.def += Math.round(change * (1 - ratio) * 1.5);
+            let offDelta = Math.round(change * ratio * 1.5);
+            let defDelta = Math.round(change * (1 - ratio) * 1.5);
+            // Shooting or defense focus concentrates the growth on one side --
+            // the same total, which off/def the engine turns into points. A
+            // decline is left alone: focus is about what he adds.
+            if (change > 0 && (focus === 'shooting' || focus === 'defense')) {
+                const budget = offDelta + defDelta;
+                const minor = Math.floor(budget / 4);
+                offDelta = focus === 'shooting' ? budget - minor : minor;
+                defDelta = budget - offDelta;
+            }
+            player.off += offDelta;
+            player.def += defDelta;
             player.off = Math.min(99, Math.max(60, player.off));
             player.def = Math.min(99, Math.max(60, player.def));
             // A player who gets better on offense gets more of the ball, one
@@ -1417,17 +1449,15 @@ const runPlayerProgression = (
             // track the offensive swing, defensive ones the defensive swing,
             // athleticism follows overall (and always fades with age).
             if (player.attributes) {
-                const offDelta = Math.round(change * ratio * 1.5);
-                const defDelta = Math.round(change * (1 - ratio) * 1.5);
                 const clampAttr = (v: number) => Math.min(99, Math.max(60, v));
-                player.attributes.shooting = clampAttr(player.attributes.shooting + offDelta);
+                player.attributes.shooting = clampAttr(player.attributes.shooting + offDelta + (focus === 'shooting' && change > 0 ? 1 : 0));
                 player.attributes.finishing = clampAttr(player.attributes.finishing + offDelta);
                 player.attributes.playmaking = clampAttr(player.attributes.playmaking + offDelta);
-                player.attributes.perimeterD = clampAttr(player.attributes.perimeterD + defDelta);
+                player.attributes.perimeterD = clampAttr(player.attributes.perimeterD + defDelta + (focus === 'defense' && change > 0 ? 1 : 0));
                 player.attributes.interiorD = clampAttr(player.attributes.interiorD + defDelta);
                 player.attributes.rebounding = clampAttr(player.attributes.rebounding + defDelta);
                 player.attributes.athleticism = clampAttr(
-                    player.attributes.athleticism + change - (player.age > 30 ? 1 : 0)
+                    player.attributes.athleticism + change - (player.age > 30 && focus !== 'physical' ? 1 : 0)
                 );
             }
         }

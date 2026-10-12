@@ -9,7 +9,7 @@ import {
 } from '@expo-google-fonts/barlow-condensed';
 import { Barlow_400Regular, Barlow_500Medium, Barlow_600SemiBold } from '@expo-google-fonts/barlow';
 
-import { Team, Player, Coach, SeasonState, LiveTactic, Notification as NotificationType } from './types';
+import { Team, Player, Coach, SeasonState, LiveTactic, TrainingFocus, Notification as NotificationType } from './types';
 import { teamsData, playersData, picksOf, releaseWithDeadMoney, getTeamNickname } from './constants';
 import { ERAS, eraById } from './data/eras';
 import { simulationEngine, ROTATION_MIN, ROTATION_MAX } from './services/simulationService';
@@ -18,6 +18,7 @@ import { generateSchedule } from './services/scheduleService';
 import { simulateOneDay, SimEffect, ALL_STAR_GAME, PinnedGameResult } from './services/seasonRunner';
 import { loadGame, saveGame } from './services/saveService';
 import { buildSeasonRecord } from './services/historyService';
+import { canPromiseMinutes, promiseSeason, PROMISE_MPG } from './services/developmentService';
 import { MIN_ROSTER_SIZE, TRADE_DEADLINE_GAME } from './services/tradeService';
 import { initialPickAssets, PICK_WINDOW, makeUserPick, scoutProspect, consensusValue } from './services/draftService';
 import { signFreeAgentLegality, evaluateSigningInterest, signPlayer, askingSalary } from './services/freeAgencyService';
@@ -587,6 +588,23 @@ export default function App() {
 
   // Waive a player off the user roster → free-agent pool. Guarded so the roster
   // can't drop below the legal minimum.
+  const handleSetTrainingFocus = (playerId: string, focus: TrainingFocus | undefined) => {
+    setSeason((prev) => {
+      const p = prev?.players[playerId];
+      if (!prev || !p) return prev;
+      return { ...prev, players: { ...prev.players, [playerId]: { ...p, trainingFocus: focus } } };
+    });
+  };
+
+  const handlePromiseMinutes = (playerId: string) => {
+    setSeason((prev) => {
+      const p = prev?.players[playerId];
+      if (!prev || !p || !canPromiseMinutes(prev, p).ok) return prev;
+      return { ...prev, minutesPromise: { playerId, season: promiseSeason(prev) } };
+    });
+    addNotification(`Promessa feita: ${season?.players[playerId]?.name} terá ${PROMISE_MPG}+ minutos por jogo nesta temporada.`, 'info');
+  };
+
   // Raising a retired player's jersey: the franchise's call, made once.
   const handleRetireJersey = (playerId: string) => {
     setSeason((prev) => {
@@ -833,6 +851,12 @@ export default function App() {
           onHireCoach={handleHireCoach}
           onSetRotationSize={handleSetRotationSize}
           onToggleLoadManagement={handleToggleLoadManagement}
+          development={{
+            promisedId: season.minutesPromise?.season === promiseSeason(season) ? season.minutesPromise.playerId : undefined,
+            canPromise: (p) => canPromiseMinutes(season, p),
+            onPromise: handlePromiseMinutes,
+            onFocus: handleSetTrainingFocus,
+          }}
         />
       );
     }

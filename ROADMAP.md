@@ -26,12 +26,12 @@ sem o time do usuário). O resto, em ordem. **L** = lapidar algo que existe,
 | 4 | Redesign do celular (handoff do Claude Design) | L | G | O usuário está insatisfeito com a UI; o PC já recebeu o redesign |
 | 5 | Histórico da liga e da franquia — **FEITO** (2026-10-12) | N | M | Dá peso aos saves longos, que o item 1 torna possíveis |
 | 6 | Eras no modelo do Basketball-Reference | L | M | 41 eras ainda com ratings antigos e salários sintéticos |
-| 7 | Desenvolvimento ativo de jogadores | N | M | Hoje a evolução é toda passiva; vira decisão de GM |
+| 7 | Desenvolvimento ativo de jogadores — **FEITO** (2026-10-12) | N | M | Hoje a evolução é toda passiva; vira decisão de GM |
 | 8 | 3D — Etapas 1 a 8 restantes — **FEITO** (2026-10-11) | L | G | Segue o PLANO-3D, uma etapa por vez |
 | 9 | Jogo decisivo dentro do 3D | L | M | Junta as duas telas de jogo; depende das etapas 4-5 do 3D |
 | 10 | Objetivos e conquistas de GM — **FEITO** (2026-10-12) | N | P | Meta para saves longos além de "ganhar o título" |
 | 11 | Staff além do técnico | N | G | Profundidade, mas mexe em muitos sistemas calibrados |
-| 12 | Ajustes técnicos menores — **FEITO em parte** (2026-10-12) | L | P | Erosão da liga e `diagnose_season` |
+| 12 | Ajustes técnicos menores — **FEITO** (2026-10-12, menos o `diagnose_season`) | L | P | Erosão da liga e `diagnose_season` |
 
 Tamanho: P = um dia ou menos, M = alguns dias, G = uma semana ou mais.
 
@@ -127,12 +127,26 @@ Levar o `fetch_bbref.py` → `apply_bbref.py` às temporadas das eras (o BBRef t
 desde 1973-74), com salários reais ou derivados do teto da época. Conferir com
 `scripts/check_eras.ts`.
 
-### 7. Desenvolvimento ativo (N)
+### 7. Desenvolvimento ativo (N) — FEITO (2026-10-12)
 
-Foco de treino por jogador (arremesso, defesa, físico), minutos prometidos a um
-jovem que viram promessa cobrada como a da coletiva, e o técnico de desenvolvimento
-pesando mais. Precisa passar pelo mesmo teste da imprensa: tem que virar número que
-o motor lê. Re-medir a curva de evolução com `check_contracts`.
+No cartão do jogador (Meu Time), seção **Treino**:
+- **Foco** (Equilibrado / Arremesso / Defesa / Físico), `Player.trainingFocus`, lido
+  por `runPlayerProgression` só enquanto ele está no time do usuário. Arremesso e
+  Defesa concentram o mesmo ganho num lado (jovem: off +3,9 / def +0,9 contra +2,3 /
+  +2,3), e esse é o off/def que o motor transforma em pontos. Físico: jovem evolui um
+  pouco menos (×0,88); depois dos 28 tira 1 ponto de metade das quedas, mas zera o
+  +1 do platô (veterano −1,74 → −1,31 por ano).
+- **Promessa de minutos** (`services/developmentService.ts`): uma por temporada,
+  para jogador de até 23 anos, até o jogo 15 ou durante draft/mercado. Cobrada no
+  `startOffseason`: 24+ mpg cumpre (desenvolvimento ×1,25 e moral +12), menos que isso
+  quebra (moral cai para no máximo 30, perto do pedido de troca em 25).
+- **Técnico de desenvolvimento:** `developmentMultiplier` de /100 para /60 (0,65–1,4).
+  Em 3 anos, técnico 95 = +0,7 OVR sobre o neutro, técnico 58 = −1,6 (era +0,45/−0,8).
+- **Erosão do topo resolvida** (veio do item 12): veterano 34+ cai mais rápido (−1 a
+  −4, chance 0,7+), a faixa 24-27 cresce mais (0,55 + potencial, +2 mais frequente) e
+  o jovem um pouco mais. Em 12 anos o top-100 fica estável (86,4 → 86,1 e 86,5 → 86,4;
+  antes 86,4 → 85,2).
+- `scripts/check_development.ts` confere tudo isso.
 
 ### 8. 3D — Etapas 1 a 8 restantes (L)
 
@@ -172,10 +186,7 @@ re-medir `check_coaches` e `diagnose_season`.
   Os pivôs jogando mais levaram o líder de rebotes a 16; o expoente de rebote caiu
   de 1,0 para 0,8. Resultado: 20+ PPG 41,8, todos os 23 itens do `diagnose_season`
   na faixa, backtest vitórias r 0,855 e força x reais 0,887, PPG por jogador 0,895.
-- **Erosão do topo — passa para o item 7.** Em 12 anos o top-100 vai de 86,4 a
-  ~85,2. A causa é a curva de evolução: a faixa 24-28 cai de 76,4 para ~74 e os 34+
-  bons crescem de 24 para ~58. Mexer nela duas vezes não faz sentido; o
-  desenvolvimento ativo é que vai reescrever essa curva.
+- **Erosão do topo — FEITO no item 7** (top-100 estável em 12 anos).
 - `diagnose_season.ts` não responde às decisões (só simula). Sem mudança.
 - `check_personality` ("elenco com líder termina com moral mais alta") e
   `check_decisions` são instáveis: falham ~1 vez em 2 com ou sem mudança.
