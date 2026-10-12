@@ -845,6 +845,7 @@ export default function App() {
           onToggleLoadManagement={handleToggleLoadManagement}
           development={{
             promisedId: season.minutesPromise?.season === promiseSeason(season) ? season.minutesPromise.playerId : undefined,
+            inSeason: season.status === 'active' && season.gamesPlayed > 0,
             canPromise: (p) => canPromiseMinutes(season, p),
             onPromise: handlePromiseMinutes,
             onFocus: handleSetTrainingFocus,

@@ -1794,11 +1794,13 @@ const selectAllStars = (teams: Team[], players: { [key: string]: Player }): { ea
 const simulateAllStarGame = (eastRoster: string[], westRoster: string[], players: { [key: string]: Player }) => {
     const avgOff = (roster: string[]) => roster.reduce((sum, id) => sum + (players[id]?.off || 70), 0) / roster.length;
     const eastScore = Math.round(150 + (avgOff(eastRoster) - 85) * 1.5 + (Math.random() * 24 - 12));
-    const westScore = Math.round(150 + (avgOff(westRoster) - 85) * 1.5 + (Math.random() * 24 - 12));
-    const winner: 'east' | 'west' = eastScore >= westScore ? 'east' : 'west';
+    let westScore = Math.round(150 + (avgOff(westRoster) - 85) * 1.5 + (Math.random() * 24 - 12));
+    // No ties in basketball: a level game went to the East every time.
+    if (westScore === eastScore) westScore += Math.random() < 0.5 ? 1 : -1;
+    const winner: 'east' | 'west' = eastScore > westScore ? 'east' : 'west';
     const winningRoster = winner === 'east' ? eastRoster : westRoster;
     const mvpId = [...winningRoster].sort((a, b) => players[b].ovr - players[a].ovr)[0];
-    return { winner, mvpId };
+    return { winner, mvpId, eastScore, westScore };
 };
 
 // Dunk Contest: weighted toward younger players — age is the closest proxy
@@ -1836,6 +1838,8 @@ const simulateAllStarWeekend = (teams: Team[], players: { [key: string]: Player 
         eastRoster,
         westRoster,
         winner: game.winner,
+        eastScore: game.eastScore,
+        westScore: game.westScore,
         mvpId: game.mvpId,
         dunkWinnerId: dunkWinnerId,
         // Saturday night has two trophies and two winners. The two draws were

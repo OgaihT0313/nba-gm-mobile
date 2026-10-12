@@ -215,7 +215,12 @@ export const startOffseason = (prev: SeasonState): SeasonState => {
     // Settled above, whatever the outcome: one promise covers one season.
     minutesPromise: undefined,
     lastMinutesPromise: promise
-      ? { playerId: promise.playerId, name: prev.players[promise.playerId]?.name ?? '', kept: promise.kept, mpg: promise.mpg }
+      ? {
+          playerId: promise.playerId, name: prev.players[promise.playerId]?.name ?? '', kept: promise.kept, mpg: promise.mpg,
+          // His deal ran out this summer: the broken promise shows up as him
+          // walking in free agency, not as a trade request.
+          expiring: (prev.players[promise.playerId]?.contractYears ?? 0) <= 1,
+        }
       : undefined,
     coaches: coaching.coaches,
     // One offseason generates several HUNDRED events against a 60-slot

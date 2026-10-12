@@ -195,7 +195,8 @@ const SimulationScreen: React.FC<SimulationScreenProps> = ({
       <BodyText style={{ marginTop: 6 }}>
         {promise.kept
           ? `${promise.name} jogou ${promise.mpg.toFixed(1)} min por jogo, como você prometeu. Chega mais motivado e evoluiu mais rápido nas férias.`
-          : `${promise.name} jogou só ${promise.mpg.toFixed(1)} min por jogo; você prometeu ${PROMISE_MPG}. A moral dele despencou e um pedido de troca pode vir.`}
+          : `${promise.name} jogou só ${promise.mpg.toFixed(1)} min por jogo; você prometeu ${PROMISE_MPG}. A moral dele despencou`
+            + (promise.expiring ? ' e ele não quer renovar.' : ' e um pedido de troca pode vir.')}
       </BodyText>
     </Panel>
   ) : null;

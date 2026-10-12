@@ -495,7 +495,7 @@ export interface SeasonState {
   minutesPromise?: { playerId: string; season: number };
   // How last season's promise ended, shown on the season screen before the
   // first game (the event feed buries anything an offseason says).
-  lastMinutesPromise?: { playerId: string; name: string; kept: boolean; mpg: number };
+  lastMinutesPromise?: { playerId: string; name: string; kept: boolean; mpg: number; expiring?: boolean };
   // The owner's mandate + the user's job security for the current season (see
   // ownerService.ts). Re-derived at each season start, updated as games are
   // played, and judged when a champion is crowned.
@@ -653,6 +653,9 @@ export interface AllStarResult {
   eastRoster: string[];
   westRoster: string[];
   winner: 'east' | 'west';
+  // Final score. Optional: saves from before it was kept show "VENCEU".
+  eastScore?: number;
+  westScore?: number;
   mvpId: string;
   dunkWinnerId: string;
   threePointWinnerId: string;

@@ -47,6 +47,9 @@ export interface PlayerAction {
 export interface PlayerDevelopment {
   /** Whoever holds this season's minutes promise, if anyone. */
   promisedId?: string;
+  /** Regular season under way: seasonStats are this season's, not last one's
+   * still waiting for the wipe at tip-off. */
+  inSeason: boolean;
   canPromise: (p: Player) => { ok: boolean; why?: string };
   onPromise: (playerId: string) => void;
   onFocus: (playerId: string, focus: TrainingFocus | undefined) => void;
@@ -266,9 +269,11 @@ const PlayerDetailModal: React.FC<{
         promised ? (
           <View style={{ gap: 4, marginTop: 4 }}>
             <Tag color={COLORS.good}>Minutos prometidos · {PROMISE_MPG}+</Tag>
-            {player.seasonStats && player.seasonStats.gp > 0 ? (
-              <BodyText size={12.5} color={player.seasonStats.mpg >= PROMISE_MPG ? COLORS.good : COLORS.warn}>
-                Até agora: {player.seasonStats.mpg.toFixed(1)} min por jogo em {player.seasonStats.gp} jogos.
+            {development.inSeason ? (
+              <BodyText size={12.5} color={(player.seasonStats?.mpg ?? 0) >= PROMISE_MPG ? COLORS.good : COLORS.warn}>
+                {player.seasonStats && player.seasonStats.gp > 0
+                  ? `Até agora: ${player.seasonStats.mpg.toFixed(1)} min por jogo em ${player.seasonStats.gp} jogos.`
+                  : 'Até agora: 0 min, fora da rotação.'}
               </BodyText>
             ) : null}
             <BodyText size={12.5} color={COLORS.muted}>

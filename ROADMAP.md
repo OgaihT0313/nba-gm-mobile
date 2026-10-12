@@ -100,6 +100,14 @@ no 3D** (tática, pular, coroação), draft, mercado. Log sem crash, ANR ou erro
   e como cumprir.
 - Placar do 3D dizia "Assistir ao jogo" no Jogo 7; coletiva repetida na mesma
   temporada tinha o mesmo texto palavra por palavra.
+Conferido no aparelho com o APK `6ca806ae`: Legado com o título da T1 (bicampeão
+desbloqueado, T1 "campanha não registrada"), "Temporada 3" nos Prêmios, faixa do draft
+60-67, classe nova (80/77/79/78 no topo), painel "Promessa quebrada" (o jogador saiu no
+mercado), coletiva repetida com texto próprio. Na mesma rodada: o All-Star agora guarda
+e mostra o placar (era calculado e jogado fora; empate ia sempre pro Leste), o
+progresso da promessa só aparece com a temporada rolando (antes mostraria os minutos do
+ano anterior) e mostra "0 min, fora da rotação", e o painel da promessa quebrada diz
+"não quer renovar" quando o contrato acabou.
 Observações sem correção: trocar o modo claro/escuro volta a tela pro topo; o melhor
 time da liga fica perto do teto real (~67 vitórias) desde o item 12, e a carreira de
 teste (folha de $249M montada com trocas) fez 74-8.

@@ -12,7 +12,7 @@ import { DPage, DTitle, Cols, Col } from '../components/desktop/kit';
 
 // Design 4e ("Transmissão"). A split scoreboard — West red, East dark blue —
 // the game MVP in a gold-inset card, both conferences' squads in columns, and
-// the two contests as tiles. The sim records the winner, not a final score, so
+// the two contests as tiles. Saves from before the score was kept record only the winner, so
 // the board says who won instead of inventing points.
 
 interface AllStarWeekendProps {
@@ -56,6 +56,11 @@ const AllStarWeekend: React.FC<AllStarWeekendProps> = ({ allStar, players, teams
   const mvp = players[allStar.mvpId];
   const mvpTeam = mvp ? teamOf(mvp.id) : undefined;
   const westWon = allStar.winner === 'west';
+  // The final score when the save has it; older saves only know who won.
+  const hasScore = allStar.eastScore !== undefined && allStar.westScore !== undefined;
+  const westText = hasScore ? String(allStar.westScore) : westWon ? 'VENCEU' : '—';
+  const eastText = hasScore ? String(allStar.eastScore) : !westWon ? 'VENCEU' : '—';
+
 
   const Squad: React.FC<{ ids: string[]; label: string; color: string }> = ({ ids, label, color }) => (
     <View style={{ flex: 1, minWidth: 0 }}>
@@ -94,14 +99,14 @@ const AllStarWeekend: React.FC<AllStarWeekendProps> = ({ allStar, players, teams
         <View style={{ marginTop: 22, borderRadius: 20, overflow: 'hidden', flexDirection: 'row', backgroundColor: COLORS.surface, height: 150 }}>
           <View style={{ flex: 1, backgroundColor: COLORS.west, paddingHorizontal: 28, justifyContent: 'center', gap: 4 }}>
             <Text style={{ fontFamily: FONT.cond700, fontSize: 13, letterSpacing: 2, color: 'rgba(255,255,255,0.85)' }}>OESTE</Text>
-            <Text style={{ fontFamily: FONT.cond800, fontSize: 64, lineHeight: 62, color: westWon ? '#fff' : 'rgba(255,255,255,0.45)' }}>{westWon ? 'VENCEU' : '—'}</Text>
+            <Text style={{ fontFamily: FONT.cond800, fontSize: 64, lineHeight: 62, color: westWon ? '#fff' : 'rgba(255,255,255,0.45)' }}>{westText}</Text>
           </View>
           <View style={{ justifyContent: 'center', paddingHorizontal: 24 }}>
             <Text style={{ fontFamily: FONT.cond800, fontSize: 16, letterSpacing: 2.4, color: COLORS.dim }}>FINAL</Text>
           </View>
           <View style={{ flex: 1, backgroundColor: EAST_BG, paddingHorizontal: 28, justifyContent: 'center', alignItems: 'flex-end', gap: 4 }}>
             <Text style={{ fontFamily: FONT.cond700, fontSize: 13, letterSpacing: 2, color: '#9DBDEB' }}>LESTE</Text>
-            <Text style={{ fontFamily: FONT.cond800, fontSize: 64, lineHeight: 62, color: !westWon ? EAST_INK : 'rgba(201,215,238,0.4)' }}>{!westWon ? 'VENCEU' : '—'}</Text>
+            <Text style={{ fontFamily: FONT.cond800, fontSize: 64, lineHeight: 62, color: !westWon ? EAST_INK : 'rgba(201,215,238,0.4)' }}>{eastText}</Text>
           </View>
         </View>
         <Cols style={{ marginTop: 22 }}>
@@ -141,14 +146,14 @@ const AllStarWeekend: React.FC<AllStarWeekendProps> = ({ allStar, players, teams
         <View style={{ borderRadius: 20, overflow: 'hidden', flexDirection: 'row', backgroundColor: COLORS.surface }}>
           <View style={{ flex: 1, backgroundColor: COLORS.west, paddingHorizontal: 14, paddingTop: 14, paddingBottom: 12, gap: 2 }}>
             <Text style={{ fontFamily: FONT.cond700, fontSize: 11, letterSpacing: 1.5, color: 'rgba(255,255,255,0.85)' }}>OESTE</Text>
-            <Text style={{ fontFamily: FONT.cond800, fontSize: 34, lineHeight: 36, color: westWon ? '#fff' : 'rgba(255,255,255,0.45)' }}>{westWon ? 'VENCEU' : '—'}</Text>
+            <Text style={{ fontFamily: FONT.cond800, fontSize: 34, lineHeight: 36, color: westWon ? '#fff' : 'rgba(255,255,255,0.45)' }}>{westText}</Text>
           </View>
           <View style={{ justifyContent: 'center', paddingHorizontal: 10 }}>
             <Text style={{ fontFamily: FONT.cond800, fontSize: 12, letterSpacing: 1.7, color: COLORS.dim }}>FINAL</Text>
           </View>
           <View style={{ flex: 1, backgroundColor: EAST_BG, paddingHorizontal: 14, paddingTop: 14, paddingBottom: 12, alignItems: 'flex-end', gap: 2 }}>
             <Text style={{ fontFamily: FONT.cond700, fontSize: 11, letterSpacing: 1.5, color: '#9DBDEB' }}>LESTE</Text>
-            <Text style={{ fontFamily: FONT.cond800, fontSize: 34, lineHeight: 36, color: !westWon ? EAST_INK : 'rgba(201,215,238,0.4)' }}>{!westWon ? 'VENCEU' : '—'}</Text>
+            <Text style={{ fontFamily: FONT.cond800, fontSize: 34, lineHeight: 36, color: !westWon ? EAST_INK : 'rgba(201,215,238,0.4)' }}>{eastText}</Text>
           </View>
         </View>
 
