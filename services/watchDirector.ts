@@ -1,4 +1,4 @@
-import type { Team, Player, Coach, WatchPlay } from '../types';
+import type { Team, Player, Coach, WatchPlay, LiveTactic } from '../types';
 import { getPlayerPositions } from '../constants';
 import { fatigueFactor } from './personalityService';
 import {
@@ -10,6 +10,7 @@ import {
     LIVE_QUARTER_VARIANCE,
     QUARTER_FLOOR,
     TIMEOUT_BONUS,
+    TACTIC_META,
     threeRate,
     type GameEvent,
 } from './simulationService';
@@ -23,8 +24,7 @@ import {
 //
 // 1. A second basketball engine. Every point it produces comes from
 //    computeExpectedPoints — the same figure simulateGame uses for every other
-//    game on the calendar — sliced per quarter exactly the way
-//    advanceLiveQuarter already slices a Game 7, and attributed to players by
+//    game on the calendar — sliced per quarter, and attributed to players by
 //    generateScoringPlays. The choreography is a *reading* of that result, not
 //    a competing simulation of it.
 //
@@ -599,12 +599,13 @@ export interface PlanQuarterArgs {
     fiveHome: FiveOnCourt;
     fiveAway: FiveOnCourt;
     /** Which side the user coaches — only that side's play affects the score,
-     * the same simplification advanceLiveQuarter makes (the CPU plays it
-     * straight). */
+     * the CPU plays it straight. */
     userSide: CourtSide;
     play: WatchPlay;
     /** Spends the timeout bonus on the user's side for this span. */
     timeout: boolean;
+    /** Game 7 only: the user's emphasis for this quarter (TACTIC_META). */
+    tactic?: LiveTactic | null;
     quarter: number;
     /** Second of the quarter to start planning from — 0 for a fresh quarter,
      * or wherever the clock was when a timeout re-opened the remainder. */
@@ -683,21 +684,28 @@ export const planQuarter = (args: PlanQuarterArgs): QuarterPlan => {
         return sum / secs - rotationOvr(team, players);
     };
 
-    // Same shape as advanceLiveQuarter: the whole-game expectation split by
-    // period, nudged by what the user called, floored so no quarter collapses.
+    // The whole-game expectation split by period, nudged by what the user
+    // called, floored so no quarter collapses.
     const { expectedPointsA, expectedPointsB } = computeExpectedPoints(home, away, players, coaches, true);
     const periodShare = quarter <= REGULATION_QUARTERS
         ? 1 / REGULATION_QUARTERS
         : OVERTIME_SECONDS / (REGULATION_SECONDS * REGULATION_QUARTERS);
 
     let selfDelta = meta.selfDelta;
-    const oppDelta = meta.oppDelta;
+    let oppDelta = meta.oppDelta;
+    let tacticVariance = 0;
     if (timeout) selfDelta += TIMEOUT_BONUS;
+    if (args.tactic) {
+        const t = TACTIC_META[args.tactic];
+        selfDelta += t.selfDelta;
+        oppDelta += t.oppDelta;
+        tacticVariance = t.variance;
+    }
 
     const edge = (lineupEdge(home, 'fiveHome') - lineupEdge(away, 'fiveAway')) * MATCHUP_STRENGTH * periodShare;
     const deltaHome = (userSide === 'home' ? selfDelta : oppDelta) + edge;
     const deltaAway = (userSide === 'home' ? oppDelta : selfDelta) - edge;
-    const variance = Math.max(4, LIVE_QUARTER_VARIANCE + meta.variance);
+    const variance = Math.max(4, LIVE_QUARTER_VARIANCE + meta.variance + tacticVariance);
     const swing = () => Math.random() * variance - variance / 2;
 
     // simulateGame clamps every other game on the calendar to at least 80

@@ -1,6 +1,6 @@
 
 import { playersData, getPlayerPositions, getPlayerAttributes, LINEUP_POSITIONS } from '../constants';
-import type { Team, Player, Coach, Event, PlayoffState, PlayoffSeries, PlayoffConference, PlayInBracket, AllStarResult, CupState, ScheduleGame, LiveGameState, LiveTactic, WatchPlay, PendingDeciderRef } from '../types';
+import type { Team, Player, Coach, Event, PlayoffState, PlayoffSeries, PlayoffConference, PlayInBracket, AllStarResult, CupState, ScheduleGame, LiveTactic, WatchPlay } from '../types';
 import { TRADE_DEADLINE_GAME } from './tradeService';
 import { sortStandings, compareStandings } from './scheduleService';
 import { coachOffenseMod, coachDefenseMod } from './coachService';
@@ -759,20 +759,19 @@ export const generateScoringPlays = (
     return events;
 };
 
-// --- LIVE DECISIVE GAME (Fase F) ---
-// A Game 7 (or Finals-clincher) involving the user is played out quarter by
-// quarter instead of resolved in one simulateGame call, with two levers the
-// user can pull between quarters: a limited timeout and a re-pickable tactical
-// emphasis. Both are small, bounded point deltas on the SAME expected-points
-// figure simulateGame already uses (via computeExpectedPoints) split four
-// ways — texture on top of the real sim, not a separate toy model.
-
-// label -> {selfDelta, oppDelta} added to that quarter's expected points (own
-// team, opponent). Re-picked every quarter; nothing persists automatically.
-export const TACTIC_META: Record<LiveTactic, { label: string; blurb: string; selfDelta: number; oppDelta: number }> = {
-    ritmo: { label: 'Acelerar o Ritmo', blurb: 'Mais posses pros dois lados — favorece quem ataca melhor.', selfDelta: 3, oppDelta: 2 },
-    defesa: { label: 'Intensificar a Defesa', blurb: 'Sufoca o ataque adversário, custando um pouco de fluidez no seu.', selfDelta: -1, oppDelta: -3 },
-    isolar: { label: 'Isolar a Estrela', blurb: 'Todas as posses decisivas pro seu melhor pontuador.', selfDelta: 4, oppDelta: 0 },
+// --- GAME 7 TACTICS ---
+// The user's Game 7 is played in the 3D screen like any watched game, plus one
+// quarter-long emphasis picked in the huddle and re-picked every quarter. Small,
+// bounded point deltas on the same computeExpectedPoints figure the plays use.
+//
+// They are a risk profile, not a ranking. On the old quarter-by-quarter screen
+// "isolar" was +4 for nothing and simply the answer every quarter; now the
+// two that add more also swing more (`variance`, on top of the play's), so
+// protecting a lead and chasing one call for different things.
+export const TACTIC_META: Record<LiveTactic, { label: string; blurb: string; selfDelta: number; oppDelta: number; variance: number }> = {
+    ritmo: { label: 'Acelerar o ritmo', blurb: 'Mais posses para os dois lados. Bom quando você ataca melhor; o placar balança mais.', selfDelta: 3, oppDelta: 2, variance: 5 },
+    defesa: { label: 'Fechar a defesa', blurb: 'Sufoca o ataque deles e trava o jogo. O jeito de segurar uma vantagem.', selfDelta: -1, oppDelta: -3, variance: -5 },
+    isolar: { label: 'Bola na estrela', blurb: 'As posses decisivas vão para o seu melhor pontuador. Rende mais, mas é tudo ou nada.', selfDelta: 2, oppDelta: 0, variance: 8 },
 };
 
 // --- WATCH-GAME PLAYS (3D "Assistir ao Jogo") ---
@@ -812,13 +811,14 @@ export const WATCH_PLAY_META: Record<WatchPlay, {
     },
 };
 
-// Timeout bonus is a flat, one-time bump to the user's own next quarter —
-// "stopping the bleeding," not a tactical choice, so it stacks with a tactic
-// if both are queued for the same quarter.
+// Timeout bonus is a flat, one-time bump to the user's own side for the rest
+// of the quarter — "stopping the bleeding," not a tactical choice, so it
+// stacks with a play and (in a Game 7) a tactic.
 export const TIMEOUT_BONUS = 3;
 export const STARTING_TIMEOUTS = 4;
-// Uniform width (not a standard deviation) of a single period's swing, shared
-// by advanceLiveQuarter and the watched-game director.
+// Uniform width (not a standard deviation) of a single period's swing in the
+// watched-game director (it was shared with the old quarter-by-quarter Game 7
+// screen, now folded into the 3D one).
 //
 // It used to be 9 — sd 2.6 — which made the one game the user actually plays
 // out five times more deterministic than every game the sim resolves in the
@@ -836,80 +836,6 @@ export const LIVE_QUARTER_VARIANCE = 17;
 // around 10; 16 was set against a league that averaged 24 a period and now
 // averages ~29, where it would bind on any genuinely cold quarter.
 export const QUARTER_FLOOR = 10;
-
-export const startLiveGame = (ref: PendingDeciderRef, teamA: Team, teamB: Team, userTeamId: string): LiveGameState => ({
-    ref,
-    teamAId: teamA.id,
-    teamBId: teamB.id,
-    userIsTeamA: teamA.id === userTeamId,
-    quarter: 1,
-    scoreA: 0,
-    scoreB: 0,
-    quarterScores: [],
-    timeoutsLeft: STARTING_TIMEOUTS,
-    pendingTimeout: false,
-    pendingTactic: null,
-    log: [],
-    complete: false,
-});
-
-const advanceLiveQuarter = (
-    game: LiveGameState, teamA: Team, teamB: Team,
-    players: { [key: string]: Player }, coaches: CoachMap,
-): LiveGameState => {
-    if (game.complete) return game;
-
-    // teamA (the bracket's m[0]) hosts the decisive game — consistent home
-    // court for the whole game, not re-rolled every quarter.
-    const { expectedPointsA, expectedPointsB } = computeExpectedPoints(teamA, teamB, players, coaches, true);
-
-    let selfDelta = 0;
-    let oppDelta = 0;
-    if (game.pendingTimeout) selfDelta += TIMEOUT_BONUS;
-    if (game.pendingTactic) {
-        const t = TACTIC_META[game.pendingTactic];
-        selfDelta += t.selfDelta;
-        oppDelta += t.oppDelta;
-    }
-    // Only the user's side ever queues a timeout/tactic — the CPU opponent
-    // plays it straight, same simplification as CPU teams not scouting.
-    const userDeltaA = game.userIsTeamA ? selfDelta : oppDelta;
-    const userDeltaB = game.userIsTeamA ? oppDelta : selfDelta;
-
-    const baseA = expectedPointsA / 4 + userDeltaA;
-    const baseB = expectedPointsB / 4 + userDeltaB;
-    const a = Math.max(QUARTER_FLOOR, Math.round(baseA + (Math.random() * LIVE_QUARTER_VARIANCE - LIVE_QUARTER_VARIANCE / 2)));
-    const b = Math.max(QUARTER_FLOOR, Math.round(baseB + (Math.random() * LIVE_QUARTER_VARIANCE - LIVE_QUARTER_VARIANCE / 2)));
-
-    const scoreA = game.scoreA + a;
-    const scoreB = game.scoreB + b;
-    const label = game.quarter <= 4 ? `${game.quarter}º Quarto` : `Prorrogação ${game.quarter - 4}`;
-    const quarterScores = [...game.quarterScores, { a, b, label }];
-
-    // Safety valve: past 4 OT periods (extraordinarily unlikely), just settle
-    // it on whoever's ahead so this can never loop forever — if it's STILL
-    // tied at that point, nudge the home team by 1 rather than leaving a tie.
-    const forceEnd = game.quarter >= 8;
-    const tied = scoreA === scoreB;
-    const complete = (game.quarter >= 4 && !tied) || forceEnd;
-    const finalA = forceEnd && tied ? scoreA + 1 : scoreA;
-
-    const line = `${label}: ${teamA.name} ${a} - ${b} ${teamB.name} (${finalA}-${scoreB})`;
-
-    return {
-        ...game,
-        quarter: game.quarter + 1,
-        scoreA: finalA,
-        scoreB,
-        quarterScores,
-        timeoutsLeft: game.timeoutsLeft - (game.pendingTimeout ? 1 : 0),
-        pendingTimeout: false,
-        pendingTactic: null,
-        log: [line, ...game.log].slice(0, 30),
-        complete,
-        winnerId: complete ? (finalA > scoreB ? teamA.id : teamB.id) : undefined,
-    };
-};
 
 // Writes a resolved live-game winner back into the exact bracket slot
 // PlayoffState.pendingDecider pointed at, then clears it — the NEXT
@@ -2032,7 +1958,5 @@ export const simulationEngine = {
     updateMorale,
     teamChemistry,
     getMorale,
-    startLiveGame,
-    advanceLiveQuarter,
     applyDeciderResult,
 };

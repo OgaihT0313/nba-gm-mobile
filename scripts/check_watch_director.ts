@@ -12,7 +12,7 @@
 //   cp -r data .check/data && node .check/scripts/check_watch_director.js
 import { teamsData, playersData } from '../constants';
 import { buildFive, planQuarter, courtStateAt, quarterSeconds, breakRecovery, rotationAt, advanceClock, SCREEN_SPRINT, type Energy, type FiveOnCourt } from '../services/watchDirector';
-import type { WatchPlay, Player } from '../types';
+import type { WatchPlay, Player, LiveTactic } from '../types';
 import { simulationEngine, getRotationWeights } from '../services/simulationService';
 
 const home = teamsData[0];
@@ -389,5 +389,34 @@ check('watched games carry a real spread', sd >= 10 && sd <= 16, sd.toFixed(1));
 check('the bulk of scores is plausible', pct(0.05) >= 88 && pct(0.95) <= 145,
   `p5 ${pct(0.05)} / p95 ${pct(0.95)}`);
 console.log(`\n300 full games: avg ${mean.toFixed(1)} pts, range ${lo}-${hi}, ${overtimes} went to OT, ${ties} ties`);
+
+// --- Game 7 tactics: a risk profile, not a ranking ---
+// Per quarter, the user's margin and its spread under each tactic. "defesa"
+// must be the steady one (protect a lead), "isolar"/"ritmo" the streaky ones
+// (chase), and none may simply dominate on both counts.
+{
+  const tacticStats = (tactic: LiveTactic | null) => {
+    const margins: number[] = [];
+    for (let n = 0; n < 1500; n++) {
+      const plan = planQuarter({
+        home, away, players, coaches: {}, fiveHome, fiveAway,
+        userSide: 'home', play: 'pick_roll', tactic, timeout: false, quarter: 1, from: 0,
+      });
+      margins.push(plan.pointsHome - plan.pointsAway);
+    }
+    const m = margins.reduce((x, y) => x + y, 0) / margins.length;
+    return { m, sd: Math.sqrt(margins.reduce((acc, v) => acc + (v - m) ** 2, 0) / margins.length) };
+  };
+  const none = tacticStats(null);
+  const t = { defesa: tacticStats('defesa'), ritmo: tacticStats('ritmo'), isolar: tacticStats('isolar') };
+  console.log(`\nTáticas do jogo 7 (margem por quarto): nenhuma ${none.m.toFixed(2)}±${none.sd.toFixed(1)}`
+    + Object.entries(t).map(([k, v]) => ` | ${k} ${v.m.toFixed(2)}±${v.sd.toFixed(1)}`).join(''));
+  check('toda tática rende mais que nenhuma', Object.values(t).every((v) => v.m > none.m + 0.3));
+  check('defesa é a mais estável', t.defesa.sd < none.sd - 0.3 && t.defesa.sd < t.ritmo.sd && t.defesa.sd < t.isolar.sd);
+  check('isolar é a mais arriscada', t.isolar.sd > none.sd + 0.5);
+  check('nenhuma tática domina (mais margem E menos risco que outra)',
+    !(t.isolar.m > t.defesa.m + 0.5 && t.isolar.sd <= t.defesa.sd) && !(t.defesa.m > t.isolar.m + 0.5 && t.defesa.sd >= t.isolar.sd));
+}
+
 
 console.log(failures === 0 ? '\nALL CHECKS PASSED' : `\n${failures} CHECK(S) FAILED`);

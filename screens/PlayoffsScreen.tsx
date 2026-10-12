@@ -18,7 +18,8 @@ import { DPage, DDock, DCta, DTitle, Cols, Col } from '../components/desktop/kit
 interface PlayoffsScreenProps {
   season: SeasonState;
   onAdvanceRound: () => void;
-  onResumeLiveGame: () => void;
+  /** Opens the user's pending Game 7 in the 3D screen. */
+  onPlayDecider: () => void;
 }
 
 const STAGE_LABEL: Record<string, string> = {
@@ -59,7 +60,7 @@ const deriveStage = (season: SeasonState): PlayoffStage => {
   return 'none';
 };
 
-const PlayoffsScreen: React.FC<PlayoffsScreenProps> = ({ season, onAdvanceRound, onResumeLiveGame }) => {
+const PlayoffsScreen: React.FC<PlayoffsScreenProps> = ({ season, onAdvanceRound, onPlayDecider }) => {
   const { accent } = useTheme();
   const desktop = useDesktop();
   const stage = deriveStage(season);
@@ -189,8 +190,8 @@ const PlayoffsScreen: React.FC<PlayoffsScreenProps> = ({ season, onAdvanceRound,
     return (
       <DPage
         footer={
-          season.liveGame ? (
-            <DDock note="Jogo decisivo em andamento."><DCta label="Jogar o jogo 7" sub="Ao vivo" onPress={onResumeLiveGame} /></DDock>
+          season.playoff?.pendingDecider ? (
+            <DDock note="A série está 3-3."><DCta label="Jogar o jogo 7" sub="Na quadra 3D" onPress={onPlayDecider} /></DDock>
           ) : season.status === 'playoffs_idle' ? (
             <DDock><DCta label="Simular rodada" sub={STAGE_SHORT[stage as (typeof STAGE_ORDER)[number]] ?? ''} onPress={onAdvanceRound} /></DDock>
           ) : undefined
@@ -214,8 +215,8 @@ const PlayoffsScreen: React.FC<PlayoffsScreenProps> = ({ season, onAdvanceRound,
     <Screen
       heroHeight={120}
       footer={
-        season.liveGame ? (
-          <Dock><CtaButton label="Jogar o jogo 7" sub="Ao vivo" onPress={onResumeLiveGame} /></Dock>
+        season.playoff?.pendingDecider ? (
+          <Dock><CtaButton label="Jogar o jogo 7" sub="Na quadra 3D" onPress={onPlayDecider} /></Dock>
         ) : season.status === 'playoffs_idle' ? (
           <Dock><CtaButton label="Simular rodada" sub={STAGE_SHORT[stage as (typeof STAGE_ORDER)[number]] ?? ''} onPress={onAdvanceRound} /></Dock>
         ) : undefined

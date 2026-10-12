@@ -9,7 +9,7 @@ import {
 } from '@expo-google-fonts/barlow-condensed';
 import { Barlow_400Regular, Barlow_500Medium, Barlow_600SemiBold } from '@expo-google-fonts/barlow';
 
-import { Team, Player, Coach, SeasonState, LiveTactic, TrainingFocus, Notification as NotificationType } from './types';
+import { Team, Player, Coach, SeasonState, TrainingFocus, Notification as NotificationType } from './types';
 import { teamsData, playersData, picksOf, releaseWithDeadMoney, getTeamNickname } from './constants';
 import { ERAS, eraById } from './data/eras';
 import { simulationEngine, ROTATION_MIN, ROTATION_MAX } from './services/simulationService';
@@ -44,7 +44,6 @@ import Scout from './screens/Scout';
 import AwardsScreen from './screens/AwardsScreen';
 import LegacyScreen from './screens/LegacyScreen';
 import PlayoffsScreen from './screens/PlayoffsScreen';
-import LiveGameScreen from './screens/LiveGameScreen';
 import TradeCenter from './screens/TradeCenter';
 import Draft from './screens/Draft';
 import FreeAgency from './screens/FreeAgency';
@@ -62,7 +61,7 @@ import { IconName } from './components/Icon';
 
 type AppView =
   | 'era-select' | 'team-select' | 'team-confirm' | 'home' | 'teams' | 'team-detail' | 'scout' | 'my-team' | 'draft' | 'free-agency'
-  | 'simulation' | 'standings' | 'leaders' | 'trade' | 'awards' | 'allstar' | 'playoffs' | 'live-game' | 'watch-game' | 'legacy';
+  | 'simulation' | 'standings' | 'leaders' | 'trade' | 'awards' | 'allstar' | 'playoffs' | 'watch-game' | 'legacy';
 
 const SIM_SAVE_INTERVAL = 5000;
 
@@ -117,7 +116,8 @@ export default function App() {
   // for team colors/names, and re-deriving them from season.teams later
   // risks drifting if state changes underneath (it doesn't here, but this
   // keeps the screen decoupled from season shape).
-  const [watchGame, setWatchGame] = useState<{ home: Team; away: Team } | null>(null);
+  // `decider`: the user's Game 7, played in the same 3D screen (see startDecider).
+  const [watchGame, setWatchGame] = useState<{ home: Team; away: Team; decider?: string } | null>(null);
   const [selectedTeamId, setSelectedTeamId] = useState<string | null>(null);
   // Set by a team page's "Abrir negociação": the Trade Center opens with them.
   const [tradePartnerId, setTradePartnerId] = useState<string | null>(null);
@@ -229,6 +229,10 @@ export default function App() {
   // proceeds exactly like a normal day advance.
   const finishWatchGame = (scoreHome: number, scoreAway: number, minutes?: { [playerId: string]: number }) => {
     if (!season || !watchGame) return;
+    if (watchGame.decider) {
+      resolveDecider(scoreHome > scoreAway ? watchGame.home.id : watchGame.away.id);
+      return;
+    }
     const pinned: PinnedGameResult = {
       homeTeamId: watchGame.home.id,
       awayTeamId: watchGame.away.id,
@@ -250,8 +254,7 @@ export default function App() {
   // the owner judges the season (fire/keep), the honors are archived into
   // awardHistory, and gmLegacy ticks up.
   // The two teams a PlayoffState.pendingDecider ref points at — pulled out of
-  // whichever bracket slot it names, so advancePlayoffs and the live-game
-  // resolution handler don't duplicate this lookup.
+  // whichever bracket slot it names, shared by startDecider and resolveDecider.
   const pendingDeciderTeams = (playoff: SeasonState['playoff']) => {
     const ref = playoff?.pendingDecider;
     if (!ref || !playoff) return null;
@@ -260,11 +263,10 @@ export default function App() {
     return { teamA: series.m[0], teamB: series.m[1] };
   };
 
-  // Shared by advancePlayoffs and handleResolveLiveGame (a Finals decider
-  // resolves outside advancePlayoffRound's normal return path, but crowning a
-  // champion needs the exact same owner-judgment/awardHistory/gmLegacy side
-  // effects either way). Always clears liveGame — a resolved decisive game is
-  // done being live either way.
+  // Shared by advancePlayoffs and resolveDecider (a Finals decider resolves
+  // outside advancePlayoffRound's normal return path, but crowning a champion
+  // needs the exact same owner-judgment/awardHistory/gmLegacy side effects
+  // either way).
   const applyPlayoffUpdate = (updatedPlayoff: NonNullable<SeasonState['playoff']>, newChampion?: Team) => {
     if (!season) return;
     let ownerAfter = season.owner;
@@ -308,7 +310,6 @@ export default function App() {
       return {
         ...prev,
         playoff: updatedPlayoff,
-        liveGame: undefined,
         seasonHistory,
         status: newChampion ? 'offseason' : prev.status,
         owner: ownerAfter,
@@ -325,16 +326,12 @@ export default function App() {
 
   const advancePlayoffs = () => {
     if (!season || !season.playoff) return;
-    if (season.liveGame) return; // a decisive game is already being played out
+    if (season.playoff.pendingDecider) return; // the user's Game 7 is still to be played
     const { updatedPlayoff, newChampion } = simulationEngine.advancePlayoffRound(season.playoff, season.players, season.coaches, season.userTeamId);
 
     if (updatedPlayoff.pendingDecider) {
-      const teams = pendingDeciderTeams(updatedPlayoff);
-      if (teams) {
-        const liveGame = simulationEngine.startLiveGame(updatedPlayoff.pendingDecider, teams.teamA, teams.teamB, season.userTeamId);
-        setSeason((prev) => (prev ? { ...prev, playoff: updatedPlayoff, liveGame } : prev));
-        setView('live-game');
-      }
+      setSeason((prev) => (prev ? { ...prev, playoff: updatedPlayoff } : prev));
+      startDecider(updatedPlayoff);
       return;
     }
 
@@ -342,42 +339,36 @@ export default function App() {
     if (newChampion) setView('awards');
   };
 
-  // --- LIVE DECISIVE GAME (Fase F) ---
-  const handleAdvanceLiveQuarter = () => {
-    setSeason((prev) => {
-      if (!prev || !prev.liveGame || !prev.playoff) return prev;
-      const teams = pendingDeciderTeams(prev.playoff);
-      if (!teams) return prev;
-      const liveGame = simulationEngine.advanceLiveQuarter(prev.liveGame, teams.teamA, teams.teamB, prev.players, prev.coaches);
-      return { ...prev, liveGame };
-    });
+  // --- DECISIVE GAME ---
+  // A series tied 3-3 with the user in it stops short of Game 7 (see
+  // advancePlayoffRound) and the game is played in the 3D screen, with the
+  // three quarter tactics added to its huddle. It used to have a screen of its
+  // own, a quarter-by-quarter scoreboard. Teams come from the live league, the
+  // bracket slot only says who: the hosts are the bracket's m[0], the better seed.
+  const startDecider = (playoff: NonNullable<SeasonState['playoff']>) => {
+    if (!season) return;
+    const pair = pendingDeciderTeams(playoff);
+    const ref = playoff.pendingDecider;
+    if (!pair || !ref) return;
+    const fresh = (t: Team) => season.teams.find((x) => x.id === t.id) ?? t;
+    const round = ref.scope === 'finals' ? 'Finais da NBA'
+      : ref.round === 'round3' ? `Final do ${ref.conf === 'east' ? 'Leste' : 'Oeste'}`
+      : ref.round === 'round2' ? 'Semifinal de conferência' : '1ª rodada';
+    setWatchGame({ home: fresh(pair.teamA), away: fresh(pair.teamB), decider: `Jogo 7 · ${round}` });
+    setView('watch-game');
   };
 
-  const handleRequestLiveTimeout = () => {
-    setSeason((prev) => {
-      if (!prev || !prev.liveGame || prev.liveGame.timeoutsLeft <= 0 || prev.liveGame.pendingTimeout) return prev;
-      return { ...prev, liveGame: { ...prev.liveGame, pendingTimeout: true } };
-    });
-  };
-
-  const handleSetLiveTactic = (tactic: LiveTactic | null) => {
-    setSeason((prev) => {
-      if (!prev || !prev.liveGame) return prev;
-      return { ...prev, liveGame: { ...prev.liveGame, pendingTactic: tactic } };
-    });
-  };
-
-  // The live game is over — write its result back into the exact bracket slot
-  // it came from and return to the normal playoff flow. A Finals decider
-  // crowns a champion right here (applyPlayoffUpdate handles that uniformly);
-  // any other round just needs one more "SIMULAR RODADA" click to continue.
-  const handleResolveLiveGame = () => {
-    if (!season || !season.liveGame || !season.liveGame.complete || !season.playoff) return;
-    const teams = pendingDeciderTeams(season.playoff);
-    if (!teams || !season.liveGame.winnerId) return;
-    const updatedPlayoff = simulationEngine.applyDeciderResult(season.playoff, teams.teamA, teams.teamB, season.liveGame.winnerId);
+  // Writes the winner back into the exact bracket slot the game came from. A
+  // Finals decider crowns the champion right here (applyPlayoffUpdate);
+  // any other round needs one more "Simular rodada" to continue.
+  const resolveDecider = (winnerId: string) => {
+    if (!season?.playoff) return;
+    const pair = pendingDeciderTeams(season.playoff);
+    if (!pair) return;
+    const updatedPlayoff = simulationEngine.applyDeciderResult(season.playoff, pair.teamA, pair.teamB, winnerId);
     const newChampion = updatedPlayoff.champion ?? undefined;
     applyPlayoffUpdate(updatedPlayoff, newChampion);
+    setWatchGame(null);
     setView(newChampion ? 'awards' : 'playoffs');
   };
 
@@ -831,6 +822,7 @@ export default function App() {
           userTeamId={season.userTeamId}
           onFinish={finishWatchGame}
           eraId={watchEraId}
+          decider={watchGame.decider}
         />
       );
     }
@@ -892,19 +884,7 @@ export default function App() {
       return <AwardsScreen season={season} onGoToPlayoffs={() => setView('playoffs')} onStartNewSeason={handleStartNewSeason} />;
     }
     if (view === 'legacy') return <LegacyScreen season={season} onRetireJersey={handleRetireJersey} />;
-    if (view === 'playoffs') return <PlayoffsScreen season={season} onAdvanceRound={advancePlayoffs} onResumeLiveGame={() => setView('live-game')} />;
-    if (view === 'live-game' && season.liveGame) {
-      return (
-        <LiveGameScreen
-          liveGame={season.liveGame}
-          teams={season.teams}
-          onAdvanceQuarter={handleAdvanceLiveQuarter}
-          onRequestTimeout={handleRequestLiveTimeout}
-          onSetTactic={handleSetLiveTactic}
-          onResolve={handleResolveLiveGame}
-        />
-      );
-    }
+    if (view === 'playoffs') return <PlayoffsScreen season={season} onAdvanceRound={advancePlayoffs} onPlayDecider={() => season.playoff && startDecider(season.playoff)} />;
     if (view === 'draft' && season.draft) {
       return <Draft season={season} onPick={handleDraftPick} onAutoPick={handleAutoPick} onFinish={handleFinishDraft} onScout={handleScoutProspect} />;
     }

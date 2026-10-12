@@ -4,9 +4,9 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useDesktop } from '../components/desktop/useDesktop';
 import { useAudioPlayer, type AudioPlayer } from 'expo-audio';
 
-import { Team, Player, Coach, WatchPlay } from '../types';
+import { Team, Player, Coach, WatchPlay, LiveTactic } from '../types';
 import { getTeamAccent, getTeamNickname, getTeamTricode, formatPositions } from '../constants';
-import { WATCH_PLAY_META, STARTING_TIMEOUTS, getRotationWeights } from '../services/simulationService';
+import { WATCH_PLAY_META, TACTIC_META, STARTING_TIMEOUTS, getRotationWeights } from '../services/simulationService';
 import {
   buildFive,
   courtStateAt,
@@ -40,6 +40,7 @@ const CAMERA_VIEWS: { id: CameraView; label: string }[] = [
 ];
 
 const PLAY_ORDER: WatchPlay[] = ['pick_roll', 'pindown', 'post_up', 'iso'];
+const TACTIC_ORDER: LiveTactic[] = ['defesa', 'ritmo', 'isolar'];
 
 const SHOT_LABEL: { [points in 1 | 2 | 3]: string } = {
   1: 'LANCE LIVRE!',
@@ -56,8 +57,8 @@ const SHOT_LABEL: { [points in 1 | 2 | 3]: string } = {
 // simulateGame() before this screen mounted and the screen replayed the
 // result. That made calling a play impossible — nothing the user did could
 // matter to a score that already existed. Now a quarter is resolved when it
-// starts (services/watchDirector.ts, same computeExpectedPoints slice
-// advanceLiveQuarter uses for a Game 7), the play the user calls in the huddle
+// starts (services/watchDirector.ts, a quarter's slice of the same
+// computeExpectedPoints every game uses), the play the user calls in the huddle
 // is folded into it, and the final score handed to onFinish is the sum of the
 // baskets that actually went in on screen.
 
@@ -67,7 +68,7 @@ const SHOT_LABEL: { [points in 1 | 2 | 3]: string } = {
 // That replaced a flat 9.6 game-seconds per real second, which moved players
 // at ~250 ft/s, and the slow-motion trip after a called play, which only
 // existed because a possession used to flash by in under two seconds.
-const MAX_QUARTER = 8; // 4 regulation + 4 OT, the same safety valve advanceLiveQuarter has
+const MAX_QUARTER = 8; // 4 regulation + 4 OT, a safety valve against an endless game
 
 type Phase = 'huddle' | 'live' | 'final';
 
@@ -119,10 +120,13 @@ interface WatchGameScreenProps {
    * identity); undefined for a live/current-season save renders the exact
    * same court that already ships today. */
   eraId?: string;
+  /** Set when this is the user's Game 7 ("Jogo 7 · Final do Leste"): the
+   * huddle adds the quarter tactics and the game can't end tied. */
+  decider?: string;
 }
 
 const WatchGameScreen: React.FC<WatchGameScreenProps> = ({
-  home, away, players, coaches, userTeamId, onFinish, eraId,
+  home, away, players, coaches, userTeamId, onFinish, eraId, decider,
 }) => {
   const insets = useSafeAreaInsets();
   const desktop = useDesktop();
@@ -187,6 +191,8 @@ const WatchGameScreen: React.FC<WatchGameScreenProps> = ({
   const [screenH, setScreenH] = useState(0);
   const [speed, setSpeed] = useState(1);
   const [play, setPlay] = useState<WatchPlay>('pick_roll');
+  // Game 7 only. Lasts one quarter (a timeout inside it may change it).
+  const [tactic, setTactic] = useState<LiveTactic | null>(null);
   const [timeoutsLeft, setTimeoutsLeft] = useState(STARTING_TIMEOUTS);
   const [isTimeoutHuddle, setIsTimeoutHuddle] = useState(false);
   const [cameraView, setCameraViewState] = useState<CameraView>(lastCameraView);
@@ -275,6 +281,7 @@ const WatchGameScreen: React.FC<WatchGameScreenProps> = ({
       userPriority: priorityRef.current,
       userSide,
       play: nextPlay,
+      tactic: decider ? tactic : null,
       timeout: spendTimeout,
       quarter: quarterRef.current,
       from,
@@ -322,7 +329,7 @@ const WatchGameScreen: React.FC<WatchGameScreenProps> = ({
       setRotationTick((n) => n + 1);
     }
     const decided = q >= REGULATION_QUARTERS && final.home !== final.away;
-    // Safety valve, same as advanceLiveQuarter's: past four overtimes, settle
+    // Safety valve: past four overtimes, settle
     // it rather than loop forever. A tie must never reach the season — the
     // standings have no concept of one.
     if (!decided && q >= MAX_QUARTER) final.home += 1;
@@ -345,6 +352,7 @@ const WatchGameScreen: React.FC<WatchGameScreenProps> = ({
     phaseRef.current = 'huddle';
     setPhase('huddle');
     setIsTimeoutHuddle(false);
+    setTactic(null);
   };
 
   // Announce every shot the clock just crossed. A made basket names its
@@ -551,9 +559,10 @@ const WatchGameScreen: React.FC<WatchGameScreenProps> = ({
   const exhausted = liveFive.filter((p) => p.energy < EXHAUSTED);
 
   const userAccent = userSide === 'home' ? homeAccent : awayAccent;
-  const huddleTitle = isTimeoutHuddle
+  const huddleMoment = isTimeoutHuddle
     ? 'Tempo pedido'
     : quarter === 1 ? 'Antes da bola subir' : `Intervalo do ${periodLabel(quarter, 'huddle')}`;
+  const huddleTitle = decider ? `${decider} · ${huddleMoment}` : huddleMoment;
   const huddleSub = isTimeoutHuddle
     ? `Reabre o restante do ${periodLabel(quarter, 'huddle')} com a nova jogada`
     : `Escolha a jogada do ${periodLabel(quarter, 'huddle')}`;
@@ -665,7 +674,36 @@ const WatchGameScreen: React.FC<WatchGameScreenProps> = ({
           </View>
         </ScrollView>
       ) : (
-      <ScrollView style={desktop ? { flex: 1, marginTop: 10 } : { maxHeight: 232, marginTop: 10 }} showsVerticalScrollIndicator={false}>
+      <ScrollView style={desktop ? { flex: 1, marginTop: 10 } : { maxHeight: decider ? 300 : 232, marginTop: 10 }} showsVerticalScrollIndicator={false}>
+        {decider ? (
+          <View style={{ marginBottom: 12 }}>
+            <Text style={{ fontFamily: FONT.cond700, fontSize: 11, letterSpacing: 1.5, color: COLORS.muted, textTransform: 'uppercase', marginBottom: 6 }}>
+              Tática do {periodLabel(quarter, 'huddle')}
+            </Text>
+            <View className="flex-row flex-wrap" style={{ gap: 6 }}>
+              {([null, ...TACTIC_ORDER] as (LiveTactic | null)[]).map((id) => {
+                const active = id === tactic;
+                const label = id ? TACTIC_META[id].label : 'Nenhuma';
+                return (
+                  <Pressable
+                    key={id ?? 'none'}
+                    accessibilityRole="button"
+                    accessibilityLabel={label}
+                    aria-selected={active}
+                    onPress={() => setTactic(id)}
+                    className="active:opacity-70"
+                    style={{ paddingVertical: 7, paddingHorizontal: 11, borderRadius: 9, backgroundColor: active ? COLORS.text : COLORS.surface2 }}
+                  >
+                    <Text style={{ fontFamily: FONT.cond700, fontSize: 13, letterSpacing: 0.8, color: active ? COLORS.bg : COLORS.textSoft, textTransform: 'uppercase' }}>{label}</Text>
+                  </Pressable>
+                );
+              })}
+            </View>
+            <Text style={{ fontFamily: FONT.body500, fontSize: 12.5, lineHeight: 17, marginTop: 6, color: COLORS.muted }}>
+              {tactic ? TACTIC_META[tactic].blurb : 'Sem ênfase: o jogo segue o plano. Vale só para este quarto.'}
+            </Text>
+          </View>
+        ) : null}
         <View style={{ gap: 6 }}>
           {PLAY_ORDER.map((id) => {
             const meta = WATCH_PLAY_META[id];
@@ -693,7 +731,7 @@ const WatchGameScreen: React.FC<WatchGameScreenProps> = ({
       <View style={{ marginTop: 10 }}>
         <CtaButton
           label={isTimeoutHuddle ? 'Voltar pra quadra' : `Começar ${periodLabel(quarter, 'huddle')}`}
-          sub={WATCH_PLAY_META[play].label}
+          sub={tactic && decider ? `${WATCH_PLAY_META[play].label} · ${TACTIC_META[tactic].label}` : WATCH_PLAY_META[play].label}
           onPress={() => startQuarter(play, isTimeoutHuddle)}
         />
       </View>

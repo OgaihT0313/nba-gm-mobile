@@ -361,44 +361,21 @@ export interface PlayoffState {
   // Set when a series tied 3-3 involving the user's team is about to be
   // decided — advancePlayoffRound stops short of simulating Game 7 for that
   // one series (every other series in the same round still resolves
-  // normally) and the app routes to the live-game screen instead. Cleared by
-  // applyDeciderResult once the live game concludes.
+  // normally) and the app plays it in the 3D screen instead. Cleared by
+  // applyDeciderResult once that game is over.
   pendingDecider?: PendingDeciderRef;
 }
 
-// A one-time strategic pick the user makes for the NEXT quarter only (must be
-// re-picked each quarter — nothing carries over). See TACTIC_META in
-// simulationService.ts for the actual point deltas each one applies.
+// The user's emphasis for one quarter of his Game 7, picked in the 3D huddle
+// and re-picked every quarter. See TACTIC_META in simulationService.ts.
 export type LiveTactic = 'ritmo' | 'defesa' | 'isolar';
 
 // The four half-court sets the user can call during a watched 3D game. Unlike
-// LiveTactic — a pure scoreboard emphasis for the Game 7 screen — each of
+// LiveTactic — a pure scoreboard emphasis — each of
 // these also owns a choreography the five players on court actually run. See
 // WATCH_PLAY_META (simulationService.ts) for the point deltas and PLAY_CHOREO
 // (watchDirector.ts) for the movement.
 export type WatchPlay = 'pick_roll' | 'pindown' | 'post_up' | 'iso';
-
-// The user's decisive Game 7 (or Finals-clinching game), played out quarter
-// by quarter instead of resolved in one shot like every other game in the
-// sim. Pure state — advanceLiveQuarter in simulationService.ts is the only
-// thing that mutates it, one quarter at a time, driven by the timeout/tactic
-// the user queued up before pressing "Simular Quarto".
-export interface LiveGameState {
-  ref: PendingDeciderRef; // where this game's result gets written back once resolved
-  teamAId: string; // hosts the game — the bracket's m[0], by convention the better seed
-  teamBId: string;
-  userIsTeamA: boolean; // which side the user's timeouts/tactics apply to
-  quarter: number; // 1-4 regulation, 5+ = OT periods
-  scoreA: number;
-  scoreB: number;
-  quarterScores: { a: number; b: number; label: string }[]; // completed periods, in order
-  timeoutsLeft: number;
-  pendingTimeout: boolean; // queued for the NEXT quarter, consumed by advanceLiveQuarter
-  pendingTactic: LiveTactic | null; // queued for the NEXT quarter, consumed by advanceLiveQuarter
-  log: string[]; // most recent first
-  complete: boolean;
-  winnerId?: string;
-}
 
 // --- DECISION QUEUE ---
 // The moments the season stops and asks the GM something. Measured before this
@@ -552,10 +529,6 @@ export interface SeasonState {
   // The user franchise's rivalries, by opponent id. Heat >= RIVAL_HEAT makes a
   // rival. See services/rivalryService.ts.
   rivalries?: { [teamId: string]: { heat: number; why?: string; close?: number } };
-  // Present only while a Game 7 (or Finals-clinching game) involving the user
-  // is being played out live — see PlayoffState.pendingDecider. Cleared once
-  // the game resolves and its result is written back into the bracket.
-  liveGame?: LiveGameState;
 }
 
 // A single-round rookie draft. Order is worst-to-first by the just-finished

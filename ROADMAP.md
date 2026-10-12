@@ -28,7 +28,7 @@ sem o time do usuário). O resto, em ordem. **L** = lapidar algo que existe,
 | 6 | Eras no modelo do Basketball-Reference | L | M | 41 eras ainda com ratings antigos e salários sintéticos |
 | 7 | Desenvolvimento ativo de jogadores — **FEITO** (2026-10-12) | N | M | Hoje a evolução é toda passiva; vira decisão de GM |
 | 8 | 3D — Etapas 1 a 8 restantes — **FEITO** (2026-10-11) | L | G | Segue o PLANO-3D, uma etapa por vez |
-| 9 | Jogo decisivo dentro do 3D | L | M | Junta as duas telas de jogo; depende das etapas 4-5 do 3D |
+| 9 | Jogo decisivo dentro do 3D — **FEITO** (2026-10-12) | L | M | Junta as duas telas de jogo; depende das etapas 4-5 do 3D |
 | 10 | Objetivos e conquistas de GM — **FEITO** (2026-10-12) | N | P | Meta para saves longos além de "ganhar o título" |
 | 11 | Staff além do técnico | N | G | Profundidade, mas mexe em muitos sistemas calibrados |
 | 12 | Ajustes técnicos menores — **FEITO** (2026-10-12, menos o `diagnose_season`) | L | P | Erosão da liga e `diagnose_season` |
@@ -152,11 +152,19 @@ No cartão do jogador (Meu Time), seção **Treino**:
 
 Ver [PLANO-3D.md](PLANO-3D.md). Confirmar com o usuário ao fim de cada etapa.
 
-### 9. Jogo decisivo no 3D (L)
+### 9. Jogo decisivo no 3D (L) — FEITO (2026-10-12)
 
-O jogo decisivo dos playoffs usa a `LiveGameScreen` (por quartos), e os outros jogos
-usam a `WatchGameScreen` (3D). Levar timeouts e as 3 táticas do decisivo para o
-huddle do 3D e apagar a tela por quartos. Decidido em 2026-10-10: só depois do 3D.
+O Jogo 7 do usuário agora é jogado na quadra 3D ("Jogar o jogo 7 · Na quadra 3D" na
+tela de Playoffs). O intervalo do 3D ganha, só nesse jogo, a **tática do quarto**
+(Nenhuma / Fechar a defesa / Acelerar o ritmo / Bola na estrela), escolhida de novo a
+cada quarto e somada à jogada e ao tempo pedido em `planQuarter`. A tela por quartos
+(`LiveGameScreen`, `advanceLiveQuarter`, `startLiveGame`, `LiveGameState`,
+`SeasonState.liveGame`) foi apagada; o estado do jogo pendente é só o
+`playoff.pendingDecider`, então fechar o app no meio só faz o jogo recomeçar.
+As táticas viraram perfil de risco: na tela antiga "isolar" dava +4 sem custo e era
+sempre a resposta. Agora (margem por quarto, `check_watch_director`): nenhuma
++3,6 ±7,0, defesa +5,6 ±5,0 (segurar vantagem), ritmo +4,3 ±8,9, estrela +5,6 ±9,9
+(correr atrás). Testado no navegador: Jogo 7 das Finais até a coroação do campeão.
 
 ### 10. Objetivos e conquistas de GM (N) — FEITO (2026-10-12)
 
