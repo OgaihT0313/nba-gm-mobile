@@ -22,7 +22,7 @@ sem o time do usuário). O resto, em ordem. **L** = lapidar algo que existe,
 |---|------|------|---------|------------------------|
 | 1 | Salvar e carregar a carreira — **FEITO** | N | M | Sem isso nada mais importa: fechar o app perde a carreira inteira |
 | 2 | 3D — Etapas 0 e 4b (medição + ritmo da partida) — **FEITO** | L | M | Já aprovado; sem ritmo, o resto do 3D passa despercebido |
-| 3 | Ratings de veteranos no pipeline | L | P | Erro de dado visível (McConnell OVR 88 aos 34) e barato de corrigir |
+| 3 | Ratings de veteranos no pipeline — **FEITO** (2026-10-12) | L | P | Erro de dado visível (McConnell OVR 88 aos 34) e barato de corrigir |
 | 4 | Redesign do celular (handoff do Claude Design) | L | G | O usuário está insatisfeito com a UI; o PC já recebeu o redesign |
 | 5 | Histórico da liga e da franquia | N | M | Dá peso aos saves longos, que o item 1 torna possíveis |
 | 6 | Eras no modelo do Basketball-Reference | L | M | 41 eras ainda com ratings antigos e salários sintéticos |
@@ -64,7 +64,7 @@ vive num `useState` do `App.tsx`).
 
 Junto com o item 8: **todas as etapas do 3D (0-8) feitas e testadas no aparelho**
 (2026-10-11). Detalhes, números e a decisão do usuário de manter o desempenho atual em
-[PLANO-3D.md](PLANO-3D.md). Falta juntar a `melhoria-3d` na `redesign-console-mygm`.
+[PLANO-3D.md](PLANO-3D.md). Juntada na `redesign-console-mygm` em 2026-10-11 (`2226c4d`).
 
 ### QA no aparelho — FEITO (2026-10-11, commit `d49c9fd` na `melhoria-3d`)
 
@@ -77,18 +77,22 @@ líder de "zona de play-in", 3D com metade preta depois do pedido de tempo, câm
 lembrada entre jogos, folha salarial cortada em Meu Time, botões dos playoffs
 quebrando linha, nomes de calouros repetidos. Observação não corrigida: os efeitos
 sonoros aparecem como player de mídia no Android (não deveriam pausar música de outro
-app — `mixWithOthers` é o padrão —, mas não confirmado). Nenhuma correção em APK ainda.
+app — `mixWithOthers` é o padrão —, mas não confirmado). As correções e o modo
+claro/escuro (`11f8cb3`) entraram no APK de 2026-10-12 (build EAS `fbeae856`).
 
-O item 5 abaixo e o [PLANO-3D.md](PLANO-3D.md), sem mudança: branch `melhoria-3d`,
-medição de referência e depois o ritmo (os jogadores atravessam a quadra em menos
-de meio segundo e a câmera filma o vazio).
+### 3. Ratings de veteranos (L) — FEITO (2026-10-12)
 
-### 3. Ratings de veteranos (L)
-
-No `nba-gm-simulator/pipeline`: veteranos de pouco minuto saem com OVR alto demais
-(T.J. McConnell 88 aos 34). Revisar a regressão por minutos e a idade no
-`apply_bbref.py`, gerar de novo e conferir com `backtest_season` e
-`diagnose_season`.
+O caso que abriu o item (T.J. McConnell 88 aos 34) já tinha sido corrigido pela
+passada do Basketball-Reference de 2026-10-06 (ele estava 82). O que sobrava não era
+idade, era amostra pequena: reservas com poucos minutos e BPM quente ao lado de
+titulares (Paul Reed 84 com 13,9 min, Thybulle e Toppin 82 com ~450 min).
+`apply_bbref.py` agora ordena o OVR com o BPM regredido mais forte (`K_RANK` 1000 em
+vez de 500) e o peso de minutos subiu de 0,08 para 0,12. off/def não mudam (o motor
+transforma eles em pontos). 284 OVRs mudaram de −4 a +5; o top 12 é o mesmo.
+Backtest: força do elenco x vitórias reais r 0,818 → 0,879, vitórias simuladas
+0,816 → 0,830, todas as linhas de jogador melhores; OVR x BPM 0,918 → 0,882 (o efeito
+pretendido: menos peso para BPM de pouca amostra). Ficou exposto um limite do motor,
+ver item 12: jogadores com 20+ PPG caíram de ~30,5 para ~29,5 (piso do portão 30).
 
 ### 4. Redesign do celular (L)
 
@@ -145,6 +149,12 @@ re-medir `check_coaches` e `diagnose_season`.
 
 - Erosão lenta do OVR do topo da liga depois do 7º ano (ver "Aposentadoria" abaixo).
 - `diagnose_season.ts` não responde às decisões.
+- Pontuação achatada: a NBA real de 2025-26 teve **46** jogadores com 20+ PPG e
+  cestinha com 33,5; a sim dá ~29,5 e ~30. Os pontos são usage × TS × minutos, então
+  a causa é a divisão de minutos (MPG viés −1,3, líder 36 vs 38), não os ratings. O
+  portão do `diagnose_season` (piso 30) está falhando por ~0,5 desde o item 3.
+- `check_decisions` é instável: com 12 temporadas, o p95 é o máximo, e "pedido de
+  troca dispara" falha às vezes também nos dados antigos.
 
 ---
 
@@ -359,7 +369,7 @@ Corrigidos, na ordem de gravidade:
 
 `matchupStrength` 1,75. Backtest: vitórias r 0,80, força x reais 0,82, PPG 0,86, MPG 0,64.
 
-## 5. Melhoria do 3D — PRÓXIMO (aprovado pelo usuário em 2026-10-06)
+## 5. Melhoria do 3D — FEITO (2026-10-11; aprovado pelo usuário em 2026-10-06)
 
 Plano completo em [PLANO-3D.md](PLANO-3D.md), reescrito em cima do código atual
 de `components/court3d/`. Etapas:
@@ -398,9 +408,7 @@ Depois do teste no celular (2026-10-07), entrou a **Etapa 4b (ritmo da partida)*
   curva em `runPlayerProgression` foi recalibrada. Em 10 anos: top-100 86,4 →
   85,6 (era 86,0 → 81,7), top-8 81,9 → 80,0. Resta uma erosão lenta depois do
   7º ano; o `check_contracts` tem portão para ela não voltar a crescer.
-- **Ratings de veteranos no pipeline.** `T.J. McConnell` está OVR 88 aos 34 anos
-  no `data/players.json`. O `pickSeriesMVP` está certo; o rating é que é
-  estranho, e vem do modelo Python no repo irmão (`nba-gm-simulator`).
+- **Ratings de veteranos no pipeline — FEITO (2026-10-12),** ver item 3 acima.
 - **`diagnose_season.ts` não responde às decisões** — só simula. Como decisões
   só afetam o time do usuário (1 de 30), as métricas de liga não se movem, mas é
   uma inconsistência.
