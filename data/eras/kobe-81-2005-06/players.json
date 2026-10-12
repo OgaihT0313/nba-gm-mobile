@@ -9,8 +9,8 @@
       "PF"
     ],
     "ovr": 81,
-    "off": 78,
-    "def": 78,
+    "off": 77,
+    "def": 73,
     "attributes": {
       "shooting": 80,
       "finishing": 85,
@@ -27,7 +27,9 @@
     "number": 1,
     "potential": "A",
     "salary": 16083000,
-    "contractYears": 3
+    "contractYears": 3,
+    "usage": 14.8,
+    "ts": 0.596
   },
   "joe_johnson": {
     "id": "joe_johnson",
@@ -38,8 +40,8 @@
       "PF"
     ],
     "ovr": 85,
-    "off": 85,
-    "def": 73,
+    "off": 80,
+    "def": 71,
     "attributes": {
       "shooting": 86,
       "finishing": 78,
@@ -56,7 +58,9 @@
     "number": 2,
     "potential": "C",
     "salary": 23506000,
-    "contractYears": 3
+    "contractYears": 3,
+    "usage": 22.7,
+    "ts": 0.543
   },
   "al_harrington": {
     "id": "al_harrington",
@@ -66,9 +70,9 @@
       "PF",
       "SF"
     ],
-    "ovr": 79,
-    "off": 77,
-    "def": 76,
+    "ovr": 81,
+    "off": 76,
+    "def": 71,
     "attributes": {
       "shooting": 77,
       "finishing": 79,
@@ -84,8 +88,10 @@
     "age": 26,
     "number": 3,
     "potential": "C",
-    "salary": 16238000,
-    "contractYears": 2
+    "salary": 20104000,
+    "contractYears": 2,
+    "usage": 24.8,
+    "ts": 0.512
   },
   "josh_smith": {
     "id": "josh_smith",
@@ -95,9 +101,9 @@
       "PF",
       "SF"
     ],
-    "ovr": 79,
-    "off": 72,
-    "def": 81,
+    "ovr": 81,
+    "off": 75,
+    "def": 75,
     "attributes": {
       "shooting": 71,
       "finishing": 75,
@@ -113,8 +119,10 @@
     "age": 20,
     "number": 5,
     "potential": "A",
-    "salary": 8931000,
-    "contractYears": 2
+    "salary": 11057000,
+    "contractYears": 2,
+    "usage": 18.7,
+    "ts": 0.503
   },
   "tyronn_lue": {
     "id": "tyronn_lue",
@@ -123,8 +131,8 @@
     "positions": [
       "SG"
     ],
-    "ovr": 82,
-    "off": 83,
+    "ovr": 78,
+    "off": 77,
     "def": 70,
     "attributes": {
       "shooting": 89,
@@ -141,8 +149,10 @@
     "age": 29,
     "number": 10,
     "potential": "C",
-    "salary": 22424000,
-    "contractYears": 4
+    "salary": 14691000,
+    "contractYears": 4,
+    "usage": 19.5,
+    "ts": 0.565
   },
   "esteban_batista": {
     "id": "esteban_batista",
@@ -152,9 +162,9 @@
       "SF",
       "C"
     ],
-    "ovr": 66,
-    "off": 66,
-    "def": 66,
+    "ovr": 65,
+    "off": 68,
+    "def": 72,
     "attributes": {
       "shooting": 66,
       "finishing": 66,
@@ -170,8 +180,10 @@
     "age": 22,
     "number": 11,
     "potential": "B",
-    "salary": 1820000,
-    "contractYears": 5
+    "salary": 1531000,
+    "contractYears": 5,
+    "usage": 13.7,
+    "ts": 0.498
   },
   "donta_smith": {
     "id": "donta_smith",
@@ -181,8 +193,8 @@
       "SG"
     ],
     "ovr": 66,
-    "off": 66,
-    "def": 66,
+    "off": 72,
+    "def": 74,
     "attributes": {
       "shooting": 66,
       "finishing": 66,
@@ -199,7 +211,9 @@
     "number": 15,
     "potential": "B",
     "salary": 1820000,
-    "contractYears": 4
+    "contractYears": 4,
+    "usage": 15.6,
+    "ts": 0.521
   },
   "anthony_grundy": {
     "id": "anthony_grundy",
@@ -208,9 +222,9 @@
     "positions": [
       "SG"
     ],
-    "ovr": 66,
-    "off": 66,
-    "def": 66,
+    "ovr": 73,
+    "off": 73,
+    "def": 73,
     "attributes": {
       "shooting": 66,
       "finishing": 66,
@@ -226,8 +240,10 @@
     "age": 27,
     "number": 16,
     "potential": "C",
-    "salary": 3309000,
-    "contractYears": 4
+    "salary": 8196000,
+    "contractYears": 4,
+    "usage": 19.8,
+    "ts": 0.565
   },
   "salim_stoudamire": {
     "id": "salim_stoudamire",
@@ -237,8 +253,8 @@
       "SG"
     ],
     "ovr": 76,
-    "off": 76,
-    "def": 71,
+    "off": 75,
+    "def": 70,
     "attributes": {
       "shooting": 87,
       "finishing": 69,
@@ -255,7 +271,9 @@
     "number": 20,
     "potential": "B",
     "salary": 9279000,
-    "contractYears": 5
+    "contractYears": 5,
+    "usage": 22.5,
+    "ts": 0.545
   },
   "marvin_williams": {
     "id": "marvin_williams",
@@ -265,9 +283,9 @@
       "PF",
       "SF"
     ],
-    "ovr": 72,
-    "off": 69,
-    "def": 75,
+    "ovr": 73,
+    "off": 73,
+    "def": 71,
     "attributes": {
       "shooting": 69,
       "finishing": 76,
@@ -283,8 +301,10 @@
     "age": 20,
     "number": 24,
     "potential": "B",
-    "salary": 3998000,
-    "contractYears": 2
+    "salary": 4508000,
+    "contractYears": 2,
+    "usage": 16.9,
+    "ts": 0.524
   },
   "zaza_pachulia": {
     "id": "zaza_pachulia",
@@ -294,8 +314,8 @@
       "C"
     ],
     "ovr": 78,
-    "off": 72,
-    "def": 80,
+    "off": 74,
+    "def": 72,
     "attributes": {
       "shooting": 68,
       "finishing": 83,
@@ -312,7 +332,9 @@
     "number": 27,
     "potential": "A",
     "salary": 8080000,
-    "contractYears": 1
+    "contractYears": 1,
+    "usage": 18.6,
+    "ts": 0.529
   },
   "royal_ivey": {
     "id": "royal_ivey",
@@ -322,9 +344,9 @@
       "PG",
       "SG"
     ],
-    "ovr": 68,
-    "off": 71,
-    "def": 70,
+    "ovr": 66,
+    "off": 69,
+    "def": 73,
     "attributes": {
       "shooting": 68,
       "finishing": 70,
@@ -340,8 +362,10 @@
     "age": 24,
     "number": 36,
     "potential": "C",
-    "salary": 3489000,
-    "contractYears": 4
+    "salary": 2648000,
+    "contractYears": 4,
+    "usage": 14.7,
+    "ts": 0.477
   },
   "john_edwards": {
     "id": "john_edwards",
@@ -351,8 +375,8 @@
       "C"
     ],
     "ovr": 66,
-    "off": 66,
-    "def": 66,
+    "off": 69,
+    "def": 73,
     "attributes": {
       "shooting": 66,
       "finishing": 66,
@@ -369,7 +393,9 @@
     "number": 54,
     "potential": "C",
     "salary": 2648000,
-    "contractYears": 3
+    "contractYears": 3,
+    "usage": 13.8,
+    "ts": 0.499
   },
   "orien_greene": {
     "id": "orien_greene",
@@ -378,9 +404,9 @@
     "positions": [
       "SG"
     ],
-    "ovr": 70,
-    "off": 70,
-    "def": 75,
+    "ovr": 66,
+    "off": 67,
+    "def": 76,
     "attributes": {
       "shooting": 66,
       "finishing": 68,
@@ -396,8 +422,10 @@
     "age": 24,
     "number": 0,
     "potential": "C",
-    "salary": 4330000,
-    "contractYears": 1
+    "salary": 2648000,
+    "contractYears": 1,
+    "usage": 14.8,
+    "ts": 0.456
   },
   "ryan_gomes": {
     "id": "ryan_gomes",
@@ -408,8 +436,8 @@
       "PF"
     ],
     "ovr": 77,
-    "off": 72,
-    "def": 77,
+    "off": 75,
+    "def": 72,
     "attributes": {
       "shooting": 70,
       "finishing": 81,
@@ -426,7 +454,9 @@
     "number": 4,
     "potential": "B",
     "salary": 10516000,
-    "contractYears": 1
+    "contractYears": 1,
+    "usage": 16.0,
+    "ts": 0.547
   },
   "gerald_green": {
     "id": "gerald_green",
@@ -437,9 +467,9 @@
       "PG",
       "SF"
     ],
-    "ovr": 71,
-    "off": 69,
-    "def": 70,
+    "ovr": 72,
+    "off": 72,
+    "def": 72,
     "attributes": {
       "shooting": 70,
       "finishing": 73,
@@ -455,8 +485,10 @@
     "age": 20,
     "number": 5,
     "potential": "B",
-    "salary": 3487000,
-    "contractYears": 5
+    "salary": 3998000,
+    "contractYears": 5,
+    "usage": 20.7,
+    "ts": 0.541
   },
   "al_jefferson": {
     "id": "al_jefferson",
@@ -465,9 +497,9 @@
     "positions": [
       "C"
     ],
-    "ovr": 83,
+    "ovr": 75,
     "off": 73,
-    "def": 82,
+    "def": 73,
     "attributes": {
       "shooting": 68,
       "finishing": 90,
@@ -482,9 +514,11 @@
     "photoUrl": "https://cdn.nba.com/headshots/nba/latest/1040x760/2744.png",
     "age": 21,
     "number": 7,
-    "potential": "A",
-    "salary": 13609000,
-    "contractYears": 3
+    "potential": "B",
+    "salary": 5529000,
+    "contractYears": 3,
+    "usage": 21.2,
+    "ts": 0.538
   },
   "delonte_west": {
     "id": "delonte_west",
@@ -493,8 +527,8 @@
     "positions": [
       "SG"
     ],
-    "ovr": 81,
-    "off": 82,
+    "ovr": 82,
+    "off": 77,
     "def": 75,
     "attributes": {
       "shooting": 87,
@@ -511,8 +545,10 @@
     "age": 22,
     "number": 13,
     "potential": "A",
-    "salary": 11057000,
-    "contractYears": 2
+    "salary": 12333000,
+    "contractYears": 2,
+    "usage": 16.5,
+    "ts": 0.568
   },
   "dan_dickau": {
     "id": "dan_dickau",
@@ -521,9 +557,9 @@
     "positions": [
       "SG"
     ],
-    "ovr": 73,
-    "off": 74,
-    "def": 71,
+    "ovr": 77,
+    "off": 75,
+    "def": 73,
     "attributes": {
       "shooting": 75,
       "finishing": 65,
@@ -539,8 +575,10 @@
     "age": 27,
     "number": 20,
     "potential": "C",
-    "salary": 8196000,
-    "contractYears": 3
+    "salary": 13145000,
+    "contractYears": 3,
+    "usage": 20.5,
+    "ts": 0.529
   },
   "dwayne_jones": {
     "id": "dwayne_jones",
@@ -551,8 +589,8 @@
       "C"
     ],
     "ovr": 66,
-    "off": 66,
-    "def": 66,
+    "off": 72,
+    "def": 73,
     "attributes": {
       "shooting": 66,
       "finishing": 66,
@@ -569,7 +607,9 @@
     "number": 27,
     "potential": "B",
     "salary": 2648000,
-    "contractYears": 3
+    "contractYears": 3,
+    "usage": 13.7,
+    "ts": 0.496
   },
   "paul_pierce": {
     "id": "paul_pierce",
@@ -579,9 +619,9 @@
       "SF",
       "PF"
     ],
-    "ovr": 89,
+    "ovr": 90,
     "off": 84,
-    "def": 77,
+    "def": 74,
     "attributes": {
       "shooting": 85,
       "finishing": 85,
@@ -597,8 +637,10 @@
     "age": 28,
     "number": 34,
     "potential": "C",
-    "salary": 40518000,
-    "contractYears": 4
+    "salary": 43301000,
+    "contractYears": 4,
+    "usage": 29.4,
+    "ts": 0.581
   },
   "michael_olowokandi": {
     "id": "michael_olowokandi",
@@ -607,9 +649,9 @@
     "positions": [
       "C"
     ],
-    "ovr": 73,
+    "ovr": 66,
     "off": 68,
-    "def": 80,
+    "def": 74,
     "attributes": {
       "shooting": 66,
       "finishing": 76,
@@ -625,8 +667,10 @@
     "age": 31,
     "number": 41,
     "potential": "D",
-    "salary": 6967000,
-    "contractYears": 5
+    "salary": 2813000,
+    "contractYears": 5,
+    "usage": 16.6,
+    "ts": 0.47
   },
   "tony_allen": {
     "id": "tony_allen",
@@ -637,9 +681,9 @@
       "SG",
       "PF"
     ],
-    "ovr": 78,
-    "off": 75,
-    "def": 77,
+    "ovr": 77,
+    "off": 73,
+    "def": 75,
     "attributes": {
       "shooting": 72,
       "finishing": 83,
@@ -655,8 +699,10 @@
     "age": 24,
     "number": 42,
     "potential": "C",
-    "salary": 11753000,
-    "contractYears": 5
+    "salary": 10516000,
+    "contractYears": 5,
+    "usage": 18.7,
+    "ts": 0.549
   },
   "kendrick_perkins": {
     "id": "kendrick_perkins",
@@ -665,9 +711,9 @@
     "positions": [
       "C"
     ],
-    "ovr": 80,
-    "off": 73,
-    "def": 84,
+    "ovr": 73,
+    "off": 71,
+    "def": 76,
     "attributes": {
       "shooting": 69,
       "finishing": 84,
@@ -682,9 +728,11 @@
     "photoUrl": "https://cdn.nba.com/headshots/nba/latest/1040x760/2570.png",
     "age": 21,
     "number": 43,
-    "potential": "A",
-    "salary": 9781000,
-    "contractYears": 1
+    "potential": "B",
+    "salary": 4508000,
+    "contractYears": 1,
+    "usage": 15.0,
+    "ts": 0.542
   },
   "brian_scalabrine": {
     "id": "brian_scalabrine",
@@ -693,9 +741,9 @@
     "positions": [
       "SF"
     ],
-    "ovr": 68,
-    "off": 68,
-    "def": 72,
+    "ovr": 66,
+    "off": 71,
+    "def": 74,
     "attributes": {
       "shooting": 71,
       "finishing": 65,
@@ -711,8 +759,10 @@
     "age": 28,
     "number": 44,
     "potential": "C",
-    "salary": 4361000,
-    "contractYears": 4
+    "salary": 3309000,
+    "contractYears": 4,
+    "usage": 14.6,
+    "ts": 0.486
   },
   "raef_lafrentz": {
     "id": "raef_lafrentz",
@@ -721,9 +771,9 @@
     "positions": [
       "SF"
     ],
-    "ovr": 78,
+    "ovr": 80,
     "off": 76,
-    "def": 77,
+    "def": 74,
     "attributes": {
       "shooting": 87,
       "finishing": 67,
@@ -739,8 +789,10 @@
     "age": 30,
     "number": 45,
     "potential": "D",
-    "salary": 14691000,
-    "contractYears": 4
+    "salary": 17784000,
+    "contractYears": 4,
+    "usage": 15.5,
+    "ts": 0.56
   },
   "wally_szczerbiak": {
     "id": "wally_szczerbiak",
@@ -750,7 +802,7 @@
       "SF"
     ],
     "ovr": 84,
-    "off": 82,
+    "off": 80,
     "def": 72,
     "attributes": {
       "shooting": 91,
@@ -768,7 +820,9 @@
     "number": 55,
     "potential": "C",
     "salary": 27063000,
-    "contractYears": 3
+    "contractYears": 3,
+    "usage": 21.8,
+    "ts": 0.594
   },
   "stephen_graham": {
     "id": "stephen_graham",
@@ -779,8 +833,8 @@
       "SF"
     ],
     "ovr": 66,
-    "off": 66,
-    "def": 66,
+    "off": 71,
+    "def": 73,
     "attributes": {
       "shooting": 66,
       "finishing": 66,
@@ -797,7 +851,9 @@
     "number": 1,
     "potential": "C",
     "salary": 2648000,
-    "contractYears": 2
+    "contractYears": 2,
+    "usage": 18.7,
+    "ts": 0.501
   },
   "flip_murray": {
     "id": "flip_murray",
@@ -806,9 +862,9 @@
     "positions": [
       "SG"
     ],
-    "ovr": 74,
-    "off": 74,
-    "def": 72,
+    "ovr": 76,
+    "off": 73,
+    "def": 71,
     "attributes": {
       "shooting": 69,
       "finishing": 76,
@@ -824,8 +880,10 @@
     "age": 26,
     "number": 2,
     "potential": "C",
-    "salary": 9124000,
-    "contractYears": 1
+    "salary": 11599000,
+    "contractYears": 1,
+    "usage": 21.9,
+    "ts": 0.48
   },
   "sasha_pavlovic": {
     "id": "sasha_pavlovic",
@@ -835,9 +893,9 @@
       "SG",
       "SF"
     ],
-    "ovr": 67,
-    "off": 69,
-    "def": 71,
+    "ovr": 66,
+    "off": 70,
+    "def": 73,
     "attributes": {
       "shooting": 74,
       "finishing": 68,
@@ -853,8 +911,10 @@
     "age": 22,
     "number": 3,
     "potential": "B",
-    "salary": 2109000,
-    "contractYears": 3
+    "salary": 1820000,
+    "contractYears": 3,
+    "usage": 16.7,
+    "ts": 0.518
   },
   "zydrunas_ilgauskas": {
     "id": "zydrunas_ilgauskas",
@@ -863,9 +923,9 @@
     "positions": [
       "C"
     ],
-    "ovr": 85,
-    "off": 75,
-    "def": 81,
+    "ovr": 82,
+    "off": 77,
+    "def": 74,
     "attributes": {
       "shooting": 71,
       "finishing": 89,
@@ -881,8 +941,10 @@
     "age": 31,
     "number": 11,
     "potential": "D",
-    "salary": 24975000,
-    "contractYears": 4
+    "salary": 19060000,
+    "contractYears": 4,
+    "usage": 24.2,
+    "ts": 0.566
   },
   "ira_newble": {
     "id": "ira_newble",
@@ -893,8 +955,8 @@
       "SG"
     ],
     "ovr": 66,
-    "off": 66,
-    "def": 66,
+    "off": 70,
+    "def": 73,
     "attributes": {
       "shooting": 66,
       "finishing": 66,
@@ -911,7 +973,9 @@
     "number": 14,
     "potential": "D",
     "salary": 2813000,
-    "contractYears": 3
+    "contractYears": 3,
+    "usage": 12.3,
+    "ts": 0.459
   },
   "martynas_andriuskevicius": {
     "id": "martynas_andriuskevicius",
@@ -920,9 +984,9 @@
     "positions": [
       "C"
     ],
-    "ovr": 66,
-    "off": 66,
-    "def": 66,
+    "ovr": 69,
+    "off": 73,
+    "def": 73,
     "attributes": {
       "shooting": 66,
       "finishing": 66,
@@ -938,8 +1002,10 @@
     "age": 20,
     "number": 15,
     "potential": "B",
-    "salary": 1820000,
-    "contractYears": 1
+    "salary": 2688000,
+    "contractYears": 1,
+    "usage": 16.0,
+    "ts": 0.495
   },
   "anderson_varejao": {
     "id": "anderson_varejao",
@@ -948,9 +1014,9 @@
     "positions": [
       "C"
     ],
-    "ovr": 79,
-    "off": 71,
-    "def": 81,
+    "ovr": 74,
+    "off": 74,
+    "def": 75,
     "attributes": {
       "shooting": 67,
       "finishing": 84,
@@ -965,9 +1031,11 @@
     "photoUrl": "https://cdn.nba.com/headshots/nba/latest/1040x760/2760.png",
     "age": 23,
     "number": 17,
-    "potential": "A",
-    "salary": 12990000,
-    "contractYears": 2
+    "potential": "B",
+    "salary": 7299000,
+    "contractYears": 2,
+    "usage": 14.4,
+    "ts": 0.539
   },
   "damon_jones": {
     "id": "damon_jones",
@@ -976,9 +1044,9 @@
     "positions": [
       "SG"
     ],
-    "ovr": 75,
-    "off": 78,
-    "def": 70,
+    "ovr": 79,
+    "off": 77,
+    "def": 73,
     "attributes": {
       "shooting": 88,
       "finishing": 62,
@@ -994,8 +1062,10 @@
     "age": 29,
     "number": 19,
     "potential": "C",
-    "salary": 10052000,
-    "contractYears": 3
+    "salary": 16238000,
+    "contractYears": 3,
+    "usage": 13.8,
+    "ts": 0.57
   },
   "eric_snow": {
     "id": "eric_snow",
@@ -1004,9 +1074,9 @@
     "positions": [
       "SG"
     ],
-    "ovr": 72,
-    "off": 73,
-    "def": 73,
+    "ovr": 73,
+    "off": 70,
+    "def": 75,
     "attributes": {
       "shooting": 66,
       "finishing": 66,
@@ -1022,8 +1092,10 @@
     "age": 33,
     "number": 20,
     "potential": "D",
-    "salary": 6178000,
-    "contractYears": 5
+    "salary": 6967000,
+    "contractYears": 5,
+    "usage": 11.1,
+    "ts": 0.447
   },
   "lebron_james": {
     "id": "lebron_james",
@@ -1033,8 +1105,8 @@
       "PF",
       "SF"
     ],
-    "ovr": 92,
-    "off": 88,
+    "ovr": 93,
+    "off": 89,
     "def": 77,
     "attributes": {
       "shooting": 84,
@@ -1051,8 +1123,10 @@
     "age": 21,
     "number": 23,
     "potential": "A",
-    "salary": 26537000,
-    "contractYears": 5
+    "salary": 27898000,
+    "contractYears": 5,
+    "usage": 32.0,
+    "ts": 0.563
   },
   "donyell_marshall": {
     "id": "donyell_marshall",
@@ -1061,9 +1135,9 @@
     "positions": [
       "SF"
     ],
-    "ovr": 78,
-    "off": 73,
-    "def": 79,
+    "ovr": 81,
+    "off": 78,
+    "def": 74,
     "attributes": {
       "shooting": 82,
       "finishing": 69,
@@ -1079,8 +1153,10 @@
     "age": 33,
     "number": 24,
     "potential": "D",
-    "salary": 12488000,
-    "contractYears": 4
+    "salary": 17088000,
+    "contractYears": 4,
+    "usage": 18.3,
+    "ts": 0.538
   },
   "larry_hughes": {
     "id": "larry_hughes",
@@ -1089,9 +1165,9 @@
     "positions": [
       "SG"
     ],
-    "ovr": 78,
+    "ovr": 84,
     "off": 76,
-    "def": 76,
+    "def": 75,
     "attributes": {
       "shooting": 76,
       "finishing": 75,
@@ -1107,8 +1183,10 @@
     "age": 27,
     "number": 32,
     "potential": "C",
-    "salary": 14691000,
-    "contractYears": 1
+    "salary": 27063000,
+    "contractYears": 1,
+    "usage": 24.7,
+    "ts": 0.514
   },
   "luke_jackson": {
     "id": "luke_jackson",
@@ -1118,9 +1196,9 @@
       "SF",
       "SG"
     ],
-    "ovr": 66,
-    "off": 66,
-    "def": 66,
+    "ovr": 68,
+    "off": 72,
+    "def": 73,
     "attributes": {
       "shooting": 66,
       "finishing": 66,
@@ -1136,8 +1214,10 @@
     "age": 24,
     "number": 33,
     "potential": "C",
-    "salary": 2648000,
-    "contractYears": 4
+    "salary": 3489000,
+    "contractYears": 4,
+    "usage": 19.4,
+    "ts": 0.496
   },
   "alan_henderson": {
     "id": "alan_henderson",
@@ -1147,8 +1227,8 @@
       "SF",
       "C"
     ],
-    "ovr": 71,
-    "off": 69,
+    "ovr": 67,
+    "off": 73,
     "def": 73,
     "attributes": {
       "shooting": 68,
@@ -1165,8 +1245,10 @@
     "age": 33,
     "number": 44,
     "potential": "D",
-    "salary": 5389000,
-    "contractYears": 5
+    "salary": 3260000,
+    "contractYears": 5,
+    "usage": 11.9,
+    "ts": 0.55
   },
   "drew_gooden": {
     "id": "drew_gooden",
@@ -1176,9 +1258,9 @@
       "PF",
       "SF"
     ],
-    "ovr": 83,
-    "off": 73,
-    "def": 81,
+    "ovr": 81,
+    "off": 77,
+    "def": 73,
     "attributes": {
       "shooting": 70,
       "finishing": 86,
@@ -1194,8 +1276,10 @@
     "age": 24,
     "number": 90,
     "potential": "C",
-    "salary": 19795000,
-    "contractYears": 1
+    "salary": 16083000,
+    "contractYears": 1,
+    "usage": 19.7,
+    "ts": 0.55
   },
   "kirk_snyder": {
     "id": "kirk_snyder",
@@ -1204,9 +1288,9 @@
     "positions": [
       "SG"
     ],
-    "ovr": 75,
+    "ovr": 78,
     "off": 76,
-    "def": 73,
+    "def": 72,
     "attributes": {
       "shooting": 77,
       "finishing": 77,
@@ -1221,9 +1305,11 @@
     "photoUrl": "https://cdn.nba.com/headshots/nba/latest/1040x760/2745.png",
     "age": 23,
     "number": 1,
-    "potential": "B",
-    "salary": 8042000,
-    "contractYears": 4
+    "potential": "A",
+    "salary": 11753000,
+    "contractYears": 4,
+    "usage": 20.6,
+    "ts": 0.517
   },
   "chris_paul": {
     "id": "chris_paul",
@@ -1232,9 +1318,9 @@
     "positions": [
       "PG"
     ],
-    "ovr": 90,
-    "off": 83,
-    "def": 77,
+    "ovr": 88,
+    "off": 81,
+    "def": 78,
     "attributes": {
       "shooting": 74,
       "finishing": 78,
@@ -1250,8 +1336,10 @@
     "age": 21,
     "number": 3,
     "potential": "A",
-    "salary": 23816000,
-    "contractYears": 1
+    "salary": 20754000,
+    "contractYears": 1,
+    "usage": 22.0,
+    "ts": 0.546
   },
   "speedy_claxton": {
     "id": "speedy_claxton",
@@ -1260,8 +1348,8 @@
     "positions": [
       "SG"
     ],
-    "ovr": 84,
-    "off": 78,
+    "ovr": 81,
+    "off": 75,
     "def": 75,
     "attributes": {
       "shooting": 69,
@@ -1278,8 +1366,10 @@
     "age": 28,
     "number": 5,
     "potential": "C",
-    "salary": 27063000,
-    "contractYears": 5
+    "salary": 20104000,
+    "contractYears": 5,
+    "usage": 22.4,
+    "ts": 0.497
   },
   "arvydas_macijauskas": {
     "id": "arvydas_macijauskas",
@@ -1288,9 +1378,9 @@
     "positions": [
       "SG"
     ],
-    "ovr": 66,
-    "off": 66,
-    "def": 66,
+    "ovr": 68,
+    "off": 72,
+    "def": 73,
     "attributes": {
       "shooting": 66,
       "finishing": 66,
@@ -1306,8 +1396,10 @@
     "age": 26,
     "number": 6,
     "potential": "C",
-    "salary": 3309000,
-    "contractYears": 4
+    "salary": 4361000,
+    "contractYears": 4,
+    "usage": 18.3,
+    "ts": 0.495
   },
   "marcus_fizer": {
     "id": "marcus_fizer",
@@ -1316,9 +1408,9 @@
     "positions": [
       "SF"
     ],
-    "ovr": 66,
-    "off": 66,
-    "def": 66,
+    "ovr": 72,
+    "off": 72,
+    "def": 73,
     "attributes": {
       "shooting": 66,
       "finishing": 66,
@@ -1334,8 +1426,10 @@
     "age": 27,
     "number": 21,
     "potential": "C",
-    "salary": 3309000,
-    "contractYears": 4
+    "salary": 7268000,
+    "contractYears": 4,
+    "usage": 19.9,
+    "ts": 0.509
   },
   "jr_smith": {
     "id": "jr_smith",
@@ -1345,8 +1439,8 @@
       "SG",
       "SF"
     ],
-    "ovr": 75,
-    "off": 73,
+    "ovr": 76,
+    "off": 74,
     "def": 73,
     "attributes": {
       "shooting": 80,
@@ -1363,8 +1457,10 @@
     "age": 20,
     "number": 23,
     "potential": "B",
-    "salary": 5529000,
-    "contractYears": 2
+    "salary": 6379000,
+    "contractYears": 2,
+    "usage": 22.3,
+    "ts": 0.499
   },
   "desmond_mason": {
     "id": "desmond_mason",
@@ -1373,9 +1469,9 @@
     "positions": [
       "SF"
     ],
-    "ovr": 71,
-    "off": 69,
-    "def": 73,
+    "ovr": 75,
+    "off": 72,
+    "def": 71,
     "attributes": {
       "shooting": 65,
       "finishing": 78,
@@ -1391,8 +1487,10 @@
     "age": 28,
     "number": 24,
     "potential": "C",
-    "salary": 6341000,
-    "contractYears": 5
+    "salary": 10052000,
+    "contractYears": 5,
+    "usage": 21.6,
+    "ts": 0.488
   },
   "moochie_norris": {
     "id": "moochie_norris",
@@ -1402,8 +1500,8 @@
       "SG"
     ],
     "ovr": 66,
-    "off": 66,
-    "def": 66,
+    "off": 69,
+    "def": 75,
     "attributes": {
       "shooting": 66,
       "finishing": 66,
@@ -1420,7 +1518,9 @@
     "number": 25,
     "potential": "D",
     "salary": 2813000,
-    "contractYears": 5
+    "contractYears": 5,
+    "usage": 18.2,
+    "ts": 0.461
   },
   "david_west": {
     "id": "david_west",
@@ -1431,8 +1531,8 @@
       "SF"
     ],
     "ovr": 83,
-    "off": 74,
-    "def": 78,
+    "off": 78,
+    "def": 73,
     "attributes": {
       "shooting": 72,
       "finishing": 83,
@@ -1449,7 +1549,9 @@
     "number": 30,
     "potential": "C",
     "salary": 19795000,
-    "contractYears": 2
+    "contractYears": 2,
+    "usage": 22.5,
+    "ts": 0.546
   },
   "brandon_bass": {
     "id": "brandon_bass",
@@ -1460,8 +1562,8 @@
       "SF"
     ],
     "ovr": 66,
-    "off": 66,
-    "def": 66,
+    "off": 72,
+    "def": 72,
     "attributes": {
       "shooting": 66,
       "finishing": 66,
@@ -1478,7 +1580,9 @@
     "number": 33,
     "potential": "B",
     "salary": 1820000,
-    "contractYears": 1
+    "contractYears": 1,
+    "usage": 16.0,
+    "ts": 0.463
   },
   "aaron_williams": {
     "id": "aaron_williams",
@@ -1488,9 +1592,9 @@
       "C",
       "SF"
     ],
-    "ovr": 73,
+    "ovr": 66,
     "off": 70,
-    "def": 76,
+    "def": 73,
     "attributes": {
       "shooting": 70,
       "finishing": 80,
@@ -1506,8 +1610,10 @@
     "age": 34,
     "number": 34,
     "potential": "D",
-    "salary": 6967000,
-    "contractYears": 3
+    "salary": 2813000,
+    "contractYears": 3,
+    "usage": 13.9,
+    "ts": 0.545
   },
   "p_j_brown": {
     "id": "p_j_brown",
@@ -1516,9 +1622,9 @@
     "positions": [
       "C"
     ],
-    "ovr": 74,
-    "off": 69,
-    "def": 76,
+    "ovr": 79,
+    "off": 74,
+    "def": 74,
     "attributes": {
       "shooting": 70,
       "finishing": 73,
@@ -1534,8 +1640,10 @@
     "age": 36,
     "number": 42,
     "potential": "D",
-    "salary": 5931000,
-    "contractYears": 5
+    "salary": 10555000,
+    "contractYears": 5,
+    "usage": 15.2,
+    "ts": 0.515
   },
   "linton_johnson": {
     "id": "linton_johnson",
@@ -1544,9 +1652,9 @@
     "positions": [
       "SF"
     ],
-    "ovr": 72,
-    "off": 68,
-    "def": 75,
+    "ovr": 67,
+    "off": 71,
+    "def": 72,
     "attributes": {
       "shooting": 70,
       "finishing": 70,
@@ -1562,8 +1670,10 @@
     "age": 26,
     "number": 43,
     "potential": "C",
-    "salary": 7268000,
-    "contractYears": 3
+    "salary": 3835000,
+    "contractYears": 3,
+    "usage": 16.7,
+    "ts": 0.48
   },
   "marc_jackson": {
     "id": "marc_jackson",
@@ -1574,8 +1684,8 @@
       "SF"
     ],
     "ovr": 73,
-    "off": 70,
-    "def": 74,
+    "off": 73,
+    "def": 71,
     "attributes": {
       "shooting": 69,
       "finishing": 76,
@@ -1592,7 +1702,9 @@
     "number": 44,
     "potential": "D",
     "salary": 6967000,
-    "contractYears": 1
+    "contractYears": 1,
+    "usage": 21.8,
+    "ts": 0.53
   },
   "rasual_butler": {
     "id": "rasual_butler",
@@ -1603,9 +1715,9 @@
       "SG",
       "PF"
     ],
-    "ovr": 74,
-    "off": 72,
-    "def": 73,
+    "ovr": 77,
+    "off": 74,
+    "def": 72,
     "attributes": {
       "shooting": 82,
       "finishing": 67,
@@ -1621,8 +1733,10 @@
     "age": 27,
     "number": 45,
     "potential": "C",
-    "salary": 9124000,
-    "contractYears": 3
+    "salary": 13145000,
+    "contractYears": 3,
+    "usage": 18.4,
+    "ts": 0.499
   },
   "randy_livingston": {
     "id": "randy_livingston",
@@ -1631,9 +1745,9 @@
     "positions": [
       "SG"
     ],
-    "ovr": 66,
-    "off": 66,
-    "def": 66,
+    "ovr": 70,
+    "off": 73,
+    "def": 74,
     "attributes": {
       "shooting": 66,
       "finishing": 66,
@@ -1649,8 +1763,10 @@
     "age": 31,
     "number": 1,
     "potential": "D",
-    "salary": 2813000,
-    "contractYears": 3
+    "salary": 4601000,
+    "contractYears": 3,
+    "usage": 15.0,
+    "ts": 0.489
   },
   "tyson_chandler": {
     "id": "tyson_chandler",
@@ -1659,9 +1775,9 @@
     "positions": [
       "C"
     ],
-    "ovr": 80,
+    "ovr": 79,
     "off": 73,
-    "def": 83,
+    "def": 78,
     "attributes": {
       "shooting": 69,
       "finishing": 85,
@@ -1677,8 +1793,10 @@
     "age": 23,
     "number": 3,
     "potential": "A",
-    "salary": 14228000,
-    "contractYears": 5
+    "salary": 12990000,
+    "contractYears": 5,
+    "usage": 11.8,
+    "ts": 0.566
   },
   "andres_nocioni": {
     "id": "andres_nocioni",
@@ -1687,9 +1805,9 @@
     "positions": [
       "SF"
     ],
-    "ovr": 83,
-    "off": 78,
-    "def": 77,
+    "ovr": 81,
+    "off": 75,
+    "def": 76,
     "attributes": {
       "shooting": 86,
       "finishing": 78,
@@ -1705,8 +1823,10 @@
     "age": 26,
     "number": 5,
     "potential": "C",
-    "salary": 24744000,
-    "contractYears": 3
+    "salary": 20104000,
+    "contractYears": 3,
+    "usage": 20.7,
+    "ts": 0.542
   },
   "ben_gordon": {
     "id": "ben_gordon",
@@ -1716,9 +1836,9 @@
       "SG",
       "PG"
     ],
-    "ovr": 81,
-    "off": 81,
-    "def": 72,
+    "ovr": 83,
+    "off": 77,
+    "def": 73,
     "attributes": {
       "shooting": 93,
       "finishing": 70,
@@ -1734,8 +1854,10 @@
     "age": 23,
     "number": 7,
     "potential": "A",
-    "salary": 16083000,
-    "contractYears": 5
+    "salary": 19795000,
+    "contractYears": 5,
+    "usage": 27.2,
+    "ts": 0.53
   },
   "luol_deng": {
     "id": "luol_deng",
@@ -1745,9 +1867,9 @@
       "SF",
       "PF"
     ],
-    "ovr": 79,
-    "off": 73,
-    "def": 76,
+    "ovr": 83,
+    "off": 77,
+    "def": 75,
     "attributes": {
       "shooting": 70,
       "finishing": 80,
@@ -1763,8 +1885,10 @@
     "age": 21,
     "number": 9,
     "potential": "A",
-    "salary": 8931000,
-    "contractYears": 1
+    "salary": 13609000,
+    "contractYears": 1,
+    "usage": 20.8,
+    "ts": 0.513
   },
   "kirk_hinrich": {
     "id": "kirk_hinrich",
@@ -1775,8 +1899,8 @@
       "SG"
     ],
     "ovr": 85,
-    "off": 84,
-    "def": 73,
+    "off": 78,
+    "def": 76,
     "attributes": {
       "shooting": 87,
       "finishing": 71,
@@ -1793,7 +1917,9 @@
     "number": 12,
     "potential": "C",
     "salary": 23506000,
-    "contractYears": 2
+    "contractYears": 2,
+    "usage": 21.6,
+    "ts": 0.518
   },
   "eddie_basden": {
     "id": "eddie_basden",
@@ -1802,9 +1928,9 @@
     "positions": [
       "SG"
     ],
-    "ovr": 66,
-    "off": 66,
-    "def": 66,
+    "ovr": 70,
+    "off": 72,
+    "def": 75,
     "attributes": {
       "shooting": 66,
       "finishing": 66,
@@ -1820,8 +1946,10 @@
     "age": 23,
     "number": 13,
     "potential": "B",
-    "salary": 2648000,
-    "contractYears": 1
+    "salary": 4330000,
+    "contractYears": 1,
+    "usage": 16.5,
+    "ts": 0.5
   },
   "jannero_pargo": {
     "id": "jannero_pargo",
@@ -1831,9 +1959,9 @@
       "PG",
       "SG"
     ],
-    "ovr": 72,
-    "off": 71,
-    "def": 70,
+    "ovr": 74,
+    "off": 72,
+    "def": 73,
     "attributes": {
       "shooting": 72,
       "finishing": 63,
@@ -1849,8 +1977,10 @@
     "age": 26,
     "number": 15,
     "potential": "C",
-    "salary": 7268000,
-    "contractYears": 1
+    "salary": 9124000,
+    "contractYears": 1,
+    "usage": 24.7,
+    "ts": 0.464
   },
   "chris_duhon": {
     "id": "chris_duhon",
@@ -1859,9 +1989,9 @@
     "positions": [
       "SG"
     ],
-    "ovr": 81,
-    "off": 82,
-    "def": 73,
+    "ovr": 80,
+    "off": 74,
+    "def": 76,
     "attributes": {
       "shooting": 85,
       "finishing": 68,
@@ -1877,8 +2007,10 @@
     "age": 23,
     "number": 21,
     "potential": "A",
-    "salary": 16083000,
-    "contractYears": 1
+    "salary": 14228000,
+    "contractYears": 1,
+    "usage": 14.4,
+    "ts": 0.516
   },
   "othella_harrington": {
     "id": "othella_harrington",
@@ -1888,9 +2020,9 @@
       "C",
       "SF"
     ],
-    "ovr": 70,
-    "off": 69,
-    "def": 71,
+    "ovr": 71,
+    "off": 71,
+    "def": 74,
     "attributes": {
       "shooting": 67,
       "finishing": 76,
@@ -1906,8 +2038,10 @@
     "age": 32,
     "number": 24,
     "potential": "D",
-    "salary": 4601000,
-    "contractYears": 3
+    "salary": 5389000,
+    "contractYears": 3,
+    "usage": 20.7,
+    "ts": 0.542
   },
   "darius_songaila": {
     "id": "darius_songaila",
@@ -1916,9 +2050,9 @@
     "positions": [
       "SF"
     ],
-    "ovr": 77,
-    "off": 73,
-    "def": 76,
+    "ovr": 78,
+    "off": 74,
+    "def": 74,
     "attributes": {
       "shooting": 71,
       "finishing": 79,
@@ -1934,8 +2068,10 @@
     "age": 28,
     "number": 25,
     "potential": "C",
-    "salary": 13145000,
-    "contractYears": 4
+    "salary": 14691000,
+    "contractYears": 4,
+    "usage": 19.2,
+    "ts": 0.54
   },
   "malik_allen": {
     "id": "malik_allen",
@@ -1945,7 +2081,7 @@
       "SF"
     ],
     "ovr": 72,
-    "off": 68,
+    "off": 72,
     "def": 74,
     "attributes": {
       "shooting": 68,
@@ -1963,7 +2099,9 @@
     "number": 35,
     "potential": "C",
     "salary": 7268000,
-    "contractYears": 1
+    "contractYears": 1,
+    "usage": 18.7,
+    "ts": 0.509
   },
   "luke_schenscher": {
     "id": "luke_schenscher",
@@ -1973,8 +2111,8 @@
       "C"
     ],
     "ovr": 66,
-    "off": 66,
-    "def": 66,
+    "off": 72,
+    "def": 74,
     "attributes": {
       "shooting": 66,
       "finishing": 66,
@@ -1991,7 +2129,9 @@
     "number": 45,
     "potential": "C",
     "salary": 2648000,
-    "contractYears": 4
+    "contractYears": 4,
+    "usage": 13.5,
+    "ts": 0.556
   },
   "michael_sweetney": {
     "id": "michael_sweetney",
@@ -2000,9 +2140,9 @@
     "positions": [
       "SF"
     ],
-    "ovr": 79,
-    "off": 73,
-    "def": 80,
+    "ovr": 74,
+    "off": 72,
+    "def": 73,
     "attributes": {
       "shooting": 67,
       "finishing": 86,
@@ -2017,9 +2157,11 @@
     "photoUrl": "https://cdn.nba.com/headshots/nba/latest/1040x760/2552.png",
     "age": 23,
     "number": 50,
-    "potential": "A",
-    "salary": 12990000,
-    "contractYears": 1
+    "potential": "B",
+    "salary": 7299000,
+    "contractYears": 1,
+    "usage": 21.7,
+    "ts": 0.535
   },
   "eric_piatkowski": {
     "id": "eric_piatkowski",
@@ -2029,9 +2171,9 @@
       "SG",
       "SF"
     ],
-    "ovr": 66,
-    "off": 66,
-    "def": 66,
+    "ovr": 72,
+    "off": 73,
+    "def": 75,
     "attributes": {
       "shooting": 66,
       "finishing": 66,
@@ -2047,8 +2189,10 @@
     "age": 35,
     "number": 52,
     "potential": "D",
-    "salary": 2151000,
-    "contractYears": 2
+    "salary": 4724000,
+    "contractYears": 2,
+    "usage": 16.3,
+    "ts": 0.536
   },
   "keith_van_horn": {
     "id": "keith_van_horn",
@@ -2057,9 +2201,9 @@
     "positions": [
       "SF"
     ],
-    "ovr": 77,
-    "off": 74,
-    "def": 76,
+    "ovr": 78,
+    "off": 76,
+    "def": 73,
     "attributes": {
       "shooting": 81,
       "finishing": 74,
@@ -2075,8 +2219,10 @@
     "age": 30,
     "number": 2,
     "potential": "D",
-    "salary": 13145000,
-    "contractYears": 1
+    "salary": 14691000,
+    "contractYears": 1,
+    "usage": 21.4,
+    "ts": 0.544
   },
   "josh_howard": {
     "id": "josh_howard",
@@ -2085,9 +2231,9 @@
     "positions": [
       "SF"
     ],
-    "ovr": 82,
-    "off": 77,
-    "def": 78,
+    "ovr": 83,
+    "off": 78,
+    "def": 74,
     "attributes": {
       "shooting": 76,
       "finishing": 83,
@@ -2103,8 +2249,10 @@
     "age": 26,
     "number": 5,
     "potential": "C",
-    "salary": 22424000,
-    "contractYears": 1
+    "salary": 24744000,
+    "contractYears": 1,
+    "usage": 21.1,
+    "ts": 0.536
   },
   "marquis_daniels": {
     "id": "marquis_daniels",
@@ -2113,8 +2261,8 @@
     "positions": [
       "SG"
     ],
-    "ovr": 79,
-    "off": 76,
+    "ovr": 81,
+    "off": 75,
     "def": 75,
     "attributes": {
       "shooting": 69,
@@ -2131,8 +2279,10 @@
     "age": 25,
     "number": 6,
     "potential": "C",
-    "salary": 12990000,
-    "contractYears": 5
+    "salary": 16083000,
+    "contractYears": 5,
+    "usage": 18.9,
+    "ts": 0.521
   },
   "desagana_diop": {
     "id": "desagana_diop",
@@ -2141,9 +2291,9 @@
     "positions": [
       "C"
     ],
-    "ovr": 75,
-    "off": 69,
-    "def": 83,
+    "ovr": 74,
+    "off": 71,
+    "def": 78,
     "attributes": {
       "shooting": 68,
       "finishing": 76,
@@ -2159,8 +2309,10 @@
     "age": 24,
     "number": 7,
     "potential": "C",
-    "salary": 8042000,
-    "contractYears": 5
+    "salary": 7299000,
+    "contractYears": 5,
+    "usage": 7.9,
+    "ts": 0.494
   },
   "darrell_armstrong": {
     "id": "darrell_armstrong",
@@ -2170,8 +2322,8 @@
       "SG"
     ],
     "ovr": 66,
-    "off": 66,
-    "def": 69,
+    "off": 71,
+    "def": 74,
     "attributes": {
       "shooting": 66,
       "finishing": 65,
@@ -2188,7 +2340,9 @@
     "number": 10,
     "potential": "D",
     "salary": 2151000,
-    "contractYears": 1
+    "contractYears": 1,
+    "usage": 16.3,
+    "ts": 0.446
   },
   "erick_dampier": {
     "id": "erick_dampier",
@@ -2197,9 +2351,9 @@
     "positions": [
       "C"
     ],
-    "ovr": 80,
-    "off": 71,
-    "def": 82,
+    "ovr": 76,
+    "off": 73,
+    "def": 74,
     "attributes": {
       "shooting": 67,
       "finishing": 83,
@@ -2215,8 +2369,10 @@
     "age": 30,
     "number": 25,
     "potential": "D",
-    "salary": 17784000,
-    "contractYears": 4
+    "salary": 11599000,
+    "contractYears": 4,
+    "usage": 14.2,
+    "ts": 0.545
   },
   "dj_mbenga": {
     "id": "dj_mbenga",
@@ -2226,8 +2382,8 @@
       "C"
     ],
     "ovr": 66,
-    "off": 66,
-    "def": 66,
+    "off": 70,
+    "def": 75,
     "attributes": {
       "shooting": 66,
       "finishing": 66,
@@ -2244,7 +2400,9 @@
     "number": 28,
     "potential": "C",
     "salary": 2648000,
-    "contractYears": 3
+    "contractYears": 3,
+    "usage": 16.7,
+    "ts": 0.534
   },
   "jason_terry": {
     "id": "jason_terry",
@@ -2254,9 +2412,9 @@
       "PG",
       "SG"
     ],
-    "ovr": 85,
-    "off": 84,
-    "def": 73,
+    "ovr": 87,
+    "off": 82,
+    "def": 74,
     "attributes": {
       "shooting": 95,
       "finishing": 73,
@@ -2272,8 +2430,10 @@
     "age": 28,
     "number": 31,
     "potential": "C",
-    "salary": 29383000,
-    "contractYears": 1
+    "salary": 34950000,
+    "contractYears": 1,
+    "usage": 20.8,
+    "ts": 0.583
   },
   "josh_powell": {
     "id": "josh_powell",
@@ -2283,9 +2443,9 @@
       "PF",
       "C"
     ],
-    "ovr": 68,
-    "off": 68,
-    "def": 71,
+    "ovr": 66,
+    "off": 72,
+    "def": 73,
     "attributes": {
       "shooting": 68,
       "finishing": 72,
@@ -2301,8 +2461,10 @@
     "age": 23,
     "number": 33,
     "potential": "B",
-    "salary": 3489000,
-    "contractYears": 3
+    "salary": 2648000,
+    "contractYears": 3,
+    "usage": 14.1,
+    "ts": 0.545
   },
   "devin_harris": {
     "id": "devin_harris",
@@ -2312,8 +2474,8 @@
       "PG",
       "SG"
     ],
-    "ovr": 82,
-    "off": 79,
+    "ovr": 81,
+    "off": 76,
     "def": 75,
     "attributes": {
       "shooting": 69,
@@ -2330,8 +2492,10 @@
     "age": 23,
     "number": 34,
     "potential": "A",
-    "salary": 17939000,
-    "contractYears": 1
+    "salary": 16083000,
+    "contractYears": 1,
+    "usage": 20.6,
+    "ts": 0.54
   },
   "dirk_nowitzki": {
     "id": "dirk_nowitzki",
@@ -2341,9 +2505,9 @@
       "PF",
       "SF"
     ],
-    "ovr": 91,
-    "off": 82,
-    "def": 78,
+    "ovr": 92,
+    "off": 89,
+    "def": 75,
     "attributes": {
       "shooting": 90,
       "finishing": 80,
@@ -2359,8 +2523,10 @@
     "age": 28,
     "number": 41,
     "potential": "C",
-    "salary": 45776000,
-    "contractYears": 2
+    "salary": 48250000,
+    "contractYears": 2,
+    "usage": 29.3,
+    "ts": 0.584
   },
   "jerry_stackhouse": {
     "id": "jerry_stackhouse",
@@ -2370,8 +2536,8 @@
       "SG",
       "SF"
     ],
-    "ovr": 76,
-    "off": 74,
+    "ovr": 80,
+    "off": 76,
     "def": 72,
     "attributes": {
       "shooting": 73,
@@ -2388,8 +2554,10 @@
     "age": 31,
     "number": 42,
     "potential": "D",
-    "salary": 9859000,
-    "contractYears": 5
+    "salary": 15117000,
+    "contractYears": 5,
+    "usage": 24.8,
+    "ts": 0.517
   },
   "adrian_griffin": {
     "id": "adrian_griffin",
@@ -2399,9 +2567,9 @@
       "SG",
       "SF"
     ],
-    "ovr": 75,
-    "off": 72,
-    "def": 78,
+    "ovr": 78,
+    "off": 73,
+    "def": 77,
     "attributes": {
       "shooting": 69,
       "finishing": 73,
@@ -2417,8 +2585,10 @@
     "age": 31,
     "number": 44,
     "potential": "D",
-    "salary": 8544000,
-    "contractYears": 4
+    "salary": 12488000,
+    "contractYears": 4,
+    "usage": 11.2,
+    "ts": 0.502
   },
   "dermarr_johnson": {
     "id": "dermarr_johnson",
@@ -2428,9 +2598,9 @@
       "SG",
       "SF"
     ],
-    "ovr": 74,
-    "off": 73,
-    "def": 73,
+    "ovr": 77,
+    "off": 75,
+    "def": 74,
     "attributes": {
       "shooting": 79,
       "finishing": 70,
@@ -2446,8 +2616,10 @@
     "age": 26,
     "number": 3,
     "potential": "C",
-    "salary": 9124000,
-    "contractYears": 3
+    "salary": 13145000,
+    "contractYears": 3,
+    "usage": 17.7,
+    "ts": 0.567
   },
   "kenyon_martin": {
     "id": "kenyon_martin",
@@ -2458,8 +2630,8 @@
       "SF"
     ],
     "ovr": 81,
-    "off": 74,
-    "def": 79,
+    "off": 75,
+    "def": 75,
     "attributes": {
       "shooting": 69,
       "finishing": 84,
@@ -2476,7 +2648,9 @@
     "number": 6,
     "potential": "C",
     "salary": 20104000,
-    "contractYears": 3
+    "contractYears": 3,
+    "usage": 22.2,
+    "ts": 0.528
   },
   "greg_buckner": {
     "id": "greg_buckner",
@@ -2486,9 +2660,9 @@
       "SG",
       "SF"
     ],
-    "ovr": 78,
-    "off": 76,
-    "def": 76,
+    "ovr": 79,
+    "off": 74,
+    "def": 77,
     "attributes": {
       "shooting": 83,
       "finishing": 69,
@@ -2504,8 +2678,10 @@
     "age": 29,
     "number": 7,
     "potential": "C",
-    "salary": 14691000,
-    "contractYears": 1
+    "salary": 16238000,
+    "contractYears": 1,
+    "usage": 12.4,
+    "ts": 0.579
   },
   "howard_eisley": {
     "id": "howard_eisley",
@@ -2514,9 +2690,9 @@
     "positions": [
       "SG"
     ],
-    "ovr": 72,
+    "ovr": 66,
     "off": 72,
-    "def": 69,
+    "def": 72,
     "attributes": {
       "shooting": 68,
       "finishing": 63,
@@ -2532,8 +2708,10 @@
     "age": 33,
     "number": 10,
     "potential": "D",
-    "salary": 6178000,
-    "contractYears": 1
+    "salary": 2813000,
+    "contractYears": 1,
+    "usage": 17.0,
+    "ts": 0.468
   },
   "earl_boykins": {
     "id": "earl_boykins",
@@ -2542,8 +2720,8 @@
     "positions": [
       "SG"
     ],
-    "ovr": 82,
-    "off": 80,
+    "ovr": 81,
+    "off": 78,
     "def": 72,
     "attributes": {
       "shooting": 81,
@@ -2560,8 +2738,10 @@
     "age": 30,
     "number": 11,
     "potential": "D",
-    "salary": 22424000,
-    "contractYears": 4
+    "salary": 20104000,
+    "contractYears": 4,
+    "usage": 22.9,
+    "ts": 0.521
   },
   "carmelo_anthony": {
     "id": "carmelo_anthony",
@@ -2572,9 +2752,9 @@
       "PF",
       "C"
     ],
-    "ovr": 86,
-    "off": 77,
-    "def": 75,
+    "ovr": 87,
+    "off": 80,
+    "def": 72,
     "attributes": {
       "shooting": 71,
       "finishing": 90,
@@ -2590,8 +2770,10 @@
     "age": 22,
     "number": 15,
     "potential": "A",
-    "salary": 17692000,
-    "contractYears": 3
+    "salary": 19223000,
+    "contractYears": 3,
+    "usage": 30.8,
+    "ts": 0.551
   },
   "eduardo_najera": {
     "id": "eduardo_najera",
@@ -2600,9 +2782,9 @@
     "positions": [
       "SF"
     ],
-    "ovr": 75,
-    "off": 70,
-    "def": 79,
+    "ovr": 73,
+    "off": 72,
+    "def": 74,
     "attributes": {
       "shooting": 69,
       "finishing": 74,
@@ -2618,8 +2800,10 @@
     "age": 29,
     "number": 21,
     "potential": "C",
-    "salary": 10052000,
-    "contractYears": 4
+    "salary": 8196000,
+    "contractYears": 4,
+    "usage": 13.6,
+    "ts": 0.495
   },
   "ruben_patterson": {
     "id": "ruben_patterson",
@@ -2629,9 +2813,9 @@
       "SF",
       "SG"
     ],
-    "ovr": 82,
-    "off": 76,
-    "def": 76,
+    "ovr": 80,
+    "off": 75,
+    "def": 73,
     "attributes": {
       "shooting": 67,
       "finishing": 93,
@@ -2647,8 +2831,10 @@
     "age": 30,
     "number": 22,
     "potential": "D",
-    "salary": 22424000,
-    "contractYears": 2
+    "salary": 17784000,
+    "contractYears": 2,
+    "usage": 22.6,
+    "ts": 0.551
   },
   "marcus_camby": {
     "id": "marcus_camby",
@@ -2658,9 +2844,9 @@
       "C",
       "SF"
     ],
-    "ovr": 88,
-    "off": 72,
-    "def": 88,
+    "ovr": 85,
+    "off": 76,
+    "def": 79,
     "attributes": {
       "shooting": 68,
       "finishing": 78,
@@ -2676,8 +2862,10 @@
     "age": 32,
     "number": 23,
     "potential": "D",
-    "salary": 32074000,
-    "contractYears": 5
+    "salary": 24975000,
+    "contractYears": 5,
+    "usage": 18.6,
+    "ts": 0.502
   },
   "andre_miller": {
     "id": "andre_miller",
@@ -2687,9 +2875,9 @@
       "PG",
       "SG"
     ],
-    "ovr": 85,
-    "off": 80,
-    "def": 75,
+    "ovr": 82,
+    "off": 77,
+    "def": 73,
     "attributes": {
       "shooting": 68,
       "finishing": 80,
@@ -2705,8 +2893,10 @@
     "age": 30,
     "number": 24,
     "potential": "D",
-    "salary": 29383000,
-    "contractYears": 3
+    "salary": 22424000,
+    "contractYears": 3,
+    "usage": 19.8,
+    "ts": 0.535
   },
   "reggie_evans": {
     "id": "reggie_evans",
@@ -2716,9 +2906,9 @@
       "PF",
       "C"
     ],
-    "ovr": 80,
-    "off": 70,
-    "def": 81,
+    "ovr": 71,
+    "off": 73,
+    "def": 71,
     "attributes": {
       "shooting": 66,
       "finishing": 84,
@@ -2734,8 +2924,10 @@
     "age": 26,
     "number": 30,
     "potential": "C",
-    "salary": 17784000,
-    "contractYears": 2
+    "salary": 6341000,
+    "contractYears": 2,
+    "usage": 13.5,
+    "ts": 0.517
   },
   "nene": {
     "id": "nene",
@@ -2745,9 +2937,9 @@
       "SF",
       "C"
     ],
-    "ovr": 66,
-    "off": 66,
-    "def": 66,
+    "ovr": 75,
+    "off": 73,
+    "def": 75,
     "attributes": {
       "shooting": 66,
       "finishing": 66,
@@ -2763,8 +2955,10 @@
     "age": 23,
     "number": 31,
     "potential": "B",
-    "salary": 2648000,
-    "contractYears": 1
+    "salary": 8042000,
+    "contractYears": 1,
+    "usage": 19.2,
+    "ts": 0.547
   },
   "julius_hodge": {
     "id": "julius_hodge",
@@ -2773,9 +2967,9 @@
     "positions": [
       "SG"
     ],
-    "ovr": 66,
-    "off": 66,
-    "def": 66,
+    "ovr": 69,
+    "off": 72,
+    "def": 73,
     "attributes": {
       "shooting": 66,
       "finishing": 66,
@@ -2791,8 +2985,10 @@
     "age": 22,
     "number": 32,
     "potential": "B",
-    "salary": 1820000,
-    "contractYears": 5
+    "salary": 2688000,
+    "contractYears": 5,
+    "usage": 21.0,
+    "ts": 0.504
   },
   "linas_kleiza": {
     "id": "linas_kleiza",
@@ -2802,8 +2998,8 @@
       "SF"
     ],
     "ovr": 66,
-    "off": 66,
-    "def": 66,
+    "off": 72,
+    "def": 73,
     "attributes": {
       "shooting": 66,
       "finishing": 66,
@@ -2820,7 +3016,9 @@
     "number": 43,
     "potential": "B",
     "salary": 1820000,
-    "contractYears": 2
+    "contractYears": 2,
+    "usage": 19.0,
+    "ts": 0.515
   },
   "francisco_elson": {
     "id": "francisco_elson",
@@ -2829,9 +3027,9 @@
     "positions": [
       "C"
     ],
-    "ovr": 75,
+    "ovr": 72,
     "off": 70,
-    "def": 80,
+    "def": 75,
     "attributes": {
       "shooting": 70,
       "finishing": 77,
@@ -2847,8 +3045,10 @@
     "age": 30,
     "number": 56,
     "potential": "D",
-    "salary": 10052000,
-    "contractYears": 1
+    "salary": 7268000,
+    "contractYears": 1,
+    "usage": 11.7,
+    "ts": 0.542
   },
   "troy_murphy": {
     "id": "troy_murphy",
@@ -2857,9 +3057,9 @@
     "positions": [
       "SF"
     ],
-    "ovr": 82,
-    "off": 73,
-    "def": 78,
+    "ovr": 81,
+    "off": 76,
+    "def": 72,
     "attributes": {
       "shooting": 76,
       "finishing": 76,
@@ -2875,8 +3075,10 @@
     "age": 26,
     "number": 1,
     "potential": "C",
-    "salary": 22424000,
-    "contractYears": 5
+    "salary": 20104000,
+    "contractYears": 5,
+    "usage": 20.1,
+    "ts": 0.519
   },
   "mickael_pietrus": {
     "id": "mickael_pietrus",
@@ -2886,9 +3088,9 @@
       "SG",
       "SF"
     ],
-    "ovr": 71,
-    "off": 72,
-    "def": 74,
+    "ovr": 77,
+    "off": 73,
+    "def": 72,
     "attributes": {
       "shooting": 75,
       "finishing": 75,
@@ -2904,8 +3106,10 @@
     "age": 24,
     "number": 2,
     "potential": "C",
-    "salary": 5072000,
-    "contractYears": 3
+    "salary": 10516000,
+    "contractYears": 3,
+    "usage": 21.4,
+    "ts": 0.515
   },
   "will_bynum": {
     "id": "will_bynum",
@@ -2915,9 +3119,9 @@
       "PG",
       "SG"
     ],
-    "ovr": 68,
-    "off": 69,
-    "def": 69,
+    "ovr": 70,
+    "off": 72,
+    "def": 73,
     "attributes": {
       "shooting": 66,
       "finishing": 70,
@@ -2933,8 +3137,10 @@
     "age": 23,
     "number": 3,
     "potential": "B",
-    "salary": 3489000,
-    "contractYears": 3
+    "salary": 4330000,
+    "contractYears": 3,
+    "usage": 18.9,
+    "ts": 0.489
   },
   "derek_fisher": {
     "id": "derek_fisher",
@@ -2945,7 +3151,7 @@
       "SG"
     ],
     "ovr": 81,
-    "off": 81,
+    "off": 75,
     "def": 74,
     "attributes": {
       "shooting": 88,
@@ -2963,7 +3169,9 @@
     "number": 4,
     "potential": "D",
     "salary": 17088000,
-    "contractYears": 2
+    "contractYears": 2,
+    "usage": 19.9,
+    "ts": 0.531
   },
   "baron_davis": {
     "id": "baron_davis",
@@ -2973,8 +3181,8 @@
       "SG"
     ],
     "ovr": 87,
-    "off": 83,
-    "def": 75,
+    "off": 81,
+    "def": 74,
     "attributes": {
       "shooting": 79,
       "finishing": 74,
@@ -2991,7 +3199,9 @@
     "number": 5,
     "potential": "C",
     "salary": 34950000,
-    "contractYears": 1
+    "contractYears": 1,
+    "usage": 26.2,
+    "ts": 0.498
   },
   "monta_ellis": {
     "id": "monta_ellis",
@@ -3001,8 +3211,8 @@
       "SG",
       "PG"
     ],
-    "ovr": 74,
-    "off": 74,
+    "ovr": 75,
+    "off": 72,
     "def": 74,
     "attributes": {
       "shooting": 74,
@@ -3019,8 +3229,10 @@
     "age": 20,
     "number": 8,
     "potential": "B",
-    "salary": 5018000,
-    "contractYears": 4
+    "salary": 5529000,
+    "contractYears": 4,
+    "usage": 19.9,
+    "ts": 0.491
   },
   "ike_diogu": {
     "id": "ike_diogu",
@@ -3029,9 +3241,9 @@
     "positions": [
       "C"
     ],
-    "ovr": 77,
+    "ovr": 73,
     "off": 73,
-    "def": 74,
+    "def": 73,
     "attributes": {
       "shooting": 71,
       "finishing": 86,
@@ -3047,8 +3259,10 @@
     "age": 22,
     "number": 9,
     "potential": "B",
-    "salary": 7230000,
-    "contractYears": 1
+    "salary": 4508000,
+    "contractYears": 1,
+    "usage": 20.6,
+    "ts": 0.591
   },
   "zarko_cabarkapa": {
     "id": "zarko_cabarkapa",
@@ -3058,9 +3272,9 @@
       "SF",
       "C"
     ],
-    "ovr": 66,
-    "off": 66,
-    "def": 66,
+    "ovr": 67,
+    "off": 71,
+    "def": 73,
     "attributes": {
       "shooting": 66,
       "finishing": 66,
@@ -3076,8 +3290,10 @@
     "age": 25,
     "number": 11,
     "potential": "C",
-    "salary": 2648000,
-    "contractYears": 4
+    "salary": 3068000,
+    "contractYears": 4,
+    "usage": 21.2,
+    "ts": 0.51
   },
   "andris_biedrins": {
     "id": "andris_biedrins",
@@ -3086,9 +3302,9 @@
     "positions": [
       "C"
     ],
-    "ovr": 75,
-    "off": 71,
-    "def": 77,
+    "ovr": 71,
+    "off": 72,
+    "def": 75,
     "attributes": {
       "shooting": 69,
       "finishing": 84,
@@ -3104,8 +3320,10 @@
     "age": 20,
     "number": 15,
     "potential": "B",
-    "salary": 5529000,
-    "contractYears": 5
+    "salary": 3487000,
+    "contractYears": 5,
+    "usage": 11.8,
+    "ts": 0.587
   },
   "chris_taft": {
     "id": "chris_taft",
@@ -3114,9 +3332,9 @@
     "positions": [
       "SF"
     ],
-    "ovr": 66,
-    "off": 66,
-    "def": 66,
+    "ovr": 70,
+    "off": 73,
+    "def": 73,
     "attributes": {
       "shooting": 66,
       "finishing": 66,
@@ -3132,8 +3350,10 @@
     "age": 21,
     "number": 21,
     "potential": "B",
-    "salary": 1820000,
-    "contractYears": 3
+    "salary": 2977000,
+    "contractYears": 3,
+    "usage": 14.8,
+    "ts": 0.562
   },
   "jason_richardson": {
     "id": "jason_richardson",
@@ -3143,9 +3363,9 @@
       "SG",
       "PG"
     ],
-    "ovr": 85,
-    "off": 82,
-    "def": 76,
+    "ovr": 88,
+    "off": 81,
+    "def": 73,
     "attributes": {
       "shooting": 89,
       "finishing": 80,
@@ -3161,8 +3381,10 @@
     "age": 25,
     "number": 23,
     "potential": "C",
-    "salary": 23506000,
-    "contractYears": 1
+    "salary": 30187000,
+    "contractYears": 1,
+    "usage": 27.2,
+    "ts": 0.532
   },
   "adonal_foyle": {
     "id": "adonal_foyle",
@@ -3172,8 +3394,8 @@
       "C"
     ],
     "ovr": 74,
-    "off": 69,
-    "def": 81,
+    "off": 70,
+    "def": 77,
     "attributes": {
       "shooting": 69,
       "finishing": 78,
@@ -3190,7 +3412,9 @@
     "number": 31,
     "potential": "D",
     "salary": 7756000,
-    "contractYears": 2
+    "contractYears": 2,
+    "usage": 10.4,
+    "ts": 0.522
   },
   "mike_dunleavy": {
     "id": "mike_dunleavy",
@@ -3201,8 +3425,8 @@
       "PG",
       "SF"
     ],
-    "ovr": 76,
-    "off": 74,
+    "ovr": 80,
+    "off": 75,
     "def": 74,
     "attributes": {
       "shooting": 74,
@@ -3219,8 +3443,10 @@
     "age": 25,
     "number": 34,
     "potential": "C",
-    "salary": 9279000,
-    "contractYears": 3
+    "salary": 14228000,
+    "contractYears": 3,
+    "usage": 18.4,
+    "ts": 0.516
   },
   "calbert_cheaney": {
     "id": "calbert_cheaney",
@@ -3230,9 +3456,9 @@
       "SG",
       "SF"
     ],
-    "ovr": 65,
-    "off": 64,
-    "def": 69,
+    "ovr": 66,
+    "off": 69,
+    "def": 74,
     "attributes": {
       "shooting": 65,
       "finishing": 64,
@@ -3248,8 +3474,10 @@
     "age": 34,
     "number": 40,
     "potential": "D",
-    "salary": 2366000,
-    "contractYears": 4
+    "salary": 2813000,
+    "contractYears": 4,
+    "usage": 14.1,
+    "ts": 0.439
   },
   "tracy_mcgrady": {
     "id": "tracy_mcgrady",
@@ -3259,9 +3487,9 @@
       "SF",
       "SG"
     ],
-    "ovr": 87,
-    "off": 80,
-    "def": 77,
+    "ovr": 91,
+    "off": 84,
+    "def": 76,
     "attributes": {
       "shooting": 79,
       "finishing": 74,
@@ -3277,8 +3505,10 @@
     "age": 27,
     "number": 1,
     "potential": "C",
-    "salary": 34950000,
-    "contractYears": 4
+    "salary": 45776000,
+    "contractYears": 4,
+    "usage": 32.7,
+    "ts": 0.51
   },
   "luther_head": {
     "id": "luther_head",
@@ -3287,9 +3517,9 @@
     "positions": [
       "SG"
     ],
-    "ovr": 77,
-    "off": 77,
-    "def": 74,
+    "ovr": 79,
+    "off": 73,
+    "def": 76,
     "attributes": {
       "shooting": 84,
       "finishing": 67,
@@ -3304,9 +3534,11 @@
     "photoUrl": "https://cdn.nba.com/headshots/nba/latest/1040x760/101129.png",
     "age": 23,
     "number": 2,
-    "potential": "B",
-    "salary": 10516000,
-    "contractYears": 5
+    "potential": "A",
+    "salary": 12990000,
+    "contractYears": 5,
+    "usage": 16.6,
+    "ts": 0.518
   },
   "bob_sura": {
     "id": "bob_sura",
@@ -3315,9 +3547,9 @@
     "positions": [
       "SG"
     ],
-    "ovr": 66,
-    "off": 66,
-    "def": 66,
+    "ovr": 78,
+    "off": 75,
+    "def": 75,
     "attributes": {
       "shooting": 66,
       "finishing": 66,
@@ -3333,8 +3565,10 @@
     "age": 33,
     "number": 3,
     "potential": "D",
-    "salary": 2813000,
-    "contractYears": 5
+    "salary": 12488000,
+    "contractYears": 5,
+    "usage": 17.9,
+    "ts": 0.534
   },
   "stromile_swift": {
     "id": "stromile_swift",
@@ -3343,9 +3577,9 @@
     "positions": [
       "SF"
     ],
-    "ovr": 79,
-    "off": 72,
-    "def": 79,
+    "ovr": 77,
+    "off": 71,
+    "def": 74,
     "attributes": {
       "shooting": 68,
       "finishing": 87,
@@ -3361,8 +3595,10 @@
     "age": 26,
     "number": 4,
     "potential": "C",
-    "salary": 16238000,
-    "contractYears": 2
+    "salary": 13145000,
+    "contractYears": 2,
+    "usage": 23.1,
+    "ts": 0.528
   },
   "juwan_howard": {
     "id": "juwan_howard",
@@ -3371,9 +3607,9 @@
     "positions": [
       "SF"
     ],
-    "ovr": 74,
-    "off": 70,
-    "def": 75,
+    "ovr": 78,
+    "off": 72,
+    "def": 73,
     "attributes": {
       "shooting": 69,
       "finishing": 74,
@@ -3389,8 +3625,10 @@
     "age": 33,
     "number": 5,
     "potential": "D",
-    "salary": 7756000,
-    "contractYears": 4
+    "salary": 12488000,
+    "contractYears": 4,
+    "usage": 19.9,
+    "ts": 0.499
   },
   "david_wesley": {
     "id": "david_wesley",
@@ -3399,9 +3637,9 @@
     "positions": [
       "SG"
     ],
-    "ovr": 73,
-    "off": 76,
-    "def": 69,
+    "ovr": 79,
+    "off": 72,
+    "def": 74,
     "attributes": {
       "shooting": 86,
       "finishing": 67,
@@ -3417,8 +3655,10 @@
     "age": 35,
     "number": 7,
     "potential": "D",
-    "salary": 5328000,
-    "contractYears": 4
+    "salary": 10555000,
+    "contractYears": 4,
+    "usage": 16.1,
+    "ts": 0.534
   },
   "rick_brunson": {
     "id": "rick_brunson",
@@ -3427,9 +3667,9 @@
     "positions": [
       "SG"
     ],
-    "ovr": 66,
-    "off": 66,
-    "def": 66,
+    "ovr": 70,
+    "off": 73,
+    "def": 74,
     "attributes": {
       "shooting": 66,
       "finishing": 66,
@@ -3445,8 +3685,10 @@
     "age": 34,
     "number": 9,
     "potential": "D",
-    "salary": 2813000,
-    "contractYears": 5
+    "salary": 4601000,
+    "contractYears": 5,
+    "usage": 14.7,
+    "ts": 0.465
   },
   "keith_bogans": {
     "id": "keith_bogans",
@@ -3457,9 +3699,9 @@
       "PG",
       "SF"
     ],
-    "ovr": 75,
-    "off": 73,
-    "def": 75,
+    "ovr": 77,
+    "off": 72,
+    "def": 74,
     "attributes": {
       "shooting": 75,
       "finishing": 71,
@@ -3475,8 +3717,10 @@
     "age": 26,
     "number": 10,
     "potential": "C",
-    "salary": 10052000,
-    "contractYears": 3
+    "salary": 13145000,
+    "contractYears": 3,
+    "usage": 18.7,
+    "ts": 0.489
   },
   "yao_ming": {
     "id": "yao_ming",
@@ -3485,9 +3729,9 @@
     "positions": [
       "C"
     ],
-    "ovr": 92,
-    "off": 76,
-    "def": 81,
+    "ovr": 88,
+    "off": 80,
+    "def": 75,
     "attributes": {
       "shooting": 72,
       "finishing": 92,
@@ -3503,8 +3747,10 @@
     "age": 25,
     "number": 11,
     "potential": "C",
-    "salary": 38600000,
-    "contractYears": 1
+    "salary": 30187000,
+    "contractYears": 1,
+    "usage": 28.3,
+    "ts": 0.599
   },
   "rafer_alston": {
     "id": "rafer_alston",
@@ -3513,8 +3759,8 @@
     "positions": [
       "SG"
     ],
-    "ovr": 80,
-    "off": 80,
+    "ovr": 82,
+    "off": 75,
     "def": 74,
     "attributes": {
       "shooting": 80,
@@ -3531,8 +3777,10 @@
     "age": 29,
     "number": 12,
     "potential": "C",
-    "salary": 17784000,
-    "contractYears": 4
+    "salary": 22424000,
+    "contractYears": 4,
+    "usage": 19.6,
+    "ts": 0.493
   },
   "richie_frahm": {
     "id": "richie_frahm",
@@ -3541,9 +3789,9 @@
     "positions": [
       "SG"
     ],
-    "ovr": 69,
-    "off": 70,
-    "def": 68,
+    "ovr": 71,
+    "off": 74,
+    "def": 73,
     "attributes": {
       "shooting": 72,
       "finishing": 65,
@@ -3559,8 +3807,10 @@
     "age": 28,
     "number": 14,
     "potential": "C",
-    "salary": 4887000,
-    "contractYears": 3
+    "salary": 6341000,
+    "contractYears": 3,
+    "usage": 15.7,
+    "ts": 0.53
   },
   "maciej_lampe": {
     "id": "maciej_lampe",
@@ -3570,8 +3820,8 @@
       "SF"
     ],
     "ovr": 66,
-    "off": 66,
-    "def": 66,
+    "off": 70,
+    "def": 72,
     "attributes": {
       "shooting": 66,
       "finishing": 66,
@@ -3588,7 +3838,9 @@
     "number": 15,
     "potential": "B",
     "salary": 1820000,
-    "contractYears": 1
+    "contractYears": 1,
+    "usage": 18.9,
+    "ts": 0.427
   },
   "ryan_bowen": {
     "id": "ryan_bowen",
@@ -3598,8 +3850,8 @@
       "SF"
     ],
     "ovr": 66,
-    "off": 66,
-    "def": 66,
+    "off": 68,
+    "def": 75,
     "attributes": {
       "shooting": 66,
       "finishing": 66,
@@ -3616,7 +3868,9 @@
     "number": 40,
     "potential": "D",
     "salary": 3309000,
-    "contractYears": 5
+    "contractYears": 5,
+    "usage": 10.9,
+    "ts": 0.393
   },
   "chuck_hayes": {
     "id": "chuck_hayes",
@@ -3626,9 +3880,9 @@
       "C",
       "PF"
     ],
-    "ovr": 81,
-    "off": 72,
-    "def": 81,
+    "ovr": 75,
+    "off": 75,
+    "def": 75,
     "attributes": {
       "shooting": 70,
       "finishing": 82,
@@ -3643,9 +3897,11 @@
     "photoUrl": "https://cdn.nba.com/headshots/nba/latest/1040x760/101236.png",
     "age": 23,
     "number": 44,
-    "potential": "A",
-    "salary": 16083000,
-    "contractYears": 4
+    "potential": "B",
+    "salary": 8042000,
+    "contractYears": 4,
+    "usage": 13.0,
+    "ts": 0.581
   },
   "dikembe_mutombo": {
     "id": "dikembe_mutombo",
@@ -3654,9 +3910,9 @@
     "positions": [
       "C"
     ],
-    "ovr": 77,
-    "off": 68,
-    "def": 79,
+    "ovr": 73,
+    "off": 73,
+    "def": 76,
     "attributes": {
       "shooting": 70,
       "finishing": 79,
@@ -3672,8 +3928,10 @@
     "age": 40,
     "number": 55,
     "potential": "D",
-    "salary": 8544000,
-    "contractYears": 2
+    "salary": 5328000,
+    "contractYears": 2,
+    "usage": 10.6,
+    "ts": 0.602
   },
   "walter_mccarty": {
     "id": "walter_mccarty",
@@ -3683,8 +3941,8 @@
       "SF"
     ],
     "ovr": 66,
-    "off": 66,
-    "def": 66,
+    "off": 71,
+    "def": 73,
     "attributes": {
       "shooting": 66,
       "finishing": 66,
@@ -3701,7 +3959,9 @@
     "number": 0,
     "potential": "D",
     "salary": 2813000,
-    "contractYears": 3
+    "contractYears": 3,
+    "usage": 15.3,
+    "ts": 0.481
   },
   "daniel_ewing": {
     "id": "daniel_ewing",
@@ -3710,9 +3970,9 @@
     "positions": [
       "SG"
     ],
-    "ovr": 69,
+    "ovr": 68,
     "off": 70,
-    "def": 72,
+    "def": 74,
     "attributes": {
       "shooting": 69,
       "finishing": 66,
@@ -3728,8 +3988,10 @@
     "age": 23,
     "number": 3,
     "potential": "B",
-    "salary": 3909000,
-    "contractYears": 1
+    "salary": 3489000,
+    "contractYears": 1,
+    "usage": 15.9,
+    "ts": 0.466
   },
   "cuttino_mobley": {
     "id": "cuttino_mobley",
@@ -3738,8 +4000,8 @@
     "positions": [
       "SG"
     ],
-    "ovr": 77,
-    "off": 76,
+    "ovr": 82,
+    "off": 75,
     "def": 74,
     "attributes": {
       "shooting": 80,
@@ -3756,8 +4018,10 @@
     "age": 30,
     "number": 5,
     "potential": "D",
-    "salary": 13145000,
-    "contractYears": 2
+    "salary": 22424000,
+    "contractYears": 2,
+    "usage": 20.2,
+    "ts": 0.53
   },
   "vladimir_radmanovic": {
     "id": "vladimir_radmanovic",
@@ -3767,8 +4031,8 @@
       "SF"
     ],
     "ovr": 80,
-    "off": 78,
-    "def": 76,
+    "off": 77,
+    "def": 73,
     "attributes": {
       "shooting": 91,
       "finishing": 68,
@@ -3785,7 +4049,9 @@
     "number": 7,
     "potential": "C",
     "salary": 14228000,
-    "contractYears": 1
+    "contractYears": 1,
+    "usage": 18.4,
+    "ts": 0.541
   },
   "zeljko_rebraca": {
     "id": "zeljko_rebraca",
@@ -3795,8 +4061,8 @@
       "C"
     ],
     "ovr": 72,
-    "off": 70,
-    "def": 73,
+    "off": 72,
+    "def": 74,
     "attributes": {
       "shooting": 70,
       "finishing": 81,
@@ -3813,7 +4079,9 @@
     "number": 11,
     "potential": "D",
     "salary": 6178000,
-    "contractYears": 1
+    "contractYears": 1,
+    "usage": 15.9,
+    "ts": 0.602
   },
   "quinton_ross": {
     "id": "quinton_ross",
@@ -3822,9 +4090,9 @@
     "positions": [
       "SF"
     ],
-    "ovr": 70,
-    "off": 68,
-    "def": 74,
+    "ovr": 72,
+    "off": 69,
+    "def": 76,
     "attributes": {
       "shooting": 67,
       "finishing": 68,
@@ -3840,8 +4108,10 @@
     "age": 25,
     "number": 13,
     "potential": "C",
-    "salary": 4330000,
-    "contractYears": 1
+    "salary": 5815000,
+    "contractYears": 1,
+    "usage": 12.5,
+    "ts": 0.47
   },
   "shaun_livingston": {
     "id": "shaun_livingston",
@@ -3852,8 +4122,8 @@
       "SG"
     ],
     "ovr": 75,
-    "off": 75,
-    "def": 74,
+    "off": 71,
+    "def": 75,
     "attributes": {
       "shooting": 67,
       "finishing": 72,
@@ -3870,7 +4140,9 @@
     "number": 14,
     "potential": "B",
     "salary": 5529000,
-    "contractYears": 1
+    "contractYears": 1,
+    "usage": 15.7,
+    "ts": 0.464
   },
   "james_singleton": {
     "id": "james_singleton",
@@ -3879,9 +4151,9 @@
     "positions": [
       "SF"
     ],
-    "ovr": 75,
-    "off": 71,
-    "def": 76,
+    "ovr": 73,
+    "off": 74,
+    "def": 75,
     "attributes": {
       "shooting": 72,
       "finishing": 74,
@@ -3897,8 +4169,10 @@
     "age": 24,
     "number": 15,
     "potential": "C",
-    "salary": 8042000,
-    "contractYears": 1
+    "salary": 6557000,
+    "contractYears": 1,
+    "usage": 12.9,
+    "ts": 0.581
   },
   "sam_cassell": {
     "id": "sam_cassell",
@@ -3907,9 +4181,9 @@
     "positions": [
       "SG"
     ],
-    "ovr": 83,
-    "off": 81,
-    "def": 71,
+    "ovr": 84,
+    "off": 79,
+    "def": 73,
     "attributes": {
       "shooting": 81,
       "finishing": 72,
@@ -3925,8 +4199,10 @@
     "age": 36,
     "number": 19,
     "potential": "D",
-    "salary": 16083000,
-    "contractYears": 3
+    "salary": 17591000,
+    "contractYears": 3,
+    "usage": 25.1,
+    "ts": 0.533
   },
   "vin_baker": {
     "id": "vin_baker",
@@ -3936,8 +4212,8 @@
       "SF"
     ],
     "ovr": 66,
-    "off": 66,
-    "def": 66,
+    "off": 70,
+    "def": 73,
     "attributes": {
       "shooting": 66,
       "finishing": 66,
@@ -3954,7 +4230,9 @@
     "number": 34,
     "potential": "D",
     "salary": 2813000,
-    "contractYears": 3
+    "contractYears": 3,
+    "usage": 16.4,
+    "ts": 0.488
   },
   "chris_kaman": {
     "id": "chris_kaman",
@@ -3963,9 +4241,9 @@
     "positions": [
       "C"
     ],
-    "ovr": 82,
-    "off": 74,
-    "def": 81,
+    "ovr": 80,
+    "off": 73,
+    "def": 75,
     "attributes": {
       "shooting": 71,
       "finishing": 88,
@@ -3981,8 +4259,10 @@
     "age": 24,
     "number": 35,
     "potential": "C",
-    "salary": 17939000,
-    "contractYears": 5
+    "salary": 14228000,
+    "contractYears": 5,
+    "usage": 18.1,
+    "ts": 0.558
   },
   "elton_brand": {
     "id": "elton_brand",
@@ -3993,8 +4273,8 @@
       "C"
     ],
     "ovr": 91,
-    "off": 78,
-    "def": 82,
+    "off": 84,
+    "def": 76,
     "attributes": {
       "shooting": 72,
       "finishing": 91,
@@ -4011,7 +4291,9 @@
     "number": 42,
     "potential": "C",
     "salary": 45776000,
-    "contractYears": 4
+    "contractYears": 4,
+    "usage": 26.7,
+    "ts": 0.571
   },
   "corey_maggette": {
     "id": "corey_maggette",
@@ -4022,8 +4304,8 @@
       "SG"
     ],
     "ovr": 83,
-    "off": 76,
-    "def": 74,
+    "off": 79,
+    "def": 73,
     "attributes": {
       "shooting": 77,
       "finishing": 80,
@@ -4040,7 +4322,9 @@
     "number": 50,
     "potential": "C",
     "salary": 24744000,
-    "contractYears": 5
+    "contractYears": 5,
+    "usage": 27.3,
+    "ts": 0.577
   },
   "smush_parker": {
     "id": "smush_parker",
@@ -4049,8 +4333,8 @@
     "positions": [
       "SG"
     ],
-    "ovr": 80,
-    "off": 80,
+    "ovr": 81,
+    "off": 74,
     "def": 75,
     "attributes": {
       "shooting": 86,
@@ -4067,8 +4351,10 @@
     "age": 25,
     "number": 1,
     "potential": "C",
-    "salary": 14228000,
-    "contractYears": 3
+    "salary": 16083000,
+    "contractYears": 3,
+    "usage": 16.6,
+    "ts": 0.546
   },
   "aaron_mckie": {
     "id": "aaron_mckie",
@@ -4078,8 +4364,8 @@
       "SG"
     ],
     "ovr": 66,
-    "off": 66,
-    "def": 66,
+    "off": 71,
+    "def": 76,
     "attributes": {
       "shooting": 66,
       "finishing": 66,
@@ -4096,7 +4382,9 @@
     "number": 2,
     "potential": "D",
     "salary": 2813000,
-    "contractYears": 5
+    "contractYears": 5,
+    "usage": 8.1,
+    "ts": 0.477
   },
   "devean_george": {
     "id": "devean_george",
@@ -4105,9 +4393,9 @@
     "positions": [
       "SF"
     ],
-    "ovr": 75,
-    "off": 70,
-    "def": 78,
+    "ovr": 77,
+    "off": 73,
+    "def": 74,
     "attributes": {
       "shooting": 73,
       "finishing": 67,
@@ -4123,8 +4411,10 @@
     "age": 28,
     "number": 3,
     "potential": "C",
-    "salary": 10052000,
-    "contractYears": 4
+    "salary": 13145000,
+    "contractYears": 4,
+    "usage": 15.7,
+    "ts": 0.487
   },
   "luke_walton": {
     "id": "luke_walton",
@@ -4133,9 +4423,9 @@
     "positions": [
       "SF"
     ],
-    "ovr": 76,
-    "off": 73,
-    "def": 76,
+    "ovr": 75,
+    "off": 74,
+    "def": 74,
     "attributes": {
       "shooting": 70,
       "finishing": 69,
@@ -4151,8 +4441,10 @@
     "age": 26,
     "number": 4,
     "potential": "C",
-    "salary": 11599000,
-    "contractYears": 3
+    "salary": 10052000,
+    "contractYears": 3,
+    "usage": 15.2,
+    "ts": 0.484
   },
   "lamar_odom": {
     "id": "lamar_odom",
@@ -4162,9 +4454,9 @@
       "SF",
       "PF"
     ],
-    "ovr": 84,
-    "off": 82,
-    "def": 77,
+    "ovr": 86,
+    "off": 79,
+    "def": 75,
     "attributes": {
       "shooting": 81,
       "finishing": 81,
@@ -4180,8 +4472,10 @@
     "age": 26,
     "number": 7,
     "potential": "C",
-    "salary": 27063000,
-    "contractYears": 4
+    "salary": 32167000,
+    "contractYears": 4,
+    "usage": 18.8,
+    "ts": 0.553
   },
   "kobe_bryant": {
     "id": "kobe_bryant",
@@ -4192,9 +4486,9 @@
       "PG",
       "SF"
     ],
-    "ovr": 91,
-    "off": 84,
-    "def": 76,
+    "ovr": 93,
+    "off": 88,
+    "def": 74,
     "attributes": {
       "shooting": 87,
       "finishing": 82,
@@ -4210,8 +4504,10 @@
     "age": 27,
     "number": 8,
     "potential": "C",
-    "salary": 45776000,
-    "contractYears": 1
+    "salary": 50724000,
+    "contractYears": 1,
+    "usage": 36.2,
+    "ts": 0.56
   },
   "andrew_bynum": {
     "id": "andrew_bynum",
@@ -4221,8 +4517,8 @@
       "C"
     ],
     "ovr": 66,
-    "off": 66,
-    "def": 66,
+    "off": 69,
+    "def": 73,
     "attributes": {
       "shooting": 66,
       "finishing": 66,
@@ -4239,7 +4535,9 @@
     "number": 17,
     "potential": "B",
     "salary": 1820000,
-    "contractYears": 5
+    "contractYears": 5,
+    "usage": 15.5,
+    "ts": 0.427
   },
   "sasha_vujacic": {
     "id": "sasha_vujacic",
@@ -4249,9 +4547,9 @@
       "SG",
       "PG"
     ],
-    "ovr": 71,
-    "off": 72,
-    "def": 73,
+    "ovr": 70,
+    "off": 71,
+    "def": 74,
     "attributes": {
       "shooting": 75,
       "finishing": 61,
@@ -4267,8 +4565,10 @@
     "age": 22,
     "number": 18,
     "potential": "B",
-    "salary": 3487000,
-    "contractYears": 4
+    "salary": 2977000,
+    "contractYears": 4,
+    "usage": 12.8,
+    "ts": 0.474
   },
   "ronny_turiaf": {
     "id": "ronny_turiaf",
@@ -4278,8 +4578,8 @@
       "C"
     ],
     "ovr": 66,
-    "off": 66,
-    "def": 66,
+    "off": 72,
+    "def": 74,
     "attributes": {
       "shooting": 66,
       "finishing": 66,
@@ -4296,7 +4596,9 @@
     "number": 21,
     "potential": "B",
     "salary": 2648000,
-    "contractYears": 5
+    "contractYears": 5,
+    "usage": 15.0,
+    "ts": 0.538
   },
   "jim_jackson": {
     "id": "jim_jackson",
@@ -4306,9 +4608,9 @@
       "SF",
       "SG"
     ],
-    "ovr": 65,
-    "off": 65,
-    "def": 71,
+    "ovr": 70,
+    "off": 72,
+    "def": 73,
     "attributes": {
       "shooting": 66,
       "finishing": 62,
@@ -4324,8 +4626,10 @@
     "age": 35,
     "number": 24,
     "potential": "D",
-    "salary": 1809000,
-    "contractYears": 2
+    "salary": 3518000,
+    "contractYears": 2,
+    "usage": 16.9,
+    "ts": 0.492
   },
   "chris_mihm": {
     "id": "chris_mihm",
@@ -4334,9 +4638,9 @@
     "positions": [
       "C"
     ],
-    "ovr": 80,
-    "off": 74,
-    "def": 78,
+    "ovr": 77,
+    "off": 73,
+    "def": 73,
     "attributes": {
       "shooting": 70,
       "finishing": 87,
@@ -4352,8 +4656,10 @@
     "age": 26,
     "number": 31,
     "potential": "C",
-    "salary": 17784000,
-    "contractYears": 1
+    "salary": 13145000,
+    "contractYears": 1,
+    "usage": 18.7,
+    "ts": 0.552
   },
   "brian_cook": {
     "id": "brian_cook",
@@ -4363,8 +4669,8 @@
       "SF"
     ],
     "ovr": 78,
-    "off": 75,
-    "def": 76,
+    "off": 76,
+    "def": 73,
     "attributes": {
       "shooting": 78,
       "finishing": 76,
@@ -4381,7 +4687,9 @@
     "number": 43,
     "potential": "C",
     "salary": 11753000,
-    "contractYears": 3
+    "contractYears": 3,
+    "usage": 18.5,
+    "ts": 0.562
   },
   "kwame_brown": {
     "id": "kwame_brown",
@@ -4391,9 +4699,9 @@
       "SF",
       "C"
     ],
-    "ovr": 76,
+    "ovr": 74,
     "off": 72,
-    "def": 77,
+    "def": 73,
     "attributes": {
       "shooting": 68,
       "finishing": 86,
@@ -4409,8 +4717,10 @@
     "age": 24,
     "number": 54,
     "potential": "C",
-    "salary": 9279000,
-    "contractYears": 1
+    "salary": 7299000,
+    "contractYears": 1,
+    "usage": 14.4,
+    "ts": 0.536
   },
   "dorell_wright": {
     "id": "dorell_wright",
@@ -4420,9 +4730,9 @@
       "SF",
       "PF"
     ],
-    "ovr": 66,
-    "off": 66,
-    "def": 66,
+    "ovr": 71,
+    "off": 72,
+    "def": 73,
     "attributes": {
       "shooting": 66,
       "finishing": 66,
@@ -4438,8 +4748,10 @@
     "age": 20,
     "number": 1,
     "potential": "B",
-    "salary": 1820000,
-    "contractYears": 3
+    "salary": 3487000,
+    "contractYears": 3,
+    "usage": 20.4,
+    "ts": 0.545
   },
   "dwyane_wade": {
     "id": "dwyane_wade",
@@ -4449,9 +4761,9 @@
       "SG",
       "PG"
     ],
-    "ovr": 91,
-    "off": 83,
-    "def": 78,
+    "ovr": 92,
+    "off": 85,
+    "def": 76,
     "attributes": {
       "shooting": 70,
       "finishing": 92,
@@ -4467,8 +4779,10 @@
     "age": 24,
     "number": 3,
     "potential": "C",
-    "salary": 36620000,
-    "contractYears": 3
+    "salary": 38600000,
+    "contractYears": 3,
+    "usage": 31.6,
+    "ts": 0.571
   },
   "derek_anderson": {
     "id": "derek_anderson",
@@ -4477,9 +4791,9 @@
     "positions": [
       "SG"
     ],
-    "ovr": 73,
-    "off": 73,
-    "def": 73,
+    "ovr": 77,
+    "off": 74,
+    "def": 74,
     "attributes": {
       "shooting": 75,
       "finishing": 65,
@@ -4495,8 +4809,10 @@
     "age": 31,
     "number": 5,
     "potential": "D",
-    "salary": 6967000,
-    "contractYears": 1
+    "salary": 11173000,
+    "contractYears": 1,
+    "usage": 18.2,
+    "ts": 0.501
   },
   "antoine_walker": {
     "id": "antoine_walker",
@@ -4505,9 +4821,9 @@
     "positions": [
       "SF"
     ],
-    "ovr": 80,
-    "off": 79,
-    "def": 76,
+    "ovr": 81,
+    "off": 77,
+    "def": 72,
     "attributes": {
       "shooting": 85,
       "finishing": 78,
@@ -4523,8 +4839,10 @@
     "age": 29,
     "number": 8,
     "potential": "C",
-    "salary": 17784000,
-    "contractYears": 1
+    "salary": 20104000,
+    "contractYears": 1,
+    "usage": 24.6,
+    "ts": 0.506
   },
   "gary_payton": {
     "id": "gary_payton",
@@ -4535,9 +4853,9 @@
       "PG",
       "SF"
     ],
-    "ovr": 73,
-    "off": 73,
-    "def": 71,
+    "ovr": 79,
+    "off": 75,
+    "def": 74,
     "attributes": {
       "shooting": 74,
       "finishing": 70,
@@ -4553,8 +4871,10 @@
     "age": 37,
     "number": 20,
     "potential": "D",
-    "salary": 5328000,
-    "contractYears": 5
+    "salary": 10555000,
+    "contractYears": 5,
+    "usage": 15.2,
+    "ts": 0.526
   },
   "jason_kapono": {
     "id": "jason_kapono",
@@ -4563,9 +4883,9 @@
     "positions": [
       "SF"
     ],
-    "ovr": 70,
-    "off": 70,
-    "def": 69,
+    "ovr": 71,
+    "off": 73,
+    "def": 72,
     "attributes": {
       "shooting": 73,
       "finishing": 67,
@@ -4581,8 +4901,10 @@
     "age": 25,
     "number": 24,
     "potential": "C",
-    "salary": 4330000,
-    "contractYears": 1
+    "salary": 5072000,
+    "contractYears": 1,
+    "usage": 18.7,
+    "ts": 0.513
   },
   "wayne_simien": {
     "id": "wayne_simien",
@@ -4592,8 +4914,8 @@
       "SF"
     ],
     "ovr": 66,
-    "off": 66,
-    "def": 66,
+    "off": 71,
+    "def": 73,
     "attributes": {
       "shooting": 66,
       "finishing": 66,
@@ -4610,7 +4932,9 @@
     "number": 25,
     "potential": "B",
     "salary": 2648000,
-    "contractYears": 5
+    "contractYears": 5,
+    "usage": 17.6,
+    "ts": 0.541
   },
   "shaquille_o_neal": {
     "id": "shaquille_o_neal",
@@ -4619,9 +4943,9 @@
     "positions": [
       "C"
     ],
-    "ovr": 89,
-    "off": 77,
-    "def": 81,
+    "ovr": 87,
+    "off": 81,
+    "def": 75,
     "attributes": {
       "shooting": 70,
       "finishing": 97,
@@ -4637,8 +4961,10 @@
     "age": 34,
     "number": 32,
     "potential": "D",
-    "salary": 34440000,
-    "contractYears": 4
+    "salary": 29708000,
+    "contractYears": 4,
+    "usage": 29.8,
+    "ts": 0.583
   },
   "alonzo_mourning": {
     "id": "alonzo_mourning",
@@ -4647,9 +4973,9 @@
     "positions": [
       "C"
     ],
-    "ovr": 84,
+    "ovr": 80,
     "off": 74,
-    "def": 81,
+    "def": 77,
     "attributes": {
       "shooting": 71,
       "finishing": 94,
@@ -4665,8 +4991,10 @@
     "age": 36,
     "number": 33,
     "potential": "D",
-    "salary": 17591000,
-    "contractYears": 5
+    "salary": 11560000,
+    "contractYears": 5,
+    "usage": 18.4,
+    "ts": 0.591
   },
   "udonis_haslem": {
     "id": "udonis_haslem",
@@ -4675,9 +5003,9 @@
     "positions": [
       "PF"
     ],
-    "ovr": 79,
-    "off": 72,
-    "def": 77,
+    "ovr": 80,
+    "off": 75,
+    "def": 74,
     "attributes": {
       "shooting": 71,
       "finishing": 77,
@@ -4693,8 +5021,10 @@
     "age": 26,
     "number": 40,
     "potential": "C",
-    "salary": 16238000,
-    "contractYears": 1
+    "salary": 17784000,
+    "contractYears": 1,
+    "usage": 14.4,
+    "ts": 0.568
   },
   "james_posey": {
     "id": "james_posey",
@@ -4704,8 +5034,8 @@
       "SF",
       "SG"
     ],
-    "ovr": 78,
-    "off": 77,
+    "ovr": 79,
+    "off": 74,
     "def": 75,
     "attributes": {
       "shooting": 92,
@@ -4722,8 +5052,10 @@
     "age": 29,
     "number": 42,
     "potential": "C",
-    "salary": 14691000,
-    "contractYears": 2
+    "salary": 16238000,
+    "contractYears": 2,
+    "usage": 13.0,
+    "ts": 0.552
   },
   "shandon_anderson": {
     "id": "shandon_anderson",
@@ -4733,9 +5065,9 @@
       "SG",
       "SF"
     ],
-    "ovr": 67,
-    "off": 68,
-    "def": 72,
+    "ovr": 66,
+    "off": 70,
+    "def": 75,
     "attributes": {
       "shooting": 68,
       "finishing": 67,
@@ -4751,8 +5083,10 @@
     "age": 32,
     "number": 49,
     "potential": "D",
-    "salary": 3260000,
-    "contractYears": 4
+    "salary": 2813000,
+    "contractYears": 4,
+    "usage": 12.0,
+    "ts": 0.497
   },
   "michael_doleac": {
     "id": "michael_doleac",
@@ -4761,8 +5095,8 @@
     "positions": [
       "C"
     ],
-    "ovr": 71,
-    "off": 66,
+    "ovr": 66,
+    "off": 70,
     "def": 74,
     "attributes": {
       "shooting": 67,
@@ -4779,8 +5113,10 @@
     "age": 29,
     "number": 51,
     "potential": "C",
-    "salary": 6341000,
-    "contractYears": 3
+    "salary": 3309000,
+    "contractYears": 3,
+    "usage": 15.1,
+    "ts": 0.476
   },
   "jason_williams": {
     "id": "jason_williams",
@@ -4789,9 +5125,9 @@
     "positions": [
       "SG"
     ],
-    "ovr": 83,
-    "off": 84,
-    "def": 71,
+    "ovr": 82,
+    "off": 79,
+    "def": 73,
     "attributes": {
       "shooting": 90,
       "finishing": 72,
@@ -4807,8 +5143,10 @@
     "age": 30,
     "number": 55,
     "potential": "D",
-    "salary": 24744000,
-    "contractYears": 5
+    "salary": 22424000,
+    "contractYears": 5,
+    "usage": 18.9,
+    "ts": 0.547
   },
   "jermaine_jackson": {
     "id": "jermaine_jackson",
@@ -4818,8 +5156,8 @@
       "SG"
     ],
     "ovr": 66,
-    "off": 66,
-    "def": 66,
+    "off": 72,
+    "def": 74,
     "attributes": {
       "shooting": 66,
       "finishing": 66,
@@ -4836,7 +5174,9 @@
     "number": 5,
     "potential": "D",
     "salary": 3309000,
-    "contractYears": 1
+    "contractYears": 1,
+    "usage": 11.7,
+    "ts": 0.542
   },
   "andrew_bogut": {
     "id": "andrew_bogut",
@@ -4845,9 +5185,9 @@
     "positions": [
       "C"
     ],
-    "ovr": 81,
-    "off": 76,
-    "def": 78,
+    "ovr": 80,
+    "off": 75,
+    "def": 75,
     "attributes": {
       "shooting": 69,
       "finishing": 87,
@@ -4863,8 +5203,10 @@
     "age": 21,
     "number": 6,
     "potential": "A",
-    "salary": 11057000,
-    "contractYears": 1
+    "salary": 9781000,
+    "contractYears": 1,
+    "usage": 15.9,
+    "ts": 0.554
   },
   "toni_kukoc": {
     "id": "toni_kukoc",
@@ -4873,9 +5215,9 @@
     "positions": [
       "SF"
     ],
-    "ovr": 72,
-    "off": 71,
-    "def": 72,
+    "ovr": 77,
+    "off": 75,
+    "def": 74,
     "attributes": {
       "shooting": 72,
       "finishing": 66,
@@ -4891,8 +5233,10 @@
     "age": 37,
     "number": 7,
     "potential": "D",
-    "salary": 4724000,
-    "contractYears": 3
+    "salary": 8544000,
+    "contractYears": 3,
+    "usage": 16.4,
+    "ts": 0.504
   },
   "joe_smith": {
     "id": "joe_smith",
@@ -4901,9 +5245,9 @@
     "positions": [
       "SF"
     ],
-    "ovr": 80,
-    "off": 72,
-    "def": 79,
+    "ovr": 76,
+    "off": 75,
+    "def": 72,
     "attributes": {
       "shooting": 70,
       "finishing": 80,
@@ -4919,8 +5263,10 @@
     "age": 30,
     "number": 8,
     "potential": "D",
-    "salary": 17784000,
-    "contractYears": 4
+    "salary": 11599000,
+    "contractYears": 4,
+    "usage": 17.9,
+    "ts": 0.55
   },
   "t_j_ford": {
     "id": "t_j_ford",
@@ -4930,8 +5276,8 @@
       "SG"
     ],
     "ovr": 80,
-    "off": 79,
-    "def": 75,
+    "off": 74,
+    "def": 74,
     "attributes": {
       "shooting": 72,
       "finishing": 74,
@@ -4948,7 +5294,9 @@
     "number": 11,
     "potential": "A",
     "salary": 14228000,
-    "contractYears": 5
+    "contractYears": 5,
+    "usage": 19.9,
+    "ts": 0.491
   },
   "jamaal_magloire": {
     "id": "jamaal_magloire",
@@ -4957,9 +5305,9 @@
     "positions": [
       "C"
     ],
-    "ovr": 79,
+    "ovr": 73,
     "off": 70,
-    "def": 81,
+    "def": 72,
     "attributes": {
       "shooting": 66,
       "finishing": 84,
@@ -4975,8 +5323,10 @@
     "age": 28,
     "number": 20,
     "potential": "C",
-    "salary": 16238000,
-    "contractYears": 3
+    "salary": 8196000,
+    "contractYears": 3,
+    "usage": 17.8,
+    "ts": 0.494
   },
   "bobby_simmons": {
     "id": "bobby_simmons",
@@ -4985,8 +5335,8 @@
     "positions": [
       "SF"
     ],
-    "ovr": 80,
-    "off": 79,
+    "ovr": 82,
+    "off": 76,
     "def": 74,
     "attributes": {
       "shooting": 90,
@@ -5003,8 +5353,10 @@
     "age": 26,
     "number": 21,
     "potential": "C",
-    "salary": 17784000,
-    "contractYears": 4
+    "salary": 22424000,
+    "contractYears": 4,
+    "usage": 19.2,
+    "ts": 0.552
   },
   "michael_redd": {
     "id": "michael_redd",
@@ -5013,9 +5365,9 @@
     "positions": [
       "SG"
     ],
-    "ovr": 87,
+    "ovr": 88,
     "off": 83,
-    "def": 73,
+    "def": 72,
     "attributes": {
       "shooting": 93,
       "finishing": 79,
@@ -5031,8 +5383,10 @@
     "age": 26,
     "number": 22,
     "potential": "C",
-    "salary": 34950000,
-    "contractYears": 3
+    "salary": 37734000,
+    "contractYears": 3,
+    "usage": 27.9,
+    "ts": 0.562
   },
   "mo_williams": {
     "id": "mo_williams",
@@ -5042,9 +5396,9 @@
       "PG",
       "SG"
     ],
-    "ovr": 81,
-    "off": 82,
-    "def": 73,
+    "ovr": 80,
+    "off": 76,
+    "def": 72,
     "attributes": {
       "shooting": 86,
       "finishing": 71,
@@ -5060,8 +5414,10 @@
     "age": 23,
     "number": 25,
     "potential": "A",
-    "salary": 16083000,
-    "contractYears": 1
+    "salary": 14228000,
+    "contractYears": 1,
+    "usage": 21.9,
+    "ts": 0.513
   },
   "ervin_johnson": {
     "id": "ervin_johnson",
@@ -5071,8 +5427,8 @@
       "C"
     ],
     "ovr": 66,
-    "off": 66,
-    "def": 66,
+    "off": 69,
+    "def": 73,
     "attributes": {
       "shooting": 66,
       "finishing": 66,
@@ -5089,7 +5445,9 @@
     "number": 40,
     "potential": "D",
     "salary": 2151000,
-    "contractYears": 4
+    "contractYears": 4,
+    "usage": 12.1,
+    "ts": 0.526
   },
   "charlie_bell": {
     "id": "charlie_bell",
@@ -5098,8 +5456,8 @@
     "positions": [
       "SG"
     ],
-    "ovr": 81,
-    "off": 81,
+    "ovr": 79,
+    "off": 75,
     "def": 75,
     "attributes": {
       "shooting": 86,
@@ -5116,8 +5474,10 @@
     "age": 27,
     "number": 42,
     "potential": "C",
-    "salary": 20104000,
-    "contractYears": 2
+    "salary": 16238000,
+    "contractYears": 2,
+    "usage": 17.5,
+    "ts": 0.549
   },
   "jiri_welsch": {
     "id": "jiri_welsch",
@@ -5127,8 +5487,8 @@
       "SF"
     ],
     "ovr": 72,
-    "off": 70,
-    "def": 73,
+    "off": 72,
+    "def": 74,
     "attributes": {
       "shooting": 68,
       "finishing": 69,
@@ -5145,7 +5505,9 @@
     "number": 44,
     "potential": "C",
     "salary": 7268000,
-    "contractYears": 3
+    "contractYears": 3,
+    "usage": 16.7,
+    "ts": 0.5
   },
   "dan_gadzuric": {
     "id": "dan_gadzuric",
@@ -5154,9 +5516,9 @@
     "positions": [
       "C"
     ],
-    "ovr": 77,
-    "off": 72,
-    "def": 76,
+    "ovr": 74,
+    "off": 74,
+    "def": 74,
     "attributes": {
       "shooting": 68,
       "finishing": 84,
@@ -5172,8 +5534,10 @@
     "age": 28,
     "number": 50,
     "potential": "C",
-    "salary": 13145000,
-    "contractYears": 3
+    "salary": 9124000,
+    "contractYears": 3,
+    "usage": 17.8,
+    "ts": 0.55
   },
   "rashad_mccants": {
     "id": "rashad_mccants",
@@ -5182,9 +5546,9 @@
     "positions": [
       "SG"
     ],
-    "ovr": 75,
-    "off": 75,
-    "def": 74,
+    "ovr": 77,
+    "off": 73,
+    "def": 73,
     "attributes": {
       "shooting": 79,
       "finishing": 77,
@@ -5200,8 +5564,10 @@
     "age": 21,
     "number": 1,
     "potential": "B",
-    "salary": 5529000,
-    "contractYears": 3
+    "salary": 7230000,
+    "contractYears": 3,
+    "usage": 22.9,
+    "ts": 0.539
   },
   "marcus_banks": {
     "id": "marcus_banks",
@@ -5211,8 +5577,8 @@
       "SG"
     ],
     "ovr": 78,
-    "off": 78,
-    "def": 73,
+    "off": 73,
+    "def": 74,
     "attributes": {
       "shooting": 74,
       "finishing": 76,
@@ -5229,7 +5595,9 @@
     "number": 3,
     "potential": "C",
     "salary": 11753000,
-    "contractYears": 1
+    "contractYears": 1,
+    "usage": 19.5,
+    "ts": 0.537
   },
   "bracey_wright": {
     "id": "bracey_wright",
@@ -5238,9 +5606,9 @@
     "positions": [
       "SG"
     ],
-    "ovr": 66,
-    "off": 66,
-    "def": 66,
+    "ovr": 74,
+    "off": 73,
+    "def": 72,
     "attributes": {
       "shooting": 66,
       "finishing": 66,
@@ -5256,8 +5624,10 @@
     "age": 21,
     "number": 6,
     "potential": "B",
-    "salary": 1820000,
-    "contractYears": 2
+    "salary": 5018000,
+    "contractYears": 2,
+    "usage": 20.6,
+    "ts": 0.537
   },
   "anthony_carter": {
     "id": "anthony_carter",
@@ -5266,9 +5636,9 @@
     "positions": [
       "SG"
     ],
-    "ovr": 73,
-    "off": 72,
-    "def": 72,
+    "ovr": 71,
+    "off": 71,
+    "def": 75,
     "attributes": {
       "shooting": 66,
       "finishing": 69,
@@ -5284,8 +5654,10 @@
     "age": 31,
     "number": 7,
     "potential": "D",
-    "salary": 6967000,
-    "contractYears": 2
+    "salary": 5389000,
+    "contractYears": 2,
+    "usage": 16.3,
+    "ts": 0.468
   },
   "justin_reed": {
     "id": "justin_reed",
@@ -5294,9 +5666,9 @@
     "positions": [
       "SF"
     ],
-    "ovr": 67,
-    "off": 68,
-    "def": 71,
+    "ovr": 66,
+    "off": 69,
+    "def": 72,
     "attributes": {
       "shooting": 66,
       "finishing": 73,
@@ -5312,8 +5684,10 @@
     "age": 24,
     "number": 9,
     "potential": "C",
-    "salary": 3068000,
-    "contractYears": 1
+    "salary": 2648000,
+    "contractYears": 1,
+    "usage": 18.5,
+    "ts": 0.479
   },
   "ronald_dupree": {
     "id": "ronald_dupree",
@@ -5323,8 +5697,8 @@
       "SF"
     ],
     "ovr": 66,
-    "off": 66,
-    "def": 66,
+    "off": 71,
+    "def": 74,
     "attributes": {
       "shooting": 66,
       "finishing": 66,
@@ -5341,7 +5715,9 @@
     "number": 12,
     "potential": "C",
     "salary": 2648000,
-    "contractYears": 3
+    "contractYears": 3,
+    "usage": 17.0,
+    "ts": 0.51
   },
   "troy_hudson": {
     "id": "troy_hudson",
@@ -5350,9 +5726,9 @@
     "positions": [
       "SG"
     ],
-    "ovr": 78,
-    "off": 79,
-    "def": 69,
+    "ovr": 77,
+    "off": 75,
+    "def": 70,
     "attributes": {
       "shooting": 83,
       "finishing": 66,
@@ -5368,8 +5744,10 @@
     "age": 30,
     "number": 16,
     "potential": "D",
-    "salary": 14691000,
-    "contractYears": 1
+    "salary": 13145000,
+    "contractYears": 1,
+    "usage": 22.3,
+    "ts": 0.489
   },
   "kevin_garnett": {
     "id": "kevin_garnett",
@@ -5380,8 +5758,8 @@
       "C"
     ],
     "ovr": 92,
-    "off": 79,
-    "def": 84,
+    "off": 86,
+    "def": 78,
     "attributes": {
       "shooting": 73,
       "finishing": 85,
@@ -5398,7 +5776,9 @@
     "number": 21,
     "potential": "D",
     "salary": 48250000,
-    "contractYears": 1
+    "contractYears": 1,
+    "usage": 25.9,
+    "ts": 0.581
   },
   "trenton_hassell": {
     "id": "trenton_hassell",
@@ -5407,9 +5787,9 @@
     "positions": [
       "SG"
     ],
-    "ovr": 71,
-    "off": 73,
-    "def": 71,
+    "ovr": 75,
+    "off": 71,
+    "def": 73,
     "attributes": {
       "shooting": 70,
       "finishing": 74,
@@ -5425,8 +5805,10 @@
     "age": 27,
     "number": 23,
     "potential": "C",
-    "salary": 6341000,
-    "contractYears": 3
+    "salary": 10052000,
+    "contractYears": 3,
+    "usage": 14.8,
+    "ts": 0.514
   },
   "mark_blount": {
     "id": "mark_blount",
@@ -5435,9 +5817,9 @@
     "positions": [
       "C"
     ],
-    "ovr": 75,
-    "off": 72,
-    "def": 75,
+    "ovr": 76,
+    "off": 71,
+    "def": 73,
     "attributes": {
       "shooting": 71,
       "finishing": 81,
@@ -5453,8 +5835,10 @@
     "age": 30,
     "number": 30,
     "potential": "D",
-    "salary": 10052000,
-    "contractYears": 2
+    "salary": 11599000,
+    "contractYears": 2,
+    "usage": 20.2,
+    "ts": 0.552
   },
   "ricky_davis": {
     "id": "ricky_davis",
@@ -5463,9 +5847,9 @@
     "positions": [
       "SG"
     ],
-    "ovr": 80,
-    "off": 78,
-    "def": 73,
+    "ovr": 83,
+    "off": 77,
+    "def": 72,
     "attributes": {
       "shooting": 76,
       "finishing": 75,
@@ -5481,8 +5865,10 @@
     "age": 26,
     "number": 31,
     "potential": "C",
-    "salary": 17784000,
-    "contractYears": 1
+    "salary": 24744000,
+    "contractYears": 1,
+    "usage": 23.9,
+    "ts": 0.529
   },
   "mark_madsen": {
     "id": "mark_madsen",
@@ -5492,8 +5878,8 @@
       "C",
       "SF"
     ],
-    "ovr": 68,
-    "off": 66,
+    "ovr": 65,
+    "off": 68,
     "def": 74,
     "attributes": {
       "shooting": 65,
@@ -5510,8 +5896,10 @@
     "age": 30,
     "number": 35,
     "potential": "D",
-    "salary": 4361000,
-    "contractYears": 2
+    "salary": 2784000,
+    "contractYears": 2,
+    "usage": 8.9,
+    "ts": 0.465
   },
   "eddie_griffin": {
     "id": "eddie_griffin",
@@ -5521,8 +5909,8 @@
       "C"
     ],
     "ovr": 77,
-    "off": 65,
-    "def": 82,
+    "off": 72,
+    "def": 76,
     "attributes": {
       "shooting": 64,
       "finishing": 67,
@@ -5539,7 +5927,9 @@
     "number": 41,
     "potential": "C",
     "salary": 10516000,
-    "contractYears": 1
+    "contractYears": 1,
+    "usage": 16.8,
+    "ts": 0.43
   },
   "marko_jaric": {
     "id": "marko_jaric",
@@ -5548,8 +5938,8 @@
     "positions": [
       "SG"
     ],
-    "ovr": 78,
-    "off": 75,
+    "ovr": 80,
+    "off": 73,
     "def": 76,
     "attributes": {
       "shooting": 71,
@@ -5566,8 +5956,10 @@
     "age": 27,
     "number": 55,
     "potential": "C",
-    "salary": 14691000,
-    "contractYears": 5
+    "salary": 17784000,
+    "contractYears": 5,
+    "usage": 16.9,
+    "ts": 0.479
   },
   "jason_kidd": {
     "id": "jason_kidd",
@@ -5576,9 +5968,9 @@
     "positions": [
       "SG"
     ],
-    "ovr": 90,
-    "off": 84,
-    "def": 79,
+    "ovr": 88,
+    "off": 81,
+    "def": 78,
     "attributes": {
       "shooting": 86,
       "finishing": 68,
@@ -5594,8 +5986,10 @@
     "age": 33,
     "number": 5,
     "potential": "D",
-    "salary": 36806000,
-    "contractYears": 3
+    "salary": 32074000,
+    "contractYears": 3,
+    "usage": 19.7,
+    "ts": 0.521
   },
   "bostjan_nachbar": {
     "id": "bostjan_nachbar",
@@ -5604,9 +5998,9 @@
     "positions": [
       "SF"
     ],
-    "ovr": 68,
-    "off": 68,
-    "def": 72,
+    "ovr": 70,
+    "off": 71,
+    "def": 73,
     "attributes": {
       "shooting": 68,
       "finishing": 66,
@@ -5622,8 +6016,10 @@
     "age": 25,
     "number": 7,
     "potential": "C",
-    "salary": 3489000,
-    "contractYears": 1
+    "salary": 4330000,
+    "contractYears": 1,
+    "usage": 18.5,
+    "ts": 0.501
   },
   "zoran_planinic": {
     "id": "zoran_planinic",
@@ -5633,9 +6029,9 @@
       "SG",
       "SF"
     ],
-    "ovr": 68,
+    "ovr": 66,
     "off": 69,
-    "def": 72,
+    "def": 74,
     "attributes": {
       "shooting": 66,
       "finishing": 69,
@@ -5651,8 +6047,10 @@
     "age": 23,
     "number": 10,
     "potential": "B",
-    "salary": 3489000,
-    "contractYears": 1
+    "salary": 2648000,
+    "contractYears": 1,
+    "usage": 20.4,
+    "ts": 0.482
   },
   "jacque_vaughn": {
     "id": "jacque_vaughn",
@@ -5661,9 +6059,9 @@
     "positions": [
       "SG"
     ],
-    "ovr": 70,
-    "off": 72,
-    "def": 71,
+    "ovr": 66,
+    "off": 68,
+    "def": 75,
     "attributes": {
       "shooting": 67,
       "finishing": 70,
@@ -5679,8 +6077,10 @@
     "age": 31,
     "number": 11,
     "potential": "D",
-    "salary": 4601000,
-    "contractYears": 1
+    "salary": 2813000,
+    "contractYears": 1,
+    "usage": 13.4,
+    "ts": 0.499
   },
   "nenad_krstic": {
     "id": "nenad_krstic",
@@ -5689,9 +6089,9 @@
     "positions": [
       "C"
     ],
-    "ovr": 77,
+    "ovr": 78,
     "off": 72,
-    "def": 76,
+    "def": 73,
     "attributes": {
       "shooting": 70,
       "finishing": 83,
@@ -5706,9 +6106,11 @@
     "photoUrl": "https://cdn.nba.com/headshots/nba/latest/1040x760/2420.png",
     "age": 22,
     "number": 12,
-    "potential": "B",
-    "salary": 7230000,
-    "contractYears": 3
+    "potential": "A",
+    "salary": 8080000,
+    "contractYears": 3,
+    "usage": 20.8,
+    "ts": 0.543
   },
   "vince_carter": {
     "id": "vince_carter",
@@ -5719,9 +6121,9 @@
       "PG",
       "SG"
     ],
-    "ovr": 87,
-    "off": 83,
-    "def": 76,
+    "ovr": 91,
+    "off": 84,
+    "def": 75,
     "attributes": {
       "shooting": 84,
       "finishing": 82,
@@ -5737,8 +6139,10 @@
     "age": 29,
     "number": 15,
     "potential": "C",
-    "salary": 34950000,
-    "contractYears": 3
+    "salary": 45776000,
+    "contractYears": 3,
+    "usage": 31.7,
+    "ts": 0.538
   },
   "antoine_wright": {
     "id": "antoine_wright",
@@ -5749,8 +6153,8 @@
       "SF"
     ],
     "ovr": 66,
-    "off": 66,
-    "def": 66,
+    "off": 68,
+    "def": 73,
     "attributes": {
       "shooting": 66,
       "finishing": 66,
@@ -5767,7 +6171,9 @@
     "number": 21,
     "potential": "B",
     "salary": 1820000,
-    "contractYears": 4
+    "contractYears": 4,
+    "usage": 14.8,
+    "ts": 0.419
   },
   "richard_jefferson": {
     "id": "richard_jefferson",
@@ -5777,9 +6183,9 @@
       "SF",
       "PF"
     ],
-    "ovr": 85,
+    "ovr": 87,
     "off": 80,
-    "def": 74,
+    "def": 75,
     "attributes": {
       "shooting": 78,
       "finishing": 84,
@@ -5795,8 +6201,10 @@
     "age": 26,
     "number": 24,
     "potential": "C",
-    "salary": 29383000,
-    "contractYears": 1
+    "salary": 34950000,
+    "contractYears": 1,
+    "usage": 23.0,
+    "ts": 0.59
   },
   "clifford_robinson": {
     "id": "clifford_robinson",
@@ -5806,9 +6214,9 @@
       "SF",
       "C"
     ],
-    "ovr": 70,
-    "off": 70,
-    "def": 73,
+    "ovr": 76,
+    "off": 71,
+    "def": 75,
     "attributes": {
       "shooting": 76,
       "finishing": 68,
@@ -5824,8 +6232,10 @@
     "age": 39,
     "number": 30,
     "potential": "D",
-    "salary": 3518000,
-    "contractYears": 5
+    "salary": 7539000,
+    "contractYears": 5,
+    "usage": 15.9,
+    "ts": 0.494
   },
   "lamond_murray": {
     "id": "lamond_murray",
@@ -5834,8 +6244,8 @@
     "positions": [
       "SF"
     ],
-    "ovr": 70,
-    "off": 67,
+    "ovr": 72,
+    "off": 73,
     "def": 73,
     "attributes": {
       "shooting": 70,
@@ -5852,8 +6262,10 @@
     "age": 33,
     "number": 31,
     "potential": "D",
-    "salary": 4601000,
-    "contractYears": 2
+    "salary": 6178000,
+    "contractYears": 2,
+    "usage": 18.7,
+    "ts": 0.515
   },
   "scott_padgett": {
     "id": "scott_padgett",
@@ -5862,8 +6274,8 @@
     "positions": [
       "SF"
     ],
-    "ovr": 74,
-    "off": 69,
+    "ovr": 75,
+    "off": 74,
     "def": 75,
     "attributes": {
       "shooting": 72,
@@ -5880,8 +6292,10 @@
     "age": 30,
     "number": 34,
     "potential": "D",
-    "salary": 9124000,
-    "contractYears": 3
+    "salary": 10052000,
+    "contractYears": 3,
+    "usage": 15.1,
+    "ts": 0.515
   },
   "jason_collins": {
     "id": "jason_collins",
@@ -5890,8 +6304,8 @@
     "positions": [
       "C"
     ],
-    "ovr": 67,
-    "off": 65,
+    "ovr": 69,
+    "off": 67,
     "def": 76,
     "attributes": {
       "shooting": 64,
@@ -5908,8 +6322,10 @@
     "age": 27,
     "number": 35,
     "potential": "C",
-    "salary": 3835000,
-    "contractYears": 2
+    "salary": 4887000,
+    "contractYears": 2,
+    "usage": 10.3,
+    "ts": 0.446
   },
   "john_thomas": {
     "id": "john_thomas",
@@ -5919,8 +6335,8 @@
       "C"
     ],
     "ovr": 66,
-    "off": 66,
-    "def": 66,
+    "off": 70,
+    "def": 73,
     "attributes": {
       "shooting": 66,
       "finishing": 66,
@@ -5937,7 +6353,9 @@
     "number": 41,
     "potential": "D",
     "salary": 3309000,
-    "contractYears": 2
+    "contractYears": 2,
+    "usage": 11.8,
+    "ts": 0.506
   },
   "steve_francis": {
     "id": "steve_francis",
@@ -5946,9 +6364,9 @@
     "positions": [
       "SG"
     ],
-    "ovr": 80,
-    "off": 77,
-    "def": 74,
+    "ovr": 83,
+    "off": 78,
+    "def": 73,
     "attributes": {
       "shooting": 71,
       "finishing": 77,
@@ -5964,8 +6382,10 @@
     "age": 29,
     "number": 1,
     "potential": "C",
-    "salary": 17784000,
-    "contractYears": 5
+    "salary": 24744000,
+    "contractYears": 5,
+    "usage": 24.5,
+    "ts": 0.529
   },
   "maurice_taylor": {
     "id": "maurice_taylor",
@@ -5974,9 +6394,9 @@
     "positions": [
       "SF"
     ],
-    "ovr": 72,
-    "off": 70,
-    "def": 75,
+    "ovr": 66,
+    "off": 69,
+    "def": 72,
     "attributes": {
       "shooting": 68,
       "finishing": 78,
@@ -5992,8 +6412,10 @@
     "age": 29,
     "number": 2,
     "potential": "C",
-    "salary": 7268000,
-    "contractYears": 3
+    "salary": 3309000,
+    "contractYears": 3,
+    "usage": 19.9,
+    "ts": 0.493
   },
   "stephon_marbury": {
     "id": "stephon_marbury",
@@ -6002,8 +6424,8 @@
     "positions": [
       "SG"
     ],
-    "ovr": 83,
-    "off": 80,
+    "ovr": 85,
+    "off": 81,
     "def": 72,
     "attributes": {
       "shooting": 73,
@@ -6020,8 +6442,10 @@
     "age": 29,
     "number": 3,
     "potential": "C",
-    "salary": 24744000,
-    "contractYears": 2
+    "salary": 29383000,
+    "contractYears": 2,
+    "usage": 23.2,
+    "ts": 0.55
   },
   "nate_robinson": {
     "id": "nate_robinson",
@@ -6031,9 +6455,9 @@
       "PG",
       "SG"
     ],
-    "ovr": 75,
-    "off": 76,
-    "def": 74,
+    "ovr": 77,
+    "off": 74,
+    "def": 72,
     "attributes": {
       "shooting": 78,
       "finishing": 74,
@@ -6049,8 +6473,10 @@
     "age": 22,
     "number": 4,
     "potential": "B",
-    "salary": 5529000,
-    "contractYears": 2
+    "salary": 7230000,
+    "contractYears": 2,
+    "usage": 22.2,
+    "ts": 0.514
   },
   "jalen_rose": {
     "id": "jalen_rose",
@@ -6060,8 +6486,8 @@
       "SG",
       "SF"
     ],
-    "ovr": 75,
-    "off": 76,
+    "ovr": 80,
+    "off": 77,
     "def": 71,
     "attributes": {
       "shooting": 77,
@@ -6078,8 +6504,10 @@
     "age": 33,
     "number": 5,
     "potential": "D",
-    "salary": 8544000,
-    "contractYears": 5
+    "salary": 15117000,
+    "contractYears": 5,
+    "usage": 23.1,
+    "ts": 0.548
   },
   "qyntel_woods": {
     "id": "qyntel_woods",
@@ -6089,9 +6517,9 @@
       "SF",
       "SG"
     ],
-    "ovr": 77,
-    "off": 74,
-    "def": 77,
+    "ovr": 76,
+    "off": 75,
+    "def": 73,
     "attributes": {
       "shooting": 75,
       "finishing": 80,
@@ -6107,8 +6535,10 @@
     "age": 25,
     "number": 6,
     "potential": "C",
-    "salary": 10516000,
-    "contractYears": 5
+    "salary": 9279000,
+    "contractYears": 5,
+    "usage": 15.7,
+    "ts": 0.566
   },
   "channing_frye": {
     "id": "channing_frye",
@@ -6118,9 +6548,9 @@
       "PF",
       "C"
     ],
-    "ovr": 81,
-    "off": 72,
-    "def": 78,
+    "ovr": 79,
+    "off": 76,
+    "def": 72,
     "attributes": {
       "shooting": 71,
       "finishing": 81,
@@ -6136,8 +6566,10 @@
     "age": 23,
     "number": 7,
     "potential": "A",
-    "salary": 16083000,
-    "contractYears": 3
+    "salary": 12990000,
+    "contractYears": 3,
+    "usage": 23.8,
+    "ts": 0.541
   },
   "ime_udoka": {
     "id": "ime_udoka",
@@ -6147,9 +6579,9 @@
       "SG",
       "SF"
     ],
-    "ovr": 66,
-    "off": 66,
-    "def": 66,
+    "ovr": 68,
+    "off": 72,
+    "def": 72,
     "attributes": {
       "shooting": 66,
       "finishing": 66,
@@ -6165,8 +6597,10 @@
     "age": 28,
     "number": 8,
     "potential": "C",
-    "salary": 3309000,
-    "contractYears": 5
+    "salary": 4361000,
+    "contractYears": 5,
+    "usage": 14.0,
+    "ts": 0.472
   },
   "jamal_crawford": {
     "id": "jamal_crawford",
@@ -6176,9 +6610,9 @@
       "SG",
       "PG"
     ],
-    "ovr": 81,
-    "off": 80,
-    "def": 73,
+    "ovr": 82,
+    "off": 79,
+    "def": 72,
     "attributes": {
       "shooting": 83,
       "finishing": 73,
@@ -6194,8 +6628,10 @@
     "age": 26,
     "number": 11,
     "potential": "C",
-    "salary": 20104000,
-    "contractYears": 3
+    "salary": 22424000,
+    "contractYears": 3,
+    "usage": 21.8,
+    "ts": 0.536
   },
   "malik_rose": {
     "id": "malik_rose",
@@ -6204,9 +6640,9 @@
     "positions": [
       "SF"
     ],
-    "ovr": 72,
-    "off": 68,
-    "def": 77,
+    "ovr": 71,
+    "off": 71,
+    "def": 74,
     "attributes": {
       "shooting": 66,
       "finishing": 71,
@@ -6222,8 +6658,10 @@
     "age": 31,
     "number": 13,
     "potential": "D",
-    "salary": 6178000,
-    "contractYears": 5
+    "salary": 5389000,
+    "contractYears": 5,
+    "usage": 18.0,
+    "ts": 0.487
   },
   "quentin_richardson": {
     "id": "quentin_richardson",
@@ -6233,9 +6671,9 @@
       "SG",
       "SF"
     ],
-    "ovr": 72,
-    "off": 72,
-    "def": 74,
+    "ovr": 79,
+    "off": 75,
+    "def": 73,
     "attributes": {
       "shooting": 77,
       "finishing": 66,
@@ -6251,8 +6689,10 @@
     "age": 26,
     "number": 23,
     "potential": "C",
-    "salary": 7268000,
-    "contractYears": 2
+    "salary": 16238000,
+    "contractYears": 2,
+    "usage": 18.1,
+    "ts": 0.489
   },
   "jerome_james": {
     "id": "jerome_james",
@@ -6263,7 +6703,7 @@
     ],
     "ovr": 66,
     "off": 66,
-    "def": 66,
+    "def": 74,
     "attributes": {
       "shooting": 66,
       "finishing": 66,
@@ -6280,7 +6720,9 @@
     "number": 31,
     "potential": "D",
     "salary": 3309000,
-    "contractYears": 3
+    "contractYears": 3,
+    "usage": 17.8,
+    "ts": 0.52
   },
   "eddy_curry": {
     "id": "eddy_curry",
@@ -6290,9 +6732,9 @@
       "C",
       "SF"
     ],
-    "ovr": 83,
-    "off": 76,
-    "def": 78,
+    "ovr": 79,
+    "off": 75,
+    "def": 72,
     "attributes": {
       "shooting": 71,
       "finishing": 99,
@@ -6308,8 +6750,10 @@
     "age": 23,
     "number": 34,
     "potential": "A",
-    "salary": 19795000,
-    "contractYears": 2
+    "salary": 12990000,
+    "contractYears": 2,
+    "usage": 24.3,
+    "ts": 0.595
   },
   "david_lee": {
     "id": "david_lee",
@@ -6319,9 +6763,9 @@
       "PF",
       "C"
     ],
-    "ovr": 80,
-    "off": 74,
-    "def": 79,
+    "ovr": 76,
+    "off": 76,
+    "def": 73,
     "attributes": {
       "shooting": 71,
       "finishing": 86,
@@ -6336,9 +6780,11 @@
     "photoUrl": "https://cdn.nba.com/headshots/nba/latest/1040x760/101135.png",
     "age": 23,
     "number": 42,
-    "potential": "A",
-    "salary": 14228000,
-    "contractYears": 2
+    "potential": "B",
+    "salary": 9279000,
+    "contractYears": 2,
+    "usage": 13.8,
+    "ts": 0.602
   },
   "jackie_butler": {
     "id": "jackie_butler",
@@ -6347,9 +6793,9 @@
     "positions": [
       "C"
     ],
-    "ovr": 77,
+    "ovr": 72,
     "off": 73,
-    "def": 76,
+    "def": 73,
     "attributes": {
       "shooting": 70,
       "finishing": 84,
@@ -6365,8 +6811,10 @@
     "age": 21,
     "number": 45,
     "potential": "B",
-    "salary": 7230000,
-    "contractYears": 4
+    "salary": 3998000,
+    "contractYears": 4,
+    "usage": 18.9,
+    "ts": 0.583
   },
   "trevor_ariza": {
     "id": "trevor_ariza",
@@ -6376,9 +6824,9 @@
       "SF",
       "PF"
     ],
-    "ovr": 75,
-    "off": 69,
-    "def": 80,
+    "ovr": 77,
+    "off": 73,
+    "def": 75,
     "attributes": {
       "shooting": 65,
       "finishing": 77,
@@ -6394,8 +6842,10 @@
     "age": 20,
     "number": 1,
     "potential": "B",
-    "salary": 5529000,
-    "contractYears": 4
+    "salary": 7230000,
+    "contractYears": 4,
+    "usage": 16.6,
+    "ts": 0.486
   },
   "stacey_augmon": {
     "id": "stacey_augmon",
@@ -6405,9 +6855,9 @@
       "SF",
       "SG"
     ],
-    "ovr": 65,
-    "off": 65,
-    "def": 69,
+    "ovr": 66,
+    "off": 71,
+    "def": 74,
     "attributes": {
       "shooting": 65,
       "finishing": 68,
@@ -6423,8 +6873,10 @@
     "age": 37,
     "number": 2,
     "potential": "D",
-    "salary": 1809000,
-    "contractYears": 3
+    "salary": 2151000,
+    "contractYears": 3,
+    "usage": 14.0,
+    "ts": 0.455
   },
   "tony_battie": {
     "id": "tony_battie",
@@ -6435,8 +6887,8 @@
       "SF"
     ],
     "ovr": 75,
-    "off": 70,
-    "def": 78,
+    "off": 72,
+    "def": 74,
     "attributes": {
       "shooting": 69,
       "finishing": 79,
@@ -6453,7 +6905,9 @@
     "number": 4,
     "potential": "D",
     "salary": 10052000,
-    "contractYears": 3
+    "contractYears": 3,
+    "usage": 13.8,
+    "ts": 0.522
   },
   "keyon_dooling": {
     "id": "keyon_dooling",
@@ -6462,9 +6916,9 @@
     "positions": [
       "SG"
     ],
-    "ovr": 77,
-    "off": 75,
-    "def": 73,
+    "ovr": 75,
+    "off": 71,
+    "def": 74,
     "attributes": {
       "shooting": 72,
       "finishing": 76,
@@ -6480,8 +6934,10 @@
     "age": 26,
     "number": 5,
     "potential": "C",
-    "salary": 13145000,
-    "contractYears": 5
+    "salary": 10052000,
+    "contractYears": 5,
+    "usage": 20.7,
+    "ts": 0.506
   },
   "pat_garrity": {
     "id": "pat_garrity",
@@ -6490,9 +6946,9 @@
     "positions": [
       "SF"
     ],
-    "ovr": 71,
-    "off": 71,
-    "def": 71,
+    "ovr": 72,
+    "off": 73,
+    "def": 72,
     "attributes": {
       "shooting": 80,
       "finishing": 64,
@@ -6508,8 +6964,10 @@
     "age": 29,
     "number": 8,
     "potential": "C",
-    "salary": 6341000,
-    "contractYears": 1
+    "salary": 7268000,
+    "contractYears": 1,
+    "usage": 15.4,
+    "ts": 0.533
   },
   "deshawn_stevenson": {
     "id": "deshawn_stevenson",
@@ -6518,8 +6976,8 @@
     "positions": [
       "SG"
     ],
-    "ovr": 72,
-    "off": 71,
+    "ovr": 77,
+    "off": 72,
     "def": 72,
     "attributes": {
       "shooting": 68,
@@ -6536,8 +6994,10 @@
     "age": 25,
     "number": 9,
     "potential": "C",
-    "salary": 5815000,
-    "contractYears": 3
+    "salary": 10516000,
+    "contractYears": 3,
+    "usage": 18.6,
+    "ts": 0.5
   },
   "dwight_howard": {
     "id": "dwight_howard",
@@ -6546,9 +7006,9 @@
     "positions": [
       "C"
     ],
-    "ovr": 86,
-    "off": 74,
-    "def": 81,
+    "ovr": 83,
+    "off": 77,
+    "def": 74,
     "attributes": {
       "shooting": 69,
       "finishing": 93,
@@ -6564,8 +7024,10 @@
     "age": 20,
     "number": 12,
     "potential": "A",
-    "salary": 17692000,
-    "contractYears": 1
+    "salary": 13609000,
+    "contractYears": 1,
+    "usage": 19.8,
+    "ts": 0.566
   },
   "jameer_nelson": {
     "id": "jameer_nelson",
@@ -6575,9 +7037,9 @@
       "PG",
       "SG"
     ],
-    "ovr": 86,
-    "off": 86,
-    "def": 74,
+    "ovr": 82,
+    "off": 78,
+    "def": 73,
     "attributes": {
       "shooting": 87,
       "finishing": 78,
@@ -6593,8 +7055,10 @@
     "age": 24,
     "number": 14,
     "potential": "C",
-    "salary": 25733000,
-    "contractYears": 2
+    "salary": 17939000,
+    "contractYears": 2,
+    "usage": 23.7,
+    "ts": 0.549
   },
   "hedo_turkoglu": {
     "id": "hedo_turkoglu",
@@ -6604,9 +7068,9 @@
       "SF",
       "PF"
     ],
-    "ovr": 83,
-    "off": 81,
-    "def": 74,
+    "ovr": 84,
+    "off": 79,
+    "def": 73,
     "attributes": {
       "shooting": 91,
       "finishing": 73,
@@ -6622,8 +7086,10 @@
     "age": 27,
     "number": 15,
     "potential": "C",
-    "salary": 24744000,
-    "contractYears": 2
+    "salary": 27063000,
+    "contractYears": 2,
+    "usage": 21.5,
+    "ts": 0.566
   },
   "carlos_arroyo": {
     "id": "carlos_arroyo",
@@ -6632,9 +7098,9 @@
     "positions": [
       "SG"
     ],
-    "ovr": 81,
-    "off": 77,
-    "def": 72,
+    "ovr": 75,
+    "off": 74,
+    "def": 73,
     "attributes": {
       "shooting": 69,
       "finishing": 73,
@@ -6650,8 +7116,10 @@
     "age": 26,
     "number": 30,
     "potential": "C",
-    "salary": 20104000,
-    "contractYears": 4
+    "salary": 10052000,
+    "contractYears": 4,
+    "usage": 20.0,
+    "ts": 0.497
   },
   "darko_milicic": {
     "id": "darko_milicic",
@@ -6661,9 +7129,9 @@
       "SF",
       "C"
     ],
-    "ovr": 76,
+    "ovr": 74,
     "off": 71,
-    "def": 77,
+    "def": 76,
     "attributes": {
       "shooting": 68,
       "finishing": 77,
@@ -6679,8 +7147,10 @@
     "age": 21,
     "number": 31,
     "potential": "B",
-    "salary": 6379000,
-    "contractYears": 4
+    "salary": 5018000,
+    "contractYears": 4,
+    "usage": 18.8,
+    "ts": 0.505
   },
   "grant_hill": {
     "id": "grant_hill",
@@ -6689,9 +7159,9 @@
     "positions": [
       "SF"
     ],
-    "ovr": 81,
-    "off": 75,
-    "def": 75,
+    "ovr": 82,
+    "off": 79,
+    "def": 74,
     "attributes": {
       "shooting": 70,
       "finishing": 83,
@@ -6707,8 +7177,10 @@
     "age": 33,
     "number": 33,
     "potential": "D",
-    "salary": 17088000,
-    "contractYears": 1
+    "salary": 19060000,
+    "contractYears": 1,
+    "usage": 24.4,
+    "ts": 0.559
   },
   "travis_diener": {
     "id": "travis_diener",
@@ -6717,9 +7189,9 @@
     "positions": [
       "SG"
     ],
-    "ovr": 72,
-    "off": 72,
-    "def": 69,
+    "ovr": 73,
+    "off": 75,
+    "def": 73,
     "attributes": {
       "shooting": 79,
       "finishing": 65,
@@ -6735,8 +7207,10 @@
     "age": 24,
     "number": 34,
     "potential": "C",
-    "salary": 5815000,
-    "contractYears": 5
+    "salary": 6557000,
+    "contractYears": 5,
+    "usage": 16.1,
+    "ts": 0.593
   },
   "mario_kasun": {
     "id": "mario_kasun",
@@ -6746,8 +7220,8 @@
       "C"
     ],
     "ovr": 66,
-    "off": 66,
-    "def": 66,
+    "off": 69,
+    "def": 72,
     "attributes": {
       "shooting": 66,
       "finishing": 66,
@@ -6764,7 +7238,9 @@
     "number": 41,
     "potential": "C",
     "salary": 3309000,
-    "contractYears": 2
+    "contractYears": 2,
+    "usage": 18.9,
+    "ts": 0.513
   },
   "bo_outlaw": {
     "id": "bo_outlaw",
@@ -6773,9 +7249,9 @@
     "positions": [
       "SF"
     ],
-    "ovr": 71,
-    "off": 70,
-    "def": 73,
+    "ovr": 70,
+    "off": 73,
+    "def": 75,
     "attributes": {
       "shooting": 70,
       "finishing": 76,
@@ -6791,8 +7267,10 @@
     "age": 35,
     "number": 45,
     "potential": "D",
-    "salary": 4121000,
-    "contractYears": 3
+    "salary": 3518000,
+    "contractYears": 3,
+    "usage": 11.4,
+    "ts": 0.554
   },
   "stephen_jackson": {
     "id": "stephen_jackson",
@@ -6803,9 +7281,9 @@
       "SG",
       "PF"
     ],
-    "ovr": 79,
-    "off": 77,
-    "def": 75,
+    "ovr": 83,
+    "off": 75,
+    "def": 74,
     "attributes": {
       "shooting": 83,
       "finishing": 73,
@@ -6821,8 +7299,10 @@
     "age": 28,
     "number": 1,
     "potential": "C",
-    "salary": 16238000,
-    "contractYears": 1
+    "salary": 24744000,
+    "contractYears": 1,
+    "usage": 24.7,
+    "ts": 0.514
   },
   "sarunas_jasikevicius": {
     "id": "sarunas_jasikevicius",
@@ -6831,9 +7311,9 @@
     "positions": [
       "SG"
     ],
-    "ovr": 81,
-    "off": 80,
-    "def": 72,
+    "ovr": 78,
+    "off": 75,
+    "def": 74,
     "attributes": {
       "shooting": 84,
       "finishing": 67,
@@ -6849,8 +7329,10 @@
     "age": 30,
     "number": 3,
     "potential": "D",
-    "salary": 20104000,
-    "contractYears": 2
+    "salary": 14691000,
+    "contractYears": 2,
+    "usage": 17.9,
+    "ts": 0.56
   },
   "eddie_gill": {
     "id": "eddie_gill",
@@ -6859,9 +7341,9 @@
     "positions": [
       "SG"
     ],
-    "ovr": 66,
-    "off": 66,
-    "def": 66,
+    "ovr": 67,
+    "off": 70,
+    "def": 76,
     "attributes": {
       "shooting": 66,
       "finishing": 66,
@@ -6877,8 +7359,10 @@
     "age": 27,
     "number": 4,
     "potential": "C",
-    "salary": 3309000,
-    "contractYears": 4
+    "salary": 3835000,
+    "contractYears": 4,
+    "usage": 17.4,
+    "ts": 0.479
   },
   "jermaine_o_neal": {
     "id": "jermaine_o_neal",
@@ -6888,9 +7372,9 @@
       "C",
       "PF"
     ],
-    "ovr": 87,
-    "off": 75,
-    "def": 81,
+    "ovr": 86,
+    "off": 77,
+    "def": 76,
     "attributes": {
       "shooting": 69,
       "finishing": 86,
@@ -6906,8 +7390,10 @@
     "age": 27,
     "number": 7,
     "potential": "C",
-    "salary": 34950000,
-    "contractYears": 4
+    "salary": 32167000,
+    "contractYears": 4,
+    "usage": 30.5,
+    "ts": 0.528
   },
   "anthony_johnson": {
     "id": "anthony_johnson",
@@ -6916,9 +7402,9 @@
     "positions": [
       "SG"
     ],
-    "ovr": 81,
-    "off": 80,
-    "def": 73,
+    "ovr": 80,
+    "off": 76,
+    "def": 75,
     "attributes": {
       "shooting": 76,
       "finishing": 73,
@@ -6934,8 +7420,10 @@
     "age": 31,
     "number": 8,
     "potential": "D",
-    "salary": 17088000,
-    "contractYears": 5
+    "salary": 15117000,
+    "contractYears": 5,
+    "usage": 17.7,
+    "ts": 0.522
   },
   "jeff_foster": {
     "id": "jeff_foster",
@@ -6945,9 +7433,9 @@
       "C",
       "SF"
     ],
-    "ovr": 84,
-    "off": 73,
-    "def": 82,
+    "ovr": 78,
+    "off": 75,
+    "def": 74,
     "attributes": {
       "shooting": 69,
       "finishing": 86,
@@ -6963,8 +7451,10 @@
     "age": 29,
     "number": 10,
     "potential": "C",
-    "salary": 27063000,
-    "contractYears": 1
+    "salary": 14691000,
+    "contractYears": 1,
+    "usage": 12.2,
+    "ts": 0.57
   },
   "jamaal_tinsley": {
     "id": "jamaal_tinsley",
@@ -6975,7 +7465,7 @@
       "SG"
     ],
     "ovr": 80,
-    "off": 76,
+    "off": 75,
     "def": 75,
     "attributes": {
       "shooting": 66,
@@ -6993,7 +7483,9 @@
     "number": 11,
     "potential": "C",
     "salary": 17784000,
-    "contractYears": 2
+    "contractYears": 2,
+    "usage": 23.5,
+    "ts": 0.483
   },
   "david_harrison": {
     "id": "david_harrison",
@@ -7002,9 +7494,9 @@
     "positions": [
       "C"
     ],
-    "ovr": 74,
-    "off": 70,
-    "def": 78,
+    "ovr": 69,
+    "off": 68,
+    "def": 75,
     "attributes": {
       "shooting": 66,
       "finishing": 85,
@@ -7020,8 +7512,10 @@
     "age": 23,
     "number": 13,
     "potential": "B",
-    "salary": 7299000,
-    "contractYears": 3
+    "salary": 3909000,
+    "contractYears": 3,
+    "usage": 19.3,
+    "ts": 0.538
   },
   "peja_stojakovic": {
     "id": "peja_stojakovic",
@@ -7031,9 +7525,9 @@
       "SF",
       "SG"
     ],
-    "ovr": 83,
-    "off": 81,
-    "def": 73,
+    "ovr": 84,
+    "off": 80,
+    "def": 72,
     "attributes": {
       "shooting": 95,
       "finishing": 73,
@@ -7049,8 +7543,10 @@
     "age": 29,
     "number": 16,
     "potential": "C",
-    "salary": 24744000,
-    "contractYears": 5
+    "salary": 27063000,
+    "contractYears": 5,
+    "usage": 21.8,
+    "ts": 0.574
   },
   "fred_jones": {
     "id": "fred_jones",
@@ -7059,9 +7555,9 @@
     "positions": [
       "SG"
     ],
-    "ovr": 75,
-    "off": 75,
-    "def": 72,
+    "ovr": 79,
+    "off": 74,
+    "def": 75,
     "attributes": {
       "shooting": 78,
       "finishing": 71,
@@ -7077,8 +7573,10 @@
     "age": 27,
     "number": 20,
     "potential": "C",
-    "salary": 10052000,
-    "contractYears": 1
+    "salary": 16238000,
+    "contractYears": 1,
+    "usage": 18.4,
+    "ts": 0.53
   },
   "danny_granger": {
     "id": "danny_granger",
@@ -7089,9 +7587,9 @@
       "SG",
       "PF"
     ],
-    "ovr": 77,
-    "off": 72,
-    "def": 79,
+    "ovr": 80,
+    "off": 74,
+    "def": 77,
     "attributes": {
       "shooting": 74,
       "finishing": 74,
@@ -7106,9 +7604,11 @@
     "photoUrl": "https://cdn.nba.com/headshots/nba/latest/1040x760/101122.png",
     "age": 23,
     "number": 33,
-    "potential": "B",
-    "salary": 10516000,
-    "contractYears": 3
+    "potential": "A",
+    "salary": 14228000,
+    "contractYears": 3,
+    "usage": 16.4,
+    "ts": 0.54
   },
   "austin_croshere": {
     "id": "austin_croshere",
@@ -7117,9 +7617,9 @@
     "positions": [
       "SF"
     ],
-    "ovr": 81,
-    "off": 78,
-    "def": 76,
+    "ovr": 80,
+    "off": 76,
+    "def": 74,
     "attributes": {
       "shooting": 87,
       "finishing": 73,
@@ -7135,8 +7635,10 @@
     "age": 31,
     "number": 44,
     "potential": "D",
-    "salary": 17088000,
-    "contractYears": 2
+    "salary": 15117000,
+    "contractYears": 2,
+    "usage": 16.8,
+    "ts": 0.578
   },
   "scot_pollard": {
     "id": "scot_pollard",
@@ -7146,9 +7648,9 @@
       "C",
       "SF"
     ],
-    "ovr": 76,
-    "off": 69,
-    "def": 82,
+    "ovr": 73,
+    "off": 71,
+    "def": 76,
     "attributes": {
       "shooting": 68,
       "finishing": 73,
@@ -7164,8 +7666,10 @@
     "age": 31,
     "number": 62,
     "potential": "D",
-    "salary": 9859000,
-    "contractYears": 5
+    "salary": 6967000,
+    "contractYears": 5,
+    "usage": 12.4,
+    "ts": 0.502
   },
   "samuel_dalembert": {
     "id": "samuel_dalembert",
@@ -7174,9 +7678,9 @@
     "positions": [
       "C"
     ],
-    "ovr": 82,
+    "ovr": 76,
     "off": 71,
-    "def": 85,
+    "def": 76,
     "attributes": {
       "shooting": 71,
       "finishing": 82,
@@ -7192,8 +7696,10 @@
     "age": 26,
     "number": 1,
     "potential": "C",
-    "salary": 22424000,
-    "contractYears": 3
+    "salary": 11599000,
+    "contractYears": 3,
+    "usage": 14.7,
+    "ts": 0.559
   },
   "allen_iverson": {
     "id": "allen_iverson",
@@ -7202,7 +7708,7 @@
     "positions": [
       "SG"
     ],
-    "ovr": 90,
+    "ovr": 92,
     "off": 85,
     "def": 73,
     "attributes": {
@@ -7220,8 +7726,10 @@
     "age": 31,
     "number": 3,
     "potential": "D",
-    "salary": 36806000,
-    "contractYears": 2
+    "salary": 41012000,
+    "contractYears": 2,
+    "usage": 35.1,
+    "ts": 0.539
   },
   "chris_webber": {
     "id": "chris_webber",
@@ -7230,9 +7738,9 @@
     "positions": [
       "SF"
     ],
-    "ovr": 83,
-    "off": 74,
-    "def": 81,
+    "ovr": 84,
+    "off": 77,
+    "def": 73,
     "attributes": {
       "shooting": 69,
       "finishing": 80,
@@ -7248,8 +7756,10 @@
     "age": 33,
     "number": 4,
     "potential": "D",
-    "salary": 21032000,
-    "contractYears": 1
+    "salary": 23004000,
+    "contractYears": 1,
+    "usage": 27.9,
+    "ts": 0.481
   },
   "michael_bradley": {
     "id": "michael_bradley",
@@ -7259,8 +7769,8 @@
       "SF"
     ],
     "ovr": 66,
-    "off": 66,
-    "def": 66,
+    "off": 72,
+    "def": 72,
     "attributes": {
       "shooting": 66,
       "finishing": 66,
@@ -7277,7 +7787,9 @@
     "number": 5,
     "potential": "C",
     "salary": 3309000,
-    "contractYears": 3
+    "contractYears": 3,
+    "usage": 13.2,
+    "ts": 0.461
   },
   "john_salmons": {
     "id": "john_salmons",
@@ -7289,7 +7801,7 @@
       "PF"
     ],
     "ovr": 74,
-    "off": 74,
+    "off": 72,
     "def": 74,
     "attributes": {
       "shooting": 71,
@@ -7307,7 +7819,9 @@
     "number": 7,
     "potential": "C",
     "salary": 9124000,
-    "contractYears": 4
+    "contractYears": 4,
+    "usage": 15.6,
+    "ts": 0.51
   },
   "andre_iguodala": {
     "id": "andre_iguodala",
@@ -7318,9 +7832,9 @@
       "PF",
       "C"
     ],
-    "ovr": 79,
-    "off": 78,
-    "def": 77,
+    "ovr": 82,
+    "off": 76,
+    "def": 76,
     "attributes": {
       "shooting": 78,
       "finishing": 81,
@@ -7336,8 +7850,10 @@
     "age": 22,
     "number": 9,
     "potential": "A",
-    "salary": 8931000,
-    "contractYears": 4
+    "salary": 12333000,
+    "contractYears": 4,
+    "usage": 14.2,
+    "ts": 0.591
   },
   "kevin_ollie": {
     "id": "kevin_ollie",
@@ -7346,9 +7862,9 @@
     "positions": [
       "SG"
     ],
-    "ovr": 70,
-    "off": 72,
-    "def": 71,
+    "ovr": 66,
+    "off": 70,
+    "def": 74,
     "attributes": {
       "shooting": 68,
       "finishing": 68,
@@ -7364,8 +7880,10 @@
     "age": 33,
     "number": 12,
     "potential": "D",
-    "salary": 4601000,
-    "contractYears": 5
+    "salary": 2813000,
+    "contractYears": 5,
+    "usage": 10.3,
+    "ts": 0.489
   },
   "matt_barnes": {
     "id": "matt_barnes",
@@ -7375,9 +7893,9 @@
       "SF",
       "PF"
     ],
-    "ovr": 71,
-    "off": 70,
-    "def": 73,
+    "ovr": 66,
+    "off": 71,
+    "def": 74,
     "attributes": {
       "shooting": 68,
       "finishing": 75,
@@ -7393,8 +7911,10 @@
     "age": 26,
     "number": 21,
     "potential": "C",
-    "salary": 6341000,
-    "contractYears": 4
+    "salary": 3309000,
+    "contractYears": 4,
+    "usage": 14.1,
+    "ts": 0.518
   },
   "lou_williams": {
     "id": "lou_williams",
@@ -7405,8 +7925,8 @@
       "PG"
     ],
     "ovr": 66,
-    "off": 66,
-    "def": 66,
+    "off": 71,
+    "def": 73,
     "attributes": {
       "shooting": 66,
       "finishing": 66,
@@ -7423,7 +7943,9 @@
     "number": 23,
     "potential": "B",
     "salary": 1820000,
-    "contractYears": 2
+    "contractYears": 2,
+    "usage": 20.1,
+    "ts": 0.507
   },
   "kyle_korver": {
     "id": "kyle_korver",
@@ -7435,7 +7957,7 @@
       "SG"
     ],
     "ovr": 80,
-    "off": 80,
+    "off": 76,
     "def": 73,
     "attributes": {
       "shooting": 96,
@@ -7453,7 +7975,9 @@
     "number": 26,
     "potential": "C",
     "salary": 14228000,
-    "contractYears": 3
+    "contractYears": 3,
+    "usage": 15.9,
+    "ts": 0.58
   },
   "willie_green": {
     "id": "willie_green",
@@ -7463,9 +7987,9 @@
       "SG",
       "PG"
     ],
-    "ovr": 68,
-    "off": 70,
-    "def": 68,
+    "ovr": 71,
+    "off": 71,
+    "def": 72,
     "attributes": {
       "shooting": 75,
       "finishing": 67,
@@ -7481,8 +8005,10 @@
     "age": 24,
     "number": 33,
     "potential": "C",
-    "salary": 3489000,
-    "contractYears": 3
+    "salary": 5072000,
+    "contractYears": 3,
+    "usage": 22.4,
+    "ts": 0.478
   },
   "shavlik_randolph": {
     "id": "shavlik_randolph",
@@ -7493,8 +8019,8 @@
       "SF"
     ],
     "ovr": 66,
-    "off": 66,
-    "def": 66,
+    "off": 72,
+    "def": 73,
     "attributes": {
       "shooting": 66,
       "finishing": 66,
@@ -7511,7 +8037,9 @@
     "number": 42,
     "potential": "B",
     "salary": 1820000,
-    "contractYears": 3
+    "contractYears": 3,
+    "usage": 14.5,
+    "ts": 0.516
   },
   "steven_hunter": {
     "id": "steven_hunter",
@@ -7521,9 +8049,9 @@
       "C",
       "SF"
     ],
-    "ovr": 78,
+    "ovr": 73,
     "off": 73,
-    "def": 78,
+    "def": 73,
     "attributes": {
       "shooting": 70,
       "finishing": 91,
@@ -7539,8 +8067,10 @@
     "age": 24,
     "number": 45,
     "potential": "C",
-    "salary": 11753000,
-    "contractYears": 5
+    "salary": 6557000,
+    "contractYears": 5,
+    "usage": 14.4,
+    "ts": 0.594
   },
   "tim_thomas": {
     "id": "tim_thomas",
@@ -7549,9 +8079,9 @@
     "positions": [
       "SF"
     ],
-    "ovr": 78,
-    "off": 77,
-    "def": 76,
+    "ovr": 75,
+    "off": 74,
+    "def": 72,
     "attributes": {
       "shooting": 90,
       "finishing": 72,
@@ -7567,8 +8097,10 @@
     "age": 29,
     "number": 2,
     "potential": "C",
-    "salary": 14691000,
-    "contractYears": 2
+    "salary": 10052000,
+    "contractYears": 2,
+    "usage": 21.0,
+    "ts": 0.536
   },
   "boris_diaw": {
     "id": "boris_diaw",
@@ -7579,7 +8111,7 @@
       "C"
     ],
     "ovr": 83,
-    "off": 80,
+    "off": 77,
     "def": 76,
     "attributes": {
       "shooting": 71,
@@ -7597,7 +8129,9 @@
     "number": 3,
     "potential": "C",
     "salary": 19795000,
-    "contractYears": 1
+    "contractYears": 1,
+    "usage": 17.5,
+    "ts": 0.549
   },
   "leandro_barbosa": {
     "id": "leandro_barbosa",
@@ -7607,9 +8141,9 @@
       "SG",
       "PG"
     ],
-    "ovr": 81,
-    "off": 84,
-    "def": 72,
+    "ovr": 80,
+    "off": 76,
+    "def": 73,
     "attributes": {
       "shooting": 93,
       "finishing": 79,
@@ -7625,8 +8159,10 @@
     "age": 23,
     "number": 10,
     "potential": "A",
-    "salary": 16083000,
-    "contractYears": 2
+    "salary": 14228000,
+    "contractYears": 2,
+    "usage": 19.8,
+    "ts": 0.583
   },
   "pat_burke": {
     "id": "pat_burke",
@@ -7637,8 +8173,8 @@
       "SF"
     ],
     "ovr": 66,
-    "off": 66,
-    "def": 66,
+    "off": 69,
+    "def": 73,
     "attributes": {
       "shooting": 66,
       "finishing": 66,
@@ -7655,7 +8191,9 @@
     "number": 11,
     "potential": "D",
     "salary": 2813000,
-    "contractYears": 3
+    "contractYears": 3,
+    "usage": 20.8,
+    "ts": 0.522
   },
   "steve_nash": {
     "id": "steve_nash",
@@ -7665,9 +8203,9 @@
       "PG",
       "SG"
     ],
-    "ovr": 93,
-    "off": 92,
-    "def": 72,
+    "ovr": 88,
+    "off": 86,
+    "def": 73,
     "attributes": {
       "shooting": 97,
       "finishing": 79,
@@ -7683,8 +8221,10 @@
     "age": 32,
     "number": 13,
     "potential": "D",
-    "salary": 43116000,
-    "contractYears": 4
+    "salary": 32074000,
+    "contractYears": 4,
+    "usage": 22.3,
+    "ts": 0.622
   },
   "nikoloz_tskitishvili": {
     "id": "nikoloz_tskitishvili",
@@ -7694,8 +8234,8 @@
       "SF"
     ],
     "ovr": 66,
-    "off": 66,
-    "def": 66,
+    "off": 70,
+    "def": 73,
     "attributes": {
       "shooting": 66,
       "finishing": 66,
@@ -7712,7 +8252,9 @@
     "number": 15,
     "potential": "B",
     "salary": 2648000,
-    "contractYears": 1
+    "contractYears": 1,
+    "usage": 19.6,
+    "ts": 0.424
   },
   "raja_bell": {
     "id": "raja_bell",
@@ -7721,9 +8263,9 @@
     "positions": [
       "SG"
     ],
-    "ovr": 80,
-    "off": 81,
-    "def": 72,
+    "ovr": 81,
+    "off": 76,
+    "def": 74,
     "attributes": {
       "shooting": 96,
       "finishing": 67,
@@ -7739,8 +8281,10 @@
     "age": 29,
     "number": 19,
     "potential": "C",
-    "salary": 17784000,
-    "contractYears": 3
+    "salary": 20104000,
+    "contractYears": 3,
+    "usage": 17.4,
+    "ts": 0.57
   },
   "james_jones": {
     "id": "james_jones",
@@ -7751,9 +8295,9 @@
       "PG",
       "SF"
     ],
-    "ovr": 78,
+    "ovr": 79,
     "off": 75,
-    "def": 75,
+    "def": 74,
     "attributes": {
       "shooting": 89,
       "finishing": 65,
@@ -7769,8 +8313,10 @@
     "age": 25,
     "number": 22,
     "potential": "C",
-    "salary": 11753000,
-    "contractYears": 5
+    "salary": 12990000,
+    "contractYears": 5,
+    "usage": 16.1,
+    "ts": 0.547
   },
   "shawn_marion": {
     "id": "shawn_marion",
@@ -7781,9 +8327,9 @@
       "SG",
       "PF"
     ],
-    "ovr": 91,
-    "off": 80,
-    "def": 85,
+    "ovr": 88,
+    "off": 82,
+    "def": 76,
     "attributes": {
       "shooting": 84,
       "finishing": 89,
@@ -7799,8 +8345,10 @@
     "age": 28,
     "number": 31,
     "potential": "C",
-    "salary": 45776000,
-    "contractYears": 4
+    "salary": 37734000,
+    "contractYears": 4,
+    "usage": 21.9,
+    "ts": 0.579
   },
   "amar_e_stoudemire": {
     "id": "amar_e_stoudemire",
@@ -7810,9 +8358,9 @@
       "C",
       "PF"
     ],
-    "ovr": 66,
-    "off": 66,
-    "def": 66,
+    "ovr": 83,
+    "off": 81,
+    "def": 74,
     "attributes": {
       "shooting": 66,
       "finishing": 66,
@@ -7827,9 +8375,11 @@
     "photoUrl": "https://cdn.nba.com/headshots/nba/latest/1040x760/2405.png",
     "age": 23,
     "number": 32,
-    "potential": "B",
-    "salary": 2648000,
-    "contractYears": 2
+    "potential": "A",
+    "salary": 19795000,
+    "contractYears": 2,
+    "usage": 27.6,
+    "ts": 0.606
   },
   "kurt_thomas": {
     "id": "kurt_thomas",
@@ -7838,9 +8388,9 @@
     "positions": [
       "C"
     ],
-    "ovr": 79,
-    "off": 70,
-    "def": 80,
+    "ovr": 78,
+    "off": 73,
+    "def": 75,
     "attributes": {
       "shooting": 71,
       "finishing": 74,
@@ -7856,8 +8406,10 @@
     "age": 33,
     "number": 40,
     "potential": "D",
-    "salary": 13802000,
-    "contractYears": 1
+    "salary": 12488000,
+    "contractYears": 1,
+    "usage": 16.1,
+    "ts": 0.508
   },
   "eddie_house": {
     "id": "eddie_house",
@@ -7866,9 +8418,9 @@
     "positions": [
       "SG"
     ],
-    "ovr": 80,
-    "off": 78,
-    "def": 72,
+    "ovr": 79,
+    "off": 77,
+    "def": 73,
     "attributes": {
       "shooting": 87,
       "finishing": 65,
@@ -7884,8 +8436,10 @@
     "age": 28,
     "number": 50,
     "potential": "C",
-    "salary": 17784000,
-    "contractYears": 1
+    "salary": 16238000,
+    "contractYears": 1,
+    "usage": 25.0,
+    "ts": 0.516
   },
   "brian_grant": {
     "id": "brian_grant",
@@ -7896,8 +8450,8 @@
       "C"
     ],
     "ovr": 66,
-    "off": 65,
-    "def": 71,
+    "off": 70,
+    "def": 73,
     "attributes": {
       "shooting": 67,
       "finishing": 67,
@@ -7914,7 +8468,9 @@
     "number": 55,
     "potential": "D",
     "salary": 2813000,
-    "contractYears": 1
+    "contractYears": 1,
+    "usage": 12.6,
+    "ts": 0.514
   },
   "voshon_lenard": {
     "id": "voshon_lenard",
@@ -7923,9 +8479,9 @@
     "positions": [
       "SG"
     ],
-    "ovr": 74,
-    "off": 72,
-    "def": 75,
+    "ovr": 75,
+    "off": 73,
+    "def": 73,
     "attributes": {
       "shooting": 74,
       "finishing": 66,
@@ -7941,8 +8497,10 @@
     "age": 33,
     "number": 0,
     "potential": "D",
-    "salary": 7756000,
-    "contractYears": 1
+    "salary": 8544000,
+    "contractYears": 1,
+    "usage": 22.7,
+    "ts": 0.481
   },
   "jarrett_jack": {
     "id": "jarrett_jack",
@@ -7952,8 +8510,8 @@
       "PG",
       "SG"
     ],
-    "ovr": 77,
-    "off": 76,
+    "ovr": 72,
+    "off": 73,
     "def": 72,
     "attributes": {
       "shooting": 71,
@@ -7970,8 +8528,10 @@
     "age": 22,
     "number": 1,
     "potential": "B",
-    "salary": 7230000,
-    "contractYears": 1
+    "salary": 3998000,
+    "contractYears": 1,
+    "usage": 17.8,
+    "ts": 0.529
   },
   "steve_blake": {
     "id": "steve_blake",
@@ -7981,8 +8541,8 @@
       "PG",
       "SG"
     ],
-    "ovr": 82,
-    "off": 82,
+    "ovr": 77,
+    "off": 76,
     "def": 71,
     "attributes": {
       "shooting": 85,
@@ -7999,8 +8559,10 @@
     "age": 26,
     "number": 2,
     "potential": "C",
-    "salary": 22424000,
-    "contractYears": 2
+    "salary": 13145000,
+    "contractYears": 2,
+    "usage": 15.9,
+    "ts": 0.537
   },
   "juan_dixon": {
     "id": "juan_dixon",
@@ -8009,9 +8571,9 @@
     "positions": [
       "SG"
     ],
-    "ovr": 77,
-    "off": 76,
-    "def": 73,
+    "ovr": 79,
+    "off": 75,
+    "def": 71,
     "attributes": {
       "shooting": 80,
       "finishing": 73,
@@ -8027,8 +8589,10 @@
     "age": 27,
     "number": 3,
     "potential": "C",
-    "salary": 13145000,
-    "contractYears": 4
+    "salary": 16238000,
+    "contractYears": 4,
+    "usage": 24.4,
+    "ts": 0.517
   },
   "ha_ha": {
     "id": "ha_ha",
@@ -8038,8 +8602,8 @@
       "C"
     ],
     "ovr": 66,
-    "off": 66,
-    "def": 66,
+    "off": 69,
+    "def": 73,
     "attributes": {
       "shooting": 66,
       "finishing": 66,
@@ -8056,7 +8620,9 @@
     "number": 5,
     "potential": "B",
     "salary": 1820000,
-    "contractYears": 4
+    "contractYears": 4,
+    "usage": 14.0,
+    "ts": 0.548
   },
   "martell_webster": {
     "id": "martell_webster",
@@ -8067,8 +8633,8 @@
       "SG",
       "PF"
     ],
-    "ovr": 72,
-    "off": 71,
+    "ovr": 73,
+    "off": 75,
     "def": 71,
     "attributes": {
       "shooting": 81,
@@ -8085,8 +8651,10 @@
     "age": 19,
     "number": 8,
     "potential": "B",
-    "salary": 3998000,
-    "contractYears": 1
+    "salary": 4508000,
+    "contractYears": 1,
+    "usage": 18.6,
+    "ts": 0.534
   },
   "joel_przybilla": {
     "id": "joel_przybilla",
@@ -8095,9 +8663,9 @@
     "positions": [
       "C"
     ],
-    "ovr": 81,
-    "off": 72,
-    "def": 83,
+    "ovr": 78,
+    "off": 73,
+    "def": 76,
     "attributes": {
       "shooting": 68,
       "finishing": 87,
@@ -8113,8 +8681,10 @@
     "age": 26,
     "number": 10,
     "potential": "C",
-    "salary": 20104000,
-    "contractYears": 1
+    "salary": 14691000,
+    "contractYears": 1,
+    "usage": 13.0,
+    "ts": 0.574
   },
   "darius_miles": {
     "id": "darius_miles",
@@ -8124,9 +8694,9 @@
       "SF",
       "SG"
     ],
-    "ovr": 75,
-    "off": 71,
-    "def": 77,
+    "ovr": 79,
+    "off": 72,
+    "def": 73,
     "attributes": {
       "shooting": 65,
       "finishing": 82,
@@ -8142,8 +8712,10 @@
     "age": 24,
     "number": 23,
     "potential": "C",
-    "salary": 8042000,
-    "contractYears": 1
+    "salary": 12990000,
+    "contractYears": 1,
+    "usage": 25.0,
+    "ts": 0.494
   },
   "travis_outlaw": {
     "id": "travis_outlaw",
@@ -8154,8 +8726,8 @@
       "PF"
     ],
     "ovr": 73,
-    "off": 68,
-    "def": 76,
+    "off": 73,
+    "def": 73,
     "attributes": {
       "shooting": 69,
       "finishing": 71,
@@ -8172,7 +8744,9 @@
     "number": 25,
     "potential": "B",
     "salary": 4508000,
-    "contractYears": 1
+    "contractYears": 1,
+    "usage": 18.5,
+    "ts": 0.504
   },
   "sebastian_telfair": {
     "id": "sebastian_telfair",
@@ -8182,9 +8756,9 @@
       "PG",
       "SG"
     ],
-    "ovr": 78,
-    "off": 79,
-    "def": 73,
+    "ovr": 73,
+    "off": 72,
+    "def": 71,
     "attributes": {
       "shooting": 77,
       "finishing": 72,
@@ -8199,9 +8773,11 @@
     "photoUrl": "https://cdn.nba.com/headshots/nba/latest/1040x760/2742.png",
     "age": 21,
     "number": 31,
-    "potential": "A",
-    "salary": 8080000,
-    "contractYears": 4
+    "potential": "B",
+    "salary": 4508000,
+    "contractYears": 4,
+    "usage": 21.7,
+    "ts": 0.488
   },
   "viktor_khryapa": {
     "id": "viktor_khryapa",
@@ -8210,9 +8786,9 @@
     "positions": [
       "SF"
     ],
-    "ovr": 73,
-    "off": 72,
-    "def": 78,
+    "ovr": 71,
+    "off": 70,
+    "def": 73,
     "attributes": {
       "shooting": 70,
       "finishing": 75,
@@ -8228,8 +8804,10 @@
     "age": 23,
     "number": 38,
     "potential": "B",
-    "salary": 6557000,
-    "contractYears": 1
+    "salary": 5072000,
+    "contractYears": 1,
+    "usage": 15.2,
+    "ts": 0.511
   },
   "theo_ratliff": {
     "id": "theo_ratliff",
@@ -8239,9 +8817,9 @@
       "C",
       "SF"
     ],
-    "ovr": 77,
-    "off": 72,
-    "def": 79,
+    "ovr": 73,
+    "off": 71,
+    "def": 76,
     "attributes": {
       "shooting": 71,
       "finishing": 83,
@@ -8257,8 +8835,10 @@
     "age": 33,
     "number": 42,
     "potential": "D",
-    "salary": 11173000,
-    "contractYears": 5
+    "salary": 6967000,
+    "contractYears": 5,
+    "usage": 10.1,
+    "ts": 0.559
   },
   "zach_randolph": {
     "id": "zach_randolph",
@@ -8268,9 +8848,9 @@
       "PF",
       "SF"
     ],
-    "ovr": 80,
-    "off": 73,
-    "def": 77,
+    "ovr": 81,
+    "off": 77,
+    "def": 70,
     "attributes": {
       "shooting": 69,
       "finishing": 81,
@@ -8286,8 +8866,10 @@
     "age": 24,
     "number": 50,
     "potential": "C",
-    "salary": 14228000,
-    "contractYears": 5
+    "salary": 16083000,
+    "contractYears": 5,
+    "usage": 28.2,
+    "ts": 0.491
   },
   "brian_skinner": {
     "id": "brian_skinner",
@@ -8296,9 +8878,9 @@
     "positions": [
       "C"
     ],
-    "ovr": 74,
-    "off": 70,
-    "def": 78,
+    "ovr": 68,
+    "off": 71,
+    "def": 74,
     "attributes": {
       "shooting": 68,
       "finishing": 77,
@@ -8314,8 +8896,10 @@
     "age": 30,
     "number": 54,
     "potential": "D",
-    "salary": 9124000,
-    "contractYears": 2
+    "salary": 4361000,
+    "contractYears": 2,
+    "usage": 12.3,
+    "ts": 0.511
   },
   "shareef_abdur_rahim": {
     "id": "shareef_abdur_rahim",
@@ -8324,9 +8908,9 @@
     "positions": [
       "SF"
     ],
-    "ovr": 82,
+    "ovr": 81,
     "off": 77,
-    "def": 76,
+    "def": 74,
     "attributes": {
       "shooting": 72,
       "finishing": 88,
@@ -8342,8 +8926,10 @@
     "age": 29,
     "number": 3,
     "potential": "C",
-    "salary": 22424000,
-    "contractYears": 3
+    "salary": 20104000,
+    "contractYears": 3,
+    "usage": 20.6,
+    "ts": 0.584
   },
   "jason_hart": {
     "id": "jason_hart",
@@ -8352,9 +8938,9 @@
     "positions": [
       "SG"
     ],
-    "ovr": 69,
-    "off": 68,
-    "def": 71,
+    "ovr": 73,
+    "off": 72,
+    "def": 75,
     "attributes": {
       "shooting": 67,
       "finishing": 66,
@@ -8370,8 +8956,10 @@
     "age": 28,
     "number": 5,
     "potential": "C",
-    "salary": 4887000,
-    "contractYears": 1
+    "salary": 8196000,
+    "contractYears": 1,
+    "usage": 17.1,
+    "ts": 0.495
   },
   "ronnie_price": {
     "id": "ronnie_price",
@@ -8381,9 +8969,9 @@
       "PG",
       "SG"
     ],
-    "ovr": 66,
-    "off": 66,
-    "def": 66,
+    "ovr": 69,
+    "off": 73,
+    "def": 73,
     "attributes": {
       "shooting": 66,
       "finishing": 66,
@@ -8399,8 +8987,10 @@
     "age": 23,
     "number": 7,
     "potential": "B",
-    "salary": 2648000,
-    "contractYears": 4
+    "salary": 3909000,
+    "contractYears": 4,
+    "usage": 20.2,
+    "ts": 0.5
   },
   "kenny_thomas": {
     "id": "kenny_thomas",
@@ -8409,9 +8999,9 @@
     "positions": [
       "SF"
     ],
-    "ovr": 82,
+    "ovr": 79,
     "off": 74,
-    "def": 80,
+    "def": 74,
     "attributes": {
       "shooting": 69,
       "finishing": 82,
@@ -8427,8 +9017,10 @@
     "age": 28,
     "number": 9,
     "potential": "C",
-    "salary": 22424000,
-    "contractYears": 2
+    "salary": 16238000,
+    "contractYears": 2,
+    "usage": 17.9,
+    "ts": 0.532
   },
   "mike_bibby": {
     "id": "mike_bibby",
@@ -8437,9 +9029,9 @@
     "positions": [
       "SG"
     ],
-    "ovr": 85,
-    "off": 84,
-    "def": 71,
+    "ovr": 86,
+    "off": 81,
+    "def": 72,
     "attributes": {
       "shooting": 92,
       "finishing": 70,
@@ -8455,8 +9047,10 @@
     "age": 28,
     "number": 10,
     "potential": "C",
-    "salary": 29383000,
-    "contractYears": 4
+    "salary": 32167000,
+    "contractYears": 4,
+    "usage": 24.7,
+    "ts": 0.55
   },
   "vitaly_potapenko": {
     "id": "vitaly_potapenko",
@@ -8466,9 +9060,9 @@
       "C",
       "SF"
     ],
-    "ovr": 67,
-    "off": 68,
-    "def": 70,
+    "ovr": 66,
+    "off": 72,
+    "def": 71,
     "attributes": {
       "shooting": 68,
       "finishing": 73,
@@ -8484,8 +9078,10 @@
     "age": 31,
     "number": 20,
     "potential": "D",
-    "salary": 3260000,
-    "contractYears": 3
+    "salary": 2813000,
+    "contractYears": 3,
+    "usage": 13.8,
+    "ts": 0.548
   },
   "kevin_martin": {
     "id": "kevin_martin",
@@ -8496,7 +9092,7 @@
       "PG"
     ],
     "ovr": 79,
-    "off": 77,
+    "off": 75,
     "def": 74,
     "attributes": {
       "shooting": 83,
@@ -8514,7 +9110,9 @@
     "number": 23,
     "potential": "A",
     "salary": 12990000,
-    "contractYears": 4
+    "contractYears": 4,
+    "usage": 17.3,
+    "ts": 0.587
   },
   "jamal_sampson": {
     "id": "jamal_sampson",
@@ -8524,8 +9122,8 @@
       "SF"
     ],
     "ovr": 66,
-    "off": 66,
-    "def": 66,
+    "off": 73,
+    "def": 74,
     "attributes": {
       "shooting": 66,
       "finishing": 66,
@@ -8542,7 +9140,9 @@
     "number": 31,
     "potential": "B",
     "salary": 2648000,
-    "contractYears": 4
+    "contractYears": 4,
+    "usage": 13.8,
+    "ts": 0.53
   },
   "francisco_garcia": {
     "id": "francisco_garcia",
@@ -8552,9 +9152,9 @@
       "SG",
       "SF"
     ],
-    "ovr": 73,
-    "off": 71,
-    "def": 77,
+    "ovr": 76,
+    "off": 72,
+    "def": 76,
     "attributes": {
       "shooting": 72,
       "finishing": 70,
@@ -8570,8 +9170,10 @@
     "age": 24,
     "number": 32,
     "potential": "C",
-    "salary": 6557000,
-    "contractYears": 5
+    "salary": 9279000,
+    "contractYears": 5,
+    "usage": 15.8,
+    "ts": 0.512
   },
   "corliss_williamson": {
     "id": "corliss_williamson",
@@ -8580,9 +9182,9 @@
     "positions": [
       "SF"
     ],
-    "ovr": 66,
-    "off": 66,
-    "def": 66,
+    "ovr": 68,
+    "off": 71,
+    "def": 72,
     "attributes": {
       "shooting": 66,
       "finishing": 66,
@@ -8598,8 +9200,10 @@
     "age": 32,
     "number": 34,
     "potential": "D",
-    "salary": 2813000,
-    "contractYears": 5
+    "salary": 3707000,
+    "contractYears": 5,
+    "usage": 21.3,
+    "ts": 0.527
   },
   "bonzi_wells": {
     "id": "bonzi_wells",
@@ -8609,8 +9213,8 @@
       "SG"
     ],
     "ovr": 82,
-    "off": 74,
-    "def": 82,
+    "off": 75,
+    "def": 75,
     "attributes": {
       "shooting": 68,
       "finishing": 83,
@@ -8627,7 +9231,9 @@
     "number": 42,
     "potential": "C",
     "salary": 22424000,
-    "contractYears": 5
+    "contractYears": 5,
+    "usage": 23.0,
+    "ts": 0.511
   },
   "brad_miller": {
     "id": "brad_miller",
@@ -8636,9 +9242,9 @@
     "positions": [
       "C"
     ],
-    "ovr": 83,
+    "ovr": 86,
     "off": 79,
-    "def": 77,
+    "def": 76,
     "attributes": {
       "shooting": 77,
       "finishing": 78,
@@ -8654,8 +9260,10 @@
     "age": 30,
     "number": 52,
     "potential": "D",
-    "salary": 24744000,
-    "contractYears": 5
+    "salary": 32167000,
+    "contractYears": 5,
+    "usage": 18.5,
+    "ts": 0.58
   },
   "metta_world_peace": {
     "id": "metta_world_peace",
@@ -8665,9 +9273,9 @@
       "SF",
       "PF"
     ],
-    "ovr": 80,
+    "ovr": 84,
     "off": 76,
-    "def": 78,
+    "def": 76,
     "attributes": {
       "shooting": 77,
       "finishing": 75,
@@ -8683,8 +9291,10 @@
     "age": 26,
     "number": 93,
     "potential": "C",
-    "salary": 17784000,
-    "contractYears": 4
+    "salary": 27063000,
+    "contractYears": 4,
+    "usage": 23.5,
+    "ts": 0.5
   },
   "eric_williams": {
     "id": "eric_williams",
@@ -8694,8 +9304,8 @@
       "SF"
     ],
     "ovr": 66,
-    "off": 67,
-    "def": 71,
+    "off": 71,
+    "def": 73,
     "attributes": {
       "shooting": 67,
       "finishing": 69,
@@ -8712,7 +9322,9 @@
     "number": 0,
     "potential": "D",
     "salary": 2813000,
-    "contractYears": 1
+    "contractYears": 1,
+    "usage": 15.6,
+    "ts": 0.52
   },
   "matt_bonner": {
     "id": "matt_bonner",
@@ -8722,9 +9334,9 @@
       "C",
       "PF"
     ],
-    "ovr": 79,
+    "ovr": 78,
     "off": 77,
-    "def": 76,
+    "def": 73,
     "attributes": {
       "shooting": 90,
       "finishing": 68,
@@ -8740,8 +9352,10 @@
     "age": 26,
     "number": 0,
     "potential": "C",
-    "salary": 16238000,
-    "contractYears": 5
+    "salary": 14691000,
+    "contractYears": 5,
+    "usage": 14.9,
+    "ts": 0.585
   },
   "nazr_mohammed": {
     "id": "nazr_mohammed",
@@ -8750,9 +9364,9 @@
     "positions": [
       "C"
     ],
-    "ovr": 81,
-    "off": 73,
-    "def": 80,
+    "ovr": 74,
+    "off": 72,
+    "def": 74,
     "attributes": {
       "shooting": 71,
       "finishing": 85,
@@ -8768,8 +9382,10 @@
     "age": 28,
     "number": 2,
     "potential": "C",
-    "salary": 20104000,
-    "contractYears": 2
+    "salary": 9124000,
+    "contractYears": 2,
+    "usage": 18.6,
+    "ts": 0.544
   },
   "michael_finley": {
     "id": "michael_finley",
@@ -8779,9 +9395,9 @@
       "SG",
       "SF"
     ],
-    "ovr": 77,
-    "off": 77,
-    "def": 72,
+    "ovr": 80,
+    "off": 76,
+    "def": 74,
     "attributes": {
       "shooting": 88,
       "finishing": 66,
@@ -8797,8 +9413,10 @@
     "age": 33,
     "number": 4,
     "potential": "D",
-    "salary": 11173000,
-    "contractYears": 1
+    "salary": 15117000,
+    "contractYears": 1,
+    "usage": 19.1,
+    "ts": 0.522
   },
   "robert_horry": {
     "id": "robert_horry",
@@ -8808,9 +9426,9 @@
       "SF",
       "C"
     ],
-    "ovr": 76,
-    "off": 71,
-    "def": 79,
+    "ovr": 81,
+    "off": 76,
+    "def": 78,
     "attributes": {
       "shooting": 77,
       "finishing": 66,
@@ -8826,8 +9444,10 @@
     "age": 35,
     "number": 5,
     "potential": "D",
-    "salary": 7539000,
-    "contractYears": 3
+    "salary": 13068000,
+    "contractYears": 3,
+    "usage": 15.4,
+    "ts": 0.513
   },
   "fabricio_oberto": {
     "id": "fabricio_oberto",
@@ -8837,8 +9457,8 @@
       "SF"
     ],
     "ovr": 66,
-    "off": 66,
-    "def": 66,
+    "off": 70,
+    "def": 75,
     "attributes": {
       "shooting": 66,
       "finishing": 66,
@@ -8855,7 +9475,9 @@
     "number": 7,
     "potential": "D",
     "salary": 2813000,
-    "contractYears": 2
+    "contractYears": 2,
+    "usage": 13.6,
+    "ts": 0.499
   },
   "tony_parker": {
     "id": "tony_parker",
@@ -8865,9 +9487,9 @@
       "PG",
       "SG"
     ],
-    "ovr": 88,
-    "off": 84,
-    "def": 72,
+    "ovr": 86,
+    "off": 79,
+    "def": 75,
     "attributes": {
       "shooting": 72,
       "finishing": 92,
@@ -8883,8 +9505,10 @@
     "age": 24,
     "number": 9,
     "potential": "C",
-    "salary": 30187000,
-    "contractYears": 2
+    "salary": 25733000,
+    "contractYears": 2,
+    "usage": 26.2,
+    "ts": 0.565
   },
   "bruce_bowen": {
     "id": "bruce_bowen",
@@ -8893,9 +9517,9 @@
     "positions": [
       "SF"
     ],
-    "ovr": 73,
-    "off": 75,
-    "def": 73,
+    "ovr": 80,
+    "off": 73,
+    "def": 77,
     "attributes": {
       "shooting": 87,
       "finishing": 66,
@@ -8911,8 +9535,10 @@
     "age": 35,
     "number": 12,
     "potential": "D",
-    "salary": 5328000,
-    "contractYears": 4
+    "salary": 11560000,
+    "contractYears": 4,
+    "usage": 11.7,
+    "ts": 0.534
   },
   "beno_udrih": {
     "id": "beno_udrih",
@@ -8922,9 +9548,9 @@
       "PG",
       "SG"
     ],
-    "ovr": 73,
-    "off": 74,
-    "def": 69,
+    "ovr": 77,
+    "off": 75,
+    "def": 73,
     "attributes": {
       "shooting": 71,
       "finishing": 73,
@@ -8940,8 +9566,10 @@
     "age": 23,
     "number": 14,
     "potential": "B",
-    "salary": 6557000,
-    "contractYears": 3
+    "salary": 10516000,
+    "contractYears": 3,
+    "usage": 22.4,
+    "ts": 0.544
   },
   "brent_barry": {
     "id": "brent_barry",
@@ -8950,9 +9578,9 @@
     "positions": [
       "SG"
     ],
-    "ovr": 78,
+    "ovr": 81,
     "off": 77,
-    "def": 73,
+    "def": 77,
     "attributes": {
       "shooting": 84,
       "finishing": 69,
@@ -8968,8 +9596,10 @@
     "age": 34,
     "number": 17,
     "potential": "D",
-    "salary": 12488000,
-    "contractYears": 3
+    "salary": 17088000,
+    "contractYears": 3,
+    "usage": 15.9,
+    "ts": 0.579
   },
   "manu_ginobili": {
     "id": "manu_ginobili",
@@ -8979,9 +9609,9 @@
       "SG",
       "PG"
     ],
-    "ovr": 88,
-    "off": 84,
-    "def": 78,
+    "ovr": 89,
+    "off": 82,
+    "def": 79,
     "attributes": {
       "shooting": 86,
       "finishing": 83,
@@ -8997,8 +9627,10 @@
     "age": 28,
     "number": 20,
     "potential": "C",
-    "salary": 37734000,
-    "contractYears": 5
+    "salary": 40518000,
+    "contractYears": 5,
+    "usage": 24.5,
+    "ts": 0.597
   },
   "tim_duncan": {
     "id": "tim_duncan",
@@ -9008,9 +9640,9 @@
       "C",
       "PF"
     ],
-    "ovr": 92,
-    "off": 77,
-    "def": 84,
+    "ovr": 90,
+    "off": 81,
+    "def": 79,
     "attributes": {
       "shooting": 68,
       "finishing": 90,
@@ -9026,8 +9658,10 @@
     "age": 30,
     "number": 21,
     "potential": "D",
-    "salary": 48250000,
-    "contractYears": 4
+    "salary": 43301000,
+    "contractYears": 4,
+    "usage": 27.8,
+    "ts": 0.528
   },
   "nick_van_exel": {
     "id": "nick_van_exel",
@@ -9036,9 +9670,9 @@
     "positions": [
       "SG"
     ],
-    "ovr": 73,
-    "off": 73,
-    "def": 68,
+    "ovr": 76,
+    "off": 75,
+    "def": 73,
     "attributes": {
       "shooting": 76,
       "finishing": 66,
@@ -9054,8 +9688,10 @@
     "age": 34,
     "number": 31,
     "potential": "D",
-    "salary": 6967000,
-    "contractYears": 1
+    "salary": 9859000,
+    "contractYears": 1,
+    "usage": 19.7,
+    "ts": 0.495
   },
   "sean_marks": {
     "id": "sean_marks",
@@ -9065,9 +9701,9 @@
       "SF",
       "C"
     ],
-    "ovr": 66,
-    "off": 66,
-    "def": 66,
+    "ovr": 71,
+    "off": 72,
+    "def": 74,
     "attributes": {
       "shooting": 66,
       "finishing": 66,
@@ -9083,8 +9719,10 @@
     "age": 30,
     "number": 40,
     "potential": "D",
-    "salary": 3309000,
-    "contractYears": 2
+    "salary": 6341000,
+    "contractYears": 2,
+    "usage": 20.2,
+    "ts": 0.497
   },
   "nick_collison": {
     "id": "nick_collison",
@@ -9094,9 +9732,9 @@
       "PF",
       "SF"
     ],
-    "ovr": 79,
+    "ovr": 73,
     "off": 74,
-    "def": 77,
+    "def": 71,
     "attributes": {
       "shooting": 70,
       "finishing": 84,
@@ -9112,8 +9750,10 @@
     "age": 25,
     "number": 4,
     "potential": "C",
-    "salary": 12990000,
-    "contractYears": 3
+    "salary": 6557000,
+    "contractYears": 3,
+    "usage": 16.0,
+    "ts": 0.56
   },
   "rashard_lewis": {
     "id": "rashard_lewis",
@@ -9123,9 +9763,9 @@
       "PF",
       "SF"
     ],
-    "ovr": 84,
-    "off": 81,
-    "def": 75,
+    "ovr": 87,
+    "off": 83,
+    "def": 71,
     "attributes": {
       "shooting": 91,
       "finishing": 79,
@@ -9141,8 +9781,10 @@
     "age": 26,
     "number": 7,
     "potential": "C",
-    "salary": 27063000,
-    "contractYears": 2
+    "salary": 34950000,
+    "contractYears": 2,
+    "usage": 23.2,
+    "ts": 0.58
   },
   "luke_ridnour": {
     "id": "luke_ridnour",
@@ -9152,9 +9794,9 @@
       "PG",
       "SG"
     ],
-    "ovr": 84,
-    "off": 80,
-    "def": 75,
+    "ovr": 81,
+    "off": 78,
+    "def": 72,
     "attributes": {
       "shooting": 73,
       "finishing": 70,
@@ -9170,8 +9812,10 @@
     "age": 25,
     "number": 8,
     "potential": "C",
-    "salary": 21651000,
-    "contractYears": 1
+    "salary": 16083000,
+    "contractYears": 1,
+    "usage": 17.8,
+    "ts": 0.506
   },
   "damien_wilkins": {
     "id": "damien_wilkins",
@@ -9182,9 +9826,9 @@
       "PG",
       "SG"
     ],
-    "ovr": 77,
-    "off": 73,
-    "def": 76,
+    "ovr": 75,
+    "off": 74,
+    "def": 73,
     "attributes": {
       "shooting": 71,
       "finishing": 77,
@@ -9200,8 +9844,10 @@
     "age": 26,
     "number": 12,
     "potential": "C",
-    "salary": 13145000,
-    "contractYears": 5
+    "salary": 10052000,
+    "contractYears": 5,
+    "usage": 17.4,
+    "ts": 0.526
   },
   "noel_felix": {
     "id": "noel_felix",
@@ -9211,8 +9857,8 @@
       "SF"
     ],
     "ovr": 66,
-    "off": 66,
-    "def": 66,
+    "off": 71,
+    "def": 72,
     "attributes": {
       "shooting": 66,
       "finishing": 66,
@@ -9229,7 +9875,9 @@
     "number": 16,
     "potential": "C",
     "salary": 2648000,
-    "contractYears": 2
+    "contractYears": 2,
+    "usage": 18.4,
+    "ts": 0.439
   },
   "danny_fortson": {
     "id": "danny_fortson",
@@ -9238,9 +9886,9 @@
     "positions": [
       "SF"
     ],
-    "ovr": 73,
+    "ovr": 66,
     "off": 71,
-    "def": 74,
+    "def": 71,
     "attributes": {
       "shooting": 70,
       "finishing": 81,
@@ -9256,8 +9904,10 @@
     "age": 30,
     "number": 21,
     "potential": "D",
-    "salary": 8196000,
-    "contractYears": 4
+    "salary": 3309000,
+    "contractYears": 4,
+    "usage": 17.7,
+    "ts": 0.648
   },
   "earl_watson": {
     "id": "earl_watson",
@@ -9267,9 +9917,9 @@
       "PG",
       "SG"
     ],
-    "ovr": 84,
-    "off": 84,
-    "def": 74,
+    "ovr": 79,
+    "off": 76,
+    "def": 73,
     "attributes": {
       "shooting": 90,
       "finishing": 70,
@@ -9285,8 +9935,10 @@
     "age": 27,
     "number": 25,
     "potential": "C",
-    "salary": 27063000,
-    "contractYears": 3
+    "salary": 16238000,
+    "contractYears": 3,
+    "usage": 19.8,
+    "ts": 0.537
   },
   "johan_petro": {
     "id": "johan_petro",
@@ -9295,9 +9947,9 @@
     "positions": [
       "C"
     ],
-    "ovr": 72,
-    "off": 69,
-    "def": 78,
+    "ovr": 66,
+    "off": 71,
+    "def": 72,
     "attributes": {
       "shooting": 69,
       "finishing": 82,
@@ -9313,8 +9965,10 @@
     "age": 20,
     "number": 27,
     "potential": "B",
-    "salary": 3998000,
-    "contractYears": 2
+    "salary": 1820000,
+    "contractYears": 2,
+    "usage": 13.9,
+    "ts": 0.531
   },
   "mike_wilks": {
     "id": "mike_wilks",
@@ -9324,8 +9978,8 @@
       "SG"
     ],
     "ovr": 66,
-    "off": 66,
-    "def": 66,
+    "off": 70,
+    "def": 74,
     "attributes": {
       "shooting": 66,
       "finishing": 66,
@@ -9342,7 +9996,9 @@
     "number": 29,
     "potential": "C",
     "salary": 3309000,
-    "contractYears": 3
+    "contractYears": 3,
+    "usage": 17.0,
+    "ts": 0.442
   },
   "robert_swift": {
     "id": "robert_swift",
@@ -9351,9 +10007,9 @@
     "positions": [
       "C"
     ],
-    "ovr": 76,
-    "off": 69,
-    "def": 79,
+    "ovr": 70,
+    "off": 72,
+    "def": 72,
     "attributes": {
       "shooting": 68,
       "finishing": 84,
@@ -9369,8 +10025,10 @@
     "age": 20,
     "number": 31,
     "potential": "B",
-    "salary": 6379000,
-    "contractYears": 4
+    "salary": 2977000,
+    "contractYears": 4,
+    "usage": 15.1,
+    "ts": 0.535
   },
   "mikki_moore": {
     "id": "mikki_moore",
@@ -9379,9 +10037,9 @@
     "positions": [
       "C"
     ],
-    "ovr": 70,
-    "off": 68,
-    "def": 73,
+    "ovr": 66,
+    "off": 71,
+    "def": 72,
     "attributes": {
       "shooting": 67,
       "finishing": 73,
@@ -9397,8 +10055,10 @@
     "age": 30,
     "number": 33,
     "potential": "D",
-    "salary": 5413000,
-    "contractYears": 1
+    "salary": 3309000,
+    "contractYears": 1,
+    "usage": 15.5,
+    "ts": 0.54
   },
   "ray_allen": {
     "id": "ray_allen",
@@ -9408,9 +10068,9 @@
       "SG",
       "PG"
     ],
-    "ovr": 88,
-    "off": 84,
-    "def": 74,
+    "ovr": 89,
+    "off": 87,
+    "def": 71,
     "attributes": {
       "shooting": 97,
       "finishing": 74,
@@ -9426,8 +10086,10 @@
     "age": 30,
     "number": 34,
     "potential": "D",
-    "salary": 37734000,
-    "contractYears": 2
+    "salary": 40518000,
+    "contractYears": 2,
+    "usage": 27.4,
+    "ts": 0.577
   },
   "chris_wilcox": {
     "id": "chris_wilcox",
@@ -9436,9 +10098,9 @@
     "positions": [
       "C"
     ],
-    "ovr": 83,
-    "off": 76,
-    "def": 78,
+    "ovr": 77,
+    "off": 75,
+    "def": 73,
     "attributes": {
       "shooting": 72,
       "finishing": 91,
@@ -9453,9 +10115,11 @@
     "photoUrl": "https://cdn.nba.com/headshots/nba/latest/1040x760/2404.png",
     "age": 23,
     "number": 54,
-    "potential": "A",
-    "salary": 19795000,
-    "contractYears": 4
+    "potential": "B",
+    "salary": 10516000,
+    "contractYears": 4,
+    "usage": 18.4,
+    "ts": 0.587
   },
   "rasho_nesterovic": {
     "id": "rasho_nesterovic",
@@ -9464,9 +10128,9 @@
     "positions": [
       "C"
     ],
-    "ovr": 75,
-    "off": 71,
-    "def": 79,
+    "ovr": 74,
+    "off": 70,
+    "def": 77,
     "attributes": {
       "shooting": 70,
       "finishing": 79,
@@ -9482,8 +10146,10 @@
     "age": 30,
     "number": 0,
     "potential": "D",
-    "salary": 10052000,
-    "contractYears": 3
+    "salary": 9124000,
+    "contractYears": 3,
+    "usage": 13.1,
+    "ts": 0.501
   },
   "kris_humphries": {
     "id": "kris_humphries",
@@ -9493,9 +10159,9 @@
       "PF",
       "SF"
     ],
-    "ovr": 70,
-    "off": 67,
-    "def": 74,
+    "ovr": 66,
+    "off": 70,
+    "def": 72,
     "attributes": {
       "shooting": 64,
       "finishing": 70,
@@ -9511,8 +10177,10 @@
     "age": 21,
     "number": 0,
     "potential": "B",
-    "salary": 2977000,
-    "contractYears": 2
+    "salary": 1820000,
+    "contractYears": 2,
+    "usage": 19.7,
+    "ts": 0.423
   },
   "darrick_martin": {
     "id": "darrick_martin",
@@ -9521,9 +10189,9 @@
     "positions": [
       "SG"
     ],
-    "ovr": 66,
-    "off": 66,
-    "def": 66,
+    "ovr": 68,
+    "off": 73,
+    "def": 73,
     "attributes": {
       "shooting": 66,
       "finishing": 66,
@@ -9539,8 +10207,10 @@
     "age": 35,
     "number": 2,
     "potential": "D",
-    "salary": 2151000,
-    "contractYears": 1
+    "salary": 2835000,
+    "contractYears": 1,
+    "usage": 16.4,
+    "ts": 0.472
   },
   "loren_woods": {
     "id": "loren_woods",
@@ -9549,9 +10219,9 @@
     "positions": [
       "C"
     ],
-    "ovr": 74,
-    "off": 67,
-    "def": 79,
+    "ovr": 66,
+    "off": 72,
+    "def": 74,
     "attributes": {
       "shooting": 67,
       "finishing": 73,
@@ -9567,8 +10237,10 @@
     "age": 28,
     "number": 3,
     "potential": "C",
-    "salary": 9124000,
-    "contractYears": 2
+    "salary": 3309000,
+    "contractYears": 2,
+    "usage": 13.7,
+    "ts": 0.478
   },
   "chris_bosh": {
     "id": "chris_bosh",
@@ -9579,8 +10251,8 @@
       "SF"
     ],
     "ovr": 86,
-    "off": 75,
-    "def": 78,
+    "off": 80,
+    "def": 73,
     "attributes": {
       "shooting": 70,
       "finishing": 85,
@@ -9597,7 +10269,9 @@
     "number": 4,
     "potential": "A",
     "salary": 17692000,
-    "contractYears": 3
+    "contractYears": 3,
+    "usage": 23.8,
+    "ts": 0.571
   },
   "jose_calderon": {
     "id": "jose_calderon",
@@ -9607,9 +10281,9 @@
       "PG",
       "SG"
     ],
-    "ovr": 78,
-    "off": 77,
-    "def": 73,
+    "ovr": 73,
+    "off": 74,
+    "def": 71,
     "attributes": {
       "shooting": 68,
       "finishing": 71,
@@ -9625,8 +10299,10 @@
     "age": 24,
     "number": 8,
     "potential": "C",
-    "salary": 11753000,
-    "contractYears": 1
+    "salary": 6557000,
+    "contractYears": 1,
+    "usage": 14.3,
+    "ts": 0.498
   },
   "pape_sow": {
     "id": "pape_sow",
@@ -9636,9 +10312,9 @@
       "C",
       "SF"
     ],
-    "ovr": 71,
-    "off": 68,
-    "def": 78,
+    "ovr": 66,
+    "off": 69,
+    "def": 73,
     "attributes": {
       "shooting": 67,
       "finishing": 74,
@@ -9654,8 +10330,10 @@
     "age": 24,
     "number": 9,
     "potential": "C",
-    "salary": 5072000,
-    "contractYears": 3
+    "salary": 2648000,
+    "contractYears": 3,
+    "usage": 14.4,
+    "ts": 0.493
   },
   "andre_barrett": {
     "id": "andre_barrett",
@@ -9664,9 +10342,9 @@
     "positions": [
       "SG"
     ],
-    "ovr": 73,
-    "off": 73,
-    "def": 71,
+    "ovr": 71,
+    "off": 72,
+    "def": 73,
     "attributes": {
       "shooting": 65,
       "finishing": 68,
@@ -9682,8 +10360,10 @@
     "age": 24,
     "number": 12,
     "potential": "C",
-    "salary": 6557000,
-    "contractYears": 1
+    "salary": 5072000,
+    "contractYears": 1,
+    "usage": 17.7,
+    "ts": 0.439
   },
   "mike_james": {
     "id": "mike_james",
@@ -9693,9 +10373,9 @@
       "PG",
       "SG"
     ],
-    "ovr": 86,
-    "off": 88,
-    "def": 72,
+    "ovr": 85,
+    "off": 82,
+    "def": 71,
     "attributes": {
       "shooting": 95,
       "finishing": 78,
@@ -9711,8 +10391,10 @@
     "age": 31,
     "number": 13,
     "potential": "D",
-    "salary": 27342000,
-    "contractYears": 4
+    "salary": 24975000,
+    "contractYears": 4,
+    "usage": 24.3,
+    "ts": 0.57
   },
   "joey_graham": {
     "id": "joey_graham",
@@ -9721,9 +10403,9 @@
     "positions": [
       "SF"
     ],
-    "ovr": 72,
-    "off": 72,
-    "def": 75,
+    "ovr": 69,
+    "off": 71,
+    "def": 72,
     "attributes": {
       "shooting": 75,
       "finishing": 76,
@@ -9739,8 +10421,10 @@
     "age": 24,
     "number": 14,
     "potential": "C",
-    "salary": 5815000,
-    "contractYears": 4
+    "salary": 3909000,
+    "contractYears": 4,
+    "usage": 16.5,
+    "ts": 0.563
   },
   "alvin_williams": {
     "id": "alvin_williams",
@@ -9749,9 +10433,9 @@
     "positions": [
       "SG"
     ],
-    "ovr": 66,
-    "off": 66,
-    "def": 66,
+    "ovr": 72,
+    "off": 73,
+    "def": 73,
     "attributes": {
       "shooting": 66,
       "finishing": 66,
@@ -9767,8 +10451,10 @@
     "age": 31,
     "number": 20,
     "potential": "D",
-    "salary": 2813000,
-    "contractYears": 3
+    "salary": 6178000,
+    "contractYears": 3,
+    "usage": 17.1,
+    "ts": 0.503
   },
   "morris_peterson": {
     "id": "morris_peterson",
@@ -9778,9 +10464,9 @@
       "SF",
       "SG"
     ],
-    "ovr": 81,
-    "off": 80,
-    "def": 74,
+    "ovr": 82,
+    "off": 78,
+    "def": 72,
     "attributes": {
       "shooting": 93,
       "finishing": 72,
@@ -9796,8 +10482,10 @@
     "age": 28,
     "number": 24,
     "potential": "C",
-    "salary": 20104000,
-    "contractYears": 5
+    "salary": 22424000,
+    "contractYears": 5,
+    "usage": 19.6,
+    "ts": 0.556
   },
   "charlie_villanueva": {
     "id": "charlie_villanueva",
@@ -9807,9 +10495,9 @@
       "PF",
       "SF"
     ],
-    "ovr": 78,
-    "off": 75,
-    "def": 78,
+    "ovr": 80,
+    "off": 77,
+    "def": 71,
     "attributes": {
       "shooting": 77,
       "finishing": 81,
@@ -9825,8 +10513,10 @@
     "age": 21,
     "number": 31,
     "potential": "A",
-    "salary": 8080000,
-    "contractYears": 1
+    "salary": 9781000,
+    "contractYears": 1,
+    "usage": 21.5,
+    "ts": 0.522
   },
   "milt_palacio": {
     "id": "milt_palacio",
@@ -9835,9 +10525,9 @@
     "positions": [
       "SG"
     ],
-    "ovr": 77,
-    "off": 75,
-    "def": 74,
+    "ovr": 72,
+    "off": 71,
+    "def": 73,
     "attributes": {
       "shooting": 65,
       "finishing": 77,
@@ -9853,8 +10543,10 @@
     "age": 28,
     "number": 3,
     "potential": "C",
-    "salary": 13145000,
-    "contractYears": 3
+    "salary": 7268000,
+    "contractYears": 3,
+    "usage": 18.5,
+    "ts": 0.486
   },
   "carlos_boozer": {
     "id": "carlos_boozer",
@@ -9864,9 +10556,9 @@
       "PF",
       "SF"
     ],
-    "ovr": 88,
-    "off": 78,
-    "def": 79,
+    "ovr": 83,
+    "off": 79,
+    "def": 73,
     "attributes": {
       "shooting": 71,
       "finishing": 92,
@@ -9882,8 +10574,10 @@
     "age": 24,
     "number": 5,
     "potential": "C",
-    "salary": 30187000,
-    "contractYears": 1
+    "salary": 19795000,
+    "contractYears": 1,
+    "usage": 23.9,
+    "ts": 0.572
   },
   "deron_williams": {
     "id": "deron_williams",
@@ -9893,8 +10587,8 @@
       "PG",
       "SG"
     ],
-    "ovr": 79,
-    "off": 81,
+    "ovr": 78,
+    "off": 75,
     "def": 72,
     "attributes": {
       "shooting": 83,
@@ -9911,8 +10605,10 @@
     "age": 22,
     "number": 8,
     "potential": "A",
-    "salary": 8931000,
-    "contractYears": 1
+    "salary": 8080000,
+    "contractYears": 1,
+    "usage": 20.2,
+    "ts": 0.502
   },
   "gordan_giricek": {
     "id": "gordan_giricek",
@@ -9921,9 +10617,9 @@
     "positions": [
       "SG"
     ],
-    "ovr": 70,
+    "ovr": 74,
     "off": 72,
-    "def": 70,
+    "def": 71,
     "attributes": {
       "shooting": 72,
       "finishing": 71,
@@ -9939,8 +10635,10 @@
     "age": 29,
     "number": 10,
     "potential": "C",
-    "salary": 5413000,
-    "contractYears": 5
+    "salary": 9124000,
+    "contractYears": 5,
+    "usage": 22.0,
+    "ts": 0.5
   },
   "mehmet_okur": {
     "id": "mehmet_okur",
@@ -9950,8 +10648,8 @@
       "SF"
     ],
     "ovr": 85,
-    "off": 77,
-    "def": 78,
+    "off": 80,
+    "def": 73,
     "attributes": {
       "shooting": 80,
       "finishing": 78,
@@ -9968,7 +10666,9 @@
     "number": 13,
     "potential": "C",
     "salary": 29383000,
-    "contractYears": 1
+    "contractYears": 1,
+    "usage": 22.7,
+    "ts": 0.558
   },
   "matt_harpring": {
     "id": "matt_harpring",
@@ -9979,8 +10679,8 @@
       "SG"
     ],
     "ovr": 80,
-    "off": 74,
-    "def": 76,
+    "off": 77,
+    "def": 72,
     "attributes": {
       "shooting": 71,
       "finishing": 83,
@@ -9997,7 +10697,9 @@
     "number": 15,
     "potential": "D",
     "salary": 17784000,
-    "contractYears": 3
+    "contractYears": 3,
+    "usage": 21.1,
+    "ts": 0.545
   },
   "devin_brown": {
     "id": "devin_brown",
@@ -10006,8 +10708,8 @@
     "positions": [
       "SG"
     ],
-    "ovr": 73,
-    "off": 72,
+    "ovr": 75,
+    "off": 73,
     "def": 73,
     "attributes": {
       "shooting": 72,
@@ -10024,8 +10726,10 @@
     "age": 27,
     "number": 23,
     "potential": "C",
-    "salary": 8196000,
-    "contractYears": 2
+    "salary": 10052000,
+    "contractYears": 2,
+    "usage": 19.4,
+    "ts": 0.504
   },
   "keith_mcleod": {
     "id": "keith_mcleod",
@@ -10034,9 +10738,9 @@
     "positions": [
       "SG"
     ],
-    "ovr": 73,
-    "off": 72,
-    "def": 72,
+    "ovr": 69,
+    "off": 70,
+    "def": 73,
     "attributes": {
       "shooting": 69,
       "finishing": 65,
@@ -10052,8 +10756,10 @@
     "age": 26,
     "number": 25,
     "potential": "C",
-    "salary": 8196000,
-    "contractYears": 2
+    "salary": 4887000,
+    "contractYears": 2,
+    "usage": 18.2,
+    "ts": 0.46
   },
   "andre_owens": {
     "id": "andre_owens",
@@ -10063,8 +10769,8 @@
       "SG"
     ],
     "ovr": 66,
-    "off": 66,
-    "def": 66,
+    "off": 70,
+    "def": 72,
     "attributes": {
       "shooting": 66,
       "finishing": 66,
@@ -10081,7 +10787,9 @@
     "number": 30,
     "potential": "C",
     "salary": 2648000,
-    "contractYears": 5
+    "contractYears": 5,
+    "usage": 19.6,
+    "ts": 0.459
   },
   "jarron_collins": {
     "id": "jarron_collins",
@@ -10090,9 +10798,9 @@
     "positions": [
       "C"
     ],
-    "ovr": 74,
+    "ovr": 72,
     "off": 72,
-    "def": 76,
+    "def": 74,
     "attributes": {
       "shooting": 68,
       "finishing": 78,
@@ -10108,8 +10816,10 @@
     "age": 27,
     "number": 31,
     "potential": "C",
-    "salary": 9124000,
-    "contractYears": 3
+    "salary": 7268000,
+    "contractYears": 3,
+    "usage": 11.9,
+    "ts": 0.542
   },
   "cj_miles": {
     "id": "cj_miles",
@@ -10119,9 +10829,9 @@
       "SG",
       "PG"
     ],
-    "ovr": 66,
-    "off": 66,
-    "def": 66,
+    "ovr": 72,
+    "off": 74,
+    "def": 72,
     "attributes": {
       "shooting": 66,
       "finishing": 66,
@@ -10137,8 +10847,10 @@
     "age": 19,
     "number": 34,
     "potential": "B",
-    "salary": 1820000,
-    "contractYears": 5
+    "salary": 3998000,
+    "contractYears": 5,
+    "usage": 20.2,
+    "ts": 0.484
   },
   "andrei_kirilenko": {
     "id": "andrei_kirilenko",
@@ -10148,9 +10860,9 @@
       "SF",
       "PF"
     ],
-    "ovr": 88,
-    "off": 78,
-    "def": 84,
+    "ovr": 91,
+    "off": 82,
+    "def": 79,
     "attributes": {
       "shooting": 73,
       "finishing": 83,
@@ -10166,8 +10878,10 @@
     "age": 25,
     "number": 47,
     "potential": "C",
-    "salary": 30187000,
-    "contractYears": 1
+    "salary": 36620000,
+    "contractYears": 1,
+    "usage": 20.6,
+    "ts": 0.564
   },
   "rafael_araujo": {
     "id": "rafael_araujo",
@@ -10176,9 +10890,9 @@
     "positions": [
       "C"
     ],
-    "ovr": 69,
+    "ovr": 65,
     "off": 66,
-    "def": 75,
+    "def": 72,
     "attributes": {
       "shooting": 65,
       "finishing": 68,
@@ -10194,8 +10908,10 @@
     "age": 25,
     "number": 55,
     "potential": "C",
-    "salary": 3909000,
-    "contractYears": 3
+    "salary": 2227000,
+    "contractYears": 3,
+    "usage": 15.6,
+    "ts": 0.436
   },
   "antonio_burks": {
     "id": "antonio_burks",
@@ -10204,9 +10920,9 @@
     "positions": [
       "SG"
     ],
-    "ovr": 69,
-    "off": 69,
-    "def": 70,
+    "ovr": 66,
+    "off": 68,
+    "def": 74,
     "attributes": {
       "shooting": 65,
       "finishing": 65,
@@ -10222,8 +10938,10 @@
     "age": 26,
     "number": 1,
     "potential": "C",
-    "salary": 4887000,
-    "contractYears": 4
+    "salary": 3309000,
+    "contractYears": 4,
+    "usage": 16.5,
+    "ts": 0.413
   },
   "anthony_roberson": {
     "id": "anthony_roberson",
@@ -10232,9 +10950,9 @@
     "positions": [
       "SG"
     ],
-    "ovr": 66,
-    "off": 66,
-    "def": 66,
+    "ovr": 70,
+    "off": 73,
+    "def": 73,
     "attributes": {
       "shooting": 66,
       "finishing": 66,
@@ -10250,8 +10968,10 @@
     "age": 23,
     "number": 3,
     "potential": "B",
-    "salary": 2648000,
-    "contractYears": 2
+    "salary": 4330000,
+    "contractYears": 2,
+    "usage": 18.1,
+    "ts": 0.544
   },
   "eddie_jones": {
     "id": "eddie_jones",
@@ -10261,9 +10981,9 @@
       "SG",
       "SF"
     ],
-    "ovr": 79,
-    "off": 77,
-    "def": 76,
+    "ovr": 83,
+    "off": 76,
+    "def": 77,
     "attributes": {
       "shooting": 86,
       "finishing": 69,
@@ -10279,8 +10999,10 @@
     "age": 34,
     "number": 6,
     "potential": "D",
-    "salary": 13802000,
-    "contractYears": 1
+    "salary": 21032000,
+    "contractYears": 1,
+    "usage": 17.5,
+    "ts": 0.547
   },
   "jake_tsakalidis": {
     "id": "jake_tsakalidis",
@@ -10289,9 +11011,9 @@
     "positions": [
       "C"
     ],
-    "ovr": 80,
+    "ovr": 74,
     "off": 73,
-    "def": 78,
+    "def": 74,
     "attributes": {
       "shooting": 71,
       "finishing": 86,
@@ -10307,8 +11029,10 @@
     "age": 27,
     "number": 12,
     "potential": "C",
-    "salary": 17784000,
-    "contractYears": 2
+    "salary": 9124000,
+    "contractYears": 2,
+    "usage": 15.9,
+    "ts": 0.61
   },
   "pau_gasol": {
     "id": "pau_gasol",
@@ -10318,9 +11042,9 @@
       "C",
       "PF"
     ],
-    "ovr": 89,
-    "off": 80,
-    "def": 79,
+    "ovr": 90,
+    "off": 82,
+    "def": 77,
     "attributes": {
       "shooting": 69,
       "finishing": 91,
@@ -10336,8 +11060,10 @@
     "age": 25,
     "number": 16,
     "potential": "C",
-    "salary": 32414000,
-    "contractYears": 3
+    "salary": 34641000,
+    "contractYears": 3,
+    "usage": 26.1,
+    "ts": 0.56
   },
   "damon_stoudamire": {
     "id": "damon_stoudamire",
@@ -10346,8 +11072,8 @@
     "positions": [
       "SG"
     ],
-    "ovr": 79,
-    "off": 80,
+    "ovr": 81,
+    "off": 78,
     "def": 72,
     "attributes": {
       "shooting": 83,
@@ -10364,8 +11090,10 @@
     "age": 32,
     "number": 20,
     "potential": "D",
-    "salary": 13802000,
-    "contractYears": 4
+    "salary": 17088000,
+    "contractYears": 4,
+    "usage": 22.3,
+    "ts": 0.509
   },
   "hakim_warrick": {
     "id": "hakim_warrick",
@@ -10374,9 +11102,9 @@
     "positions": [
       "SF"
     ],
-    "ovr": 70,
+    "ovr": 66,
     "off": 69,
-    "def": 72,
+    "def": 73,
     "attributes": {
       "shooting": 66,
       "finishing": 76,
@@ -10392,8 +11120,10 @@
     "age": 23,
     "number": 21,
     "potential": "B",
-    "salary": 4330000,
-    "contractYears": 4
+    "salary": 2648000,
+    "contractYears": 4,
+    "usage": 21.8,
+    "ts": 0.504
   },
   "bobby_jackson": {
     "id": "bobby_jackson",
@@ -10402,9 +11132,9 @@
     "positions": [
       "SG"
     ],
-    "ovr": 80,
-    "off": 80,
-    "def": 74,
+    "ovr": 81,
+    "off": 77,
+    "def": 73,
     "attributes": {
       "shooting": 88,
       "finishing": 68,
@@ -10420,8 +11150,10 @@
     "age": 33,
     "number": 24,
     "potential": "D",
-    "salary": 15117000,
-    "contractYears": 4
+    "salary": 17088000,
+    "contractYears": 4,
+    "usage": 24.7,
+    "ts": 0.504
   },
   "dahntay_jones": {
     "id": "dahntay_jones",
@@ -10432,9 +11164,9 @@
       "PG",
       "SF"
     ],
-    "ovr": 69,
-    "off": 67,
-    "def": 72,
+    "ovr": 66,
+    "off": 68,
+    "def": 75,
     "attributes": {
       "shooting": 65,
       "finishing": 72,
@@ -10450,8 +11182,10 @@
     "age": 25,
     "number": 30,
     "potential": "C",
-    "salary": 3909000,
-    "contractYears": 5
+    "salary": 2648000,
+    "contractYears": 5,
+    "usage": 17.8,
+    "ts": 0.484
   },
   "shane_battier": {
     "id": "shane_battier",
@@ -10461,9 +11195,9 @@
       "SF",
       "PF"
     ],
-    "ovr": 78,
-    "off": 76,
-    "def": 78,
+    "ovr": 84,
+    "off": 77,
+    "def": 77,
     "attributes": {
       "shooting": 80,
       "finishing": 76,
@@ -10479,8 +11213,10 @@
     "age": 27,
     "number": 31,
     "potential": "C",
-    "salary": 14691000,
-    "contractYears": 5
+    "salary": 27063000,
+    "contractYears": 5,
+    "usage": 14.1,
+    "ts": 0.567
   },
   "chucky_atkins": {
     "id": "chucky_atkins",
@@ -10489,9 +11225,9 @@
     "positions": [
       "SG"
     ],
-    "ovr": 77,
-    "off": 79,
-    "def": 71,
+    "ovr": 78,
+    "off": 76,
+    "def": 72,
     "attributes": {
       "shooting": 84,
       "finishing": 68,
@@ -10507,8 +11243,10 @@
     "age": 31,
     "number": 32,
     "potential": "D",
-    "salary": 11173000,
-    "contractYears": 5
+    "salary": 12488000,
+    "contractYears": 5,
+    "usage": 19.1,
+    "ts": 0.541
   },
   "mike_miller": {
     "id": "mike_miller",
@@ -10520,8 +11258,8 @@
       "SG",
       "PF"
     ],
-    "ovr": 86,
-    "off": 83,
+    "ovr": 85,
+    "off": 80,
     "def": 75,
     "attributes": {
       "shooting": 94,
@@ -10538,8 +11276,10 @@
     "age": 26,
     "number": 33,
     "potential": "C",
-    "salary": 32167000,
-    "contractYears": 1
+    "salary": 29383000,
+    "contractYears": 1,
+    "usage": 20.7,
+    "ts": 0.6
   },
   "brian_cardinal": {
     "id": "brian_cardinal",
@@ -10548,9 +11288,9 @@
     "positions": [
       "SF"
     ],
-    "ovr": 71,
-    "off": 70,
-    "def": 73,
+    "ovr": 75,
+    "off": 72,
+    "def": 76,
     "attributes": {
       "shooting": 71,
       "finishing": 68,
@@ -10566,8 +11306,10 @@
     "age": 29,
     "number": 35,
     "potential": "C",
-    "salary": 6341000,
-    "contractYears": 2
+    "salary": 10052000,
+    "contractYears": 2,
+    "usage": 18.9,
+    "ts": 0.511
   },
   "lorenzen_wright": {
     "id": "lorenzen_wright",
@@ -10576,9 +11318,9 @@
     "positions": [
       "C"
     ],
-    "ovr": 76,
-    "off": 70,
-    "def": 79,
+    "ovr": 75,
+    "off": 72,
+    "def": 75,
     "attributes": {
       "shooting": 67,
       "finishing": 79,
@@ -10594,8 +11336,10 @@
     "age": 30,
     "number": 42,
     "potential": "D",
-    "salary": 11599000,
-    "contractYears": 1
+    "salary": 10052000,
+    "contractYears": 1,
+    "usage": 16.3,
+    "ts": 0.499
   },
   "lawrence_roberts": {
     "id": "lawrence_roberts",
@@ -10605,8 +11349,8 @@
       "SF"
     ],
     "ovr": 66,
-    "off": 66,
-    "def": 66,
+    "off": 72,
+    "def": 73,
     "attributes": {
       "shooting": 66,
       "finishing": 66,
@@ -10623,7 +11367,9 @@
     "number": 44,
     "potential": "B",
     "salary": 2648000,
-    "contractYears": 4
+    "contractYears": 4,
+    "usage": 16.3,
+    "ts": 0.496
   },
   "gilbert_arenas": {
     "id": "gilbert_arenas",
@@ -10632,8 +11378,8 @@
     "positions": [
       "SG"
     ],
-    "ovr": 88,
-    "off": 86,
+    "ovr": 91,
+    "off": 85,
     "def": 74,
     "attributes": {
       "shooting": 90,
@@ -10650,8 +11396,10 @@
     "age": 24,
     "number": 0,
     "potential": "C",
-    "salary": 30187000,
-    "contractYears": 3
+    "salary": 36620000,
+    "contractYears": 3,
+    "usage": 29.2,
+    "ts": 0.575
   },
   "jared_jeffries": {
     "id": "jared_jeffries",
@@ -10660,9 +11408,9 @@
     "positions": [
       "SF"
     ],
-    "ovr": 73,
-    "off": 72,
-    "def": 78,
+    "ovr": 77,
+    "off": 73,
+    "def": 74,
     "attributes": {
       "shooting": 68,
       "finishing": 77,
@@ -10678,8 +11426,10 @@
     "age": 24,
     "number": 1,
     "potential": "C",
-    "salary": 6557000,
-    "contractYears": 4
+    "salary": 10516000,
+    "contractYears": 4,
+    "usage": 13.6,
+    "ts": 0.506
   },
   "caron_butler": {
     "id": "caron_butler",
@@ -10690,8 +11440,8 @@
       "PF"
     ],
     "ovr": 82,
-    "off": 75,
-    "def": 78,
+    "off": 76,
+    "def": 74,
     "attributes": {
       "shooting": 76,
       "finishing": 78,
@@ -10708,7 +11458,9 @@
     "number": 3,
     "potential": "C",
     "salary": 22424000,
-    "contractYears": 4
+    "contractYears": 4,
+    "usage": 22.2,
+    "ts": 0.533
   },
   "antawn_jamison": {
     "id": "antawn_jamison",
@@ -10719,8 +11471,8 @@
       "SF"
     ],
     "ovr": 84,
-    "off": 79,
-    "def": 77,
+    "off": 80,
+    "def": 71,
     "attributes": {
       "shooting": 89,
       "finishing": 77,
@@ -10737,7 +11489,9 @@
     "number": 4,
     "potential": "D",
     "salary": 27063000,
-    "contractYears": 5
+    "contractYears": 5,
+    "usage": 23.8,
+    "ts": 0.515
   },
   "antonio_daniels": {
     "id": "antonio_daniels",
@@ -10746,9 +11500,9 @@
     "positions": [
       "SG"
     ],
-    "ovr": 78,
-    "off": 76,
-    "def": 71,
+    "ovr": 80,
+    "off": 77,
+    "def": 72,
     "attributes": {
       "shooting": 69,
       "finishing": 76,
@@ -10764,8 +11518,10 @@
     "age": 31,
     "number": 6,
     "potential": "D",
-    "salary": 12488000,
-    "contractYears": 2
+    "salary": 15117000,
+    "contractYears": 2,
+    "usage": 16.5,
+    "ts": 0.552
   },
   "billy_thomas": {
     "id": "billy_thomas",
@@ -10774,9 +11530,9 @@
     "positions": [
       "SG"
     ],
-    "ovr": 66,
-    "off": 66,
-    "def": 66,
+    "ovr": 68,
+    "off": 72,
+    "def": 74,
     "attributes": {
       "shooting": 66,
       "finishing": 66,
@@ -10792,8 +11548,10 @@
     "age": 30,
     "number": 12,
     "potential": "D",
-    "salary": 3309000,
-    "contractYears": 3
+    "salary": 4361000,
+    "contractYears": 3,
+    "usage": 15.4,
+    "ts": 0.486
   },
   "donell_taylor": {
     "id": "donell_taylor",
@@ -10802,9 +11560,9 @@
     "positions": [
       "SG"
     ],
-    "ovr": 66,
-    "off": 66,
-    "def": 66,
+    "ovr": 70,
+    "off": 71,
+    "def": 75,
     "attributes": {
       "shooting": 66,
       "finishing": 66,
@@ -10820,8 +11578,10 @@
     "age": 23,
     "number": 21,
     "potential": "B",
-    "salary": 2648000,
-    "contractYears": 3
+    "salary": 4330000,
+    "contractYears": 3,
+    "usage": 17.9,
+    "ts": 0.468
   },
   "andray_blatche": {
     "id": "andray_blatche",
@@ -10831,9 +11591,9 @@
       "C",
       "PF"
     ],
-    "ovr": 66,
-    "off": 66,
-    "def": 66,
+    "ovr": 67,
+    "off": 71,
+    "def": 73,
     "attributes": {
       "shooting": 66,
       "finishing": 66,
@@ -10849,8 +11609,10 @@
     "age": 19,
     "number": 32,
     "potential": "B",
-    "salary": 1820000,
-    "contractYears": 2
+    "salary": 2109000,
+    "contractYears": 2,
+    "usage": 19.9,
+    "ts": 0.483
   },
   "brendan_haywood": {
     "id": "brendan_haywood",
@@ -10859,9 +11621,9 @@
     "positions": [
       "C"
     ],
-    "ovr": 78,
-    "off": 72,
-    "def": 80,
+    "ovr": 77,
+    "off": 74,
+    "def": 74,
     "attributes": {
       "shooting": 68,
       "finishing": 87,
@@ -10877,8 +11639,10 @@
     "age": 26,
     "number": 33,
     "potential": "C",
-    "salary": 14691000,
-    "contractYears": 2
+    "salary": 13145000,
+    "contractYears": 2,
+    "usage": 15.0,
+    "ts": 0.557
   },
   "awvee_storey": {
     "id": "awvee_storey",
@@ -10888,8 +11652,8 @@
       "SF"
     ],
     "ovr": 66,
-    "off": 66,
-    "def": 66,
+    "off": 72,
+    "def": 72,
     "attributes": {
       "shooting": 66,
       "finishing": 66,
@@ -10906,7 +11670,9 @@
     "number": 35,
     "potential": "C",
     "salary": 3309000,
-    "contractYears": 1
+    "contractYears": 1,
+    "usage": 18.4,
+    "ts": 0.486
   },
   "etan_thomas": {
     "id": "etan_thomas",
@@ -10915,9 +11681,9 @@
     "positions": [
       "C"
     ],
-    "ovr": 77,
-    "off": 71,
-    "def": 79,
+    "ovr": 71,
+    "off": 72,
+    "def": 73,
     "attributes": {
       "shooting": 69,
       "finishing": 84,
@@ -10933,8 +11699,10 @@
     "age": 28,
     "number": 36,
     "potential": "C",
-    "salary": 13145000,
-    "contractYears": 1
+    "salary": 6341000,
+    "contractYears": 1,
+    "usage": 14.9,
+    "ts": 0.548
   },
   "michael_ruffin": {
     "id": "michael_ruffin",
@@ -10944,9 +11712,9 @@
       "C",
       "SF"
     ],
-    "ovr": 71,
-    "off": 68,
-    "def": 77,
+    "ovr": 66,
+    "off": 70,
+    "def": 75,
     "attributes": {
       "shooting": 66,
       "finishing": 73,
@@ -10962,8 +11730,10 @@
     "age": 29,
     "number": 51,
     "potential": "C",
-    "salary": 6341000,
-    "contractYears": 5
+    "salary": 3309000,
+    "contractYears": 5,
+    "usage": 6.9,
+    "ts": 0.465
   },
   "calvin_booth": {
     "id": "calvin_booth",
@@ -10973,8 +11743,8 @@
       "C"
     ],
     "ovr": 66,
-    "off": 66,
-    "def": 66,
+    "off": 71,
+    "def": 75,
     "attributes": {
       "shooting": 66,
       "finishing": 66,
@@ -10991,7 +11761,9 @@
     "number": 52,
     "potential": "D",
     "salary": 3309000,
-    "contractYears": 1
+    "contractYears": 1,
+    "usage": 12.9,
+    "ts": 0.489
   },
   "tony_delk": {
     "id": "tony_delk",
@@ -11002,7 +11774,7 @@
     ],
     "ovr": 77,
     "off": 76,
-    "def": 73,
+    "def": 72,
     "attributes": {
       "shooting": 80,
       "finishing": 71,
@@ -11019,7 +11791,9 @@
     "number": 0,
     "potential": "D",
     "salary": 11173000,
-    "contractYears": 4
+    "contractYears": 4,
+    "usage": 23.1,
+    "ts": 0.519
   },
   "chauncey_billups": {
     "id": "chauncey_billups",
@@ -11029,9 +11803,9 @@
       "PG",
       "SG"
     ],
-    "ovr": 93,
-    "off": 89,
-    "def": 71,
+    "ovr": 89,
+    "off": 85,
+    "def": 74,
     "attributes": {
       "shooting": 95,
       "finishing": 71,
@@ -11047,8 +11821,10 @@
     "age": 29,
     "number": 1,
     "potential": "C",
-    "salary": 50724000,
-    "contractYears": 1
+    "salary": 40518000,
+    "contractYears": 1,
+    "usage": 22.1,
+    "ts": 0.603
   },
   "ben_wallace": {
     "id": "ben_wallace",
@@ -11057,9 +11833,9 @@
     "positions": [
       "C"
     ],
-    "ovr": 84,
-    "off": 73,
-    "def": 88,
+    "ovr": 85,
+    "off": 76,
+    "def": 79,
     "attributes": {
       "shooting": 67,
       "finishing": 83,
@@ -11075,8 +11851,10 @@
     "age": 31,
     "number": 3,
     "potential": "D",
-    "salary": 23004000,
-    "contractYears": 3
+    "salary": 24975000,
+    "contractYears": 3,
+    "usage": 12.6,
+    "ts": 0.489
   },
   "maurice_evans": {
     "id": "maurice_evans",
@@ -11085,8 +11863,8 @@
     "positions": [
       "SG"
     ],
-    "ovr": 74,
-    "off": 73,
+    "ovr": 75,
+    "off": 74,
     "def": 74,
     "attributes": {
       "shooting": 75,
@@ -11103,8 +11881,10 @@
     "age": 27,
     "number": 5,
     "potential": "C",
-    "salary": 9124000,
-    "contractYears": 2
+    "salary": 10052000,
+    "contractYears": 2,
+    "usage": 16.6,
+    "ts": 0.533
   },
   "lindsey_hunter": {
     "id": "lindsey_hunter",
@@ -11115,7 +11895,7 @@
     ],
     "ovr": 72,
     "off": 70,
-    "def": 71,
+    "def": 77,
     "attributes": {
       "shooting": 67,
       "finishing": 64,
@@ -11132,7 +11912,9 @@
     "number": 10,
     "potential": "D",
     "salary": 4724000,
-    "contractYears": 1
+    "contractYears": 1,
+    "usage": 16.3,
+    "ts": 0.442
   },
   "kelvin_cato": {
     "id": "kelvin_cato",
@@ -11141,9 +11923,9 @@
     "positions": [
       "C"
     ],
-    "ovr": 69,
-    "off": 67,
-    "def": 73,
+    "ovr": 72,
+    "off": 72,
+    "def": 75,
     "attributes": {
       "shooting": 67,
       "finishing": 73,
@@ -11159,8 +11941,10 @@
     "age": 31,
     "number": 13,
     "potential": "D",
-    "salary": 4154000,
-    "contractYears": 3
+    "salary": 6178000,
+    "contractYears": 3,
+    "usage": 13.8,
+    "ts": 0.565
   },
   "carlos_delfino": {
     "id": "carlos_delfino",
@@ -11172,8 +11956,8 @@
       "SF"
     ],
     "ovr": 69,
-    "off": 69,
-    "def": 72,
+    "off": 70,
+    "def": 75,
     "attributes": {
       "shooting": 68,
       "finishing": 69,
@@ -11190,7 +11974,9 @@
     "number": 20,
     "potential": "B",
     "salary": 3909000,
-    "contractYears": 5
+    "contractYears": 5,
+    "usage": 18.2,
+    "ts": 0.477
   },
   "tayshaun_prince": {
     "id": "tayshaun_prince",
@@ -11200,9 +11986,9 @@
       "SF",
       "PF"
     ],
-    "ovr": 77,
-    "off": 76,
-    "def": 73,
+    "ovr": 83,
+    "off": 77,
+    "def": 74,
     "attributes": {
       "shooting": 78,
       "finishing": 76,
@@ -11218,8 +12004,10 @@
     "age": 26,
     "number": 22,
     "potential": "C",
-    "salary": 13145000,
-    "contractYears": 1
+    "salary": 24744000,
+    "contractYears": 1,
+    "usage": 19.3,
+    "ts": 0.535
   },
   "antonio_mcdyess": {
     "id": "antonio_mcdyess",
@@ -11228,9 +12016,9 @@
     "positions": [
       "SF"
     ],
-    "ovr": 79,
-    "off": 71,
-    "def": 80,
+    "ovr": 78,
+    "off": 73,
+    "def": 75,
     "attributes": {
       "shooting": 68,
       "finishing": 77,
@@ -11246,8 +12034,10 @@
     "age": 31,
     "number": 24,
     "potential": "D",
-    "salary": 13802000,
-    "contractYears": 5
+    "salary": 12488000,
+    "contractYears": 5,
+    "usage": 19.3,
+    "ts": 0.528
   },
   "richard_hamilton": {
     "id": "richard_hamilton",
@@ -11256,9 +12046,9 @@
     "positions": [
       "SG"
     ],
-    "ovr": 81,
-    "off": 80,
-    "def": 71,
+    "ovr": 84,
+    "off": 78,
+    "def": 73,
     "attributes": {
       "shooting": 82,
       "finishing": 81,
@@ -11274,8 +12064,10 @@
     "age": 28,
     "number": 32,
     "potential": "C",
-    "salary": 20104000,
-    "contractYears": 5
+    "salary": 27063000,
+    "contractYears": 5,
+    "usage": 26.4,
+    "ts": 0.544
   },
   "dale_davis": {
     "id": "dale_davis",
@@ -11286,8 +12078,8 @@
       "SF"
     ],
     "ovr": 66,
-    "off": 66,
-    "def": 66,
+    "off": 73,
+    "def": 74,
     "attributes": {
       "shooting": 66,
       "finishing": 66,
@@ -11304,7 +12096,9 @@
     "number": 34,
     "potential": "D",
     "salary": 2151000,
-    "contractYears": 3
+    "contractYears": 3,
+    "usage": 11.5,
+    "ts": 0.498
   },
   "rasheed_wallace": {
     "id": "rasheed_wallace",
@@ -11313,9 +12107,9 @@
     "positions": [
       "SF"
     ],
-    "ovr": 82,
+    "ovr": 86,
     "off": 78,
-    "def": 79,
+    "def": 77,
     "attributes": {
       "shooting": 87,
       "finishing": 70,
@@ -11331,8 +12125,10 @@
     "age": 31,
     "number": 36,
     "potential": "D",
-    "salary": 19060000,
-    "contractYears": 2
+    "salary": 27342000,
+    "contractYears": 2,
+    "usage": 21.4,
+    "ts": 0.518
   },
   "jason_maxiell": {
     "id": "jason_maxiell",
@@ -11343,8 +12139,8 @@
       "SF"
     ],
     "ovr": 66,
-    "off": 66,
-    "def": 66,
+    "off": 71,
+    "def": 72,
     "attributes": {
       "shooting": 66,
       "finishing": 66,
@@ -11361,7 +12157,9 @@
     "number": 54,
     "potential": "B",
     "salary": 2648000,
-    "contractYears": 5
+    "contractYears": 5,
+    "usage": 21.8,
+    "ts": 0.463
   },
   "melvin_ely": {
     "id": "melvin_ely",
@@ -11371,9 +12169,9 @@
       "C",
       "PF"
     ],
-    "ovr": 80,
-    "off": 75,
-    "def": 77,
+    "ovr": 75,
+    "off": 72,
+    "def": 73,
     "attributes": {
       "shooting": 69,
       "finishing": 89,
@@ -11389,8 +12187,10 @@
     "age": 28,
     "number": 2,
     "potential": "C",
-    "salary": 17784000,
-    "contractYears": 4
+    "salary": 10052000,
+    "contractYears": 4,
+    "usage": 19.8,
+    "ts": 0.519
   },
   "gerald_wallace": {
     "id": "gerald_wallace",
@@ -11400,9 +12200,9 @@
       "SF",
       "PF"
     ],
-    "ovr": 87,
-    "off": 76,
-    "def": 84,
+    "ovr": 85,
+    "off": 77,
+    "def": 78,
     "attributes": {
       "shooting": 71,
       "finishing": 92,
@@ -11418,8 +12218,10 @@
     "age": 23,
     "number": 3,
     "potential": "A",
-    "salary": 27960000,
-    "contractYears": 2
+    "salary": 23506000,
+    "contractYears": 2,
+    "usage": 19.2,
+    "ts": 0.553
   },
   "primoz_brezec": {
     "id": "primoz_brezec",
@@ -11429,8 +12231,8 @@
       "C"
     ],
     "ovr": 78,
-    "off": 72,
-    "def": 75,
+    "off": 75,
+    "def": 71,
     "attributes": {
       "shooting": 71,
       "finishing": 83,
@@ -11447,7 +12249,9 @@
     "number": 7,
     "potential": "C",
     "salary": 14691000,
-    "contractYears": 5
+    "contractYears": 5,
+    "usage": 19.5,
+    "ts": 0.551
   },
   "kevin_burleson": {
     "id": "kevin_burleson",
@@ -11457,8 +12261,8 @@
       "SG"
     ],
     "ovr": 66,
-    "off": 66,
-    "def": 66,
+    "off": 68,
+    "def": 75,
     "attributes": {
       "shooting": 66,
       "finishing": 66,
@@ -11475,7 +12279,9 @@
     "number": 12,
     "potential": "C",
     "salary": 3309000,
-    "contractYears": 1
+    "contractYears": 1,
+    "usage": 16.0,
+    "ts": 0.406
   },
   "matt_carroll": {
     "id": "matt_carroll",
@@ -11484,8 +12290,8 @@
     "positions": [
       "SG"
     ],
-    "ovr": 76,
-    "off": 72,
+    "ovr": 77,
+    "off": 75,
     "def": 73,
     "attributes": {
       "shooting": 80,
@@ -11502,8 +12308,10 @@
     "age": 25,
     "number": 13,
     "potential": "C",
-    "salary": 9279000,
-    "contractYears": 5
+    "salary": 10516000,
+    "contractYears": 5,
+    "usage": 21.1,
+    "ts": 0.537
   },
   "alan_anderson": {
     "id": "alan_anderson",
@@ -11516,7 +12324,7 @@
     ],
     "ovr": 71,
     "off": 73,
-    "def": 71,
+    "def": 72,
     "attributes": {
       "shooting": 77,
       "finishing": 71,
@@ -11533,7 +12341,9 @@
     "number": 15,
     "potential": "B",
     "salary": 5072000,
-    "contractYears": 3
+    "contractYears": 3,
+    "usage": 18.0,
+    "ts": 0.523
   },
   "raymond_felton": {
     "id": "raymond_felton",
@@ -11543,9 +12353,9 @@
       "PG",
       "SG"
     ],
-    "ovr": 81,
-    "off": 81,
-    "def": 75,
+    "ovr": 80,
+    "off": 76,
+    "def": 73,
     "attributes": {
       "shooting": 80,
       "finishing": 71,
@@ -11561,8 +12371,10 @@
     "age": 22,
     "number": 20,
     "potential": "A",
-    "salary": 11057000,
-    "contractYears": 1
+    "salary": 9781000,
+    "contractYears": 1,
+    "usage": 21.2,
+    "ts": 0.485
   },
   "bernard_robinson": {
     "id": "bernard_robinson",
@@ -11571,9 +12383,9 @@
     "positions": [
       "SF"
     ],
-    "ovr": 77,
+    "ovr": 74,
     "off": 71,
-    "def": 79,
+    "def": 75,
     "attributes": {
       "shooting": 67,
       "finishing": 78,
@@ -11589,8 +12401,10 @@
     "age": 25,
     "number": 21,
     "potential": "C",
-    "salary": 10516000,
-    "contractYears": 5
+    "salary": 7299000,
+    "contractYears": 5,
+    "usage": 16.8,
+    "ts": 0.501
   },
   "brevin_knight": {
     "id": "brevin_knight",
@@ -11599,8 +12413,8 @@
     "positions": [
       "SG"
     ],
-    "ovr": 86,
-    "off": 78,
+    "ovr": 83,
+    "off": 76,
     "def": 76,
     "attributes": {
       "shooting": 68,
@@ -11617,8 +12431,10 @@
     "age": 30,
     "number": 22,
     "potential": "D",
-    "salary": 32167000,
-    "contractYears": 4
+    "salary": 24744000,
+    "contractYears": 4,
+    "usage": 19.7,
+    "ts": 0.485
   },
   "jumaine_jones": {
     "id": "jumaine_jones",
@@ -11627,9 +12443,9 @@
     "positions": [
       "SF"
     ],
-    "ovr": 76,
-    "off": 73,
-    "def": 76,
+    "ovr": 78,
+    "off": 75,
+    "def": 72,
     "attributes": {
       "shooting": 83,
       "finishing": 67,
@@ -11645,8 +12461,10 @@
     "age": 27,
     "number": 33,
     "potential": "C",
-    "salary": 11599000,
-    "contractYears": 2
+    "salary": 14691000,
+    "contractYears": 2,
+    "usage": 17.0,
+    "ts": 0.522
   },
   "lonny_baxter": {
     "id": "lonny_baxter",
@@ -11656,8 +12474,8 @@
       "SF"
     ],
     "ovr": 66,
-    "off": 66,
-    "def": 66,
+    "off": 71,
+    "def": 73,
     "attributes": {
       "shooting": 66,
       "finishing": 66,
@@ -11674,7 +12492,9 @@
     "number": 35,
     "potential": "C",
     "salary": 3309000,
-    "contractYears": 5
+    "contractYears": 5,
+    "usage": 16.5,
+    "ts": 0.495
   },
   "sean_may": {
     "id": "sean_may",
@@ -11683,9 +12503,9 @@
     "positions": [
       "SF"
     ],
-    "ovr": 79,
-    "off": 71,
-    "def": 81,
+    "ovr": 75,
+    "off": 73,
+    "def": 73,
     "attributes": {
       "shooting": 66,
       "finishing": 80,
@@ -11700,9 +12520,11 @@
     "photoUrl": "https://cdn.nba.com/headshots/nba/latest/1040x760/101118.png",
     "age": 22,
     "number": 42,
-    "potential": "A",
-    "salary": 8931000,
-    "contractYears": 4
+    "potential": "B",
+    "salary": 5529000,
+    "contractYears": 4,
+    "usage": 24.1,
+    "ts": 0.487
   },
   "jake_voskuhl": {
     "id": "jake_voskuhl",
@@ -11711,9 +12533,9 @@
     "positions": [
       "C"
     ],
-    "ovr": 73,
-    "off": 68,
-    "def": 78,
+    "ovr": 66,
+    "off": 69,
+    "def": 74,
     "attributes": {
       "shooting": 67,
       "finishing": 71,
@@ -11729,8 +12551,10 @@
     "age": 28,
     "number": 43,
     "potential": "C",
-    "salary": 8196000,
-    "contractYears": 2
+    "salary": 3309000,
+    "contractYears": 2,
+    "usage": 16.4,
+    "ts": 0.486
   },
   "emeka_okafor": {
     "id": "emeka_okafor",
@@ -11739,9 +12563,9 @@
     "positions": [
       "C"
     ],
-    "ovr": 80,
-    "off": 70,
-    "def": 82,
+    "ovr": 78,
+    "off": 74,
+    "def": 72,
     "attributes": {
       "shooting": 66,
       "finishing": 81,
@@ -11757,7 +12581,9 @@
     "age": 23,
     "number": 50,
     "potential": "A",
-    "salary": 14228000,
-    "contractYears": 5
+    "salary": 11753000,
+    "contractYears": 5,
+    "usage": 21.5,
+    "ts": 0.476
   }
 }

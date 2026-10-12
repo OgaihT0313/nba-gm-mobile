@@ -1,12 +1,12 @@
-// League shape for the historical eras: their ratings come from the classic
-// pipeline, not the BPM model the default league now uses, and the engine's
-// matchup strength is shared -- so this checks that an era season still lands
-// in a real NBA shape (win spread, best/worst record) and reports how close it
-// gets to that season's real standings where BBRef would have them.
+// League shape for the historical eras -- an era season must land in a real
+// NBA shape (win spread, best/worst record) -- and how close it gets to that
+// season's real standings: r between simulated and real wins per team, from
+// scripts/fixtures/era_records.json (pipeline/export_era_records.py).
 //
-// Run: bash scratchpad/run.sh check_eras [seasonsPerEra]
+// Run: npx tsx scripts/check_eras.ts [seasonsPerEra] [all]
 import type { Team, Player, SeasonState } from '../types';
 import { ERAS } from '../data/eras';
+import eraRecords from './fixtures/era_records.json';
 import { simulationEngine } from '../services/simulationService';
 import { generateSchedule } from '../services/scheduleService';
 import { simulateOneDay } from '../services/seasonRunner';
@@ -34,17 +34,33 @@ const build = (teamsIn: Team[], playersIn: { [k: string]: Player }): SeasonState
   };
 };
 
-const all: { sd: number; best: number; worst: number }[] = [];
-ERAS.filter((_, i) => i % 3 === 0).forEach(era => {
+const REAL = eraRecords as unknown as Record<string, Record<string, number>>;
+const pearson = (xs: number[], ys: number[]) => {
+  const mx = mean(xs), my = mean(ys);
+  let n = 0, dx = 0, dy = 0;
+  xs.forEach((x, i) => { n += (x - mx) * (ys[i] - my); dx += (x - mx) ** 2; dy += (ys[i] - my) ** 2; });
+  return n / (Math.sqrt(dx * dy) || 1);
+};
+const all: { sd: number; best: number; worst: number; r?: number }[] = [];
+ERAS.filter((_, i) => process.argv[3] === 'all' || i % 3 === 0).forEach(era => {
+  const simWins: Record<string, number[]> = {};
   const sds: number[] = [], best: number[] = [], worst: number[] = [];
   for (let r = 0; r < RUNS; r++) {
     let s = build(era.teams, era.players);
     const days = Math.max(...s.schedule.map(g => g.day));
     for (let d = 0; d < days; d++) s = simulateOneDay(s).season;
     const w = s.teams.map(t => t.wins || 0);
+    s.teams.forEach(t => { (simWins[t.id] ??= []).push(t.wins || 0); });
     sds.push(sd(w)); best.push(Math.max(...w)); worst.push(Math.min(...w));
   }
-  all.push({ sd: mean(sds), best: mean(best), worst: mean(worst) });
-  console.log(`${era.label.padEnd(36)} dp vitórias ${mean(sds).toFixed(1)}   melhor ${mean(best).toFixed(0)}   pior ${mean(worst).toFixed(0)}`);
+  const real = REAL[era.id];
+  const ids = real ? Object.keys(real).filter(id => simWins[id]) : [];
+  const r = ids.length > 10 ? pearson(ids.map(id => mean(simWins[id])), ids.map(id => real[id])) : undefined;
+  all.push({ sd: mean(sds), best: mean(best), worst: mean(worst), r });
+  console.log(`${era.label.padEnd(36)} dp vitórias ${mean(sds).toFixed(1)}   melhor ${mean(best).toFixed(0)}   pior ${mean(worst).toFixed(0)}`
+    + (r !== undefined ? `   r x real ${r.toFixed(2)}` : ''));
 });
+const rs = all.map(a => a.r).filter((x): x is number => x !== undefined);
+if (rs.length) console.log(`
+Vitórias simuladas x reais: r médio ${mean(rs).toFixed(2)} (pior ${Math.min(...rs).toFixed(2)}) em ${rs.length} eras`);
 console.log(`\nMédia das eras: dp ${mean(all.map(a => a.sd)).toFixed(1)} (real ~12-14), melhor ${mean(all.map(a => a.best)).toFixed(0)} (real ~60-67), pior ${mean(all.map(a => a.worst)).toFixed(0)} (real ~15-22)`);

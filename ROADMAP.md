@@ -25,7 +25,7 @@ sem o time do usuário). O resto, em ordem. **L** = lapidar algo que existe,
 | 3 | Ratings de veteranos no pipeline — **FEITO** (2026-10-12) | L | P | Erro de dado visível (McConnell OVR 88 aos 34) e barato de corrigir |
 | 4 | Redesign do celular (handoff do Claude Design) | L | G | O usuário está insatisfeito com a UI; o PC já recebeu o redesign |
 | 5 | Histórico da liga e da franquia — **FEITO** (2026-10-12) | N | M | Dá peso aos saves longos, que o item 1 torna possíveis |
-| 6 | Eras no modelo do Basketball-Reference | L | M | 41 eras ainda com ratings antigos e salários sintéticos |
+| 6 | Eras no modelo do Basketball-Reference — **FEITO** (2026-10-12) | L | M | 41 eras ainda com ratings antigos e salários sintéticos |
 | 7 | Desenvolvimento ativo de jogadores — **FEITO** (2026-10-12) | N | M | Hoje a evolução é toda passiva; vira decisão de GM |
 | 8 | 3D — Etapas 1 a 8 restantes — **FEITO** (2026-10-11) | L | G | Segue o PLANO-3D, uma etapa por vez |
 | 9 | Jogo decisivo dentro do 3D — **FEITO** (2026-10-12) | L | M | Junta as duas telas de jogo; depende das etapas 4-5 do 3D |
@@ -121,11 +121,24 @@ time ele se aposentou). Tudo em `services/historyService.ts`, derivado, nada pel
   playoffs de verdade e confere o histórico; com o terceiro argumento grava um save
   pronto para o preview web.
 
-### 6. Eras no modelo novo (L)
+### 6. Eras no modelo novo (L) — FEITO (2026-10-12)
 
-Levar o `fetch_bbref.py` → `apply_bbref.py` às temporadas das eras (o BBRef tem BPM
-desde 1973-74), com salários reais ou derivados do teto da época. Conferir com
-`scripts/check_eras.ts`.
+As 41 eras agora têm ovr/off/def/usage/ts do Basketball-Reference, pelo mesmo
+`apply_bbref.py --ratings --teams` da liga atual (BPM regredido por minutos, com a
+temporada anterior pela metade; OVR mapeado na distribuição da própria era).
+- `fetch_bbref.py --ratings-only` baixa só as páginas advanced (temporada e anterior)
+  e `--standings-only` a classificação; `bbref_join` pula as páginas de dinheiro que
+  uma era não tem.
+- Nomes: `norm_name` não tira mais "JR" do começo (JR Smith), traduz letras que o NFKD
+  não decompõe (Aşık, Guðmundsson), e há aliases para os apelidos da nba_api antiga
+  (World B. Free, Tiny Archibald, Fat Lever, Flip Murray...). Um fallback casa
+  sobrenome + 3 letras do primeiro nome quando é único. A liga atual sai idêntica.
+- Salários continuam sintéticos na escala do teto atual (`compute_salary`), só que
+  recalculados pelo OVR novo (12.911 jogadores).
+- `pipeline/export_era_records.py` grava `scripts/fixtures/era_records.json` (vitórias
+  reais por time), e o `check_eras` mede a correlação. **Vitórias simuladas x reais:
+  r médio 0,54 → 0,86** (pior era 0,35 → 0,73), e as 41 melhoraram. Forma da liga
+  dentro do real (dp 12,3, melhor 62, pior 17).
 
 ### 7. Desenvolvimento ativo (N) — FEITO (2026-10-12)
 
