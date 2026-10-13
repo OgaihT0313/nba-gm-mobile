@@ -25,12 +25,15 @@ export interface SoundEngine {
   buzzer: () => void;
   /** 0-1: how loud the building gets, held for `holdS` seconds, then settles. */
   crowd: (level: number, holdS?: number) => void;
+  /** Silence everything while the app is in the background, and bring it back. */
+  pause: () => void;
+  resume: () => void;
   close: () => void;
 }
 
 const noop: SoundEngine = {
   dribble: () => {}, squeak: () => {}, swish: () => {}, rim: () => {}, dunk: () => {},
-  whistle: () => {}, buzzer: () => {}, crowd: () => {}, close: () => {},
+  whistle: () => {}, buzzer: () => {}, crowd: () => {}, pause: () => {}, resume: () => {}, close: () => {},
 };
 
 const jitter = (v: number, pct: number) => v * (1 + (Math.random() * 2 - 1) * pct);
@@ -78,7 +81,10 @@ export const createSoundEngine = (): SoundEngine => {
     src.start();
   } catch { /* no crowd bed, the rest still plays */ }
 
-  const resume = () => { try { if (ctx.state === 'suspended') ctx.resume(); } catch { /* ignore */ } };
+  // Paused by the app (backgrounded): no sound may wake the context until the
+  // app comes back -- the crowd bed loops forever otherwise, screen off or not.
+  let paused = false;
+  const resume = () => { if (paused) return; try { if (ctx.state === 'suspended') ctx.resume(); } catch { /* ignore */ } };
 
   const tone = (type: string, f0: number, f1: number, dur: number, vol: number, at = 0) => {
     const t = ctx.currentTime + at;
@@ -211,6 +217,8 @@ export const createSoundEngine = (): SoundEngine => {
         crowdGain.gain.exponentialRampToValueAtTime(CROWD_BASE, t + 0.25 + holdS);
       } catch { /* ignore */ }
     },
+    pause: () => { paused = true; try { ctx.suspend(); } catch { /* ignore */ } },
+    resume: () => { paused = false; resume(); },
     close: () => { try { ctx.close(); } catch { /* ignore */ } },
   };
   return engine;

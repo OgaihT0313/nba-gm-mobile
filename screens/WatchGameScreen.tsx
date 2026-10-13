@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { View, Text, Pressable, ScrollView } from 'react-native';
+import { View, Text, Pressable, ScrollView, AppState } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useDesktop } from '../components/desktop/useDesktop';
 
@@ -234,7 +234,13 @@ const WatchGameScreen: React.FC<WatchGameScreenProps> = ({
     engine.whistle(); // tip-off
     const v = voice.current;
     v.setEnabled(lastVoiceOn);
-    return () => { sound.current = null; engine.close(); v.stop(); };
+    // Leaving the app (home button, screen off) silences the arena; coming
+    // back brings it back. Without this the crowd kept roaring in the pocket.
+    const sub = AppState.addEventListener('change', (state) => {
+      if (state === 'active') engine.resume();
+      else { engine.pause(); v.stop(); }
+    });
+    return () => { sub.remove(); sound.current = null; engine.close(); v.stop(); };
   }, []);
   const toggleVoice = () => {
     lastVoiceOn = !voiceOn;
