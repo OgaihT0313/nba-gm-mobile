@@ -174,3 +174,82 @@ export const buildApronDecal = (word: string, primary: string, secondary: string
   const ink = lum(secondary) > 0.35 && Math.abs(lum(primary) - lum(secondary)) >= 0.25 ? secondary : '#f5f5f5';
   return decalTexture(W, H, (p) => fitWord(p, word.toUpperCase(), ink, 'rgba(0,0,0,0.55)', 0.96));
 };
+
+/* ------------------------------------------------------------------ */
+/* The jumbotron on the far wall                                        */
+/* ------------------------------------------------------------------ */
+
+export const JUMBO_W = 768;
+export const JUMBO_H = 256;
+
+/** What the big screen shows. */
+export interface JumboFace {
+  homeLabel: string;
+  awayLabel: string;
+  home: number;
+  away: number;
+  period: string;
+  clock: string;
+  homeColor: string;
+  awayColor: string;
+  accent: string;
+  /** The game's top scorer so far. */
+  leader?: { name: string; pts: number };
+  /** A moment: "DE TRÊS!" with the shooter, "REPLAY"... */
+  message?: { title: string; sub?: string };
+  /** The home team is on defense: the crowd gets told. */
+  defense?: boolean;
+}
+
+export const createJumboTexture = () => {
+  const tex = new THREE.DataTexture(new Uint8Array(JUMBO_W * JUMBO_H * 4), JUMBO_W, JUMBO_H, THREE.RGBAFormat);
+  tex.colorSpace = THREE.SRGBColorSpace;
+  tex.magFilter = THREE.LinearFilter;
+  tex.minFilter = THREE.LinearFilter;
+  return tex;
+};
+
+/** Repaints the jumbotron; false when the brush isn't ready (the screen stays dark). */
+export const paintJumbo = (tex: THREE.DataTexture, f: JumboFace): boolean => {
+  const p = createPainter(JUMBO_W, JUMBO_H);
+  if (!p) return false;
+  const W = JUMBO_W;
+  const H = JUMBO_H;
+  const TOP = 70;
+  p.rect(0, 0, W, H, '#05060a');
+  // Score bar: each team's color block with its tricode and score, the
+  // period and clock between them.
+  const block = 250;
+  p.rect(0, 0, block, TOP, f.homeColor);
+  p.rect(W - block, 0, block, TOP, f.awayColor);
+  const onBlock = (c: string) => (lum(c) > 0.55 ? '#141418' : '#f5f5f5');
+  p.text(f.homeLabel, 18, 54, 50, onBlock(f.homeColor), { align: 'left' });
+  p.text(String(f.home), block - 64, 56, 60, onBlock(f.homeColor));
+  p.text(f.awayLabel, W - block + 18, 54, 50, onBlock(f.awayColor), { align: 'left' });
+  p.text(String(f.away), W - 64, 56, 60, onBlock(f.awayColor));
+  p.text(`${f.period}  ${f.clock}`, W / 2, 52, 46, '#f5f5f5');
+  p.rect(0, TOP, W, 4, f.accent);
+  // The main panel.
+  const mid = TOP + (H - TOP) / 2;
+  const big = (word: string, color: string, size: number, y: number) => {
+    const s = Math.min(size, (W * 0.92) / Math.max(1, p.textWidth(word, 100) / 100));
+    p.text(word, W / 2, y, s, color, { stroke: '#000000', strokeWidth: Math.max(3, s * 0.05) });
+  };
+  if (f.message) {
+    big(f.message.title, f.accent === '#f5f5f5' ? '#ffd23f' : f.accent, f.message.sub ? 104 : 130, f.message.sub ? mid + 22 : mid + 44);
+    if (f.message.sub) big(f.message.sub.toUpperCase(), '#f5f5f5', 46, H - 16);
+  } else if (f.defense) {
+    big('DEFENSE!', '#f5f5f5', 140, mid + 48);
+  } else if (f.leader) {
+    p.text('CESTINHA DO JOGO', W / 2, TOP + 46, 30, f.accent === '#f5f5f5' ? '#ffd23f' : f.accent);
+    big(f.leader.name.toUpperCase(), '#f5f5f5', 82, TOP + 122);
+    p.text(`${f.leader.pts} PONTOS`, W / 2, H - 14, 36, '#c9c9c9');
+  } else {
+    big(f.homeLabel, f.homeColor, 120, mid + 42);
+  }
+  const px = p.pixels();
+  if (!px) return false;
+  flipInto(px, tex.image.data as Uint8Array, W, H);
+  tex.needsUpdate = true;
+  return true;
+};

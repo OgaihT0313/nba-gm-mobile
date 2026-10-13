@@ -4,13 +4,13 @@ import { Canvas, useFrame, useThree } from '@react-three/fiber/native';
 import * as THREE from 'three';
 
 import type { CourtState } from '../../services/watchDirector';
-import Arena, { RIM_X, type CrowdHype, type ScoreboardData } from './Arena';
+import Arena, { RIM_X, type CrowdHype, type JumboData, type ScoreboardData } from './Arena';
 import { createRig, dribblePhase, type Rig, type RigPlayer } from './PlayerRig';
 import { loadPainterFont, painterReady } from './painter';
 import { buildApronDecal, buildCenterDecal } from './richTextures';
 import { buildBallTexture, buildFloorTexture, buildShadowTexture, hexToRgb, FLOOR_L, FLOOR_W } from './textures';
 
-export type { ScoreboardData, CrowdHype };
+export type { ScoreboardData, CrowdHype, JumboData };
 
 /** What the court hears: the ball off the floor, a sneaker on it. */
 export type CourtSound = 'bounce' | 'squeak';
@@ -61,6 +61,8 @@ interface CameraPreset {
   follow: number;
   /** Look-at height. The close camera aims at chest height, not the floor. */
   targetY?: number;
+  /** Cut to this framing (and away from it) instead of easing: the replay. */
+  instant?: boolean;
   /** Fraction of the gap to the ball the camera still has left after one
    * second -- small is snappy. The wide shots drift; the close one has to
    * stay on the play or it films an empty floor. */
@@ -112,6 +114,11 @@ interface Court3DProps {
   crowd?: React.MutableRefObject<CrowdHype>;
   /** Called when the ball hits the floor or a shoe squeaks, for the sound. */
   onSound?: (kind: CourtSound) => void;
+  /** A replay is on: the low camera at the hoop being attacked (+1 = the +x
+   *  hoop), and the bodies' own motion slowed to match the playback. */
+  replay?: { hoopSide: 1 | -1; slow: number } | null;
+  /** The far-wall jumbotron. */
+  jumbo?: JumboData;
 }
 
 const DEFAULT_FLOOR_COLOR = '#caa271'; // light maple
@@ -178,7 +185,15 @@ function CameraRig({
     const s = stateRef.current;
     const k = 1 - Math.pow(0.02, dt); // frame-rate independent easing
     if (lastPreset.current !== preset) {
-      blend.current = { preset, from: { angle: s.angle, elev: s.elev, dist: s.dist }, t: 0 };
+      if (preset.instant || lastPreset.current.instant) {
+        // A replay cuts in and out, like a broadcast's.
+        s.angle = preset.angle;
+        s.elev = preset.elev;
+        s.dist = preset.dist;
+        blend.current = null;
+      } else {
+        blend.current = { preset, from: { angle: s.angle, elev: s.elev, dist: s.dist }, t: 0 };
+      }
       lastPreset.current = preset;
     }
     if (!s.dragging) {
@@ -412,14 +427,18 @@ const BALL_HANDOFF = 0.12;
 const SQUEAK_EVERY = 0.35;
 
 function PlayersAndBall({
-  home, away, courtRef, bodies, onSound,
+  home, away, courtRef, bodies, onSound, slow = 1,
 }: {
   home: TeamVisual;
   away: TeamVisual;
   courtRef: React.MutableRefObject<CourtState | null>;
   bodies?: { [playerId: string]: RigPlayer };
   onSound?: React.MutableRefObject<((kind: CourtSound) => void) | undefined>;
+  /** Playback slowed to this fraction (a replay): strides, dribbles and the
+   *  ball's hand-offs slow with it. */
+  slow?: number;
 }) {
+  const simTime = useRef(0);
   const shadowMat = useMemo(() => new THREE.MeshBasicMaterial({
     map: buildShadowTexture(), transparent: true, depthWrite: false,
   }), []);
@@ -461,10 +480,12 @@ function PlayersAndBall({
     owner: -2, blend: 1, lastY: 0, lastVy: 0, lastSqueak: 0,
   }), []);
 
-  useFrame(({ clock }, dt) => {
+  useFrame((_, realDt) => {
     const court = courtRef.current;
     if (!court) return;
-    const t = clock.getElapsedTime();
+    const dt = realDt * slow;
+    simTime.current += dt;
+    const t = simTime.current;
     const snap = court.cut !== lastCut.current;
     lastCut.current = court.cut;
 
@@ -570,7 +591,7 @@ function PlayersAndBall({
 /* Scene root.                                                         */
 /* ------------------------------------------------------------------ */
 function Scene({
-  home, away, courtRef, visual, homeLabel, bodies, scoreboard, banners, homeNickname, homeCity, crowd, soundRef,
+  home, away, courtRef, visual, homeLabel, bodies, scoreboard, banners, homeNickname, homeCity, crowd, soundRef, replay, jumbo,
 }: Omit<Court3DProps, 'cameraView' | 'onSound'> & { soundRef: React.MutableRefObject<((kind: CourtSound) => void) | undefined> }) {
   // The type on the floor waits for the brush's font (painter.ts): until it
   // is in -- or if it never loads -- the floor paints its own pixel lettering.
@@ -616,20 +637,29 @@ function Scene({
         homeLabel={homeLabel}
         banners={banners}
         hype={crowd}
+        jumbo={jumbo}
       />
-      <PlayersAndBall home={home} away={away} courtRef={courtRef} bodies={bodies} onSound={soundRef} />
+      <PlayersAndBall home={home} away={away} courtRef={courtRef} bodies={bodies} onSound={soundRef} slow={replay?.slow ?? 1} />
     </>
   );
 }
 
 export default function Court3D({
   home, away, courtRef, visual, cameraView = 'iso', homeLabel, bodies, scoreboard, insets, banners,
-  homeNickname, homeCity, crowd, onSound,
+  homeNickname, homeCity, crowd, onSound, replay, jumbo,
 }: Court3DProps) {
   // Read through a ref so a new callback each render never rebuilds the scene.
   const soundRef = useRef(onSound);
   soundRef.current = onSound;
-  const preset = CAMERA_PRESETS[cameraView];
+  // The replay camera: low, a few steps off the baseline at the hoop being
+  // attacked, looking back up the floor at the play -- the angle the
+  // broadcast never had live. It rides the ball like the close camera.
+  const replaySide = replay?.hoopSide ?? 0;
+  const replayPreset = useMemo<CameraPreset | null>(() => (replaySide === 0 ? null : {
+    angle: replaySide > 0 ? -0.5 : Math.PI + 0.5,
+    elev: 0.2, dist: 40, autoRotate: false, follow: 1, targetY: 6, lag: 0.02, instant: true,
+  }), [replaySide]);
+  const preset = replayPreset ?? CAMERA_PRESETS[cameraView];
   const camState = useRef<CameraDragState>({
     angle: CAMERA_PRESETS.iso.angle, elev: CAMERA_PRESETS.iso.elev, dist: CAMERA_PRESETS.iso.dist, dragging: false,
   });
@@ -666,6 +696,7 @@ export default function Court3D({
         <Scene
           home={home} away={away} courtRef={courtRef} visual={visual} homeLabel={homeLabel} bodies={bodies}
           scoreboard={scoreboard} banners={banners} homeNickname={homeNickname} homeCity={homeCity} crowd={crowd} soundRef={soundRef}
+          replay={replay} jumbo={jumbo}
         />
       </Canvas>
     </View>

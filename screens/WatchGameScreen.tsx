@@ -17,18 +17,21 @@ import {
   initialEnergy,
   breakRecovery,
   rotationAt,
+  playbackRate,
+  replayWindow,
   REGULATION_QUARTERS,
   type CourtSide,
   type CourtState,
   type Energy,
   type FiveOnCourt,
+  type Possession,
   type QuarterPlan,
 } from '../services/watchDirector';
 import { eraGroupForEraId } from '../data/eras';
 import { getEraVisual } from '../src/theme/eraVisuals';
 import { COLORS, INK, RADIUS, FONT, withAlpha, onAccent, ovrColor } from '../src/theme/tokens';
 import { Panel, MonoLabel, Stat, CtaButton, GhostButton, Meter } from '../components/ui/kit';
-import Court3D, { CameraView, type CourtSound } from '../components/court3d/Court3D';
+import Court3D, { CameraView, type CourtSound, type JumboData } from '../components/court3d/Court3D';
 import { cheer, newCrowdHype } from '../components/court3d/Arena';
 import type { RigPlayer } from '../components/court3d/PlayerRig';
 import { createSoundEngine, type SoundEngine } from '../components/court3d/sound/soundEngine';
@@ -72,6 +75,15 @@ const SHOT_LABEL: { [points in 1 | 2 | 3]: string } = {
 // at ~250 ft/s, and the slow-motion trip after a called play, which only
 // existed because a possession used to flash by in under two seconds.
 const MAX_QUARTER = 8; // 4 regulation + 4 OT, a safety valve against an endless game
+
+// Replays (the big plays, again, slowed, from the baseline): a dunk, a three
+// of yours, or anyone's three in the fourth quarter on. Not at 4x -- that's
+// the user saying he wants it over with -- and not more than one every
+// REPLAY_GAP game-seconds, or a hot quarter turns into a highlight package.
+const REPLAY_SLOW = 0.5;
+const REPLAY_GAP = 90;
+/** How long the jumbotron holds a moment ("DE TRÊS!"), ms. */
+const JUMBO_MOMENT = 3200;
 
 type Phase = 'huddle' | 'live' | 'final';
 
@@ -189,6 +201,13 @@ const WatchGameScreen: React.FC<WatchGameScreenProps> = ({
   const firedRef = useRef(0); // possessions already announced
   const speedRef = useRef(1);
   const playRef = useRef<WatchPlay>('pick_roll');
+  // A basket waiting for its replay (starts when its trip ends), the replay
+  // running, and when the last one was (quarter * 10000 + seconds).
+  const pendingReplay = useRef<Possession | null>(null);
+  const replayRef = useRef<{ plan: QuarterPlan; t: number; to: number } | null>(null);
+  const lastReplayAt = useRef(-Infinity);
+  // Points per player this game, for the jumbotron's top scorer.
+  const pointsRef = useRef<Map<string, number>>(new Map());
 
   // --- State, updated a few times a second, never per frame. ---
   const [phase, setPhase] = useState<Phase>('huddle');
@@ -220,6 +239,10 @@ const WatchGameScreen: React.FC<WatchGameScreenProps> = ({
   const [selectedSlot, setSelectedSlot] = useState<number | null>(null);
   // The user's five and their energy as of the last scoreboard refresh.
   const [liveFive, setLiveFive] = useState<{ id: string; name: string; energy: number }[]>([]);
+  const [replaying, setReplaying] = useState<1 | -1 | 0>(0);
+  const [homeDefending, setHomeDefending] = useState(false);
+  const [leader, setLeader] = useState<{ name: string; pts: number } | undefined>(undefined);
+  const [moment, setMoment] = useState<{ title: string; sub?: string } | undefined>(undefined);
 
   // Live-synthesized sound (components/court3d/sound): one engine for the
   // screen, opened on mount and closed on the way out.
@@ -253,7 +276,7 @@ const WatchGameScreen: React.FC<WatchGameScreenProps> = ({
   // when a player plants or cuts hard. They used to be a timer, unrelated to
   // anything on screen.
   const onCourtSound = useMemo(() => (kind: CourtSound) => {
-    if (phaseRef.current !== 'live') return;
+    if (phaseRef.current !== 'live' || replayRef.current) return;
     if (kind === 'bounce') sound.current?.dribble(); else sound.current?.squeak();
   }, []);
   // Who led after the last basket, for the announcer's "virada".
@@ -339,6 +362,7 @@ const WatchGameScreen: React.FC<WatchGameScreenProps> = ({
   };
 
   const endQuarter = () => {
+    pendingReplay.current = null;
     const final = scoreAt(quarterSeconds(quarterRef.current));
     const q = quarterRef.current;
     const ended = planRef.current;
@@ -397,6 +421,7 @@ const WatchGameScreen: React.FC<WatchGameScreenProps> = ({
         continue;
       }
       const pts = Math.min(3, Math.max(1, p.points)) as 1 | 2 | 3;
+      pointsRef.current.set(p.scorerName, (pointsRef.current.get(p.scorerName) ?? 0) + p.points);
       setBanner({
         text: `${SHOT_LABEL[pts]}${p.points > 3 ? ` (+${p.points})` : ''}`,
         sub: p.assistName ? `${p.scorerName} · passe de ${p.assistName}` : p.scorerName,
@@ -407,6 +432,17 @@ const WatchGameScreen: React.FC<WatchGameScreenProps> = ({
       const dunk = p.finish === 'dunk';
       if (dunk) sound.current?.dunk(); else sound.current?.swish();
       const big = dunk || pts === 3;
+      // The jumbotron calls the home team's baskets.
+      if (p.side === 'home') {
+        setMoment({ title: dunk ? 'ENTERRADA!' : pts === 3 ? 'DE TRÊS!' : pts === 1 ? 'LANCE LIVRE' : 'CESTA!', sub: spokenName(p.scorerName) });
+      }
+      // Worth seeing again?
+      const gameT = quarterRef.current * 10000 + p.shotAt;
+      if (speedRef.current === 1 && (dunk || (pts === 3 && (p.side === userSide || quarterRef.current >= REGULATION_QUARTERS)))
+        && gameT - lastReplayAt.current >= REPLAY_GAP) {
+        pendingReplay.current = p;
+        lastReplayAt.current = gameT;
+      }
       if (p.side === 'home') {
         sound.current?.crowd(big ? 0.85 : pts === 2 ? 0.4 : 0.2, big ? 2.4 : 1.4);
         // ...and the building gets up: on its feet for a dunk or a three.
@@ -431,6 +467,30 @@ const WatchGameScreen: React.FC<WatchGameScreenProps> = ({
     }
   };
 
+  const startReplay = (p: Possession) => {
+    const plan = planRef.current;
+    if (!plan) return;
+    const w = replayWindow(p);
+    replayRef.current = { plan, t: w.from, to: w.to };
+    cutRef.current++;
+    setReplaying(p.side === 'home' ? 1 : -1);
+    setMoment({ title: 'REPLAY', sub: spokenName(p.scorerName) });
+  };
+  const endReplay = () => {
+    if (!replayRef.current) return;
+    replayRef.current = null;
+    cutRef.current++;
+    setReplaying(0);
+    setMoment(undefined);
+    // Back to the game where it was.
+    const plan = planRef.current;
+    if (plan) {
+      const court = courtStateAt(plan, clockRef.current, fives.current.home, fives.current.away);
+      if (court) court.cut = cutRef.current;
+      courtRef.current = court;
+    }
+  };
+
   /* ---------------------------------------------------------------- */
   /* The playback loop. One rAF for the whole screen: it advances the  */
   /* clock, writes the court state into courtRef (which Court3D reads  */
@@ -447,6 +507,17 @@ const WatchGameScreen: React.FC<WatchGameScreenProps> = ({
       last = now;
       if (phaseRef.current !== 'live' || !planRef.current) return;
 
+      // A replay holds the game clock and plays its window again, slowed.
+      const r = replayRef.current;
+      if (r) {
+        r.t += dt * playbackRate(r.plan, r.t) * REPLAY_SLOW;
+        if (r.t >= r.to) { endReplay(); return; }
+        const court = courtStateAt(r.plan, r.t, fives.current.home, fives.current.away);
+        if (court) court.cut = cutRef.current;
+        courtRef.current = court;
+        return;
+      }
+
       const step = advanceClock(planRef.current, clockRef.current, dt, { speed: speedRef.current, userSide });
       clockRef.current = step.seconds;
       if (step.cut) cutRef.current++;
@@ -457,6 +528,12 @@ const WatchGameScreen: React.FC<WatchGameScreenProps> = ({
         announce();
         endQuarter();
         return;
+      }
+      // The trip with a replay owed is over: show it before the next one.
+      const owed = pendingReplay.current;
+      if (owed && clockRef.current >= owed.end) {
+        pendingReplay.current = null;
+        if (speedRef.current === 1) { startReplay(owed); return; }
       }
       const court = courtStateAt(
         planRef.current, clockRef.current, fives.current.home, fives.current.away,
@@ -479,6 +556,10 @@ const WatchGameScreen: React.FC<WatchGameScreenProps> = ({
       setScore(scoreAt(clockRef.current));
       const trip = planRef.current ? possessionAt(planRef.current, clockRef.current) : null;
       setShotClock(trip && clockRef.current < trip.end ? Math.max(0, 24 - (clockRef.current - trip.start)) : undefined);
+      setHomeDefending(!!trip && trip.side === 'away' && !replayRef.current);
+      let top: { name: string; pts: number } | undefined;
+      pointsRef.current.forEach((pts, name) => { if (!top || pts > top.pts) top = { name, pts }; });
+      setLeader((prev) => (top && (!prev || prev.name !== top.name || prev.pts !== top.pts) ? top : prev));
       const at = planRef.current ? rotationAt(planRef.current, clockRef.current) : null;
       if (at) {
         const five = userSide === 'home' ? at.fiveHome : at.fiveAway;
@@ -489,6 +570,13 @@ const WatchGameScreen: React.FC<WatchGameScreenProps> = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // The jumbotron's moment clears itself, except the replay's.
+  useEffect(() => {
+    if (!moment || moment.title === 'REPLAY') return;
+    const id = setTimeout(() => setMoment(undefined), JUMBO_MOMENT);
+    return () => clearTimeout(id);
+  }, [moment]);
+
   // Banners clear themselves; one timer, restarted per banner.
   useEffect(() => {
     if (!banner) return;
@@ -498,6 +586,8 @@ const WatchGameScreen: React.FC<WatchGameScreenProps> = ({
 
   const callTimeout = () => {
     if (timeoutsLeft <= 0 || phaseRef.current !== 'live') return;
+    endReplay();
+    pendingReplay.current = null;
     sound.current?.whistle();
     voice.current.say(LINES.timeout(getTeamNickname(userSide === 'home' ? home : away)), true);
     // The huddle edits the five that is actually out there, with the legs it
@@ -523,6 +613,8 @@ const WatchGameScreen: React.FC<WatchGameScreenProps> = ({
   // Resolve whatever is left of the game at once, with the play currently
   // called and no further input, then jump to the result.
   const skipToEnd = () => {
+    endReplay();
+    pendingReplay.current = null;
     let h = completedRef.current.home;
     let a = completedRef.current.away;
     let energy = energyRef.current;
@@ -575,8 +667,21 @@ const WatchGameScreen: React.FC<WatchGameScreenProps> = ({
 
   const toggleSpeed = () => {
     const next = speed === 1 ? 4 : 1;
+    if (next !== 1) { endReplay(); pendingReplay.current = null; }
     speedRef.current = next;
     setSpeed(next);
+  };
+
+  const jumbo: JumboData = {
+    homeLabel: getTeamTricode(home),
+    awayLabel: getTeamTricode(away),
+    home: score.home,
+    away: score.away,
+    period: phase === 'final' ? 'FINAL' : quarter <= REGULATION_QUARTERS ? `${quarter}º Q` : `PR ${quarter - REGULATION_QUARTERS}`,
+    clock: phase === 'final' ? '' : clockLabel(clock, quarter),
+    leader,
+    message: moment,
+    defense: phase === 'live' && homeDefending,
   };
 
   const userTeam = userSide === 'home' ? home : away;
@@ -841,6 +946,8 @@ const WatchGameScreen: React.FC<WatchGameScreenProps> = ({
         homeCity={getTeamCity(home)}
         crowd={crowd}
         onSound={onCourtSound}
+        replay={replaying ? { hoopSide: replaying, slow: REPLAY_SLOW } : null}
+        jumbo={jumbo}
         bodies={jerseyNumbers}
         banners={banners}
         scoreboard={{
@@ -856,6 +963,20 @@ const WatchGameScreen: React.FC<WatchGameScreenProps> = ({
       />
 
       {desktop ? cameras : null}
+
+      {replaying ? (
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel="Pular replay"
+          onPress={endReplay}
+          className="active:opacity-75"
+          style={{ position: 'absolute', top: desktop ? 96 : insets.top + 68, right: desktop ? (phase === 'huddle' ? 440 : 120) : 96, flexDirection: 'row', alignItems: 'center', gap: 8, paddingVertical: 8, paddingHorizontal: 12, borderRadius: 10, backgroundColor: 'rgba(11,11,13,0.86)' }}
+        >
+          <View style={{ width: 8, height: 8, borderRadius: 4, backgroundColor: COLORS.cta }} />
+          <Text style={{ fontFamily: FONT.cond800, fontSize: 13, letterSpacing: 1.4, color: COLORS.text }}>REPLAY</Text>
+          <Text style={{ fontFamily: FONT.cond600, fontSize: 11.5, letterSpacing: 0.8, color: COLORS.muted }}>TOQUE P/ PULAR</Text>
+        </Pressable>
+      ) : null}
 
       {banner && (
         <View style={{ pointerEvents: 'none', position: 'absolute', top: desktop ? 20 : insets.top + 68, left: desktop ? 20 : 14, maxWidth: desktop ? 280 : 220 }}>

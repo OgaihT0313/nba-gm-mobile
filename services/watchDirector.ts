@@ -1319,6 +1319,31 @@ const showRate = (p: Possession, t: number): [number, number] => {
     return [rate, until > t ? until : p.shotAt];
 };
 
+/**
+ * The playback rate (game-seconds per real second) at `t` -- what a replay
+ * slows down from.
+ */
+export const playbackRate = (plan: QuarterPlan, t: number): number => {
+    const p = possessionAt(plan, t);
+    if (!p || t >= p.end) return SHOW_RATE_MAX;
+    return showRate(p, t)[0];
+};
+
+/**
+ * The stretch of a trip worth replaying: from partway into the leg before
+ * the gather (the pass or the drive that set it up) to the ball through the
+ * net. Seconds into the quarter.
+ */
+export const replayWindow = (p: Possession): { from: number; to: number } => {
+    const ri = p.beats.findIndex((b) => b.release);
+    const gather = p.beats[Math.max(0, ri - 1)];
+    const before = p.beats[Math.max(0, ri - 2)];
+    return {
+        from: Math.max(p.start, gather.t - (gather.t - before.t) * 0.6),
+        to: p.shotAt + (p.end - p.shotAt) * 0.8,
+    };
+};
+
 export interface ClockStep {
     seconds: number;
     /** True when this step jumped over part of the game. */

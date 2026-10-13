@@ -3,7 +3,8 @@ import { useFrame } from '@react-three/fiber/native';
 import * as THREE from 'three';
 
 import type { CourtState } from '../../services/watchDirector';
-import { buildBannerTexture } from './richTextures';
+import { buildBannerTexture, createJumboTexture, paintJumbo, JUMBO_W, JUMBO_H, type JumboFace } from './richTextures';
+import { onPainterReady } from './painter';
 import {
   buildLedTexture, buildNetTexture, hexToRgb, LIGHT_POOLS,
   buildScoreboardTexture, paintScoreboard, buildShotClockTexture, paintShotClock,
@@ -501,7 +502,7 @@ function Scoreboard({ primary, secondary, board, awayPrimary }: ArenaProps & { b
 const BANNER_W_FT = 6;
 const BANNER_H_FT = 12;
 const BANNER_GAP = 1.6;
-const BANNERS_PER_ROW = 10;
+const BANNERS_PER_ROW = 14;
 
 function Banners({ years, primary, secondary }: { years: number[]; primary: string; secondary: string }) {
   const tex = useMemo(() => buildBannerTexture(years, primary, secondary), [years, primary, secondary]);
@@ -514,13 +515,64 @@ function Banners({ years, primary, secondary }: { years: number[]; primary: stri
     const inRow = Math.min(BANNERS_PER_ROW, years.length - row * BANNERS_PER_ROW);
     const col = i % BANNERS_PER_ROW;
     const x = (col - (inRow - 1) / 2) * (BANNER_W_FT + BANNER_GAP);
-    return { g, x, y: 44 - row * (BANNER_H_FT + 2) };
+    // Over the jumbotron (y ~24-38), which hangs over the same stands; more
+    // rows go up, not down into it.
+    return { g, x, y: 44 + row * (BANNER_H_FT + 2) };
   }), [years]);
   if (!mat) return null;
   const z = -(BOWL_INSET_W + ROWS * ROW_DEPTH - 4);
   return (
     <group position={[0, 0, z]}>
       {quads.map((q, i) => <mesh key={i} geometry={q.g} material={mat} position={[q.x, q.y, 0]} />)}
+    </group>
+  );
+}
+
+/* ------------------------------------------------------------------ */
+/* The jumbotron on the far wall.                                       */
+/* ------------------------------------------------------------------ */
+// The center-hung board sits 62 ft up, out of every broadcast framing. This
+// one hangs over the far stands, under the banners, where the TV and the wide
+// cameras see it: the score and clock, the game's top scorer, a call for
+// DEFENSE! while the visitors have the ball (the screen pulses), and the
+// moment after a home basket or during a replay. Painted with the platform
+// brush (richTextures.paintJumbo), only when what it shows changes.
+const JUMBO_FT_W = 45;
+const JUMBO_FT_H = (JUMBO_FT_W * JUMBO_H) / JUMBO_W;
+// Low enough for the broadcast camera on a phone held upright (it sees the far
+// wall up to ~50 ft; the last rows of fans hide the bottom edge a little).
+const JUMBO_Y = 31;
+const JUMBO_Z = -(BOWL_INSET_W + ROWS * ROW_DEPTH + 1.5);
+
+export type JumboData = Omit<JumboFace, 'homeColor' | 'awayColor' | 'accent'>;
+
+function Jumbotron({ face, primary, secondary, awayPrimary }: { face: JumboData; primary: string; secondary: string; awayPrimary: string }) {
+  const tex = useMemo(() => createJumboTexture(), []);
+  const mat = useMemo(() => new THREE.MeshBasicMaterial({ map: tex, toneMapped: false }), [tex]);
+  // The accent: the home secondary when it reads on black, else white.
+  const accent = useMemo(() => {
+    const c = new THREE.Color(secondary);
+    return 0.2126 * c.r + 0.7152 * c.g + 0.0722 * c.b > 0.18 ? secondary : '#f5f5f5';
+  }, [secondary]);
+  const full: JumboFace = { ...face, homeColor: primary, awayColor: awayPrimary, accent };
+  const key = JSON.stringify(full);
+  const [fontTick, setFontTick] = React.useState(0);
+  useEffect(() => { onPainterReady(() => setFontTick((n) => n + 1)); }, []);
+  useEffect(() => { paintJumbo(tex, full); }, [key, fontTick]); // eslint-disable-line react-hooks/exhaustive-deps
+  const defense = !!face.defense && !face.message;
+  useFrame(({ clock }) => {
+    const k = defense ? 0.72 + 0.28 * Math.abs(Math.sin(clock.getElapsedTime() * 4.5)) : 1;
+    if (mat.color.r !== k) mat.color.setScalar(k);
+  });
+  return (
+    <group position={[0, JUMBO_Y, JUMBO_Z]}>
+      <mesh position={[0, 0, -0.6]}>
+        <boxGeometry args={[JUMBO_FT_W + 2, JUMBO_FT_H + 2, 1]} />
+        <meshStandardMaterial color="#0b0d12" roughness={0.5} metalness={0.4} />
+      </mesh>
+      <mesh material={mat}>
+        <planeGeometry args={[JUMBO_FT_W, JUMBO_FT_H]} />
+      </mesh>
     </group>
   );
 }
@@ -808,7 +860,9 @@ function Hoop({ side, primary, courtRef, shotClockMat, violation }: {
 
 const IDLE_BOARD: ScoreboardData = { home: 0, away: 0, quarter: 1, clock: 12 * 60 };
 
-export default function Arena({ primary, secondary, courtRef, board = IDLE_BOARD, awayPrimary, homeLabel, banners, hype }: ArenaProps & {
+export default function Arena({ primary, secondary, courtRef, board = IDLE_BOARD, awayPrimary, homeLabel, banners, hype, jumbo }: ArenaProps & {
+  /** What the far-wall jumbotron shows; absent: no jumbotron. */
+  jumbo?: JumboData;
   /** How worked up the crowd is (cheer). */
   hype?: React.MutableRefObject<CrowdHype>;
   /** The home team's title years, for the rafters. */
@@ -837,6 +891,7 @@ export default function Arena({ primary, secondary, courtRef, board = IDLE_BOARD
       <CeilingLights />
       <SpotBeams />
       {banners && banners.length ? <Banners years={banners} primary={primary} secondary={secondary} /> : null}
+      {jumbo ? <Jumbotron face={jumbo} primary={primary} secondary={secondary} awayPrimary={awayPrimary ?? secondary} /> : null}
       <Hoop side={1} primary={primary} courtRef={courtRef} shotClockMat={shotClockMat} violation={violation} />
       <Hoop side={-1} primary={primary} courtRef={courtRef} shotClockMat={shotClockMat} violation={violation} />
     </>
