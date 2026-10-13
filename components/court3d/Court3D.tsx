@@ -63,6 +63,10 @@ interface CameraPreset {
   targetY?: number;
   /** Cut to this framing (and away from it) instead of easing: the replay. */
   instant?: boolean;
+  /** For the riding framings (lag set): feet of court the lens keeps on each
+   *  side of the action across the screen, widening the lens on a narrow
+   *  (upright) screen. Absent: the base lens. */
+  halfWidth?: number;
   /** Fraction of the gap to the ball the camera still has left after one
    * second -- small is snappy. The wide shots drift; the close one has to
    * stay on the play or it films an empty floor. */
@@ -81,7 +85,10 @@ const CAMERA_PRESETS: Record<CameraView, CameraPreset> = {
   overhead: { angle: Math.PI / 2, elev: 0.95, dist: 105, autoRotate: false, follow: 0.15 },
   // The tight sideline camera that rides the ball -- the one that shows the
   // players as players rather than as a formation.
-  close: { angle: Math.PI / 2 - 0.2, elev: 0.3, dist: 46, autoRotate: false, follow: 1, targetY: 4, lag: 0.02 },
+  // On a phone held upright the base lens at 46 ft showed ~7 ft either side
+  // of the ball: one player and a half (seen 2026-10-13, "MUITO perto"). It
+  // sits further back now and keeps ~11 ft either side in frame.
+  close: { angle: Math.PI / 2 - 0.2, elev: 0.3, dist: 56, autoRotate: false, follow: 1, targetY: 4, lag: 0.02, halfWidth: 11 },
   // A touch off the axis, like the broadcast baseline camera: dead-on, the
   // near stanchion's arm runs straight up the middle of the frame.
   behind_basket: { angle: Math.PI - 0.16, elev: 0.3, dist: 118, autoRotate: false, follow: 0.75 },
@@ -122,6 +129,8 @@ interface Court3DProps {
 }
 
 const DEFAULT_FLOOR_COLOR = '#caa271'; // light maple
+/** Longest the floor waits for the brush's font, ms. */
+const FONT_WAIT = 1500;
 /** Vertical field of view on a wide screen; portrait phones get more (CameraRig). */
 const BASE_FOV = 38;
 
@@ -284,7 +293,7 @@ function CameraRig({
     // the close camera (which rides the ball) keeps the tight lens.
     if (camera instanceof THREE.PerspectiveCamera) {
       const aspect = size.width / Math.max(1, size.height);
-      const wantHalf = preset.lag ? 0 : 24 / Math.max(1, s.dist);
+      const wantHalf = (preset.lag ? preset.halfWidth ?? 0 : 24) / Math.max(1, s.dist);
       const vfov = wantHalf > 0 ? THREE.MathUtils.radToDeg(2 * Math.atan(wantHalf / aspect)) : BASE_FOV;
       const fov = THREE.MathUtils.clamp(vfov, BASE_FOV, 60);
       if (Math.abs(camera.fov - fov) > 0.05) {
@@ -423,6 +432,8 @@ const BACKSPIN = Math.PI * 4;
 
 /** Seconds the ball takes to settle from one owner to the next (a catch, a release). */
 const BALL_HANDOFF = 0.12;
+/** Closest two bodies' centers come on screen, ft (about shoulder to shoulder). */
+const MIN_GAP = 2.1;
 /** A shoe squeak at most this often, anywhere on the floor. */
 const SQUEAK_EVERY = 0.35;
 
@@ -439,6 +450,12 @@ function PlayersAndBall({
   slow?: number;
 }) {
   const simTime = useRef(0);
+  // Bodies don't pass through each other: two players closer than their
+  // shoulders allow are eased apart a little, on screen only (the director's
+  // spots are unchanged). Without it a screen or a box-out drew two bodies
+  // fused into one.
+  const sep = useMemo(() => Array.from({ length: 10 }, () => ({ x: 0, z: 0 })), []);
+  const push = useMemo(() => Array.from({ length: 10 }, () => ({ x: 0, z: 0 })), []);
   const shadowMat = useMemo(() => new THREE.MeshBasicMaterial({
     map: buildShadowTexture(), transparent: true, depthWrite: false,
   }), []);
@@ -490,6 +507,28 @@ function PlayersAndBall({
     lastCut.current = court.cut;
 
     let squeaked = false;
+    const n = court.players.length;
+    for (let i = 0; i < n; i++) { push[i].x = 0; push[i].z = 0; }
+    for (let i = 0; i < n; i++) {
+      for (let k = i + 1; k < n; k++) {
+        const a = court.players[i];
+        const b = court.players[k];
+        const dx = a.x - b.x;
+        const dz = a.z - b.z;
+        const d = Math.hypot(dx, dz);
+        if (d >= MIN_GAP) continue;
+        const ux = d > 1e-3 ? dx / d : (i % 2 ? 1 : -1);
+        const uz = d > 1e-3 ? dz / d : 0;
+        const amt = (MIN_GAP - d) / 2;
+        push[i].x += ux * amt; push[i].z += uz * amt;
+        push[k].x -= ux * amt; push[k].z -= uz * amt;
+      }
+    }
+    const ease = snap ? 1 : Math.min(1, realDt * 10);
+    for (let i = 0; i < n; i++) {
+      sep[i].x += (push[i].x - sep[i].x) * ease;
+      sep[i].z += (push[i].z - sep[i].z) * ease;
+    }
     court.players.forEach((p, i) => {
       const rig = rigs[i];
       if (!rig) return;
@@ -498,7 +537,7 @@ function PlayersAndBall({
         rig.setPlayer(p.playerId, bodies?.[p.playerId] ?? { number: null });
       }
       if (rig.update({
-        x: p.x, z: p.z, rotY: p.rotY, dt, time: t,
+        x: p.x + sep[i].x, z: p.z + sep[i].z, rotY: p.rotY, dt, time: t,
         hasBall: p.hasBall,
         onOffense: p.side === court.possession,
         ball: court.ball,
@@ -599,8 +638,12 @@ function Scene({
   const [fontSettled, setFontSettled] = useState(false);
   useEffect(() => {
     let live = true;
-    loadPainterFont().finally(() => { if (live) setFontSettled(true); });
-    return () => { live = false; };
+    // A slow font (the browser can take seconds) doesn't hold the floor back:
+    // past FONT_WAIT the floor paints its own lettering and goes on.
+    const settle = () => { if (live) setFontSettled(true); };
+    loadPainterFont().finally(settle);
+    const t = setTimeout(settle, FONT_WAIT);
+    return () => { live = false; clearTimeout(t); };
   }, []);
   const rich = fontSettled && painterReady();
   return (
@@ -657,7 +700,7 @@ export default function Court3D({
   const replaySide = replay?.hoopSide ?? 0;
   const replayPreset = useMemo<CameraPreset | null>(() => (replaySide === 0 ? null : {
     angle: replaySide > 0 ? -0.5 : Math.PI + 0.5,
-    elev: 0.2, dist: 40, autoRotate: false, follow: 1, targetY: 6, lag: 0.02, instant: true,
+    elev: 0.2, dist: 42, autoRotate: false, follow: 1, targetY: 6, lag: 0.02, instant: true, halfWidth: 9,
   }), [replaySide]);
   const preset = replayPreset ?? CAMERA_PRESETS[cameraView];
   const camState = useRef<CameraDragState>({
