@@ -32,6 +32,7 @@ sem o time do usuário). O resto, em ordem. **L** = lapidar algo que existe,
 | 10 | Objetivos e conquistas de GM — **FEITO** (2026-10-12) | N | P | Meta para saves longos além de "ganhar o título" |
 | 11 | Staff além do técnico | N | G | Profundidade, mas mexe em muitos sistemas calibrados |
 | 12 | Ajustes técnicos menores — **FEITO** (2026-10-12, menos o `diagnose_season`) | L | P | Erosão da liga e `diagnose_season` |
+| 13 | Minha Carreira (modo novo, separado do GM) — **PLANO** em [PLANO-CARREIRA.md](PLANO-CARREIRA.md), aguardando aprovação | N | G | Pedido do usuário (2026-10-12): criar um jogador, ser draftado, momentos de decisão no jogo; liga atual e eras |
 
 Tamanho: P = um dia ou menos, M = alguns dias, G = uma semana ou mais.
 
