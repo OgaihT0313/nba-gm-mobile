@@ -30,7 +30,7 @@ sem o time do usuário). O resto, em ordem. **L** = lapidar algo que existe,
 | 8 | 3D — Etapas 1 a 8 restantes — **FEITO** (2026-10-11) | L | G | Segue o PLANO-3D, uma etapa por vez |
 | 9 | Jogo decisivo dentro do 3D — **FEITO** (2026-10-12) | L | M | Junta as duas telas de jogo; depende das etapas 4-5 do 3D |
 | 10 | Objetivos e conquistas de GM — **FEITO** (2026-10-12) | N | P | Meta para saves longos além de "ganhar o título" |
-| 11 | Staff além do técnico | N | G | Profundidade, mas mexe em muitos sistemas calibrados |
+| 11 | Staff além do técnico — **PLANO** em [PLANO-STAFF.md](PLANO-STAFF.md), aguardando aprovação | N | M | Profundidade, mas mexe em muitos sistemas calibrados |
 | 12 | Ajustes técnicos menores — **FEITO** (2026-10-12, menos o `diagnose_season`) | L | P | Erosão da liga e `diagnose_season` |
 | 13 | Minha Carreira (modo novo, separado do GM) — [PLANO-CARREIRA.md](PLANO-CARREIRA.md); **fase 1 FEITA** (2026-10-13, `14ab9a7`) | N | G | Pedido do usuário (2026-10-12): criar um jogador, ser draftado, momentos de decisão no jogo; liga atual e eras |
 
@@ -271,6 +271,10 @@ Zebra (Finais saindo do 5º ou pior), Presença garantida (5 playoffs seguidos),
 Longevidade (10 temporadas). Na aba Conquistas da tela Legado.
 
 ### 11. Staff além do técnico (N)
+
+Plano em [PLANO-STAFF.md](PLANO-STAFF.md) (2026-10-13): quatro cargos (preparador físico,
+olheiro-chefe, analista de desempenho, assistente de vestiário), orçamento rígido, efeito
+medido contra o profissional médio para não descalibrar a liga.
 
 Assistentes, preparador físico (risco de lesão e carga) e olheiros (precisão do
 relatório do draft). É grande porque cada um mexe num sistema já calibrado:
