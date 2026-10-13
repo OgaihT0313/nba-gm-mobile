@@ -77,6 +77,8 @@ const ORDINARY: PersonalityId[] = ['lider', 'estrela', 'guerreiro', 'imprevisive
  */
 export const personalityOf = (p: Player | undefined): Personality => {
     if (!p) return PERSONALITIES.guerreiro;
+    // Chosen, not drawn: the Minha Carreira player picks his own.
+    if (p.personality && p.personality in PERSONALITIES) return PERSONALITIES[p.personality as PersonalityId];
     const pool = (p.potential === 'A' || p.potential === 'B') ? HIGH_CEILING : ORDINARY;
     return PERSONALITIES[pool[hash(p.id) % pool.length]];
 };

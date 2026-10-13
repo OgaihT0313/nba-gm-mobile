@@ -168,7 +168,7 @@ const guessPotential = (real: Player['potential']): Player['potential'] => {
     return pick([POTENTIAL_TIERS[i - 1], POTENTIAL_TIERS[i + 1]].filter(Boolean));
 };
 
-const makeScoutReport = (p: Player): ScoutReport => {
+export const makeScoutReport = (p: Player): ScoutReport => {
     const uncertainty = initialUncertainty(p);
     return {
         estimate: noisyEstimate(p, uncertainty),

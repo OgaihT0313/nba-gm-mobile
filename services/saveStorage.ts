@@ -3,12 +3,15 @@
 // saveStorage.web.ts instead — expo-file-system has no web implementation.
 import { File, Paths } from 'expo-file-system';
 
-const NAME = 'nba-manager-save.json';
-const TMP_NAME = 'nba-manager-save.tmp.json';
+// A slot is a save of its own: 'save' is the GM's (the original file name),
+// 'career' is Minha Carreira's.
+export type SaveSlot = 'save' | 'career';
+const nameOf = (slot: SaveSlot) => `nba-manager-${slot}.json`;
+const tmpOf = (slot: SaveSlot) => `nba-manager-${slot}.tmp.json`;
 
-export const readSave = (): string | null => {
+export const readSave = (slot: SaveSlot = 'save'): string | null => {
   try {
-    const file = new File(Paths.document, NAME);
+    const file = new File(Paths.document, nameOf(slot));
     return file.exists ? file.textSync() : null;
   } catch (e) {
     console.warn('[save] leitura falhou', e);
@@ -18,17 +21,17 @@ export const readSave = (): string | null => {
 
 // Written to a temp file and moved over the real one, so an app killed
 // mid-write leaves the previous save intact instead of half a JSON.
-export const writeSave = async (text: string): Promise<void> => {
-  const tmp = new File(Paths.document, TMP_NAME);
+export const writeSave = async (text: string, slot: SaveSlot = 'save'): Promise<void> => {
+  const tmp = new File(Paths.document, tmpOf(slot));
   if (tmp.exists) tmp.delete();
   tmp.create();
   tmp.write(text);
-  await tmp.move(new File(Paths.document, NAME), { overwrite: true });
+  await tmp.move(new File(Paths.document, nameOf(slot)), { overwrite: true });
 };
 
-export const removeSave = (): void => {
+export const removeSave = (slot: SaveSlot = 'save'): void => {
   try {
-    const file = new File(Paths.document, NAME);
+    const file = new File(Paths.document, nameOf(slot));
     if (file.exists) file.delete();
   } catch (e) {
     console.warn('[save] remoção falhou', e);

@@ -33,7 +33,16 @@ const mineFirst = (events: Event[], userTeamId: string): Event[] => [
 // Champion crowned -> progression, real NBA offseason moves replayed, contracts
 // tick down, then the rookie draft (BEFORE free agency, matching the real
 // calendar). CPU free agency waits until the draft finishes.
-export const startOffseason = (prev: SeasonState): SeasonState => {
+/** Minha Carreira's hooks into the offseason; absent in a GM save. */
+export interface OffseasonOptions {
+  /** Prospects to enter in this draft class (the career player), with the
+   * league's scouting report on each. */
+  extraProspects?: { players: { [id: string]: Player }; reports: DraftState['reports'] };
+  /** Players whose training focus counts in progression wherever they play. */
+  focusIds?: string[];
+}
+
+export const startOffseason = (prev: SeasonState, opts: OffseasonOptions = {}): SeasonState => {
   // The draft board is built from the just-finished records (lottery for the
   // top four), so it must read prev.teams BEFORE wins reset. It also settles
   // who OWNS each slot and consumes the picks spent on this draft, so its
@@ -63,7 +72,7 @@ export const startOffseason = (prev: SeasonState): SeasonState => {
   // actually got, before progression reads them.
   const promise = settleMinutesPromise(prev, teamOf);
   if (promise?.kept) devBonus[promise.playerId] = (devBonus[promise.playerId] ?? 1) * PROMISE_DEV_BONUS;
-  const { updatedPlayers: progressed, progressionEvents } = simulationEngine.runPlayerProgression(withCareers, devBonus, teamOf, prev.userTeamId);
+  const { updatedPlayers: progressed, progressionEvents } = simulationEngine.runPlayerProgression(withCareers, devBonus, teamOf, prev.userTeamId, opts.focusIds);
   const updatedPlayers = promise ? applyPromiseMorale(progressed, promise) : progressed;
   // Snapshot last season's OVR so next season's MIP can measure real growth.
   for (const id in updatedPlayers) {
@@ -189,13 +198,14 @@ export const startOffseason = (prev: SeasonState): SeasonState => {
     : generateDraftClass(30, Object.keys(contracts.players));
   // Undrafted/international fringe talent enters the market alongside the draft.
   const undrafted = generateUndraftedClass(10, [...Object.keys(contracts.players), ...ids]);
-  const playersWithProspects = { ...contracts.players, ...prospects, ...undrafted.players };
+  const extra = opts.extraProspects;
+  const playersWithProspects = { ...contracts.players, ...prospects, ...undrafted.players, ...(extra?.players ?? {}) };
   // `reports` is the fog of war: prospects carry their real rating in
   // `players` (the sim needs it the instant they're drafted), and this is the
   // only rating the draft screen and the CPU are allowed to read.
   const initialDraft: DraftState = {
-    order: board.order, picks: [], available: ids, complete: false,
-    reports, scoutBudget: SCOUT_BUDGET,
+    order: board.order, picks: [], available: [...ids, ...Object.keys(extra?.players ?? {})], complete: false,
+    reports: { ...reports, ...(extra?.reports ?? {}) }, scoutBudget: SCOUT_BUDGET,
   };
   // The window slides forward: everyone gets their own pick for the draft
   // that just entered the horizon (picks they traded away stay gone).

@@ -21,9 +21,11 @@ interface HomeProps {
   season: SeasonState | null;
   themeMode: ThemeMode;
   onThemeMode: (mode: ThemeMode) => void;
+  /** Opens Minha Carreira, the other mode (its own save). */
+  onCareer?: () => void;
 }
 
-const Home: React.FC<HomeProps> = ({ onStart, onContinue, season, themeMode, onThemeMode }) => {
+const Home: React.FC<HomeProps> = ({ onStart, onContinue, season, themeMode, onThemeMode, onCareer }) => {
   const insets = useSafeAreaInsets();
   const desktop = useDesktop();
   const userTeam = season?.teams.find((t) => t.id === season.userTeamId);
@@ -78,6 +80,24 @@ const Home: React.FC<HomeProps> = ({ onStart, onContinue, season, themeMode, onT
     <CtaButton label="Nova carreira" onPress={onStart} size={desktop ? 21 : 20} style={desktop ? { minHeight: 58 } : undefined} />
   );
 
+  // The other mode: a player, not a GM. Its own save, its own screens.
+  const careerCard = onCareer ? (
+    <Pressable
+      accessibilityRole="button"
+      accessibilityLabel="Minha carreira"
+      onPress={onCareer}
+      className="active:opacity-80"
+      style={{ backgroundColor: COLORS.surface, borderRadius: 20, padding: 16, flexDirection: 'row', alignItems: 'center', gap: 12, maxWidth: desktop ? 440 : undefined }}
+    >
+      <View style={{ flex: 1, gap: 3 }}>
+        <Text style={{ fontFamily: FONT.cond700, fontSize: 11, letterSpacing: 1.5, color: COLORS.muted }}>OUTRO MODO</Text>
+        <Text style={{ fontFamily: FONT.cond800, fontSize: 24, lineHeight: 25, color: COLORS.text, textTransform: 'uppercase' }}>Minha carreira</Text>
+        <BodyText size={13}>Crie um jogador, vá para o draft e conquiste o seu espaço na liga.</BodyText>
+      </View>
+      <Text style={{ fontFamily: FONT.cond800, fontSize: 26, color: COLORS.textSoft }}>›</Text>
+    </Pressable>
+  ) : null;
+
   const leagueData = (
     <View style={desktop ? { maxWidth: 440 } : undefined}>
       <Text style={{ fontFamily: FONT.cond700, fontSize: 11, letterSpacing: 1.5, color: COLORS.dim, paddingBottom: 6 }}>DADOS DA LIGA</Text>
@@ -98,7 +118,10 @@ const Home: React.FC<HomeProps> = ({ onStart, onContinue, season, themeMode, onT
             <BrandLogo size={144} />
             <BodyText size={20} style={{ marginTop: 28 }}>Monte a franquia. Aguente o dono. Ganhe o anel.</BodyText>
           </View>
-          {leagueData}
+          <View style={{ gap: 24 }}>
+            {careerCard}
+            {leagueData}
+          </View>
         </View>
         <View style={{ width: 520, backgroundColor: COLORS.navBg, borderLeftWidth: 1, borderLeftColor: COLORS.line, paddingTop: 96, paddingHorizontal: 48, paddingBottom: 72, justifyContent: 'space-between' }}>
           {savedCard ?? <View />}
@@ -121,6 +144,7 @@ const Home: React.FC<HomeProps> = ({ onStart, onContinue, season, themeMode, onT
         </View>
 
         {savedCard}
+        {careerCard}
         {leagueData}
       </ScrollView>
 

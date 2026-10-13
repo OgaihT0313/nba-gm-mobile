@@ -77,6 +77,9 @@ export interface Player {
   // Optional so older saves / any data predating the attribute rebuild still
   // typecheck; UI and sim fall back gracefully when it's absent.
   attributes?: PlayerAttributes;
+  // A personality picked rather than drawn from the id (the Minha Carreira
+  // player); see personalityOf.
+  personality?: string;
   // Real usage rate (USG%, share of team possessions he finishes while on the
   // floor) and true shooting, from the season the roster was rated on,
   // regressed by minutes. A player's share of his team's points is usage x
@@ -179,6 +182,11 @@ export interface Team {
   // simulationService.ts). Undefined/missing slots fall back to an
   // auto-picked best-OVR-at-position starter.
   starters?: { [pos: string]: string };
+  // Minha Carreira: how much the coach likes a player beyond his rating, in
+  // OVR points, by player id (services/career). It only moves him in the
+  // pecking order -- who starts, who gets the minutes -- never how good the
+  // team plays. Absent everywhere outside a career save.
+  favor?: { [playerId: string]: number };
   wins?: number;
   losses?: number;
   // Salary still owed to players this team released while they were under

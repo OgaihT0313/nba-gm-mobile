@@ -21,7 +21,8 @@ const STARTING_SLOTS: { slot: string; bucket: Player['pos'] }[] =
 // decide whether a bench player has actually overtaken a starter right now.
 const effectiveOvr = (team: Team, pId: string, players: { [key: string]: Player }): number => {
     const effect = team.playerStatusEffects?.[pId];
-    return players[pId].ovr + (effect ? effect.ovrChange : 0);
+    // Team.favor: a career player's standing with his coach (services/career).
+    return players[pId].ovr + (effect ? effect.ovrChange : 0) + (team.favor?.[pId] ?? 0);
 };
 
 export interface LineupSlot {
@@ -1268,6 +1269,8 @@ const runPlayerProgression = (
     devBonus: { [playerId: string]: number } = {},
     teamOf: { [playerId: string]: string } = {},
     userTeamId?: string,
+    /** Players whose trainingFocus counts wherever they play (a career player). */
+    focusIds: string[] = [],
 ): { updatedPlayers: { [key: string]: Player }, progressionEvents: Event[] } => {
     const updatedPlayers = JSON.parse(JSON.stringify(players));
     const progressionEvents: Event[] = [];
@@ -1282,7 +1285,7 @@ const runPlayerProgression = (
         const potential = potentialMap[player.potential] || 1;
         let change = 0;
         // The user's training focus, only while he wears the user's jersey.
-        const focus = userTeamId && teamOf[pId] === userTeamId ? player.trainingFocus : undefined;
+        const focus = (userTeamId && teamOf[pId] === userTeamId) || focusIds.includes(pId) ? player.trainingFocus : undefined;
         // Gym work instead of skill work: a young player grows a little less
         // often, a veteran ages more slowly (see the decline branches).
         const physicalGrowth = focus === 'physical' ? 0.88 : 1;

@@ -34,6 +34,7 @@ import BottomNav from './components/BottomNav';
 import Sidebar from './components/desktop/Sidebar';
 import { useDesktop } from './components/desktop/useDesktop';
 import Home from './screens/Home';
+import CareerApp from './screens/career/CareerApp';
 import EraSelect from './screens/EraSelect';
 import TeamSelect from './screens/TeamSelect';
 import TeamConfirm from './screens/TeamConfirm';
@@ -61,7 +62,8 @@ import { IconName } from './components/Icon';
 
 type AppView =
   | 'era-select' | 'team-select' | 'team-confirm' | 'home' | 'teams' | 'team-detail' | 'scout' | 'my-team' | 'draft' | 'free-agency'
-  | 'simulation' | 'standings' | 'leaders' | 'trade' | 'awards' | 'allstar' | 'playoffs' | 'watch-game' | 'legacy';
+  | 'simulation' | 'standings' | 'leaders' | 'trade' | 'awards' | 'allstar' | 'playoffs' | 'watch-game' | 'legacy'
+  | 'career';
 
 const SIM_SAVE_INTERVAL = 5000;
 
@@ -153,6 +155,7 @@ export default function App() {
   useEffect(() => {
     const sub = BackHandler.addEventListener('hardwareBackPress', () => {
       if (view === 'watch-game') return true;
+      if (view === 'career') { setView('home'); return true; }
       if (view === 'team-detail') { setView('teams'); return true; }
       if (view === 'team-select') { if (!season) setView('era-select'); return true; }
       if (view === 'team-confirm') { setView('team-select'); return true; }
@@ -772,9 +775,12 @@ export default function App() {
           season={season}
           themeMode={themeMode}
           onThemeMode={changeThemeMode}
+          onCareer={() => setView('career')}
         />
       );
     }
+    // Minha Carreira: its own mode, its own save, full screen.
+    if (view === 'career') return <CareerApp onExit={() => setView('home')} />;
     // Era choice — before the franchise picker, same "no season yet" reasoning
     // as team-confirm below.
     if (view === 'era-select') {
@@ -914,7 +920,7 @@ export default function App() {
     return <Placeholder title={ph?.title ?? view} icon={ph?.icon} />;
   };
 
-  const showSidebar = !['watch-game', 'home', 'era-select', 'team-select', 'team-confirm'].includes(view) && !season?.owner.fired;
+  const showSidebar = !['watch-game', 'home', 'era-select', 'team-select', 'team-confirm', 'career'].includes(view) && !season?.owner.fired;
   const sidebarCaption = !season ? '' : season.status === 'active'
     ? `Jogo ${season.gamesPlayed}/82`
     : season.status === 'draft' ? 'Draft'
@@ -971,7 +977,7 @@ export default function App() {
           {/* The decision queue. Rendered above the season screen and below the
               fired takeover: being let go outranks any question about tonight. */}
           <DecisionModal
-            decision={season?.decisions?.[0]}
+            decision={view === 'career' ? undefined : season?.decisions?.[0]}
             players={season?.players ?? {}}
             remaining={Math.max(0, (season?.decisions?.length ?? 0) - 1)}
             onChoose={handleResolveDecision}
@@ -979,7 +985,7 @@ export default function App() {
 
           {/* Fired: full-screen takeover that ends the save. */}
           <FiredOverlay
-            visible={!!season?.owner.fired}
+            visible={!!season?.owner.fired && view !== 'career'}
             note={season?.owner.note}
             seasons={season?.gmLegacy.seasons ?? 0}
             titles={season?.gmLegacy.titles ?? 0}
@@ -992,7 +998,7 @@ export default function App() {
 
           {/* Bottom nav (only once a season exists) */}
           {/* Hidden while watching: the HUD is full-bleed, and a tab tap mid-game would drop the game. */}
-          {!desktop && season && view !== 'watch-game' ? (
+          {!desktop && season && view !== 'watch-game' && view !== 'career' ? (
             <BottomNav
               view={view}
               onNavigate={(v) => setView(v as AppView)}
