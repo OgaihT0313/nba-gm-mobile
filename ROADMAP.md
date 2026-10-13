@@ -135,6 +135,30 @@ Conferido no Galaxy (APK `0fb1d782`): uniformes e banners renderizam, quadro 7-1
 Android fechava o app de qualquer tela** (inclusive no meio do jogo); agora volta para
 a tela anterior/Simulação e não faz nada dentro do jogo.
 
+### 3D — quadra do time, torcida, locutor, jogadas — FEITO (2026-10-12, `753906e`, `7b72398`)
+
+Pedido do usuário (itens 1, 2, 4 e 5 da lista "o que dá pra melhorar no 3D" + lapidar
+movimentação, física e jogadas):
+- **Quadra do time**: apelido no meio da quadra e nas linhas de fundo, cidade na lateral
+  do lado oposto às câmeras (decalques Skia, `CourtDecals`), faixa na segunda cor em volta.
+- **Torcida que reage**: de pé, pulando e de braços erguidos depois das cestas do seu time
+  (shader de vértice sobre o `InstancedMesh`, `cheer`/`CrowdHype` em `Arena.tsx`).
+- **Locutor** pt-BR pelo TTS do aparelho (`expo-speech`, `sound/announcer.ts`): bola ao
+  alto, três, enterrada, virada no 4º Q, tempo, fim de quarto/jogo; botão "Locutor".
+- **Acessórios por jogador** (fixos pelo id): faixa, manga curta/longa, munhequeira,
+  manga de perna ou joelheira, meia preta/branca, tênis próprio.
+- **Jogadas** roteirizadas por etapa (`playSteps` no `watchDirector`): corta-luz com
+  defensor preso, curl do pin-down, entrada no poste e back-down, isolação com lado
+  limpo; defesa de ajuda e closeout; lance livre alinhado no garrafão; erro bate no aro e
+  vira rebote disputado. Trajetórias em curva (Hermite) sem parar a cada etapa.
+- **Física**: bola voa no tempo real (três ~1 s), cai pela rede e quica, fica na mão de quem
+  dribla; som do quique e chiado de tênis saem do 3D. Corpos giram, correm de frente,
+  defensores deslizam e andam de costas.
+- Quarto passou de ~172 para ~194 s reais em 1x (`check_watch_director` todo verde).
+Conferido no Galaxy (APK `574cc94a`): decalques, bola na mão, torcida, quadro 8-10 ms,
+~400 MB, log limpo; locutor, quique/chiado e movimento confirmados pelo usuário.
+Depois do APK: o som da arena pausa quando o app sai da frente (`7b72398`, sem APK ainda).
+
 ### 3. Ratings de veteranos (L) — FEITO (2026-10-12)
 
 O caso que abriu o item (T.J. McConnell 88 aos 34) já tinha sido corrigido pela
