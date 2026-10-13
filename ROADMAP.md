@@ -112,6 +112,29 @@ Observações sem correção: trocar o modo claro/escuro volta a tela pro topo; 
 time da liga fica perto do teto real (~67 vitórias) desde o item 12, e a carreira de
 teste (folha de $249M montada com trocas) fez 74-8.
 
+### 3D — upgrade de realismo — FEITO (2026-10-12, `f4f9b91`, `f1be5b2`, `38d1857`)
+
+Fora da lista: veio da análise do protótipo do Gemini (`upgraded_3d_court_engine.tsx`),
+refeita com alternativas em RN/Expo para o que parecia impossível. Pedido do usuário:
+- **Corpo pela altura e peso reais**: `heightCm`/`weightKg` dos elencos do BBRef
+  (`pipeline/sync_physical.py` no simulator; 530/530 na liga atual, eras por posição).
+  Altura escala o boneco (0,85-1,16), o IMC engrossa tronco, braços e pernas.
+- **Cor de pele pela foto** (`skinTone`): mediana da faixa média de luminância do rosto
+  no headshot da NBA; 529/530 na liga atual, 44% nas eras (onde há foto).
+- **Uniformes ricos com Skia** (`@shopify/react-native-skia` 2.6.2, `painter.ts`;
+  canvas do navegador no web): número com contorno e sobrenome na fonte do app,
+  gola V, viés, costura e trama do tecido.
+- **Banners de título no teto** (`TEAM_TITLE_YEARS` + títulos da carreira,
+  `bannerYears`).
+- **Torcida com a cor da casa**: 55% primária, 20% secundária, 10% visitante.
+- **Som ao vivo sintetizado** (`react-native-audio-api` 0.13.6, Web Audio no web):
+  quique, tênis, apito, aro, cesta, enterrada, buzina e torcida que cresce com as
+  cestas do time da casa. Não pede foco de áudio (toca junto com a música).
+Conferido no Galaxy (APK `0fb1d782`): uniformes e banners renderizam, quadro 7-10 ms,
+~380 MB, som confirmado pelo usuário, log limpo. No mesmo teste: o **botão voltar do
+Android fechava o app de qualquer tela** (inclusive no meio do jogo); agora volta para
+a tela anterior/Simulação e não faz nada dentro do jogo.
+
 ### 3. Ratings de veteranos (L) — FEITO (2026-10-12)
 
 O caso que abriu o item (T.J. McConnell 88 aos 34) já tinha sido corrigido pela
