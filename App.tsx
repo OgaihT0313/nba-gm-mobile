@@ -1,6 +1,6 @@
 import './global.css';
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { View } from 'react-native';
+import { View, BackHandler } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 import { useFonts } from 'expo-font';
@@ -145,6 +145,23 @@ export default function App() {
     if (effect.kind === 'view') setView(effect.view);
     else if (effect.kind === 'notification') addNotification(effect.message, effect.type);
   };
+
+  // Android's back button. With no navigator, the default would close the app
+  // from any screen -- in the middle of a watched game, losing it. Back steps
+  // out the way the screens' own back buttons do; only the main screens let
+  // the system close the app.
+  useEffect(() => {
+    const sub = BackHandler.addEventListener('hardwareBackPress', () => {
+      if (view === 'watch-game') return true;
+      if (view === 'team-detail') { setView('teams'); return true; }
+      if (view === 'team-select') { if (!season) setView('era-select'); return true; }
+      if (view === 'team-confirm') { setView('team-select'); return true; }
+      if (view === 'era-select') { setView('home'); return true; }
+      if (season && !season.owner.fired && view !== 'simulation' && view !== 'home') { setView('simulation'); return true; }
+      return false;
+    });
+    return () => sub.remove();
+  }, [view, season]);
 
   // Autosave. Every change to the season is written, debounced so a burst of
   // taps writes once; while the clock runs (a new state every day) it writes at

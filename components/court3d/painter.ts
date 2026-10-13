@@ -64,11 +64,9 @@ export const createPainter = (w: number, h: number): Painter | null => {
     h,
     rect: (x, y, rw, rh, color) => canvas.drawRect(Skia.XYWHRect(x, y, rw, rh), fill(color)),
     poly: (pts, color) => {
-      const path = Skia.Path.Make();
-      path.moveTo(pts[0], pts[1]);
-      for (let i = 2; i < pts.length; i += 2) path.lineTo(pts[i], pts[i + 1]);
-      path.close();
-      canvas.drawPath(path, fill(color));
+      const b = Skia.PathBuilder.Make().moveTo(pts[0], pts[1]);
+      for (let i = 2; i < pts.length; i += 2) b.lineTo(pts[i], pts[i + 1]);
+      canvas.drawPath(b.close().build(), fill(color));
     },
     textWidth: (str, size) => fontAt(size)?.measureText(str).width ?? 0,
     text: (str, x, y, size, color, opts = {}) => {
