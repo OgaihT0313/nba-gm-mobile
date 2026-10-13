@@ -134,7 +134,12 @@ export const buildFloorTexture = (opts: {
    *  on the phone and in the browser alike (Court3D passes true); without it
    *  the tricode and the wordmarks read upside down. */
   flipRows?: boolean;
+  /** Paint the wordmarks and the center tricode in the pixel font. Off when
+   *  Court3D lays the team's type over the floor with the real font instead
+   *  (CourtDecals); default on. */
+  pixelText?: boolean;
 }): THREE.DataTexture => {
+  const pixelText = opts.pixelText !== false;
   // 1536 x 768: ~14.5 px per foot, so a two-inch line is still ~2.4 px wide,
   // and it builds in about half the time of 2048 x 1024 -- this runs on the
   // JS thread when the screen opens, on a phone.
@@ -236,8 +241,12 @@ export const buildFloorTexture = (opts: {
       const rCenter = Math.sqrt(x * x + z * z);
       if (rCenter <= 6) c = mix(c, primary, paintAlpha);
 
+      // A stripe of the second color just outside the boundary, all the way
+      // round: the trim that makes a home floor look painted, not stained.
+      if (!onCourt && Math.max(ax - HALF_L, az - HALF_W) <= 0.75 && Math.max(ax - HALF_L, az - HALF_W) > LINE) c = mix(c, secondary, 0.9);
+
       // Wordmark on the apron behind each baseline, facing the court.
-      if (ax > HALF_L + 1 && ax < HALF_L + 5.5 && az < 14) {
+      if (pixelText && ax > HALF_L + 1 && ax < HALF_L + 5.5 && az < 14) {
         const u = sx > 0 ? (z + 14) / 28 : (14 - z) / 28;
         // Read from midcourt: the edge farther from the court is the top.
         const v = 1 - (ax - (HALF_L + 1)) / 4.5;
@@ -283,7 +292,7 @@ export const buildFloorTexture = (opts: {
       // circle, and the tricode across it, painted over the midcourt line the
       // way a logo is. Read from the near (+z) sideline: the far edge is the top.
       if (rCenter >= 4.75 && rCenter <= 5.35) c = mix(c, secondary, 0.92);
-      if (rCenter <= 5.2) {
+      if (pixelText && rCenter <= 5.2) {
         const tw = 8.4;
         const th = tw * 7 / (opts.label.length * 6 - 1);
         if (textCovers(opts.label, (x + tw / 2) / tw, (z + th / 2) / th)) c = textColor;

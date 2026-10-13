@@ -97,60 +97,72 @@ const BASE_SET: Spot[] = [
 
 const FT_SPOT: Spot = { ax: 28, az: 0 };
 
-// Where the five stand at the moment the play actually breaks — this is the
-// shape the user is paying to see, so each one is visibly different from the
-// base set above.
-const PLAY_ACTION: Record<WatchPlay, Spot[]> = {
-    // Big climbs out to screen for the handler, everyone else spaces off.
-    pick_roll: [
-        { ax: 22, az: -3 },
-        { ax: 27, az: -21 },
-        { ax: 26, az: 20 },
-        { ax: 30, az: 15 },
-        { ax: 24, az: -7 },
-    ],
-    // Four flatten out; the SG runs the baseline off the PF's pin-down.
-    pindown: [
-        { ax: 20, az: 4 },
-        { ax: 26, az: -21 },
-        { ax: 24, az: 20 },
-        { ax: 35, az: -17 },
-        { ax: 36, az: 8 },
-    ],
-    // Entry angle: handler up top, big sealing on the block, shooters spaced.
-    post_up: [
-        { ax: 22, az: -9 },
-        { ax: 26, az: -22 },
-        { ax: 25, az: 21 },
-        { ax: 30, az: 17 },
-        { ax: 37, az: -5 },
-    ],
-    // Full clear-out — everybody to the weak side, star alone on an island.
-    iso: [
-        { ax: 24, az: -14 },
-        { ax: 20, az: 21 },
-        { ax: 33, az: 21 },
-        { ax: 38, az: 15 },
-        { ax: 38, az: -20 },
-    ],
+// Where each spot shoots from. Threes are all beyond the arc (23.75 ft, 22 in
+// the corners); twos at the rim are inside RIM_RANGE so they finish as layups
+// or dunks; the rest of the twos are a step inside -- an elbow or short-corner
+// jumper.
+const THREE_SPOT: Spot[] = [
+    { ax: 18, az: -6 },   // PG, pull-up from the slot
+    { ax: 26, az: -21 },  // SG, strong wing
+    { ax: 25.5, az: 20 }, // SF, weak wing
+    { ax: 22, az: 15 },   // PF, popping to the weak slot
+    { ax: 17.5, az: -3 }, // C, pick-and-pop up top
+];
+const CORNER: Spot[] = [{ ax: 40.5, az: -22.4 }, { ax: 40.5, az: 22.4 }];
+const RIM_SPOT: Spot[] = [
+    { ax: 37, az: -3.5 },
+    { ax: 38, az: -5 },
+    { ax: 38, az: 5 },
+    { ax: 37.5, az: 4 },
+    { ax: 38.5, az: -3 },
+];
+const MID_SPOT: Spot[] = [
+    { ax: 28, az: -9 },
+    { ax: 33, az: -14 },
+    { ax: 33, az: 14 },
+    { ax: 29, az: 9 },
+    { ax: 34, az: -9 },
+];
+
+/* ------------------------------------------------------------------ */
+/* Defense.                                                            */
+/* ------------------------------------------------------------------ */
+// Each defender takes his own man, index for index. The man with the ball is
+// pressured close; everyone else sits between his man and the rim and sags
+// toward the ball the farther from it he is -- the help a real defense shows,
+// and what makes a drive or a skip pass read as one. (It was one fixed 3.8 ft
+// gap for all five: ten bodies in pairs, nobody helping.)
+const ON_BALL_GAP = 3.2;
+const OFF_BALL_GAP = 4.6;
+const guard = (off: Spot[], ballIdx: number): Spot[] => {
+    const ball = off[ballIdx];
+    const helpAx = ball.ax + (HOOP_AX - ball.ax) * 0.55;
+    const helpAz = ball.az * 0.45;
+    return off.map((man, i) => {
+        const dx = HOOP_AX - man.ax;
+        const dz = -man.az;
+        const len = Math.hypot(dx, dz) || 1;
+        const onBall = i === ballIdx;
+        // Never past the rim: a man on the block is guarded from the side.
+        const gap = Math.min(len * 0.6, onBall ? ON_BALL_GAP : OFF_BALL_GAP);
+        let ax = man.ax + (dx / len) * gap;
+        let az = man.az + (dz / len) * gap;
+        if (!onBall) {
+            const sag = Math.max(0, Math.min(0.38, (Math.hypot(man.ax - ball.ax, man.az - ball.az) - 12) / 40));
+            ax += (helpAx - ax) * sag;
+            az += (helpAz - az) * sag;
+        }
+        return { ax: Math.min(45.5, ax), az };
+    });
 };
 
-// Where the shot goes up from, per play. `rim` covers 2s, `three` covers 3s,
-// and a free throw is always the line.
-const SHOT_SPOT: Record<WatchPlay, { rim: Spot; three: Spot }> = {
-    pick_roll: { rim: { ax: 37, az: -3 }, three: { ax: 20, az: -7 } },
-    pindown: { rim: { ax: 34, az: -15 }, three: { ax: 23, az: -21 } },
-    post_up: { rim: { ax: 38, az: -4 }, three: { ax: 23, az: 13 } },
-    iso: { rim: { ax: 36, az: -9 }, three: { ax: 25, az: -16 } },
-};
-
-// A defender sits between their man and the rim.
-const DEF_GAP = 3.8;
-const defendSpot = (s: Spot): Spot => {
-    const dx = HOOP_AX - s.ax;
-    const dz = -s.az;
+/** The shooter's man closing out: a step and a half off him, toward the rim. */
+const closeout = (shooter: Spot): Spot => {
+    const dx = HOOP_AX - shooter.ax;
+    const dz = -shooter.az;
     const len = Math.hypot(dx, dz) || 1;
-    return { ax: s.ax + (dx / len) * DEF_GAP, az: s.az + (dz / len) * DEF_GAP };
+    const gap = Math.min(len * 0.5, 2.4);
+    return { ax: shooter.ax + (dx / len) * gap, az: shooter.az + (dz / len) * gap };
 };
 
 /* ------------------------------------------------------------------ */
@@ -409,8 +421,21 @@ interface Beat {
     off: Vec2[]; // the five in possession
     def: Vec2[]; // the five defending
     ball: Vec3;
-    handler: number | null; // index into `off`; null while the ball is in the air
+    /** Index into `off` of who has the ball at this beat; null while it's loose
+     * (a shot, the carom, through the net). */
+    handler: number | null;
     arc: number; // extra height added over the segment that STARTS at this beat
+    /** The segment starting here is a pass from `handler` to the next beat's handler. */
+    pass?: boolean;
+    /** Offensive index setting a screen over the segment starting here. */
+    screener?: number;
+    /** This beat is the release: the ball leaves the shooter's hands. */
+    release?: boolean;
+    /** Defensive index going up for the rebound over the segment starting here. */
+    rebounder?: number;
+    /** Real seconds the segment starting here should last on screen: a ball in
+     * the air flies at its own speed, whatever the playback is doing. */
+    real?: number;
 }
 
 export interface Possession {
@@ -424,6 +449,7 @@ export interface Possession {
      * an and-1 rather than quietly dropping the points. */
     points: number;
     shooter: number; // index into the five in possession
+    /** Who made the last pass to the shooter, if anyone did. */
     passer: number | null;
     scorerName: string;
     assistName: string | null;
@@ -433,6 +459,8 @@ export interface Possession {
      * outside ~8 ft), a layup, or a dunk. Absent on plans from before this
      * field existed -- read as 'shot'. */
     finish?: Finish;
+    /** A trip that is a free throw: nobody contests it. */
+    freeThrow?: boolean;
     /** Who was on the floor for this trip, both sides, and how fresh. */
     fiveHome?: FiveOnCourt;
     fiveAway?: FiveOnCourt;
@@ -457,20 +485,29 @@ export type Finish = 'shot' | 'layup' | 'dunk';
 const RIM_RANGE = 8;
 
 // The release beat's ball height and arc for each finish. A jumper leaves the
-// hand at ~7 ft and arcs high; a layup is laid up off the glass from ~9 ft; a
-// dunk is carried to the rim and barely leaves the hand.
+// hand over the head at the top of the jump and arcs high; a layup is laid up
+// off the glass from ~9 ft; a dunk is carried to the rim and barely leaves the
+// hand.
 //
 // A jumper's arc grows with the distance (PLANO-3D Etapa 6). Launched at ~50
 // degrees, the apex sits about 0.3 x the distance above the line from hand to
 // rim: ~8 ft over it from the corner three, ~5 on a free throw, ~4 from 10 ft.
-// It used to be fixed per kind, which sent free throws higher than threes.
-// The ball's timing is unchanged -- only the height of the arc.
 const jumperArc = (distance: number) => 1 + 0.3 * distance;
 const RELEASE: Record<Finish, { y: number; arc: (distance: number) => number }> = {
-    shot: { y: 7.2, arc: jumperArc },
-    layup: { y: 8.8, arc: () => 2 },
-    dunk: { y: 10.6, arc: () => 0.4 },
+    shot: { y: 8.4, arc: jumperArc },
+    layup: { y: 9.2, arc: () => 1.6 },
+    dunk: { y: 10.6, arc: () => 0.3 },
 };
+
+// How long the ball is really in the air, in seconds of screen time. Before,
+// the flight played at the beat's rate like everything else: a three reached
+// the rim in a third of a second. A real one hangs about a second.
+const flightReal = (finish: Finish, distance: number) =>
+    (finish === 'dunk' ? 0.28 : finish === 'layup' ? 0.45 : 0.5 + 0.024 * distance);
+/** The gather before the release, real seconds. A free throw takes its time. */
+const gatherReal = (finish: Finish, freeThrow: boolean) => (freeThrow ? 0.7 : finish === 'shot' ? 0.34 : 0.3);
+/** A pass: ~42 ft/s, plus the windup. */
+const passReal = (distance: number) => 0.15 + distance / 42;
 
 /**
  * The chance a made shot at the rim is a dunk, from the shooter's athleticism
@@ -483,109 +520,364 @@ export const dunkChance = (p: Player | undefined): number => {
     return Math.max(0.05, Math.min(0.75, 0.12 + athletic * 0.45 + big));
 };
 
-/** Turns a made finish at the rim into a dunk: the release beat moves up to the rim. */
-const makeDunk = (poss: Possession) => {
-    poss.finish = 'dunk';
-    const release = poss.beats[poss.beats.length - 3];
-    release.ball = { ...release.ball, y: RELEASE.dunk.y };
-    release.arc = RELEASE.dunk.arc(0);
+/* ------------------------------------------------------------------ */
+/* Plays, step by step.                                                */
+/* ------------------------------------------------------------------ */
+// A play is a few steps between the half-court set and the shot. Each step is
+// where the five stand and who has the ball; a step can hand the ball on (a
+// pass), set a screen, or leave a defender caught on one. The defense is
+// worked out from the offense (guard), so every play gets help defense and
+// closeouts for free.
+interface Step {
+    f: number; // fraction of the possession
+    off: Spot[];
+    handler: number;
+    /** Passes the ball, arriving with the next step's handler. */
+    pass?: boolean;
+    lob?: boolean;
+    screener?: number;
+    /** Defenders caught on a screen over the leg INTO this step. */
+    screened?: number[];
+    /** Fixed defense (the free-throw line-up), instead of guard(). */
+    def?: Spot[];
+}
+
+const place = (spots: Spot[], changes: { [i: number]: Spot }): Spot[] => spots.map((s, i) => changes[i] ?? s);
+const nudge = (s: Spot, r: number): Spot => ({ ax: s.ax + (Math.random() * 2 - 1) * r, az: s.az + (Math.random() * 2 - 1) * r });
+
+/** Where this shot goes up from, for this shooter in this play. */
+const shotSpotFor = (play: WatchPlay, shooter: number, kind: 1 | 2 | 3): Spot => {
+    if (kind === 1) return FT_SPOT;
+    if (play === 'iso') {
+        // The star works one side: a step-back, a pull-up, or all the way in.
+        const m = isoSide(shooter);
+        if (kind === 3) return nudge({ ax: 19.5, az: 14 * m }, 0.8);
+        return Math.random() < 0.7 ? nudge({ ax: 37, az: 4.5 * m }, 0.6) : nudge({ ax: 29, az: 10 * m }, 1);
+    }
+    if (kind === 3) {
+        // Wings take a share of their threes from the corner.
+        if ((shooter === 1 || shooter === 2) && Math.random() < 0.3) return CORNER[shooter - 1];
+        return nudge(THREE_SPOT[shooter], 0.8);
+    }
+    return Math.random() < 0.7 ? nudge(RIM_SPOT[shooter], 0.5) : nudge(MID_SPOT[shooter], 1);
 };
 
-const withShooter = (spots: Spot[], idx: number, spot: Spot): Spot[] =>
-    spots.map((s, i) => (i === idx ? spot : s));
-
-const buildPossession = (
-    side: CourtSide, play: WatchPlay, start: number, duration: number,
-    made: boolean, points: number, shotKind: 1 | 2 | 3,
-    shooter: number, passer: number | null, scorerName: string, assistName: string | null,
-): Possession => {
-    const d = dirOf(side);
-    const w = (s: Spot): Vec2 => ({ x: d * s.ax, z: d * s.az });
-    const offOf = (spots: Spot[]) => spots.map(w);
-    const defOf = (spots: Spot[]) => spots.map((s) => w(defendSpot(s)));
-    const held = (spots: Spot[], idx: number): Vec3 => {
-        const p = w(spots[idx]);
-        return { x: p.x, y: CARRY_Y, z: p.z };
-    };
-
-    const action = PLAY_ACTION[play];
-    const shotSpot = shotKind === 1 ? FT_SPOT : shotKind === 3 ? SHOT_SPOT[play].three : SHOT_SPOT[play].rim;
-    const finish: Finish = shotKind === 2 && Math.hypot(HOOP_AX - shotSpot.ax, shotSpot.az) < RIM_RANGE ? 'layup' : 'shot';
-    const shotSet = withShooter(action, shooter, shotSpot);
-    const hoop: Vec3 = { x: d * HOOP_AX, y: RIM_Y, z: 0 };
-
-    const at = (frac: number) => start + duration * frac;
-    const beats: Beat[] = [];
-
-    // Bring it up.
-    beats.push({
-        t: at(0), off: offOf(TRANSITION_SET), def: defOf(TRANSITION_SET),
-        ball: held(TRANSITION_SET, 0), handler: 0, arc: 0,
-    });
-    // Set the half-court. This leg is generous (a third of the possession)
-    // because it is also the leg that carries everyone back from the other
-    // end after a change of possession — squeeze it and the full-court trip
-    // comes out at a sprint no human runs.
-    beats.push({
-        t: at(0.36), off: offOf(BASE_SET), def: defOf(BASE_SET),
-        ball: held(BASE_SET, 0), handler: 0, arc: 0,
-    });
-    // The play breaks.
-    const entryHandler = passer ?? 0;
-    const passes = passer !== null && passer !== shooter;
-    beats.push({
-        t: at(0.52), off: offOf(action), def: defOf(action),
-        ball: held(action, entryHandler), handler: entryHandler,
-        arc: passes ? 2.2 : 0,
-    });
-
-    if (passes) {
-        // Ball in the air, then caught at the shot spot.
-        beats.push({
-            t: at(0.68), off: offOf(shotSet), def: defOf(shotSet),
-            ball: held(shotSet, shooter), handler: null, arc: 0,
-        });
-        beats.push({
-            t: at(0.76), off: offOf(shotSet), def: defOf(shotSet),
-            ball: held(shotSet, shooter), handler: shooter, arc: 0,
-        });
-    } else {
-        // The handler creates their own — drive or rise up, no pass.
-        beats.push({
-            t: at(0.72), off: offOf(shotSet), def: defOf(shotSet),
-            ball: held(shotSet, shooter), handler: shooter, arc: 0,
-        });
+/**
+ * The steps of `play` after the half-court set, up to (not including) the
+ * gather, plus whether a pass into the shooter counts for an assist.
+ */
+const playSteps = (play: WatchPlay, shooter: number, kind: 1 | 2 | 3): { steps: Step[]; assistable: boolean } => {
+    if (kind === 1) {
+        // A free throw: the shooter on the line, two of his on the second
+        // lane spaces, two back behind the arc; the defense on the blocks and
+        // the third spaces, his own man up top.
+        const others = [0, 1, 2, 3, 4].filter((i) => i !== shooter);
+        const offSpots: { [i: number]: Spot } = { [shooter]: FT_SPOT };
+        const defSpots: Spot[] = [];
+        const lane: Spot[] = [{ ax: 36.3, az: 8.9 }, { ax: 36.3, az: -8.9 }, { ax: 21, az: 14 }, { ax: 21, az: -14 }];
+        const laneDef: Spot[] = [{ ax: 39.5, az: 8.9 }, { ax: 39.5, az: -8.9 }, { ax: 33.2, az: 8.9 }, { ax: 33.2, az: -8.9 }];
+        others.forEach((i, k) => { offSpots[i] = lane[k]; defSpots[i] = laneDef[k]; });
+        defSpots[shooter] = { ax: 17.5, az: 0 };
+        return { steps: [{ f: 0.5, off: place(BASE_SET, offSpots), handler: shooter, def: defSpots }], assistable: false };
     }
+    switch (play) {
+        case 'pick_roll': {
+            // The big comes up and sets it on the guard's man; the guard comes
+            // off it going downhill while the big rolls (or pops, when he's the
+            // one shooting the three) and the guard's man is left behind.
+            const s2 = place(BASE_SET, { 0: { ax: 17, az: 1.5 }, 3: { ax: 29, az: 15 }, 4: { ax: 20.6, az: -3.2 } });
+            const pullUp = shooter === 0 && kind === 3;
+            const pop = shooter === 4 && kind === 3;
+            const s3 = place(s2, {
+                0: pullUp ? { ax: 19.5, az: -6 } : { ax: 24, az: -7 },
+                4: pop ? { ax: 19, az: -2.5 } : { ax: 31, az: -2 },
+            });
+            return {
+                steps: [
+                    { f: 0.48, off: s2, handler: 0, screener: 4 },
+                    { f: 0.62, off: s3, handler: 0, screened: [0] },
+                ],
+                assistable: true,
+            };
+        }
+        case 'pindown': {
+            // The shooting guard goes down to the block, the four sets a
+            // pin-down on his man, and he curls up off it to the wing.
+            const s2 = place(BASE_SET, { 0: { ax: 20, az: 2 }, 1: { ax: 38.5, az: -12 }, 3: { ax: 34.5, az: -15 }, 4: { ax: 36, az: 7 } });
+            const s3 = place(s2, { 1: { ax: 30, az: -18.5 }, 3: { ax: 35.5, az: -14.5 } });
+            return {
+                steps: [
+                    { f: 0.46, off: s2, handler: 0, screener: 3 },
+                    { f: 0.6, off: s3, handler: 0, screened: [1] },
+                ],
+                assistable: true,
+            };
+        }
+        case 'post_up': {
+            // The big seals on the block, the guard feeds him from the wing,
+            // and he backs his man down toward the rim.
+            const s2 = place(BASE_SET, { 0: { ax: 26, az: -15 }, 1: CORNER[0], 3: { ax: 24, az: 9 }, 4: { ax: 37.5, az: -7 } });
+            const s3 = place(s2, { 4: { ax: 37.5, az: -6.5 } });
+            const s4 = place(s3, { 4: { ax: 39, az: -4.5 } });
+            return {
+                steps: [
+                    { f: 0.46, off: s2, handler: 0, pass: true },
+                    { f: 0.58, off: s3, handler: 4 },
+                    { f: 0.7, off: s4, handler: 4 },
+                ],
+                assistable: true,
+            };
+        }
+        case 'iso': {
+            // Clear-out: the ball goes to the star on his own wing, the other
+            // four empty that side (each to the nearest open spot), and he
+            // sizes his man up before going.
+            const star = shooter;
+            const m = isoSide(star);
+            const wing: Spot = { ax: 25, az: 14 * m };
+            const weak: Spot[] = [{ ax: 19, az: -12 * m }, { ax: 35, az: -21.5 * m }, { ax: 40.5, az: -22.4 * m }, { ax: 36, az: -11 * m }];
+            const clear: { [i: number]: Spot } = { [star]: wing };
+            const left = [0, 1, 2, 3, 4].filter((i) => i !== star);
+            // The guard who makes the entry pass hangs on to it until then.
+            const entry = star !== 0;
+            // The pairing with the least running (squared, so nobody gets the
+            // cross-court trip): four men, four spots, 24 ways to pair them.
+            const entrySpot: Spot = { ax: 19.5, az: -3 * m };
+            const startOf = (i: number) => (entry && i === 0 ? entrySpot : BASE_SET[i]);
+            let best: number[] = left;
+            let bestCost = Infinity;
+            const permute = (rest: number[], picked: number[]) => {
+                if (rest.length === 0) {
+                    const cost = picked.reduce((c, i, k) => c + (startOf(i).ax - weak[k].ax) ** 2 + (startOf(i).az - weak[k].az) ** 2, 0);
+                    if (cost < bestCost) { bestCost = cost; best = picked; }
+                    return;
+                }
+                rest.forEach((i) => permute(rest.filter((x) => x !== i), [...picked, i]));
+            };
+            permute(left, []);
+            best.forEach((i, k) => { clear[i] = weak[k]; });
+            const s2 = place(BASE_SET, entry ? { ...clear, 0: entrySpot } : clear);
+            const s3 = place(BASE_SET, clear);
+            const s4 = place(s3, { [star]: { ax: 25, az: 10 * m } });
+            return {
+                steps: [
+                    { f: 0.48, off: s2, handler: 0, pass: entry },
+                    { f: 0.58, off: s3, handler: star },
+                    { f: 0.67, off: s4, handler: star },
+                ],
+                assistable: false,
+            };
+        }
+    }
+};
 
-    // Release: the ball leaves the hand and arcs to the rim.
-    const release = held(shotSet, shooter);
-    beats.push({
-        t: at(0.86), off: offOf(shotSet), def: defOf(shotSet),
-        ball: { x: release.x, y: RELEASE[finish].y, z: release.z }, handler: null,
-        arc: RELEASE[finish].arc(Math.hypot(hoop.x - release.x, hoop.z - release.z)),
+/** The side of the floor a star isolates on: his own (+1 = the +z side). */
+const isoSide = (star: number) => (BASE_SET[star].az > 0 ? 1 : -1);
+
+/** The farthest a shooter goes from the play's last step to his spot, ft. */
+const MAX_CUT = 14;
+
+/** Real-feet position of a spot in the world for the side attacking. */
+const toWorld = (side: CourtSide, s: Spot): Vec2 => ({ x: dirOf(side) * s.ax, z: dirOf(side) * s.az });
+
+interface BuildArgs {
+    side: CourtSide;
+    play: WatchPlay;
+    start: number;
+    duration: number;
+    made: boolean;
+    points: number;
+    shotKind: 1 | 2 | 3;
+    shooter: number;
+    scorerName: string;
+    /** A made finish at the rim is a dunk (dunkChance, rolled by the caller). */
+    dunk: boolean;
+}
+
+const buildPossession = (args: BuildArgs): Possession & { assistable: boolean } => {
+    const { side, play, start, duration, made, points, shotKind, shooter, scorerName } = args;
+    const freeThrow = shotKind === 1;
+    const w = (s: Spot) => toWorld(side, s);
+    const at = (frac: number) => start + duration * frac;
+
+    // --- the steps: bring it up, set up, run the play, get to the spot ---
+    const { steps, assistable } = playSteps(play, shooter, shotKind);
+    let spot = shotSpotFor(play, shooter, shotKind);
+    // From where the play left him. A shooter already spotted up behind the
+    // arc shoots from there; one who'd have to cross the floor to his spot
+    // gets as far as a hard cut takes him (and settles for that shot).
+    const from = steps[steps.length - 1].off[shooter];
+    const fromRim = Math.hypot(HOOP_AX - from.ax, from.az);
+    const travel = Math.hypot(spot.ax - from.ax, spot.az - from.az);
+    if (shotKind === 3 && (fromRim >= 23.9 || (Math.abs(from.az) >= 22.2 && from.ax >= 33))) spot = from;
+    else if (shotKind !== 1 && travel > MAX_CUT) {
+        spot = { ax: from.ax + ((spot.ax - from.ax) * MAX_CUT) / travel, az: from.az + ((spot.az - from.az) * MAX_CUT) / travel };
+    }
+    const rimDist = Math.hypot(HOOP_AX - spot.ax, spot.az);
+    let finish: Finish = shotKind === 2 && rimDist < RIM_RANGE ? 'layup' : 'shot';
+    if (finish === 'layup' && made && args.dunk) finish = 'dunk';
+
+    steps.unshift(
+        { f: 0, off: TRANSITION_SET, handler: 0 },
+        // The half-court set. This leg is generous (a third of the trip)
+        // because it also carries everyone back from the other end after a
+        // change of possession -- squeeze it and the full-court run comes out
+        // at a sprint no human runs.
+        { f: 0.34, off: BASE_SET, handler: 0 },
+    );
+    const last = steps[steps.length - 1];
+    let passer: number | null = null;
+    if (last.handler !== shooter) {
+        // Whoever has it hits the shooter on his spot.
+        last.pass = true;
+        passer = last.handler;
+    } else {
+        for (let k = steps.length - 2; k >= 0; k--) {
+            if (steps[k].pass && steps[k + 1].handler === shooter) { passer = steps[k].handler; break; }
+        }
+    }
+    steps.push({ f: 0.78, off: place(last.off, { [shooter]: spot }), handler: shooter, def: last.def });
+
+    // --- the beats: the steps with their defense ---
+    const beats: Beat[] = [];
+    let prevDef: Spot[] | null = null;
+    steps.forEach((st, k) => {
+        let def = st.def ?? guard(st.off, st.handler);
+        if (st.screened && prevDef) {
+            // Caught on the screen: a quarter of the way to where he wants to be.
+            const pd = prevDef;
+            def = def.map((d, i) => (st.screened!.includes(i)
+                ? { ax: pd[i].ax + (d.ax - pd[i].ax) * 0.25, az: pd[i].az + (d.az - pd[i].az) * 0.25 }
+                : d));
+        }
+        const isGather = k === steps.length - 1;
+        if (isGather && !freeThrow) def = place(def, { [shooter]: closeout(spot) });
+        prevDef = def;
+        const holder = w(st.off[st.handler]);
+        const next = steps[k + 1];
+        const passDist = st.pass && next ? Math.hypot(next.off[next.handler].ax - st.off[st.handler].ax, next.off[next.handler].az - st.off[st.handler].az) : 0;
+        beats.push({
+            t: at(st.f),
+            off: st.off.map(w),
+            def: def.map(w),
+            ball: { x: holder.x, y: CARRY_Y, z: holder.z },
+            handler: st.handler,
+            arc: st.pass ? (st.lob ? 3 : 1.2) : 0,
+            pass: st.pass,
+            screener: st.screener,
+            real: st.pass ? passReal(passDist) : isGather ? gatherReal(finish, freeThrow) : undefined,
+        });
     });
 
+    // --- the shot ---
+    const gather = beats[beats.length - 1];
+    const hoop: Vec3 = { x: dirOf(side) * HOOP_AX, y: RIM_Y, z: 0 };
+    const shooterAt = gather.off[shooter];
+    const flightDist = Math.hypot(hoop.x - shooterAt.x, hoop.z - shooterAt.z);
+    beats.push({
+        t: at(0.86),
+        off: gather.off,
+        def: gather.def,
+        ball: { x: shooterAt.x, y: RELEASE[finish].y, z: shooterAt.z },
+        handler: null,
+        arc: RELEASE[finish].arc(flightDist),
+        release: true,
+        real: flightReal(finish, flightDist),
+    });
+
+    // A layup or a dunk carries the shooter in under the rim with the ball.
+    let rimOff = gather.off;
+    if (finish !== 'shot') {
+        const dx = HOOP_AX - spot.ax;
+        const dz = -spot.az;
+        const len = Math.hypot(dx, dz) || 1;
+        const under = Math.max(0, len - 2.2);
+        const glide = w({ ax: spot.ax + (dx / len) * under, az: spot.az + (dz / len) * under });
+        rimOff = gather.off.map((p, i) => (i === shooter ? glide : p));
+    }
+    // A miss hits the iron: the front of the rim (short) or the back (long).
+    let rimBall: Vec3 = hoop;
+    if (!made) {
+        const dx = shooterAt.x - hoop.x;
+        const dz = shooterAt.z - hoop.z;
+        const len = Math.hypot(dx, dz) || 1;
+        const front = Math.random() < 0.55 ? 0.62 : -0.62;
+        rimBall = { x: hoop.x + (dx / len) * front, y: RIM_Y + 0.25, z: hoop.z + (dz / len) * front + (Math.random() - 0.5) * 0.5 };
+    }
     const shotAt = at(0.95);
-    beats.push({ t: shotAt, off: offOf(shotSet), def: defOf(shotSet), ball: hoop, handler: null, arc: 0 });
 
-    // The aftermath. Bodies stay where the shot left them — they do NOT snap
-    // back to a transition set here. Getting back down the floor is the next
-    // possession's opening beat, which starts from exactly these positions
-    // (see stitch) and has four or five game-seconds to cover the ground.
-    // Resetting here instead compressed a full-court sprint into the 0.8s tail
-    // of the possession, which read as players moving at ~50 ft/s.
-    const endBall: Vec3 = made
-        ? { x: d * HOOP_AX, y: 1.2, z: 0 } // through the net
-        : { x: d * 36, y: 2.4, z: d * 6 }; // caroms toward the weak-side block
-    beats.push({
-        t: start + duration, off: offOf(shotSet), def: defOf(shotSet),
-        ball: endBall, handler: null, arc: made ? 0 : 3.5,
-    });
+    if (made) {
+        beats.push({ t: shotAt, off: rimOff, def: gather.def, ball: hoop, handler: null, arc: 0 });
+        // The aftermath. Bodies stay where the shot left them -- getting back
+        // down the floor is the next trip's opening beat (see stitch). The ball
+        // through the net is worked out in courtStateAt (madeDrop); this is
+        // where it ends up.
+        const endBall = madeDrop(side, (duration * 0.05) / NET_RATE);
+        beats.push({ t: start + duration, off: rimOff, def: gather.def, ball: endBall, handler: null, arc: 0 });
+    } else {
+        // The carom: off the rim and out, five to eleven feet, and a defender
+        // goes up and takes it -- the big most often -- while the offense's
+        // big crashes. Before, the ball just rolled to a spot and the next trip
+        // started with nobody having touched it.
+        const rebounder = freeThrow
+            ? (Math.random() < 0.5 ? [0, 1, 2, 3, 4].filter((i) => i !== shooter)[0] : [0, 1, 2, 3, 4].filter((i) => i !== shooter)[1])
+            : (() => { const r = Math.random(); return r < 0.5 ? 4 : r < 0.8 ? 3 : Math.floor(Math.random() * 3); })();
+        const angle = (Math.random() - 0.5) * 2.2;
+        const out = 4.5 + Math.random() * 6;
+        const carom: Spot = { ax: HOOP_AX - Math.cos(angle) * out, az: Math.sin(angle) * out };
+        const defW = gather.def.map((p) => p);
+        const boxOut = (p: Vec2, frac: number): Vec2 => {
+            const c = w(carom);
+            return { x: p.x + (c.x - p.x) * frac, z: p.z + (c.z - p.z) * frac };
+        };
+        const defRim = defW.map((p, i) => (i === rebounder ? boxOut(p, 0.6) : p));
+        const defEnd = defW.map((p, i) => (i === rebounder ? w(carom) : p));
+        const crasher = shooter === 4 ? 3 : 4;
+        const crashSpot = w({ ax: carom.ax + 2, az: carom.az + (carom.az >= 0 ? -2 : 2) });
+        // He crashes most of the way; the defender has the position.
+        const crash = (p: Vec2, frac: number): Vec2 => ({ x: p.x + (crashSpot.x - p.x) * frac, z: p.z + (crashSpot.z - p.z) * frac });
+        const offRim = rimOff.map((p, i) => (i === crasher ? crash(p, 0.5) : p));
+        const offEnd = rimOff.map((p, i) => (i === crasher ? crash(p, 0.75) : p));
+        beats.push({ t: shotAt, off: offRim, def: defRim, ball: rimBall, handler: null, arc: 2.8, rebounder });
+        const c = w(carom);
+        beats.push({ t: start + duration, off: offEnd, def: defEnd, ball: { x: c.x, y: 8.6, z: c.z }, handler: null, arc: 0 });
+    }
 
     return {
         side, play, start, end: start + duration, made, points,
-        shooter, passer, scorerName, assistName, shotAt, beats, finish,
+        shooter, passer, scorerName, assistName: null, shotAt, beats, finish,
+        freeThrow: freeThrow || undefined,
+        assistable: assistable && passer !== null && passer !== shooter,
     };
+};
+
+const GRAVITY = 32; // ft/s^2
+const BALL_REST = 0.39;
+
+/**
+ * The ball after it drops through: caught by the net for an instant, then
+ * free fall to the floor and a couple of bounces, drifting back out toward
+ * the court. `real` is screen seconds since it reached the rim.
+ */
+const madeDrop = (side: CourtSide, real: number): Vec3 => {
+    const d = dirOf(side);
+    const x = d * (HOOP_AX - Math.min(2.4, real * 1.4));
+    // The net holds it for its first ~0.15 s.
+    const NET = 0.15;
+    if (real < NET) return { x, y: RIM_Y - (real / NET) * 1.3, z: 0 };
+    let y = RIM_Y - 1.3;
+    let v = -7;
+    let t = real - NET;
+    for (let bounce = 0; bounce < 4; bounce++) {
+        // Time to the floor from y at speed v (negative is down).
+        const hit = (v + Math.sqrt(v * v + 2 * GRAVITY * (y - BALL_REST))) / GRAVITY;
+        if (t < hit) return { x, y: y + v * t - 0.5 * GRAVITY * t * t, z: 0 };
+        t -= hit;
+        const impact = v - GRAVITY * hit;
+        y = BALL_REST;
+        v = -impact * 0.55;
+    }
+    return { x, y: BALL_REST, z: 0 };
 };
 
 /* ------------------------------------------------------------------ */
@@ -765,24 +1057,23 @@ export const planQuarter = (args: PlanQuarterArgs): QuarterPlan => {
             const shotKind: 1 | 2 | 3 = basket
                 ? basket.shotKind
                 : (Math.random() < threeRate(players[five.players[shooter]?.playerId]) ? 3 : 2);
-            // Free throws are never assisted; otherwise the point guard sets
-            // it up, or the big does when the guard is the one shooting.
-            const passer = shotKind === 1 ? null : shooter === 0 ? 4 : 0;
-            const assisted = made && passer !== null && passer !== shooter && Math.random() < 0.62;
-            const poss = buildPossession(
-                s, sidePlay, slot.start, slot.duration, made,
-                basket ? basket.points : 0, shotKind,
-                shooter, passer,
-                basket?.playerName ?? five.players[shooter]?.name ?? '',
-                assisted && passer !== null ? five.players[passer]?.name ?? null : null,
-            );
+            // Who passes to whom is the play's own (playSteps): the guard
+            // hitting the roll man, the curl off the pin-down, the kick-out
+            // from the post. A pass into the shooter is an assist most of the
+            // time; an iso is his alone, and a free throw is never assisted.
+            const { assistable, ...poss } = buildPossession({
+                side: s, play: sidePlay, start: slot.start, duration: slot.duration, made,
+                points: basket ? basket.points : 0, shotKind, shooter,
+                scorerName: basket?.playerName ?? five.players[shooter]?.name ?? '',
+                // A make at the rim is a dunk as often as the shooter's legs allow.
+                dunk: made && Math.random() < dunkChance(players[five.players[shooter]?.playerId]),
+            });
+            if (made && assistable && poss.passer !== null && Math.random() < 0.62) {
+                poss.assistName = five.players[poss.passer]?.name ?? null;
+            }
             poss.fiveHome = lineups[k].fiveHome;
             poss.fiveAway = lineups[k].fiveAway;
             poss.energy = lineups[k].energy;
-            // A make at the rim is a dunk as often as the shooter's legs allow.
-            if (made && poss.finish === 'layup' && Math.random() < dunkChance(players[five.players[shooter]?.playerId])) {
-                makeDunk(poss);
-            }
             possessions.push(poss);
         });
     }
@@ -843,7 +1134,7 @@ const stitch = (possessions: Possession[]) => {
 /* Reading the plan at a point in time.                                */
 /* ------------------------------------------------------------------ */
 /** What a body is doing this instant -- the 3D picks the animation from it. */
-export type PlayerAction = 'dribble' | 'pass' | 'shot' | 'layup' | 'dunk' | 'contest' | 'idle';
+export type PlayerAction = 'dribble' | 'pass' | 'shot' | 'layup' | 'dunk' | 'contest' | 'screen' | 'rebound' | 'idle';
 
 export interface PlayerState {
     playerId: string;
@@ -883,6 +1174,75 @@ export interface CourtState {
 }
 
 /* ------------------------------------------------------------------ */
+/* Paths between beats.                                                */
+/* ------------------------------------------------------------------ */
+// Players used to ease in and out of every beat (smoothstep), so all ten
+// stopped dead at each one and started again together: a formation changing
+// shape, not people moving. Now each path is a curve through the beats with
+// its speed carried across them (cubic Hermite, Catmull-Rom tangents), and a
+// player only stops where he really stops: at either end of the trip, where a
+// leg barely moves, or where he cuts back sharply (a plant, then go).
+const segmentAt = (beats: Beat[], seconds: number) => {
+    let i = 0;
+    while (i < beats.length - 2 && beats[i + 1].t <= seconds) i++;
+    return i;
+};
+
+type Pick = (b: Beat) => Vec2;
+const ZERO: Vec2 = { x: 0, z: 0 };
+
+/** Velocity through beat i, ft per game-second. */
+const tangentAt = (beats: Beat[], i: number, pick: Pick): Vec2 => {
+    if (i <= 0 || i >= beats.length - 1) return ZERO;
+    const p0 = pick(beats[i - 1]);
+    const p1 = pick(beats[i]);
+    const p2 = pick(beats[i + 1]);
+    const h0 = beats[i].t - beats[i - 1].t;
+    const h1 = beats[i + 1].t - beats[i].t;
+    if (h0 <= 1e-6 || h1 <= 1e-6) return ZERO;
+    const d0x = (p1.x - p0.x) / h0;
+    const d0z = (p1.z - p0.z) / h0;
+    const d1x = (p2.x - p1.x) / h1;
+    const d1z = (p2.z - p1.z) / h1;
+    const s0 = Math.hypot(d0x, d0z);
+    const s1 = Math.hypot(d1x, d1z);
+    if (s0 < 0.4 || s1 < 0.4) return ZERO;
+    // A cut of more than ~70 degrees is a plant: he stops and goes.
+    if ((d0x * d1x + d0z * d1z) / (s0 * s1) < 0.35) return ZERO;
+    let mx = (d0x + d1x) / 2;
+    let mz = (d0z + d1z) / 2;
+    // Never faster through the beat than the slower leg (no overshoot).
+    const lim = Math.min(s0, s1);
+    const m = Math.hypot(mx, mz);
+    if (m > lim) { mx *= lim / m; mz *= lim / m; }
+    return { x: mx, z: mz };
+};
+
+const pathAt = (beats: Beat[], i: number, u: number, pick: Pick): Vec2 => {
+    const a = beats[i];
+    const b = beats[Math.min(i + 1, beats.length - 1)];
+    const pa = pick(a);
+    const pb = pick(b);
+    const h = b.t - a.t;
+    if (h <= 1e-6) return pb;
+    const ma = tangentAt(beats, i, pick);
+    const mb = tangentAt(beats, i + 1, pick);
+    const u2 = u * u;
+    const u3 = u2 * u;
+    const h00 = 2 * u3 - 3 * u2 + 1;
+    const h10 = u3 - 2 * u2 + u;
+    const h01 = -2 * u3 + 3 * u2;
+    const h11 = u3 - u2;
+    return {
+        x: h00 * pa.x + h10 * h * ma.x + h01 * pb.x + h11 * h * mb.x,
+        z: h00 * pa.z + h10 * h * ma.z + h01 * pb.z + h11 * h * mb.z,
+    };
+};
+
+const offPick = (k: number): Pick => (b) => b.off[k];
+const defPick = (k: number): Pick => (b) => b.def[k];
+
+/* ------------------------------------------------------------------ */
 /* Screen pacing -- the TV "compacto".                                 */
 /* ------------------------------------------------------------------ */
 // Played back at one fixed rate (9.6 game-seconds per real second), a trip up
@@ -895,13 +1255,14 @@ export interface CourtState {
 // the offense arrives and is settling into its set (the tail of the run, at a
 // plausible speed), plays at a readable rate through the shot, and holds a
 // beat on the ball through the net. The run up the floor before that is a CUT.
-// The opponent's trips are picked up later, at the play itself: the user's own
-// offense is what he called and wants to see. Score, clock and results are
-// untouched -- this only decides how fast the plan's own seconds go by.
+// The opponent's trips are picked up later, as their play starts: the user's
+// own offense is what he called and wants to see. Score, clock and results
+// are untouched -- this only decides how fast the plan's own seconds go by.
 //
 // The rate is set per beat, not fixed: a beat where the shooter sprints 40 ft
 // to his spot plays slower than one where the set just shifts, so no body ever
 // moves faster on screen than SCREEN_SPRINT, and the quiet beats go by quickly.
+// A ball in the air plays at its own real speed (Beat.real).
 /** Top on-screen speed of any player, ft per real second (a real sprint is
  * ~25-30; a broadcast package tolerates a little more). */
 export const SCREEN_SPRINT = 34;
@@ -909,36 +1270,52 @@ export const SCREEN_SPRINT = 34;
 const SHOW_RATE_MAX = 3.6;
 /** Fraction of a trip where the screen picks it up: the user's offense... */
 const SHOW_FROM_OWN = 0.3;
-/** ...and the opponent's, at the play itself (the BASE_SET -> action beat). */
-const SHOW_FROM_THEIRS = 0.52;
+/** ...and the opponent's, as their play starts (the first screen or entry). */
+const SHOW_FROM_THEIRS = 0.42;
 /** After a make, the ball dropping through the net: ~1 real second. */
 const NET_RATE = 0.75;
-/** After a miss, the carom: ~half a real second. */
+/** After a miss, the carom and the rebound: ~half a real second. */
 const MISS_RATE = 1.5;
 
-// Fastest any of the ten moves between two beats, in game ft/s. Positions ease
-// with smoothstep, whose peak speed is 1.5x the average over the leg.
-const beatPeakSpeed = (a: Beat, b: Beat): number => {
+// Fastest any of the ten moves over a leg, in game ft/s, sampled along the
+// curves.
+const SAMPLES = 10;
+const beatPeakSpeed = (beats: Beat[], i: number): number => {
+    const a = beats[i];
+    const b = beats[i + 1];
     const span = b.t - a.t;
     if (span <= 0) return 0;
-    let far = 0;
-    for (let i = 0; i < a.off.length; i++) {
-        far = Math.max(far, Math.hypot(b.off[i].x - a.off[i].x, b.off[i].z - a.off[i].z));
-        far = Math.max(far, Math.hypot(b.def[i].x - a.def[i].x, b.def[i].z - a.def[i].z));
+    let peak = 0;
+    for (let k = 0; k < a.off.length; k++) {
+        for (const pick of [offPick(k), defPick(k)]) {
+            let prev = pathAt(beats, i, 0, pick);
+            for (let s = 1; s <= SAMPLES; s++) {
+                const cur = pathAt(beats, i, s / SAMPLES, pick);
+                peak = Math.max(peak, Math.hypot(cur.x - prev.x, cur.z - prev.z));
+                prev = cur;
+            }
+        }
     }
-    return (1.5 * far) / span;
+    return (peak * SAMPLES * 1.04) / span;
 };
 
 // Game-seconds per real second for the stretch of `p` containing `t`, and
 // where that stretch ends.
 const showRate = (p: Possession, t: number): [number, number] => {
-    if (t >= p.shotAt) return [p.made ? NET_RATE : MISS_RATE, p.end];
     const beats = p.beats;
-    let i = 0;
-    while (i < beats.length - 2 && beats[i + 1].t <= t) i++;
-    const until = Math.min(beats[i + 1].t, p.shotAt);
-    const peak = beatPeakSpeed(beats[i], beats[i + 1]);
-    const rate = peak > 0 ? Math.min(SHOW_RATE_MAX, SCREEN_SPRINT / peak) : SHOW_RATE_MAX;
+    const i = segmentAt(beats, t);
+    if (t >= p.shotAt) {
+        // The carom: the rebounder still can't outrun the sprint limit.
+        const peak = beatPeakSpeed(beats, i);
+        const base = p.made ? NET_RATE : MISS_RATE;
+        return [peak > 0 ? Math.min(base, SCREEN_SPRINT / peak) : base, p.end];
+    }
+    const a = beats[i];
+    const b = beats[i + 1];
+    const until = Math.min(b.t, p.shotAt);
+    const peak = beatPeakSpeed(beats, i);
+    let rate = peak > 0 ? Math.min(SHOW_RATE_MAX, SCREEN_SPRINT / peak) : SHOW_RATE_MAX;
+    if (a.real) rate = Math.min(rate, (b.t - a.t) / a.real);
     return [rate, until > t ? until : p.shotAt];
 };
 
@@ -983,11 +1360,7 @@ export const advanceClock = (
     return { seconds: t, cut };
 };
 
-const lerp =(a: number, b: number, t: number) => a + (b - a) * t;
-// Ease in and out so players settle into a spot instead of sliding at constant
-// speed between beats — the single cheapest thing that makes it read as people
-// playing rather than markers interpolating.
-const smooth = (t: number) => t * t * (3 - 2 * t);
+const lerp = (a: number, b: number, t: number) => a + (b - a) * t;
 
 // What the court looks like before anyone has planned a quarter: the two
 // centers squared up at the circle, everyone else ringed around it, ball in
@@ -1049,22 +1422,31 @@ export const courtStateAt = (
     if (!poss) return null;
 
     const beats = poss.beats;
-    let i = 0;
-    while (i < beats.length - 2 && beats[i + 1].t <= seconds) i++;
+    const i = segmentAt(beats, seconds);
     const a = beats[i];
     const b = beats[Math.min(i + 1, beats.length - 1)];
     const raw = b.t > a.t ? (seconds - a.t) / (b.t - a.t) : 1;
     const u = Math.max(0, Math.min(1, raw));
-    const e = smooth(u);
 
-    const ball: BallState = {
-        x: lerp(a.ball.x, b.ball.x, u),
-        y: lerp(a.ball.y, b.ball.y, u) + Math.sin(Math.PI * u) * a.arc,
-        z: lerp(a.ball.z, b.ball.z, u),
-        inFlight: a.handler === null,
-    };
-    // A held ball bounces; an airborne one doesn't.
-    if (a.handler !== null) ball.y += Math.abs(Math.sin(seconds * 7)) * 1.1 - 0.5;
+    const offPos = a.off.map((_, k) => pathAt(beats, i, u, offPick(k)));
+    const defPos = a.def.map((_, k) => pathAt(beats, i, u, defPick(k)));
+
+    // Who has it right now: nobody while a pass or a shot is in the air.
+    const holder = a.pass ? null : a.handler;
+    let ball: BallState;
+    if (holder !== null) {
+        // In his hands -- the 3D puts it in the dribbling hand (Court3D).
+        ball = { x: offPos[holder].x, y: CARRY_Y, z: offPos[holder].z, inFlight: false };
+    } else if (poss.made && seconds >= poss.shotAt) {
+        ball = { ...madeDrop(poss.side, (seconds - poss.shotAt) / NET_RATE), inFlight: true };
+    } else {
+        ball = {
+            x: lerp(a.ball.x, b.ball.x, u),
+            y: lerp(a.ball.y, b.ball.y, u) + Math.sin(Math.PI * u) * a.arc,
+            z: lerp(a.ball.z, b.ball.z, u),
+            inFlight: true,
+        };
+    }
 
     // The trip's own fives when the plan recorded them (it always does now);
     // the caller's are the fallback for a plan built before substitutions.
@@ -1072,34 +1454,36 @@ export const courtStateAt = (
     const fa = poss.fiveAway ?? fiveAway;
     const offFive = poss.side === 'home' ? fh : fa;
     const defFive = poss.side === 'home' ? fa : fh;
-    const handler = a.handler;
 
-    // Actions, read off the beat in progress. The last three beats are always
-    // release -> rim -> aftermath, so the release beat is beats.length - 3.
+    // Actions, read off the beat in progress:
     //  - the shot spans the gather (the beat before release) and the flight:
     //    0-0.4 gathering and rising, 0.4 the release, 0.4-1 the ball to the rim;
-    //  - the man guarding the shooter contests over the same window;
-    //  - a pass is the beat where the ball travels from the entry handler to
-    //    the shooter (beat 2, when the play has a passer).
-    const releaseIdx = beats.length - 3;
+    //  - the man guarding the shooter contests over the same window (not on a
+    //    free throw);
+    //  - a pass, a screen and the rebound are the legs that carry them.
+    const releaseIdx = beats.findIndex((bt) => bt.release);
     const shotT = i === releaseIdx - 1 ? 0.4 * u : i === releaseIdx ? 0.4 + 0.6 * u : -1;
     const finish: Finish = poss.finish ?? 'shot';
-    const passing = poss.passer !== null && poss.passer !== poss.shooter && i === 2;
     const actionOf = (idx: number, isOffense: boolean, hasBall: boolean): [PlayerAction, number] => {
-        if (shotT >= 0 && idx === poss.shooter) return [isOffense ? finish : 'contest', shotT];
-        if (isOffense && passing && idx === (poss.passer ?? 0)) return ['pass', u];
+        if (shotT >= 0 && idx === poss.shooter) {
+            if (isOffense) return [finish, shotT];
+            if (!poss.freeThrow) return ['contest', shotT];
+        }
+        if (isOffense && a.pass && idx === a.handler) return ['pass', u];
+        if (isOffense && a.screener === idx) return ['screen', u];
+        if (!isOffense && a.rebounder === idx) return ['rebound', u];
         if (isOffense && hasBall) return ['dribble', u];
         return ['idle', 0];
     };
 
-    const build = (five: FiveOnCourt, from: Vec2[], to: Vec2[], isOffense: boolean): PlayerState[] =>
+    const hoopX = dirOf(poss.side) * HOOP_AX;
+    const build = (five: FiveOnCourt, pos: Vec2[], isOffense: boolean): PlayerState[] =>
         five.players.map((p, idx) => {
-            const x = lerp(from[idx].x, to[idx].x, e);
-            const z = lerp(from[idx].z, to[idx].z, e);
-            const hasBall = isOffense && handler === idx;
-            // The ball handler squares up to the rim they're attacking;
-            // everyone else — teammates and defenders alike — turns to the ball.
-            const face = hasBall ? { x: dirOf(poss.side) * HOOP_AX, z: 0 } : { x: ball.x, z: ball.z };
+            const { x, z } = pos[idx];
+            const hasBall = isOffense && holder === idx;
+            // The ball handler squares up to the rim he's attacking; everyone
+            // else -- teammates and defenders alike -- turns to the ball.
+            const face = hasBall ? { x: hoopX, z: 0 } : { x: ball.x, z: ball.z };
             const [action, actionT] = actionOf(idx, isOffense, hasBall);
             return {
                 playerId: p.playerId,
@@ -1115,14 +1499,14 @@ export const courtStateAt = (
             };
         });
 
-    const offense = build(offFive, a.off, b.off, true);
-    const defense = build(defFive, a.def, b.def, false);
+    const offense = build(offFive, offPos, true);
+    const defense = build(defFive, defPos, false);
 
     return {
         players: poss.side === 'home' ? [...offense, ...defense] : [...defense, ...offense],
         ball,
         possession: poss.side,
-        handlerName: handler !== null ? offFive.players[handler]?.name ?? null : null,
+        handlerName: holder !== null ? offFive.players[holder]?.name ?? null : null,
         play: poss.play,
     };
 };

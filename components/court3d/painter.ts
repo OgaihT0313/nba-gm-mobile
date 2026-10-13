@@ -7,7 +7,7 @@
 // Text is Barlow Condensed ExtraBold, the app's display face, loaded once from
 // the font package's .ttf. Until it is in, painters still draw shapes, and
 // callers that need text wait on onPainterReady.
-import { Skia, PaintStyle, ColorType, AlphaType, type SkTypeface, type SkFont } from '@shopify/react-native-skia';
+import { Skia, PaintStyle, StrokeJoin, ColorType, AlphaType, type SkTypeface, type SkFont } from '@shopify/react-native-skia';
 import { Asset } from 'expo-asset';
 
 import type { Painter } from './painterTypes';
@@ -53,6 +53,8 @@ export const createPainter = (w: number, h: number): Painter | null => {
   const surface = Skia.Surface.MakeOffscreen(w, h);
   if (!surface) return null;
   const canvas = surface.getCanvas();
+  // Start transparent: decals are laid over the floor with nothing behind the type.
+  canvas.clear(Skia.Color('transparent'));
   const fill = (color: string) => {
     const p = Skia.Paint();
     p.setColor(Skia.Color(color));
@@ -78,6 +80,7 @@ export const createPainter = (w: number, h: number): Painter | null => {
         const s = fill(opts.stroke);
         s.setStyle(PaintStyle.Stroke);
         s.setStrokeWidth(opts.strokeWidth);
+        s.setStrokeJoin(StrokeJoin.Round);
         canvas.drawText(str, left, y, s, font);
       }
       canvas.drawText(str, left, y, fill(color), font);

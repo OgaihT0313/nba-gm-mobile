@@ -113,8 +113,82 @@ const ringPoints = (hx: number, hz: number, r: number, pitch: number) => {
   return out;
 };
 
-function Bowl({ primary, secondary, awayPrimary }: ArenaProps & { awayPrimary?: string }) {
-  const { risers, fans, heads, flashSpots } = useMemo(() => {
+/* ------------------------------------------------------------------ */
+/* The crowd on its feet.                                               */
+/* ------------------------------------------------------------------ */
+// The sound already roars on a big basket (sound/soundEngine.ts); this is the
+// picture: the fans of the team that scored stand, bounce and throw their arms
+// up, then settle back into their seats. All of it in the vertex shader, from
+// three numbers per fan (its rhythm, which side it's on, how into it it is) and
+// two levels for the whole building -- not one matrix rewritten per frame, so
+// ~3,300 fans cost the same on their feet as sitting down.
+
+/** How worked up each side's fans are. Written by the screen (cheer), read by the bowl. */
+export interface CrowdHype {
+  home: number;
+  away: number;
+  homeUntil: number;
+  awayUntil: number;
+}
+export const newCrowdHype = (): CrowdHype => ({ home: 0, away: 0, homeUntil: 0, awayUntil: 0 });
+const nowS = () => Date.now() / 1000;
+/** Gets one side's fans up to `level` (0-1) for `holdS` seconds. */
+export const cheer = (hype: CrowdHype, side: 'home' | 'away', level: number, holdS: number) => {
+  const now = nowS();
+  const until = now + holdS;
+  if (side === 'home') {
+    hype.home = Math.max(level, now < hype.homeUntil ? hype.home : 0);
+    hype.homeUntil = Math.max(until, hype.homeUntil);
+  } else {
+    hype.away = Math.max(level, now < hype.awayUntil ? hype.away : 0);
+    hype.awayUntil = Math.max(until, hype.awayUntil);
+  }
+};
+
+const crowdUniforms = { uHome: { value: 0 }, uAway: { value: 0 }, uTime: { value: 0 } };
+
+const STAND_GLSL = `
+        // aFan: x = rhythm (0-1), y = home fan (1) or away (0), z = how into it.
+        float ex = mix(uAway, uHome, aFan.y) * aFan.z;
+        float stand = smoothstep(0.05, 0.4, ex);
+        float jumpy = smoothstep(0.35, 0.9, ex);
+        float hop = abs(sin(uTime * (6.5 + aFan.x * 3.0) + aFan.x * 6.2832));`;
+const ARMS_GLSL = `
+        float up = smoothstep(0.3, 0.75, ex) * step(0.4, aFan.z);
+        transformed.y *= up;
+        transformed.x += sin(uTime * (7.0 + aFan.x * 4.0) + aFan.x * 12.0) * 0.45 * transformed.y;`;
+const LIFT_GLSL = `
+        transformed.y += stand * 0.85 + hop * jumpy * 0.5 + sin(uTime * 1.3 + aFan.x * 40.0) * 0.03;`;
+
+/**
+ * Teaches a crowd material to stand up. `arms` makes the vertex collapse to
+ * nothing until the fan is excited enough to raise them.
+ */
+const standingCrowd = (mat: THREE.MeshStandardMaterial, kind: string, arms = false) => {
+  mat.onBeforeCompile = (shader) => {
+    shader.uniforms.uHome = crowdUniforms.uHome;
+    shader.uniforms.uAway = crowdUniforms.uAway;
+    shader.uniforms.uTime = crowdUniforms.uTime;
+    shader.vertexShader = shader.vertexShader
+      .replace('#include <common>', '#include <common>\nuniform float uHome;\nuniform float uAway;\nuniform float uTime;\nattribute vec3 aFan;')
+      .replace('#include <begin_vertex>', '#include <begin_vertex>' + STAND_GLSL + (arms ? ARMS_GLSL : '') + LIFT_GLSL);
+  };
+  mat.customProgramCacheKey = () => `crowd-${kind}`;
+  return mat;
+};
+
+/** Raised arms: two thin boxes in a V from the shoulders, base at y = 0. */
+const armsGeometry = () => {
+  // Thick enough to read from the broadcast camera, ~100 ft away.
+  const arm = (side: number) => new THREE.BoxGeometry(0.4, 1.7, 0.36)
+    .translate(0, 0.8, 0)
+    .rotateZ(-side * 0.5)
+    .translate(side * 0.5, 0, 0);
+  return mergeParts([arm(1), arm(-1)], ['position', 'normal', 'uv']);
+};
+
+function Bowl({ primary, secondary, awayPrimary, hype }: ArenaProps & { awayPrimary?: string; hype?: React.MutableRefObject<CrowdHype> }) {
+  const { risers, fans, heads, arms, flashSpots } = useMemo(() => {
     const seats: { x: number; z: number; rot: number; row: number }[] = [];
     for (let r = 0; r < ROWS; r++) {
       const off = r * ROW_DEPTH;
@@ -127,13 +201,18 @@ function Bowl({ primary, secondary, awayPrimary }: ArenaProps & { awayPrimary?: 
     const riserMat = new THREE.MeshStandardMaterial({ color: '#2a3040', roughness: 0.95 });
     const risers = new THREE.InstancedMesh(box, riserMat, seats.length);
     const fanGeo = new THREE.BoxGeometry(1.25, 1.9, 0.95);
-    const fanMat = new THREE.MeshStandardMaterial({ roughness: 0.9 });
+    const fanMat = standingCrowd(new THREE.MeshStandardMaterial({ roughness: 0.9 }), 'body');
     const fans = new THREE.InstancedMesh(fanGeo, fanMat, seats.length);
     // ~3,300 heads: a 48-triangle sphere instead of 96 halves the bowl's
     // geometry, and at stand distance nobody can count the facets.
     const headGeo = new THREE.SphereGeometry(0.42, 6, 4);
-    const headMat = new THREE.MeshStandardMaterial({ roughness: 0.8 });
+    const headMat = standingCrowd(new THREE.MeshStandardMaterial({ roughness: 0.8 }), 'head');
     const heads = new THREE.InstancedMesh(headGeo, headMat, seats.length);
+    const armGeo = armsGeometry();
+    const armMat = standingCrowd(new THREE.MeshStandardMaterial({ roughness: 0.8 }), 'arms', true);
+    const arms = new THREE.InstancedMesh(armGeo, armMat, seats.length);
+    // Per fan: rhythm, home or away, how into it (see standingCrowd).
+    const fanAttr = new Float32Array(seats.length * 3);
 
     const m = new THREE.Matrix4();
     const q = new THREE.Quaternion();
@@ -143,12 +222,13 @@ function Bowl({ primary, secondary, awayPrimary }: ArenaProps & { awayPrimary?: 
     // rest in street clothes. It was a third in the primary color, which on
     // screen read as a neutral building rather than a home floor.
     const neutral = ['#f2f2f2', '#1b1d24', '#2b3a55', '#d9d2c3'];
-    const shirtFor = () => {
+    /** The fan's shirt, and whether he's here for the visitors. */
+    const shirtFor = (): [string, boolean] => {
       const r = rnd();
-      if (r < 0.55) return primary;
-      if (r < 0.75) return secondary;
-      if (r < 0.85) return awayPrimary ?? '#7a1f2b';
-      return neutral[Math.floor(rnd() * neutral.length)];
+      if (r < 0.55) return [primary, false];
+      if (r < 0.75) return [secondary, false];
+      if (r < 0.85) return [awayPrimary ?? '#7a1f2b', true];
+      return [neutral[Math.floor(rnd() * neutral.length)], false];
     };
     const skins = ['#f1c7a3', '#d9a57c', '#b97a52', '#8d5a3b', '#5c3826'];
     let seed = 7;
@@ -173,29 +253,55 @@ function Bowl({ primary, secondary, awayPrimary }: ArenaProps & { awayPrimary?: 
       // further from the light, so the bowl fades into the dark toward the
       // back (PLANO-3D Etapa 2: the penumbra, without a single extra light).
       const dusk = 1 - (s.row / (ROWS - 1)) * 0.55;
-      c.set(shirtFor()).multiplyScalar((0.38 + rnd() * 0.2) * dusk);
+      const [shirt, visitor] = shirtFor();
+      c.set(shirt).multiplyScalar((0.38 + rnd() * 0.2) * dusk);
       fans.setColorAt(i, c);
       m.compose(new THREE.Vector3(s.x, top + 1.9 * h + 0.4, s.z), q, new THREE.Vector3(h, h, h));
       heads.setMatrixAt(i, m);
       c.set(skins[Math.floor(rnd() * skins.length)]).multiplyScalar(0.55 * dusk);
       heads.setColorAt(i, c);
+      // Arms from the shoulders, in the same skin, a little lighter: up in
+      // the air they catch the light the seated crowd doesn't.
+      m.compose(new THREE.Vector3(s.x, top + 1.75 * h, s.z), q, new THREE.Vector3(h, h, h));
+      arms.setMatrixAt(i, m);
+      arms.setColorAt(i, c.multiplyScalar(1.5));
+      fanAttr[i * 3] = rnd();
+      fanAttr[i * 3 + 1] = visitor ? 0 : 1;
+      // Most are into it; some just watch.
+      fanAttr[i * 3 + 2] = 0.55 + rnd() * 0.45;
       if (!empty && flashSpots.length < FLASH_SPOTS && rnd() < 0.012) {
         flashSpots.push(new THREE.Vector3(s.x, top + 1.9 * h + 0.9, s.z));
       }
     });
-    [risers, fans, heads].forEach((im) => {
+    [fanGeo, headGeo, armGeo].forEach((g) => g.setAttribute('aFan', new THREE.InstancedBufferAttribute(fanAttr, 3)));
+    [risers, fans, heads, arms].forEach((im) => {
       im.instanceMatrix.needsUpdate = true;
       if (im.instanceColor) im.instanceColor.needsUpdate = true;
       im.frustumCulled = false;
     });
-    return { risers, fans, heads, flashSpots };
+    return { risers, fans, heads, arms, flashSpots };
   }, [primary, secondary, awayPrimary]);
+
+  // Each side's level rises fast and settles slowly once its hold runs out.
+  const level = useRef({ home: 0, away: 0 });
+  useFrame(({ clock }, dt) => {
+    const h = hype?.current;
+    const now = nowS();
+    const lv = level.current;
+    const ease = (cur: number, target: number) => cur + (target - cur) * Math.min(1, dt * (target > cur ? 6 : 1.1));
+    lv.home = ease(lv.home, h && now < h.homeUntil ? h.home : 0);
+    lv.away = ease(lv.away, h && now < h.awayUntil ? h.away : 0);
+    crowdUniforms.uHome.value = lv.home;
+    crowdUniforms.uAway.value = lv.away;
+    crowdUniforms.uTime.value = clock.getElapsedTime();
+  });
 
   return (
     <>
       <primitive object={risers} />
       <primitive object={fans} />
       <primitive object={heads} />
+      <primitive object={arms} />
       <Flashes spots={flashSpots} />
     </>
   );
@@ -702,7 +808,9 @@ function Hoop({ side, primary, courtRef, shotClockMat, violation }: {
 
 const IDLE_BOARD: ScoreboardData = { home: 0, away: 0, quarter: 1, clock: 12 * 60 };
 
-export default function Arena({ primary, secondary, courtRef, board = IDLE_BOARD, awayPrimary, homeLabel, banners }: ArenaProps & {
+export default function Arena({ primary, secondary, courtRef, board = IDLE_BOARD, awayPrimary, homeLabel, banners, hype }: ArenaProps & {
+  /** How worked up the crowd is (cheer). */
+  hype?: React.MutableRefObject<CrowdHype>;
   /** The home team's title years, for the rafters. */
   banners?: number[];
   courtRef?: React.MutableRefObject<CourtState | null>;
@@ -723,7 +831,7 @@ export default function Arena({ primary, secondary, courtRef, board = IDLE_BOARD
         <planeGeometry args={[420, 320]} />
         <meshStandardMaterial color="#101219" roughness={0.95} />
       </mesh>
-      <Bowl primary={primary} secondary={secondary} awayPrimary={awayPrimary} />
+      <Bowl primary={primary} secondary={secondary} awayPrimary={awayPrimary} hype={hype} />
       <Courtside primary={primary} secondary={secondary} label={homeLabel} scored={board.home + board.away} />
       <Scoreboard primary={primary} secondary={secondary} board={board} awayPrimary={awayPrimary ?? secondary} />
       <CeilingLights />

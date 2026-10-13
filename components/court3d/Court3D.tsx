@@ -1,15 +1,19 @@
-import React, { useEffect, useMemo, useRef } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { GestureResponderEvent, PanResponder, View } from 'react-native';
 import { Canvas, useFrame, useThree } from '@react-three/fiber/native';
 import * as THREE from 'three';
 
 import type { CourtState } from '../../services/watchDirector';
-import Arena, { RIM_X, type ScoreboardData } from './Arena';
-import { createRig, type Rig, type RigPlayer } from './PlayerRig';
-import { loadPainterFont } from './painter';
+import Arena, { RIM_X, type CrowdHype, type ScoreboardData } from './Arena';
+import { createRig, dribblePhase, type Rig, type RigPlayer } from './PlayerRig';
+import { loadPainterFont, painterReady } from './painter';
+import { buildApronDecal, buildCenterDecal } from './richTextures';
 import { buildBallTexture, buildFloorTexture, buildShadowTexture, hexToRgb, FLOOR_L, FLOOR_W } from './textures';
 
-export type { ScoreboardData };
+export type { ScoreboardData, CrowdHype };
+
+/** What the court hears: the ball off the floor, a sneaker on it. */
+export type CourtSound = 'bounce' | 'squeak';
 
 // The 3D "Assistir ao Jogo" court, rendered natively through expo-gl by React
 // Three Fiber.
@@ -101,6 +105,13 @@ interface Court3DProps {
   /** Layout pixels the screen's own overlays cover at the top and bottom; the
    *  camera centers the action in the strip between them (PLANO-3D Etapa 7). */
   insets?: { top: number; bottom: number };
+  /** The home team's nickname and city, painted on its floor. */
+  homeNickname?: string;
+  homeCity?: string;
+  /** How worked up the crowd is (Arena's cheer). */
+  crowd?: React.MutableRefObject<CrowdHype>;
+  /** Called when the ball hits the floor or a shoe squeaks, for the sound. */
+  onSound?: (kind: CourtSound) => void;
 }
 
 const DEFAULT_FLOOR_COLOR = '#caa271'; // light maple
@@ -322,13 +333,13 @@ function RenderProbe() {
   return null;
 }
 
-function Floor({ wood, primary, secondary, label }: { wood: string; primary: string; secondary: string; label: string }) {
+function Floor({ wood, primary, secondary, label, pixelText }: { wood: string; primary: string; secondary: string; label: string; pixelText: boolean }) {
   const gl = useThree((s) => s.gl);
   const material = useMemo(() => {
     // Flipped on every platform. The phone was checked on the device
     // (2026-10-07); the browser was left unflipped and drew the tricode upside
     // down ("BOS" read "BO2", seen 2026-10-10).
-    const map = buildFloorTexture({ wood, primary, secondary, label, flipRows: true });
+    const map = buildFloorTexture({ wood, primary, secondary, label, flipRows: true, pixelText });
     // The floor is seen at a grazing angle almost all the time; anisotropic
     // filtering is what keeps the far lines crisp instead of smeared.
     map.anisotropy = Math.min(8, gl.capabilities.getMaxAnisotropy());
@@ -339,11 +350,50 @@ function Floor({ wood, primary, secondary, label }: { wood: string; primary: str
     // near-side cameras and washed the court grey (seen in Etapa 2). Lambert
     // is also the cheapest lit material.
     return new THREE.MeshLambertMaterial({ map });
-  }, [wood, primary, secondary, label, gl]);
+  }, [wood, primary, secondary, label, pixelText, gl]);
   return (
     <mesh rotation={[-Math.PI / 2, 0, 0]} material={material}>
       <planeGeometry args={[FLOOR_L, FLOOR_W]} />
     </mesh>
+  );
+}
+
+/* ------------------------------------------------------------------ */
+/* The home team's type on its floor.                                  */
+/* ------------------------------------------------------------------ */
+// The nickname across center court and on both baselines, the city along the
+// far sideline (the one the cameras face), in the app's display face (Skia,
+// richTextures.ts). Flat quads a hair over the wood, lit like it; the floor
+// itself leaves out its pixel-font lettering when these are on.
+interface Decal { mat: THREE.Material; geo: THREE.PlaneGeometry; x: number; z: number; rz: number }
+function CourtDecals({ primary, secondary, nickname, city }: { primary: string; secondary: string; nickname: string; city?: string }) {
+  const gl = useThree((s) => s.gl);
+  const decals = useMemo<Decal[]>(() => {
+    const out: Decal[] = [];
+    const add = (tex: THREE.DataTexture | null, w: number, h: number, x: number, z: number, rz: number) => {
+      if (!tex) return;
+      tex.anisotropy = Math.min(8, gl.capabilities.getMaxAnisotropy());
+      const mat = new THREE.MeshLambertMaterial({
+        map: tex, transparent: true, depthWrite: false,
+        polygonOffset: true, polygonOffsetFactor: -4, polygonOffsetUnits: -4,
+      });
+      out.push({ mat, geo: new THREE.PlaneGeometry(w, h), x, z, rz });
+    };
+    // Read from the near sideline: the top of the type is the far side.
+    add(buildCenterDecal(nickname, primary, secondary), 16, 8, 0, 0, 0);
+    // Each baseline's reads from midcourt, top toward the stanchion.
+    const base = buildApronDecal(nickname, primary, secondary);
+    add(base, 26, 3.25, 50.2, 0, -Math.PI / 2);
+    add(base, 26, 3.25, -50.2, 0, Math.PI / 2);
+    if (city) add(buildApronDecal(city, primary, secondary, 2048, 160), 52, 4.06, 0, -28.1, 0);
+    return out;
+  }, [primary, secondary, nickname, city, gl]);
+  return (
+    <>
+      {decals.map((d, i) => (
+        <mesh key={i} geometry={d.geo} material={d.mat} rotation={[-Math.PI / 2, 0, d.rz]} position={[d.x, 0.02, d.z]} renderOrder={1} />
+      ))}
+    </>
   );
 }
 
@@ -356,13 +406,19 @@ const BALL_R = 0.39; // 9.4-inch ball, in feet
 /** Backspin on a shot or a lob, radians per real second (~2 turns). */
 const BACKSPIN = Math.PI * 4;
 
+/** Seconds the ball takes to settle from one owner to the next (a catch, a release). */
+const BALL_HANDOFF = 0.12;
+/** A shoe squeak at most this often, anywhere on the floor. */
+const SQUEAK_EVERY = 0.35;
+
 function PlayersAndBall({
-  home, away, courtRef, bodies,
+  home, away, courtRef, bodies, onSound,
 }: {
   home: TeamVisual;
   away: TeamVisual;
   courtRef: React.MutableRefObject<CourtState | null>;
   bodies?: { [playerId: string]: RigPlayer };
+  onSound?: React.MutableRefObject<((kind: CourtSound) => void) | undefined>;
 }) {
   const shadowMat = useMemo(() => new THREE.MeshBasicMaterial({
     map: buildShadowTexture(), transparent: true, depthWrite: false,
@@ -398,6 +454,12 @@ function PlayersAndBall({
   const lastBall = useRef(new THREE.Vector3());
   const lastCut = useRef<number | undefined>(undefined);
   const spin = useMemo(() => ({ axis: new THREE.Vector3(), q: new THREE.Quaternion(), move: new THREE.Vector3(), up: new THREE.Vector3(0, 1, 0) }), []);
+  // The ball in a player's hands: where it is, who has it, and the blend from
+  // its last place when it changes hands.
+  const hold = useMemo(() => ({
+    right: new THREE.Vector3(), left: new THREE.Vector3(), target: new THREE.Vector3(), from: new THREE.Vector3(),
+    owner: -2, blend: 1, lastY: 0, lastVy: 0, lastSqueak: 0,
+  }), []);
 
   useFrame(({ clock }, dt) => {
     const court = courtRef.current;
@@ -406,6 +468,7 @@ function PlayersAndBall({
     const snap = court.cut !== lastCut.current;
     lastCut.current = court.cut;
 
+    let squeaked = false;
     court.players.forEach((p, i) => {
       const rig = rigs[i];
       if (!rig) return;
@@ -413,7 +476,7 @@ function PlayersAndBall({
         bound.current[i] = p.playerId;
         rig.setPlayer(p.playerId, bodies?.[p.playerId] ?? { number: null });
       }
-      rig.update({
+      if (rig.update({
         x: p.x, z: p.z, rotY: p.rotY, dt, time: t,
         hasBall: p.hasBall,
         onOffense: p.side === court.possession,
@@ -421,12 +484,57 @@ function PlayersAndBall({
         snap,
         action: p.action,
         actionT: p.actionT,
-      });
+      })) squeaked = true;
     });
+    if (squeaked && t - hold.lastSqueak > SQUEAK_EVERY) {
+      hold.lastSqueak = t;
+      onSound?.current?.('squeak');
+    }
 
-    // Lift the ball by its radius so it rests on the floor instead of in it.
+    // Where the ball is. In someone's hands it's in HIS hands: dribbled off
+    // the floor from his right hand, in time with the arm (dribblePhase), or
+    // held in both for a shot or a pass. Loose, it's wherever the director
+    // put it. A change of owner -- a catch, a release -- eases over a few
+    // frames instead of jumping from the body's center to the hand.
     const b = court.ball;
-    ball.position.set(b.x, Math.max(BALL_R, b.y), b.z);
+    const owner = court.players.findIndex((p) => p.hasBall);
+    if (owner >= 0) {
+      const rig = rigs[owner];
+      rig.hands(hold.right, hold.left);
+      const pl = court.players[owner];
+      const yaw = rig.yaw();
+      const fx = Math.sin(yaw);
+      const fz = Math.cos(yaw);
+      if (pl.action === 'shot' || pl.action === 'layup' || pl.action === 'dunk' || pl.action === 'pass' || pl.action === 'screen') {
+        hold.target.addVectors(hold.right, hold.left).multiplyScalar(0.5);
+        hold.target.x += fx * 0.35;
+        hold.target.z += fz * 0.35;
+      } else {
+        const f = dribblePhase(t);
+        const handY = Math.max(BALL_R, hold.right.y - BALL_R);
+        hold.target.set(hold.right.x + fx * 0.3, BALL_R + (handY - BALL_R) * (2 * f - 1) ** 2, hold.right.z + fz * 0.3);
+      }
+    } else {
+      // Lift the ball by its radius so it rests on the floor instead of in it.
+      hold.target.set(b.x, Math.max(BALL_R, b.y), b.z);
+    }
+    if (owner !== hold.owner) {
+      hold.from.copy(ball.position);
+      hold.blend = snap || hold.owner === -2 ? 1 : 0;
+      hold.owner = owner;
+    }
+    if (hold.blend < 1) {
+      hold.blend = Math.min(1, hold.blend + dt / BALL_HANDOFF);
+      const e = hold.blend * hold.blend * (3 - 2 * hold.blend);
+      ball.position.lerpVectors(hold.from, hold.target, e);
+    } else {
+      ball.position.copy(hold.target);
+    }
+    // The bounce: the ball turning from down to up near the floor.
+    const vy = (ball.position.y - hold.lastY) / Math.max(1e-3, dt);
+    if (!snap && hold.lastVy < -2 && vy >= 0 && ball.position.y < BALL_R + 0.6) onSound?.current?.('bounce');
+    hold.lastVy = snap ? 0 : vy;
+    hold.lastY = ball.position.y;
     // Spin about the axis across the direction of travel (PLANO-3D Etapa 6):
     // in the air that's backspin -- the top turning back toward the shooter,
     // about two turns a second -- and on the floor or the bounce it rolls
@@ -443,8 +551,8 @@ function PlayersAndBall({
     lastBall.current.copy(ball.position);
     // Contact shadow: tight and dark with the ball on the floor, spread out
     // and faint when it's up in the air.
-    ballShadow.position.set(b.x, 0.05, b.z);
-    const lift = Math.min(1, b.y / 14);
+    ballShadow.position.set(ball.position.x, 0.05, ball.position.z);
+    const lift = Math.min(1, ball.position.y / 14);
     ballShadow.scale.setScalar(0.9 + lift * 1.6);
     (ballShadow.material as THREE.MeshBasicMaterial).opacity = 1 - lift * 0.72;
   });
@@ -461,7 +569,19 @@ function PlayersAndBall({
 /* ------------------------------------------------------------------ */
 /* Scene root.                                                         */
 /* ------------------------------------------------------------------ */
-function Scene({ home, away, courtRef, visual, homeLabel, bodies, scoreboard, banners }: Omit<Court3DProps, 'cameraView'>) {
+function Scene({
+  home, away, courtRef, visual, homeLabel, bodies, scoreboard, banners, homeNickname, homeCity, crowd, soundRef,
+}: Omit<Court3DProps, 'cameraView' | 'onSound'> & { soundRef: React.MutableRefObject<((kind: CourtSound) => void) | undefined> }) {
+  // The type on the floor waits for the brush's font (painter.ts): until it
+  // is in -- or if it never loads -- the floor paints its own pixel lettering.
+  // Held back until the font settles so the floor isn't built twice.
+  const [fontSettled, setFontSettled] = useState(false);
+  useEffect(() => {
+    let live = true;
+    loadPainterFont().finally(() => { if (live) setFontSettled(true); });
+    return () => { live = false; };
+  }, []);
+  const rich = fontSettled && painterReady();
   return (
     <>
       {/* Arena lighting: a warm key from the rig above, a cold rim light low
@@ -475,12 +595,18 @@ function Scene({ home, away, courtRef, visual, homeLabel, bodies, scoreboard, ba
       <directionalLight position={[-20, 38, -110]} intensity={1.25} color="#cfe0ff" />
       <directionalLight position={[0, 60, 90]} intensity={0.5} color="#ffffff" />
 
-      <Floor
-        wood={visual?.floorColor ?? DEFAULT_FLOOR_COLOR}
-        primary={home.primary}
-        secondary={home.secondary}
-        label={homeLabel ?? 'NBA'}
-      />
+      {fontSettled ? (
+        <Floor
+          wood={visual?.floorColor ?? DEFAULT_FLOOR_COLOR}
+          primary={home.primary}
+          secondary={home.secondary}
+          label={homeLabel ?? 'NBA'}
+          pixelText={!rich || !homeNickname}
+        />
+      ) : null}
+      {rich && homeNickname ? (
+        <CourtDecals primary={home.primary} secondary={home.secondary} nickname={homeNickname} city={homeCity} />
+      ) : null}
       <Arena
         primary={home.primary}
         secondary={home.secondary}
@@ -489,18 +615,20 @@ function Scene({ home, away, courtRef, visual, homeLabel, bodies, scoreboard, ba
         awayPrimary={away.primary}
         homeLabel={homeLabel}
         banners={banners}
+        hype={crowd}
       />
-      <PlayersAndBall home={home} away={away} courtRef={courtRef} bodies={bodies} />
+      <PlayersAndBall home={home} away={away} courtRef={courtRef} bodies={bodies} onSound={soundRef} />
     </>
   );
 }
 
 export default function Court3D({
   home, away, courtRef, visual, cameraView = 'iso', homeLabel, bodies, scoreboard, insets, banners,
+  homeNickname, homeCity, crowd, onSound,
 }: Court3DProps) {
-  // The rich jerseys and banners need the brush's font; start it now, the
-  // bodies wear the pixel-font jersey until it lands (painter.ts).
-  useEffect(() => { loadPainterFont(); }, []);
+  // Read through a ref so a new callback each render never rebuilds the scene.
+  const soundRef = useRef(onSound);
+  soundRef.current = onSound;
   const preset = CAMERA_PRESETS[cameraView];
   const camState = useRef<CameraDragState>({
     angle: CAMERA_PRESETS.iso.angle, elev: CAMERA_PRESETS.iso.elev, dist: CAMERA_PRESETS.iso.dist, dragging: false,
@@ -535,7 +663,10 @@ export default function Court3D({
         <fog attach="fog" args={['#04060b', 160, 520]} />
         <CameraRig stateRef={camState} preset={preset} courtRef={courtRef} insets={insets} />
         {__DEV__ ? <RenderProbe /> : null}
-        <Scene home={home} away={away} courtRef={courtRef} visual={visual} homeLabel={homeLabel} bodies={bodies} scoreboard={scoreboard} banners={banners} />
+        <Scene
+          home={home} away={away} courtRef={courtRef} visual={visual} homeLabel={homeLabel} bodies={bodies}
+          scoreboard={scoreboard} banners={banners} homeNickname={homeNickname} homeCity={homeCity} crowd={crowd} soundRef={soundRef}
+        />
       </Canvas>
     </View>
   );

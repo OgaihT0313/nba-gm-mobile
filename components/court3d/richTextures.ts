@@ -20,7 +20,7 @@ const lum = (hex: string) => {
   return 0.2126 * c.r + 0.7152 * c.g + 0.0722 * c.b;
 };
 /** The number's fill: the secondary if it stands out on the primary, else white or ink. */
-const inkFor = (primary: string, secondary: string) =>
+export const inkFor = (primary: string, secondary: string) =>
   Math.abs(lum(primary) - lum(secondary)) >= 0.25 ? secondary : lum(primary) > 0.5 ? '#141418' : '#f5f5f5';
 const outlineFor = (primary: string, ink: string) => (ink === '#f5f5f5' || ink === '#141418' ? primary : lum(ink) > 0.5 ? '#141418' : '#f5f5f5');
 
@@ -133,4 +133,44 @@ export const buildBannerTexture = (years: number[], primary: string, secondary: 
   tex.minFilter = THREE.LinearFilter;
   tex.needsUpdate = true;
   return tex;
+};
+
+/* ------------------------------------------------------------------ */
+/* Floor decals: the home team's type, laid over the hardwood           */
+/* ------------------------------------------------------------------ */
+
+/** Type alone on a transparent ground, mipmapped (the floor is seen edge-on). */
+const decalTexture = (W: number, H: number, draw: (p: Painter) => void): THREE.DataTexture | null => {
+  const p = createPainter(W, H);
+  if (!p) return null;
+  draw(p);
+  const px = p.pixels();
+  if (!px) return null;
+  const data = new Uint8Array(W * H * 4);
+  flipInto(px, data, W, H);
+  const tex = new THREE.DataTexture(data, W, H, THREE.RGBAFormat);
+  tex.colorSpace = THREE.SRGBColorSpace;
+  tex.magFilter = THREE.LinearFilter;
+  tex.minFilter = THREE.LinearMipmapLinearFilter;
+  tex.generateMipmaps = true;
+  tex.needsUpdate = true;
+  return tex;
+};
+
+/** One word as big as fits the canvas, with an outline. */
+const fitWord = (p: Painter, word: string, color: string, edge: string, fill = 0.92) => {
+  const size = Math.min(p.h * 0.82, (p.w * fill) / Math.max(1, p.textWidth(word, 100) / 100));
+  p.text(word, p.w / 2, p.h / 2 + size * 0.36, size, color, { stroke: edge, strokeWidth: Math.max(4, size * 0.08) });
+};
+
+/** Center court: the nickname across the circle, the way a logo spills over it. */
+export const buildCenterDecal = (nickname: string, primary: string, secondary: string) => {
+  const ink = inkFor(primary, secondary);
+  return decalTexture(1024, 512, (p) => fitWord(p, nickname.toUpperCase(), ink, outlineFor(primary, ink)));
+};
+
+/** A wordmark for the painted apron (the city, the nickname): light type, a dark edge. */
+export const buildApronDecal = (word: string, primary: string, secondary: string, W = 1024, H = 128) => {
+  const ink = lum(secondary) > 0.35 && Math.abs(lum(primary) - lum(secondary)) >= 0.25 ? secondary : '#f5f5f5';
+  return decalTexture(W, H, (p) => fitWord(p, word.toUpperCase(), ink, 'rgba(0,0,0,0.55)', 0.96));
 };

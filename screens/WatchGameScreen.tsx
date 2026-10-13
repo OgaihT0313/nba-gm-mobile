@@ -4,7 +4,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useDesktop } from '../components/desktop/useDesktop';
 
 import { Team, Player, Coach, WatchPlay, LiveTactic } from '../types';
-import { getTeamAccent, getTeamNickname, getTeamTricode, formatPositions } from '../constants';
+import { getTeamAccent, getTeamCity, getTeamNickname, getTeamTricode, formatPositions } from '../constants';
 import { WATCH_PLAY_META, TACTIC_META, STARTING_TIMEOUTS, getRotationWeights } from '../services/simulationService';
 import {
   buildFive,
@@ -28,9 +28,11 @@ import { eraGroupForEraId } from '../data/eras';
 import { getEraVisual } from '../src/theme/eraVisuals';
 import { COLORS, INK, RADIUS, FONT, withAlpha, onAccent, ovrColor } from '../src/theme/tokens';
 import { Panel, MonoLabel, Stat, CtaButton, GhostButton, Meter } from '../components/ui/kit';
-import Court3D, { CameraView } from '../components/court3d/Court3D';
+import Court3D, { CameraView, type CourtSound } from '../components/court3d/Court3D';
+import { cheer, newCrowdHype } from '../components/court3d/Arena';
 import type { RigPlayer } from '../components/court3d/PlayerRig';
 import { createSoundEngine, type SoundEngine } from '../components/court3d/sound/soundEngine';
+import { createAnnouncer, LINES, spokenName } from '../components/court3d/sound/announcer';
 
 const CAMERA_VIEWS: { id: CameraView; label: string }[] = [
   { id: 'iso', label: 'Livre' },
@@ -76,6 +78,8 @@ type Phase = 'huddle' | 'live' | 'final';
 // The camera the user last picked, kept for the next game this session: it
 // reset to the overview every time (phone playthrough, 2026-10-11).
 let lastCameraView: CameraView = 'iso';
+// Same for the announcer's voice: switched off once, it stays off.
+let lastVoiceOn = true;
 type HuddleTab = 'play' | 'lineup';
 
 /** Below this the live panel calls a player out as spent. */
@@ -220,23 +224,34 @@ const WatchGameScreen: React.FC<WatchGameScreenProps> = ({
   // Live-synthesized sound (components/court3d/sound): one engine for the
   // screen, opened on mount and closed on the way out.
   const sound = useRef<SoundEngine | null>(null);
+  // The announcer (sound/announcer.ts) and the crowd's mood (Arena's cheer).
+  const voice = useRef(createAnnouncer());
+  const crowd = useRef(newCrowdHype());
+  const [voiceOn, setVoiceOn] = useState(lastVoiceOn);
   useEffect(() => {
     const engine = createSoundEngine();
     sound.current = engine;
     engine.whistle(); // tip-off
-    return () => { sound.current = null; engine.close(); };
+    const v = voice.current;
+    v.setEnabled(lastVoiceOn);
+    return () => { sound.current = null; engine.close(); v.stop(); };
   }, []);
+  const toggleVoice = () => {
+    lastVoiceOn = !voiceOn;
+    voice.current.setEnabled(lastVoiceOn);
+    setVoiceOn(lastVoiceOn);
+  };
 
-  // The floor during live play: the bounce, and now and then a sneaker
-  // squeak off a cut, never on the beat of the bounce.
-  useEffect(() => {
-    if (phase !== 'live') return;
-    const id = setInterval(() => {
-      sound.current?.dribble();
-      if (Math.random() < 0.35) setTimeout(() => sound.current?.squeak(), 150 + Math.random() * 500);
-    }, 1800 / speed);
-    return () => clearInterval(id);
-  }, [phase, speed]);
+  // The floor's own sounds come from the 3D: the ball hitting the hardwood on
+  // each dribble (in time with the bounce you see) and a sneaker squeaking
+  // when a player plants or cuts hard. They used to be a timer, unrelated to
+  // anything on screen.
+  const onCourtSound = useMemo(() => (kind: CourtSound) => {
+    if (phaseRef.current !== 'live') return;
+    if (kind === 'bounce') sound.current?.dribble(); else sound.current?.squeak();
+  }, []);
+  // Who led after the last basket, for the announcer's "virada".
+  const leaderRef = useRef<CourtSide | null>(null);
 
   /* ---------------------------------------------------------------- */
   /* Score bookkeeping — always the sum of baskets that have actually  */
@@ -304,6 +319,10 @@ const WatchGameScreen: React.FC<WatchGameScreenProps> = ({
   };
 
   const startQuarter = (nextPlay: WatchPlay, spendTimeout: boolean) => {
+    if (!spendTimeout) {
+      if (quarterRef.current === 1) voice.current.say(LINES.tipOff(), true);
+      else if (quarterRef.current > REGULATION_QUARTERS) voice.current.say(LINES.overtime(), true);
+    }
     playRef.current = nextPlay;
     setPlay(nextPlay);
     openPlan(nextPlay, spendTimeout);
@@ -336,11 +355,17 @@ const WatchGameScreen: React.FC<WatchGameScreenProps> = ({
     sound.current?.buzzer();
 
     if (decided || q >= MAX_QUARTER) {
-      if (final.home > final.away) sound.current?.crowd(1, 4.5);
+      if (final.home > final.away) {
+        sound.current?.crowd(1, 4.5);
+        cheer(crowd.current, 'home', 1, 6);
+      }
+      const homeWon = final.home > final.away;
+      voice.current.say(LINES.final(getTeamNickname(homeWon ? home : away), Math.max(final.home, final.away), Math.min(final.home, final.away)), true);
       phaseRef.current = 'final';
       setPhase('final');
       return;
     }
+    voice.current.say(q >= REGULATION_QUARTERS ? LINES.toOvertime() : LINES.quarterEnd(q), true);
     quarterRef.current = q + 1;
     clockRef.current = 0;
     setQuarter(q + 1);
@@ -375,8 +400,28 @@ const WatchGameScreen: React.FC<WatchGameScreenProps> = ({
       // dunk or a three the most; the visitors' get a murmur.
       const dunk = p.finish === 'dunk';
       if (dunk) sound.current?.dunk(); else sound.current?.swish();
-      if (p.side === 'home') sound.current?.crowd(dunk || pts === 3 ? 0.85 : pts === 2 ? 0.4 : 0.2, dunk || pts === 3 ? 2.4 : 1.4);
-      else if (pts >= 2) sound.current?.crowd(0.04, 0.8);
+      const big = dunk || pts === 3;
+      if (p.side === 'home') {
+        sound.current?.crowd(big ? 0.85 : pts === 2 ? 0.4 : 0.2, big ? 2.4 : 1.4);
+        // ...and the building gets up: on its feet for a dunk or a three.
+        cheer(crowd.current, 'home', big ? 1 : pts === 2 ? 0.45 : 0.2, big ? 3 : 1.6);
+      } else {
+        if (pts >= 2) sound.current?.crowd(0.04, 0.8);
+        // The visitors' corner of the stands celebrates its own.
+        cheer(crowd.current, 'away', big ? 1 : 0.5, big ? 2.6 : 1.4);
+      }
+      // A lead change late is the line that matters most; otherwise the
+      // dunks and the threes get called, and now and then a basket of yours.
+      const now = scoreAt(p.shotAt);
+      const leader: CourtSide | null = now.home > now.away ? 'home' : now.away > now.home ? 'away' : null;
+      const flipped = leader !== null && leaderRef.current !== null && leader !== leaderRef.current;
+      if (leader !== null) leaderRef.current = leader;
+      const who = spokenName(p.scorerName);
+      if (flipped && quarterRef.current >= REGULATION_QUARTERS) {
+        voice.current.say(LINES.leadChange(getTeamNickname(p.side === 'home' ? home : away)), true);
+      } else if (dunk) voice.current.say(LINES.dunk(who));
+      else if (pts === 3) voice.current.say(LINES.three(who));
+      else if (p.side === userSide && pts === 2 && Math.random() < 0.3) voice.current.say(LINES.two(who));
     }
   };
 
@@ -448,6 +493,7 @@ const WatchGameScreen: React.FC<WatchGameScreenProps> = ({
   const callTimeout = () => {
     if (timeoutsLeft <= 0 || phaseRef.current !== 'live') return;
     sound.current?.whistle();
+    voice.current.say(LINES.timeout(getTeamNickname(userSide === 'home' ? home : away)), true);
     // The huddle edits the five that is actually out there, with the legs it
     // has right now. Minutes up to the whistle are banked; the rest of the
     // quarter is replanned from here.
@@ -518,6 +564,7 @@ const WatchGameScreen: React.FC<WatchGameScreenProps> = ({
     setQuarter(q);
     setPhase('final');
     sound.current?.buzzer();
+    voice.current.say(LINES.final(getTeamNickname(h > a ? home : away), Math.max(h, a), Math.min(h, a)), true);
   };
 
   const toggleSpeed = () => {
@@ -761,6 +808,17 @@ const WatchGameScreen: React.FC<WatchGameScreenProps> = ({
           </Pressable>
         );
       })}
+      <View style={{ height: 1, marginHorizontal: 6, backgroundColor: COLORS.lineStrong }} />
+      <Pressable
+        accessibilityRole="switch"
+        accessibilityLabel="Locutor"
+        aria-checked={voiceOn}
+        onPress={toggleVoice}
+        className="active:opacity-75"
+        style={{ height: 36, paddingHorizontal: 12, borderRadius: 9, justifyContent: 'center' }}
+      >
+        <Text style={{ fontFamily: FONT.cond800, fontSize: 12.5, letterSpacing: 1, color: voiceOn ? COLORS.textSoft : COLORS.dim, textTransform: 'uppercase', textDecorationLine: voiceOn ? 'none' : 'line-through' }}>Locutor</Text>
+      </Pressable>
     </View>
   );
 
@@ -773,6 +831,10 @@ const WatchGameScreen: React.FC<WatchGameScreenProps> = ({
         visual={courtVisual}
         cameraView={cameraView}
         homeLabel={getTeamTricode(home)}
+        homeNickname={getTeamNickname(home)}
+        homeCity={getTeamCity(home)}
+        crowd={crowd}
+        onSound={onCourtSound}
         bodies={jerseyNumbers}
         banners={banners}
         scoreboard={{

@@ -162,7 +162,7 @@ for (const play of PLAYS) {
 // contesting -- and every assisted-shape trip shows the pass. Also prints how
 // the made twos at the rim split between dunks and layups.
 {
-  let baskets = 0, finished = 0, contested = 0, passTrips = 0, passShown = 0;
+  let baskets = 0, finished = 0, contested = 0, passTrips = 0, passShown = 0, misses = 0, rebounded = 0;
   const finishes: Record<string, number> = { shot: 0, layup: 0, dunk: 0 };
   for (const play of PLAYS) {
     for (let n = 0; n < 10; n++) {
@@ -171,8 +171,9 @@ for (const play of PLAYS) {
         userSide: 'home', play, timeout: false, quarter: 1, from: 0,
       });
       for (const p of plan.possessions) {
-        const release = p.beats[p.beats.length - 3].t;
-        const gather = p.beats[p.beats.length - 4].t;
+        const ri = p.beats.findIndex((b) => b.release);
+        const release = p.beats[ri].t;
+        const gather = p.beats[ri - 1].t;
         // Sample the gather and the flight.
         const at = [gather + (release - gather) * 0.5, release + (p.shotAt - release) * 0.5];
         const shooterIdx = (p.side === 'home' ? 0 : 5) + p.shooter;
@@ -186,13 +187,25 @@ for (const play of PLAYS) {
           });
           if (ok) finished++;
           const st = courtStateAt(plan, at[1], fiveHome, fiveAway)!;
-          if (st.players[defIdx].action === 'contest') contested++;
+          // Free throws go up uncontested.
+          if (p.freeThrow || st.players[defIdx].action === 'contest') contested++;
         }
-        if (p.passer !== null && p.passer !== p.shooter) {
+        // Every pass in the trip shows the passer passing, mid-flight.
+        p.beats.forEach((b, k) => {
+          if (!b.pass || b.handler === null) return;
           passTrips++;
-          const mid = p.beats[2].t + (p.beats[3].t - p.beats[2].t) * 0.5;
+          const mid = b.t + (p.beats[k + 1].t - b.t) * 0.5;
           const st = courtStateAt(plan, mid, fiveHome, fiveAway)!;
-          if (st.players[(p.side === 'home' ? 0 : 5) + p.passer].action === 'pass') passShown++;
+          if (st.players[(p.side === 'home' ? 0 : 5) + b.handler].action === 'pass' && st.ball.inFlight) passShown++;
+        });
+        // A miss is rebounded: a defender is in the 'rebound' action on the way down.
+        if (!p.made) {
+          misses++;
+          const rb = p.beats.find((b) => b.rebounder !== undefined);
+          if (rb) {
+            const st = courtStateAt(plan, p.shotAt + (p.end - p.shotAt) * 0.5, fiveHome, fiveAway)!;
+            if (st.players[(p.side === 'home' ? 5 : 0) + rb.rebounder!].action === 'rebound') rebounded++;
+          }
         }
       }
     }
@@ -200,6 +213,7 @@ for (const play of PLAYS) {
   check('every basket shows its finish', finished === baskets, `${finished}/${baskets}`);
   check('every basket is contested', contested === baskets, `${contested}/${baskets}`);
   check('every pass is shown', passShown === passTrips, `${passShown}/${passTrips}`);
+  check('every miss is rebounded', rebounded === misses, `${rebounded}/${misses}`);
   const rim = finishes.layup + finishes.dunk;
   console.log(`actions: ${finished}/${baskets} baskets show their finish, ${passShown}/${passTrips} passes; `
     + `made: ${finishes.shot} jumpers, ${finishes.layup} layups, ${finishes.dunk} dunks `
