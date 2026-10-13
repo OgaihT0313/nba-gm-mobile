@@ -1,6 +1,12 @@
 # Minha Carreira — plano
 
-Modo novo, pedido pelo usuário em 2026-10-12. **Plano para aprovar; nada implementado.**
+Modo novo, pedido pelo usuário em 2026-10-12. Plano aprovado em 2026-10-12.
+
+**Andamento:** fase 1 feita em 2026-10-13 (`14ab9a7`): criação, combine, noite do draft,
+temporada com a confiança do técnico (`Team.favor`), treino semanal e pontos de evolução
+com teto escondido, abas Hoje/Treino/Time/Carreira, save separado, `scripts/check_career.ts`.
+Medido: escolhas de 1 a 30 no draft; a maioria vira reserva e alguns titulares no 3º-4º ano;
+um nº 1 virou All-NBA. Uma temporada leva ~0,7-1,2 s no Node.
 
 Você cria um jogador, passa pelo campeonato de testes pré-draft, é escolhido por um time
 e vive a carreira dele até a aposentadoria. É praticamente um segundo jogo dentro do app,
