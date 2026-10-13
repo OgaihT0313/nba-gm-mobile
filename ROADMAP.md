@@ -323,9 +323,9 @@ lê o Basketball-Reference e:
   nome nas listas de times (`TeamLogo`), escudo translúcido no topo de Confirmar,
   troféu (silhueta Larry O'Brien, `components/Trophy.tsx`) sobre as Finais. Eras checadas em
   `scripts/check_eras.ts` (continuam no formato real).
-- Pendente: as **eras** ainda usam o modelo antigo de rating e salários
-  sintéticos; o BBRef tem BPM desde 1973-74, então dá para levar o mesmo
-  tratamento a elas.
+- ~~Pendente: as eras ainda usam o modelo antigo de rating~~ — feito no item 6
+  (2026-10-12). Resta nas eras: altura/peso por posição (não os reais) e pele pela
+  foto só em 44% dos jogadores.
 
 **Elenco padrão de volta a 2025-26 (2026-10-05)**, a pedido do usuário depois de
 jogar: os elencos 2026-27 (pré-temporada, avaliados pelas estatísticas de
