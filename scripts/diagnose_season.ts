@@ -16,6 +16,7 @@ import { generateSchedule } from '../services/scheduleService';
 import { simulateOneDay } from '../services/seasonRunner';
 import { buildSeasonOwner } from '../services/ownerService';
 import { initCoaches } from '../services/coachService';
+import { initStaff } from '../services/staffService';
 import { initialPickAssets } from '../services/draftService';
 
 declare const process: { argv: string[] };
@@ -44,7 +45,9 @@ const buildSeason = (userTeamId: string): SeasonState => {
     })),
     1,
   );
-  const { coaches, teams } = initCoaches(initialTeams);
+  const { coaches, teams: coached } = initCoaches(initialTeams);
+  // The real league carries a staff (staffService); its average is neutral.
+  const teams = initStaff(coached);
   const players: { [k: string]: Player } = JSON.parse(JSON.stringify(playersData));
   const userTeam = teams.find(t => t.id === userTeamId)!;
   return {

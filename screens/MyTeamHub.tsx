@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { View, Text, Pressable, ScrollView, Modal } from 'react-native';
 import { Image } from 'expo-image';
 
-import { Team, Player, Coach, GmLegacy, OwnerExpectation, ScheduleGame } from '../types';
+import { Team, Player, Coach, GmLegacy, OwnerExpectation, ScheduleGame, SeasonState, StaffMember, StaffRole } from '../types';
 import { sortStandings } from '../services/scheduleService';
 import {
   getTeamLogoUrl, getTeamSalary, SALARY_CAP, getTeamNickname, conferenceLabel, coachOf,
@@ -25,6 +25,7 @@ import TeamAnalytics from '../components/TeamAnalytics';
 import TeamComparisonChart from '../components/TeamComparisonChart';
 import PickAssets from '../components/PickAssets';
 import CoachPanel from '../components/CoachPanel';
+import StaffPanel from '../components/StaffPanel';
 import RotationPanel from '../components/RotationPanel';
 import Icon from '../components/Icon';
 import PlayerDetailModal, { PlayerDevelopment } from '../components/PlayerDetailModal';
@@ -43,7 +44,7 @@ type Tab = 'roster' | 'rotation' | 'coach' | 'analysis';
 const TABS: { id: Tab; label: string }[] = [
   { id: 'roster', label: 'Elenco' },
   { id: 'rotation', label: 'Rotação' },
-  { id: 'coach', label: 'Técnico' },
+  { id: 'coach', label: 'Staff' },
   { id: 'analysis', label: 'Análise' },
 ];
 
@@ -63,6 +64,10 @@ interface MyTeamHubProps {
   onSetStarter: (pos: string, playerId: string) => void;
   onFireCoach: () => void;
   onHireCoach: (coach: Coach) => void;
+  seasonStatus: SeasonState['status'];
+  staffMarket?: SeasonState['staffMarket'];
+  onHireStaff: (member: StaffMember) => void;
+  onFireStaff: (role: StaffRole) => void;
   onSetRotationSize: (size: number) => void;
   onToggleLoadManagement: (playerId: string) => void;
   development: PlayerDevelopment;
@@ -81,7 +86,8 @@ const MINUTES_IN_A_GAME = 48;
 
 const MyTeamHub: React.FC<MyTeamHubProps> = ({
   team, players, allTeams, schedule, coaches, gmLegacy, owner, currentDraft,
-  onWaive, onSetStarter, onFireCoach, onHireCoach, onSetRotationSize, onToggleLoadManagement, development,
+  onWaive, onSetStarter, onFireCoach, onHireCoach, seasonStatus, staffMarket, onHireStaff, onFireStaff,
+  onSetRotationSize, onToggleLoadManagement, development,
 }) => {
   const [tab, setTab] = useState<Tab>('roster');
   const desktop = useDesktop();
@@ -96,6 +102,9 @@ const MyTeamHub: React.FC<MyTeamHubProps> = ({
   const [rivalPickerOpen, setRivalPickerOpen] = useState(false);
   const rival = allTeams.find((t) => t.id === rivalId) || null;
   const coach = coachOf(team, coaches);
+  const staffPanel = team.staff ? (
+    <StaffPanel team={team} status={seasonStatus} market={staffMarket} onHire={onHireStaff} onFire={onFireStaff} />
+  ) : null;
 
   const salary = getTeamSalary(team, players);
   const capSpace = SALARY_CAP - salary;
@@ -438,7 +447,10 @@ const MyTeamHub: React.FC<MyTeamHubProps> = ({
 
           {tab === 'coach' ? (
             <Cols>
-              <Col><CoachPanel team={team} coaches={coaches} editable onFire={onFireCoach} onHire={onHireCoach} /></Col>
+              <Col gap={12}>
+                <CoachPanel team={team} coaches={coaches} editable onFire={onFireCoach} onHire={onHireCoach} />
+                {staffPanel}
+              </Col>
               <Col gap={12}>
                 {ownerPanel}
                 {coach ? (
@@ -651,6 +663,8 @@ const MyTeamHub: React.FC<MyTeamHubProps> = ({
         {tab === 'coach' ? (
           <>
             <CoachPanel team={team} coaches={coaches} editable onFire={onFireCoach} onHire={onHireCoach} />
+
+            {staffPanel}
 
             {/* What the owner is measuring the coach — and you — against. */}
             {ownerPanel}

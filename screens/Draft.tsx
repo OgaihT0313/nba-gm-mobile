@@ -3,7 +3,8 @@ import { View, Text, Pressable } from 'react-native';
 
 import { SeasonState, ScoutReport } from '../types';
 import { formatPositions, getTeamAccent } from '../constants';
-import { consensusValue, draftVerdict, SCOUT_BUDGET, PROJECTION_FLOOR, PROJECTION_CEIL } from '../services/draftService';
+import { consensusValue, draftVerdict, PROJECTION_FLOOR, PROJECTION_CEIL } from '../services/draftService';
+import { scoutBudgetFor, NEUTRAL_RATING } from '../services/staffService';
 import { COLORS, FONT, withAlpha } from '../src/theme/tokens';
 import Screen, { Body } from '../components/ui/Screen';
 import {
@@ -336,7 +337,7 @@ const Draft: React.FC<DraftProps> = ({ season, onPick, onAutoPick, onFinish, onS
             )}
             <BodyText size={12.5} color={COLORS.dim}>
               Ninguém sabe o que esses garotos vão virar — o número é projeção, não verdade. Cada relatório de olheiro
-              ({SCOUT_BUDGET} por draft) estreita a faixa de um recruta, e é nos nebulosos que moram os achados e as furadas.
+              ({scoutBudgetFor(draft.scoutRating ?? NEUTRAL_RATING)} por draft com o seu olheiro-chefe nota {draft.scoutRating ?? NEUTRAL_RATING}) estreita a faixa de um recruta, e é nos nebulosos que moram os achados e as furadas.
             </BodyText>
           </Col>
           <Col width={460}>
@@ -393,7 +394,7 @@ const Draft: React.FC<DraftProps> = ({ season, onPick, onAutoPick, onFinish, onS
 
         <BodyText size={12} color={COLORS.dim}>
           Ninguém sabe o que esses garotos vão virar — o número é projeção, não verdade. Cada relatório de olheiro
-          ({SCOUT_BUDGET} por draft) estreita a faixa de um recruta, e é nos nebulosos que moram os achados e as furadas.
+          ({scoutBudgetFor(draft.scoutRating ?? NEUTRAL_RATING)} por draft com o seu olheiro-chefe nota {draft.scoutRating ?? NEUTRAL_RATING}) estreita a faixa de um recruta, e é nos nebulosos que moram os achados e as furadas.
         </BodyText>
       </Body>
     </Screen>

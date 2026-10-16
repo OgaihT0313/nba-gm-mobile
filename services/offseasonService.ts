@@ -13,8 +13,9 @@ import { generateSchedule } from './scheduleService';
 import { MIN_ROSTER_SIZE, MAX_ROSTER_SIZE } from './tradeService';
 import {
     buildDraftBoard, grantNextWindowPick, PICK_WINDOW,
-    generateDraftClass, generateRealDraftClass, generateUndraftedClass, advanceDraftToUser, SCOUT_BUDGET,
+    generateDraftClass, generateRealDraftClass, generateUndraftedClass, advanceDraftToUser,
 } from './draftService';
+import { staffOffseason, buildStaffMarket, fillUserVacancies, ratingOf, scoutBudgetFor, ROLE_LABEL } from './staffService';
 import { processOffseasonContracts, runCpuFreeAgency, trimCpuRosters } from './freeAgencyService';
 import { accumulateCareers, championRosterOf } from './careerService';
 import { ageCoachesAndRetire, buildDevelopmentBonusMap } from './coachService';
@@ -84,9 +85,17 @@ export const startOffseason = (prev: SeasonState, opts: OffseasonOptions = {}): 
   // work above, run on board.teams so the result flows into newTeams below
   // along with everything else buildDraftBoard already carried forward.
   const coaching = ageCoachesAndRetire(board.teams, prev.coaches);
+  // The rest of the staff has its year too: contracts run out, CPU teams
+  // refill, the user's openings go to this summer's market (staffService).
+  const staffing = staffOffseason(coaching.teams, prev.userTeamId);
+  const userAfterStaff = staffing.teams.find((t) => t.id === prev.userTeamId);
+  const staffMarket = userAfterStaff?.staff ? buildStaffMarket(userAfterStaff, staffing.expiring) : undefined;
+  // This class was scouted all year by the scout who worked last season, even
+  // if his deal just ran out.
+  const scoutRating = ratingOf(prev.teams.find((t) => t.id === prev.userTeamId), 'scout');
 
   // Annotated so the inferred literal type doesn't make wins/losses non-optional.
-  const newTeams: Team[] = coaching.teams.map((t) => ({
+  const newTeams: Team[] = staffing.teams.map((t) => ({
     ...t,
     wins: 0,
     losses: 0,
@@ -205,7 +214,7 @@ export const startOffseason = (prev: SeasonState, opts: OffseasonOptions = {}): 
   // only rating the draft screen and the CPU are allowed to read.
   const initialDraft: DraftState = {
     order: board.order, picks: [], available: [...ids, ...Object.keys(extra?.players ?? {})], complete: false,
-    reports: { ...reports, ...(extra?.reports ?? {}) }, scoutBudget: SCOUT_BUDGET,
+    reports: { ...reports, ...(extra?.reports ?? {}) }, scoutBudget: scoutBudgetFor(scoutRating), scoutRating,
   };
   // The window slides forward: everyone gets their own pick for the draft
   // that just entered the horizon (picks they traded away stay gone).
@@ -233,6 +242,7 @@ export const startOffseason = (prev: SeasonState, opts: OffseasonOptions = {}): 
         }
       : undefined,
     coaches: coaching.coaches,
+    staffMarket,
     // One offseason generates several HUNDRED events against a 60-slot
     // buffer, so this array is a budget, not a list. It used to be plain
     // concatenation, which meant the two biggest batches (draft picks and
@@ -252,6 +262,7 @@ export const startOffseason = (prev: SeasonState, opts: OffseasonOptions = {}): 
       ...mineFirst(contracts.events, prev.userTeamId).slice(0, 6),
       ...board.events,
       ...mineFirst(coaching.events, prev.userTeamId).slice(0, 4),
+      ...staffing.events.slice(0, 4),
       ...mineFirst(progressionEvents, prev.userTeamId).slice(0, 8),
       ...prev.events,
     ].slice(0, 60),
@@ -303,6 +314,18 @@ export const startSeason = (prev: SeasonState): SeasonState => {
   }
   const lastCall = runCpuFreeAgency(prev.teams, released, prev.userTeamId);
   prev = { ...prev, teams: lastCall.teams, players: lastCall.players, events: [...mineFirst(lastCall.events, prev.userTeamId).slice(0, 6), ...prev.events].slice(0, 60) };
+  // Hiring closes: any staff role the user left open goes to an interim.
+  const staffed = uTeam0 ? fillUserVacancies(prev.teams.find((t) => t.id === prev.userTeamId)!) : null;
+  if (staffed && staffed.filled.length) {
+    prev = {
+      ...prev,
+      teams: prev.teams.map((t) => (t.id === prev.userTeamId ? staffed.team : t)),
+      events: [{
+        message: `🧢 Cargos vagos na abertura da temporada (${staffed.filled.map((r) => ROLE_LABEL[r].toLowerCase()).join(', ')}): interinos nota 2 assumem até a entressafra.`,
+        type: 'info' as const, teamIds: [prev.userTeamId],
+      }, ...prev.events].slice(0, 60),
+    };
+  }
   const uTeam = prev.teams.find((t) => t.id === prev.userTeamId);
   // Wipe last season's box scores so leaders/awards start clean.
   const freshPlayers: { [key: string]: Player } = {};
@@ -331,5 +354,6 @@ export const startSeason = (prev: SeasonState): SeasonState => {
     owner,
     cup: simulationEngine.initCupGroups(prev.teams),
     schedule: generateSchedule(prev.teams),
+    staffMarket: undefined,
   };
 };

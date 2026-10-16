@@ -8,6 +8,7 @@
 
 import type { SeasonState } from '../types';
 import { readSave, writeSave, removeSave } from './saveStorage';
+import { ensureStaff } from './staffService';
 
 // Bump when SeasonState changes in a way an old save can't be read as-is, and
 // add the step that upgrades the previous version to MIGRATIONS.
@@ -38,7 +39,9 @@ export const loadGame = (): SeasonState | null => {
       if (!step) return null;
       season = step(season);
     }
-    return looksLikeSeason(season) ? season : null;
+    // Additive fields that old saves simply lack are filled here rather than
+    // bumping the version: a save from before the staff gets an average one.
+    return looksLikeSeason(season) ? ensureStaff(season) : null;
   } catch (e) {
     console.warn('[save] arquivo ilegível', e);
     return null;

@@ -1,7 +1,25 @@
 # Staff além do técnico — plano
 
 Item 11 do [ROADMAP.md](ROADMAP.md). Pedido pelo usuário em 2026-10-13: quatro cargos,
-orçamento rígido. **Plano para aprovar; nada implementado.**
+orçamento rígido. Aprovado em 2026-10-15.
+
+**Andamento:** fase 1 **feita e medida** (2026-10-15), falta testar no aparelho: `services/staffService.ts`, `components/StaffPanel.tsx` (a aba Técnico de Meu Time virou "Staff"), preparador em `handleRandomEvents` e `recordGameStats`, olheiro em `scoutProspect`, mercado em `startOffseason`, interinos em `startSeason`, saves antigos com staff nota 3 em `loadGame`, `scripts/check_staff.ts` (`node .check/scripts/check_staff.js [temporadas] [seções]`).
+
+**Medido (`check_staff`, `diagnose_season`, `backtest_season`):**
+- Liga: média 3,03 na abertura (1:8% 2:25% 3:33% 4:24% 5:10%) e 2,96 depois de 10 entressafras; nenhum time acima do orçamento.
+- Preparador, 16 temporadas por braço, top 8 do time: nota 5 perde 35 jogos, nota 3 48, sem staff 49, nota 1 55 — 36% menos com 5 do que com 1 (meta 25-35%, dentro do ruído de ±5-8).
+- Olheiro, 300 classes: erro no top 15 do quadro 1,55 (nota 5, 17 avaliações) / 2,06 (3) / 2,56 (1) — 39,5% menor; potencial certo 80% / 72% / 67%.
+- `diagnose_season`: 0 de 23 métricas fora da faixa, como antes.
+- `backtest_season` (20 rodadas): r 0,852 → 0,837 e RMSE 7,1 → 7,5. É o custo do staff aleatório: elencos iguais passam a perder números diferentes de jogos por lesão. Pequeno, mas é piora — a meta do plano era "não piora".
+
+**O que mudou do plano na fase 1:**
+- **Staff mora no `Team`** (`team.staff`, `team.staffDeadMoney`), não num mapa em `SeasonState`: a simulação já recebe o time, então lesão e carga leem o preparador sem mudar assinatura nenhuma.
+- **Preparador mais fraco que o plano:** chance de lesão ×1,1 → ×0,9 e duração ×1,08 → ×0,92 (carga ×1,15 → ×0,85 mantida). Os números originais se multiplicam e davam 62% menos jogos perdidos de 5 para 1.
+- **Olheiro: a faixa inicial do quadro não muda.** O quadro de projeções é um só, lido pelo usuário e pela CPU; estreitá-lo ajudaria os 29 times da CPU tanto quanto você. O olheiro age nos seus relatórios: avaliações 8/10/12/14/17, quanto cada relatório estreita a faixa (sobra 60% → 50%; era 55% fixo) e a releitura do potencial a cada relatório (acerta 55% → 80%). O olheiro da CPU não tem efeito no draft dela.
+- **Salários:** nota 1 US$ 0,5 mi, 2 0,9, 3 1,5, 4 2,5, 5 4,0 (±10%). Quatro notas 3 = US$ 6 mi.
+- **Orçamento em três faixas:** 9 mi (LAL, LAC, NYK, BKN, GSW, CHI, BOS), 6 mi (13 mercados pequenos), 7,5 mi o resto. A CPU gasta até o limite na abertura e, ao repor um cargo, deixa salário mínimo para os outros vagos.
+- **Analista e vestiário já existem** (contratáveis, custam orçamento), com o efeito marcado como "entra na próxima atualização" até a fase 2.
+- **Fim de contrato do seu staff:** o profissional volta como candidato no mercado, com 10% de aumento (a renovação antecipada continua na fase 3).
 
 ## A regra que mantém a liga calibrada
 

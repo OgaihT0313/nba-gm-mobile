@@ -4,6 +4,7 @@ import type { Team, Player, Coach, Event, PlayoffState, PlayoffSeries, PlayoffCo
 import { TRADE_DEADLINE_GAME } from './tradeService';
 import { sortStandings, compareStandings } from './scheduleService';
 import { coachOffenseMod, coachDefenseMod } from './coachService';
+import { trainerInjuryMult, trainerDurationMult, trainerLoadMult } from './staffService';
 import { personalityOf, moraleTargetShift, moraleSpeed, fatigueFactor, developmentFactor, LEADER_LIFT } from './personalityService';
 
 type CoachMap = { [key: string]: Coach };
@@ -1049,10 +1050,12 @@ const recordGameStats = (
     // back down. This is what makes load management a real lever on injury
     // risk (see injuryRisk) rather than just fewer box-score minutes.
     const minutesOf = new Map(rotation.map((pId, i) => [pId, minutes[i]]));
+    const loadMult = trainerLoadMult(team);
     team.roster.forEach(pId => {
         const p = players[pId];
         if (!p) return;
-        const target = clampMod(((minutesOf.get(pId) ?? 0) - 18) * 2.6, 0, 100);
+        // The trainer scales how much load each minute puts on (staffService).
+        const target = clampMod(((minutesOf.get(pId) ?? 0) - 18) * 2.6 * loadMult, 0, 100);
         p.load = clampMod(getLoad(p) + (target - getLoad(p)) * 0.25, 0, 100);
     });
 };
@@ -1146,7 +1149,9 @@ const handleRandomEvents = (currentTeams: Team[], players: { [key: string]: Play
     // Severity runs from a minor tweak to a season-altering blow.
     let worstInjury: { message: string; duration: number; teamId: string; mine: boolean } | null = null;
     newTeams.forEach(t => {
-        if (Math.random() >= INJURY_CHANCE_PER_TEAM) return;
+        // The trainer (staffService) scales both the odds and the games lost;
+        // a rating 3 is exactly the calibrated rate.
+        if (Math.random() >= INJURY_CHANCE_PER_TEAM * trainerInjuryMult(t)) return;
         const eligible = t.roster
             .map((pId, idx) => ({ pId, idx }))
             .filter(({ pId }) => !t.playerAbsences?.[pId] && players[pId]);
@@ -1154,7 +1159,9 @@ const handleRandomEvents = (currentTeams: Team[], players: { [key: string]: Play
         const rotSize = rotationSize(t);
         const chosen = eligible[weightedIndex(eligible.map(({ pId, idx }) => injuryRisk(players[pId], idx, rotSize)))];
         const player = players[chosen.pId];
-        const { duration, label } = rollInjury(player.age);
+        const rolled = rollInjury(player.age);
+        const { label } = rolled;
+        const duration = Math.max(1, Math.round(rolled.duration * trainerDurationMult(t)));
         if (!t.playerAbsences) t.playerAbsences = {};
         t.playerAbsences[chosen.pId] = { reason: 'injury', duration };
         // Which injuries are NEWS. Every one of them applies to the roster;
@@ -1177,11 +1184,17 @@ const handleRandomEvents = (currentTeams: Team[], players: { [key: string]: Play
         const w = worstInjury as { duration: number; mine: boolean } | null;
         if (!w || (mine && !w.mine) || (mine === w.mine && duration > w.duration)) {
             const severe = duration >= 18 ? ' Lesão séria — pode comprometer a temporada.' : '';
+            // On your own roster, the trainer's hand is shown where it acts.
+            const care = t.id === userTeamId && duration !== rolled.duration
+                ? duration < rolled.duration
+                    ? ` Preparador físico: volta em ${duration} jogos em vez de ${rolled.duration}.`
+                    : ` Preparador físico fraco: ${duration} jogos em vez de ${rolled.duration}.`
+                : '';
             worstInjury = {
                 duration,
                 teamId: t.id,
                 mine,
-                message: `❤️‍🩹 LESÃO! ${player.name} (${t.name}) sofreu ${label} e perderá ${duration} jogos.${severe}`,
+                message: `❤️‍🩹 LESÃO! ${player.name} (${t.name}) sofreu ${label} e perderá ${duration} jogos.${severe}${care}`,
             };
         }
     });

@@ -9,7 +9,7 @@ import {
 } from '@expo-google-fonts/barlow-condensed';
 import { Barlow_400Regular, Barlow_500Medium, Barlow_600SemiBold } from '@expo-google-fonts/barlow';
 
-import { Team, Player, Coach, SeasonState, TrainingFocus, Notification as NotificationType } from './types';
+import { Team, Player, Coach, SeasonState, StaffMember, StaffRole, TrainingFocus, Notification as NotificationType } from './types';
 import { teamsData, playersData, picksOf, releaseWithDeadMoney, getTeamNickname } from './constants';
 import { ERAS, eraById } from './data/eras';
 import { simulationEngine, ROTATION_MIN, ROTATION_MAX } from './services/simulationService';
@@ -26,6 +26,7 @@ import { resolveDecision } from './services/decisionService';
 import { isRival } from './services/rivalryService';
 import { startOffseason, finishDraft, startSeason } from './services/offseasonService';
 import { initCoaches, fireCoach, hireCoach } from './services/coachService';
+import { initStaff, hireStaff, fireStaff } from './services/staffService';
 
 import { ThemeProvider } from './src/theme/ThemeProvider';
 import { COLORS, applyThemeMode, themeMode as currentThemeMode, type ThemeMode } from './src/theme/tokens';
@@ -699,6 +700,15 @@ export default function App() {
     });
   };
 
+  // The rest of the staff (staffService): hiring checks the budget and the
+  // calendar itself, so a blocked hire just leaves the season as it was.
+  const handleHireStaff = (member: StaffMember) => {
+    setSeason((prev) => (prev ? hireStaff(prev, member) : prev));
+  };
+  const handleFireStaff = (role: StaffRole) => {
+    setSeason((prev) => (prev ? fireStaff(prev, role) : prev));
+  };
+
   // Ported verbatim from the web App.tsx — builds a fresh season with real
   // schedule, cup groups, and owner mandate from the pure ported services.
   // `pendingEraId` (set on the EraSelect screen, null = today's live
@@ -723,7 +733,8 @@ export default function App() {
       })),
       1,
     );
-    const { coaches, teams: teamsWithCoaches } = initCoaches(initialTeams);
+    const { coaches, teams: coachedTeams } = initCoaches(initialTeams);
+    const teamsWithCoaches = initStaff(coachedTeams);
     const userTeam = teamsWithCoaches.find((t) => t.id === teamId)!;
     setSeason({
       status: 'active',
@@ -865,6 +876,10 @@ export default function App() {
           onSetStarter={handleSetStarter}
           onFireCoach={handleFireCoach}
           onHireCoach={handleHireCoach}
+          seasonStatus={season.status}
+          staffMarket={season.staffMarket}
+          onHireStaff={handleHireStaff}
+          onFireStaff={handleFireStaff}
           onSetRotationSize={handleSetRotationSize}
           onToggleLoadManagement={handleToggleLoadManagement}
           development={{

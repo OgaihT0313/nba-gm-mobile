@@ -3,6 +3,7 @@
 // runtime — see the balance harness note in careerService.ts.
 import type { Player, Team, DraftState, DraftPick, DraftSlot, DraftPickAsset, Event, ScoutReport } from '../types';
 import { getPlayerPositions, LINEUP_POSITIONS, ATTRIBUTE_META, getPlayerAttributes } from '../constants';
+import { scoutStepFor, scoutPotentialAccuracy, NEUTRAL_RATING } from './staffService';
 
 // The rookie draft is a single round (30 picks) held in the offseason before
 // free agency. nba_api doesn't model *future* draft classes, so prospects are
@@ -128,13 +129,12 @@ const makeProspect = (slot: number, usedIds: Set<string>, idPrefix = 'rookie_'):
 //      the consensus underrates slides down the board and can fall to a user
 //      who spent scouting on him — which is the entire point of the budget.
 
-// Scouting reports the user gets per draft. A prospect costs 1-3 reports to
-// fully unlock (see scoutProspect), so this buys certainty on roughly a fifth
-// of the class: enough to work a shortlist, never enough to solve the board.
+// Scouting reports the user gets per draft with an average head scout (rating
+// 3; the real number comes from staffService.scoutBudgetFor). A prospect costs
+// 1-3 reports to fully unlock (see scoutProspect), so this buys certainty on
+// roughly a fifth of the class: enough to work a shortlist, never enough to
+// solve the board.
 export const SCOUT_BUDGET = 12;
-
-// How much of the error bar survives one scouting report.
-const SCOUT_STEP = 0.55;
 
 // A wider band means less film and more disagreement. Correlating it with age
 // is safe (age is public) and reads true — an 19-year-old is a projection, not
@@ -162,8 +162,8 @@ export const PROJECTION_CEIL = 99;
 // Potential is a tier, so its fog is a chance of being off by one tier either
 // way rather than a numeric band.
 const POTENTIAL_TIERS: Player['potential'][] = ['A', 'B', 'C', 'D'];
-const guessPotential = (real: Player['potential']): Player['potential'] => {
-    if (Math.random() < 0.65) return real;
+const guessPotential = (real: Player['potential'], accuracy = 0.65): Player['potential'] => {
+    if (Math.random() < accuracy) return real;
     const i = POTENTIAL_TIERS.indexOf(real);
     return pick([POTENTIAL_TIERS[i - 1], POTENTIAL_TIERS[i + 1]].filter(Boolean));
 };
@@ -219,7 +219,11 @@ export const scoutProspect = (
     const p = players[playerId];
     if (!report || !p || draft.scoutBudget <= 0 || report.potentialKnown) return null;
 
-    const tightened = Math.floor(report.uncertainty * SCOUT_STEP);
+    // The head scout sets how much one report narrows the band (0.55 at rating
+    // 3) and re-reads the potential tier with his own accuracy each time —
+    // a good scout's read converges, a bad one's keeps wobbling.
+    const rating = draft.scoutRating ?? NEUTRAL_RATING;
+    const tightened = Math.floor(report.uncertainty * scoutStepFor(rating));
     const solved = tightened <= 1;
     const uncertainty = solved ? 0 : tightened;
     const facts = scoutNotes(p);
@@ -230,7 +234,7 @@ export const scoutProspect = (
     const next: ScoutReport = {
         estimate: solved ? p.ovr : noisyEstimate(p, uncertainty),
         uncertainty,
-        potentialGuess: solved ? p.potential : report.potentialGuess,
+        potentialGuess: solved ? p.potential : guessPotential(p.potential, scoutPotentialAccuracy(rating)),
         potentialKnown: solved,
         reports: report.reports + 1,
         notes: [...report.notes, ...revealed],
