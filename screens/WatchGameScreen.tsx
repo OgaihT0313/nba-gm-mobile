@@ -4,7 +4,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useDesktop } from '../components/desktop/useDesktop';
 
 import { Team, Player, Coach, WatchPlay, LiveTactic } from '../types';
-import { getTeamAccent, getTeamCity, getTeamNickname, getTeamTricode, formatPositions } from '../constants';
+import { getTeamAccent, getTeamCity, getTeamNickname, getTeamTricode, formatPositions, playerLastName } from '../constants';
 import { WATCH_PLAY_META, TACTIC_META, STARTING_TIMEOUTS, getRotationWeights } from '../services/simulationService';
 import {
   buildFive,
@@ -100,7 +100,7 @@ type HuddleTab = 'play' | 'lineup';
 const EXHAUSTED = 35;
 
 const energyColor = (e: number) => (e >= 70 ? COLORS.good : e >= 50 ? COLORS.warn : COLORS.cta);
-const lastName = (name: string) => name.split(' ').slice(-1)[0];
+const lastName = playerLastName;
 
 /** Minutes each player spent on the floor in a plan's trips, added into `into`. */
 const addMinutes = (into: { [id: string]: number }, plan: QuarterPlan, until = Infinity) => {
@@ -895,7 +895,7 @@ const WatchGameScreen: React.FC<WatchGameScreenProps> = ({
               Chame {WATCH_PLAY_META[report.play].label}: {report.reason}.
             </Text>
             <Text style={{ fontFamily: FONT.body500, fontSize: 12, lineHeight: 16, marginTop: 3, color: COLORS.muted }}>
-              Se a leitura estiver certa, rende +{report.bonus.toFixed(1).replace('.', ',')} pts no quarto. Nesta nota, acerta {Math.round(analystAccuracy(report.rating) * 100)}% das leituras.
+              Se a leitura estiver certa, rende +{report.bonus.toFixed(1)} pts no quarto. Nesta nota, acerta {Math.round(analystAccuracy(report.rating) * 100)}% das leituras.
             </Text>
           </View>
         ) : null}
@@ -981,7 +981,11 @@ const WatchGameScreen: React.FC<WatchGameScreenProps> = ({
         crowd={crowd}
         onSound={onCourtSound}
         replay={replaying ? { hoopSide: replaying, slow: REPLAY_SLOW } : null}
-        jumbo={jumbo}
+        // On a phone held upright the TV and close cameras put the far wall
+        // at the top of the frame, and the jumbotron sat right under the HUD's
+        // own scoreboard (device audit, 2026-10-17). The HUD already shows the
+        // score there; the other cameras and the PC keep it.
+        jumbo={desktop || (cameraView !== 'tv' && cameraView !== 'close') ? jumbo : undefined}
         bodies={jerseyNumbers}
         banners={banners}
         scoreboard={{
@@ -1022,10 +1026,12 @@ const WatchGameScreen: React.FC<WatchGameScreenProps> = ({
         </View>
       )}
 
-      {/* Score bar: color blocks at the ends, the clock and possession in the middle. */}
+      {/* Score bar: color blocks at the ends, the clock and possession in the middle.
+          Above the bottom controls (zIndex): on a phone it carries the camera
+          column, whose last button (Locutor) the huddle sheet used to cover. */}
       <View
         onLayout={(e) => { const l = e.nativeEvent.layout; setHudTop(l.y + l.height); }}
-        style={{ pointerEvents: 'box-none', position: 'absolute', top: insets.top + (desktop ? 20 : 10), ...(desktop ? { left: '50%', width: 640, marginLeft: -320 } : { left: 14, right: 14 }) }}
+        style={{ pointerEvents: 'box-none', zIndex: 2, position: 'absolute', top: insets.top + (desktop ? 20 : 10), ...(desktop ? { left: '50%', width: 640, marginLeft: -320 } : { left: 14, right: 14 }) }}
       >
         <View style={{ height: desktop ? 60 : 48, borderRadius: 12, overflow: 'hidden', flexDirection: 'row', backgroundColor: 'rgba(11,11,13,0.88)', borderWidth: 1, borderColor: 'rgba(255,255,255,0.08)' }}>
           <View style={{ width: desktop ? 90 : 58, backgroundColor: homeAccent.primary, alignItems: 'center', justifyContent: 'center' }}>

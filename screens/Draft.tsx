@@ -2,7 +2,7 @@ import React, { useMemo, useState } from 'react';
 import { View, Text, Pressable } from 'react-native';
 
 import { SeasonState, ScoutReport } from '../types';
-import { formatPositions, getTeamAccent } from '../constants';
+import { formatPositions, getTeamAccent, playerLastName } from '../constants';
 import { consensusValue, draftVerdict, PROJECTION_FLOOR, PROJECTION_CEIL } from '../services/draftService';
 import { scoutBudgetFor, NEUTRAL_RATING } from '../services/staffService';
 import { COLORS, FONT, withAlpha } from '../src/theme/tokens';
@@ -209,7 +209,7 @@ const Draft: React.FC<DraftProps> = ({ season, onPick, onAutoPick, onFinish, onS
               style={{ flex: 1 }}
             />
             <CtaButton
-              label={userOnClock ? `Escolher ${focus.name.split(' ').slice(-1)[0]}` : 'Aguarde a vez'}
+              label={userOnClock ? `Escolher ${playerLastName(focus.name)}` : 'Aguarde a vez'}
               onPress={() => onPick(focus.id)}
               disabled={!userOnClock}
               size={16}

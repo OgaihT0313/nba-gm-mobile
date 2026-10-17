@@ -452,7 +452,9 @@ const SimulationScreen: React.FC<SimulationScreenProps> = ({
           {userTeam ? <TeamBadge teamId={userTeam.id} width={62} height={62} /> : null}
           <View className="flex-1" style={{ gap: 3 }}>
             <HeroTitle size={30} numberOfLines={1} adjustsFontSizeToFit>{getTeamNickname(userTeam)}</HeroTitle>
-            <BodyText size={13} numberOfLines={1}>
+            {/* Two lines: beside the big record, "9º no Oeste · 2 derrotas
+                seguidas" doesn't fit one on a phone (cut at "seg..."). */}
+            <BodyText size={13} numberOfLines={2}>
               {gp > 0
                 ? `${confRank}º no ${userTeam?.conference === 'East' ? 'Leste' : 'Oeste'}`
                 : `${getTeamCity(userTeam)} · ${conferenceLabel(userTeam)}`}

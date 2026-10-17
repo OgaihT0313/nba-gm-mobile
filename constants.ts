@@ -93,6 +93,14 @@ export const LUXURY_TAX = 187_895_000;
 export const MID_LEVEL_EXCEPTION = 14_104_000;
 
 // --- HELPER FUNCTIONS ---
+// A player's surname for tight labels: "Derrick Jones Jr." is "Jones", not
+// "Jr." (device audit, 2026-10-17).
+const NAME_SUFFIX = /^(jr\.?|sr\.?|ii|iii|iv|v)$/i;
+export const playerLastName = (name: string) => {
+    const parts = name.trim().split(/\s+/);
+    const last = parts[parts.length - 1];
+    return parts.length > 1 && NAME_SUFFIX.test(last) ? parts[parts.length - 2] : last;
+};
 export const getPlayerImageUrl = (p?: Player) => {
     if (p?.photoUrl) return p.photoUrl;
     if (p?.espnId) {

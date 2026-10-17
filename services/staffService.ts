@@ -93,7 +93,8 @@ export const analystAccuracy = (rating: number): number => at(rating, [0.6, 0.68
 export const analystBonus = (rating: number): number => at(rating, [0.5, 0.875, 1.25, 1.625, 2]);
 
 const pct = (mult: number) => `${mult < 1 ? '−' : '+'}${Math.round(Math.abs(1 - mult) * 100)}%`;
-const fmtPts = (v: number) => v.toFixed(1).replace('.', ',').replace(',0', '');
+// Decimal point, like every stat and salary in the app ("34.4", "$0.8M").
+const fmtPts = (v: number) => v.toFixed(1).replace(/\.0$/, '');
 
 /** The effect in one line, for the Staff tab and the market. */
 export const effectLine = (role: StaffRole, rating: number): string => {

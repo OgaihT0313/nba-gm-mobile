@@ -161,6 +161,28 @@ Conferido no Galaxy (APK `574cc94a`): decalques, bola na mão, torcida, quadro 8
 ~400 MB, log limpo; locutor, quique/chiado e movimento confirmados pelo usuário.
 Depois do APK: o som da arena pausa quando o app sai da frente (`7b72398`, sem APK ainda).
 
+### Auditoria no aparelho 3 — FEITA (2026-10-17, APK `1002` do GitHub Actions)
+
+Galaxy A57 (SM-A576B) por adb, com o save real do usuário (Clippers 4-4, que não foi
+alterado: o jogo 3D foi fechado antes do fim).
+- **Erros:** nenhum crash, ANR ou erro de JS do app. Os 10 crashes no buffer do aparelho
+  são do app Soundcore. Ficam os avisos conhecidos: StatusBar ignorado (edge-to-edge),
+  `pixelStorei` do EXGL e `THREE.Clock`.
+- **3D:** quadros da superfície pelo SurfaceFlinger, amostrados por 30 s. Nenhum intervalo
+  acima de 40 ms em 2.772 (TV) e 2.267 (Perto): as engasgadas periódicas sumiram. TV ~85
+  qps e Perto ~98 qps numa tela de 120 Hz. O atraso que sobra (17-22% pelo `gfxinfo`) é
+  custo de desenho na GPU, não travada.
+- **Memória:** ~390 MB no jogo e ~200 MB fora dele, sem vazamento.
+- **Visual, corrigido depois:**
+  - "2 derrotas seg..." cortado no topo da Simulação (agora quebra em 2 linhas);
+  - Locutor escondido atrás do painel do intervalo (o HUD do topo passou para a frente);
+  - telão embaixo do placar do HUD nas câmeras TV e Perto do celular (sai de cena nessas
+    duas);
+  - "Jr." no lugar do sobrenome no painel Em quadra e no botão do draft
+    (`playerLastName`);
+  - as frases do Staff usavam vírgula decimal, enquanto o app inteiro usa ponto.
+- **Não era bug:** o "Banco · 13 jogadores" em Meu Time estava só na borda da rolagem.
+
 ### 3. Ratings de veteranos (L) — FEITO (2026-10-12)
 
 O caso que abriu o item (T.J. McConnell 88 aos 34) já tinha sido corrigido pela
