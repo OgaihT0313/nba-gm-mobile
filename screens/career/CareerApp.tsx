@@ -12,8 +12,15 @@ import { COLORS, FONT } from '../../src/theme/tokens';
 import { getTeamNickname } from '../../constants';
 import type { PlayerAttributes } from '../../types';
 import type { CareerCreation, CareerState, CombineResult, WeeklyTraining } from '../../services/career/careerTypes';
-import { newCareer, simDay, simToNextGame, simPlayoffRound, runSummer, myTeam, me } from '../../services/career/careerLeague';
-import { spendPoint } from '../../services/career/careerTrust';
+import { newCareer, simDay, simToNextGame, simPlayoffRound, runSummer, myTeam, me, nextGame } from '../../services/career/careerLeague';
+import { spendPoint, roleOf, favorFor } from '../../services/career/careerTrust';
+import { buildMoments, resolveMoment, type Moment, type MomentResult } from '../../services/career/careerMoments';
+import WatchGameScreen from '../WatchGameScreen';
+import { answerPress, requestTrade, acceptExtension, declineExtension, freeAgencyOffers, signOffer } from '../../services/career/careerLife';
+import { retire } from '../../services/career/careerLegacy';
+import { seasonLineFor } from '../../services/career/careerLeague';
+import { RetiredScreen } from './CareerLegacy';
+import { ERA_GROUPS, eraById } from '../../data/eras';
 import { loadCareer, saveCareer, deleteCareer } from '../../services/career/careerSave';
 import CareerCreateScreen from './CareerCreateScreen';
 import CareerPreDraftScreen from './CareerPreDraftScreen';
@@ -30,7 +37,12 @@ type Run = { kind: 'days'; left: number } | { kind: 'season' } | { kind: 'predra
 
 const CareerApp: React.FC<{ onExit: () => void }> = ({ onExit }) => {
   const [career, setCareer] = useState<CareerState | null>(() => loadCareer());
-  const [view, setView] = useState<'start' | 'create' | 'play'>('start');
+  const [view, setView] = useState<'start' | 'create' | 'play' | 'game' | 'eras'>('start');
+  // Fase 5: the era a new career starts in (undefined = the live league).
+  const [pendingEra, setPendingEra] = useState<string | undefined>(undefined);
+  // The game you play: who, where, your moments, and their results so far.
+  const [game, setGame] = useState<{ homeId: string; awayId: string; moments: Moment[] } | null>(null);
+  const momentResults = useRef<MomentResult[]>([]);
   const [run, setRun] = useState<Run>(null);
   const [busy, setBusy] = useState<string | null>(null);
   const [confirmNew, setConfirmNew] = useState(false);
@@ -92,7 +104,7 @@ const CareerApp: React.FC<{ onExit: () => void }> = ({ onExit }) => {
 
   const begin = (c: CareerCreation) => {
     deleteCareer();
-    const fresh = newCareer(c);
+    const fresh = newCareer(c, pendingEra);
     setCareer(fresh);
     setView('play');
   };
@@ -105,7 +117,39 @@ const CareerApp: React.FC<{ onExit: () => void }> = ({ onExit }) => {
     return runSummer(s, { player: prospect, combine: s.combine });
   });
 
+  // "Jogar": the days before your game go by, then the game opens in the 3D
+  // with your moments (fase 2).
+  const playGame = () => {
+    if (!career || busy) return;
+    let s = career;
+    const ng0 = nextGame(s);
+    if (!ng0) return;
+    for (let guard = 0; guard < 10 && s.league.gamesPlayed + 1 < ng0.day && s.league.status === 'active'; guard++) s = simDay(s);
+    const ng = nextGame(s);
+    const mine = myTeam(s);
+    const p = s.league.players[s.meId];
+    if (!ng || !mine || !p) { setCareer(s); return; }
+    const opp = s.league.teams.find((t) => t.id === ng.opponentId)!;
+    momentResults.current = [];
+    setCareer(s);
+    setGame({
+      homeId: ng.home ? mine.id : opp.id,
+      awayId: ng.home ? opp.id : mine.id,
+      moments: buildMoments(p, opp, s.league.players, roleOf(s).rank),
+    });
+    setView('game');
+  };
+
+  const finishGame = (scoreHome: number, scoreAway: number, minutes?: { [id: string]: number }) => {
+    if (!career || !game) return;
+    const results = momentResults.current;
+    setCareer(simDay(career, { pinned: { homeTeamId: game.homeId, awayTeamId: game.awayId, scoreHome, scoreAway, minutes }, results }));
+    setGame(null);
+    setView('play');
+  };
+
   const actions = {
+    playGame,
     simGame: () => { if (career && !busy) setCareer(simToNextGame(career)); },
     simDays: (n: number) => { if (!busy) { setBusy('Simulando...'); setRun({ kind: 'days', left: n }); } },
     simToEnd: () => { if (!busy) { setBusy('Simulando a temporada...'); setRun({ kind: 'season' }); } },
@@ -113,10 +157,81 @@ const CareerApp: React.FC<{ onExit: () => void }> = ({ onExit }) => {
     nextSeason: () => heavy('O verão passa...', (s) => runSummer(s)),
     setTraining: (t: WeeklyTraining) => setCareer((s) => (s ? { ...s, training: t } : s)),
     spend: (k: keyof PlayerAttributes) => setCareer((s) => (s ? spendPoint(s, k) : s)),
+    retire: () => setCareer((s) => (s ? retire(s, seasonLineFor(s)) : s)),
+    answerPress: (id: string) => setCareer((s) => (s ? answerPress(s, id) : s)),
+    requestTrade: () => setCareer((s) => (s ? requestTrade(s) : s)),
+    acceptExtension: () => setCareer((s) => (s ? acceptExtension(s) : s)),
+    declineExtension: () => setCareer((s) => (s ? declineExtension(s) : s)),
+    loadOffers: () => setCareer((s) => (s ? { ...s, offers: freeAgencyOffers(s) } : s)),
+    signOffer: (o: Parameters<typeof signOffer>[1]) => setCareer((s) => (s ? signOffer(s, o) : s)),
     exit: onExit,
   };
 
   /* --- screens --- */
+  if (view === 'game' && career && game) {
+    const lg = career.league;
+    // The coach's trust decides your minutes in the 3D exactly as in a
+    // simulated game (Team.favor).
+    const withFavor = (id: string) => {
+      const t = lg.teams.find((x) => x.id === id)!;
+      return t.roster.includes(career.meId) ? { ...t, favor: { [career.meId]: favorFor(career.trust) } } : t;
+    };
+    const mineId = myTeam(career)!.id;
+    return (
+      <WatchGameScreen
+        home={withFavor(game.homeId)}
+        away={withFavor(game.awayId)}
+        players={lg.players}
+        coaches={lg.coaches}
+        userTeamId={mineId}
+        eraId={lg.era?.id}
+        onFinish={finishGame}
+        career={{
+          meId: career.meId,
+          moments: game.moments,
+          onMoment: (m, optionId) => {
+            const r = resolveMoment(m, optionId, lg.players[career.meId], lg.players);
+            momentResults.current = [...momentResults.current, r];
+            return r;
+          },
+        }}
+      />
+    );
+  }
+
+  if (view === 'eras') {
+    return (
+      <Page>
+        <View className="flex-row items-center justify-between">
+          <Label>Minha carreira · eras</Label>
+          <Pressable accessibilityRole="button" accessibilityLabel="Voltar" onPress={() => setView('start')} className="active:opacity-70">
+            <Label color={COLORS.textSoft}>‹ Voltar</Label>
+          </Pressable>
+        </View>
+        <Title size={34}>Escolha a temporada</Title>
+        <Body>Você joga a temporada escolhida como prospecto e entra no draft seguinte, na classe real daquele ano. A liga segue a história real até você mudá-la.</Body>
+        {ERA_GROUPS.map((g) => (
+          <Box key={g.id}>
+            <Label>{g.label} · {g.spanLabel}</Label>
+            <View className="flex-row flex-wrap" style={{ gap: 6 }}>
+              {g.seasonIds.map((id) => {
+                const e = eraById(id);
+                if (!e) return null;
+                const active = pendingEra === id;
+                return (
+                  <Pressable key={id} accessibilityRole="button" accessibilityLabel={e.seasonLabel} onPress={() => { setPendingEra(id); setView('start'); }} className="active:opacity-70"
+                    style={{ paddingVertical: 8, paddingHorizontal: 10, borderRadius: 10, backgroundColor: active ? COLORS.text : COLORS.surface2 }}>
+                    <Text style={{ fontFamily: FONT.cond800, fontSize: 14, color: active ? COLORS.bg : COLORS.text }}>{e.seasonLabel}</Text>
+                  </Pressable>
+                );
+              })}
+            </View>
+          </Box>
+        ))}
+      </Page>
+    );
+  }
+
   if (view === 'create') return <CareerCreateScreen onDone={begin} onBack={() => setView('start')} />;
 
   if (view === 'start' || !career) {
@@ -151,10 +266,11 @@ const CareerApp: React.FC<{ onExit: () => void }> = ({ onExit }) => {
         ) : null}
         <Box>
           <Label>Onde começar</Label>
-          <Option label="Liga atual" sub="O draft de 2026, com os elencos de 2025-26." active onPress={() => (career ? setConfirmNew(true) : setView('create'))} />
-          <Option label="Eras" sub="Entrar numa era da NBA, na classe de draft real. Em breve." active={false} onPress={() => {}} disabled />
+          <Option label="Liga atual" sub="O draft de 2026, com os elencos de 2025-26." active={!pendingEra} onPress={() => { setPendingEra(undefined); if (career) setConfirmNew(true); else setView('create'); }} />
+          <Option label="Eras" sub={pendingEra ? `${eraById(pendingEra)?.seasonLabel}: ${eraById(pendingEra)?.label}` : 'Entrar numa temporada da história, na classe de draft real.'} active={!!pendingEra} onPress={() => setView('eras')} />
         </Box>
-        {!career ? <Cta label="Criar jogador" sub="Liga atual ›" onPress={() => setView('create')} /> : null}
+        {!career ? <Cta label="Criar jogador" sub={pendingEra ? `${eraById(pendingEra)?.seasonLabel} ›` : 'Liga atual ›'} onPress={() => setView('create')} /> : null}
+        {career && pendingEra ? <Cta label="Criar jogador nesta era" sub={`${eraById(pendingEra)?.seasonLabel} ›`} onPress={() => setConfirmNew(true)} /> : null}
       </Page>
     );
   }
@@ -177,6 +293,10 @@ const CareerApp: React.FC<{ onExit: () => void }> = ({ onExit }) => {
 
   if (career.phase === 'draft') {
     return <CareerDraftScreen career={career} onStart={() => setCareer({ ...career, phase: 'season' })} />;
+  }
+
+  if (career.phase === 'retired') {
+    return <RetiredScreen career={career} onNew={() => setView('create')} onExit={onExit} />;
   }
 
   return <CareerHub career={career} busy={busy} actions={actions} />;

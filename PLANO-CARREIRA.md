@@ -8,6 +8,72 @@ com teto escondido, abas Hoje/Treino/Time/Carreira, save separado, `scripts/chec
 Medido: escolhas de 1 a 30 no draft; a maioria vira reserva e alguns titulares no 3º-4º ano;
 um nº 1 virou All-NBA. Uma temporada leva ~0,7-1,2 s no Node.
 
+**Fases 2 a 5 feitas em 2026-10-17** (pedido do usuário: "roda todo o bloco"). Conferidas no
+navegador e medidas; **falta testar no celular.**
+
+- **Fase 2, momentos:** `services/career/careerMoments.ts`.
+  - **Como é um lance:** 13 situações (6 com a bola, 4 sem a bola, 3 na defesa), cada uma
+    com uma leitura e de 3 a 4 opções. A chance sai do seu atributo contra o do marcador
+    real, com bônus para a opção que a leitura aponta. O valor é medido contra a escolha
+    média: o motor já conta um jogador do seu nível decidindo na média.
+  - **Quantos por jogo:** 7 / 6 / 5 / 4 / 2, de estrela a fora da rotação. Um lance que
+    chega com você no banco é descartado.
+  - **No 3D:** o `WatchGameScreen` ganhou o modo `career`. Sem jogada, quinteto e tempos;
+    a jogada do seu lado não dá bônus (`planQuarter({ coached: false })`). O jogo congela
+    no lance e mostra o cartão de decisão; o placar soma o resultado na hora; o seu
+    jogador ganha um anel amarelo no chão (`RigPlayer.marked`).
+  - **Na carreira:** "Jogar" é o botão principal. O placar da tela é fixado
+    (`PinnedGameResult`), a sua linha soma a diferença dos lances e a confiança sobe com
+    as leituras (+0,3 por jogo jogado em vez de simulado).
+  - **Medido (`scripts/check_moments.ts`, 3.000 jogos com jogadores reais como "você"):**
+    - ler bem: +1,32 pt/jogo para o time e +1,91 para você;
+    - escolha aleatória: +0,05 (≈0);
+    - ir contra a leitura: −0,91;
+    - confiança: +2,45 / +0,19 / −1,95;
+    - a opção da leitura é a de maior valor esperado em 84% dos lances.
+- **Fase 3, fora da quadra:** `careerLife.ts` e a aba **Vida**.
+  - **Relações:** técnico (a confiança), vestiário (vitórias e assistências) e diretoria
+    (produção pelo custo).
+  - **Coletiva:** sobre papel, má fase, boa fase, contrato ou derrotas, a cada 14+ jogos;
+    as respostas mexem nas três relações, e com a personalidade "estrela" o vestiário ouve
+    pela metade.
+  - **Pedido de troca:** uma vez por temporada, só se o técnico te esqueceu. Se aceito,
+    você vai para um time onde joga, trocado por alguém do seu nível; se recusado,
+    técnico e diretoria lembram.
+  - **Extensão:** no jogo 41 do último ano, pelo preço da liga (`askingSalary`), ajustado
+    pela diretoria.
+  - **Agência livre:** o seu time mais os 3 que mais te querem, com dinheiro, papel e
+    chance de título, e o agente recomenda um. O contrato é gravado como as extensões do
+    GM (anos + 1, `nextSalary`).
+- **Fase 4, legado:** `careerLegacy.ts`.
+  - **Aposentadoria:** o verão não aposenta mais você (`OffseasonOptions.keepIds` →
+    `retirePlayers(..., keep)`). Você decide entre temporadas, com o corpo avisando, e aos
+    41 é obrigatório.
+  - **Hall da Fama:** o mesmo placar do Hall da liga, mostrado ao longo da carreira.
+  - **Comparação:** o seu ranking em pontos, rebotes e assistências entre as carreiras da
+    liga.
+  - **Camisa aposentada:** pelos times onde você passou 8+ temporadas, ou 5+ com título ou
+    Hall da Fama.
+  - **Tela de fim de carreira.**
+- **Fase 5, eras:** "Eras" na tela inicial da carreira, com as 41 temporadas.
+  - **Liga:** a liga da carreira é montada como um save de era do GM (`era` e
+    `eraChainIndex`). O verão repete as movimentações reais, e o draft seguinte é a classe
+    real com você inserido.
+  - **Rótulos:** temporadas pelo ano da era (`CareerState.startYear`).
+- **Medido no `check_career`:** os robôs respondem à coletiva, metade aceita e metade
+  recusa a extensão, seguem o agente e se aposentam aos 37.
+  - **Liga atual (4 carreiras × 8 temporadas):** 24 coletivas, extensões e uma troca.
+  - **Era 2016-17:** começa na temporada certa, com draft real; 2 assinaturas na agência
+    livre, 1 trocando de time.
+  - **Carreira de 20 anos:** aposentadoria aos 37, fora de todos os elencos, com o resumo
+    gravado.
+  - **Tudo verde,** e o `diagnose_season` segue com 0 de 23 métricas fora da faixa.
+- **Limites desta versão:**
+  - a comparação com as lendas só tem as carreiras reais da liga atual (os jogadores das
+    eras não trazem totais de carreira);
+  - o lance não é encenado no 3D: o cartão decide e a quadra segue;
+  - o Jogo das Estrelas jogável e os patrocínios ficam para depois.
+
 Você cria um jogador, passa pelo campeonato de testes pré-draft, é escolhido por um time
 e vive a carreira dele até a aposentadoria. É praticamente um segundo jogo dentro do app,
 então o plano começa pelas decisões que definem se ele é divertido, não pela lista de telas.

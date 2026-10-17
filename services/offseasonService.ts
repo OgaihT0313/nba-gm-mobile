@@ -41,6 +41,8 @@ export interface OffseasonOptions {
   extraProspects?: { players: { [id: string]: Player }; reports: DraftState['reports'] };
   /** Players whose training focus counts in progression wherever they play. */
   focusIds?: string[];
+  /** Players the summer never retires: the career player decides that himself. */
+  keepIds?: string[];
 }
 
 export const startOffseason = (prev: SeasonState, opts: OffseasonOptions = {}): SeasonState => {
@@ -115,7 +117,7 @@ export const startOffseason = (prev: SeasonState, opts: OffseasonOptions = {}): 
 
   // Retirement comes right after aging, before real moves and contracts: a
   // player who hangs it up must not be re-signed or replayed into a trade.
-  const retiring = retirePlayers(newTeams, updatedPlayers, Math.random, draftNumber);
+  const retiring = retirePlayers(newTeams, updatedPlayers, Math.random, draftNumber, new Set(opts.keepIds ?? []));
   newTeams.splice(0, newTeams.length, ...retiring.teams);
   const rosterPlayers = retiring.players;
 

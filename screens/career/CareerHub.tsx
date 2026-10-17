@@ -18,12 +18,17 @@ import { me, myTeam, nextGame, seasonLabel } from '../../services/career/careerL
 import { roleOf, TRAINING_META, canSpend, pointCost, getRotationWeightsFor } from '../../services/career/careerTrust';
 import { styleById } from '../../services/career/careerCreate';
 import { Page, Label, Title, Body, Box, Option, Bar, Tabs, Cta, Ghost } from './careerUi';
+import { LifeTab, PressCard, ExtensionCard, OffersCard, type LifeActions } from './CareerLife';
+import { contractEnding } from '../../services/career/careerLife';
+import { LegacyBoxes } from './CareerLegacy';
+import { LAST_AGE } from '../../services/career/careerLegacy';
 
-type Tab = 'hoje' | 'treino' | 'time' | 'carreira';
+type Tab = 'hoje' | 'treino' | 'time' | 'vida' | 'carreira';
 const TABS: { id: Tab; label: string }[] = [
   { id: 'hoje', label: 'Hoje' },
   { id: 'treino', label: 'Treino' },
   { id: 'time', label: 'Time' },
+  { id: 'vida', label: 'Vida' },
   { id: 'carreira', label: 'Carreira' },
 ];
 
@@ -32,7 +37,9 @@ const ATTR_LABEL: Record<keyof PlayerAttributes, string> = {
   interiorD: 'Def. interior', rebounding: 'Rebote', athleticism: 'Atletismo',
 };
 
-export interface HubActions {
+export interface HubActions extends LifeActions {
+  playGame: () => void;
+  retire: () => void;
   simGame: () => void;
   simDays: (n: number) => void;
   simToEnd: () => void;
@@ -56,6 +63,7 @@ const CareerHub: React.FC<{ career: CareerState; busy: string | null; actions: H
         {tab === 'hoje' ? <Today career={career} busy={busy} actions={actions} /> : null}
         {tab === 'treino' ? <Training career={career} actions={actions} /> : null}
         {tab === 'time' ? <TeamTab career={career} /> : null}
+        {tab === 'vida' ? <LifeTab career={career} actions={actions} /> : null}
         {tab === 'carreira' ? <CareerTab career={career} actions={actions} /> : null}
       </View>
       <Tabs tabs={TABS} active={tab} onChange={setTab} accent={accent.primary} />
@@ -129,6 +137,7 @@ const GameRow: React.FC<{ career: CareerState; g: CareerState['games'][number] }
       <Text style={{ width: 84, fontFamily: FONT.cond700, fontSize: 14, color: COLORS.textSoft }}>{g.home ? 'vs' : '@'} {getTeamTricode(opp)} {g.teamScore}-{g.oppScore}</Text>
       <Text style={{ flex: 1, fontFamily: FONT.cond700, fontSize: 14, color: l ? COLORS.text : COLORS.dim, textAlign: 'right' }}>
         {l ? `${l.pts} pts · ${l.reb} reb · ${l.ast} ast · ${l.min} min` : 'Não jogou'}
+        {g.played?.moments ? <Text style={{ color: COLORS.warn }}>{`  ${g.played.good}/${g.played.moments}`}</Text> : null}
       </Text>
     </View>
   );
@@ -163,21 +172,34 @@ const Today: React.FC<{ career: CareerState; busy: string | null; actions: HubAc
 
   let dock: React.ReactNode;
   if (busy) dock = <Cta label={busy} onPress={() => {}} disabled />;
-  else if (lg.status === 'active') dock = (
-    <View style={{ gap: 8 }}>
-      <Cta label="Simular jogo" sub={ng ? `Dia ${ng.day} ›` : undefined} onPress={actions.simGame} />
-      <View className="flex-row" style={{ gap: 8 }}>
-        <Ghost label="+7 dias" onPress={() => actions.simDays(7)} style={{ flex: 1 }} />
-        <Ghost label="Até o fim" onPress={actions.simToEnd} style={{ flex: 1 }} />
+  else if (lg.status === 'active') {
+    const injured = roleOf(career).label === 'Lesionado';
+    dock = (
+      <View style={{ gap: 8 }}>
+        {injured
+          ? <Cta label="Simular jogo" sub="Você está lesionado ›" onPress={actions.simGame} />
+          : <Cta label="Jogar" sub={ng ? `Dia ${ng.day} · você decide os seus lances ›` : undefined} onPress={actions.playGame} />}
+        <View className="flex-row" style={{ gap: 8 }}>
+          {injured ? null : <Ghost label="Simular" onPress={actions.simGame} style={{ flex: 1 }} />}
+          <Ghost label="+7 dias" onPress={() => actions.simDays(7)} style={{ flex: 1 }} />
+          <Ghost label="Até o fim" onPress={actions.simToEnd} style={{ flex: 1 }} />
+        </View>
       </View>
-    </View>
-  );
+    );
+  }
   else if (inPlayoffs) dock = <Cta label="Simular rodada" sub="Playoffs ›" onPress={actions.simPlayoffRound} />;
+  // At the end of a deal the summer waits for your signature (OffersCard).
+  else if ((me(career)?.age ?? 0) >= LAST_AGE) dock = <Cta label="Aposentar" sub="O corpo pede ›" onPress={actions.retire} />;
+  else if (contractEnding(career) && !career.offers) dock = <Cta label="Ver ofertas" sub="Fim de contrato ›" onPress={actions.loadOffers} />;
+  else if (contractEnding(career)) dock = <Cta label="Escolha um time" sub="Ofertas acima" onPress={() => {}} disabled />;
   else dock = <Cta label="Próxima temporada" sub="Verão ›" onPress={actions.nextSeason} />;
 
   return (
     <Page band={{ color: accent.primary, height: 150 }} dock={dock}>
       <Hero career={career} />
+      <PressCard career={career} actions={actions} />
+      <ExtensionCard career={career} actions={actions} />
+      <OffersCard career={career} actions={actions} />
 
       {lg.status === 'active' && ng && opp ? (
         <Box>
@@ -215,7 +237,7 @@ const Today: React.FC<{ career: CareerState; busy: string | null; actions: HubAc
 
       {recent.length ? (
         <Box>
-          <Label>Últimos jogos</Label>
+          <Label>Últimos jogos · em amarelo, leituras certas nos jogos jogados</Label>
           {recent.map((g) => <GameRow key={g.day} career={career} g={g} />)}
         </Box>
       ) : null}
@@ -323,7 +345,7 @@ const TeamTab: React.FC<{ career: CareerState }> = ({ career }) => {
 /* Carreira                                                             */
 /* ------------------------------------------------------------------ */
 
-const CareerTab: React.FC<{ career: CareerState; actions: HubActions }> = ({ career }) => {
+const CareerTab: React.FC<{ career: CareerState; actions: HubActions }> = ({ career, actions }) => {
   const p = me(career)!;
   const c = p.career;
   const honors = career.seasons.flatMap((s) => s.honors);
@@ -345,6 +367,7 @@ const CareerTab: React.FC<{ career: CareerState; actions: HubActions }> = ({ car
           <Body color={COLORS.text}>{[...new Set(honors)].map((h) => `${h}${count(h) > 1 ? ` ×${count(h)}` : ''}`).join(' · ')}</Body>
         ) : <Body>Nenhum prêmio ainda.</Body>}
       </Box>
+      <LegacyBoxes career={career} onRetire={actions.retire} />
       <Box>
         <Label>Temporada a temporada</Label>
         {career.seasons.length === 0 ? <Body>A primeira temporada ainda está em andamento.</Body> : null}

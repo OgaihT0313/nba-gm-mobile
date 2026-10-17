@@ -963,6 +963,9 @@ export interface PlanQuarterArgs {
     tactic?: LiveTactic | null;
     /** The analyst's report for this period; pays only if `play` follows a right one. */
     report?: ScoutingReport | null;
+    /** False in Minha Carreira: you are a player, not the coach, so the set
+     * your side runs is only choreography -- no point delta from calling it. */
+    coached?: boolean;
     quarter: number;
     /** Second of the quarter to start planning from — 0 for a fresh quarter,
      * or wherever the clock was when a timeout re-opened the remainder. */
@@ -1048,8 +1051,9 @@ export const planQuarter = (args: PlanQuarterArgs): QuarterPlan => {
         ? 1 / REGULATION_QUARTERS
         : OVERTIME_SECONDS / (REGULATION_SECONDS * REGULATION_QUARTERS);
 
-    let selfDelta = meta.selfDelta;
-    let oppDelta = meta.oppDelta;
+    const coached = args.coached ?? true;
+    let selfDelta = coached ? meta.selfDelta : 0;
+    let oppDelta = coached ? meta.oppDelta : 0;
     let tacticVariance = 0;
     if (timeout) selfDelta += TIMEOUT_BONUS;
     // Scaled by the span like everything else here: a report followed after a
@@ -1065,7 +1069,7 @@ export const planQuarter = (args: PlanQuarterArgs): QuarterPlan => {
     const edge = (lineupEdge(home, 'fiveHome') - lineupEdge(away, 'fiveAway')) * MATCHUP_STRENGTH * periodShare;
     const deltaHome = (userSide === 'home' ? selfDelta : oppDelta) + edge;
     const deltaAway = (userSide === 'home' ? oppDelta : selfDelta) - edge;
-    const variance = Math.max(4, LIVE_QUARTER_VARIANCE + meta.variance + tacticVariance);
+    const variance = Math.max(4, LIVE_QUARTER_VARIANCE + (coached ? meta.variance : 0) + tacticVariance);
     const swing = () => Math.random() * variance - variance / 2;
 
     // simulateGame clamps every other game on the calendar to at least 80

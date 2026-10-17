@@ -5,6 +5,8 @@
 // Around it, the career keeps what is yours: the player, the coach's trust,
 // training, and the record of your games and seasons.
 import type { Player, PlayerAttributes, SeasonState } from '../../types';
+import type { CareerPress, ContractOffer, Relations } from './careerLife';
+import type { RetirementSummary } from './careerLegacy';
 
 /** The league's user team in a career save: nobody. */
 export const NO_TEAM = '__career__';
@@ -48,6 +50,8 @@ export interface CareerGame {
   line?: { min: number; pts: number; reb: number; ast: number; stl: number; blk: number; tov: number };
   /** Trust after the game, for the chart. */
   trust: number;
+  /** Played (not simulated): your moments, how many you read right, how many worked. */
+  played?: { moments: number; good: number; made: number };
 }
 
 export interface CareerSeasonLine {
@@ -77,6 +81,8 @@ export type CareerPhase =
 export interface CareerState {
   version: 1;
   mode: 'live' | 'era';
+  /** First year of the league's first season: 2025, or the era's (fase 5). */
+  startYear?: number;
   phase: CareerPhase;
   /** The league, run with userTeamId = NO_TEAM. */
   league: SeasonState;
@@ -109,4 +115,18 @@ export interface CareerState {
   pendingRole?: { rank: number; since: number };
   /** Things that happened to you, newest first (trades, role changes, injuries). */
   feed: { day: number; text: string }[];
+  /* --- fase 3: off the floor (careerLife.ts). All optional: older saves start neutral. --- */
+  /** Locker room and front office, 0-100 (the coach is `trust`). */
+  relations?: Relations;
+  /** A press question waiting for your answer. */
+  press?: CareerPress;
+  lastPressDay?: number;
+  /** League season (gmLegacy.seasons) of your last trade request / extension answer. */
+  tradeRequestSeason?: number;
+  extensionAnswered?: number;
+  /** Offers on the table at the end of your deal. */
+  offers?: ContractOffer[];
+  /* --- fase 4 --- */
+  /** Set when you hang it up (careerLegacy.retire). */
+  retirement?: RetirementSummary;
 }

@@ -198,6 +198,8 @@ export interface RigPlayer {
   weightKg?: number;
   /** Sampled from his official photo; absent = a stable tone from his id. */
   skinTone?: string;
+  /** Minha Carreira: you. A ring on the floor under him, to find him fast. */
+  marked?: boolean;
 }
 
 /** The model's own height at scale 1: ~6'5". */
@@ -326,6 +328,17 @@ export const createRig = (team: { primary: string; secondary: string }, shadowMa
   shadow.position.y = 0.04;
   shadow.renderOrder = 1;
   root.add(shadow);
+  // The career player's ring (RigPlayer.marked): flat on the floor, drawn
+  // over the wood and the shadow, never lit.
+  const ring = new THREE.Mesh(
+    new THREE.RingGeometry(1.5, 2.05, 40),
+    new THREE.MeshBasicMaterial({ color: '#ffd23f', transparent: true, opacity: 0.9, depthWrite: false }),
+  );
+  ring.rotation.x = -Math.PI / 2;
+  ring.position.y = 0.06;
+  ring.renderOrder = 2;
+  ring.visible = false;
+  root.add(ring);
 
   const body = at(root, 0, 0);
   const hips = at(body, 0, 3.45);
@@ -414,6 +427,7 @@ export const createRig = (team: { primary: string; secondary: string }, shadowMa
 
   const setPlayer = (playerId: string, info: RigPlayer) => {
     const { number } = info;
+    ring.visible = !!info.marked;
     const r = seeded(playerId);
     skin.color.set(info.skinTone ?? SKIN_TONES[Math.floor(r * SKIN_TONES.length)]);
     hair.visible = r % 0.5 > 0.15;

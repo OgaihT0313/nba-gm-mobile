@@ -32,7 +32,7 @@ sem o time do usuário). O resto, em ordem. **L** = lapidar algo que existe,
 | 10 | Objetivos e conquistas de GM — **FEITO** (2026-10-12) | N | P | Meta para saves longos além de "ganhar o título" |
 | 11 | Staff além do técnico — [PLANO-STAFF.md](PLANO-STAFF.md), aprovado 2026-10-15; **fases 1 e 2 feitas e medidas** (2026-10-15 e 2026-10-17; falta testar no aparelho), falta a fase 3 | N | M | Profundidade, mas mexe em muitos sistemas calibrados |
 | 12 | Ajustes técnicos menores — **FEITO** (2026-10-12, menos o `diagnose_season`) | L | P | Erosão da liga e `diagnose_season` |
-| 13 | Minha Carreira (modo novo, separado do GM) — [PLANO-CARREIRA.md](PLANO-CARREIRA.md); **fase 1 FEITA** (2026-10-13, `14ab9a7`) | N | G | Pedido do usuário (2026-10-12): criar um jogador, ser draftado, momentos de decisão no jogo; liga atual e eras |
+| 13 | Minha Carreira (modo novo, separado do GM) — [PLANO-CARREIRA.md](PLANO-CARREIRA.md); **fases 1 a 5 FEITAS** (fase 1 em 2026-10-13; momentos, fora da quadra, legado e eras em 2026-10-17; falta o aparelho) | N | G | Pedido do usuário (2026-10-12): criar um jogador, ser draftado, momentos de decisão no jogo; liga atual e eras |
 | 14 | Fotos dos jogadores pela era — [PLANO-FOTOS-ERAS.md](PLANO-FOTOS-ERAS.md), pedido 2026-10-17; **fases 1 e 3 + tratamento de época FEITOS** (falta o aparelho; fases 2 e 4 em aberto) | L | M | Hoje toda era usa a foto mais recente: o LeBron de 2010-11 aparece com 40 anos no Lakers |
 
 Tamanho: P = um dia ou menos, M = alguns dias, G = uma semana ou mais.

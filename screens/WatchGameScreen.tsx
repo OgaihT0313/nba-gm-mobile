@@ -29,6 +29,7 @@ import {
   type QuarterPlan,
 } from '../services/watchDirector';
 import { ROLE_LABEL, analystAccuracy } from '../services/staffService';
+import type { Moment, MomentResult } from '../services/career/careerMoments';
 import { eraGroupForEraId } from '../data/eras';
 import { getEraVisual } from '../src/theme/eraVisuals';
 import { COLORS, INK, RADIUS, FONT, withAlpha, onAccent, ovrColor } from '../src/theme/tokens';
@@ -144,10 +145,19 @@ interface WatchGameScreenProps {
   decider?: string;
   /** The home team's title years for the arena's rafters (historyService.bannerYears). */
   homeBanners?: number[];
+  /** Minha Carreira: you are a player on `userTeamId`, not its coach. No play
+   * calling, lineup or timeouts; the game stops at your moments instead
+   * (services/career/careerMoments.ts) and your man is marked on the floor. */
+  career?: {
+    meId: string;
+    moments: Moment[];
+    /** Decides one; the career keeps the result. */
+    onMoment: (m: Moment, optionId: string) => MomentResult;
+  };
 }
 
 const WatchGameScreen: React.FC<WatchGameScreenProps> = ({
-  home, away, players, coaches, userTeamId, onFinish, eraId, decider, homeBanners,
+  home, away, players, coaches, userTeamId, onFinish, eraId, decider, homeBanners, career,
 }) => {
   const insets = useSafeAreaInsets();
   const desktop = useDesktop();
@@ -170,10 +180,10 @@ const WatchGameScreen: React.FC<WatchGameScreenProps> = ({
     const out: { [id: string]: RigPlayer } = {};
     [...home.roster, ...away.roster].forEach((id) => {
       const p = players[id];
-      if (p) out[id] = { number: p.number, name: p.name, heightCm: p.heightCm, weightKg: p.weightKg, skinTone: p.skinTone };
+      if (p) out[id] = { number: p.number, name: p.name, heightCm: p.heightCm, weightKg: p.weightKg, skinTone: p.skinTone, marked: id === career?.meId };
     });
     return out;
-  }, [home, away, players]);
+  }, [home, away, players, career?.meId]);
 
   const fives = useRef<{ home: FiveOnCourt; away: FiveOnCourt }>({
     home: buildFive(home, players, 'home'),
@@ -254,6 +264,15 @@ const WatchGameScreen: React.FC<WatchGameScreenProps> = ({
   const [leader, setLeader] = useState<{ name: string; pts: number } | undefined>(undefined);
   const [moment, setMoment] = useState<{ title: string; sub?: string } | undefined>(undefined);
 
+  // Minha Carreira: the moments still to come, the one on screen, and what
+  // they have added to each side's score so far (fractions kept, the board
+  // shows them rounded -- see withMoments).
+  const pendingMoments = useRef<Moment[]>(career ? [...career.moments] : []);
+  const momentAdj = useRef({ home: 0, away: 0 });
+  const pausedRef = useRef(false);
+  const [activeMoment, setActiveMoment] = useState<Moment | null>(null);
+  const [momentLog, setMomentLog] = useState<MomentResult[]>([]);
+
   // Live-synthesized sound (components/court3d/sound): one engine for the
   // screen, opened on mount and closed on the way out.
   const sound = useRef<SoundEngine | null>(null);
@@ -308,6 +327,12 @@ const WatchGameScreen: React.FC<WatchGameScreenProps> = ({
     }
     return { home: h, away: a };
   };
+  // What the board shows: the baskets plus what your moments added. Kept out
+  // of completedRef, which only ever holds the director's own baskets.
+  const withMoments = (s: { home: number; away: number }) => ({
+    home: s.home + Math.round(momentAdj.current.home),
+    away: s.away + Math.round(momentAdj.current.away),
+  });
 
   const totalOf = (plan: QuarterPlan) => {
     let h = 0;
@@ -332,6 +357,7 @@ const WatchGameScreen: React.FC<WatchGameScreenProps> = ({
       play: nextPlay,
       tactic: decider ? tactic : null,
       report,
+      coached: !career,
       timeout: spendTimeout,
       quarter: quarterRef.current,
       from,
@@ -383,25 +409,27 @@ const WatchGameScreen: React.FC<WatchGameScreenProps> = ({
       energyRef.current = breakRecovery(ended.endEnergy, q);
       setRotationTick((n) => n + 1);
     }
-    const decided = q >= REGULATION_QUARTERS && final.home !== final.away;
+    const shown = withMoments(final);
+    const decided = q >= REGULATION_QUARTERS && shown.home !== shown.away;
     // Safety valve: past four overtimes, settle
     // it rather than loop forever. A tie must never reach the season — the
     // standings have no concept of one.
     if (!decided && q >= MAX_QUARTER) final.home += 1;
 
     completedRef.current = final;
-    setScore(final);
+    setScore(withMoments(final));
     planRef.current = null;
     firedRef.current = 0;
     sound.current?.buzzer();
 
     if (decided || q >= MAX_QUARTER) {
-      if (final.home > final.away) {
+      const end = withMoments(final);
+      if (end.home > end.away) {
         sound.current?.crowd(1, 4.5);
         cheer(crowd.current, 'home', 1, 6);
       }
-      const homeWon = final.home > final.away;
-      voice.current.say(LINES.final(getTeamNickname(homeWon ? home : away), Math.max(final.home, final.away), Math.min(final.home, final.away)), true);
+      const homeWon = end.home > end.away;
+      voice.current.say(LINES.final(getTeamNickname(homeWon ? home : away), Math.max(end.home, end.away), Math.min(end.home, end.away)), true);
       phaseRef.current = 'final';
       setPhase('final');
       return;
@@ -435,7 +463,7 @@ const WatchGameScreen: React.FC<WatchGameScreenProps> = ({
       pointsRef.current.set(p.scorerName, (pointsRef.current.get(p.scorerName) ?? 0) + p.points);
       // The board goes up with the ball through the net, not on the next
       // 200 ms scoreboard refresh.
-      setScore(scoreAt(p.shotAt));
+      setScore(withMoments(scoreAt(p.shotAt)));
       setBanner({
         text: `${SHOT_LABEL[pts]}${p.points > 3 ? ` (+${p.points})` : ''}`,
         sub: p.assistName ? `${p.scorerName} · passe de ${p.assistName}` : p.scorerName,
@@ -468,7 +496,7 @@ const WatchGameScreen: React.FC<WatchGameScreenProps> = ({
       }
       // A lead change late is the line that matters most; otherwise the
       // dunks and the threes get called, and now and then a basket of yours.
-      const now = scoreAt(p.shotAt);
+      const now = withMoments(scoreAt(p.shotAt));
       const leader: CourtSide | null = now.home > now.away ? 'home' : now.away > now.home ? 'away' : null;
       const flipped = leader !== null && leaderRef.current !== null && leader !== leaderRef.current;
       if (leader !== null) leaderRef.current = leader;
@@ -520,6 +548,8 @@ const WatchGameScreen: React.FC<WatchGameScreenProps> = ({
       const dt = Math.min(0.1, (now - last) / 1000);
       last = now;
       if (phaseRef.current !== 'live' || !planRef.current) return;
+      // Minha Carreira: frozen on your moment until you decide.
+      if (pausedRef.current) return;
 
       // A replay holds the game clock and plays its window again, slowed.
       const r = replayRef.current;
@@ -555,6 +585,7 @@ const WatchGameScreen: React.FC<WatchGameScreenProps> = ({
       if (court) court.cut = cutRef.current;
       courtRef.current = court;
       announce();
+      reachMoment();
     };
     raf = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(raf);
@@ -567,7 +598,7 @@ const WatchGameScreen: React.FC<WatchGameScreenProps> = ({
     const id = setInterval(() => {
       if (phaseRef.current !== 'live') return;
       setClock(clockRef.current);
-      setScore(scoreAt(clockRef.current));
+      setScore(withMoments(scoreAt(clockRef.current)));
       const trip = planRef.current ? possessionAt(planRef.current, clockRef.current) : null;
       setShotClock(trip && clockRef.current < trip.end ? Math.max(0, 24 - (clockRef.current - trip.start)) : undefined);
       setHomeDefending(!!trip && trip.side === 'away' && !replayRef.current);
@@ -643,8 +674,13 @@ const WatchGameScreen: React.FC<WatchGameScreenProps> = ({
       fh = planRef.current.endFiveHome;
       fa = planRef.current.endFiveAway;
     }
+    // Skipping hands the rest of your moments to the simulation: no more stops.
+    pendingMoments.current = [];
+    pausedRef.current = false;
+    setActiveMoment(null);
+    const tied = () => withMoments({ home: h, away: a }).home === withMoments({ home: h, away: a }).away;
     let q = quarterRef.current;
-    while (q < REGULATION_QUARTERS || h === a) {
+    while (q < REGULATION_QUARTERS || tied()) {
       q += 1;
       if (q > MAX_QUARTER) { h += 1; break; }
       const plan = planQuarter({
@@ -656,6 +692,7 @@ const WatchGameScreen: React.FC<WatchGameScreenProps> = ({
         userPriority: priorityRef.current,
         userSide,
         play: playRef.current,
+        coached: !career,
         // Skipped periods still get their report: the call left running pays
         // when it happens to be the one a right report names.
         report: scoutingReport(userTeam, userSide === 'home' ? fa : fh, players),
@@ -675,11 +712,52 @@ const WatchGameScreen: React.FC<WatchGameScreenProps> = ({
     planRef.current = null;
     quarterRef.current = q;
     phaseRef.current = 'final';
-    setScore({ home: h, away: a });
+    const end = withMoments({ home: h, away: a });
+    setScore(end);
     setQuarter(q);
     setPhase('final');
     sound.current?.buzzer();
-    voice.current.say(LINES.final(getTeamNickname(h > a ? home : away), Math.max(h, a), Math.min(h, a)), true);
+    voice.current.say(LINES.final(getTeamNickname(end.home > end.away ? home : away), Math.max(end.home, end.away), Math.min(end.home, end.away)), true);
+  };
+
+  /* ---------------------------------------------------------------- */
+  /* Minha Carreira: your moments.                                      */
+  /* ---------------------------------------------------------------- */
+  // Called from the playback loop: the next moment's time has come. It only
+  // stops the game if you are on the floor; a moment that comes while you sit
+  // (or in a quarter already gone) is simply dropped.
+  const reachMoment = (): boolean => {
+    if (!career || !planRef.current) return false;
+    const q = quarterRef.current;
+    while (pendingMoments.current.length && pendingMoments.current[0].quarter < q) pendingMoments.current.shift();
+    const next = pendingMoments.current[0];
+    if (!next || next.quarter !== q || clockRef.current < next.at) return false;
+    pendingMoments.current.shift();
+    const at = rotationAt(planRef.current, clockRef.current);
+    const five = at ? (userSide === 'home' ? at.fiveHome : at.fiveAway) : null;
+    if (!five?.players.some((pl) => pl.playerId === career.meId)) return false;
+    pausedRef.current = true;
+    endReplay();
+    setActiveMoment(next);
+    return true;
+  };
+
+  const decideMoment = (optionId: string) => {
+    if (!career || !activeMoment) return;
+    const r = career.onMoment(activeMoment, optionId);
+    const mine = userSide;
+    const theirs: CourtSide = mine === 'home' ? 'away' : 'home';
+    momentAdj.current = {
+      ...momentAdj.current,
+      [mine]: momentAdj.current[mine] + r.teamDelta,
+      [theirs]: momentAdj.current[theirs] + r.oppDelta,
+    } as { home: number; away: number };
+    setMomentLog((l) => [...l, r]);
+    setScore(withMoments(scoreAt(clockRef.current)));
+    setBanner({ text: r.success ? (r.good ? 'BOA LEITURA' : 'DEU CERTO') : r.bad ? 'LEITURA RUIM' : 'NÃO SAIU', sub: r.text, color: r.success ? COLORS.good : COLORS.bad });
+    if (r.success && r.pts >= 2) sound.current?.swish();
+    setActiveMoment(null);
+    pausedRef.current = false;
   };
 
   const toggleSpeed = () => {
@@ -759,9 +837,53 @@ const WatchGameScreen: React.FC<WatchGameScreenProps> = ({
       : `${getTeamNickname(away)} vence`;
   }, [score, home, away]);
 
+  // Minha Carreira's break: you don't call the play, you go back out. What
+  // your moments have done so far, and the button.
+  const momentsSoFar = momentLog.length
+    ? `${momentLog.length} lance${momentLog.length === 1 ? '' : 's'} · ${momentLog.filter((r) => r.good).length} boa${momentLog.filter((r) => r.good).length === 1 ? '' : 's'} leitura${momentLog.filter((r) => r.good).length === 1 ? '' : 's'} · ${momentLog.reduce((s, r) => s + r.pts, 0)} pts seus`
+    : 'O jogo para quando a bola for sua: leia a defesa e escolha.';
+  const careerHuddle = (
+    <View style={desktop
+      ? { position: 'absolute', top: 0, right: 0, bottom: 0, width: 420, backgroundColor: 'rgba(11,11,13,0.96)', borderLeftWidth: 1, borderLeftColor: COLORS.lineStrong, padding: 20, paddingTop: 24, gap: 8 }
+      : { backgroundColor: 'rgba(11,11,13,0.94)', borderRadius: 20, borderWidth: 1, borderColor: COLORS.lineStrong, padding: 14, gap: 8 }}>
+      <Text style={{ fontFamily: FONT.cond700, fontSize: 11, letterSpacing: 1.5, color: COLORS.warn, textTransform: 'uppercase' }}>{huddleMoment}</Text>
+      <Text style={{ fontFamily: FONT.cond800, fontSize: 22, lineHeight: 24, color: COLORS.text, textTransform: 'uppercase' }}>
+        {quarter === 1 ? 'Sua noite começa' : 'De volta para a quadra'}
+      </Text>
+      <Text style={{ fontFamily: FONT.body500, fontSize: 13, lineHeight: 18, color: COLORS.muted }}>{momentsSoFar}</Text>
+      <Text style={{ fontFamily: FONT.body500, fontSize: 12.5, lineHeight: 17, color: COLORS.dim }}>O anel amarelo no chão é você.</Text>
+      <CtaButton label={`Começar ${periodLabel(quarter, 'huddle')}`} sub="Jogar" onPress={() => startQuarter(play, false)} />
+    </View>
+  );
+
+  // Your moment: the game frozen, the read, the options.
+  const momentCard = activeMoment ? (
+    <View style={{ backgroundColor: 'rgba(11,11,13,0.95)', borderRadius: 18, borderWidth: 1, borderColor: COLORS.warn, padding: 14, gap: 8 }}>
+      <Text style={{ fontFamily: FONT.cond700, fontSize: 11, letterSpacing: 1.5, color: COLORS.warn, textTransform: 'uppercase' }}>
+        Seu lance · {periodLabel(quarter, phase)} · {clockLabel(clock, quarter)} · {activeMoment.kind === 'defense' ? 'na defesa' : activeMoment.kind === 'offball' ? 'sem a bola' : 'com a bola'}
+      </Text>
+      <Text style={{ fontFamily: FONT.body600, fontSize: 14.5, lineHeight: 20, color: COLORS.text }}>{activeMoment.read}</Text>
+      <View style={{ gap: 6 }}>
+        {activeMoment.options.map((o) => (
+          <Pressable
+            key={o.id}
+            accessibilityRole="button"
+            accessibilityLabel={o.label}
+            onPress={() => decideMoment(o.id)}
+            className="active:opacity-75"
+            style={{ paddingVertical: 10, paddingHorizontal: 12, borderRadius: 12, backgroundColor: COLORS.surface2 }}
+          >
+            <Text style={{ fontFamily: FONT.cond800, fontSize: 16, color: COLORS.text, textTransform: 'uppercase' }}>{o.label}</Text>
+            <Text style={{ fontFamily: FONT.body500, fontSize: 12, color: COLORS.muted }}>{o.detail}</Text>
+          </Pressable>
+        ))}
+      </View>
+    </View>
+  ) : null;
+
   // The timeout huddle: a card at the foot on the phone, a 420px drawer on
   // the right edge on PC.
-  const huddle = (
+  const huddle = career ? careerHuddle : (
     <View style={desktop
       ? { position: 'absolute', top: 0, right: 0, bottom: 0, width: 420, backgroundColor: 'rgba(11,11,13,0.96)', borderLeftWidth: 1, borderLeftColor: COLORS.lineStrong, padding: 20, paddingTop: 24 }
       : { backgroundColor: 'rgba(11,11,13,0.94)', borderRadius: 20, borderWidth: 1, borderColor: COLORS.lineStrong, padding: 14 }}>
@@ -1045,7 +1167,9 @@ const WatchGameScreen: React.FC<WatchGameScreenProps> = ({
               {phase === 'final' ? 'FINAL' : `${periodLabel(quarter, phase)} · ${clockLabel(clock, quarter)}`}
             </Text>
             <Text numberOfLines={1} style={{ fontFamily: FONT.cond600, fontSize: 10.5, letterSpacing: 1, color: COLORS.muted, textTransform: 'uppercase' }}>
-              {phase === 'live' ? `${WATCH_PLAY_META[play].label} · ${timeoutsLeft} tempo${timeoutsLeft === 1 ? '' : 's'}` : decider ? decider.split(' · ')[0] : 'Assistir ao jogo'}
+              {career
+                ? `Minha carreira · ${momentLog.length} lance${momentLog.length === 1 ? '' : 's'}`
+                : phase === 'live' ? `${WATCH_PLAY_META[play].label} · ${timeoutsLeft} tempo${timeoutsLeft === 1 ? '' : 's'}` : decider ? decider.split(' · ')[0] : 'Assistir ao jogo'}
             </Text>
           </View>
           <View style={{ width: desktop ? 70 : 46, alignItems: 'center', justifyContent: 'center' }}>
@@ -1066,7 +1190,8 @@ const WatchGameScreen: React.FC<WatchGameScreenProps> = ({
         style={{ position: 'absolute', bottom: insets.bottom + (desktop ? 24 : 14), ...(desktop ? { left: '50%', width: 760, marginLeft: -380 } : { left: 14, right: 14 }) }}
       >
         {phase === 'huddle' && !desktop ? huddle : null}
-        {phase === 'live' && (
+        {phase === 'live' && activeMoment ? momentCard : null}
+        {phase === 'live' && !activeMoment && (
           // Measured here, on the live panel only: the container above also
           // holds the huddle sheet, which covers half the screen, and the
           // camera kept that framing after play resumed -- the bottom of the
@@ -1113,7 +1238,7 @@ const WatchGameScreen: React.FC<WatchGameScreenProps> = ({
               >
                 <Text style={{ fontFamily: FONT.cond700, fontSize: 14, letterSpacing: 1.1, color: COLORS.text }}>{speed > 1 ? `${speed}X ✓` : '4X'}</Text>
               </Pressable>
-              <Pressable
+              {career ? null : <Pressable
                 accessibilityRole="button"
                 aria-disabled={timeoutsLeft <= 0}
                 onPress={timeoutsLeft > 0 ? callTimeout : undefined}
@@ -1123,7 +1248,7 @@ const WatchGameScreen: React.FC<WatchGameScreenProps> = ({
                 <Text style={{ fontFamily: FONT.cond800, fontSize: 16, letterSpacing: 1, color: timeoutsLeft > 0 ? COLORS.ctaInk : COLORS.dim }}>
                   {timeoutsLeft > 0 ? 'PEDIR TEMPO' : 'SEM TEMPOS'}
                 </Text>
-              </Pressable>
+              </Pressable>}
               <Pressable
                 accessibilityRole="button"
                 onPress={skipToEnd}

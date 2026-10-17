@@ -11,23 +11,34 @@ import { teamsData, playersData } from '../../constants';
 import { simulationEngine, getRotationWeights } from '../simulationService';
 import { buildSeasonOwner } from '../ownerService';
 import { generateSchedule } from '../scheduleService';
-import { simulateOneDay } from '../seasonRunner';
+import { simulateOneDay, type PinnedGameResult } from '../seasonRunner';
 import { initialPickAssets, makeScoutReport } from '../draftService';
 import { startOffseason, finishDraft, startSeason } from '../offseasonService';
 import { initCoaches } from '../coachService';
 import { MAX_ROSTER_SIZE } from '../tradeService';
+import { ERAS, eraById } from '../../data/eras';
 import { NO_TEAM, type CareerGame, type CareerSeasonLine, type CareerState, type CareerCreation, type CombineResult } from './careerTypes';
 import { buildCareerPlayer, rollPotential, STARTING_OVR } from './careerCreate';
 import { afterGame, favorFor, roleOf, roleFromMinutes, initialTrust, applyWeeklyTraining, TRAINING_DAYS, capAtCeiling } from './careerTrust';
+import { trustFromMoments, momentTotals, type MomentResult } from './careerMoments';
+import { relationsAfterGame, tickPress } from './careerLife';
 
 /* ------------------------------------------------------------------ */
 /* Starting a career                                                    */
 /* ------------------------------------------------------------------ */
 
-/** The 2025-26 league, nobody's GM -- the season before your draft. */
-export const newLeague = (): SeasonState => {
+/**
+ * The league, nobody's GM -- the season before your draft: 2025-26, or an
+ * era's real season (fase 5). An era league is chained like a GM era save
+ * (era / eraChainIndex), so the summer replays the real moves and the draft
+ * after it is the REAL class -- with you inserted in it.
+ */
+export const newLeague = (eraId?: string): SeasonState => {
+  const era = eraId ? eraById(eraId) : undefined;
+  const seedTeams = era ? era.teams : teamsData;
+  const seedPlayers = era ? era.players : playersData;
   const teams: Team[] = initialPickAssets(
-    teamsData.map((t) => ({
+    seedTeams.map((t) => ({
       ...t, wins: 0, losses: 0, momentum: 0,
       stats: { ppg: 0, oppg: 0, rpg: 0, apg: 0, spg: 0, bpg: 0, tpg: 0 },
       performanceHistory: [{ gamesPlayed: 0, wins: 0 }],
@@ -40,7 +51,7 @@ export const newLeague = (): SeasonState => {
     playoffStage: 'none',
     gamesPlayed: 0,
     teams: withCoaches,
-    players: { ...playersData },
+    players: { ...seedPlayers },
     events: [],
     playoff: null,
     awards: null,
@@ -49,21 +60,28 @@ export const newLeague = (): SeasonState => {
     gmLegacy: { seasons: 0, titles: 0 },
     awardHistory: [],
     // Nobody's owner: required by the type, never read with no user team.
-    owner: buildSeasonOwner(withCoaches[0], withCoaches, playersData),
+    owner: buildSeasonOwner(withCoaches[0], withCoaches, seedPlayers),
     schedule: generateSchedule(withCoaches),
     coaches,
+    era: era ? { id: era.id, label: era.label, seasonLabel: era.seasonLabel } : undefined,
+    eraChainIndex: era ? ERAS.findIndex((e) => e.id === era.id) : undefined,
   };
 };
 
+/** First year of the career league's first season (2025 for the live league). */
+export const startYearOf = (s: CareerState) => s.startYear ?? 2025;
+
 /** A new career: the prospect exists, the league starts the season before his draft. */
-export const newCareer = (creation: CareerCreation): CareerState => {
+export const newCareer = (creation: CareerCreation, eraId?: string): CareerState => {
   const { tier, ceiling } = rollPotential();
   const me = buildCareerPlayer(creation, STARTING_OVR, tier);
+  const era = eraId ? eraById(eraId) : undefined;
   return {
     version: 1,
-    mode: 'live',
+    mode: era ? 'era' : 'live',
+    startYear: era ? parseInt(era.seasonLabel, 10) : 2025,
     phase: 'predraft',
-    league: newLeague(),
+    league: newLeague(era?.id),
     meId: me.id,
     creation,
     ceiling,
@@ -90,7 +108,7 @@ export const me = (s: CareerState): Player | undefined => s.league.players[s.meI
 
 /** The season label of the league's current season ("2026-27"). */
 const labelForYear = (y: number) => `${y}-${String(y + 1).slice(-2)}`;
-export const seasonLabel = (s: CareerState) => labelForYear(2025 + s.league.gmLegacy.seasons);
+export const seasonLabel = (s: CareerState) => labelForYear(startYearOf(s) + s.league.gmLegacy.seasons);
 
 /** Your team's next game in the schedule, if the season is on. */
 export const nextGame = (s: CareerState) => {
@@ -120,13 +138,38 @@ const withFavor = (league: SeasonState, meId: string, trust: number): SeasonStat
  * rotation (Team.favor), the day is simulated like any other, and then your
  * game -- if your team played -- is read off the box score.
  */
-export const simDay = (s: CareerState): CareerState => {
+export interface PlayedGame {
+  /** The score as it happened on screen, and everyone's minutes. */
+  pinned: PinnedGameResult;
+  /** Your moments, decided. */
+  results: MomentResult[];
+}
+
+/** Trust a game you PLAY earns over the same game simulated (PLANO-CARREIRA: playing always pays more). */
+export const PLAYED_BONUS = 0.3;
+
+export const simDay = (s: CareerState, played?: PlayedGame): CareerState => {
   if (s.league.status !== 'active') return s;
   const before = s.league;
   const teamBefore = myTeam(s);
   const statsBefore = before.players[s.meId]?.seasonStats;
   const dayIdx = before.gamesPlayed + 1;
-  let league = simulateOneDay(withFavor(before, s.meId, s.trust)).season;
+  let league = simulateOneDay(withFavor(before, s.meId, s.trust), played?.pinned).season;
+  // Your moments on top of the box score the engine split: it already counts a
+  // player of your rating deciding like an average one, so only the
+  // difference is added (careerMoments.ts).
+  if (played && league.players[s.meId]?.seasonStats) {
+    const add = momentTotals(played.results);
+    const st = league.players[s.meId].seasonStats!;
+    const bump = (avg: number, delta: number) => Math.max(0, avg * st.gp + delta) / st.gp;
+    league = {
+      ...league,
+      players: {
+        ...league.players,
+        [s.meId]: { ...league.players[s.meId], seasonStats: { ...st, ppg: bump(st.ppg, add.pts), apg: bump(st.apg, add.ast), spg: bump(st.spg, add.stl) } },
+      },
+    };
+  }
   // Nobody is the GM: anything raised for a user team is moot. (None should
   // be -- the user team doesn't exist -- but a queued decision would stop a
   // GM's clock, so make sure.)
@@ -148,9 +191,17 @@ export const simDay = (s: CareerState): CareerState => {
     const line = gameLine(statsBefore, statsAfter);
     const teamScore = (home ? game.homeScore : game.awayScore) ?? 0;
     const oppScore = (home ? game.awayScore : game.homeScore) ?? 0;
-    const trust = afterGame(s, line, teamScore > oppScore);
-    const g: CareerGame = { day: dayIdx, opponentId: home ? game.awayTeamId : game.homeTeamId, home, teamScore, oppScore, line, trust };
-    next = { ...next, trust, games: [...s.games, g] };
+    const momentsTrust = played ? trustFromMoments(played.results) + PLAYED_BONUS : 0;
+    const trust = Math.max(0, Math.min(100, afterGame(s, line, teamScore > oppScore) + momentsTrust));
+    const g: CareerGame = {
+      day: dayIdx, opponentId: home ? game.awayTeamId : game.homeTeamId, home, teamScore, oppScore, line, trust,
+      played: played ? { moments: played.results.length, good: played.results.filter((r) => r.good).length, made: played.results.filter((r) => r.success).length } : undefined,
+    };
+    next = {
+      ...next, trust, games: [...s.games, g],
+      relations: relationsAfterGame(s, teamScore > oppScore, line, played ? played.results.reduce((n, r) => n + r.ast, 0) : 0),
+    };
+    next = tickPress(next);
     // A role change is news once it has held for ROLE_HOLD games: the
     // rotation's tail flickers night to night, and the feed shouldn't.
     const role = roleOf(next);
@@ -229,7 +280,7 @@ export const simPlayoffs = (s: CareerState): CareerState => {
 };
 
 /** The finished season, as a line in your career. */
-const seasonLineFor = (s: CareerState): CareerSeasonLine | null => {
+export const seasonLineFor = (s: CareerState): CareerSeasonLine | null => {
   const p = s.league.players[s.meId];
   const t = myTeam(s);
   if (!p || !t) return null;
@@ -250,7 +301,7 @@ const seasonLineFor = (s: CareerState): CareerSeasonLine | null => {
   return {
     season: s.seasons.length + 1,
     // Crowning the champion already counted this season as done.
-    label: labelForYear(2025 + lg.gmLegacy.seasons - 1),
+    label: labelForYear(startYearOf(s) + lg.gmLegacy.seasons - 1),
     teamId: t.id,
     age: p.age,
     ovr: p.ovr,
@@ -284,7 +335,8 @@ export const runSummer = (s: CareerState, draftProspect?: { player: Player; comb
     if (draftProspect.combine) report.uncertainty = Math.max(2, report.uncertainty - 3);
     return { players: { [draftProspect.player.id]: draftProspect.player }, reports: { [draftProspect.player.id]: report } };
   })() : undefined;
-  league = startOffseason(league, { extraProspects: extra, focusIds: [s.meId] });
+  // keepIds: the summer never retires you -- that is your call (careerLegacy).
+  league = startOffseason(league, { extraProspects: extra, focusIds: [s.meId], keepIds: [s.meId] });
 
   // Draft night, settled: where you went, or that nobody called your name.
   let draft = s.draft;

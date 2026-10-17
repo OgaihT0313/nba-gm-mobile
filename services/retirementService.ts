@@ -52,6 +52,8 @@ export const retirePlayers = (
   players: PlayerMap,
   rand: () => number = Math.random,
   seasonNumber = 0,
+  /** Never retired here (Minha Carreira's player retires by his own choice). */
+  keep: Set<string> = new Set(),
 ): { teams: Team[]; players: PlayerMap; retired: Retirement[] } => {
   const teamOf = new Map<string, string>();
   teams.forEach((t) => t.roster.forEach((id) => teamOf.set(id, t.id)));
@@ -61,7 +63,7 @@ export const retirePlayers = (
   for (const id in players) {
     const p = players[id];
     const teamId = teamOf.get(id);
-    if (rand() >= retirementChance(p, !!teamId)) continue;
+    if (keep.has(id) || rand() >= retirementChance(p, !!teamId)) continue;
     // Kept in `players`, flagged: award history and career records still
     // point at him. He just leaves every roster and the market.
     out[id] = {
