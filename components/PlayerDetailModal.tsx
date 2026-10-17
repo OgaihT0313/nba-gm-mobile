@@ -1,6 +1,5 @@
 import React from 'react';
 import { View, Text, Pressable, ScrollView, Modal } from 'react-native';
-import { Image } from 'expo-image';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Player, TrainingFocus } from '../types';
@@ -8,12 +7,13 @@ import { careerAverages } from '../services/careerService';
 import { nextMilestone, MILESTONES } from '../services/milestoneService';
 import { personalityOf } from '../services/personalityService';
 import {
-  getPlayerImageUrl, PLAYER_PLACEHOLDER_SVG, formatPositionsFull, ATTRIBUTE_META, getPlayerAttributes, getTeamAccent,
+  formatPositionsFull, ATTRIBUTE_META, getPlayerAttributes, getTeamAccent,
 } from '../constants';
 import { COLORS, FONT, withAlpha, onAccent } from '../src/theme/tokens';
 import { StatStrip, Tag, SectionLabel, BodyText, FilterRow, GhostButton } from './ui/kit';
 import { PROMISE_MAX_AGE, PROMISE_MPG } from '../services/developmentService';
 import { useDesktop } from './desktop/useDesktop';
+import PlayerPhoto from './ui/PlayerPhoto';
 
 // Design 5c ("Transmissão"). A bottom sheet: the header is a flat block in the
 // player's team color (photo, "POS · # · AGE", name, OVR at 56px), then the
@@ -113,7 +113,7 @@ const PlayerDetailModal: React.FC<{
   const header = (
     <View style={{ height: desktop ? 200 : 170, flexDirection: 'row', backgroundColor: accent.primary }}>
       <View style={{ width: desktop ? 200 : 130, justifyContent: 'flex-end', backgroundColor: inkA(0.08) }}>
-        <Image source={{ uri: getPlayerImageUrl(player) }} placeholder={{ uri: PLAYER_PLACEHOLDER_SVG }} style={{ width: desktop ? 200 : 130, height: desktop ? 180 : 150 }} contentFit="cover" contentPosition="top" />
+        <PlayerPhoto player={player} style={{ width: desktop ? 200 : 130, height: desktop ? 180 : 150 }} contentFit="cover" contentPosition="top" />
       </View>
       <View style={{ flex: 1, paddingVertical: desktop ? 20 : 16, paddingHorizontal: desktop ? 24 : 16, justifyContent: 'space-between' }}>
         <View style={{ gap: desktop ? 4 : 3 }}>

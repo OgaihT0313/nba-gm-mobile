@@ -121,6 +121,11 @@ export interface Player {
   espnId: number | null;
   nbaId?: number | null;
   photoUrl?: string;
+  // Era data only (scripts/sync_era_photos.js): the season the official photo
+  // is from, and whether that is 2+ seasons off the era -- then PlayerPhoto
+  // gives the face an era treatment instead of passing it off as that season.
+  photoYear?: number;
+  photoOffEra?: boolean;
   age: number;
   number: number;
   potential: 'A' | 'B' | 'C' | 'D';

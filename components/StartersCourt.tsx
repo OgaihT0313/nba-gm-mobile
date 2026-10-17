@@ -1,13 +1,13 @@
 import React, { useState } from 'react';
 import { View, Text, Pressable } from 'react-native';
-import { Image } from 'expo-image';
 import { Svg, Rect, Path, Circle, Line, Defs, LinearGradient, Stop, G } from 'react-native-svg';
 import { Team, Player } from '../types';
-import { getPlayerImageUrl, PLAYER_PLACEHOLDER_SVG, getPlayerPositions, POSITIONS } from '../constants';
+import { getPlayerPositions, POSITIONS } from '../constants';
 import { simulationEngine, LineupSlot } from '../services/simulationService';
 import { useTheme } from '../src/theme/ThemeProvider';
 import { COLORS, FONT } from '../src/theme/tokens';
 import { useDesktop } from './desktop/useDesktop';
+import PlayerPhoto from './ui/PlayerPhoto';
 
 interface StartersCourtProps {
   team: Team;
@@ -196,7 +196,7 @@ const StartersCourt: React.FC<StartersCourtProps> = ({ team, players, onSetStart
                 }}
               >
                 {player ? (
-                  <Image source={{ uri: getPlayerImageUrl(player) }} placeholder={{ uri: PLAYER_PLACEHOLDER_SVG }} style={{ width: '100%', height: '100%' }} contentFit="cover" />
+                  <PlayerPhoto player={player} style={{ width: '100%', height: '100%' }} contentFit="cover" />
                 ) : (
                   <View className="w-full h-full items-center justify-center">
                     <Text className="text-fg-dim text-[10px] font-black">?</Text>
@@ -244,7 +244,7 @@ const StartersCourt: React.FC<StartersCourtProps> = ({ team, players, onSetStart
                 style={isDesignated ? { backgroundColor: `${accent.primary}33`, borderColor: accent.primary } : undefined}
               >
                 <View className="flex-row items-center gap-2 flex-1 min-w-0">
-                  <Image source={{ uri: getPlayerImageUrl(p) }} placeholder={{ uri: PLAYER_PLACEHOLDER_SVG }} style={{ width: 28, height: 28, borderRadius: 14, backgroundColor: '#1e293b' }} contentFit="cover" />
+                  <PlayerPhoto player={p} style={{ width: 28, height: 28, borderRadius: 14, backgroundColor: '#1e293b' }} contentFit="cover" />
                   <Text className="font-bold text-xs text-fg flex-1" numberOfLines={1}>{p.name}</Text>
                 </View>
                 <Text className="font-mono-bold text-xs text-accent">{p.ovr}</Text>

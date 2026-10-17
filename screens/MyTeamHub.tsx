@@ -1,12 +1,11 @@
 import React, { useState } from 'react';
 import { View, Text, Pressable, ScrollView, Modal } from 'react-native';
-import { Image } from 'expo-image';
 
 import { Team, Player, Coach, GmLegacy, OwnerExpectation, ScheduleGame, SeasonState, StaffMember, StaffRole } from '../types';
 import { sortStandings } from '../services/scheduleService';
 import {
   getTeamLogoUrl, getTeamSalary, SALARY_CAP, getTeamNickname, conferenceLabel, coachOf,
-  getTeamCity, getPlayerImageUrl, PLAYER_PLACEHOLDER_SVG,
+  getTeamCity, 
 } from '../constants';
 import { MIN_ROSTER_SIZE } from '../services/tradeService';
 import { simulationEngine, DEFAULT_ROTATION_SIZE } from '../services/simulationService';
@@ -32,6 +31,7 @@ import PlayerDetailModal, { PlayerDevelopment } from '../components/PlayerDetail
 import BottomSheet from '../components/ui/BottomSheet';
 import { useDesktop } from '../components/desktop/useDesktop';
 import { DPage, DDock, DCta, DTabs, DTh, Hover, Cols, Col, PAGE_X } from '../components/desktop/kit';
+import PlayerPhoto from '../components/ui/PlayerPhoto';
 
 // Design 1c of "Transmissão" (was design 2a) — elenco, rotação and técnico on one screen. The mockup shows three
 // segments doing exactly that; the real hub also carries draft capital, team
@@ -364,7 +364,7 @@ const MyTeamHub: React.FC<MyTeamHubProps> = ({
                       >
                         <View style={{ height: 150, backgroundColor: COLORS.surface2, alignItems: 'center', justifyContent: 'flex-end', overflow: 'hidden' }}>
                           {p ? (
-                            <Image source={{ uri: getPlayerImageUrl(p) }} placeholder={{ uri: PLAYER_PLACEHOLDER_SVG }} style={{ width: '100%', height: 140 }} contentFit="cover" contentPosition="top" />
+                            <PlayerPhoto player={p} style={{ width: '100%', height: 140 }} contentFit="cover" contentPosition="top" />
                           ) : null}
                           <Text style={{ position: 'absolute', top: 8, left: 10, fontFamily: FONT.cond800, fontSize: 13, letterSpacing: 0.65, color: COLORS.muted }}>{slot.bucket}</Text>
                         </View>
@@ -582,7 +582,7 @@ const MyTeamHub: React.FC<MyTeamHubProps> = ({
                     >
                       <View style={{ height: 76, backgroundColor: COLORS.surface2, alignItems: 'center', justifyContent: 'flex-end' }}>
                         {p ? (
-                          <Image source={{ uri: getPlayerImageUrl(p) }} placeholder={{ uri: PLAYER_PLACEHOLDER_SVG }} style={{ width: '100%', height: 70 }} contentFit="cover" contentPosition="top" />
+                          <PlayerPhoto player={p} style={{ width: '100%', height: 70 }} contentFit="cover" contentPosition="top" />
                         ) : null}
                         <Text style={{ position: 'absolute', top: 5, left: 6, fontFamily: FONT.cond800, fontSize: 11, letterSpacing: 0.6, color: COLORS.muted }}>
                           {slot.bucket}

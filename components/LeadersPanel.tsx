@@ -1,11 +1,11 @@
 import React, { useMemo } from 'react';
 import { View, Text } from 'react-native';
-import { Image } from 'expo-image';
 
 import { Player, Team, PlayerSeasonStats } from '../types';
-import { getPlayerImageUrl, PLAYER_PLACEHOLDER_SVG, getTeamTricode } from '../constants';
+import { getTeamTricode } from '../constants';
 import { COLORS, INK, RADIUS } from '../src/theme/tokens';
 import { Panel, MonoLabel, Stat } from './ui/kit';
+import PlayerPhoto from './ui/PlayerPhoto';
 
 // The "LÍDERES DA LIGA" block from design 3e: one line per category, the
 // league leader only. It sits under the standings on the same tab because the
@@ -68,9 +68,8 @@ const LeadersPanel: React.FC<LeadersPanelProps> = ({ players, teams, userTeamId,
           return (
             <View key={cat.key} className="flex-row items-center" style={{ gap: 11 }}>
               <MonoLabel size={8.5} color={INK.faint} style={{ width: 30 }}>{cat.abbr}</MonoLabel>
-              <Image
-                source={{ uri: getPlayerImageUrl(leader) }}
-                placeholder={{ uri: PLAYER_PLACEHOLDER_SVG }}
+              <PlayerPhoto
+                player={leader}
                 style={{ width: 28, height: 28, borderRadius: RADIUS.pill, backgroundColor: COLORS.line }}
                 contentFit="cover"
               />

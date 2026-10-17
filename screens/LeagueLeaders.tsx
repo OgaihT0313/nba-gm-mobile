@@ -1,14 +1,14 @@
 import React, { useMemo, useState } from 'react';
 import { View, Text, Pressable } from 'react-native';
-import { Image } from 'expo-image';
 
 import { Player, Team, PlayerSeasonStats } from '../types';
-import { getPlayerImageUrl, PLAYER_PLACEHOLDER_SVG, getTeamAccent } from '../constants';
+import { getTeamAccent } from '../constants';
 import { COLORS, FONT, withAlpha, ovrColor } from '../src/theme/tokens';
 import Screen, { Body } from '../components/ui/Screen';
 import { ScreenTitle, TeamBadge, Panel, BodyText, Name, PlayerFace } from '../components/ui/kit';
 import { useDesktop } from '../components/desktop/useDesktop';
 import { DPage, DTitle, Hover, Cols, Col } from '../components/desktop/kit';
+import PlayerPhoto from '../components/ui/PlayerPhoto';
 
 // Design 1e ("Transmissão"). Six category tabs; the leader as a big card
 // (photo edged in his team color, the number at 66px, the gap over #2); ranks
@@ -130,7 +130,7 @@ const LeagueLeaders: React.FC<{ players: { [key: string]: Player }; teams: Team[
             <Col width={440}>
               <Panel padding={0} radius={20}>
                 <View style={{ height: 300, backgroundColor: COLORS.surface2, justifyContent: 'flex-end', alignItems: 'center', overflow: 'hidden' }}>
-                  <Image source={{ uri: getPlayerImageUrl(top) }} placeholder={{ uri: PLAYER_PLACEHOLDER_SVG }} style={{ width: '100%', height: 290 }} contentFit="cover" contentPosition="top" />
+                  <PlayerPhoto player={top} style={{ width: '100%', height: 290 }} contentFit="cover" contentPosition="top" />
                   <View style={{ position: 'absolute', left: 0, right: 0, bottom: 0, height: 5, backgroundColor: getTeamAccent(topTeam.id).primary }} />
                 </View>
                 <View style={{ padding: 20, gap: 10 }}>
@@ -207,7 +207,7 @@ const LeagueLeaders: React.FC<{ players: { [key: string]: Player }; teams: Team[
         {top && topTeam ? (
           <Panel padding={0} radius={20} style={{ height: 190, flexDirection: 'row' }}>
             <View style={{ width: 132, backgroundColor: COLORS.surface2, justifyContent: 'flex-end' }}>
-              <Image source={{ uri: getPlayerImageUrl(top) }} placeholder={{ uri: PLAYER_PLACEHOLDER_SVG }} style={{ width: 132, height: 170 }} contentFit="cover" contentPosition="top" />
+              <PlayerPhoto player={top} style={{ width: 132, height: 170 }} contentFit="cover" contentPosition="top" />
               <View style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: 5, backgroundColor: getTeamAccent(topTeam.id).primary }} />
             </View>
             <View style={{ flex: 1, minWidth: 0, paddingHorizontal: 16, paddingVertical: 14, justifyContent: 'space-between' }}>

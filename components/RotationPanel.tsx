@@ -1,13 +1,13 @@
 import React from 'react';
 import { View, Text, Pressable } from 'react-native';
-import { Image } from 'expo-image';
 
 import { Team, Player } from '../types';
-import { getPlayerImageUrl, PLAYER_PLACEHOLDER_SVG, getTeamAccent } from '../constants';
+import { getTeamAccent } from '../constants';
 import { simulationEngine, ROTATION_MIN, ROTATION_MAX, DEFAULT_ROTATION_SIZE } from '../services/simulationService';
 import { COLORS, INK, RADIUS, withAlpha } from '../src/theme/tokens';
 import { Panel, Well, MonoLabel, Stat, Meter } from './ui/kit';
 import Icon from './Icon';
+import PlayerPhoto from './ui/PlayerPhoto';
 
 const loadColor = (load: number) => (load >= 75 ? COLORS.bad : load >= 50 ? COLORS.warn : COLORS.goodSoft);
 const loadLabel = (load: number) => (load >= 75 ? 'Sobrecarregado' : load >= 50 ? 'Cansado' : 'Descansado');
@@ -53,9 +53,8 @@ const RotationPanel: React.FC<RotationPanelProps> = ({ team, players, onSetRotat
           const isManaged = managed.has(p.id);
           return (
             <Well key={p.id} padding={10} className="flex-row items-center" style={{ gap: 10 }}>
-              <Image
-                source={{ uri: getPlayerImageUrl(p) }}
-                placeholder={{ uri: PLAYER_PLACEHOLDER_SVG }}
+              <PlayerPhoto
+                player={p}
                 style={{ width: 32, height: 32, borderRadius: RADIUS.pill, backgroundColor: COLORS.line }}
                 contentFit="cover"
               />

@@ -5,7 +5,8 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { COLORS, INK, RADIUS, FONT, tracking, withAlpha, onAccent, themeMode } from '../../src/theme/tokens';
 import { Image } from 'expo-image';
 import type { Player } from '../../types';
-import { getTeamAccent, teamsData, getPlayerImageUrl, PLAYER_PLACEHOLDER_SVG } from '../../constants';
+import { getTeamAccent, teamsData } from '../../constants';
+import PlayerPhoto from './PlayerPhoto';
 
 // The "Transmissão" primitives (design_handoff_redesign_transmissao). Everything
 // the redesign repeats — the card, the condensed label, the meter, the one light
@@ -322,9 +323,8 @@ export const PlayerFace: React.FC<{ player: Player; teamId?: string; size?: numb
   const bg = teamId ? withAlpha(getTeamAccent(teamId).primary, 0.45) : COLORS.surface2;
   return (
     <View style={[{ width: size, height: size, borderRadius: Math.round(size * 0.28), overflow: 'hidden', backgroundColor: bg }, style]}>
-      <Image
-        source={{ uri: getPlayerImageUrl(player) }}
-        placeholder={{ uri: PLAYER_PLACEHOLDER_SVG }}
+      <PlayerPhoto
+        player={player}
         style={{ width: size, height: size }}
         contentFit="cover"
         contentPosition="top"

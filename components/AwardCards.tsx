@@ -1,11 +1,11 @@
 import React from 'react';
 import { View, Text } from 'react-native';
-import { Image } from 'expo-image';
 
-import { getPlayerImageUrl, PLAYER_PLACEHOLDER_SVG, getTeamAccent, getTeamNickname } from '../constants';
+import { getTeamAccent, getTeamNickname } from '../constants';
 import { Player, Team } from '../types';
 import { COLORS, FONT, visibleTeamColor } from '../src/theme/tokens';
 import { Panel, TeamBadge } from './ui/kit';
+import PlayerPhoto from './ui/PlayerPhoto';
 
 // The award cards in the "Transmissão" register: flat surface, a colored stroke
 // on the left, condensed caps. Gold is the system's trophy color and appears
@@ -30,9 +30,8 @@ const Kicker: React.FC<{ color: string; children: React.ReactNode }> = ({ color,
 );
 
 const Headshot: React.FC<{ p: Player; size: number }> = ({ p, size }) => (
-  <Image
-    source={{ uri: getPlayerImageUrl(p) }}
-    placeholder={{ uri: PLAYER_PLACEHOLDER_SVG }}
+  <PlayerPhoto
+    player={p}
     style={{ width: size, height: size, borderRadius: 12, backgroundColor: COLORS.surface2 }}
     contentFit="cover"
     contentPosition="top"

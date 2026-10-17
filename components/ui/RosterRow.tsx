@@ -1,11 +1,11 @@
 import React from 'react';
 import { View, Text, Pressable } from 'react-native';
-import { Image } from 'expo-image';
 
 import { Player } from '../../types';
-import { attributeColor, getPlayerImageUrl, PLAYER_PLACEHOLDER_SVG } from '../../constants';
+import { attributeColor } from '../../constants';
 import { COLORS, INK, RADIUS, withAlpha } from '../../src/theme/tokens';
 import { Panel, MonoLabel, Stat, Meter } from './kit';
+import PlayerPhoto from './PlayerPhoto';
 
 // The roster line from design 2a, and the single most repeated object in the
 // app — My Team, Free Agency, the trade baskets and the draft board all show
@@ -48,9 +48,8 @@ const RosterRow: React.FC<RosterRowProps> = ({
       style={out ? { borderColor: '#3a1f22' } : undefined}
     >
       <View className="flex-row items-center" style={{ gap: 11 }}>
-        <Image
-          source={{ uri: getPlayerImageUrl(player) }}
-          placeholder={{ uri: PLAYER_PLACEHOLDER_SVG }}
+        <PlayerPhoto
+          player={player}
           style={{ width: avatar, height: avatar, borderRadius: RADIUS.pill, backgroundColor: COLORS.line, opacity: out ? 0.65 : 1 }}
           contentFit="cover"
           transition={120}

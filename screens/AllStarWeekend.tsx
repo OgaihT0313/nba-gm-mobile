@@ -5,10 +5,9 @@ import { AllStarResult, Player, Team } from '../types';
 import { COLORS, FONT } from '../src/theme/tokens';
 import Screen, { Body } from '../components/ui/Screen';
 import { Panel, ScreenTitle, SectionLabel, BodyText, Name, TeamBadge } from '../components/ui/kit';
-import { Image } from 'expo-image';
-import { getPlayerImageUrl, PLAYER_PLACEHOLDER_SVG } from '../constants';
 import { useDesktop } from '../components/desktop/useDesktop';
 import { DPage, DTitle, Cols, Col } from '../components/desktop/kit';
+import PlayerPhoto from '../components/ui/PlayerPhoto';
 
 // Design 4e ("Transmissão"). A split scoreboard — West red, East dark blue —
 // the game MVP in a gold-inset card, both conferences' squads in columns, and
@@ -116,7 +115,7 @@ const AllStarWeekend: React.FC<AllStarWeekendProps> = ({ allStar, players, teams
             {mvp ? (
               <Panel padding={0} bar={COLORS.gold}>
                 <View style={{ height: 220, backgroundColor: COLORS.surface2, justifyContent: 'flex-end', overflow: 'hidden' }}>
-                  <Image source={{ uri: getPlayerImageUrl(mvp) }} placeholder={{ uri: PLAYER_PLACEHOLDER_SVG }} style={{ width: '100%', height: 210 }} contentFit="cover" contentPosition="top" />
+                  <PlayerPhoto player={mvp} style={{ width: '100%', height: 210 }} contentFit="cover" contentPosition="top" />
                 </View>
                 <View style={{ padding: 16, gap: 4 }}>
                   <Text style={{ fontFamily: FONT.cond700, fontSize: 11, letterSpacing: 1.5, color: COLORS.gold }}>MVP DO JOGO</Text>

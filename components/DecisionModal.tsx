@@ -1,13 +1,12 @@
 import React from 'react';
 import { View, Text, Pressable, ScrollView, Modal } from 'react-native';
-import { Image } from 'expo-image';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import type { Decision, DecisionOption, DecisionKind, Player } from '../types';
-import { getPlayerImageUrl, PLAYER_PLACEHOLDER_SVG } from '../constants';
 import { personalityOf } from '../services/personalityService';
 import { COLORS, FONT, ovrColor } from '../src/theme/tokens';
 import { useDesktop } from './desktop/useDesktop';
+import PlayerPhoto from './ui/PlayerPhoto';
 
 // Design 5d ("Transmissão"). The decision queue's one screen, as an
 // INTERRUPTION: the season stays visible behind a dark veil — your record is
@@ -85,9 +84,8 @@ const DecisionModal: React.FC<DecisionModalProps> = ({ decision, players, remain
                 </Text>
                 {subject ? (
                   <View className="flex-row items-center" style={{ gap: 10 }}>
-                    <Image
-                      source={{ uri: getPlayerImageUrl(subject) }}
-                      placeholder={{ uri: PLAYER_PLACEHOLDER_SVG }}
+                    <PlayerPhoto
+                      player={subject}
                       style={{ width: 40, height: 40, borderRadius: 10, backgroundColor: COLORS.surface2 }}
                       contentFit="cover"
                       contentPosition="top"

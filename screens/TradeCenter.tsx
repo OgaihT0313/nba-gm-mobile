@@ -1,11 +1,10 @@
 import React, { useState, useMemo, useCallback, useEffect } from 'react';
 import { View, Text, Pressable, ScrollView, Modal } from 'react-native';
-import { Image } from 'expo-image';
 import { LinearGradient } from 'expo-linear-gradient';
 
 import { Team, Player, TradeOffer, DraftPickAsset } from '../types';
 import {
-  getPlayerImageUrl, PLAYER_PLACEHOLDER_SVG, getTeamLogoUrl, getTeamSalary, SALARY_CAP,
+  getTeamLogoUrl, getTeamSalary, SALARY_CAP,
   formatPositions, getPlayerPositions, picksOf, getTeamNickname, getTeamTricode, attributeColor,
 } from '../constants';
 import {
@@ -23,6 +22,7 @@ import Icon from '../components/Icon';
 import PlayerDetailModal from '../components/PlayerDetailModal';
 import { useDesktop } from '../components/desktop/useDesktop';
 import { DPage, DDock, DCta, DTitle, DLabel, Hover, PAGE_X, PAGE_Y } from '../components/desktop/kit';
+import PlayerPhoto from '../components/ui/PlayerPhoto';
 
 // Design 3a of "Transmissão" (was design 2b) — the value scale is the hero of this screen. The old version made
 // you build a package blind and only told you afterwards (via a confirm dialog)
@@ -689,9 +689,8 @@ const AssetSheet: React.FC<{
                 borderWidth: 1, borderColor: on ? accent : COLORS.line,
               }}
             >
-              <Image
-                source={{ uri: getPlayerImageUrl(p) }}
-                placeholder={{ uri: PLAYER_PLACEHOLDER_SVG }}
+              <PlayerPhoto
+                player={p}
                 style={{ width: 32, height: 32, borderRadius: RADIUS.pill, backgroundColor: COLORS.line }}
                 contentFit="cover"
               />
@@ -805,7 +804,7 @@ const RosterColumn: React.FC<{
           const on = selectedPlayers.includes(p.id);
           return (
             <Pressable key={p.id} accessibilityRole="button" aria-selected={on} accessibilityLabel={p.name} onPress={() => onTogglePlayer(p.id)} onLongPress={() => onInspect(p)} style={rowStyle(on)}>
-              <Image source={{ uri: getPlayerImageUrl(p) }} placeholder={{ uri: PLAYER_PLACEHOLDER_SVG }} style={{ width: 32, height: 32, borderRadius: 16, backgroundColor: COLORS.line }} contentFit="cover" contentPosition="top" />
+              <PlayerPhoto player={p} style={{ width: 32, height: 32, borderRadius: 16, backgroundColor: COLORS.line }} contentFit="cover" contentPosition="top" />
               <View style={{ flex: 1, minWidth: 0 }}>
                 <Text numberOfLines={1} style={{ fontFamily: FONT.cond600, fontSize: 14.5, color: COLORS.text }}>{p.name}</Text>
                 <Text style={{ fontFamily: FONT.cond700, fontSize: 11, color: COLORS.dim }}>{formatPositions(p)} · {money(p.salary)}</Text>
