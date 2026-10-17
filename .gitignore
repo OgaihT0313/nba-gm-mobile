@@ -52,3 +52,6 @@ dist-web/
 
 # On-device 3D captures (scripts/device_3d.sh)
 .device-3d/
+
+# EAS signing credentials, downloaded for the GitHub Actions build (BUILD.md)
+credentials.json
