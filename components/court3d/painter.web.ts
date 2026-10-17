@@ -11,13 +11,24 @@ export const loadPainterFont = async () => {
   try { await (document as any).fonts?.load(`100px ${FAMILY}`); } catch { /* fallback font */ }
 };
 
+// One canvas per size, reused, and kept in CPU memory (willReadFrequently):
+// every paint is read back with getImageData, which on a GPU canvas waits
+// for the GPU. Same reason as the native painter's raster surface.
+const contexts = new Map<string, CanvasRenderingContext2D>();
+
 export const createPainter = (w: number, h: number): Painter | null => {
   if (typeof document === 'undefined') return null;
-  const canvas = document.createElement('canvas');
-  canvas.width = w;
-  canvas.height = h;
-  const ctx = canvas.getContext('2d');
-  if (!ctx) return null;
+  const key = `${w}x${h}`;
+  let ctx = contexts.get(key) ?? null;
+  if (!ctx) {
+    const canvas = document.createElement('canvas');
+    canvas.width = w;
+    canvas.height = h;
+    ctx = canvas.getContext('2d', { willReadFrequently: true });
+    if (!ctx) return null;
+    contexts.set(key, ctx);
+  }
+  ctx.clearRect(0, 0, w, h);
   const font = (size: number) => `${Math.round(size)}px ${FAMILY}, "Arial Narrow", sans-serif`;
   return {
     w,

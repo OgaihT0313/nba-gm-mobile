@@ -430,6 +430,35 @@ arquivos, +1.613 / −188):
   centrada na faixa livre do HUD. Não conferidos de perto ainda: placar central,
   relógio de posse, sigla do piso pela TV.
 
+## Otimização — 2026-10-17 (pedido do usuário)
+
+Relato no aparelho, depois do telão/replays (`afa3bda`) e dos corpos com anatomia
+(`a91dfcf`), nenhum dos dois medido no celular: **engasgadas periódicas**, **placar
+demora a subir depois da cesta**, **câmera Perto perto demais**. Causas achadas no
+código e corrigidas:
+- **Telão repintado ~3,7 vezes por segundo.** O relógio de jogo estava nele e anda
+  ~3,7 s de jogo por segundo real; cada mudança criava uma superfície Skia **na GPU**,
+  desenhava e lia os pixels de volta (`readPixels` espera a GPU) e reenviava 768x256.
+  Agora o telão não tem relógio (o placar central tem) e repinta só com cesta, lance,
+  cestinha ou troca de posse. O pintor (`painter.ts`) usa uma superfície **de CPU**
+  (`Skia.Surface.Make`), uma por tamanho, reaproveitada; o da web reaproveita o canvas
+  com `willReadFrequently`.
+- **A cena inteira era reconciliada 5 vezes por segundo.** O tique do placar do HUD
+  (200 ms) passava props novas ao `Court3D`, e arquibancada, luzes, aros, piso e
+  jogadores re-renderizavam sem precisar. Ficaram atrás de `React.memo` (`Arena.tsx`:
+  Bowl, Courtside, CeilingLights, SpotBeams, Banners, Hoop; `Court3D.tsx`: Floor,
+  CourtDecals, PlayersAndBall).
+- **Placar do HUD** subia no tique seguinte (até 200 ms) e, pior, depois das travadas
+  acima. Agora sobe no `announce`, junto com a bola na rede.
+- **Câmera Perto:** ±11 → ±17 pés de quadra na tela em pé (`halfWidth` 17, `dist` 70,
+  `elev` 0,33). Mostra quem tem a bola e os dois mais perto, com a jogada inteira.
+
+Conferido no navegador (PC, tela de celular em pé): 15 s de jogo na Perto sem
+nenhum quadro acima de 17 ms; `check_watch_director` verde. **Falta medir no
+aparelho** (`scripts/device_3d.sh`, `gfxinfo` por câmera) com o APK do GitHub Actions.
+Se ainda engasgar, os próximos suspeitos são os corpos novos de `a91dfcf` (malhas e
+draw calls por jogador) e o replay.
+
 ---
 
 ## Critérios de aceite

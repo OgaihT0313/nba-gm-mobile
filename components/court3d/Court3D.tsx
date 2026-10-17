@@ -88,7 +88,10 @@ const CAMERA_PRESETS: Record<CameraView, CameraPreset> = {
   // On a phone held upright the base lens at 46 ft showed ~7 ft either side
   // of the ball: one player and a half (seen 2026-10-13, "MUITO perto"). It
   // sits further back now and keeps ~11 ft either side in frame.
-  close: { angle: Math.PI / 2 - 0.2, elev: 0.3, dist: 56, autoRotate: false, follow: 1, targetY: 4, lag: 0.02, halfWidth: 11 },
+  // Still too close (2026-10-17, "a câmera perto é muito perto"): ~17 ft
+  // either side now, the ball handler and the two men nearest him, between
+  // the old close shot and the TV's 24.
+  close: { angle: Math.PI / 2 - 0.2, elev: 0.33, dist: 70, autoRotate: false, follow: 1, targetY: 4, lag: 0.02, halfWidth: 17 },
   // A touch off the axis, like the broadcast baseline camera: dead-on, the
   // near stanchion's arm runs straight up the middle of the frame.
   behind_basket: { angle: Math.PI - 0.16, elev: 0.3, dist: 118, autoRotate: false, follow: 0.75 },
@@ -626,6 +629,12 @@ function PlayersAndBall({
   );
 }
 
+// Held behind memo: the screen re-renders the scene five times a second for
+// the scoreboard, and none of these read it.
+const FloorM = React.memo(Floor);
+const CourtDecalsM = React.memo(CourtDecals);
+const PlayersAndBallM = React.memo(PlayersAndBall);
+
 /* ------------------------------------------------------------------ */
 /* Scene root.                                                         */
 /* ------------------------------------------------------------------ */
@@ -660,7 +669,7 @@ function Scene({
       <directionalLight position={[0, 60, 90]} intensity={0.5} color="#ffffff" />
 
       {fontSettled ? (
-        <Floor
+        <FloorM
           wood={visual?.floorColor ?? DEFAULT_FLOOR_COLOR}
           primary={home.primary}
           secondary={home.secondary}
@@ -669,7 +678,7 @@ function Scene({
         />
       ) : null}
       {rich && homeNickname ? (
-        <CourtDecals primary={home.primary} secondary={home.secondary} nickname={homeNickname} city={homeCity} />
+        <CourtDecalsM primary={home.primary} secondary={home.secondary} nickname={homeNickname} city={homeCity} />
       ) : null}
       <Arena
         primary={home.primary}
@@ -682,7 +691,7 @@ function Scene({
         hype={crowd}
         jumbo={jumbo}
       />
-      <PlayersAndBall home={home} away={away} courtRef={courtRef} bodies={bodies} onSound={soundRef} slow={replay?.slow ?? 1} />
+      <PlayersAndBallM home={home} away={away} courtRef={courtRef} bodies={bodies} onSound={soundRef} slow={replay?.slow ?? 1} />
     </>
   );
 }

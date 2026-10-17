@@ -227,7 +227,7 @@ export const paintJumbo = (tex: THREE.DataTexture, f: JumboFace): boolean => {
   p.text(String(f.home), block - 64, 56, 60, onBlock(f.homeColor));
   p.text(f.awayLabel, W - block + 18, 54, 50, onBlock(f.awayColor), { align: 'left' });
   p.text(String(f.away), W - 64, 56, 60, onBlock(f.awayColor));
-  p.text(`${f.period}  ${f.clock}`, W / 2, 52, 46, '#f5f5f5');
+  p.text(f.clock ? `${f.period}  ${f.clock}` : f.period, W / 2, 52, 46, '#f5f5f5');
   p.rect(0, TOP, W, 4, f.accent);
   // The main panel.
   const mid = TOP + (H - TOP) / 2;

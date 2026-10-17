@@ -1,5 +1,5 @@
 // A 2D brush for the 3D court's rich textures (jerseys, title banners), drawn
-// with React Native Skia on an offscreen surface and read back as RGBA bytes
+// with React Native Skia on a CPU surface and read back as RGBA bytes
 // for a THREE.DataTexture. React Native has no HTML canvas; Skia is the
 // native equivalent (certified for Expo SDK 57). The web build resolves
 // painter.web.ts, which does the same with the browser's canvas.
@@ -7,7 +7,7 @@
 // Text is Barlow Condensed ExtraBold, the app's display face, loaded once from
 // the font package's .ttf. Until it is in, painters still draw shapes, and
 // callers that need text wait on onPainterReady.
-import { Skia, PaintStyle, StrokeJoin, ColorType, AlphaType, type SkTypeface, type SkFont } from '@shopify/react-native-skia';
+import { Skia, PaintStyle, StrokeJoin, ColorType, AlphaType, type SkTypeface, type SkFont, type SkSurface } from '@shopify/react-native-skia';
 import { Asset } from 'expo-asset';
 
 import type { Painter } from './painterTypes';
@@ -49,8 +49,24 @@ const fontAt = (size: number): SkFont | null => {
   return f;
 };
 
+// One surface per size, reused. A CPU (raster) surface, not a GPU one: the
+// bytes are read straight back into a DataTexture, and reading a GPU surface
+// stalls until the GPU catches up -- which the jumbotron did several times a
+// second during a game, the 3D's periodic hitch. Painting is sequential on
+// the JS thread, so sharing a surface between callers is safe.
+const surfaces = new Map<string, SkSurface>();
+const surfaceFor = (w: number, h: number): SkSurface | null => {
+  const key = `${w}x${h}`;
+  let s = surfaces.get(key);
+  if (!s) {
+    s = Skia.Surface.Make(w, h) ?? Skia.Surface.MakeOffscreen(w, h) ?? undefined;
+    if (s) surfaces.set(key, s);
+  }
+  return s ?? null;
+};
+
 export const createPainter = (w: number, h: number): Painter | null => {
-  const surface = Skia.Surface.MakeOffscreen(w, h);
+  const surface = surfaceFor(w, h);
   if (!surface) return null;
   const canvas = surface.getCanvas();
   // Start transparent: decals are laid over the floor with nothing behind the type.

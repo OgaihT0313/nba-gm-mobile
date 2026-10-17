@@ -858,6 +858,16 @@ function Hoop({ side, primary, courtRef, shotClockMat, violation }: {
   );
 }
 
+// The screen's scoreboard state changes five times a second, and every change
+// re-rendered the whole arena -- ~3,300 seats, the lights, both hoops -- for
+// nothing. The parts that don't read the score or the clock sit behind memo.
+const BowlM = React.memo(Bowl);
+const CourtsideM = React.memo(Courtside);
+const CeilingLightsM = React.memo(CeilingLights);
+const SpotBeamsM = React.memo(SpotBeams);
+const BannersM = React.memo(Banners);
+const HoopM = React.memo(Hoop);
+
 const IDLE_BOARD: ScoreboardData = { home: 0, away: 0, quarter: 1, clock: 12 * 60 };
 
 export default function Arena({ primary, secondary, courtRef, board = IDLE_BOARD, awayPrimary, homeLabel, banners, hype, jumbo }: ArenaProps & {
@@ -885,15 +895,15 @@ export default function Arena({ primary, secondary, courtRef, board = IDLE_BOARD
         <planeGeometry args={[420, 320]} />
         <meshStandardMaterial color="#101219" roughness={0.95} />
       </mesh>
-      <Bowl primary={primary} secondary={secondary} awayPrimary={awayPrimary} hype={hype} />
-      <Courtside primary={primary} secondary={secondary} label={homeLabel} scored={board.home + board.away} />
+      <BowlM primary={primary} secondary={secondary} awayPrimary={awayPrimary} hype={hype} />
+      <CourtsideM primary={primary} secondary={secondary} label={homeLabel} scored={board.home + board.away} />
       <Scoreboard primary={primary} secondary={secondary} board={board} awayPrimary={awayPrimary ?? secondary} />
-      <CeilingLights />
-      <SpotBeams />
-      {banners && banners.length ? <Banners years={banners} primary={primary} secondary={secondary} /> : null}
+      <CeilingLightsM />
+      <SpotBeamsM />
+      {banners && banners.length ? <BannersM years={banners} primary={primary} secondary={secondary} /> : null}
       {jumbo ? <Jumbotron face={jumbo} primary={primary} secondary={secondary} awayPrimary={awayPrimary ?? secondary} /> : null}
-      <Hoop side={1} primary={primary} courtRef={courtRef} shotClockMat={shotClockMat} violation={violation} />
-      <Hoop side={-1} primary={primary} courtRef={courtRef} shotClockMat={shotClockMat} violation={violation} />
+      <HoopM side={1} primary={primary} courtRef={courtRef} shotClockMat={shotClockMat} violation={violation} />
+      <HoopM side={-1} primary={primary} courtRef={courtRef} shotClockMat={shotClockMat} violation={violation} />
     </>
   );
 }

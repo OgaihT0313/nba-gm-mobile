@@ -433,6 +433,9 @@ const WatchGameScreen: React.FC<WatchGameScreenProps> = ({
       }
       const pts = Math.min(3, Math.max(1, p.points)) as 1 | 2 | 3;
       pointsRef.current.set(p.scorerName, (pointsRef.current.get(p.scorerName) ?? 0) + p.points);
+      // The board goes up with the ball through the net, not on the next
+      // 200 ms scoreboard refresh.
+      setScore(scoreAt(p.shotAt));
       setBanner({
         text: `${SHOT_LABEL[pts]}${p.points > 3 ? ` (+${p.points})` : ''}`,
         sub: p.assistName ? `${p.scorerName} · passe de ${p.assistName}` : p.scorerName,
@@ -692,7 +695,11 @@ const WatchGameScreen: React.FC<WatchGameScreenProps> = ({
     home: score.home,
     away: score.away,
     period: phase === 'final' ? 'FINAL' : quarter <= REGULATION_QUARTERS ? `${quarter}º Q` : `PR ${quarter - REGULATION_QUARTERS}`,
-    clock: phase === 'final' ? '' : clockLabel(clock, quarter),
+    // No game clock up there: the clock runs ~3.7 game-seconds per real
+    // second, and every change repainted the whole screen -- the 3D's periodic
+    // hitch. The center-hung scoreboard keeps the clock; the jumbotron now
+    // repaints on a basket, a moment or a change of possession.
+    clock: '',
     leader,
     message: moment,
     defense: phase === 'live' && homeDefending,
