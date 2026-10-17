@@ -71,7 +71,7 @@ navegador e medidas; **falta testar no celular.**
 - **Limites desta versão:**
   - a comparação com as lendas só tem as carreiras reais da liga atual (os jogadores das
     eras não trazem totais de carreira);
-  - o lance não é encenado no 3D: o cartão decide e a quadra segue;
+  - ~~o lance não é encenado no 3D~~ — **resolvido em 2026-10-17:** a próxima posse do lado certo, com você em quadra, é reconstruída como a escolha (`restagePossession` no `watchDirector`, `stageOf` no `careerMoments`): o seu chute, a sua infiltração, o passe que vira assistência sua, o arremesso do seu marcador na defesa. O ajuste de placar entra quando a bola chega ao aro. `check_moments`: 300/300 encenados com arremessador, resultado e assistência certos;
   - o Jogo das Estrelas jogável e os patrocínios ficam para depois.
 
 Você cria um jogador, passa pelo campeonato de testes pré-draft, é escolhido por um time

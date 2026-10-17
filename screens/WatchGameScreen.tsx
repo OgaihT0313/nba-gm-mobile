@@ -13,6 +13,7 @@ import {
   possessionAt,
   planQuarter,
   scoutingReport,
+  restagePossession,
   quarterSeconds,
   tipOffState,
   initialEnergy,
@@ -29,7 +30,7 @@ import {
   type QuarterPlan,
 } from '../services/watchDirector';
 import { ROLE_LABEL, analystAccuracy } from '../services/staffService';
-import type { Moment, MomentResult } from '../services/career/careerMoments';
+import { stageOf, type Moment, type MomentResult } from '../services/career/careerMoments';
 import { eraGroupForEraId } from '../data/eras';
 import { getEraVisual } from '../src/theme/eraVisuals';
 import { COLORS, INK, RADIUS, FONT, withAlpha, onAccent, ovrColor } from '../src/theme/tokens';
@@ -269,6 +270,20 @@ const WatchGameScreen: React.FC<WatchGameScreenProps> = ({
   // shows them rounded -- see withMoments).
   const pendingMoments = useRef<Moment[]>(career ? [...career.moments] : []);
   const momentAdj = useRef({ home: 0, away: 0 });
+  // A staged trip's share of the adjustment waits for its ball to reach the
+  // rim, so the board moves with the shot and not before it.
+  const pendingAdj = useRef<{ quarter: number; at: number; side: CourtSide; value: number }[]>([]);
+  const settleAdj = (all = false) => {
+    if (!pendingAdj.current.length) return;
+    const q = quarterRef.current;
+    const keep: typeof pendingAdj.current = [];
+    pendingAdj.current.forEach((e) => {
+      if (all || e.quarter < q || (e.quarter === q && clockRef.current >= e.at)) {
+        momentAdj.current = { ...momentAdj.current, [e.side]: momentAdj.current[e.side] + e.value } as { home: number; away: number };
+      } else keep.push(e);
+    });
+    pendingAdj.current = keep;
+  };
   const pausedRef = useRef(false);
   const [activeMoment, setActiveMoment] = useState<Moment | null>(null);
   const [momentLog, setMomentLog] = useState<MomentResult[]>([]);
@@ -329,7 +344,11 @@ const WatchGameScreen: React.FC<WatchGameScreenProps> = ({
   };
   // What the board shows: the baskets plus what your moments added. Kept out
   // of completedRef, which only ever holds the director's own baskets.
-  const withMoments = (s: { home: number; away: number }) => ({
+  const withMoments = (s: { home: number; away: number }) => {
+    settleAdj();
+    return withAdj(s);
+  };
+  const withAdj = (s: { home: number; away: number }) => ({
     home: s.home + Math.round(momentAdj.current.home),
     away: s.away + Math.round(momentAdj.current.away),
   });
@@ -676,6 +695,7 @@ const WatchGameScreen: React.FC<WatchGameScreenProps> = ({
     }
     // Skipping hands the rest of your moments to the simulation: no more stops.
     pendingMoments.current = [];
+    settleAdj(true);
     pausedRef.current = false;
     setActiveMoment(null);
     const tied = () => withMoments({ home: h, away: a }).home === withMoments({ home: h, away: a }).away;
@@ -744,18 +764,49 @@ const WatchGameScreen: React.FC<WatchGameScreenProps> = ({
 
   const decideMoment = (optionId: string) => {
     if (!career || !activeMoment) return;
-    const r = career.onMoment(activeMoment, optionId);
+    const m = activeMoment;
+    const r = career.onMoment(m, optionId);
     const mine = userSide;
     const theirs: CourtSide = mine === 'home' ? 'away' : 'home';
-    momentAdj.current = {
-      ...momentAdj.current,
-      [mine]: momentAdj.current[mine] + r.teamDelta,
-      [theirs]: momentAdj.current[theirs] + r.oppDelta,
-    } as { home: number; away: number };
+    const st = stageOf(m, r);
+    const tripSide = st.onDefense ? theirs : mine;
+    // What the moment is worth to the score (careerMoments measures it
+    // against the average choice) -- the court will show the shot itself.
+    const worth = st.onDefense ? r.oppDelta : r.teamDelta;
+    // The court plays it out: the next trip of that side, with you on the
+    // floor, rebuilt as the choice you made (restagePossession).
+    let staged: ReturnType<typeof restagePossession> = null;
+    if (planRef.current) {
+      const at = rotationAt(planRef.current, clockRef.current);
+      const myFive = at ? (mine === 'home' ? at.fiveHome : at.fiveAway) : null;
+      const mate = myFive?.players
+        .filter((pl) => pl.playerId !== career.meId)
+        .sort((a, b) => (players[b.playerId]?.ovr ?? 0) - (players[a.playerId]?.ovr ?? 0))[0]?.playerId;
+      staged = restagePossession(planRef.current, players, {
+        side: tripSide,
+        mustHave: career.meId,
+        shooterId: st.shooter === 'me' ? career.meId : st.shooter === 'mate' ? mate : m.defenderId,
+        play: st.play, made: st.made, points: st.points, shotKind: st.shotKind,
+        assistId: st.assist ? career.meId : undefined,
+        after: clockRef.current,
+      });
+    }
+    const option = m.options.find((o) => o.id === optionId);
+    const read = r.good ? ' · boa leitura' : r.bad ? ' · leitura ruim' : '';
+    if (staged) {
+      planRef.current = staged.plan;
+      // The staged trip already moves the score by its own result; the rest
+      // of the moment's worth lands with that shot.
+      pendingAdj.current = [...pendingAdj.current, { quarter: quarterRef.current, at: staged.shotAt, side: tripSide, value: worth - staged.delta }];
+      setBanner({ text: 'SEU LANCE', sub: `${option?.label ?? ''}${read}`, color: r.good ? COLORS.good : r.bad ? COLORS.bad : COLORS.warn });
+    } else {
+      // No trip of yours left this quarter to show it on: the result, straight away.
+      momentAdj.current = { ...momentAdj.current, [tripSide]: momentAdj.current[tripSide] + worth } as { home: number; away: number };
+      setScore(withMoments(scoreAt(clockRef.current)));
+      setBanner({ text: r.success ? (r.good ? 'BOA LEITURA' : 'DEU CERTO') : r.bad ? 'LEITURA RUIM' : 'NÃO SAIU', sub: r.text, color: r.success ? COLORS.good : COLORS.bad });
+      if (r.success && r.pts >= 2) sound.current?.swish();
+    }
     setMomentLog((l) => [...l, r]);
-    setScore(withMoments(scoreAt(clockRef.current)));
-    setBanner({ text: r.success ? (r.good ? 'BOA LEITURA' : 'DEU CERTO') : r.bad ? 'LEITURA RUIM' : 'NÃO SAIU', sub: r.text, color: r.success ? COLORS.good : COLORS.bad });
-    if (r.success && r.pts >= 2) sound.current?.swish();
     setActiveMoment(null);
     pausedRef.current = false;
   };

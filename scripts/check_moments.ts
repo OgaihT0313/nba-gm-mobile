@@ -13,7 +13,9 @@
 //   cp -r data .check/data && node .check/scripts/check_moments.js [games]
 import { teamsData, playersData } from '../constants';
 import type { Player, Team } from '../types';
-import { buildMoments, resolveMoment, trustFromMoments, momentTotals, chanceOf, type Moment } from '../services/career/careerMoments';
+import { buildMoments, resolveMoment, trustFromMoments, momentTotals, chanceOf, stageOf, type Moment } from '../services/career/careerMoments';
+import { buildFive, planQuarter, restagePossession } from '../services/watchDirector';
+import { initCoaches } from '../services/coachService';
 
 declare const process: { argv: string[] };
 const GAMES = Number(process.argv[2] || 3000);
@@ -82,4 +84,48 @@ check('ler bem rende +1 a +2 pts por jogo sobre o aleatório', edge >= 1 && edge
 check('a escolha aleatória fica perto de zero', Math.abs(mean(res.random.team)) < 0.5, f(mean(res.random.team)));
 check('ir contra a leitura custa pontos', mean(res.against.team) < -0.5, f(mean(res.against.team)));
 check('a confiança premia ler bem', mean(res.read.trust) > 1.5 && mean(res.against.trust) < -1, `${f(mean(res.read.trust))} / ${f(mean(res.against.trust))}`);
+// --- The court plays the decided moment out (restagePossession) ---
+// Real quarters with a real starter as "you": every kind of option staged on
+// the next trip, then read back -- who shoots, whether it falls, the assist.
+{
+  const { coaches } = initCoaches(teams.map((t) => ({ ...t })));
+  let staged = 0, tried = 0, shooterOk = 0, resultOk = 0, assistOk = 0, assistTried = 0;
+  for (let g = 0; g < 300; g++) {
+    const home = teams[g % teams.length];
+    const away = teams[(g + 7) % teams.length];
+    const fh = buildFive(home, players, 'home');
+    const fa = buildFive(away, players, 'away');
+    const me = players[fh.players[g % 5].playerId];
+    if (!me) continue;
+    const plan = planQuarter({ home, away, players, coaches, fiveHome: fh, fiveAway: fa, userSide: 'home', play: 'pick_roll', timeout: false, quarter: 1, from: 0, coached: false });
+    const moment = buildMoments(me, away, players, 0)[0];
+    const option = moment.options[g % moment.options.length];
+    const r = resolveMoment(moment, option.id, me, players);
+    const st = stageOf(moment, r);
+    const side = st.onDefense ? 'away' : 'home';
+    const mate = fh.players.find((pl) => pl.playerId !== me.id)!.playerId;
+    const wantId = st.shooter === 'me' ? me.id : st.shooter === 'mate' ? mate : moment.defenderId;
+    const after = 60;
+    tried++;
+    const out = restagePossession(plan, players, {
+      side, mustHave: me.id, shooterId: wantId,
+      play: st.play, made: st.made, points: st.points, shotKind: st.shotKind, assistId: st.assist ? me.id : undefined, after,
+    });
+    if (!out) continue;
+    staged++;
+    const poss = out.plan.possessions.find((x) => x.start >= after && x.side === side && !x.freeThrow
+      && [x.fiveHome, x.fiveAway].some((f) => f?.players.some((pl) => pl.playerId === me.id)))!;
+    const five = side === 'away' ? poss.fiveAway! : poss.fiveHome!;
+    if (five.players[poss.shooter]?.playerId === wantId || !five.players.some((pl) => pl.playerId === wantId)) shooterOk++;
+    if (poss.made === st.made && (!st.made || poss.points === st.points)) resultOk++;
+    if (st.assist && st.made) { assistTried++; if (poss.assistName === me.name) assistOk++; }
+  }
+  console.log(`\nEncenação: ${staged}/${tried} lances encenados (o resto: você fora de quadra no resto do quarto)`);
+  console.log(`  arremessador certo ${shooterOk}/${staged} · resultado certo ${resultOk}/${staged} · assistência sua ${assistOk}/${assistTried}`);
+  check('a maioria dos lances é encenada', staged >= tried * 0.8, `${staged}/${tried}`);
+  check('a quadra mostra quem a escolha manda arremessar', shooterOk === staged, `${shooterOk}/${staged}`);
+  check('a quadra mostra o resultado sorteado', resultOk === staged, `${resultOk}/${staged}`);
+  check('o passe certo vira assistência sua', assistOk === assistTried, `${assistOk}/${assistTried}`);
+}
+
 console.log(failures === 0 ? '\nALL CHECKS PASSED' : `\n${failures} CHECK(S) FAILED`);

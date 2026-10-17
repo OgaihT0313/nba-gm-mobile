@@ -245,6 +245,44 @@ export const resolveMoment = (
   };
 };
 
+/**
+ * How the court plays a decided moment out (WatchGameScreen restages the next
+ * trip with it): which set, who shoots, from where, and whether it falls.
+ * On defense it is THEIR trip, their man shooting, falling when you failed.
+ */
+export interface MomentStage {
+  onDefense: boolean;
+  shooter: 'me' | 'mate' | 'their';
+  play: 'pick_roll' | 'pindown' | 'post_up' | 'iso';
+  shotKind: 2 | 3;
+  made: boolean;
+  points: number;
+  /** You get the assist when it falls. */
+  assist: boolean;
+}
+
+export const stageOf = (m: Moment, r: MomentResult): MomentStage => {
+  if (m.kind === 'defense') {
+    return { onDefense: true, shooter: 'their', play: 'iso', shotKind: 2, made: !r.success, points: 2, assist: false };
+  }
+  switch (r.optionId) {
+    case 'three':
+    case 'corner':
+      return { onDefense: false, shooter: 'me', play: 'pindown', shotKind: 3, made: r.success, points: 3, assist: false };
+    case 'post':
+      return { onDefense: false, shooter: 'me', play: 'post_up', shotKind: 2, made: r.success, points: 2, assist: false };
+    case 'pullup':
+    case 'drive':
+    case 'cut':
+    case 'crash':
+      return { onDefense: false, shooter: 'me', play: 'iso', shotKind: 2, made: r.success, points: 2, assist: false };
+    case 'pass':
+      return { onDefense: false, shooter: 'mate', play: 'pick_roll', shotKind: 2, made: r.success, points: 2, assist: true };
+    default: // screen, hold: a teammate finishes the trip you set up
+      return { onDefense: false, shooter: 'mate', play: 'pick_roll', shotKind: 2, made: r.success, points: 2, assist: false };
+  }
+};
+
 /** The coach notices how you decide, more than whether it fell. */
 export const trustFromMoments = (results: MomentResult[]): number =>
   results.reduce((t, r) => t + (r.good ? 0.45 : r.bad ? -0.4 : 0) + (r.success ? 0.12 : -0.05), 0);

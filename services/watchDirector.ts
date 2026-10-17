@@ -1203,6 +1203,72 @@ const stitch = (possessions: Possession[]) => {
 };
 
 /* ------------------------------------------------------------------ */
+/* Minha Carreira: staging the trip you just decided.                  */
+/* ------------------------------------------------------------------ */
+export interface Restage {
+    /** Whose trip: yours (offense) or theirs (you on defense). */
+    side: CourtSide;
+    /** The player who must be on the floor for it (you). */
+    mustHave: string;
+    /** Who takes the shot, by id; absent = keep the trip's own shooter. */
+    shooterId?: string;
+    play: WatchPlay;
+    made: boolean;
+    points: number;
+    shotKind: 2 | 3;
+    /** Credited with the assist when it falls. */
+    assistId?: string;
+    /** Earliest second it may start (the clock now): a trip already under way is left alone. */
+    after: number;
+}
+
+/**
+ * Rebuild the next trip of `side` that starts after `after` with `mustHave`
+ * on the floor, so the court plays out the choice the user just made: his
+ * three from the corner, his drive, his pass to the open man, the stop he
+ * made on his man. Same start, length and lineups; only the choreography and
+ * the result change. Returns the new plan and how many points the trip's
+ * result changed by (the caller squares the score with it), or null when no
+ * such trip is left in the quarter.
+ */
+export const restagePossession = (
+    plan: QuarterPlan, players: { [key: string]: Player }, r: Restage,
+): { plan: QuarterPlan; delta: number; shotAt: number } | null => {
+    const list = plan.possessions;
+    const idx = list.findIndex((p) => {
+        if (p.side !== r.side || p.start < r.after || p.freeThrow) return false;
+        const fives = [p.fiveHome, p.fiveAway];
+        return fives.some((f) => f?.players.some((pl) => pl.playerId === r.mustHave));
+    });
+    if (idx < 0) return null;
+    const old = list[idx];
+    const five = r.side === 'home' ? old.fiveHome : old.fiveAway;
+    if (!five) return null;
+    const found = r.shooterId ? five.players.findIndex((pl) => pl.playerId === r.shooterId) : -1;
+    const shooter = found >= 0 ? found : old.shooter;
+    const scorer = five.players[shooter];
+    const built = buildPossession({
+        side: r.side, play: r.play, start: old.start, duration: old.end - old.start,
+        made: r.made, points: r.made ? r.points : 0, shotKind: r.shotKind, shooter,
+        scorerName: scorer?.name ?? old.scorerName,
+        dunk: r.made && r.shotKind === 2 && Math.random() < dunkChance(players[scorer?.playerId ?? '']),
+    });
+    const { assistable, ...poss } = built;
+    void assistable;
+    const assist = r.made && r.assistId ? five.players.find((pl) => pl.playerId === r.assistId) : undefined;
+    poss.assistName = assist && assist.playerId !== scorer?.playerId ? assist.name : null;
+    poss.fiveHome = old.fiveHome;
+    poss.fiveAway = old.fiveAway;
+    poss.energy = old.energy;
+    const possessions = [...list];
+    possessions[idx] = poss;
+    stitch(possessions);
+    const before = old.made ? old.points : 0;
+    const after = poss.made ? poss.points : 0;
+    return { plan: { ...plan, possessions }, delta: after - before, shotAt: poss.shotAt };
+};
+
+/* ------------------------------------------------------------------ */
 /* Reading the plan at a point in time.                                */
 /* ------------------------------------------------------------------ */
 /** What a body is doing this instant -- the 3D picks the animation from it. */
