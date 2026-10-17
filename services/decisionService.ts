@@ -21,6 +21,7 @@ import { generateCpuTradeOffer, TRADE_DEADLINE_GAME } from './tradeService';
 import { sortStandings } from './scheduleService';
 import { personalityOf, rushLoadCost } from './personalityService';
 import { pressConferenceFor, resolvePress } from './pressService';
+import { lockerRequestLineShift } from './staffService';
 
 /**
  * How long a starter has to be out before covering the hole is a real decision.
@@ -41,7 +42,7 @@ const INJURY_COVER_MIN_GAMES = 6;
 const PROSPECT_MAX_AGE = 24;
 
 /** Below this a player is not good enough for his unhappiness to be your problem. */
-const TRADE_REQUEST_MIN_OVR = 78;
+export const TRADE_REQUEST_MIN_OVR = 78;
 
 /**
  * When the buy-or-sell question lands. Three games before the deadline itself,
@@ -444,6 +445,9 @@ export const generateDecisions = (before: SeasonState, after: SeasonState): Deci
     // than a state, the same way the injury is: morale hovering below the
     // threshold must ask once, not every night for the rest of the season.
     const alreadyAsked = new Set(teamAfter.tradeRequestedIds ?? []);
+    // The assistente de vestiário moves the line: a 5 keeps a good player in
+    // the room down to 20, a 1 loses him at 30.
+    const requestLine = TRADE_REQUEST_MORALE - lockerRequestLineShift(teamAfter);
     teamAfter.roster.forEach(pId => {
         const now = after.players[pId];
         const was = before.players[pId];
@@ -457,7 +461,7 @@ export const generateDecisions = (before: SeasonState, after: SeasonState): Deci
         if (personalityOf(now).id === 'lider') return;
         const moraleBefore = was.morale ?? 70;
         const moraleAfter = now.morale ?? 70;
-        if (moraleBefore < TRADE_REQUEST_MORALE || moraleAfter >= TRADE_REQUEST_MORALE) return;
+        if (moraleBefore < requestLine || moraleAfter >= requestLine) return;
         out.push(buildTradeRequest(after, teamAfter, now));
     });
 

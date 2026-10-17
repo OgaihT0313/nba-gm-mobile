@@ -1,6 +1,7 @@
 import type { Team, Player, Coach, WatchPlay, LiveTactic } from '../types';
-import { getPlayerPositions } from '../constants';
+import { getPlayerPositions, getPlayerAttributes } from '../constants';
 import { fatigueFactor } from './personalityService';
+import { ratingOf, analystAccuracy, analystBonus } from './staffService';
 import {
     computeExpectedPoints,
     generateScoringPlays,
@@ -881,6 +882,68 @@ const madeDrop = (side: CourtSide, real: number): Vec3 => {
 };
 
 /* ------------------------------------------------------------------ */
+/* The analyst's report (PLANO-STAFF.md, phase 2).                     */
+/* ------------------------------------------------------------------ */
+// Before each period the analista reads the five the opponent has out there
+// and names the set that hurts it most. Each set attacks one thing a defense
+// can be bad at; the weakness is how far that number sits below the league's
+// usual for the same spot (WEAK_BASELINE, the mean across every team's opening
+// five, measured by check_staff). A right report followed adds analystBonus to
+// the quarter; a wrong one (1 - analystAccuracy of the time) points at another
+// set and adds nothing. Only the user's side ever has one, so it changes the
+// game he watches and nothing the season simulates.
+export interface ScoutingReport {
+    play: WatchPlay;
+    /** Hidden from the screen: whether the play is the real weakness. */
+    correct: boolean;
+    bonus: number;
+    rating: number;
+    reason: string;
+}
+
+const WEAK_BASELINE: Record<WatchPlay, number> = { pindown: 76.2, post_up: 79.2, pick_roll: 80.4, iso: 70.7 };
+
+/** How exposed the five is to each set — higher is weaker. */
+export const defenseWeakness = (five: FiveOnCourt, players: { [key: string]: Player }): { weak: Record<WatchPlay, number>; value: Record<WatchPlay, number> } => {
+    const attr = (i: number) => {
+        const p = players[five.players[i]?.playerId];
+        return p ? getPlayerAttributes(p) : { perimeterD: 70, interiorD: 70 };
+    };
+    const a = [0, 1, 2, 3, 4].map(attr);
+    const value: Record<WatchPlay, number> = {
+        // The wings chasing shooters around the pin-down.
+        pindown: (a[1].perimeterD + a[2].perimeterD) / 2,
+        // The bigs on the block.
+        post_up: (a[3].interiorD + a[4].interiorD) / 2,
+        // The two men in the action: the guard over the screen, the big dropping.
+        pick_roll: (a[0].perimeterD + a[4].interiorD) / 2,
+        // The weakest perimeter defender, whom the star goes and finds.
+        iso: Math.min(...a.map((x) => x.perimeterD)),
+    };
+    const weak = {} as Record<WatchPlay, number>;
+    (Object.keys(value) as WatchPlay[]).forEach((k) => { weak[k] = WEAK_BASELINE[k] - value[k]; });
+    return { weak, value };
+};
+
+const REASON: Record<WatchPlay, (v: number) => string> = {
+    pindown: (v) => `os alas deles sofrem para perseguir arremessador (Def. Perímetro ${Math.round(v)})`,
+    post_up: (v) => `o garrafão deles é frágil de costas para a cesta (Def. Interior ${Math.round(v)})`,
+    pick_roll: (v) => `a dupla armador-pivô deles defende mal o bloqueio (${Math.round(v)} na média)`,
+    iso: (v) => `há um elo fraco no quinteto deles para a sua estrela caçar (Def. Perímetro ${Math.round(v)})`,
+};
+
+/** The report for the user's next period, or null when his team has no staff (Minha Carreira). */
+export const scoutingReport = (userTeam: Team, oppFive: FiveOnCourt, players: { [key: string]: Player }): ScoutingReport | null => {
+    if (!userTeam.staff) return null;
+    const rating = ratingOf(userTeam, 'analyst');
+    const { weak, value } = defenseWeakness(oppFive, players);
+    const order = (Object.keys(weak) as WatchPlay[]).sort((x, y) => weak[y] - weak[x]);
+    const correct = Math.random() < analystAccuracy(rating);
+    const play = correct ? order[0] : order[1 + Math.floor(Math.random() * (order.length - 1))];
+    return { play, correct, bonus: analystBonus(rating), rating, reason: REASON[play](value[play]) };
+};
+
+/* ------------------------------------------------------------------ */
 /* Planning a quarter (or the remainder of one, after a timeout).      */
 /* ------------------------------------------------------------------ */
 export interface PlanQuarterArgs {
@@ -898,6 +961,8 @@ export interface PlanQuarterArgs {
     timeout: boolean;
     /** Game 7 only: the user's emphasis for this quarter (TACTIC_META). */
     tactic?: LiveTactic | null;
+    /** The analyst's report for this period; pays only if `play` follows a right one. */
+    report?: ScoutingReport | null;
     quarter: number;
     /** Second of the quarter to start planning from — 0 for a fresh quarter,
      * or wherever the clock was when a timeout re-opened the remainder. */
@@ -987,6 +1052,9 @@ export const planQuarter = (args: PlanQuarterArgs): QuarterPlan => {
     let oppDelta = meta.oppDelta;
     let tacticVariance = 0;
     if (timeout) selfDelta += TIMEOUT_BONUS;
+    // Scaled by the span like everything else here: a report followed after a
+    // late timeout pays for the minutes left, not the whole quarter.
+    if (args.report?.correct && args.report.play === play) selfDelta += args.report.bonus;
     if (args.tactic) {
         const t = TACTIC_META[args.tactic];
         selfDelta += t.selfDelta;

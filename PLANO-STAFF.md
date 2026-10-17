@@ -18,8 +18,24 @@ orçamento rígido. Aprovado em 2026-10-15.
 - **Olheiro: a faixa inicial do quadro não muda.** O quadro de projeções é um só, lido pelo usuário e pela CPU; estreitá-lo ajudaria os 29 times da CPU tanto quanto você. O olheiro age nos seus relatórios: avaliações 8/10/12/14/17, quanto cada relatório estreita a faixa (sobra 60% → 50%; era 55% fixo) e a releitura do potencial a cada relatório (acerta 55% → 80%). O olheiro da CPU não tem efeito no draft dela.
 - **Salários:** nota 1 US$ 0,5 mi, 2 0,9, 3 1,5, 4 2,5, 5 4,0 (±10%). Quatro notas 3 = US$ 6 mi.
 - **Orçamento em três faixas:** 9 mi (LAL, LAC, NYK, BKN, GSW, CHI, BOS), 6 mi (13 mercados pequenos), 7,5 mi o resto. A CPU gasta até o limite na abertura e, ao repor um cargo, deixa salário mínimo para os outros vagos.
-- **Analista e vestiário já existem** (contratáveis, custam orçamento), com o efeito marcado como "entra na próxima atualização" até a fase 2.
+- **Analista e vestiário já existiam na fase 1** (contratáveis, custando orçamento), com o efeito marcado como "entra na próxima atualização". Ganharam efeito na fase 2.
 - **Fim de contrato do seu staff:** o profissional volta como candidato no mercado, com 10% de aumento (a renovação antecipada continua na fase 3).
+
+**Fase 2 feita e medida** (2026-10-17), falta testar no aparelho: analista em `scoutingReport`/`planQuarter` (`watchDirector`) e no intervalo do `WatchGameScreen`; vestiário em `updateMorale` (`simulationService`) e na linha do pedido de troca (`decisionService`). Efeitos em `staffService` (`lockerMoraleShift`, `lockerRequestLineShift`, `analystAccuracy`, `analystBonus`). `check_staff` ganhou as seções 4 (vestiário) e 5 (analista).
+
+**Medido na fase 2 (`check_staff`, `diagnose_season`, `backtest_season`, `check_watch_director`, `check_decisions`):**
+- Vestiário, liga inteira com a mesma nota, 20 temporadas por braço, regra do pedido lida nos 30 times: nota 5 0,373 pedidos por time-temporada, nota 3 0,447, nota 1 0,573 — **35% menos com 5 do que com 1** (meta ~1/3). Moral média 51,6 / 49,6 / 47,6; vitórias iguais (41,0 nos três). Numa liga mista (`initStaff`) as vitórias por nota de vestiário ficaram entre 40,6 e 41,7.
+- Analista, 400 confrontos por nota, planos pareados (mesma sequência aleatória): relatório certo 91% / 76% / 60% (alvo 90/75/60), seguir um certo rende +2,00 / +1,26 / +0,49 pts no quarto (alvo +2,0 / +1,25 / +0,5).
+- Linha de base do relatório (`WEAK_BASELINE`, média dos quintetos iniciais): pindown 76,2, post-up 79,2, pick & roll 80,4, iso 70,7. Fraqueza principal dos 30 quintetos: pindown 13, post-up 8, P&R 5, iso 4 — o relatório não aponta sempre a mesma jogada.
+- `diagnose_season` 0 de 23 fora da faixa; `backtest_season` (20 rodadas) r 0,861 e RMSE 6,9 (fase 1: 0,837 e 7,5 — dentro do ruído); `check_watch_director` e `check_decisions` todos verdes.
+
+**O que mudou do plano na fase 2:**
+- **Vestiário mais fraco que o plano.** O alvo de ânimo −4 → +4 e a linha 30 → 20 juntos davam 88% menos pedidos de 5 para 1. Ficou −2 → +2 no ânimo e 26,5 → 23,5 na linha.
+- **Como o analista lê o adversário:** cada jogada ataca um número da defesa que está em quadra no começo do quarto — pindown a Def. Perímetro dos alas (SG/SF), post-up a Def. Interior de PF/C, pick & roll a média do armador (perímetro) com o pivô (interior), iso o pior defensor de perímetro dos cinco. A fraqueza é a distância até a média da liga para o mesmo número. Um relatório por quarto; o pedido de tempo mantém o do quarto.
+- **O relatório errado aponta outra jogada e não rende nada.** A tela não diz se acertou; mostra a nota e a taxa de acerto dela.
+- **O analista nota 3 também tem relatório** (+1,25 pts quando acerta e é seguido): é vantagem por decisão, só no jogo assistido, então não mexe na temporada simulada. O `effectLine` dele nunca diz "sem efeito".
+- **Pular até o fim** também gera o relatório de cada quarto pulado: rende se a jogada que ficou valendo for a que um relatório certo apontou.
+- Traços (ex. Linha dura) continuam na fase 3.
 
 ## A regra que mantém a liga calibrada
 

@@ -4,7 +4,7 @@ import type { Team, Player, Coach, Event, PlayoffState, PlayoffSeries, PlayoffCo
 import { TRADE_DEADLINE_GAME } from './tradeService';
 import { sortStandings, compareStandings } from './scheduleService';
 import { coachOffenseMod, coachDefenseMod } from './coachService';
-import { trainerInjuryMult, trainerDurationMult, trainerLoadMult } from './staffService';
+import { trainerInjuryMult, trainerDurationMult, trainerLoadMult, lockerMoraleShift } from './staffService';
 import { personalityOf, moraleTargetShift, moraleSpeed, fatigueFactor, developmentFactor, LEADER_LIFT } from './personalityService';
 
 type CoachMap = { [key: string]: Coach };
@@ -495,6 +495,7 @@ const updateMorale = (
         // times the effect -- it is a coincidence of the roster.
         const leaderIds = getTeamRotation(team, players, size)
             .filter(id => players[id] && personalityOf(players[id]).id === 'lider');
+        const lockerShift = lockerMoraleShift(team);
         team.roster.forEach((id, idx) => {
             const p = players[id];
             if (!p) return;
@@ -525,6 +526,8 @@ const updateMorale = (
             // the league (measured: 46.4 against a 52 average), which is an
             // artefact and not a character trait.
             target += LEADER_LIFT * Math.min(1, leaderIds.filter(id => id !== p.id).length);
+            // The assistente de vestiário: the whole room, ±4 around a 3.
+            target += lockerShift;
             target = clampMod(target, 5, 98);
 
             const cur = getMorale(p);

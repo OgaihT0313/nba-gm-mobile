@@ -12,6 +12,7 @@ import {
   advanceClock,
   possessionAt,
   planQuarter,
+  scoutingReport,
   quarterSeconds,
   tipOffState,
   initialEnergy,
@@ -27,6 +28,7 @@ import {
   type Possession,
   type QuarterPlan,
 } from '../services/watchDirector';
+import { ROLE_LABEL, analystAccuracy } from '../services/staffService';
 import { eraGroupForEraId } from '../data/eras';
 import { getEraVisual } from '../src/theme/eraVisuals';
 import { COLORS, INK, RADIUS, FONT, withAlpha, onAccent, ovrColor } from '../src/theme/tokens';
@@ -237,6 +239,14 @@ const WatchGameScreen: React.FC<WatchGameScreenProps> = ({
   // (a swap in the huddle, a quarter break), so the lineup panel re-reads refs.
   const [rotationTick, setRotationTick] = useState(0);
   const [selectedSlot, setSelectedSlot] = useState<number | null>(null);
+  // The analyst's read of the five the opponent opens this period with. One
+  // per period: endQuarter swaps fives.current before bumping the quarter, so
+  // this reads the five that will actually start it. A timeout keeps it.
+  const userTeam = userSide === 'home' ? home : away;
+  const report = useMemo(
+    () => scoutingReport(userTeam, userSide === 'home' ? fives.current.away : fives.current.home, players),
+    [quarter], // eslint-disable-line react-hooks/exhaustive-deps
+  );
   // The user's five and their energy as of the last scoreboard refresh.
   const [liveFive, setLiveFive] = useState<{ id: string; name: string; energy: number }[]>([]);
   const [replaying, setReplaying] = useState<1 | -1 | 0>(0);
@@ -321,6 +331,7 @@ const WatchGameScreen: React.FC<WatchGameScreenProps> = ({
       userSide,
       play: nextPlay,
       tactic: decider ? tactic : null,
+      report,
       timeout: spendTimeout,
       quarter: quarterRef.current,
       from,
@@ -642,6 +653,9 @@ const WatchGameScreen: React.FC<WatchGameScreenProps> = ({
         userPriority: priorityRef.current,
         userSide,
         play: playRef.current,
+        // Skipped periods still get their report: the call left running pays
+        // when it happens to be the one a right report names.
+        report: scoutingReport(userTeam, userSide === 'home' ? fa : fh, players),
         timeout: false,
         quarter: q,
         from: 0,
@@ -684,7 +698,6 @@ const WatchGameScreen: React.FC<WatchGameScreenProps> = ({
     defense: phase === 'live' && homeDefending,
   };
 
-  const userTeam = userSide === 'home' ? home : away;
   const myFive = userSide === 'home' ? fives.current.home : fives.current.away;
   // The bench: everyone on the roster who is not out there and not hurt,
   // freshest-first within the rotation order.
@@ -836,7 +849,7 @@ const WatchGameScreen: React.FC<WatchGameScreenProps> = ({
           </View>
         </ScrollView>
       ) : (
-      <ScrollView style={desktop ? { flex: 1, marginTop: 10 } : { maxHeight: decider ? 300 : 232, marginTop: 10 }} showsVerticalScrollIndicator={false}>
+      <ScrollView style={desktop ? { flex: 1, marginTop: 10 } : { maxHeight: (decider ? 300 : 232) + (report ? 64 : 0), marginTop: 10 }} showsVerticalScrollIndicator={false}>
         {decider ? (
           <View style={{ marginBottom: 12 }}>
             <Text style={{ fontFamily: FONT.cond700, fontSize: 11, letterSpacing: 1.5, color: COLORS.muted, textTransform: 'uppercase', marginBottom: 6 }}>
@@ -866,10 +879,24 @@ const WatchGameScreen: React.FC<WatchGameScreenProps> = ({
             </Text>
           </View>
         ) : null}
+        {report ? (
+          <View style={{ marginBottom: 10, padding: 10, borderRadius: 12, borderLeftWidth: 3, borderLeftColor: COLORS.warn, backgroundColor: COLORS.surface2 }}>
+            <Text style={{ fontFamily: FONT.cond700, fontSize: 11, letterSpacing: 1.5, color: COLORS.muted, textTransform: 'uppercase' }}>
+              {ROLE_LABEL.analyst} · nota {report.rating}
+            </Text>
+            <Text style={{ fontFamily: FONT.body500, fontSize: 13, lineHeight: 18, marginTop: 3, color: COLORS.text }}>
+              Chame {WATCH_PLAY_META[report.play].label}: {report.reason}.
+            </Text>
+            <Text style={{ fontFamily: FONT.body500, fontSize: 12, lineHeight: 16, marginTop: 3, color: COLORS.muted }}>
+              Se a leitura estiver certa, rende +{report.bonus.toFixed(1).replace('.', ',')} pts no quarto. Nesta nota, acerta {Math.round(analystAccuracy(report.rating) * 100)}% das leituras.
+            </Text>
+          </View>
+        ) : null}
         <View style={{ gap: 6 }}>
           {PLAY_ORDER.map((id) => {
             const meta = WATCH_PLAY_META[id];
             const active = id === play;
+            const advised = report?.play === id;
             return (
               <Pressable accessibilityRole="button"
                 key={id}
@@ -880,7 +907,7 @@ const WatchGameScreen: React.FC<WatchGameScreenProps> = ({
               >
                 <View className="flex-row items-center justify-between">
                   <Text style={{ fontFamily: FONT.cond800, fontSize: 17, color: active ? COLORS.bg : COLORS.text, textTransform: 'uppercase' }}>{meta.label}</Text>
-                  <Text style={{ fontFamily: FONT.cond700, fontSize: 11, letterSpacing: 1.2, color: active ? 'rgba(11,11,13,0.6)' : COLORS.dim }}>{meta.short}</Text>
+                  <Text style={{ fontFamily: FONT.cond700, fontSize: 11, letterSpacing: 1.2, color: active ? 'rgba(11,11,13,0.6)' : advised ? COLORS.warn : COLORS.dim }}>{advised ? `ANALISTA · ${meta.short}` : meta.short}</Text>
                 </View>
                 <Text style={{ fontFamily: FONT.body500, fontSize: 12.5, lineHeight: 17, marginTop: 2, color: active ? 'rgba(11,11,13,0.72)' : COLORS.muted }}>{meta.blurb}</Text>
               </Pressable>

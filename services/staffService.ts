@@ -78,11 +78,28 @@ export const scoutStepFor = (rating: number): number => at(rating, [0.6, 0.58, 0
 /** Olheiro: odds a report reads a prospect's potential tier right (the board's own read is 0.65). */
 export const scoutPotentialAccuracy = (rating: number): number => at(rating, [0.55, 0.6, 0.65, 0.72, 0.8]);
 
+/** Vestiário: added to every player's morale target, −4 → +4. */
+export const lockerMoraleShift = (team: Team | undefined): number => (ratingOf(team, 'locker') - 3) * 1;
+/**
+ * Vestiário: how far the morale line where a good player asks out
+ * (TRADE_REQUEST_MORALE, 25) drops — 30 with a 1, 20 with a 5. Subtracted by
+ * decisionService; kept as a shift so this module stays free of the engine.
+ */
+export const lockerRequestLineShift = (team: Team | undefined): number => (ratingOf(team, 'locker') - 3) * 0.75;
+
+/** Analista: odds the opponent report names the play that really hurts them. */
+export const analystAccuracy = (rating: number): number => at(rating, [0.6, 0.68, 0.75, 0.83, 0.9]);
+/** Analista: points a quarter adds when the user calls the play a right report named. */
+export const analystBonus = (rating: number): number => at(rating, [0.5, 0.875, 1.25, 1.625, 2]);
+
 const pct = (mult: number) => `${mult < 1 ? '−' : '+'}${Math.round(Math.abs(1 - mult) * 100)}%`;
+const fmtPts = (v: number) => v.toFixed(1).replace('.', ',').replace(',0', '');
 
 /** The effect in one line, for the Staff tab and the market. */
 export const effectLine = (role: StaffRole, rating: number): string => {
-    if (rating === NEUTRAL_RATING) return 'Na média da liga: sem efeito';
+    // The analyst is the exception: his report exists at every rating, since
+    // it pays only in the game the user watches and only when he follows it.
+    if (rating === NEUTRAL_RATING && role !== 'analyst') return 'Na média da liga: sem efeito';
     switch (role) {
         case 'trainer': {
             const team = { staff: { trainer: { rating } } } as unknown as Team;
@@ -90,8 +107,13 @@ export const effectLine = (role: StaffRole, rating: number): string => {
         }
         case 'scout':
             return `${scoutBudgetFor(rating)} avaliações por draft, potencial lido certo ${Math.round(scoutPotentialAccuracy(rating) * 100)}%`;
-        default:
-            return 'Efeito entra na próxima atualização';
+        case 'analyst':
+            return `Relatório no intervalo acerta ${Math.round(analystAccuracy(rating) * 100)}%, +${fmtPts(analystBonus(rating))} pts no quarto se seguido`;
+        case 'locker': {
+            const team = { staff: { locker: { rating } } } as unknown as Team;
+            const shift = lockerMoraleShift(team);
+            return `Ânimo do elenco ${shift > 0 ? '+' : '−'}${Math.abs(shift)}, pedido de troca abaixo de ${fmtPts(25 - lockerRequestLineShift(team))}`;
+        }
     }
 };
 
