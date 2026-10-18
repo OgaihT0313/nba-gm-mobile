@@ -126,6 +126,9 @@ export interface Player {
   // gives the face an era treatment instead of passing it off as that season.
   photoYear?: number;
   photoOffEra?: boolean;
+  /** Era data: no real photo anywhere (the NBA only has its silhouette, ESPN
+   * nothing) -- PlayerPhoto draws an avatar instead (scripts/sync_era_photo_gaps.js). */
+  photoMissing?: boolean;
   age: number;
   number: number;
   potential: 'A' | 'B' | 'C' | 'D';

@@ -5,7 +5,9 @@
 // setState callback could be measured there.
 
 import type { Team, Player, SeasonState, DraftState, Event, OffseasonMove } from '../types';
-import { getTeamSalary, LUXURY_TAX } from '../constants';
+import { getTeamSalary, LUXURY_TAX, teamsData } from '../constants';
+import { teamNameFor } from '../src/eraIdentity';
+import { eraEndYearOf } from '../src/eraYear';
 import { ERAS, currentEra } from '../data/eras';
 import { simulationEngine } from './simulationService';
 import { buildSeasonOwner, luxuryTaxConfidenceHit } from './ownerService';
@@ -228,7 +230,15 @@ export const startOffseason = (prev: SeasonState, opts: OffseasonOptions = {}): 
     status: 'draft',
     playoffStage: 'none',
     gamesPlayed: 0,
-    teams: advanced.teams,
+    // An era save takes each franchise's name for the season it walks into:
+    // the Sonics become the Thunder in 2008-09, the Bullets the Wizards in
+    // 1997-98 (src/eraIdentity.ts). A live save keeps its names.
+    teams: prev.era
+      ? advanced.teams.map((t) => {
+          const current = teamsData.find((c) => c.id === t.id)?.name ?? t.name;
+          return { ...t, name: teamNameFor(t.id, eraEndYearOf({ era: prev.era, eraChainIndex: nextEraChainIndex }), current) };
+        })
+      : advanced.teams,
     // Not playersWithProspects: the CPU picks made above already lifted the
     // fog on those prospects (applyPick returns an updated map).
     players: advanced.players,

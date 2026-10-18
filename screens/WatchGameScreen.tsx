@@ -36,6 +36,8 @@ import { getEraVisual } from '../src/theme/eraVisuals';
 import { COLORS, INK, RADIUS, FONT, withAlpha, onAccent, ovrColor } from '../src/theme/tokens';
 import { Panel, MonoLabel, Stat, CtaButton, GhostButton, Meter } from '../components/ui/kit';
 import Court3D, { CameraView, type CourtSound, type JumboData } from '../components/court3d/Court3D';
+import EraTVFilter from '../components/court3d/EraTVFilter';
+import { eraYear } from '../src/eraIdentity';
 import { cheer, newCrowdHype } from '../components/court3d/Arena';
 import type { RigPlayer } from '../components/court3d/PlayerRig';
 import { createSoundEngine, type SoundEngine } from '../components/court3d/sound/soundEngine';
@@ -1173,6 +1175,9 @@ const WatchGameScreen: React.FC<WatchGameScreenProps> = ({
         insets={screenH && livePanelH ? { top: hudTop, bottom: livePanelH + insets.bottom + (desktop ? 24 : 14) } : undefined}
       />
 
+      {/* The older eras on an old TV (scanlines, darkened edges, washed color). */}
+      <EraTVFilter year={eraYear()} />
+
       {desktop ? cameras : null}
 
       {replaying ? (
@@ -1231,7 +1236,10 @@ const WatchGameScreen: React.FC<WatchGameScreenProps> = ({
           </View>
         </View>
 
-        {desktop ? null : cameras}
+        {/* Not during the break on a phone: the huddle sheet needs the room
+            (on a short screen the column covered its options), and the
+            cameras only matter with the game running. */}
+        {desktop || phase === 'huddle' ? null : cameras}
       </View>
 
       {/* Bottom controls. The tab bar is hidden while watching, so this

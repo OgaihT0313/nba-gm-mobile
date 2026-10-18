@@ -6,8 +6,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Player, Team } from '../types';
 import {
   getPlayerImageUrl, PLAYER_PLACEHOLDER_SVG, getTeamLogoUrl, getPlayerPositions,
-  formatPositions, attributeColor,
-} from '../constants';
+  formatPositions, attributeColor, tricodeOf } from '../constants';
 import { useTheme } from '../src/theme/ThemeProvider';
 import { COLORS, FONT, withAlpha, ovrColor } from '../src/theme/tokens';
 import { ScreenTitle, BodyText, Name, PlayerFace } from '../components/ui/kit';
@@ -156,7 +155,7 @@ const Scout: React.FC<ScoutProps> = ({ players, teams, userTeamId }) => {
                     <Name size={16} style={{ flex: 1 }}>{item.name}</Name>
                   </View>
                   <Text style={{ width: 70, fontFamily: FONT.cond700, fontSize: 14, color: item.team ? COLORS.textSoft : COLORS.good }}>
-                    {item.team ? item.team.id.toUpperCase() : 'LIVRE'}
+                    {item.team ? tricodeOf(item.team.id) : 'LIVRE'}
                   </Text>
                   <Text numberOfLines={1} style={{ width: 70, fontFamily: FONT.body500, fontSize: 13, color: COLORS.muted }}>{formatPositions(item)}</Text>
                   <Text style={{ width: 56, fontFamily: FONT.body500, fontSize: 13, color: COLORS.muted }}>{item.age}</Text>
@@ -222,7 +221,7 @@ const Scout: React.FC<ScoutProps> = ({ players, teams, userTeamId }) => {
               <Text style={{ fontFamily: FONT.body500, fontSize: 11.5, color: COLORS.dim }}>
                 {formatPositions(item)} ·{' '}
                 {item.team
-                  ? <Text style={{ fontFamily: FONT.cond700, color: COLORS.textSoft }}>{item.team.id.toUpperCase()}</Text>
+                  ? <Text style={{ fontFamily: FONT.cond700, color: COLORS.textSoft }}>{tricodeOf(item.team.id)}</Text>
                   : <Text style={{ fontFamily: FONT.cond700, color: COLORS.good }}>LIVRE</Text>}
               </Text>
             </View>

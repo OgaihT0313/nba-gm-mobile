@@ -2,7 +2,7 @@ import React, { useMemo, useState } from 'react';
 import { View, Text, Pressable } from 'react-native';
 
 import { SeasonState, ScoutReport } from '../types';
-import { formatPositions, getTeamAccent, playerLastName } from '../constants';
+import { formatPositions, getTeamAccent, playerLastName, tricodeOf } from '../constants';
 import { consensusValue, draftVerdict, PROJECTION_FLOOR, PROJECTION_CEIL } from '../services/draftService';
 import { scoutBudgetFor, NEUTRAL_RATING } from '../services/staffService';
 import { COLORS, FONT, withAlpha } from '../src/theme/tokens';
@@ -154,7 +154,7 @@ const Draft: React.FC<DraftProps> = ({ season, onPick, onAutoPick, onFinish, onS
               }}
             >
               <Text style={{ fontFamily: FONT.cond700, fontSize: 12, color: onClock ? COLORS.ctaInk : COLORS.muted }}>{number}</Text>
-              <Text style={{ fontFamily: FONT.cond800, fontSize: 12, color: onClock ? COLORS.ctaInk : COLORS.text }}>{slot.teamId.toUpperCase()}</Text>
+              <Text style={{ fontFamily: FONT.cond800, fontSize: 12, color: onClock ? COLORS.ctaInk : COLORS.text }}>{tricodeOf(slot.teamId)}</Text>
             </View>
           );
         })}
@@ -281,7 +281,7 @@ const Draft: React.FC<DraftProps> = ({ season, onPick, onAutoPick, onFinish, onS
                 <View style={{ flex: 1, minWidth: 0, gap: 1 }}>
                   <Name size={14.5}>{p?.name}</Name>
                   <Text numberOfLines={1} style={{ fontFamily: FONT.body500, fontSize: 11.5, color: COLORS.dim }}>
-                    {p ? formatPositions(p) : ''}{p?.draftInfo ? ` · proj. ${p.draftInfo.projected}` : ''}{pick.viaTeamId ? ` · via ${pick.viaTeamId.toUpperCase()}` : ''}
+                    {p ? formatPositions(p) : ''}{p?.draftInfo ? ` · proj. ${p.draftInfo.projected}` : ''}{pick.viaTeamId ? ` · via ${tricodeOf(pick.viaTeamId)}` : ''}
                   </Text>
                 </View>
                 {surprise === 'steal' ? <Tag color={COLORS.good}>Achado</Tag> : surprise === 'bust' ? <Tag color={COLORS.bad}>Furada</Tag> : null}

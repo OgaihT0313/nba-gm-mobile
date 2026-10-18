@@ -60,6 +60,8 @@ import DecisionModal from './components/DecisionModal';
 import FadeInView from './components/FadeInView';
 import Placeholder from './screens/Placeholder';
 import { IconName } from './components/Icon';
+import { setEraYear } from './src/eraIdentity';
+import { eraEndYearOf } from './src/eraYear';
 
 type AppView =
   | 'era-select' | 'team-select' | 'team-confirm' | 'home' | 'teams' | 'team-detail' | 'scout' | 'my-team' | 'draft' | 'free-agency'
@@ -131,6 +133,12 @@ export default function App() {
   // default). Same "chosen but not committed" lifecycle as pendingTeamId,
   // just one screen earlier; only becomes part of `season` inside initSeason.
   const [pendingEraId, setPendingEraId] = useState<string | null>(null);
+  // Every team name, color and crest reads the season on screen (src/eraIdentity):
+  // set on each render, before the children read it. While a new save is being
+  // picked, that is the era being picked, not the save on disk.
+  const picking = view === 'era-select' || view === 'team-select' || view === 'team-confirm';
+  const pickingEra = picking && pendingEraId ? eraById(pendingEraId) : undefined;
+  setEraYear(picking ? (pickingEra ? parseInt(pickingEra.seasonLabel, 10) + 1 : null) : eraEndYearOf(season));
   const [notifications, setNotifications] = useState<NotificationType[]>([]);
 
   // Date.now() alone collides when several events fire in the same tick

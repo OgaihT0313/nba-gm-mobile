@@ -26,7 +26,9 @@ import CareerCreateScreen from './CareerCreateScreen';
 import CareerPreDraftScreen from './CareerPreDraftScreen';
 import CareerDraftScreen from './CareerDraftScreen';
 import CareerHub from './CareerHub';
-import { Page, Label, Title, Body, Box, Option, Cta, Ghost } from './careerUi';
+import { Page, Label, Title, Body, Box, Option, Cta, Ghost } from './careerUi';import { setEraYear } from '../../src/eraIdentity';
+import { eraEndYearOf } from '../../src/eraYear';
+
 
 /** Days simulated per timer tick while a run is going. */
 const DAYS_PER_TICK = 2;
@@ -37,6 +39,8 @@ type Run = { kind: 'days'; left: number } | { kind: 'season' } | { kind: 'predra
 
 const CareerApp: React.FC<{ onExit: () => void }> = ({ onExit }) => {
   const [career, setCareer] = useState<CareerState | null>(() => loadCareer());
+  // The career's league, when it is an era one, names its teams by its season.
+  setEraYear(career ? eraEndYearOf(career.league) : null);
   const [view, setView] = useState<'start' | 'create' | 'play' | 'game' | 'eras'>('start');
   // Fase 5: the era a new career starts in (undefined = the live league).
   const [pendingEra, setPendingEra] = useState<string | undefined>(undefined);

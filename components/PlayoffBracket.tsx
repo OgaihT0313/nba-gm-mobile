@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { View, Text, Dimensions } from 'react-native';
 
 import { PlayoffState, PlayoffSeries, PlayInBracket, Team } from '../types';
-import { getTeamAccent } from '../constants';
+import { getTeamAccent, tricodeOf } from '../constants';
 import { COLORS, FONT, withAlpha } from '../src/theme/tokens';
 import { SectionLabel } from './ui/kit';
 import Trophy from './Trophy';
@@ -104,7 +104,7 @@ const Box: React.FC<{
         <Text style={{ fontFamily: FONT.cond600, fontSize: big ? 11 : 8.5, color: COLORS.dim, minWidth: big ? 10 : 5 }}>{seed(team.id)}</Text>
         {/* Never ellipsized: a tricode is three letters, and "N…" names nobody. */}
         <Text style={{ flex: big ? 0 : 1, fontFamily: FONT.cond800, fontSize: big ? 14 : 11, letterSpacing: -0.2, color: COLORS.text }}>
-          {team.id.toUpperCase()}
+          {tricodeOf(team.id)}
         </Text>
         {big ? (
           <Text numberOfLines={1} style={{ flex: 1, minWidth: 0, fontFamily: FONT.cond600, fontSize: 13, color: COLORS.muted }}>{getTeamNickname(team)}</Text>
@@ -331,7 +331,7 @@ const PlayoffBracket: React.FC<{ playoffState: PlayoffState | null; userTeamId?:
               fontFamily: FONT.cond800, fontSize: 11, letterSpacing: 1, color: COLORS.gold,
             }}
           >
-            {playoffState.champion.id.toUpperCase()} CAMPEÃO
+            {tricodeOf(playoffState.champion.id)} CAMPEÃO
           </Text>
         ) : null}
       </View>

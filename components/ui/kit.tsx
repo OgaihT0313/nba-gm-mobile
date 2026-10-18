@@ -5,8 +5,10 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { COLORS, INK, RADIUS, FONT, tracking, withAlpha, onAccent, themeMode } from '../../src/theme/tokens';
 import { Image } from 'expo-image';
 import type { Player } from '../../types';
-import { getTeamAccent, teamsData } from '../../constants';
+import { getTeamAccent, teamsData, tricodeOf } from '../../constants';
 import PlayerPhoto from './PlayerPhoto';
+import { eraYear } from '../../src/eraIdentity';
+import { eraLogo } from '../../src/eraLogos';
 
 // The "Transmissão" primitives (design_handoff_redesign_transmissao). Everything
 // the redesign repeats — the card, the condensed label, the meter, the one light
@@ -290,7 +292,7 @@ export const TeamBadge: React.FC<{
       }, style]}
     >
       <Text style={{ fontFamily: FONT.cond800, fontSize, color: onAccent(bg), letterSpacing: 0.4 }} numberOfLines={1}>
-        {teamId.toUpperCase()}
+        {tricodeOf(teamId)}
       </Text>
     </View>
   );
@@ -306,6 +308,11 @@ export const TeamBadge: React.FC<{
 const LOGO_BY_ID = new Map(teamsData.map((t) => [t.id, t.logoUrl?.replace('/global/L/', '/global/D/')]));
 const LOGO_LIGHT_BY_ID = new Map(teamsData.map((t) => [t.id, t.logoUrl?.replace('/global/D/', '/global/L/')]));
 export const TeamLogo: React.FC<{ teamId: string; size?: number; style?: StyleProp<any> }> = ({ teamId, size = 22, style }) => {
+  // An era save shows the franchise's logo of that season (src/eraLogos.ts):
+  // the Sonics' skyline, the Bullets, the 1996 Raptors.
+  const year = eraYear();
+  const era = year !== null ? eraLogo(teamId, year) : undefined;
+  if (era) return <Image source={era} style={[{ width: size, height: size }, style]} contentFit="contain" />;
   const uri = (themeMode() === 'light' ? LOGO_LIGHT_BY_ID : LOGO_BY_ID).get(teamId);
   if (!uri) return <View style={[{ width: size, height: size }, style]} />;
   return (

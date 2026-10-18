@@ -8,7 +8,7 @@ import React, { useState } from 'react';
 import { View, Text, Pressable } from 'react-native';
 
 import { COLORS, FONT, withAlpha, onAccent, ovrColor } from '../../src/theme/tokens';
-import { getTeamAccent, getTeamNickname, getTeamTricode } from '../../constants';
+import { getTeamAccent, getTeamNickname, getTeamTricode, tricodeOf } from '../../constants';
 import type { PlayerAttributes } from '../../types';
 import { personalityOf } from '../../services/personalityService';
 import { sortStandings } from '../../services/scheduleService';
@@ -374,7 +374,7 @@ const CareerTab: React.FC<{ career: CareerState; actions: HubActions }> = ({ car
         {[...career.seasons].reverse().map((s) => (
           <View key={s.season} style={{ paddingVertical: 8, borderTopWidth: 1, borderTopColor: COLORS.line, gap: 2 }}>
             <View className="flex-row items-center justify-between">
-              <Text style={{ fontFamily: FONT.cond800, fontSize: 16, color: COLORS.text }}>{s.label} · {s.teamId.toUpperCase()} · {s.role}</Text>
+              <Text style={{ fontFamily: FONT.cond800, fontSize: 16, color: COLORS.text }}>{s.label} · {tricodeOf(s.teamId)} · {s.role}</Text>
               <Text style={{ fontFamily: FONT.cond800, fontSize: 16, color: ovrColor(s.ovr) }}>{s.ovr}</Text>
             </View>
             <Body>{s.gp} jogos · {s.mpg.toFixed(1)} min · {s.ppg.toFixed(1)} pts · {s.rpg.toFixed(1)} reb · {s.apg.toFixed(1)} ast · time {s.teamWins}-{s.teamLosses}</Body>

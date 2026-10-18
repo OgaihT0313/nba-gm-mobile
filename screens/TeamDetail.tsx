@@ -3,8 +3,7 @@ import { View, Text, Pressable } from 'react-native';
 
 import { Team, Player, Coach, ScheduleGame } from '../types';
 import {
-  getTeamSalary, SALARY_CAP, getTeamTitles, getTeamNickname, getTeamCity, getTeamAccent, picksOf,
-} from '../constants';
+  getTeamSalary, SALARY_CAP, getTeamTitles, getTeamNickname, getTeamCity, getTeamAccent, picksOf, tricodeOf } from '../constants';
 import { teamRating } from '../services/formService';
 import { sortStandings } from '../services/scheduleService';
 import { simulationEngine, DEFAULT_ROTATION_SIZE } from '../services/simulationService';
@@ -93,9 +92,9 @@ const TeamDetail: React.FC<{
   const compareCard = mine && us ? (
     <Panel style={{ gap: 10 }}>
       <View className="flex-row justify-between">
-        <MonoLabel size={9}>{mine.id.toUpperCase()}</MonoLabel>
+        <MonoLabel size={9}>{tricodeOf(mine.id)}</MonoLabel>
         <MonoLabel size={9}>Comparação</MonoLabel>
-        <MonoLabel size={9}>{team.id.toUpperCase()}</MonoLabel>
+        <MonoLabel size={9}>{tricodeOf(team.id)}</MonoLabel>
       </View>
       {rows.map((r) => (
         <View key={r.k} className="flex-row items-center" style={{ gap: 6 }}>

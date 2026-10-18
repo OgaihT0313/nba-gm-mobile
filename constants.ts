@@ -3,6 +3,7 @@ import type { Player, Team, PlayerAttributes, DraftPickAsset, Coach } from './ty
 import rawPlayersData from './data/players.json';
 import rawTeamsData from './data/teams.json';
 import { themeMode } from './src/theme/tokens';
+import { eraIdentity } from './src/eraIdentity';
 
 
 // --- ASSETS AND CONFIGURATION ---
@@ -113,7 +114,10 @@ export const getTeamLogoUrl = (t?: Team) => t?.logoUrl || 'https://a.espncdn.com
 // team.id is already a standard 3-letter tricode (okc, bos, gsw...) — reused as
 // a compact label anywhere a full team.name would get clipped (bracket columns,
 // tight rows), same convention broadcasts/ESPN use for the same reason.
-export const getTeamTricode = (t?: Team) => (t?.id ?? '???').toUpperCase();
+// In an era save, the franchise's tricode that season (SEA, NJN, WSB...).
+export const getTeamTricode = (t?: Team) => eraIdentity(t?.id)?.tricode ?? (t?.id ?? '???').toUpperCase();
+/** Same, from an id alone. */
+export const tricodeOf = (teamId: string) => eraIdentity(teamId)?.tricode ?? teamId.toUpperCase();
 
 // The redesign's heroes set the franchise nickname huge ("THUNDER") with the
 // market underneath it ("OKLAHOMA CITY · OESTE"), so the full data name has to
@@ -130,11 +134,13 @@ const TEAM_CITY: { [key: string]: string } = {
     was: 'Washington',
 };
 
-export const getTeamCity = (t?: Team) => (t ? TEAM_CITY[t.id] ?? t.name : '');
+export const getTeamCity = (t?: Team) => (t ? eraIdentity(t.id)?.city ?? TEAM_CITY[t.id] ?? t.name : '');
 
 /** "Oklahoma City Thunder" → "Thunder". Falls back to the full name. */
 export const getTeamNickname = (t?: Team) => {
     if (!t) return '';
+    const era = eraIdentity(t.id);
+    if (era) return era.nickname;
     const city = TEAM_CITY[t.id];
     if (city && t.name.startsWith(city)) return t.name.slice(city.length).trim() || t.name;
     return t.name;
@@ -210,8 +216,13 @@ export const TEAM_COLORS: { [key: string]: { primary: string; secondary: string 
 
 const DEFAULT_ACCENT = { primary: '#0ea5e9', secondary: '#0284c7' };
 
-export const getTeamAccent = (teamId?: string | null) =>
-    (teamId && TEAM_COLORS[teamId]) || DEFAULT_ACCENT;
+// In an era save, the colors of that season's identity (Sonics green and gold).
+export const getTeamAccent = (teamId?: string | null) => {
+    const era = eraIdentity(teamId);
+    // The identity object itself: a stable reference, which the 3D scene's memo relies on.
+    if (era) return era;
+    return (teamId && TEAM_COLORS[teamId]) || DEFAULT_ACCENT;
+};
 
 // Real all-time NBA championship counts per current franchise, through the
 // 2026 Finals (Knicks) — a fixed historical fact like TEAM_COLORS, not

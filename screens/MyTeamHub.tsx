@@ -5,8 +5,7 @@ import { Team, Player, Coach, GmLegacy, OwnerExpectation, ScheduleGame, SeasonSt
 import { sortStandings } from '../services/scheduleService';
 import {
   getTeamLogoUrl, getTeamSalary, SALARY_CAP, getTeamNickname, conferenceLabel, coachOf,
-  getTeamCity, 
-} from '../constants';
+  getTeamCity, tricodeOf } from '../constants';
 import { MIN_ROSTER_SIZE } from '../services/tradeService';
 import { simulationEngine, DEFAULT_ROTATION_SIZE } from '../services/simulationService';
 import { COLORS, INK, RADIUS, FONT, withAlpha, onAccent, ovrColor, visibleTeamColor } from '../src/theme/tokens';
@@ -317,7 +316,7 @@ const MyTeamHub: React.FC<MyTeamHubProps> = ({
           <View style={{ position: 'absolute', left: 0, right: 0, top: 0, bottom: 5, backgroundColor: accent.primary }} />
           <View style={{ position: 'absolute', left: 0, right: 0, bottom: 0, height: 5, backgroundColor: accent.secondary }} />
           <Text style={{ position: 'absolute', right: -10, bottom: -62, fontFamily: FONT.cond800, fontSize: 240, lineHeight: 240, color: heroInkA(0.13) }}>
-            {team.id.toUpperCase()}
+            {tricodeOf(team.id)}
           </Text>
           <View style={{ position: 'absolute', left: PAGE_X, right: PAGE_X, bottom: 30 }}>
             <Text style={{ fontFamily: FONT.cond700, fontSize: 13, letterSpacing: 2.6, color: heroInkA(0.8) }}>MEU TIME</Text>
@@ -509,7 +508,7 @@ const MyTeamHub: React.FC<MyTeamHubProps> = ({
             color: withAlpha(heroInk === '#ffffff' ? '#ffffff' : '#000000', 0.13),
           }}
         >
-          {team.id.toUpperCase()}
+          {tricodeOf(team.id)}
         </Text>
         <Text style={{ fontFamily: FONT.cond700, fontSize: 12, letterSpacing: 2.4, color: withAlpha(heroInk === '#ffffff' ? '#ffffff' : '#000000', 0.8) }}>
           MEU TIME

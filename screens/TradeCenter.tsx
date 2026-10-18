@@ -5,8 +5,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { Team, Player, TradeOffer, DraftPickAsset } from '../types';
 import {
   getTeamLogoUrl, getTeamSalary, SALARY_CAP,
-  formatPositions, getPlayerPositions, picksOf, getTeamNickname, getTeamTricode, attributeColor,
-} from '../constants';
+  formatPositions, getPlayerPositions, picksOf, getTeamNickname, getTeamTricode, attributeColor, tricodeOf } from '../constants';
 import {
   evaluateTradeLegality, evaluateTradeValue, TRADE_DEADLINE_GAME, playerValue, picksValue, OFFER_TTL,
 } from '../services/tradeService';
@@ -132,7 +131,7 @@ const PackagePanel: React.FC<{
         return (
           <AssetRow
             key={pick.id}
-            label={`1ª rodada ${pick.originalTeamId.toUpperCase()}`}
+            label={`1ª rodada ${tricodeOf(pick.originalTeamId)}`}
             sub={prot ? `Proteção top ${prot}` : `Projetada ~#${slot + 1}`}
             subColor={prot ? COLORS.warn : undefined}
             onRemove={() => onRemovePick(pick.id)}
@@ -382,7 +381,7 @@ const TradeCenter: React.FC<TradeCenterProps> = ({
       <MonoLabel size={9}>Proteção das suas picks</MonoLabel>
       {picksOf(userTeam).filter((pk) => userPickIds.includes(pk.id)).map((pick) => (
         <View key={pick.id} className="flex-row items-center justify-between" style={{ minHeight: 40 }}>
-          <Name size={15}>1ª rodada {pick.originalTeamId.toUpperCase()} · draft {pick.draft}</Name>
+          <Name size={15}>1ª rodada {tricodeOf(pick.originalTeamId)} · draft {pick.draft}</Name>
           <Chip tone={protections[pick.id] ? 'warn' : 'neutral'} onPress={() => toggleProtection(pick.id)}>
             {protections[pick.id] ? `Top ${protections[pick.id]}` : 'Proteger'}
           </Chip>
@@ -735,7 +734,7 @@ const AssetSheet: React.FC<{
                   </View>
                   <View style={{ flex: 1 }}>
                     <Text className="font-bold text-fg" style={{ fontSize: 12 }}>
-                      1ª rodada {pick.originalTeamId.toUpperCase()}
+                      1ª rodada {tricodeOf(pick.originalTeamId)}
                     </Text>
                     <MonoLabel size={9.5} color={INK.meta} style={{ letterSpacing: 0, marginTop: 2 }}>
                       Draft {pick.draft} · projetada ~#{slot + 1}
@@ -826,7 +825,7 @@ const RosterColumn: React.FC<{
                     <Text style={{ fontFamily: FONT.cond700, fontSize: 11, color: COLORS.warn }}>1ª</Text>
                   </View>
                   <View style={{ flex: 1 }}>
-                    <Text style={{ fontFamily: FONT.cond600, fontSize: 14.5, color: COLORS.text }}>1ª rodada {pick.originalTeamId.toUpperCase()}</Text>
+                    <Text style={{ fontFamily: FONT.cond600, fontSize: 14.5, color: COLORS.text }}>1ª rodada {tricodeOf(pick.originalTeamId)}</Text>
                     <Text style={{ fontFamily: FONT.cond700, fontSize: 11, color: COLORS.dim }}>Draft {pick.draft} · projetada ~#{slot + 1}</Text>
                   </View>
                 </Pressable>

@@ -208,6 +208,48 @@ Pedido do usuário: no Lakers da era Bird x Magic não havia armador nem ala-piv
   McHale e Rambis PF, Rodman PF, Kerr e Harper PG.
 - **`check_eras` (14 eras):** r médio 0,86-0,88 contra 0,88 antes, dentro do ruído.
 
+### Eras: escudos de época, TV antiga e fotos que faltavam — FEITO (2026-10-18)
+
+Pedido do usuário: Sonics, Vancouver e New Jersey apareciam com o escudo de hoje; um
+filtro de TV antiga nas eras mais velhas; fotos dos jogadores antigos.
+- **Identidade por temporada** (`src/eraIdentity.ts`): sigla, cidade, apelido e cores de
+  época para as 8 identidades que mudaram.
+  - As identidades: Seattle SuperSonics até 2007-08, New Jersey Nets até 2011-12,
+    Washington Bullets até 1996-97, Vancouver Grizzlies até 2000-01, Kansas City Kings
+    até 1984-85, San Diego Clippers até 1983-84, New Orleans (e NO/OKC) Hornets de
+    2002-03 a 2012-13 e Charlotte Bobcats de 2004-05 a 2013-14.
+  - **Onde vale:** `getTeamAccent`, `getTeamTricode`/`tricodeOf`, `getTeamCity` e
+    `getTeamNickname` leem o ano da temporada na tela (`setEraYear`, em `App`/`CareerApp`
+    a partir de `src/eraYear.ts`; na escolha de franquia, o ano da era escolhida). Valem
+    no app inteiro e no 3D: o piso do Sonics fica verde e dourado. As 16 siglas montadas à
+    mão a partir do id (`id.toUpperCase()`) passaram para `tricodeOf`.
+  - **Avanço do save:** ao avançar, o time troca de nome no ano certo
+    (`startOffseason`: o Sonics vira Thunder em 2008-09).
+- **Logos de época de todas as franquias, ano a ano,** do thebasketballdatabase.com,
+  incluídos no app (`scripts/fetch_era_logos.js`, `assets/era-logos/`, `src/eraLogos.ts`):
+  - 1.160 franquia-temporadas e 121 imagens distintas (1,4 MB);
+  - as 70 que faltam são anos em que o time não existia;
+  - o `TeamLogo` usa o logo da temporada quando há um.
+- **Filtro de TV antiga no 3D** (`components/court3d/EraTVFilter.tsx`): só camadas por
+  cima da quadra (linhas de varredura, vinheta, tom lavado), sem custo no quadro.
+  - Forte até 1989-90, leve nos anos 90, nenhum de 2000-01 em diante.
+- **Fotos** (`scripts/sync_era_photo_gaps.js`): a CDN da NBA devolve uma silhueta cinza
+  genérica (sempre o mesmo arquivo de 4.937 bytes) para 1.941 dos 2.242 jogadores com
+  foto "latest", até Jason Kidd e Tim Hardaway.
+  - **ESPN:** a busca dela deu foto para 231 jogadores, quase todos dos anos 2000.
+  - **Avatar:** os outros 1.710 ganham `photoMissing`, e o `PlayerPhoto` desenha um
+    avatar com iniciais e número numa cor fixa por jogador, no lugar da silhueta.
+  - **Fotos do Basketball-Reference não foram usadas:** são fotos com direito autoral, e
+    o thebasketballdatabase só tem a silhueta.
+- **De quebra:** no intervalo do 3D no celular, a coluna de câmeras não aparece (em tela
+  baixa ela cobria as opções; volta com o jogo rolando).
+- **Conferido no navegador com o Bulls de 1995-96:**
+  - escolha de franquia com SEA verde "SuperSonics", WSB "Bullets", CHA "Hornets" e os
+    logos de 1996;
+  - quinteto Kerr PG, Jordan SG, Pippen SF, Rodman PF, Longley C (avatar);
+  - TV antiga no 3D.
+  - `check_eras` r médio 0,88.
+
 ### 3. Ratings de veteranos (L) — FEITO (2026-10-12)
 
 O caso que abriu o item (T.J. McConnell 88 aos 34) já tinha sido corrigido pela

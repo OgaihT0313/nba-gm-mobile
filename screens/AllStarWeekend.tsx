@@ -8,6 +8,7 @@ import { Panel, ScreenTitle, SectionLabel, BodyText, Name, TeamBadge } from '../
 import { useDesktop } from '../components/desktop/useDesktop';
 import { DPage, DTitle, Cols, Col } from '../components/desktop/kit';
 import PlayerPhoto from '../components/ui/PlayerPhoto';
+import { tricodeOf } from '../constants';
 
 // Design 4e ("Transmissão"). A split scoreboard — West red, East dark blue —
 // the game MVP in a gold-inset card, both conferences' squads in columns, and
@@ -70,7 +71,7 @@ const AllStarWeekend: React.FC<AllStarWeekendProps> = ({ allStar, players, teams
           return (
             <View key={p.id} className="flex-row items-center" style={{ height: desktop ? 44 : 34, gap: 6, borderBottomWidth: 1, borderBottomColor: COLORS.lineSoft }}>
               <Name size={desktop ? 16 : 14} style={{ flex: 1 }}>{p.name}</Name>
-              <Text style={{ fontFamily: FONT.cond700, fontSize: 11, color: t?.id === userTeamId ? COLORS.gold : COLORS.dim }}>{t?.id.toUpperCase() ?? ''}</Text>
+              <Text style={{ fontFamily: FONT.cond700, fontSize: 11, color: t?.id === userTeamId ? COLORS.gold : COLORS.dim }}>{(t ? tricodeOf(t.id) : '')}</Text>
             </View>
           );
         })}
@@ -84,7 +85,7 @@ const AllStarWeekend: React.FC<AllStarWeekendProps> = ({ allStar, players, teams
     return (
       <Panel padding={12} radius={14} className="flex-1" style={{ gap: 3 }}>
         <Text style={{ fontFamily: FONT.cond700, fontSize: 10.5, letterSpacing: 1.5, color: COLORS.muted }}>{label}</Text>
-        <Name size={15} numberOfLines={2}>{p ? `${p.name}${t ? ` · ${t.id.toUpperCase()}` : ''}` : '—'}</Name>
+        <Name size={15} numberOfLines={2}>{p ? `${p.name}${t ? ` · ${tricodeOf(t.id)}` : ''}` : '—'}</Name>
       </Panel>
     );
   };

@@ -1,8 +1,9 @@
 import React from 'react';
-import { View, Image as RNImage, StyleSheet, type StyleProp, type ImageStyle, type ViewStyle } from 'react-native';
+import { View, Text, Image as RNImage, StyleSheet, type StyleProp, type ImageStyle, type ViewStyle } from 'react-native';
 import { Image, type ImageContentFit, type ImageContentPosition } from 'expo-image';
 import type { Player } from '../../types';
 import { getPlayerImageUrl, PLAYER_PLACEHOLDER_SVG } from '../../constants';
+import { FONT } from '../../src/theme/tokens';
 
 // Every player headshot in the app goes through here.
 //
@@ -26,7 +27,30 @@ interface Props {
   transition?: number;
 }
 
+// For a player with no photo anywhere (photoMissing): his initials and number
+// over a color of his own -- a face card rather than the NBA's grey silhouette,
+// which a whole 1980 roster used to share.
+const AVATAR_TONES = ['#3b4a6b', '#5a3d5c', '#2f5d50', '#6b4a2f', '#41526b', '#5d3a3a', '#3d5a6b', '#4f4a2a'];
+const toneOf = (id: string) => AVATAR_TONES[[...id].reduce((h, c) => (h * 31 + c.charCodeAt(0)) >>> 0, 7) % AVATAR_TONES.length];
+const initialsOf = (name: string) => {
+  const parts = name.split(' ').filter((w) => !/^(jr\.?|sr\.?|ii|iii|iv)$/i.test(w));
+  return ((parts[0]?.[0] ?? '') + (parts.length > 1 ? parts[parts.length - 1][0] : '')).toUpperCase();
+};
+
+const Avatar: React.FC<{ player: Player; style?: StyleProp<ImageStyle> }> = ({ player, style }) => {
+  const flat = (StyleSheet.flatten(style) ?? {}) as ImageStyle;
+  const side = Math.min(typeof flat.width === 'number' ? flat.width : 120, typeof flat.height === 'number' ? flat.height : 120);
+  const big = Math.max(11, Math.round(side * 0.36));
+  return (
+    <View style={[flat as ViewStyle, { overflow: 'hidden', backgroundColor: toneOf(player.id), alignItems: 'center', justifyContent: 'center' }]}>
+      <Text style={{ fontFamily: FONT.cond800, fontSize: big, color: 'rgba(255,255,255,0.92)', letterSpacing: 1 }}>{initialsOf(player.name)}</Text>
+      {side >= 56 ? <Text style={{ position: 'absolute', bottom: Math.round(side * 0.08), fontFamily: FONT.cond700, fontSize: Math.round(side * 0.12), color: 'rgba(255,255,255,0.55)' }}>#{player.number}</Text> : null}
+    </View>
+  );
+};
+
 export const PlayerPhoto: React.FC<Props> = ({ player, style, contentFit = 'cover', contentPosition, transition }) => {
+  if (player?.photoMissing) return <Avatar player={player} style={style} />;
   const photo = (
     <Image
       source={{ uri: getPlayerImageUrl(player) }}
