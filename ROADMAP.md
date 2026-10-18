@@ -183,6 +183,31 @@ alterado: o jogo 3D foi fechado antes do fim).
   - as frases do Staff usavam vírgula decimal, enquanto o app inteiro usa ponto.
 - **Não era bug:** o "Banco · 13 jogadores" em Meu Time estava só na borda da rolagem.
 
+### Eras: posições, altura e peso reais — FEITO (2026-10-18)
+
+Pedido do usuário: no Lakers da era Bird x Magic não havia armador nem ala-pivô.
+- **A causa:** as eras vinham das posições genéricas da nba_api ("Guard / Forward /
+  Center"), então todo armador era SG, todo ala era SF, e PG e PF quase não existiam
+  (1984-85 tinha 2 PG e 1 PF na liga inteira; Magic Johnson aparecia como SG, Kurt
+  Rambis como SF). A altura era a média da posição: todo SG com 196 cm, todo SF com 201,
+  todo C com 211.
+- **A correção:** posição da própria temporada e altura/peso reais, do
+  Basketball-Reference.
+  - `scripts/fetch_bbref_positions.py` usa o `curl_cffi`, porque o site recusa
+    clientes HTTP comuns. Lê 41 páginas de temporada e 26 do índice de jogadores, com
+    cache em `.bbref-cache/` e uma requisição a cada 3,6 s, e grava
+    `scripts/fixtures/bbref_positions.json`.
+  - `scripts/sync_era_positions.js` aplica um patch de texto só nas linhas
+    `pos`/`positions`/`heightCm`/`weightKg`. Rodar de novo dá o mesmo resultado.
+- **Casamento:** pelo nome na temporada, desempatado pelo time (siglas históricas
+  KCK/SEA/NJN/CHH/VAN... mapeadas para a franquia). Quem passou o ano lesionado é
+  procurado na temporada vizinha. Nomes com grafia diferente casam por sobrenome + 3
+  letras quando isso é único.
+- **Resultado:** 96,6-100% dos jogadores encontrados por era, e as eras ficam com PG/SG/SF/PF/C
+  equilibrados (1984-85: PG 59, SG 64, SF 73, PF 56, C 68). Magic PG com 2,06 m,
+  McHale e Rambis PF, Rodman PF, Kerr e Harper PG.
+- **`check_eras` (14 eras):** r médio 0,86-0,88 contra 0,88 antes, dentro do ruído.
+
 ### 3. Ratings de veteranos (L) — FEITO (2026-10-12)
 
 O caso que abriu o item (T.J. McConnell 88 aos 34) já tinha sido corrigido pela

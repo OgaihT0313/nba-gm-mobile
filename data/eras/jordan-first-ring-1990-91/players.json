@@ -28,8 +28,8 @@
     "contractYears": 1,
     "usage": 23.0,
     "ts": 0.539,
-    "heightCm": 196,
-    "weightKg": 93
+    "heightCm": 188,
+    "weightKg": 79
   },
   "duane_ferrell": {
     "id": "duane_ferrell",
@@ -61,7 +61,7 @@
     "usage": 17.8,
     "ts": 0.555,
     "heightCm": 201,
-    "weightKg": 99
+    "weightKg": 95
   },
   "jon_koncak": {
     "id": "jon_koncak",
@@ -92,8 +92,8 @@
     "contractYears": 4,
     "usage": 8.9,
     "ts": 0.488,
-    "heightCm": 211,
-    "weightKg": 114
+    "heightCm": 213,
+    "weightKg": 113
   },
   "gary_leonard": {
     "id": "gary_leonard",
@@ -124,8 +124,8 @@
     "contractYears": 5,
     "usage": 16.1,
     "ts": 0.501,
-    "heightCm": 211,
-    "weightKg": 114
+    "heightCm": 216,
+    "weightKg": 113
   },
   "moses_malone": {
     "id": "moses_malone",
@@ -156,8 +156,8 @@
     "contractYears": 3,
     "usage": 21.3,
     "ts": 0.567,
-    "heightCm": 211,
-    "weightKg": 114,
+    "heightCm": 208,
+    "weightKg": 98,
     "skinTone": "#88453f"
   },
   "tim_mccormick": {
@@ -190,7 +190,7 @@
     "usage": 16.4,
     "ts": 0.543,
     "heightCm": 211,
-    "weightKg": 114
+    "weightKg": 109
   },
   "sidney_moncrief": {
     "id": "sidney_moncrief",
@@ -221,15 +221,15 @@
     "contractYears": 3,
     "usage": 13.6,
     "ts": 0.585,
-    "heightCm": 196,
-    "weightKg": 93
+    "heightCm": 193,
+    "weightKg": 82
   },
   "doc_rivers": {
     "id": "doc_rivers",
     "name": "Doc Rivers",
-    "pos": "SG",
+    "pos": "PG",
     "positions": [
-      "SG"
+      "PG"
     ],
     "ovr": 83,
     "off": 77,
@@ -253,15 +253,15 @@
     "contractYears": 1,
     "usage": 19.5,
     "ts": 0.53,
-    "heightCm": 196,
-    "weightKg": 93
+    "heightCm": 193,
+    "weightKg": 84
   },
   "rumeal_robinson": {
     "id": "rumeal_robinson",
     "name": "Rumeal Robinson",
-    "pos": "SG",
+    "pos": "PG",
     "positions": [
-      "SG"
+      "PG"
     ],
     "ovr": 71,
     "off": 72,
@@ -285,15 +285,15 @@
     "contractYears": 2,
     "usage": 21.0,
     "ts": 0.486,
-    "heightCm": 196,
-    "weightKg": 93
+    "heightCm": 188,
+    "weightKg": 88
   },
   "spud_webb": {
     "id": "spud_webb",
     "name": "Spud Webb",
-    "pos": "SG",
+    "pos": "PG",
     "positions": [
-      "SG"
+      "PG"
     ],
     "ovr": 79,
     "off": 78,
@@ -317,8 +317,8 @@
     "contractYears": 2,
     "usage": 18.7,
     "ts": 0.543,
-    "heightCm": 196,
-    "weightKg": 93
+    "heightCm": 168,
+    "weightKg": 60
   },
   "dominique_wilkins": {
     "id": "dominique_wilkins",
@@ -349,17 +349,16 @@
     "contractYears": 4,
     "usage": 28.6,
     "ts": 0.555,
-    "heightCm": 201,
-    "weightKg": 99,
+    "heightCm": 203,
+    "weightKg": 98,
     "skinTone": "#88583c"
   },
   "kevin_willis": {
     "id": "kevin_willis",
     "name": "Kevin Willis",
-    "pos": "SF",
+    "pos": "PF",
     "positions": [
-      "SF",
-      "C"
+      "PF"
     ],
     "ovr": 76,
     "off": 75,
@@ -383,15 +382,15 @@
     "contractYears": 5,
     "usage": 19.6,
     "ts": 0.539,
-    "heightCm": 201,
-    "weightKg": 99
+    "heightCm": 213,
+    "weightKg": 100
   },
   "trevor_wilson": {
     "id": "trevor_wilson",
     "name": "Trevor Wilson",
-    "pos": "SF",
+    "pos": "PF",
     "positions": [
-      "SF"
+      "PF"
     ],
     "ovr": 66,
     "off": 71,
@@ -416,7 +415,7 @@
     "usage": 22.0,
     "ts": 0.415,
     "heightCm": 201,
-    "weightKg": 99
+    "weightKg": 95
   },
   "larry_bird": {
     "id": "larry_bird",
@@ -447,16 +446,16 @@
     "contractYears": 1,
     "usage": 24.9,
     "ts": 0.536,
-    "heightCm": 201,
-    "weightKg": 99,
+    "heightCm": 206,
+    "weightKg": 100,
     "skinTone": "#bc7763"
   },
   "dee_brown": {
     "id": "dee_brown",
     "name": "Dee Brown",
-    "pos": "SG",
+    "pos": "PG",
     "positions": [
-      "SG"
+      "PG"
     ],
     "ovr": 75,
     "off": 74,
@@ -480,7 +479,7 @@
     "contractYears": 4,
     "usage": 17.7,
     "ts": 0.524,
-    "heightCm": 196,
+    "heightCm": 188,
     "weightKg": 93
   },
   "kevin_gamble": {
@@ -512,8 +511,8 @@
     "contractYears": 5,
     "usage": 18.1,
     "ts": 0.603,
-    "heightCm": 201,
-    "weightKg": 99
+    "heightCm": 196,
+    "weightKg": 95
   },
   "joe_kleine": {
     "id": "joe_kleine",
@@ -545,7 +544,7 @@
     "usage": 14.9,
     "ts": 0.524,
     "heightCm": 211,
-    "weightKg": 114
+    "weightKg": 116
   },
   "reggie_lewis": {
     "id": "reggie_lewis",
@@ -576,15 +575,15 @@
     "contractYears": 3,
     "usage": 22.2,
     "ts": 0.541,
-    "heightCm": 196,
-    "weightKg": 93
+    "heightCm": 201,
+    "weightKg": 88
   },
   "kevin_mchale": {
     "id": "kevin_mchale",
     "name": "Kevin McHale",
-    "pos": "SF",
+    "pos": "PF",
     "positions": [
-      "SF"
+      "PF"
     ],
     "ovr": 85,
     "off": 81,
@@ -608,8 +607,8 @@
     "contractYears": 5,
     "usage": 23.8,
     "ts": 0.611,
-    "heightCm": 201,
-    "weightKg": 99,
+    "heightCm": 208,
+    "weightKg": 95,
     "skinTone": "#b36d5d"
   },
   "robert_parish": {
@@ -641,16 +640,16 @@
     "contractYears": 2,
     "usage": 19.5,
     "ts": 0.628,
-    "heightCm": 211,
-    "weightKg": 114,
+    "heightCm": 216,
+    "weightKg": 104,
     "skinTone": "#6b4437"
   },
   "ed_pinckney": {
     "id": "ed_pinckney",
     "name": "Ed Pinckney",
-    "pos": "SF",
+    "pos": "PF",
     "positions": [
-      "SF"
+      "PF"
     ],
     "ovr": 76,
     "off": 76,
@@ -674,15 +673,15 @@
     "contractYears": 4,
     "usage": 13.0,
     "ts": 0.611,
-    "heightCm": 201,
-    "weightKg": 99
+    "heightCm": 206,
+    "weightKg": 88
   },
   "dave_popson": {
     "id": "dave_popson",
     "name": "Dave Popson",
-    "pos": "C",
+    "pos": "PF",
     "positions": [
-      "C"
+      "PF"
     ],
     "ovr": 66,
     "off": 72,
@@ -706,15 +705,15 @@
     "contractYears": 3,
     "usage": 21.3,
     "ts": 0.517,
-    "heightCm": 211,
-    "weightKg": 114
+    "heightCm": 208,
+    "weightKg": 100
   },
   "brian_shaw": {
     "id": "brian_shaw",
     "name": "Brian Shaw",
-    "pos": "SG",
+    "pos": "PG",
     "positions": [
-      "SG"
+      "PG"
     ],
     "ovr": 81,
     "off": 77,
@@ -738,15 +737,15 @@
     "contractYears": 2,
     "usage": 19.2,
     "ts": 0.52,
-    "heightCm": 196,
-    "weightKg": 93
+    "heightCm": 198,
+    "weightKg": 86
   },
   "charles_smith": {
     "id": "charles_smith",
     "name": "Charles Smith",
-    "pos": "SF",
+    "pos": "PG",
     "positions": [
-      "SF"
+      "PG"
     ],
     "ovr": 84,
     "off": 77,
@@ -770,15 +769,15 @@
     "contractYears": 5,
     "usage": 23.2,
     "ts": 0.553,
-    "heightCm": 201,
-    "weightKg": 99
+    "heightCm": 185,
+    "weightKg": 73
   },
   "derek_smith": {
     "id": "derek_smith",
     "name": "Derek Smith",
-    "pos": "SG",
+    "pos": "SF",
     "positions": [
-      "SG"
+      "SF"
     ],
     "ovr": 74,
     "off": 74,
@@ -802,15 +801,15 @@
     "contractYears": 2,
     "usage": 20.0,
     "ts": 0.556,
-    "heightCm": 196,
+    "heightCm": 198,
     "weightKg": 93
   },
   "michael_smith": {
     "id": "michael_smith",
     "name": "Michael Smith",
-    "pos": "SG",
+    "pos": "PF",
     "positions": [
-      "SG"
+      "PF"
     ],
     "ovr": 69,
     "off": 74,
@@ -834,8 +833,8 @@
     "contractYears": 4,
     "usage": 24.9,
     "ts": 0.52,
-    "heightCm": 196,
-    "weightKg": 93
+    "heightCm": 208,
+    "weightKg": 102
   },
   "stojko_vrankovic": {
     "id": "stojko_vrankovic",
@@ -866,15 +865,15 @@
     "contractYears": 1,
     "usage": 19.7,
     "ts": 0.505,
-    "heightCm": 211,
-    "weightKg": 114
+    "heightCm": 218,
+    "weightKg": 118
   },
   "a_j_wynder": {
     "id": "a_j_wynder",
     "name": "A.J. Wynder",
-    "pos": "SG",
+    "pos": "PG",
     "positions": [
-      "SG"
+      "PG"
     ],
     "ovr": 69,
     "off": 73,
@@ -898,15 +897,15 @@
     "contractYears": 2,
     "usage": 18.2,
     "ts": 0.497,
-    "heightCm": 196,
-    "weightKg": 93
+    "heightCm": 188,
+    "weightKg": 82
   },
   "milos_babic": {
     "id": "milos_babic",
     "name": "Milos Babic",
-    "pos": "C",
+    "pos": "PF",
     "positions": [
-      "C"
+      "PF"
     ],
     "ovr": 66,
     "off": 72,
@@ -930,15 +929,15 @@
     "contractYears": 4,
     "usage": 19.6,
     "ts": 0.489,
-    "heightCm": 211,
-    "weightKg": 114
+    "heightCm": 213,
+    "weightKg": 109
   },
   "winston_bennett": {
     "id": "winston_bennett",
     "name": "Winston Bennett",
-    "pos": "SG",
+    "pos": "SF",
     "positions": [
-      "SG"
+      "SF"
     ],
     "ovr": 66,
     "off": 70,
@@ -962,8 +961,8 @@
     "contractYears": 3,
     "usage": 17.9,
     "ts": 0.494,
-    "heightCm": 196,
-    "weightKg": 93
+    "heightCm": 201,
+    "weightKg": 95
   },
   "chucky_brown": {
     "id": "chucky_brown",
@@ -995,7 +994,7 @@
     "usage": 19.2,
     "ts": 0.545,
     "heightCm": 201,
-    "weightKg": 99
+    "weightKg": 97
   },
   "derrick_chievous": {
     "id": "derrick_chievous",
@@ -1027,7 +1026,7 @@
     "usage": 21.2,
     "ts": 0.514,
     "heightCm": 201,
-    "weightKg": 99
+    "weightKg": 88
   },
   "brad_daugherty": {
     "id": "brad_daugherty",
@@ -1058,8 +1057,8 @@
     "contractYears": 3,
     "usage": 23.5,
     "ts": 0.574,
-    "heightCm": 211,
-    "weightKg": 114
+    "heightCm": 213,
+    "weightKg": 111
   },
   "craig_ehlo": {
     "id": "craig_ehlo",
@@ -1090,15 +1089,15 @@
     "contractYears": 1,
     "usage": 16.4,
     "ts": 0.513,
-    "heightCm": 196,
-    "weightKg": 93
+    "heightCm": 198,
+    "weightKg": 82
   },
   "danny_ferry": {
     "id": "danny_ferry",
     "name": "Danny Ferry",
-    "pos": "SF",
+    "pos": "PF",
     "positions": [
-      "SF"
+      "PF"
     ],
     "ovr": 70,
     "off": 71,
@@ -1122,15 +1121,15 @@
     "contractYears": 1,
     "usage": 21.5,
     "ts": 0.494,
-    "heightCm": 201,
-    "weightKg": 99
+    "heightCm": 208,
+    "weightKg": 104
   },
   "henry_james": {
     "id": "henry_james",
     "name": "Henry James",
-    "pos": "SF",
+    "pos": "PF",
     "positions": [
-      "SF"
+      "PF"
     ],
     "ovr": 74,
     "off": 74,
@@ -1154,15 +1153,15 @@
     "contractYears": 4,
     "usage": 26.1,
     "ts": 0.527,
-    "heightCm": 201,
-    "weightKg": 99
+    "heightCm": 203,
+    "weightKg": 100
   },
   "steve_kerr": {
     "id": "steve_kerr",
     "name": "Steve Kerr",
-    "pos": "SG",
+    "pos": "PG",
     "positions": [
-      "SG"
+      "PG"
     ],
     "ovr": 72,
     "off": 74,
@@ -1186,8 +1185,8 @@
     "contractYears": 1,
     "usage": 14.1,
     "ts": 0.554,
-    "heightCm": 196,
-    "weightKg": 93,
+    "heightCm": 190,
+    "weightKg": 79,
     "skinTone": "#7e482f"
   },
   "john_morton": {
@@ -1219,16 +1218,15 @@
     "contractYears": 2,
     "usage": 17.4,
     "ts": 0.514,
-    "heightCm": 201,
-    "weightKg": 99
+    "heightCm": 190,
+    "weightKg": 82
   },
   "larry_nance": {
     "id": "larry_nance",
     "name": "Larry Nance",
     "pos": "PF",
     "positions": [
-      "PF",
-      "C"
+      "PF"
     ],
     "ovr": 86,
     "off": 80,
@@ -1252,8 +1250,8 @@
     "contractYears": 2,
     "usage": 21.9,
     "ts": 0.563,
-    "heightCm": 206,
-    "weightKg": 107
+    "heightCm": 208,
+    "weightKg": 93
   },
   "gerald_paddio": {
     "id": "gerald_paddio",
@@ -1285,14 +1283,14 @@
     "usage": 22.3,
     "ts": 0.467,
     "heightCm": 201,
-    "weightKg": 99
+    "weightKg": 93
   },
   "mark_price": {
     "id": "mark_price",
     "name": "Mark Price",
-    "pos": "SG",
+    "pos": "PG",
     "positions": [
-      "SG"
+      "PG"
     ],
     "ovr": 85,
     "off": 83,
@@ -1316,15 +1314,15 @@
     "contractYears": 2,
     "usage": 22.1,
     "ts": 0.593,
-    "heightCm": 196,
-    "weightKg": 93
+    "heightCm": 183,
+    "weightKg": 77
   },
   "darnell_valentine": {
     "id": "darnell_valentine",
     "name": "Darnell Valentine",
-    "pos": "SG",
+    "pos": "PG",
     "positions": [
-      "SG"
+      "PG"
     ],
     "ovr": 76,
     "off": 73,
@@ -1348,15 +1346,15 @@
     "contractYears": 3,
     "usage": 16.5,
     "ts": 0.533,
-    "heightCm": 196,
-    "weightKg": 93
+    "heightCm": 185,
+    "weightKg": 83
   },
   "hot_rod_williams": {
     "id": "hot_rod_williams",
     "name": "Hot Rod Williams",
-    "pos": "SF",
+    "pos": "C",
     "positions": [
-      "SF"
+      "C"
     ],
     "ovr": 79,
     "off": 76,
@@ -1380,8 +1378,8 @@
     "contractYears": 3,
     "usage": 20.4,
     "ts": 0.526,
-    "heightCm": 201,
-    "weightKg": 99
+    "heightCm": 211,
+    "weightKg": 98
   },
   "mike_woodson": {
     "id": "mike_woodson",
@@ -1413,14 +1411,14 @@
     "usage": 20.6,
     "ts": 0.444,
     "heightCm": 196,
-    "weightKg": 93
+    "weightKg": 88
   },
   "b_j_armstrong": {
     "id": "b_j_armstrong",
     "name": "B.J. Armstrong",
-    "pos": "SG",
+    "pos": "PG",
     "positions": [
-      "SG"
+      "PG"
     ],
     "ovr": 75,
     "off": 74,
@@ -1444,8 +1442,8 @@
     "contractYears": 1,
     "usage": 18.7,
     "ts": 0.53,
-    "heightCm": 196,
-    "weightKg": 93
+    "heightCm": 188,
+    "weightKg": 79
   },
   "bill_cartwright": {
     "id": "bill_cartwright",
@@ -1476,16 +1474,15 @@
     "contractYears": 4,
     "usage": 16.1,
     "ts": 0.535,
-    "heightCm": 211,
-    "weightKg": 114
+    "heightCm": 216,
+    "weightKg": 111
   },
   "horace_grant": {
     "id": "horace_grant",
     "name": "Horace Grant",
-    "pos": "SF",
+    "pos": "PF",
     "positions": [
-      "SF",
-      "C"
+      "PF"
     ],
     "ovr": 82,
     "off": 79,
@@ -1509,8 +1506,8 @@
     "contractYears": 2,
     "usage": 15.8,
     "ts": 0.574,
-    "heightCm": 201,
-    "weightKg": 99
+    "heightCm": 208,
+    "weightKg": 98
   },
   "craig_hodges": {
     "id": "craig_hodges",
@@ -1541,8 +1538,8 @@
     "contractYears": 1,
     "usage": 18.0,
     "ts": 0.54,
-    "heightCm": 196,
-    "weightKg": 93
+    "heightCm": 188,
+    "weightKg": 86
   },
   "dennis_hopson": {
     "id": "dennis_hopson",
@@ -1573,8 +1570,8 @@
     "contractYears": 4,
     "usage": 21.2,
     "ts": 0.494,
-    "heightCm": 201,
-    "weightKg": 99
+    "heightCm": 196,
+    "weightKg": 91
   },
   "michael_jordan": {
     "id": "michael_jordan",
@@ -1605,16 +1602,16 @@
     "contractYears": 5,
     "usage": 32.8,
     "ts": 0.604,
-    "heightCm": 196,
-    "weightKg": 93,
+    "heightCm": 198,
+    "weightKg": 90,
     "skinTone": "#602507"
   },
   "stacey_king": {
     "id": "stacey_king",
     "name": "Stacey King",
-    "pos": "C",
+    "pos": "PF",
     "positions": [
-      "C"
+      "PF"
     ],
     "ovr": 66,
     "off": 72,
@@ -1639,14 +1636,14 @@
     "usage": 17.9,
     "ts": 0.54,
     "heightCm": 211,
-    "weightKg": 114
+    "weightKg": 104
   },
   "cliff_levingston": {
     "id": "cliff_levingston",
     "name": "Cliff Levingston",
-    "pos": "SF",
+    "pos": "PF",
     "positions": [
-      "SF"
+      "PF"
     ],
     "ovr": 69,
     "off": 73,
@@ -1670,15 +1667,15 @@
     "contractYears": 3,
     "usage": 14.6,
     "ts": 0.513,
-    "heightCm": 201,
-    "weightKg": 99
+    "heightCm": 203,
+    "weightKg": 95
   },
   "john_paxson": {
     "id": "john_paxson",
     "name": "John Paxson",
-    "pos": "SG",
+    "pos": "PG",
     "positions": [
-      "SG"
+      "PG"
     ],
     "ovr": 75,
     "off": 76,
@@ -1702,8 +1699,8 @@
     "contractYears": 3,
     "usage": 14.7,
     "ts": 0.579,
-    "heightCm": 196,
-    "weightKg": 93
+    "heightCm": 188,
+    "weightKg": 84
   },
   "will_perdue": {
     "id": "will_perdue",
@@ -1734,16 +1731,15 @@
     "contractYears": 2,
     "usage": 16.6,
     "ts": 0.519,
-    "heightCm": 211,
-    "weightKg": 114
+    "heightCm": 213,
+    "weightKg": 109
   },
   "scottie_pippen": {
     "id": "scottie_pippen",
     "name": "Scottie Pippen",
     "pos": "SF",
     "positions": [
-      "SF",
-      "SG"
+      "SF"
     ],
     "ovr": 87,
     "off": 80,
@@ -1767,17 +1763,16 @@
     "contractYears": 5,
     "usage": 21.5,
     "ts": 0.549,
-    "heightCm": 201,
-    "weightKg": 99,
+    "heightCm": 203,
+    "weightKg": 95,
     "skinTone": "#9a4016"
   },
   "scott_williams": {
     "id": "scott_williams",
     "name": "Scott Williams",
-    "pos": "SF",
+    "pos": "PF",
     "positions": [
-      "SF",
-      "C"
+      "PF"
     ],
     "ovr": 66,
     "off": 72,
@@ -1801,16 +1796,16 @@
     "contractYears": 1,
     "usage": 17.5,
     "ts": 0.545,
-    "heightCm": 201,
-    "weightKg": 99,
+    "heightCm": 208,
+    "weightKg": 104,
     "skinTone": "#6d4236"
   },
   "steve_alford": {
     "id": "steve_alford",
     "name": "Steve Alford",
-    "pos": "SG",
+    "pos": "PG",
     "positions": [
-      "SG"
+      "PG"
     ],
     "ovr": 74,
     "off": 77,
@@ -1834,8 +1829,8 @@
     "contractYears": 4,
     "usage": 24.5,
     "ts": 0.56,
-    "heightCm": 196,
-    "weightKg": 93
+    "heightCm": 188,
+    "weightKg": 83
   },
   "rolando_blackman": {
     "id": "rolando_blackman",
@@ -1866,15 +1861,15 @@
     "contractYears": 2,
     "usage": 23.8,
     "ts": 0.547,
-    "heightCm": 196,
-    "weightKg": 93
+    "heightCm": 198,
+    "weightKg": 86
   },
   "brad_davis": {
     "id": "brad_davis",
     "name": "Brad Davis",
-    "pos": "SG",
+    "pos": "PG",
     "positions": [
-      "SG"
+      "PG"
     ],
     "ovr": 72,
     "off": 72,
@@ -1898,8 +1893,8 @@
     "contractYears": 1,
     "usage": 16.0,
     "ts": 0.529,
-    "heightCm": 196,
-    "weightKg": 93
+    "heightCm": 190,
+    "weightKg": 82
   },
   "james_donaldson": {
     "id": "james_donaldson",
@@ -1930,8 +1925,8 @@
     "contractYears": 3,
     "usage": 13.6,
     "ts": 0.574,
-    "heightCm": 211,
-    "weightKg": 114
+    "heightCm": 218,
+    "weightKg": 125
   },
   "alex_english": {
     "id": "alex_english",
@@ -1962,15 +1957,15 @@
     "contractYears": 3,
     "usage": 23.7,
     "ts": 0.498,
-    "heightCm": 201,
-    "weightKg": 99
+    "heightCm": 203,
+    "weightKg": 86
   },
   "jim_grandholm": {
     "id": "jim_grandholm",
     "name": "Jim Grandholm",
-    "pos": "C",
+    "pos": "PF",
     "positions": [
-      "C"
+      "PF"
     ],
     "ovr": 70,
     "off": 74,
@@ -1994,15 +1989,15 @@
     "contractYears": 1,
     "usage": 19.3,
     "ts": 0.569,
-    "heightCm": 211,
-    "weightKg": 114
+    "heightCm": 213,
+    "weightKg": 107
   },
   "derek_harper": {
     "id": "derek_harper",
     "name": "Derek Harper",
-    "pos": "SG",
+    "pos": "PG",
     "positions": [
-      "SG"
+      "PG"
     ],
     "ovr": 87,
     "off": 81,
@@ -2026,8 +2021,8 @@
     "contractYears": 5,
     "usage": 23.3,
     "ts": 0.551,
-    "heightCm": 196,
-    "weightKg": 93
+    "heightCm": 193,
+    "weightKg": 84
   },
   "lafayette_lever": {
     "id": "lafayette_lever",
@@ -2058,15 +2053,15 @@
     "contractYears": 2,
     "usage": 21.5,
     "ts": 0.506,
-    "heightCm": 196,
-    "weightKg": 93
+    "heightCm": 190,
+    "weightKg": 77
   },
   "rodney_mccray": {
     "id": "rodney_mccray",
     "name": "Rodney McCray",
-    "pos": "SF",
+    "pos": "PF",
     "positions": [
-      "SF"
+      "PF"
     ],
     "ovr": 81,
     "off": 78,
@@ -2091,7 +2086,7 @@
     "usage": 16.6,
     "ts": 0.557,
     "heightCm": 201,
-    "weightKg": 99
+    "weightKg": 100
   },
   "john_shasky": {
     "id": "john_shasky",
@@ -2123,14 +2118,14 @@
     "usage": 15.6,
     "ts": 0.496,
     "heightCm": 211,
-    "weightKg": 114
+    "weightKg": 107
   },
   "roy_tarpley": {
     "id": "roy_tarpley",
     "name": "Roy Tarpley",
-    "pos": "SF",
+    "pos": "C",
     "positions": [
-      "SF"
+      "C"
     ],
     "ovr": 77,
     "off": 75,
@@ -2154,8 +2149,8 @@
     "contractYears": 3,
     "usage": 23.4,
     "ts": 0.51,
-    "heightCm": 201,
-    "weightKg": 99
+    "heightCm": 213,
+    "weightKg": 111
   },
   "kelvin_upshaw": {
     "id": "kelvin_upshaw",
@@ -2186,15 +2181,15 @@
     "contractYears": 1,
     "usage": 23.2,
     "ts": 0.517,
-    "heightCm": 196,
-    "weightKg": 93
+    "heightCm": 188,
+    "weightKg": 82
   },
   "randy_white": {
     "id": "randy_white",
     "name": "Randy White",
-    "pos": "SF",
+    "pos": "PF",
     "positions": [
-      "SF"
+      "PF"
     ],
     "ovr": 66,
     "off": 68,
@@ -2218,8 +2213,8 @@
     "contractYears": 1,
     "usage": 20.7,
     "ts": 0.451,
-    "heightCm": 201,
-    "weightKg": 99
+    "heightCm": 203,
+    "weightKg": 109
   },
   "herb_williams": {
     "id": "herb_williams",
@@ -2251,14 +2246,14 @@
     "usage": 18.7,
     "ts": 0.507,
     "heightCm": 211,
-    "weightKg": 114
+    "weightKg": 118
   },
   "howard_wright": {
     "id": "howard_wright",
     "name": "Howard Wright",
-    "pos": "SF",
+    "pos": "PF",
     "positions": [
-      "SF"
+      "PF"
     ],
     "ovr": 66,
     "off": 71,
@@ -2282,15 +2277,15 @@
     "contractYears": 3,
     "usage": 17.1,
     "ts": 0.496,
-    "heightCm": 201,
-    "weightKg": 99
+    "heightCm": 203,
+    "weightKg": 100
   },
   "mahmoud_abdul_rauf": {
     "id": "mahmoud_abdul_rauf",
     "name": "Mahmoud Abdul-Rauf",
-    "pos": "SG",
+    "pos": "PG",
     "positions": [
-      "SG"
+      "PG"
     ],
     "ovr": 72,
     "off": 72,
@@ -2314,15 +2309,15 @@
     "contractYears": 2,
     "usage": 26.6,
     "ts": 0.454,
-    "heightCm": 196,
-    "weightKg": 93
+    "heightCm": 185,
+    "weightKg": 73
   },
   "michael_adams": {
     "id": "michael_adams",
     "name": "Michael Adams",
-    "pos": "SG",
+    "pos": "PG",
     "positions": [
-      "SG"
+      "PG"
     ],
     "ovr": 87,
     "off": 84,
@@ -2346,15 +2341,15 @@
     "contractYears": 1,
     "usage": 24.6,
     "ts": 0.535,
-    "heightCm": 196,
-    "weightKg": 93
+    "heightCm": 178,
+    "weightKg": 73
   },
   "greg_anderson": {
     "id": "greg_anderson",
     "name": "Greg Anderson",
-    "pos": "SF",
+    "pos": "PF",
     "positions": [
-      "SF"
+      "PF"
     ],
     "ovr": 66,
     "off": 69,
@@ -2378,8 +2373,8 @@
     "contractYears": 1,
     "usage": 17.4,
     "ts": 0.486,
-    "heightCm": 201,
-    "weightKg": 99
+    "heightCm": 208,
+    "weightKg": 104
   },
   "kenny_battle": {
     "id": "kenny_battle",
@@ -2410,15 +2405,15 @@
     "contractYears": 4,
     "usage": 14.6,
     "ts": 0.542,
-    "heightCm": 196,
-    "weightKg": 93
+    "heightCm": 198,
+    "weightKg": 95
   },
   "anthony_cook": {
     "id": "anthony_cook",
     "name": "Anthony Cook",
-    "pos": "SF",
+    "pos": "PF",
     "positions": [
-      "SF"
+      "PF"
     ],
     "ovr": 66,
     "off": 71,
@@ -2442,8 +2437,8 @@
     "contractYears": 1,
     "usage": 12.7,
     "ts": 0.459,
-    "heightCm": 201,
-    "weightKg": 99
+    "heightCm": 206,
+    "weightKg": 93
   },
   "t_r_dunn": {
     "id": "t_r_dunn",
@@ -2474,15 +2469,15 @@
     "contractYears": 1,
     "usage": 9.8,
     "ts": 0.508,
-    "heightCm": 196,
-    "weightKg": 93
+    "heightCm": 193,
+    "weightKg": 87
   },
   "jim_farmer": {
     "id": "jim_farmer",
     "name": "Jim Farmer",
-    "pos": "SF",
+    "pos": "SG",
     "positions": [
-      "SF"
+      "SG"
     ],
     "ovr": 73,
     "off": 74,
@@ -2506,8 +2501,8 @@
     "contractYears": 2,
     "usage": 23.1,
     "ts": 0.512,
-    "heightCm": 201,
-    "weightKg": 99
+    "heightCm": 193,
+    "weightKg": 86
   },
   "corey_gaines": {
     "id": "corey_gaines",
@@ -2538,15 +2533,15 @@
     "contractYears": 1,
     "usage": 16.1,
     "ts": 0.502,
-    "heightCm": 196,
-    "weightKg": 93
+    "heightCm": 190,
+    "weightKg": 88
   },
   "jerome_lane": {
     "id": "jerome_lane",
     "name": "Jerome Lane",
-    "pos": "SF",
+    "pos": "PF",
     "positions": [
-      "SF"
+      "PF"
     ],
     "ovr": 70,
     "off": 72,
@@ -2570,8 +2565,8 @@
     "contractYears": 4,
     "usage": 16.6,
     "ts": 0.453,
-    "heightCm": 201,
-    "weightKg": 99
+    "heightCm": 198,
+    "weightKg": 104
   },
   "tim_legler": {
     "id": "tim_legler",
@@ -2602,8 +2597,8 @@
     "contractYears": 2,
     "usage": 18.0,
     "ts": 0.449,
-    "heightCm": 196,
-    "weightKg": 93
+    "heightCm": 193,
+    "weightKg": 91
   },
   "marcus_liberty": {
     "id": "marcus_liberty",
@@ -2634,8 +2629,8 @@
     "contractYears": 2,
     "usage": 18.7,
     "ts": 0.464,
-    "heightCm": 201,
-    "weightKg": 99
+    "heightCm": 203,
+    "weightKg": 93
   },
   "todd_lichti": {
     "id": "todd_lichti",
@@ -2666,15 +2661,15 @@
     "contractYears": 4,
     "usage": 18.9,
     "ts": 0.514,
-    "heightCm": 196,
+    "heightCm": 193,
     "weightKg": 93
   },
   "anthony_mason": {
     "id": "anthony_mason",
     "name": "Anthony Mason",
-    "pos": "SF",
+    "pos": "PF",
     "positions": [
-      "SF"
+      "PF"
     ],
     "ovr": 69,
     "off": 72,
@@ -2698,16 +2693,16 @@
     "contractYears": 5,
     "usage": 17.8,
     "ts": 0.511,
-    "heightCm": 201,
-    "weightKg": 99,
+    "heightCm": 203,
+    "weightKg": 113,
     "skinTone": "#593526"
   },
   "craig_neal": {
     "id": "craig_neal",
     "name": "Craig Neal",
-    "pos": "SG",
+    "pos": "PG",
     "positions": [
-      "SG"
+      "PG"
     ],
     "ovr": 66,
     "off": 72,
@@ -2732,14 +2727,14 @@
     "usage": 17.6,
     "ts": 0.513,
     "heightCm": 196,
-    "weightKg": 93
+    "weightKg": 75
   },
   "blair_rasmussen": {
     "id": "blair_rasmussen",
     "name": "Blair Rasmussen",
-    "pos": "SF",
+    "pos": "C",
     "positions": [
-      "SF"
+      "C"
     ],
     "ovr": 74,
     "off": 71,
@@ -2763,16 +2758,15 @@
     "contractYears": 5,
     "usage": 16.8,
     "ts": 0.49,
-    "heightCm": 201,
-    "weightKg": 99
+    "heightCm": 213,
+    "weightKg": 113
   },
   "reggie_williams": {
     "id": "reggie_williams",
     "name": "Reggie Williams",
     "pos": "SF",
     "positions": [
-      "SF",
-      "SG"
+      "SF"
     ],
     "ovr": 76,
     "off": 74,
@@ -2797,7 +2791,7 @@
     "usage": 20.6,
     "ts": 0.512,
     "heightCm": 201,
-    "weightKg": 99
+    "weightKg": 86
   },
   "joe_wolf": {
     "id": "joe_wolf",
@@ -2829,7 +2823,7 @@
     "usage": 14.9,
     "ts": 0.474,
     "heightCm": 211,
-    "weightKg": 114
+    "weightKg": 104
   },
   "orlando_woolridge": {
     "id": "orlando_woolridge",
@@ -2860,8 +2854,8 @@
     "contractYears": 5,
     "usage": 24.3,
     "ts": 0.574,
-    "heightCm": 201,
-    "weightKg": 99
+    "heightCm": 206,
+    "weightKg": 98
   },
   "vincent_askew": {
     "id": "vincent_askew",
@@ -2892,8 +2886,8 @@
     "contractYears": 2,
     "usage": 16.9,
     "ts": 0.546,
-    "heightCm": 196,
-    "weightKg": 93
+    "heightCm": 198,
+    "weightKg": 95
   },
   "mario_elie": {
     "id": "mario_elie",
@@ -2924,17 +2918,16 @@
     "contractYears": 5,
     "usage": 14.6,
     "ts": 0.59,
-    "heightCm": 201,
-    "weightKg": 99,
+    "heightCm": 196,
+    "weightKg": 95,
     "skinTone": "#764c38"
   },
   "tim_hardaway": {
     "id": "tim_hardaway",
     "name": "Tim Hardaway",
-    "pos": "SF",
+    "pos": "PG",
     "positions": [
-      "SF",
-      "SG"
+      "PG"
     ],
     "ovr": 87,
     "off": 82,
@@ -2958,8 +2951,8 @@
     "contractYears": 2,
     "usage": 23.3,
     "ts": 0.541,
-    "heightCm": 201,
-    "weightKg": 99
+    "heightCm": 183,
+    "weightKg": 79
   },
   "rod_higgins": {
     "id": "rod_higgins",
@@ -2991,15 +2984,14 @@
     "usage": 15.2,
     "ts": 0.591,
     "heightCm": 201,
-    "weightKg": 99
+    "weightKg": 91
   },
   "tyrone_hill": {
     "id": "tyrone_hill",
     "name": "Tyrone Hill",
-    "pos": "SF",
+    "pos": "PF",
     "positions": [
-      "SF",
-      "C"
+      "PF"
     ],
     "ovr": 66,
     "off": 70,
@@ -3023,15 +3015,15 @@
     "contractYears": 3,
     "usage": 14.9,
     "ts": 0.534,
-    "heightCm": 201,
-    "weightKg": 99
+    "heightCm": 206,
+    "weightKg": 109
   },
   "les_jepsen": {
     "id": "les_jepsen",
     "name": "Les Jepsen",
-    "pos": "SG",
+    "pos": "C",
     "positions": [
-      "SG"
+      "C"
     ],
     "ovr": 66,
     "off": 72,
@@ -3055,8 +3047,8 @@
     "contractYears": 4,
     "usage": 16.6,
     "ts": 0.443,
-    "heightCm": 196,
-    "weightKg": 93
+    "heightCm": 213,
+    "weightKg": 108
   },
   "steve_johnson": {
     "id": "steve_johnson",
@@ -3087,15 +3079,15 @@
     "contractYears": 3,
     "usage": 19.2,
     "ts": 0.555,
-    "heightCm": 211,
-    "weightKg": 114
+    "heightCm": 208,
+    "weightKg": 107
   },
   "bart_kofoed": {
     "id": "bart_kofoed",
     "name": "Bart Kofoed",
-    "pos": "SF",
+    "pos": "SG",
     "positions": [
-      "SF"
+      "SG"
     ],
     "ovr": 67,
     "off": 73,
@@ -3119,8 +3111,8 @@
     "contractYears": 1,
     "usage": 16.6,
     "ts": 0.492,
-    "heightCm": 201,
-    "weightKg": 99
+    "heightCm": 193,
+    "weightKg": 95
   },
   "alton_lister": {
     "id": "alton_lister",
@@ -3151,8 +3143,8 @@
     "contractYears": 4,
     "usage": 15.2,
     "ts": 0.511,
-    "heightCm": 211,
-    "weightKg": 114
+    "heightCm": 213,
+    "weightKg": 109
   },
   "sarunas_marciulionis": {
     "id": "sarunas_marciulionis",
@@ -3184,7 +3176,7 @@
     "usage": 21.2,
     "ts": 0.592,
     "heightCm": 196,
-    "weightKg": 93
+    "weightKg": 91
   },
   "paul_mokeski": {
     "id": "paul_mokeski",
@@ -3215,8 +3207,8 @@
     "contractYears": 4,
     "usage": 15.1,
     "ts": 0.46,
-    "heightCm": 211,
-    "weightKg": 114
+    "heightCm": 213,
+    "weightKg": 113
   },
   "chris_mullin": {
     "id": "chris_mullin",
@@ -3248,15 +3240,15 @@
     "usage": 23.7,
     "ts": 0.624,
     "heightCm": 201,
-    "weightKg": 99,
+    "weightKg": 98,
     "skinTone": "#bb7167"
   },
   "jim_petersen": {
     "id": "jim_petersen",
     "name": "Jim Petersen",
-    "pos": "SF",
+    "pos": "C",
     "positions": [
-      "SF"
+      "C"
     ],
     "ovr": 66,
     "off": 70,
@@ -3280,15 +3272,15 @@
     "contractYears": 1,
     "usage": 15.1,
     "ts": 0.515,
-    "heightCm": 201,
-    "weightKg": 99
+    "heightCm": 208,
+    "weightKg": 107
   },
   "kevin_pritchard": {
     "id": "kevin_pritchard",
     "name": "Kevin Pritchard",
-    "pos": "SG",
+    "pos": "PG",
     "positions": [
-      "SG"
+      "PG"
     ],
     "ovr": 66,
     "off": 70,
@@ -3312,8 +3304,8 @@
     "contractYears": 4,
     "usage": 16.6,
     "ts": 0.471,
-    "heightCm": 196,
-    "weightKg": 93
+    "heightCm": 190,
+    "weightKg": 82
   },
   "mitch_richmond": {
     "id": "mitch_richmond",
@@ -3345,15 +3337,15 @@
     "usage": 24.2,
     "ts": 0.568,
     "heightCm": 196,
-    "weightKg": 93,
+    "weightKg": 98,
     "skinTone": "#684634"
   },
   "tom_tolbert": {
     "id": "tom_tolbert",
     "name": "Tom Tolbert",
-    "pos": "SF",
+    "pos": "PF",
     "positions": [
-      "SF"
+      "PF"
     ],
     "ovr": 70,
     "off": 72,
@@ -3378,14 +3370,14 @@
     "usage": 17.6,
     "ts": 0.516,
     "heightCm": 201,
-    "weightKg": 99
+    "weightKg": 107
   },
   "matt_bullard": {
     "id": "matt_bullard",
     "name": "Matt Bullard",
-    "pos": "SF",
+    "pos": "PF",
     "positions": [
-      "SF"
+      "PF"
     ],
     "ovr": 69,
     "off": 73,
@@ -3409,16 +3401,16 @@
     "contractYears": 1,
     "usage": 20.9,
     "ts": 0.527,
-    "heightCm": 201,
-    "weightKg": 99,
+    "heightCm": 208,
+    "weightKg": 98,
     "skinTone": "#9e5b4f"
   },
   "adrian_caldwell": {
     "id": "adrian_caldwell",
     "name": "Adrian Caldwell",
-    "pos": "SF",
+    "pos": "PF",
     "positions": [
-      "SF"
+      "PF"
     ],
     "ovr": 66,
     "off": 70,
@@ -3442,8 +3434,8 @@
     "contractYears": 2,
     "usage": 14.9,
     "ts": 0.478,
-    "heightCm": 201,
-    "weightKg": 99
+    "heightCm": 203,
+    "weightKg": 120
   },
   "dave_feitl": {
     "id": "dave_feitl",
@@ -3475,14 +3467,14 @@
     "usage": 19.7,
     "ts": 0.453,
     "heightCm": 211,
-    "weightKg": 114
+    "weightKg": 107
   },
   "sleepy_floyd": {
     "id": "sleepy_floyd",
     "name": "Sleepy Floyd",
-    "pos": "SG",
+    "pos": "PG",
     "positions": [
-      "SG"
+      "PG"
     ],
     "ovr": 78,
     "off": 77,
@@ -3506,8 +3498,8 @@
     "contractYears": 4,
     "usage": 22.4,
     "ts": 0.511,
-    "heightCm": 196,
-    "weightKg": 93
+    "heightCm": 190,
+    "weightKg": 77
   },
   "dave_jamerson": {
     "id": "dave_jamerson",
@@ -3539,7 +3531,7 @@
     "usage": 25.4,
     "ts": 0.481,
     "heightCm": 196,
-    "weightKg": 93
+    "weightKg": 86
   },
   "buck_johnson": {
     "id": "buck_johnson",
@@ -3571,7 +3563,7 @@
     "usage": 19.3,
     "ts": 0.521,
     "heightCm": 201,
-    "weightKg": 99
+    "weightKg": 86
   },
   "vernon_maxwell": {
     "id": "vernon_maxwell",
@@ -3602,8 +3594,8 @@
     "contractYears": 1,
     "usage": 21.0,
     "ts": 0.505,
-    "heightCm": 196,
-    "weightKg": 93
+    "heightCm": 193,
+    "weightKg": 82
   },
   "hakeem_olajuwon": {
     "id": "hakeem_olajuwon",
@@ -3634,16 +3626,16 @@
     "contractYears": 1,
     "usage": 26.1,
     "ts": 0.545,
-    "heightCm": 211,
-    "weightKg": 114,
+    "heightCm": 213,
+    "weightKg": 116,
     "skinTone": "#744631"
   },
   "kenny_smith": {
     "id": "kenny_smith",
     "name": "Kenny Smith",
-    "pos": "SG",
+    "pos": "PG",
     "positions": [
-      "SG"
+      "PG"
     ],
     "ovr": 83,
     "off": 79,
@@ -3667,15 +3659,15 @@
     "contractYears": 5,
     "usage": 20.4,
     "ts": 0.575,
-    "heightCm": 196,
-    "weightKg": 93
+    "heightCm": 190,
+    "weightKg": 77
   },
   "larry_smith": {
     "id": "larry_smith",
     "name": "Larry Smith",
-    "pos": "SF",
+    "pos": "PF",
     "positions": [
-      "SF"
+      "PF"
     ],
     "ovr": 73,
     "off": 72,
@@ -3699,15 +3691,15 @@
     "contractYears": 1,
     "usage": 8.8,
     "ts": 0.472,
-    "heightCm": 201,
-    "weightKg": 99
+    "heightCm": 203,
+    "weightKg": 98
   },
   "otis_thorpe": {
     "id": "otis_thorpe",
     "name": "Otis Thorpe",
-    "pos": "SF",
+    "pos": "PF",
     "positions": [
-      "SF"
+      "PF"
     ],
     "ovr": 82,
     "off": 77,
@@ -3731,8 +3723,8 @@
     "contractYears": 4,
     "usage": 19.3,
     "ts": 0.593,
-    "heightCm": 201,
-    "weightKg": 99,
+    "heightCm": 208,
+    "weightKg": 112,
     "skinTone": "#5d3a2e"
   },
   "kennard_winchester": {
@@ -3764,8 +3756,8 @@
     "contractYears": 5,
     "usage": 19.6,
     "ts": 0.464,
-    "heightCm": 201,
-    "weightKg": 99
+    "heightCm": 196,
+    "weightKg": 95
   },
   "david_wood": {
     "id": "david_wood",
@@ -3796,15 +3788,15 @@
     "contractYears": 5,
     "usage": 14.6,
     "ts": 0.531,
-    "heightCm": 201,
-    "weightKg": 99
+    "heightCm": 206,
+    "weightKg": 103
   },
   "cedric_ball": {
     "id": "cedric_ball",
     "name": "Cedric Ball",
-    "pos": "SF",
+    "pos": "PF",
     "positions": [
-      "SF"
+      "PF"
     ],
     "ovr": 66,
     "off": 73,
@@ -3828,15 +3820,15 @@
     "contractYears": 1,
     "usage": 17.0,
     "ts": 0.521,
-    "heightCm": 201,
-    "weightKg": 99
+    "heightCm": 203,
+    "weightKg": 95
   },
   "ken_bannister": {
     "id": "ken_bannister",
     "name": "Ken Bannister",
-    "pos": "SF",
+    "pos": "PF",
     "positions": [
-      "SF"
+      "PF"
     ],
     "ovr": 65,
     "off": 69,
@@ -3860,8 +3852,8 @@
     "contractYears": 4,
     "usage": 17.0,
     "ts": 0.505,
-    "heightCm": 201,
-    "weightKg": 99
+    "heightCm": 206,
+    "weightKg": 107
   },
   "greg_butler": {
     "id": "greg_butler",
@@ -3893,14 +3885,14 @@
     "usage": 20.0,
     "ts": 0.455,
     "heightCm": 211,
-    "weightKg": 114
+    "weightKg": 109
   },
   "winston_garland": {
     "id": "winston_garland",
     "name": "Winston Garland",
-    "pos": "SG",
+    "pos": "PG",
     "positions": [
-      "SG"
+      "PG"
     ],
     "ovr": 74,
     "off": 71,
@@ -3924,8 +3916,8 @@
     "contractYears": 1,
     "usage": 17.3,
     "ts": 0.475,
-    "heightCm": 196,
-    "weightKg": 93
+    "heightCm": 188,
+    "weightKg": 77
   },
   "tom_garrick": {
     "id": "tom_garrick",
@@ -3956,15 +3948,15 @@
     "contractYears": 1,
     "usage": 14.5,
     "ts": 0.51,
-    "heightCm": 196,
-    "weightKg": 93
+    "heightCm": 188,
+    "weightKg": 84
   },
   "gary_grant": {
     "id": "gary_grant",
     "name": "Gary Grant",
-    "pos": "SG",
+    "pos": "PG",
     "positions": [
-      "SG"
+      "PG"
     ],
     "ovr": 76,
     "off": 74,
@@ -3988,17 +3980,15 @@
     "contractYears": 4,
     "usage": 17.3,
     "ts": 0.486,
-    "heightCm": 196,
-    "weightKg": 93
+    "heightCm": 190,
+    "weightKg": 84
   },
   "ron_harper": {
     "id": "ron_harper",
     "name": "Ron Harper",
-    "pos": "PF",
+    "pos": "SG",
     "positions": [
-      "PF",
-      "SG",
-      "SF"
+      "SG"
     ],
     "ovr": 84,
     "off": 78,
@@ -4022,8 +4012,8 @@
     "contractYears": 2,
     "usage": 26.8,
     "ts": 0.491,
-    "heightCm": 206,
-    "weightKg": 107
+    "heightCm": 198,
+    "weightKg": 84
   },
   "bo_kimble": {
     "id": "bo_kimble",
@@ -4054,16 +4044,15 @@
     "contractYears": 5,
     "usage": 21.6,
     "ts": 0.464,
-    "heightCm": 196,
-    "weightKg": 93
+    "heightCm": 193,
+    "weightKg": 86
   },
   "danny_manning": {
     "id": "danny_manning",
     "name": "Danny Manning",
-    "pos": "SF",
+    "pos": "PF",
     "positions": [
-      "SF",
-      "C"
+      "PF"
     ],
     "ovr": 82,
     "off": 77,
@@ -4087,16 +4076,16 @@
     "contractYears": 5,
     "usage": 22.2,
     "ts": 0.565,
-    "heightCm": 201,
-    "weightKg": 99,
+    "heightCm": 208,
+    "weightKg": 104,
     "skinTone": "#6f3f22"
   },
   "jeff_martin": {
     "id": "jeff_martin",
     "name": "Jeff Martin",
-    "pos": "SG",
+    "pos": "PG",
     "positions": [
-      "SG"
+      "PG"
     ],
     "ovr": 70,
     "off": 72,
@@ -4121,7 +4110,7 @@
     "usage": 17.5,
     "ts": 0.473,
     "heightCm": 196,
-    "weightKg": 93
+    "weightKg": 88
   },
   "ken_norman": {
     "id": "ken_norman",
@@ -4152,16 +4141,15 @@
     "contractYears": 3,
     "usage": 22.5,
     "ts": 0.529,
-    "heightCm": 201,
-    "weightKg": 99
+    "heightCm": 203,
+    "weightKg": 98
   },
   "olden_polynice": {
     "id": "olden_polynice",
     "name": "Olden Polynice",
     "pos": "C",
     "positions": [
-      "C",
-      "SF"
+      "C"
     ],
     "ovr": 75,
     "off": 75,
@@ -4185,8 +4173,8 @@
     "contractYears": 1,
     "usage": 15.0,
     "ts": 0.568,
-    "heightCm": 211,
-    "weightKg": 114
+    "heightCm": 213,
+    "weightKg": 113
   },
   "charles_smith_293": {
     "id": "charles_smith_293",
@@ -4217,8 +4205,8 @@
     "contractYears": 4,
     "usage": 23.2,
     "ts": 0.553,
-    "heightCm": 201,
-    "weightKg": 99
+    "heightCm": 208,
+    "weightKg": 104
   },
   "mike_smrek": {
     "id": "mike_smrek",
@@ -4249,15 +4237,15 @@
     "contractYears": 3,
     "usage": 15.4,
     "ts": 0.444,
-    "heightCm": 211,
-    "weightKg": 114
+    "heightCm": 213,
+    "weightKg": 113
   },
   "loy_vaught": {
     "id": "loy_vaught",
     "name": "Loy Vaught",
-    "pos": "SF",
+    "pos": "PF",
     "positions": [
-      "SF"
+      "PF"
     ],
     "ovr": 67,
     "off": 72,
@@ -4281,16 +4269,15 @@
     "contractYears": 5,
     "usage": 15.3,
     "ts": 0.512,
-    "heightCm": 201,
-    "weightKg": 99
+    "heightCm": 206,
+    "weightKg": 104
   },
   "elden_campbell": {
     "id": "elden_campbell",
     "name": "Elden Campbell",
-    "pos": "SF",
+    "pos": "PF",
     "positions": [
-      "SF",
-      "C"
+      "PF"
     ],
     "ovr": 68,
     "off": 72,
@@ -4314,8 +4301,8 @@
     "contractYears": 1,
     "usage": 18.1,
     "ts": 0.507,
-    "heightCm": 201,
-    "weightKg": 99,
+    "heightCm": 211,
+    "weightKg": 98,
     "skinTone": "#765142"
   },
   "vlade_divac": {
@@ -4347,16 +4334,16 @@
     "contractYears": 3,
     "usage": 17.8,
     "ts": 0.588,
-    "heightCm": 211,
-    "weightKg": 114,
+    "heightCm": 216,
+    "weightKg": 110,
     "skinTone": "#b4724d"
   },
   "larry_drew": {
     "id": "larry_drew",
     "name": "Larry Drew",
-    "pos": "SG",
+    "pos": "PG",
     "positions": [
-      "SG"
+      "PG"
     ],
     "ovr": 68,
     "off": 73,
@@ -4380,15 +4367,15 @@
     "contractYears": 5,
     "usage": 16.2,
     "ts": 0.515,
-    "heightCm": 196,
-    "weightKg": 93
+    "heightCm": 185,
+    "weightKg": 77
   },
   "a_c_green": {
     "id": "a_c_green",
     "name": "A.C. Green",
-    "pos": "SF",
+    "pos": "PF",
     "positions": [
-      "SF"
+      "PF"
     ],
     "ovr": 76,
     "off": 76,
@@ -4412,15 +4399,15 @@
     "contractYears": 5,
     "usage": 16.2,
     "ts": 0.553,
-    "heightCm": 201,
-    "weightKg": 99
+    "heightCm": 206,
+    "weightKg": 100
   },
   "magic_johnson": {
     "id": "magic_johnson",
     "name": "Magic Johnson",
-    "pos": "SG",
+    "pos": "PG",
     "positions": [
-      "SG"
+      "PG"
     ],
     "ovr": 94,
     "off": 89,
@@ -4444,16 +4431,16 @@
     "contractYears": 2,
     "usage": 23.4,
     "ts": 0.621,
-    "heightCm": 196,
-    "weightKg": 93,
+    "heightCm": 206,
+    "weightKg": 98,
     "skinTone": "#8c5a37"
   },
   "sam_perkins": {
     "id": "sam_perkins",
     "name": "Sam Perkins",
-    "pos": "SF",
+    "pos": "PF",
     "positions": [
-      "SF"
+      "PF"
     ],
     "ovr": 81,
     "off": 76,
@@ -4477,8 +4464,8 @@
     "contractYears": 4,
     "usage": 18.0,
     "ts": 0.565,
-    "heightCm": 201,
-    "weightKg": 99
+    "heightCm": 206,
+    "weightKg": 107
   },
   "byron_scott": {
     "id": "byron_scott",
@@ -4509,8 +4496,8 @@
     "contractYears": 1,
     "usage": 19.9,
     "ts": 0.538,
-    "heightCm": 196,
-    "weightKg": 93
+    "heightCm": 193,
+    "weightKg": 91
   },
   "tony_smith": {
     "id": "tony_smith",
@@ -4541,8 +4528,8 @@
     "contractYears": 2,
     "usage": 19.4,
     "ts": 0.485,
-    "heightCm": 196,
-    "weightKg": 93
+    "heightCm": 190,
+    "weightKg": 84
   },
   "terry_teagle": {
     "id": "terry_teagle",
@@ -4574,14 +4561,14 @@
     "usage": 24.9,
     "ts": 0.507,
     "heightCm": 196,
-    "weightKg": 93
+    "weightKg": 88
   },
   "irving_thomas": {
     "id": "irving_thomas",
     "name": "Irving Thomas",
-    "pos": "SF",
+    "pos": "PF",
     "positions": [
-      "SF"
+      "PF"
     ],
     "ovr": 66,
     "off": 70,
@@ -4605,8 +4592,8 @@
     "contractYears": 3,
     "usage": 23.3,
     "ts": 0.461,
-    "heightCm": 201,
-    "weightKg": 99
+    "heightCm": 203,
+    "weightKg": 102
   },
   "mychal_thompson": {
     "id": "mychal_thompson",
@@ -4637,8 +4624,8 @@
     "contractYears": 4,
     "usage": 14.6,
     "ts": 0.541,
-    "heightCm": 211,
-    "weightKg": 114
+    "heightCm": 208,
+    "weightKg": 103
   },
   "james_worthy": {
     "id": "james_worthy",
@@ -4669,8 +4656,8 @@
     "contractYears": 4,
     "usage": 23.9,
     "ts": 0.549,
-    "heightCm": 201,
-    "weightKg": 99,
+    "heightCm": 206,
+    "weightKg": 102,
     "skinTone": "#5e4232"
   },
   "keith_askins": {
@@ -4703,7 +4690,7 @@
     "usage": 16.1,
     "ts": 0.487,
     "heightCm": 201,
-    "weightKg": 99
+    "weightKg": 89
   },
   "willie_burton": {
     "id": "willie_burton",
@@ -4734,15 +4721,15 @@
     "contractYears": 3,
     "usage": 21.8,
     "ts": 0.509,
-    "heightCm": 201,
-    "weightKg": 99
+    "heightCm": 203,
+    "weightKg": 95
   },
   "bimbo_coles": {
     "id": "bimbo_coles",
     "name": "Bimbo Coles",
-    "pos": "SG",
+    "pos": "PG",
     "positions": [
-      "SG"
+      "PG"
     ],
     "ovr": 71,
     "off": 71,
@@ -4766,15 +4753,15 @@
     "contractYears": 3,
     "usage": 16.1,
     "ts": 0.466,
-    "heightCm": 196,
-    "weightKg": 93
+    "heightCm": 183,
+    "weightKg": 83
   },
   "terry_davis": {
     "id": "terry_davis",
     "name": "Terry Davis",
-    "pos": "SF",
+    "pos": "PF",
     "positions": [
-      "SF"
+      "PF"
     ],
     "ovr": 66,
     "off": 71,
@@ -4798,15 +4785,15 @@
     "contractYears": 2,
     "usage": 14.6,
     "ts": 0.512,
-    "heightCm": 201,
-    "weightKg": 99
+    "heightCm": 206,
+    "weightKg": 102
   },
   "sherman_douglas": {
     "id": "sherman_douglas",
     "name": "Sherman Douglas",
-    "pos": "SG",
+    "pos": "PG",
     "positions": [
-      "SG"
+      "PG"
     ],
     "ovr": 84,
     "off": 79,
@@ -4830,8 +4817,8 @@
     "contractYears": 3,
     "usage": 23.1,
     "ts": 0.542,
-    "heightCm": 196,
-    "weightKg": 93,
+    "heightCm": 183,
+    "weightKg": 82,
     "skinTone": "#603a3b"
   },
   "kevin_edwards": {
@@ -4863,15 +4850,15 @@
     "contractYears": 3,
     "usage": 23.2,
     "ts": 0.464,
-    "heightCm": 196,
-    "weightKg": 93
+    "heightCm": 190,
+    "weightKg": 86
   },
   "alec_kessler": {
     "id": "alec_kessler",
     "name": "Alec Kessler",
-    "pos": "SF",
+    "pos": "C",
     "positions": [
-      "SF"
+      "C"
     ],
     "ovr": 64,
     "off": 67,
@@ -4895,15 +4882,15 @@
     "contractYears": 5,
     "usage": 20.2,
     "ts": 0.468,
-    "heightCm": 201,
-    "weightKg": 99
+    "heightCm": 211,
+    "weightKg": 104
   },
   "grant_long": {
     "id": "grant_long",
     "name": "Grant Long",
-    "pos": "SF",
+    "pos": "PF",
     "positions": [
-      "SF"
+      "PF"
     ],
     "ovr": 76,
     "off": 72,
@@ -4927,8 +4914,8 @@
     "contractYears": 2,
     "usage": 14.3,
     "ts": 0.549,
-    "heightCm": 201,
-    "weightKg": 99
+    "heightCm": 203,
+    "weightKg": 102
   },
   "alan_ogg": {
     "id": "alan_ogg",
@@ -4959,15 +4946,15 @@
     "contractYears": 1,
     "usage": 12.3,
     "ts": 0.479,
-    "heightCm": 211,
-    "weightKg": 114
+    "heightCm": 218,
+    "weightKg": 109
   },
   "glen_rice": {
     "id": "glen_rice",
     "name": "Glen Rice",
-    "pos": "SG",
+    "pos": "SF",
     "positions": [
-      "SG"
+      "SF"
     ],
     "ovr": 78,
     "off": 74,
@@ -4991,8 +4978,8 @@
     "contractYears": 5,
     "usage": 22.0,
     "ts": 0.506,
-    "heightCm": 196,
-    "weightKg": 93
+    "heightCm": 203,
+    "weightKg": 98
   },
   "rony_seikaly": {
     "id": "rony_seikaly",
@@ -5024,7 +5011,7 @@
     "usage": 22.7,
     "ts": 0.525,
     "heightCm": 211,
-    "weightKg": 114
+    "weightKg": 104
   },
   "jon_sundvold": {
     "id": "jon_sundvold",
@@ -5055,8 +5042,8 @@
     "contractYears": 2,
     "usage": 20.7,
     "ts": 0.504,
-    "heightCm": 196,
-    "weightKg": 93
+    "heightCm": 188,
+    "weightKg": 77
   },
   "billy_thompson": {
     "id": "billy_thompson",
@@ -5088,7 +5075,7 @@
     "usage": 16.9,
     "ts": 0.536,
     "heightCm": 201,
-    "weightKg": 99
+    "weightKg": 88
   },
   "milt_wagner": {
     "id": "milt_wagner",
@@ -5120,14 +5107,14 @@
     "usage": 21.8,
     "ts": 0.523,
     "heightCm": 196,
-    "weightKg": 93
+    "weightKg": 84
   },
   "frank_brickowski": {
     "id": "frank_brickowski",
     "name": "Frank Brickowski",
-    "pos": "SF",
+    "pos": "PF",
     "positions": [
-      "SF"
+      "PF"
     ],
     "ovr": 77,
     "off": 74,
@@ -5151,15 +5138,15 @@
     "contractYears": 5,
     "usage": 20.1,
     "ts": 0.576,
-    "heightCm": 201,
-    "weightKg": 99
+    "heightCm": 206,
+    "weightKg": 109
   },
   "lester_conner": {
     "id": "lester_conner",
     "name": "Lester Conner",
-    "pos": "SG",
+    "pos": "PG",
     "positions": [
-      "SG"
+      "PG"
     ],
     "ovr": 74,
     "off": 72,
@@ -5183,8 +5170,8 @@
     "contractYears": 2,
     "usage": 13.4,
     "ts": 0.505,
-    "heightCm": 196,
-    "weightKg": 93
+    "heightCm": 193,
+    "weightKg": 82
   },
   "adrian_dantley": {
     "id": "adrian_dantley",
@@ -5215,8 +5202,8 @@
     "contractYears": 5,
     "usage": 22.0,
     "ts": 0.541,
-    "heightCm": 201,
-    "weightKg": 99,
+    "heightCm": 196,
+    "weightKg": 94,
     "skinTone": "#7d3b3c"
   },
   "dale_ellis": {
@@ -5248,7 +5235,7 @@
     "contractYears": 2,
     "usage": 25.4,
     "ts": 0.557,
-    "heightCm": 196,
+    "heightCm": 201,
     "weightKg": 93,
     "skinTone": "#824e37"
   },
@@ -5282,14 +5269,14 @@
     "usage": 18.9,
     "ts": 0.484,
     "heightCm": 196,
-    "weightKg": 93
+    "weightKg": 91
   },
   "steve_henson": {
     "id": "steve_henson",
     "name": "Steve Henson",
-    "pos": "SG",
+    "pos": "PG",
     "positions": [
-      "SG"
+      "PG"
     ],
     "ovr": 68,
     "off": 73,
@@ -5313,15 +5300,15 @@
     "contractYears": 4,
     "usage": 15.8,
     "ts": 0.519,
-    "heightCm": 196,
-    "weightKg": 93
+    "heightCm": 180,
+    "weightKg": 80
   },
   "jay_humphries": {
     "id": "jay_humphries",
     "name": "Jay Humphries",
-    "pos": "SG",
+    "pos": "PG",
     "positions": [
-      "SG"
+      "PG"
     ],
     "ovr": 84,
     "off": 79,
@@ -5345,15 +5332,15 @@
     "contractYears": 5,
     "usage": 19.1,
     "ts": 0.562,
-    "heightCm": 196,
-    "weightKg": 93
+    "heightCm": 190,
+    "weightKg": 84
   },
   "frank_kornet": {
     "id": "frank_kornet",
     "name": "Frank Kornet",
-    "pos": "SF",
+    "pos": "PF",
     "positions": [
-      "SF"
+      "PF"
     ],
     "ovr": 66,
     "off": 70,
@@ -5377,15 +5364,15 @@
     "contractYears": 1,
     "usage": 17.5,
     "ts": 0.453,
-    "heightCm": 201,
-    "weightKg": 99
+    "heightCm": 206,
+    "weightKg": 102
   },
   "brad_lohaus": {
     "id": "brad_lohaus",
     "name": "Brad Lohaus",
-    "pos": "SF",
+    "pos": "PF",
     "positions": [
-      "SF"
+      "PF"
     ],
     "ovr": 74,
     "off": 73,
@@ -5409,15 +5396,15 @@
     "contractYears": 4,
     "usage": 17.7,
     "ts": 0.503,
-    "heightCm": 201,
-    "weightKg": 99
+    "heightCm": 211,
+    "weightKg": 104
   },
   "fred_roberts": {
     "id": "fred_roberts",
     "name": "Fred Roberts",
-    "pos": "SF",
+    "pos": "PF",
     "positions": [
-      "SF"
+      "PF"
     ],
     "ovr": 75,
     "off": 75,
@@ -5441,7 +5428,7 @@
     "contractYears": 5,
     "usage": 17.8,
     "ts": 0.572,
-    "heightCm": 201,
+    "heightCm": 208,
     "weightKg": 99
   },
   "alvin_robertson": {
@@ -5473,8 +5460,8 @@
     "contractYears": 4,
     "usage": 20.3,
     "ts": 0.539,
-    "heightCm": 196,
-    "weightKg": 93
+    "heightCm": 193,
+    "weightKg": 84
   },
   "dan_schayes": {
     "id": "dan_schayes",
@@ -5506,7 +5493,7 @@
     "usage": 16.3,
     "ts": 0.585,
     "heightCm": 211,
-    "weightKg": 114
+    "weightKg": 107
   },
   "jack_sikma": {
     "id": "jack_sikma",
@@ -5538,14 +5525,14 @@
     "usage": 20.0,
     "ts": 0.52,
     "heightCm": 211,
-    "weightKg": 114
+    "weightKg": 104
   },
   "everette_stephens": {
     "id": "everette_stephens",
     "name": "Everette Stephens",
-    "pos": "SG",
+    "pos": "PG",
     "positions": [
-      "SG"
+      "PG"
     ],
     "ovr": 70,
     "off": 74,
@@ -5569,8 +5556,8 @@
     "contractYears": 2,
     "usage": 17.6,
     "ts": 0.553,
-    "heightCm": 196,
-    "weightKg": 93
+    "heightCm": 188,
+    "weightKg": 79
   },
   "randy_breuer": {
     "id": "randy_breuer",
@@ -5601,15 +5588,15 @@
     "contractYears": 4,
     "usage": 17.3,
     "ts": 0.462,
-    "heightCm": 211,
-    "weightKg": 114
+    "heightCm": 221,
+    "weightKg": 104
   },
   "scott_brooks": {
     "id": "scott_brooks",
     "name": "Scott Brooks",
-    "pos": "SG",
+    "pos": "PG",
     "positions": [
-      "SG"
+      "PG"
     ],
     "ovr": 76,
     "off": 78,
@@ -5633,15 +5620,15 @@
     "contractYears": 3,
     "usage": 18.1,
     "ts": 0.529,
-    "heightCm": 196,
-    "weightKg": 93
+    "heightCm": 180,
+    "weightKg": 75
   },
   "tony_campbell": {
     "id": "tony_campbell",
     "name": "Tony Campbell",
-    "pos": "SF",
+    "pos": "SG",
     "positions": [
-      "SF"
+      "SG"
     ],
     "ovr": 83,
     "off": 78,
@@ -5666,14 +5653,14 @@
     "usage": 28.2,
     "ts": 0.504,
     "heightCm": 201,
-    "weightKg": 99
+    "weightKg": 98
   },
   "richard_coffey": {
     "id": "richard_coffey",
     "name": "Richard Coffey",
-    "pos": "SG",
+    "pos": "SF",
     "positions": [
-      "SG"
+      "SF"
     ],
     "ovr": 65,
     "off": 71,
@@ -5697,8 +5684,8 @@
     "contractYears": 4,
     "usage": 13.3,
     "ts": 0.435,
-    "heightCm": 196,
-    "weightKg": 93
+    "heightCm": 198,
+    "weightKg": 96
   },
   "tyrone_corbin": {
     "id": "tyrone_corbin",
@@ -5729,8 +5716,8 @@
     "contractYears": 1,
     "usage": 21.5,
     "ts": 0.504,
-    "heightCm": 201,
-    "weightKg": 99
+    "heightCm": 198,
+    "weightKg": 95
   },
   "gerald_glass": {
     "id": "gerald_glass",
@@ -5761,15 +5748,15 @@
     "contractYears": 1,
     "usage": 27.6,
     "ts": 0.481,
-    "heightCm": 201,
-    "weightKg": 99
+    "heightCm": 196,
+    "weightKg": 100
   },
   "dan_godfread": {
     "id": "dan_godfread",
     "name": "Dan Godfread",
-    "pos": "SF",
+    "pos": "C",
     "positions": [
-      "SF"
+      "C"
     ],
     "ovr": 69,
     "off": 73,
@@ -5793,15 +5780,15 @@
     "contractYears": 1,
     "usage": 19.1,
     "ts": 0.529,
-    "heightCm": 201,
-    "weightKg": 99
+    "heightCm": 208,
+    "weightKg": 113
   },
   "sam_mitchell": {
     "id": "sam_mitchell",
     "name": "Sam Mitchell",
-    "pos": "SF",
+    "pos": "PF",
     "positions": [
-      "SF"
+      "PF"
     ],
     "ovr": 75,
     "off": 73,
@@ -5825,15 +5812,15 @@
     "contractYears": 5,
     "usage": 18.3,
     "ts": 0.508,
-    "heightCm": 201,
-    "weightKg": 99
+    "heightCm": 198,
+    "weightKg": 95
   },
   "tod_murphy": {
     "id": "tod_murphy",
     "name": "Tod Murphy",
-    "pos": "C",
+    "pos": "PF",
     "positions": [
-      "C"
+      "PF"
     ],
     "ovr": 73,
     "off": 73,
@@ -5857,15 +5844,15 @@
     "contractYears": 4,
     "usage": 12.6,
     "ts": 0.499,
-    "heightCm": 211,
-    "weightKg": 114
+    "heightCm": 206,
+    "weightKg": 100
   },
   "pooh_richardson": {
     "id": "pooh_richardson",
     "name": "Pooh Richardson",
-    "pos": "SG",
+    "pos": "PG",
     "positions": [
-      "SG"
+      "PG"
     ],
     "ovr": 84,
     "off": 80,
@@ -5889,8 +5876,8 @@
     "contractYears": 3,
     "usage": 20.9,
     "ts": 0.49,
-    "heightCm": 196,
-    "weightKg": 93
+    "heightCm": 185,
+    "weightKg": 82
   },
   "felton_spencer": {
     "id": "felton_spencer",
@@ -5921,8 +5908,8 @@
     "contractYears": 3,
     "usage": 11.9,
     "ts": 0.579,
-    "heightCm": 211,
-    "weightKg": 114
+    "heightCm": 213,
+    "weightKg": 120
   },
   "jim_thomas": {
     "id": "jim_thomas",
@@ -5953,15 +5940,15 @@
     "contractYears": 1,
     "usage": 16.8,
     "ts": 0.504,
-    "heightCm": 196,
-    "weightKg": 93
+    "heightCm": 190,
+    "weightKg": 86
   },
   "bob_thornton": {
     "id": "bob_thornton",
     "name": "Bob Thornton",
-    "pos": "SF",
+    "pos": "PF",
     "positions": [
-      "SF"
+      "PF"
     ],
     "ovr": 66,
     "off": 69,
@@ -5985,8 +5972,8 @@
     "contractYears": 2,
     "usage": 12.7,
     "ts": 0.474,
-    "heightCm": 201,
-    "weightKg": 99
+    "heightCm": 208,
+    "weightKg": 102
   },
   "doug_west": {
     "id": "doug_west",
@@ -6017,15 +6004,15 @@
     "contractYears": 1,
     "usage": 17.6,
     "ts": 0.51,
-    "heightCm": 196,
-    "weightKg": 93
+    "heightCm": 198,
+    "weightKg": 91
   },
   "mookie_blaylock": {
     "id": "mookie_blaylock",
     "name": "Mookie Blaylock",
-    "pos": "SG",
+    "pos": "PG",
     "positions": [
-      "SG"
+      "PG"
     ],
     "ovr": 78,
     "off": 72,
@@ -6049,8 +6036,8 @@
     "contractYears": 5,
     "usage": 20.9,
     "ts": 0.45,
-    "heightCm": 196,
-    "weightKg": 93,
+    "heightCm": 183,
+    "weightKg": 82,
     "skinTone": "#583421"
   },
   "sam_bowie": {
@@ -6082,8 +6069,8 @@
     "contractYears": 2,
     "usage": 20.3,
     "ts": 0.492,
-    "heightCm": 211,
-    "weightKg": 114
+    "heightCm": 216,
+    "weightKg": 107
   },
   "jud_buechler": {
     "id": "jud_buechler",
@@ -6114,15 +6101,15 @@
     "contractYears": 2,
     "usage": 13.5,
     "ts": 0.464,
-    "heightCm": 201,
-    "weightKg": 99
+    "heightCm": 198,
+    "weightKg": 100
   },
   "derrick_coleman": {
     "id": "derrick_coleman",
     "name": "Derrick Coleman",
-    "pos": "SF",
+    "pos": "PF",
     "positions": [
-      "SF"
+      "PF"
     ],
     "ovr": 81,
     "off": 77,
@@ -6146,8 +6133,8 @@
     "contractYears": 4,
     "usage": 23.1,
     "ts": 0.527,
-    "heightCm": 201,
-    "weightKg": 99,
+    "heightCm": 208,
+    "weightKg": 104,
     "skinTone": "#80543a"
   },
   "chris_dudley": {
@@ -6180,14 +6167,14 @@
     "usage": 15.2,
     "ts": 0.433,
     "heightCm": 211,
-    "weightKg": 114
+    "weightKg": 107
   },
   "tate_george": {
     "id": "tate_george",
     "name": "Tate George",
-    "pos": "SG",
+    "pos": "PG",
     "positions": [
-      "SG"
+      "PG"
     ],
     "ovr": 66,
     "off": 72,
@@ -6212,14 +6199,14 @@
     "usage": 17.1,
     "ts": 0.468,
     "heightCm": 196,
-    "weightKg": 93
+    "weightKg": 86
   },
   "derrick_gervin": {
     "id": "derrick_gervin",
     "name": "Derrick Gervin",
-    "pos": "SF",
+    "pos": "PF",
     "positions": [
-      "SF"
+      "PF"
     ],
     "ovr": 74,
     "off": 74,
@@ -6243,15 +6230,15 @@
     "contractYears": 2,
     "usage": 26.0,
     "ts": 0.493,
-    "heightCm": 201,
-    "weightKg": 99
+    "heightCm": 203,
+    "weightKg": 91
   },
   "jack_haley": {
     "id": "jack_haley",
     "name": "Jack Haley",
-    "pos": "SF",
+    "pos": "PF",
     "positions": [
-      "SF"
+      "PF"
     ],
     "ovr": 66,
     "off": 70,
@@ -6275,15 +6262,15 @@
     "contractYears": 5,
     "usage": 16.9,
     "ts": 0.495,
-    "heightCm": 201,
-    "weightKg": 99
+    "heightCm": 208,
+    "weightKg": 109
   },
   "roy_hinson": {
     "id": "roy_hinson",
     "name": "Roy Hinson",
-    "pos": "C",
+    "pos": "PF",
     "positions": [
-      "C"
+      "PF"
     ],
     "ovr": 72,
     "off": 74,
@@ -6307,15 +6294,15 @@
     "contractYears": 2,
     "usage": 19.1,
     "ts": 0.555,
-    "heightCm": 211,
-    "weightKg": 114
+    "heightCm": 206,
+    "weightKg": 95
   },
   "kurk_lee": {
     "id": "kurk_lee",
     "name": "Kurk Lee",
-    "pos": "SG",
+    "pos": "PG",
     "positions": [
-      "SG"
+      "PG"
     ],
     "ovr": 66,
     "off": 70,
@@ -6339,15 +6326,15 @@
     "contractYears": 1,
     "usage": 16.1,
     "ts": 0.435,
-    "heightCm": 196,
-    "weightKg": 93
+    "heightCm": 190,
+    "weightKg": 86
   },
   "terry_mills": {
     "id": "terry_mills",
     "name": "Terry Mills",
-    "pos": "SF",
+    "pos": "PF",
     "positions": [
-      "SF"
+      "PF"
     ],
     "ovr": 69,
     "off": 72,
@@ -6371,8 +6358,8 @@
     "contractYears": 3,
     "usage": 16.8,
     "ts": 0.502,
-    "heightCm": 201,
-    "weightKg": 99,
+    "heightCm": 208,
+    "weightKg": 104,
     "skinTone": "#7c4626"
   },
   "chris_morris": {
@@ -6404,8 +6391,8 @@
     "contractYears": 1,
     "usage": 20.5,
     "ts": 0.49,
-    "heightCm": 201,
-    "weightKg": 99
+    "heightCm": 203,
+    "weightKg": 95
   },
   "drazen_petrovic": {
     "id": "drazen_petrovic",
@@ -6437,7 +6424,7 @@
     "usage": 24.4,
     "ts": 0.569,
     "heightCm": 196,
-    "weightKg": 93
+    "weightKg": 88
   },
   "reggie_theus": {
     "id": "reggie_theus",
@@ -6468,15 +6455,15 @@
     "contractYears": 3,
     "usage": 23.4,
     "ts": 0.536,
-    "heightCm": 196,
-    "weightKg": 93
+    "heightCm": 198,
+    "weightKg": 86
   },
   "maurice_cheeks": {
     "id": "maurice_cheeks",
     "name": "Maurice Cheeks",
-    "pos": "SG",
+    "pos": "PG",
     "positions": [
-      "SG"
+      "PG"
     ],
     "ovr": 78,
     "off": 76,
@@ -6500,8 +6487,8 @@
     "contractYears": 4,
     "usage": 13.4,
     "ts": 0.554,
-    "heightCm": 196,
-    "weightKg": 93
+    "heightCm": 185,
+    "weightKg": 82
   },
   "patrick_ewing": {
     "id": "patrick_ewing",
@@ -6532,15 +6519,15 @@
     "contractYears": 1,
     "usage": 30.2,
     "ts": 0.573,
-    "heightCm": 211,
-    "weightKg": 114
+    "heightCm": 213,
+    "weightKg": 109
   },
   "greg_grant": {
     "id": "greg_grant",
     "name": "Greg Grant",
-    "pos": "SG",
+    "pos": "PG",
     "positions": [
-      "SG"
+      "PG"
     ],
     "ovr": 66,
     "off": 71,
@@ -6564,8 +6551,8 @@
     "contractYears": 5,
     "usage": 18.3,
     "ts": 0.452,
-    "heightCm": 196,
-    "weightKg": 93
+    "heightCm": 170,
+    "weightKg": 64
   },
   "stuart_gray": {
     "id": "stuart_gray",
@@ -6596,15 +6583,15 @@
     "contractYears": 2,
     "usage": 13.0,
     "ts": 0.492,
-    "heightCm": 211,
-    "weightKg": 114
+    "heightCm": 213,
+    "weightKg": 107
   },
   "mark_jackson": {
     "id": "mark_jackson",
     "name": "Mark Jackson",
-    "pos": "SG",
+    "pos": "PG",
     "positions": [
-      "SG"
+      "PG"
     ],
     "ovr": 78,
     "off": 79,
@@ -6628,15 +6615,15 @@
     "contractYears": 4,
     "usage": 18.7,
     "ts": 0.523,
-    "heightCm": 196,
-    "weightKg": 93
+    "heightCm": 190,
+    "weightKg": 87
   },
   "jerrod_mustaf": {
     "id": "jerrod_mustaf",
     "name": "Jerrod Mustaf",
-    "pos": "SF",
+    "pos": "PF",
     "positions": [
-      "SF"
+      "PF"
     ],
     "ovr": 66,
     "off": 69,
@@ -6660,16 +6647,15 @@
     "contractYears": 1,
     "usage": 17.3,
     "ts": 0.507,
-    "heightCm": 201,
-    "weightKg": 99
+    "heightCm": 208,
+    "weightKg": 108
   },
   "charles_oakley": {
     "id": "charles_oakley",
     "name": "Charles Oakley",
-    "pos": "SF",
+    "pos": "PF",
     "positions": [
-      "SF",
-      "C"
+      "PF"
     ],
     "ovr": 77,
     "off": 75,
@@ -6693,8 +6679,8 @@
     "contractYears": 4,
     "usage": 15.8,
     "ts": 0.582,
-    "heightCm": 201,
-    "weightKg": 99,
+    "heightCm": 206,
+    "weightKg": 102,
     "skinTone": "#4a2a1c"
   },
   "brian_quinnett": {
@@ -6726,8 +6712,8 @@
     "contractYears": 2,
     "usage": 15.9,
     "ts": 0.49,
-    "heightCm": 196,
-    "weightKg": 93
+    "heightCm": 203,
+    "weightKg": 107
   },
   "john_starks": {
     "id": "john_starks",
@@ -6759,7 +6745,7 @@
     "usage": 19.5,
     "ts": 0.513,
     "heightCm": 196,
-    "weightKg": 93
+    "weightKg": 82
   },
   "trent_tucker": {
     "id": "trent_tucker",
@@ -6791,7 +6777,7 @@
     "usage": 17.7,
     "ts": 0.52,
     "heightCm": 196,
-    "weightKg": 93
+    "weightKg": 88
   },
   "kiki_vandeweghe": {
     "id": "kiki_vandeweghe",
@@ -6822,8 +6808,8 @@
     "contractYears": 5,
     "usage": 20.7,
     "ts": 0.573,
-    "heightCm": 201,
-    "weightKg": 99
+    "heightCm": 203,
+    "weightKg": 100
   },
   "kenny_walker": {
     "id": "kenny_walker",
@@ -6854,8 +6840,8 @@
     "contractYears": 4,
     "usage": 14.3,
     "ts": 0.544,
-    "heightCm": 201,
-    "weightKg": 99
+    "heightCm": 203,
+    "weightKg": 95
   },
   "gerald_wilkins": {
     "id": "gerald_wilkins",
@@ -6886,8 +6872,8 @@
     "contractYears": 3,
     "usage": 21.2,
     "ts": 0.523,
-    "heightCm": 196,
-    "weightKg": 93
+    "heightCm": 198,
+    "weightKg": 84
   },
   "eddielee_wilkins": {
     "id": "eddielee_wilkins",
@@ -6918,8 +6904,8 @@
     "contractYears": 4,
     "usage": 20.8,
     "ts": 0.487,
-    "heightCm": 211,
-    "weightKg": 114
+    "heightCm": 208,
+    "weightKg": 100
   },
   "mark_acres": {
     "id": "mark_acres",
@@ -6951,7 +6937,7 @@
     "usage": 9.7,
     "ts": 0.545,
     "heightCm": 211,
-    "weightKg": 114
+    "weightKg": 100
   },
   "nick_anderson": {
     "id": "nick_anderson",
@@ -6982,7 +6968,7 @@
     "contractYears": 3,
     "usage": 22.1,
     "ts": 0.519,
-    "heightCm": 196,
+    "heightCm": 198,
     "weightKg": 93,
     "skinTone": "#583520"
   },
@@ -7016,14 +7002,14 @@
     "usage": 17.7,
     "ts": 0.575,
     "heightCm": 201,
-    "weightKg": 99
+    "weightKg": 102
   },
   "terry_catledge": {
     "id": "terry_catledge",
     "name": "Terry Catledge",
-    "pos": "SF",
+    "pos": "PF",
     "positions": [
-      "SF"
+      "PF"
     ],
     "ovr": 75,
     "off": 75,
@@ -7047,8 +7033,8 @@
     "contractYears": 1,
     "usage": 23.9,
     "ts": 0.512,
-    "heightCm": 201,
-    "weightKg": 99
+    "heightCm": 203,
+    "weightKg": 100
   },
   "greg_kite": {
     "id": "greg_kite",
@@ -7080,7 +7066,7 @@
     "usage": 9.4,
     "ts": 0.491,
     "heightCm": 211,
-    "weightKg": 114
+    "weightKg": 113
   },
   "mark_mcnamara": {
     "id": "mark_mcnamara",
@@ -7112,7 +7098,7 @@
     "usage": 21.2,
     "ts": 0.484,
     "heightCm": 211,
-    "weightKg": 114
+    "weightKg": 107
   },
   "jerry_reynolds": {
     "id": "jerry_reynolds",
@@ -7143,15 +7129,15 @@
     "contractYears": 2,
     "usage": 24.0,
     "ts": 0.516,
-    "heightCm": 196,
-    "weightKg": 93
+    "heightCm": 203,
+    "weightKg": 91
   },
   "dennis_scott": {
     "id": "dennis_scott",
     "name": "Dennis Scott",
-    "pos": "SF",
+    "pos": "SG",
     "positions": [
-      "SF"
+      "SG"
     ],
     "ovr": 77,
     "off": 75,
@@ -7175,15 +7161,15 @@
     "contractYears": 3,
     "usage": 24.1,
     "ts": 0.505,
-    "heightCm": 201,
-    "weightKg": 99
+    "heightCm": 203,
+    "weightKg": 104
   },
   "scott_skiles": {
     "id": "scott_skiles",
     "name": "Scott Skiles",
-    "pos": "SG",
+    "pos": "PG",
     "positions": [
-      "SG"
+      "PG"
     ],
     "ovr": 82,
     "off": 79,
@@ -7207,8 +7193,8 @@
     "contractYears": 5,
     "usage": 20.5,
     "ts": 0.553,
-    "heightCm": 196,
-    "weightKg": 93
+    "heightCm": 185,
+    "weightKg": 82
   },
   "otis_smith": {
     "id": "otis_smith",
@@ -7239,15 +7225,15 @@
     "contractYears": 1,
     "usage": 23.9,
     "ts": 0.517,
-    "heightCm": 201,
-    "weightKg": 99
+    "heightCm": 196,
+    "weightKg": 95
   },
   "jeff_turner": {
     "id": "jeff_turner",
     "name": "Jeff Turner",
-    "pos": "SF",
+    "pos": "PF",
     "positions": [
-      "SF"
+      "PF"
     ],
     "ovr": 66,
     "off": 69,
@@ -7271,15 +7257,15 @@
     "contractYears": 1,
     "usage": 16.3,
     "ts": 0.51,
-    "heightCm": 201,
-    "weightKg": 99
+    "heightCm": 206,
+    "weightKg": 104
   },
   "sam_vincent": {
     "id": "sam_vincent",
     "name": "Sam Vincent",
-    "pos": "SG",
+    "pos": "PG",
     "positions": [
-      "SG"
+      "PG"
     ],
     "ovr": 75,
     "off": 75,
@@ -7303,15 +7289,15 @@
     "contractYears": 4,
     "usage": 19.6,
     "ts": 0.518,
-    "heightCm": 196,
-    "weightKg": 93
+    "heightCm": 188,
+    "weightKg": 84
   },
   "morlon_wiley": {
     "id": "morlon_wiley",
     "name": "Morlon Wiley",
-    "pos": "SG",
+    "pos": "PG",
     "positions": [
-      "SG"
+      "PG"
     ],
     "ovr": 68,
     "off": 72,
@@ -7335,15 +7321,15 @@
     "contractYears": 4,
     "usage": 17.6,
     "ts": 0.498,
-    "heightCm": 196,
-    "weightKg": 93
+    "heightCm": 193,
+    "weightKg": 84
   },
   "byron_dinkins": {
     "id": "byron_dinkins",
     "name": "Byron Dinkins",
-    "pos": "SG",
+    "pos": "PG",
     "positions": [
-      "SG"
+      "PG"
     ],
     "ovr": 66,
     "off": 71,
@@ -7367,8 +7353,8 @@
     "contractYears": 2,
     "usage": 16.4,
     "ts": 0.488,
-    "heightCm": 196,
-    "weightKg": 93
+    "heightCm": 185,
+    "weightKg": 77
   },
   "greg_dreiling": {
     "id": "greg_dreiling",
@@ -7399,15 +7385,15 @@
     "contractYears": 4,
     "usage": 12.5,
     "ts": 0.532,
-    "heightCm": 211,
-    "weightKg": 114
+    "heightCm": 216,
+    "weightKg": 113
   },
   "vern_fleming": {
     "id": "vern_fleming",
     "name": "Vern Fleming",
-    "pos": "SG",
+    "pos": "PG",
     "positions": [
-      "SG"
+      "PG"
     ],
     "ovr": 79,
     "off": 80,
@@ -7432,14 +7418,14 @@
     "usage": 19.3,
     "ts": 0.566,
     "heightCm": 196,
-    "weightKg": 93
+    "weightKg": 84
   },
   "george_mccloud": {
     "id": "george_mccloud",
     "name": "George McCloud",
-    "pos": "SG",
+    "pos": "SF",
     "positions": [
-      "SG"
+      "SF"
     ],
     "ovr": 66,
     "off": 70,
@@ -7463,8 +7449,8 @@
     "contractYears": 3,
     "usage": 18.4,
     "ts": 0.455,
-    "heightCm": 196,
-    "weightKg": 93,
+    "heightCm": 203,
+    "weightKg": 102,
     "skinTone": "#86523c"
   },
   "reggie_miller": {
@@ -7496,8 +7482,8 @@
     "contractYears": 1,
     "usage": 23.0,
     "ts": 0.646,
-    "heightCm": 196,
-    "weightKg": 93,
+    "heightCm": 201,
+    "weightKg": 84,
     "skinTone": "#b7734e"
   },
   "jawann_oldham": {
@@ -7529,8 +7515,8 @@
     "contractYears": 4,
     "usage": 15.7,
     "ts": 0.528,
-    "heightCm": 211,
-    "weightKg": 114
+    "heightCm": 213,
+    "weightKg": 98
   },
   "chuck_person": {
     "id": "chuck_person",
@@ -7561,8 +7547,8 @@
     "contractYears": 4,
     "usage": 24.5,
     "ts": 0.554,
-    "heightCm": 201,
-    "weightKg": 99
+    "heightCm": 203,
+    "weightKg": 100
   },
   "mike_sanders": {
     "id": "mike_sanders",
@@ -7593,15 +7579,15 @@
     "contractYears": 1,
     "usage": 17.6,
     "ts": 0.468,
-    "heightCm": 201,
-    "weightKg": 99
+    "heightCm": 198,
+    "weightKg": 95
   },
   "detlef_schrempf": {
     "id": "detlef_schrempf",
     "name": "Detlef Schrempf",
-    "pos": "SF",
+    "pos": "PF",
     "positions": [
-      "SF"
+      "PF"
     ],
     "ovr": 82,
     "off": 80,
@@ -7625,8 +7611,8 @@
     "contractYears": 3,
     "usage": 20.0,
     "ts": 0.614,
-    "heightCm": 201,
-    "weightKg": 99
+    "heightCm": 208,
+    "weightKg": 107
   },
   "rik_smits": {
     "id": "rik_smits",
@@ -7657,8 +7643,8 @@
     "contractYears": 2,
     "usage": 21.8,
     "ts": 0.547,
-    "heightCm": 211,
-    "weightKg": 114
+    "heightCm": 224,
+    "weightKg": 113
   },
   "lasalle_thompson": {
     "id": "lasalle_thompson",
@@ -7689,15 +7675,15 @@
     "contractYears": 2,
     "usage": 15.8,
     "ts": 0.517,
-    "heightCm": 211,
-    "weightKg": 114
+    "heightCm": 208,
+    "weightKg": 111
   },
   "micheal_williams": {
     "id": "micheal_williams",
     "name": "Micheal Williams",
-    "pos": "SG",
+    "pos": "PG",
     "positions": [
-      "SG"
+      "PG"
     ],
     "ovr": 81,
     "off": 78,
@@ -7721,15 +7707,15 @@
     "contractYears": 3,
     "usage": 20.1,
     "ts": 0.601,
-    "heightCm": 196,
-    "weightKg": 93
+    "heightCm": 188,
+    "weightKg": 79
   },
   "kenny_williams": {
     "id": "kenny_williams",
     "name": "Kenny Williams",
-    "pos": "SF",
+    "pos": "PF",
     "positions": [
-      "SF"
+      "PF"
     ],
     "ovr": 66,
     "off": 73,
@@ -7753,15 +7739,15 @@
     "contractYears": 5,
     "usage": 18.9,
     "ts": 0.546,
-    "heightCm": 201,
-    "weightKg": 99
+    "heightCm": 206,
+    "weightKg": 93
   },
   "randy_wittman": {
     "id": "randy_wittman",
     "name": "Randy Wittman",
-    "pos": "SG",
+    "pos": "SF",
     "positions": [
-      "SG"
+      "SF"
     ],
     "ovr": 66,
     "off": 72,
@@ -7785,8 +7771,8 @@
     "contractYears": 4,
     "usage": 12.0,
     "ts": 0.491,
-    "heightCm": 196,
-    "weightKg": 93
+    "heightCm": 198,
+    "weightKg": 95
   },
   "ron_anderson": {
     "id": "ron_anderson",
@@ -7818,7 +7804,7 @@
     "usage": 22.2,
     "ts": 0.517,
     "heightCm": 201,
-    "weightKg": 99
+    "weightKg": 98
   },
   "charles_barkley": {
     "id": "charles_barkley",
@@ -7849,8 +7835,8 @@
     "contractYears": 3,
     "usage": 26.9,
     "ts": 0.642,
-    "heightCm": 201,
-    "weightKg": 99,
+    "heightCm": 198,
+    "weightKg": 114,
     "skinTone": "#ba693a"
   },
   "manute_bol": {
@@ -7882,15 +7868,15 @@
     "contractYears": 1,
     "usage": 7.6,
     "ts": 0.419,
-    "heightCm": 211,
-    "weightKg": 114
+    "heightCm": 231,
+    "weightKg": 91
   },
   "johnny_dawkins": {
     "id": "johnny_dawkins",
     "name": "Johnny Dawkins",
-    "pos": "SG",
+    "pos": "PG",
     "positions": [
-      "SG"
+      "PG"
     ],
     "ovr": 77,
     "off": 78,
@@ -7914,15 +7900,15 @@
     "contractYears": 5,
     "usage": 18.7,
     "ts": 0.559,
-    "heightCm": 196,
-    "weightKg": 93
+    "heightCm": 188,
+    "weightKg": 75
   },
   "armen_gilliam": {
     "id": "armen_gilliam",
     "name": "Armen Gilliam",
-    "pos": "SF",
+    "pos": "PF",
     "positions": [
-      "SF"
+      "PF"
     ],
     "ovr": 77,
     "off": 75,
@@ -7946,15 +7932,15 @@
     "contractYears": 3,
     "usage": 21.9,
     "ts": 0.549,
-    "heightCm": 201,
-    "weightKg": 99
+    "heightCm": 206,
+    "weightKg": 104
   },
   "rickey_green": {
     "id": "rickey_green",
     "name": "Rickey Green",
-    "pos": "SG",
+    "pos": "PG",
     "positions": [
-      "SG"
+      "PG"
     ],
     "ovr": 75,
     "off": 74,
@@ -7978,8 +7964,8 @@
     "contractYears": 3,
     "usage": 16.9,
     "ts": 0.503,
-    "heightCm": 196,
-    "weightKg": 93
+    "heightCm": 183,
+    "weightKg": 77
   },
   "tony_harris": {
     "id": "tony_harris",
@@ -8010,8 +7996,8 @@
     "contractYears": 4,
     "usage": 18.5,
     "ts": 0.465,
-    "heightCm": 196,
-    "weightKg": 93
+    "heightCm": 190,
+    "weightKg": 86
   },
   "hersey_hawkins": {
     "id": "hersey_hawkins",
@@ -8042,8 +8028,8 @@
     "contractYears": 1,
     "usage": 23.4,
     "ts": 0.584,
-    "heightCm": 196,
-    "weightKg": 93,
+    "heightCm": 190,
+    "weightKg": 86,
     "skinTone": "#6d4936"
   },
   "dave_hoppen": {
@@ -8076,14 +8062,14 @@
     "usage": 17.7,
     "ts": 0.546,
     "heightCm": 211,
-    "weightKg": 114
+    "weightKg": 107
   },
   "rick_mahorn": {
     "id": "rick_mahorn",
     "name": "Rick Mahorn",
-    "pos": "SF",
+    "pos": "C",
     "positions": [
-      "SF"
+      "C"
     ],
     "ovr": 76,
     "off": 72,
@@ -8107,8 +8093,8 @@
     "contractYears": 5,
     "usage": 14.8,
     "ts": 0.539,
-    "heightCm": 201,
-    "weightKg": 99
+    "heightCm": 208,
+    "weightKg": 109
   },
   "brian_oliver": {
     "id": "brian_oliver",
@@ -8139,8 +8125,8 @@
     "contractYears": 3,
     "usage": 19.0,
     "ts": 0.469,
-    "heightCm": 196,
-    "weightKg": 93
+    "heightCm": 193,
+    "weightKg": 95
   },
   "kenny_payne": {
     "id": "kenny_payne",
@@ -8171,8 +8157,8 @@
     "contractYears": 1,
     "usage": 21.9,
     "ts": 0.444,
-    "heightCm": 201,
-    "weightKg": 99
+    "heightCm": 203,
+    "weightKg": 88
   },
   "robert_reid": {
     "id": "robert_reid",
@@ -8203,15 +8189,15 @@
     "contractYears": 4,
     "usage": 18.5,
     "ts": 0.428,
-    "heightCm": 201,
-    "weightKg": 99
+    "heightCm": 203,
+    "weightKg": 93
   },
   "andre_turner": {
     "id": "andre_turner",
     "name": "Andre Turner",
-    "pos": "SG",
+    "pos": "PG",
     "positions": [
-      "SG"
+      "PG"
     ],
     "ovr": 73,
     "off": 73,
@@ -8235,15 +8221,15 @@
     "contractYears": 4,
     "usage": 16.2,
     "ts": 0.486,
-    "heightCm": 196,
-    "weightKg": 93
+    "heightCm": 180,
+    "weightKg": 73
   },
   "jayson_williams": {
     "id": "jayson_williams",
     "name": "Jayson Williams",
-    "pos": "SF",
+    "pos": "PF",
     "positions": [
-      "SF"
+      "PF"
     ],
     "ovr": 66,
     "off": 69,
@@ -8267,8 +8253,8 @@
     "contractYears": 1,
     "usage": 19.0,
     "ts": 0.498,
-    "heightCm": 201,
-    "weightKg": 99
+    "heightCm": 206,
+    "weightKg": 109
   },
   "joe_barry_carroll": {
     "id": "joe_barry_carroll",
@@ -8299,8 +8285,8 @@
     "contractYears": 2,
     "usage": 22.1,
     "ts": 0.462,
-    "heightCm": 211,
-    "weightKg": 114
+    "heightCm": 213,
+    "weightKg": 102
   },
   "cedric_ceballos": {
     "id": "cedric_ceballos",
@@ -8332,14 +8318,14 @@
     "usage": 29.6,
     "ts": 0.529,
     "heightCm": 201,
-    "weightKg": 99
+    "weightKg": 100
   },
   "tom_chambers": {
     "id": "tom_chambers",
     "name": "Tom Chambers",
-    "pos": "SF",
+    "pos": "PF",
     "positions": [
-      "SF"
+      "PF"
     ],
     "ovr": 82,
     "off": 77,
@@ -8363,8 +8349,8 @@
     "contractYears": 2,
     "usage": 27.5,
     "ts": 0.538,
-    "heightCm": 201,
-    "weightKg": 99
+    "heightCm": 208,
+    "weightKg": 100
   },
   "jeff_hornacek": {
     "id": "jeff_hornacek",
@@ -8395,16 +8381,16 @@
     "contractYears": 4,
     "usage": 19.4,
     "ts": 0.588,
-    "heightCm": 196,
-    "weightKg": 93,
+    "heightCm": 193,
+    "weightKg": 86,
     "skinTone": "#bf8a6e"
   },
   "kevin_johnson": {
     "id": "kevin_johnson",
     "name": "Kevin Johnson",
-    "pos": "SG",
+    "pos": "PG",
     "positions": [
-      "SG"
+      "PG"
     ],
     "ovr": 92,
     "off": 85,
@@ -8428,16 +8414,16 @@
     "contractYears": 4,
     "usage": 24.7,
     "ts": 0.596,
-    "heightCm": 196,
-    "weightKg": 93,
+    "heightCm": 185,
+    "weightKg": 82,
     "skinTone": "#a95e3b"
   },
   "negele_knight": {
     "id": "negele_knight",
     "name": "Negele Knight",
-    "pos": "SG",
+    "pos": "PG",
     "positions": [
-      "SG"
+      "PG"
     ],
     "ovr": 71,
     "off": 74,
@@ -8461,8 +8447,8 @@
     "contractYears": 5,
     "usage": 21.8,
     "ts": 0.479,
-    "heightCm": 196,
-    "weightKg": 93
+    "heightCm": 185,
+    "weightKg": 79
   },
   "andrew_lang": {
     "id": "andrew_lang",
@@ -8494,7 +8480,7 @@
     "usage": 10.8,
     "ts": 0.616,
     "heightCm": 211,
-    "weightKg": 114
+    "weightKg": 111
   },
   "ian_lockhart": {
     "id": "ian_lockhart",
@@ -8525,15 +8511,15 @@
     "contractYears": 1,
     "usage": 17.4,
     "ts": 0.55,
-    "heightCm": 201,
-    "weightKg": 99
+    "heightCm": 203,
+    "weightKg": 109
   },
   "dan_majerle": {
     "id": "dan_majerle",
     "name": "Dan Majerle",
-    "pos": "SG",
+    "pos": "SF",
     "positions": [
-      "SG"
+      "SF"
     ],
     "ovr": 82,
     "off": 78,
@@ -8557,8 +8543,8 @@
     "contractYears": 5,
     "usage": 18.2,
     "ts": 0.534,
-    "heightCm": 196,
-    "weightKg": 93,
+    "heightCm": 198,
+    "weightKg": 98,
     "skinTone": "#9f573f"
   },
   "xavier_mcdaniel": {
@@ -8591,14 +8577,14 @@
     "usage": 24.2,
     "ts": 0.529,
     "heightCm": 201,
-    "weightKg": 99
+    "weightKg": 93
   },
   "ed_nealy": {
     "id": "ed_nealy",
     "name": "Ed Nealy",
-    "pos": "SF",
+    "pos": "PF",
     "positions": [
-      "SF"
+      "PF"
     ],
     "ovr": 70,
     "off": 74,
@@ -8623,14 +8609,14 @@
     "usage": 10.1,
     "ts": 0.554,
     "heightCm": 201,
-    "weightKg": 99
+    "weightKg": 108
   },
   "tim_perry": {
     "id": "tim_perry",
     "name": "Tim Perry",
-    "pos": "SF",
+    "pos": "C",
     "positions": [
-      "SF"
+      "C"
     ],
     "ovr": 73,
     "off": 74,
@@ -8654,15 +8640,15 @@
     "contractYears": 1,
     "usage": 16.1,
     "ts": 0.547,
-    "heightCm": 201,
-    "weightKg": 99
+    "heightCm": 206,
+    "weightKg": 91
   },
   "kurt_rambis": {
     "id": "kurt_rambis",
     "name": "Kurt Rambis",
-    "pos": "SF",
+    "pos": "PF",
     "positions": [
-      "SF"
+      "PF"
     ],
     "ovr": 74,
     "off": 74,
@@ -8686,8 +8672,8 @@
     "contractYears": 3,
     "usage": 11.8,
     "ts": 0.546,
-    "heightCm": 201,
-    "weightKg": 99
+    "heightCm": 203,
+    "weightKg": 97
   },
   "mark_west": {
     "id": "mark_west",
@@ -8718,15 +8704,15 @@
     "contractYears": 4,
     "usage": 12.5,
     "ts": 0.658,
-    "heightCm": 211,
-    "weightKg": 114
+    "heightCm": 208,
+    "weightKg": 104
   },
   "alaa_abdelnaby": {
     "id": "alaa_abdelnaby",
     "name": "Alaa Abdelnaby",
-    "pos": "SF",
+    "pos": "PF",
     "positions": [
-      "SF"
+      "PF"
     ],
     "ovr": 66,
     "off": 72,
@@ -8750,8 +8736,8 @@
     "contractYears": 1,
     "usage": 20.8,
     "ts": 0.51,
-    "heightCm": 201,
-    "weightKg": 99
+    "heightCm": 208,
+    "weightKg": 109
   },
   "danny_ainge": {
     "id": "danny_ainge",
@@ -8783,15 +8769,14 @@
     "usage": 21.6,
     "ts": 0.553,
     "heightCm": 196,
-    "weightKg": 93
+    "weightKg": 84
   },
   "mark_bryant": {
     "id": "mark_bryant",
     "name": "Mark Bryant",
-    "pos": "SF",
+    "pos": "PF",
     "positions": [
-      "SF",
-      "C"
+      "PF"
     ],
     "ovr": 67,
     "off": 72,
@@ -8815,8 +8800,8 @@
     "contractYears": 5,
     "usage": 14.7,
     "ts": 0.532,
-    "heightCm": 201,
-    "weightKg": 99
+    "heightCm": 206,
+    "weightKg": 111
   },
   "wayne_cooper": {
     "id": "wayne_cooper",
@@ -8847,8 +8832,8 @@
     "contractYears": 1,
     "usage": 11.4,
     "ts": 0.464,
-    "heightCm": 211,
-    "weightKg": 114
+    "heightCm": 208,
+    "weightKg": 100
   },
   "walter_davis": {
     "id": "walter_davis",
@@ -8879,8 +8864,8 @@
     "contractYears": 3,
     "usage": 26.0,
     "ts": 0.517,
-    "heightCm": 196,
-    "weightKg": 93
+    "heightCm": 198,
+    "weightKg": 88
   },
   "clyde_drexler": {
     "id": "clyde_drexler",
@@ -8911,8 +8896,8 @@
     "contractYears": 5,
     "usage": 25.4,
     "ts": 0.559,
-    "heightCm": 196,
-    "weightKg": 93,
+    "heightCm": 201,
+    "weightKg": 95,
     "skinTone": "#885233"
   },
   "kevin_duckworth": {
@@ -8944,8 +8929,8 @@
     "contractYears": 1,
     "usage": 22.8,
     "ts": 0.523,
-    "heightCm": 211,
-    "weightKg": 114
+    "heightCm": 213,
+    "weightKg": 125
   },
   "jerome_kersey": {
     "id": "jerome_kersey",
@@ -8977,14 +8962,14 @@
     "usage": 19.9,
     "ts": 0.525,
     "heightCm": 201,
-    "weightKg": 99
+    "weightKg": 98
   },
   "terry_porter": {
     "id": "terry_porter",
     "name": "Terry Porter",
-    "pos": "SG",
+    "pos": "PG",
     "positions": [
-      "SG"
+      "PG"
     ],
     "ovr": 89,
     "off": 85,
@@ -9008,16 +8993,15 @@
     "contractYears": 3,
     "usage": 19.7,
     "ts": 0.618,
-    "heightCm": 196,
-    "weightKg": 93
+    "heightCm": 190,
+    "weightKg": 88
   },
   "clifford_robinson": {
     "id": "clifford_robinson",
     "name": "Clifford Robinson",
-    "pos": "SF",
+    "pos": "PF",
     "positions": [
-      "SF",
-      "C"
+      "PF"
     ],
     "ovr": 75,
     "off": 72,
@@ -9041,15 +9025,15 @@
     "contractYears": 5,
     "usage": 23.0,
     "ts": 0.488,
-    "heightCm": 201,
-    "weightKg": 99
+    "heightCm": 208,
+    "weightKg": 102
   },
   "buck_williams": {
     "id": "buck_williams",
     "name": "Buck Williams",
-    "pos": "SF",
+    "pos": "PF",
     "positions": [
-      "SF"
+      "PF"
     ],
     "ovr": 78,
     "off": 76,
@@ -9073,15 +9057,15 @@
     "contractYears": 2,
     "usage": 14.4,
     "ts": 0.622,
-    "heightCm": 201,
-    "weightKg": 99
+    "heightCm": 203,
+    "weightKg": 98
   },
   "danny_young": {
     "id": "danny_young",
     "name": "Danny Young",
-    "pos": "SG",
+    "pos": "PG",
     "positions": [
-      "SG"
+      "PG"
     ],
     "ovr": 74,
     "off": 74,
@@ -9105,15 +9089,15 @@
     "contractYears": 3,
     "usage": 14.5,
     "ts": 0.499,
-    "heightCm": 196,
-    "weightKg": 93
+    "heightCm": 190,
+    "weightKg": 79
   },
   "anthony_bonner": {
     "id": "anthony_bonner",
     "name": "Anthony Bonner",
-    "pos": "SF",
+    "pos": "PF",
     "positions": [
-      "SF"
+      "PF"
     ],
     "ovr": 74,
     "off": 73,
@@ -9137,8 +9121,8 @@
     "contractYears": 4,
     "usage": 17.6,
     "ts": 0.482,
-    "heightCm": 201,
-    "weightKg": 99
+    "heightCm": 203,
+    "weightKg": 98
   },
   "rick_calloway": {
     "id": "rick_calloway",
@@ -9169,15 +9153,15 @@
     "contractYears": 4,
     "usage": 17.8,
     "ts": 0.463,
-    "heightCm": 196,
-    "weightKg": 93
+    "heightCm": 198,
+    "weightKg": 82
   },
   "antoine_carr": {
     "id": "antoine_carr",
     "name": "Antoine Carr",
-    "pos": "SF",
+    "pos": "PF",
     "positions": [
-      "SF"
+      "PF"
     ],
     "ovr": 82,
     "off": 78,
@@ -9201,8 +9185,8 @@
     "contractYears": 4,
     "usage": 26.2,
     "ts": 0.554,
-    "heightCm": 201,
-    "weightKg": 99
+    "heightCm": 206,
+    "weightKg": 102
   },
   "duane_causwell": {
     "id": "duane_causwell",
@@ -9233,15 +9217,15 @@
     "contractYears": 1,
     "usage": 14.9,
     "ts": 0.541,
-    "heightCm": 211,
-    "weightKg": 114
+    "heightCm": 213,
+    "weightKg": 109
   },
   "steve_colter": {
     "id": "steve_colter",
     "name": "Steve Colter",
-    "pos": "SG",
+    "pos": "PG",
     "positions": [
-      "SG"
+      "PG"
     ],
     "ovr": 73,
     "off": 74,
@@ -9265,8 +9249,8 @@
     "contractYears": 4,
     "usage": 14.9,
     "ts": 0.518,
-    "heightCm": 196,
-    "weightKg": 93
+    "heightCm": 190,
+    "weightKg": 75
   },
   "tony_dawson": {
     "id": "tony_dawson",
@@ -9298,7 +9282,7 @@
     "usage": 17.5,
     "ts": 0.555,
     "heightCm": 201,
-    "weightKg": 99
+    "weightKg": 98
   },
   "anthony_frederick": {
     "id": "anthony_frederick",
@@ -9330,7 +9314,7 @@
     "usage": 20.8,
     "ts": 0.47,
     "heightCm": 201,
-    "weightKg": 99
+    "weightKg": 93
   },
   "bob_hansen": {
     "id": "bob_hansen",
@@ -9361,8 +9345,8 @@
     "contractYears": 4,
     "usage": 14.9,
     "ts": 0.479,
-    "heightCm": 196,
-    "weightKg": 93
+    "heightCm": 198,
+    "weightKg": 86
   },
   "mike_higgins": {
     "id": "mike_higgins",
@@ -9393,15 +9377,15 @@
     "contractYears": 4,
     "usage": 14.6,
     "ts": 0.567,
-    "heightCm": 201,
-    "weightKg": 99
+    "heightCm": 206,
+    "weightKg": 100
   },
   "jim_les": {
     "id": "jim_les",
     "name": "Jim Les",
-    "pos": "SG",
+    "pos": "PG",
     "positions": [
-      "SG"
+      "PG"
     ],
     "ovr": 75,
     "off": 75,
@@ -9425,15 +9409,15 @@
     "contractYears": 4,
     "usage": 12.5,
     "ts": 0.621,
-    "heightCm": 196,
-    "weightKg": 93
+    "heightCm": 180,
+    "weightKg": 75
   },
   "travis_mays": {
     "id": "travis_mays",
     "name": "Travis Mays",
-    "pos": "SG",
+    "pos": "PG",
     "positions": [
-      "SG"
+      "PG"
     ],
     "ovr": 76,
     "off": 74,
@@ -9457,8 +9441,8 @@
     "contractYears": 4,
     "usage": 20.8,
     "ts": 0.527,
-    "heightCm": 196,
-    "weightKg": 93
+    "heightCm": 188,
+    "weightKg": 86
   },
   "ralph_sampson": {
     "id": "ralph_sampson",
@@ -9489,8 +9473,8 @@
     "contractYears": 2,
     "usage": 16.8,
     "ts": 0.4,
-    "heightCm": 211,
-    "weightKg": 114
+    "heightCm": 224,
+    "weightKg": 103
   },
   "lionel_simmons": {
     "id": "lionel_simmons",
@@ -9522,14 +9506,14 @@
     "usage": 25.0,
     "ts": 0.478,
     "heightCm": 201,
-    "weightKg": 99
+    "weightKg": 95
   },
   "rory_sparrow": {
     "id": "rory_sparrow",
     "name": "Rory Sparrow",
-    "pos": "SG",
+    "pos": "PG",
     "positions": [
-      "SG"
+      "PG"
     ],
     "ovr": 75,
     "off": 73,
@@ -9553,15 +9537,15 @@
     "contractYears": 1,
     "usage": 16.3,
     "ts": 0.505,
-    "heightCm": 196,
-    "weightKg": 93
+    "heightCm": 188,
+    "weightKg": 79
   },
   "wayman_tisdale": {
     "id": "wayman_tisdale",
     "name": "Wayman Tisdale",
-    "pos": "SF",
+    "pos": "PF",
     "positions": [
-      "SF"
+      "PF"
     ],
     "ovr": 79,
     "off": 77,
@@ -9585,8 +9569,8 @@
     "contractYears": 3,
     "usage": 25.8,
     "ts": 0.552,
-    "heightCm": 201,
-    "weightKg": 99
+    "heightCm": 206,
+    "weightKg": 109
   },
   "bill_wennington": {
     "id": "bill_wennington",
@@ -9617,8 +9601,8 @@
     "contractYears": 2,
     "usage": 15.7,
     "ts": 0.488,
-    "heightCm": 211,
-    "weightKg": 114
+    "heightCm": 213,
+    "weightKg": 111
   },
   "leon_wood": {
     "id": "leon_wood",
@@ -9649,8 +9633,8 @@
     "contractYears": 5,
     "usage": 15.8,
     "ts": 0.529,
-    "heightCm": 196,
-    "weightKg": 93
+    "heightCm": 190,
+    "weightKg": 84
   },
   "willie_anderson": {
     "id": "willie_anderson",
@@ -9681,15 +9665,15 @@
     "contractYears": 2,
     "usage": 20.3,
     "ts": 0.511,
-    "heightCm": 196,
-    "weightKg": 93
+    "heightCm": 201,
+    "weightKg": 86
   },
   "terry_cummings": {
     "id": "terry_cummings",
     "name": "Terry Cummings",
-    "pos": "SF",
+    "pos": "PF",
     "positions": [
-      "SF"
+      "PF"
     ],
     "ovr": 82,
     "off": 77,
@@ -9713,8 +9697,8 @@
     "contractYears": 3,
     "usage": 25.6,
     "ts": 0.52,
-    "heightCm": 201,
-    "weightKg": 99
+    "heightCm": 206,
+    "weightKg": 100
   },
   "sean_elliott": {
     "id": "sean_elliott",
@@ -9745,15 +9729,15 @@
     "contractYears": 4,
     "usage": 17.7,
     "ts": 0.559,
-    "heightCm": 201,
-    "weightKg": 99
+    "heightCm": 203,
+    "weightKg": 93
   },
   "sidney_green": {
     "id": "sidney_green",
     "name": "Sidney Green",
-    "pos": "SF",
+    "pos": "PF",
     "positions": [
-      "SF"
+      "PF"
     ],
     "ovr": 68,
     "off": 71,
@@ -9777,15 +9761,15 @@
     "contractYears": 1,
     "usage": 19.0,
     "ts": 0.51,
-    "heightCm": 201,
-    "weightKg": 99
+    "heightCm": 206,
+    "weightKg": 100
   },
   "david_greenwood": {
     "id": "david_greenwood",
     "name": "David Greenwood",
-    "pos": "SF",
+    "pos": "PF",
     "positions": [
-      "SF"
+      "PF"
     ],
     "ovr": 66,
     "off": 70,
@@ -9809,8 +9793,8 @@
     "contractYears": 4,
     "usage": 12.0,
     "ts": 0.565,
-    "heightCm": 201,
-    "weightKg": 99
+    "heightCm": 206,
+    "weightKg": 101
   },
   "sean_higgins": {
     "id": "sean_higgins",
@@ -9841,15 +9825,15 @@
     "contractYears": 1,
     "usage": 23.4,
     "ts": 0.505,
-    "heightCm": 201,
-    "weightKg": 99
+    "heightCm": 206,
+    "weightKg": 93
   },
   "avery_johnson": {
     "id": "avery_johnson",
     "name": "Avery Johnson",
-    "pos": "SG",
+    "pos": "PG",
     "positions": [
-      "SG"
+      "PG"
     ],
     "ovr": 74,
     "off": 75,
@@ -9873,16 +9857,16 @@
     "contractYears": 4,
     "usage": 16.0,
     "ts": 0.495,
-    "heightCm": 196,
-    "weightKg": 93,
+    "heightCm": 178,
+    "weightKg": 79,
     "skinTone": "#724433"
   },
   "clifford_lett": {
     "id": "clifford_lett",
     "name": "Clifford Lett",
-    "pos": "SG",
+    "pos": "PG",
     "positions": [
-      "SG"
+      "PG"
     ],
     "ovr": 67,
     "off": 71,
@@ -9906,16 +9890,15 @@
     "contractYears": 1,
     "usage": 17.0,
     "ts": 0.51,
-    "heightCm": 196,
-    "weightKg": 93
+    "heightCm": 190,
+    "weightKg": 77
   },
   "tony_massenburg": {
     "id": "tony_massenburg",
     "name": "Tony Massenburg",
-    "pos": "SF",
+    "pos": "PF",
     "positions": [
-      "SF",
-      "C"
+      "PF"
     ],
     "ovr": 66,
     "off": 73,
@@ -9939,8 +9922,8 @@
     "contractYears": 5,
     "usage": 21.3,
     "ts": 0.524,
-    "heightCm": 201,
-    "weightKg": 99
+    "heightCm": 206,
+    "weightKg": 100
   },
   "pete_myers": {
     "id": "pete_myers",
@@ -9971,8 +9954,8 @@
     "contractYears": 1,
     "usage": 18.0,
     "ts": 0.481,
-    "heightCm": 196,
-    "weightKg": 93
+    "heightCm": 198,
+    "weightKg": 82
   },
   "paul_pressey": {
     "id": "paul_pressey",
@@ -10004,7 +9987,7 @@
     "usage": 16.9,
     "ts": 0.541,
     "heightCm": 196,
-    "weightKg": 93
+    "weightKg": 84
   },
   "david_robinson": {
     "id": "david_robinson",
@@ -10035,8 +10018,8 @@
     "contractYears": 2,
     "usage": 26.4,
     "ts": 0.608,
-    "heightCm": 211,
-    "weightKg": 114,
+    "heightCm": 216,
+    "weightKg": 107,
     "skinTone": "#5c3924"
   },
   "dwayne_schintzius": {
@@ -10068,15 +10051,15 @@
     "contractYears": 4,
     "usage": 20.7,
     "ts": 0.474,
-    "heightCm": 211,
-    "weightKg": 114
+    "heightCm": 216,
+    "weightKg": 118
   },
   "rod_strickland": {
     "id": "rod_strickland",
     "name": "Rod Strickland",
-    "pos": "SG",
+    "pos": "PG",
     "positions": [
-      "SG"
+      "PG"
     ],
     "ovr": 83,
     "off": 77,
@@ -10100,8 +10083,8 @@
     "contractYears": 3,
     "usage": 18.8,
     "ts": 0.524,
-    "heightCm": 196,
-    "weightKg": 93,
+    "heightCm": 190,
+    "weightKg": 79,
     "skinTone": "#996241"
   },
   "david_wingate": {
@@ -10134,14 +10117,14 @@
     "usage": 15.0,
     "ts": 0.473,
     "heightCm": 196,
-    "weightKg": 93
+    "weightKg": 84
   },
   "dana_barros": {
     "id": "dana_barros",
     "name": "Dana Barros",
-    "pos": "SG",
+    "pos": "PG",
     "positions": [
-      "SG"
+      "PG"
     ],
     "ovr": 76,
     "off": 79,
@@ -10165,8 +10148,8 @@
     "contractYears": 4,
     "usage": 22.6,
     "ts": 0.546,
-    "heightCm": 196,
-    "weightKg": 93
+    "heightCm": 180,
+    "weightKg": 74
   },
   "benoit_benjamin": {
     "id": "benoit_benjamin",
@@ -10197,8 +10180,8 @@
     "contractYears": 1,
     "usage": 20.0,
     "ts": 0.553,
-    "heightCm": 211,
-    "weightKg": 114
+    "heightCm": 213,
+    "weightKg": 113
   },
   "michael_cage": {
     "id": "michael_cage",
@@ -10229,8 +10212,8 @@
     "contractYears": 3,
     "usage": 12.2,
     "ts": 0.533,
-    "heightCm": 211,
-    "weightKg": 114
+    "heightCm": 206,
+    "weightKg": 102
   },
   "dave_corzine": {
     "id": "dave_corzine",
@@ -10262,7 +10245,7 @@
     "usage": 15.8,
     "ts": 0.492,
     "heightCm": 211,
-    "weightKg": 114
+    "weightKg": 113
   },
   "quintin_dailey": {
     "id": "quintin_dailey",
@@ -10293,15 +10276,15 @@
     "contractYears": 3,
     "usage": 25.6,
     "ts": 0.493,
-    "heightCm": 196,
-    "weightKg": 93
+    "heightCm": 190,
+    "weightKg": 82
   },
   "eddie_johnson": {
     "id": "eddie_johnson",
     "name": "Eddie Johnson",
-    "pos": "SF",
+    "pos": "SG",
     "positions": [
-      "SF"
+      "SG"
     ],
     "ovr": 78,
     "off": 78,
@@ -10326,14 +10309,14 @@
     "usage": 26.3,
     "ts": 0.546,
     "heightCm": 201,
-    "weightKg": 99
+    "weightKg": 98
   },
   "shawn_kemp": {
     "id": "shawn_kemp",
     "name": "Shawn Kemp",
-    "pos": "SF",
+    "pos": "PF",
     "positions": [
-      "SF"
+      "PF"
     ],
     "ovr": 78,
     "off": 75,
@@ -10357,8 +10340,8 @@
     "contractYears": 3,
     "usage": 22.2,
     "ts": 0.547,
-    "heightCm": 201,
-    "weightKg": 99,
+    "heightCm": 208,
+    "weightKg": 104,
     "skinTone": "#533a2c"
   },
   "derrick_mckey": {
@@ -10390,8 +10373,8 @@
     "contractYears": 3,
     "usage": 19.2,
     "ts": 0.568,
-    "heightCm": 201,
-    "weightKg": 99
+    "heightCm": 208,
+    "weightKg": 109
   },
   "nate_mcmillan": {
     "id": "nate_mcmillan",
@@ -10423,14 +10406,14 @@
     "usage": 13.3,
     "ts": 0.503,
     "heightCm": 196,
-    "weightKg": 93
+    "weightKg": 88
   },
   "scott_meents": {
     "id": "scott_meents",
     "name": "Scott Meents",
-    "pos": "SF",
+    "pos": "PF",
     "positions": [
-      "SF"
+      "PF"
     ],
     "ovr": 70,
     "off": 72,
@@ -10454,17 +10437,15 @@
     "contractYears": 4,
     "usage": 19.9,
     "ts": 0.47,
-    "heightCm": 201,
-    "weightKg": 99
+    "heightCm": 208,
+    "weightKg": 102
   },
   "gary_payton": {
     "id": "gary_payton",
     "name": "Gary Payton",
-    "pos": "SG",
+    "pos": "PG",
     "positions": [
-      "SG",
-      "PG",
-      "SF"
+      "PG"
     ],
     "ovr": 77,
     "off": 75,
@@ -10488,8 +10469,8 @@
     "contractYears": 5,
     "usage": 15.0,
     "ts": 0.479,
-    "heightCm": 196,
-    "weightKg": 93,
+    "heightCm": 193,
+    "weightKg": 82,
     "skinTone": "#472c25"
   },
   "ricky_pierce": {
@@ -10521,15 +10502,15 @@
     "contractYears": 4,
     "usage": 29.7,
     "ts": 0.586,
-    "heightCm": 196,
+    "heightCm": 193,
     "weightKg": 93
   },
   "sedale_threatt": {
     "id": "sedale_threatt",
     "name": "Sedale Threatt",
-    "pos": "SG",
+    "pos": "PG",
     "positions": [
-      "SG"
+      "PG"
     ],
     "ovr": 78,
     "off": 77,
@@ -10553,15 +10534,15 @@
     "contractYears": 4,
     "usage": 21.1,
     "ts": 0.556,
-    "heightCm": 196,
-    "weightKg": 93
+    "heightCm": 188,
+    "weightKg": 79
   },
   "thurl_bailey": {
     "id": "thurl_bailey",
     "name": "Thurl Bailey",
-    "pos": "SF",
+    "pos": "PF",
     "positions": [
-      "SF"
+      "PF"
     ],
     "ovr": 77,
     "off": 74,
@@ -10585,8 +10566,8 @@
     "contractYears": 1,
     "usage": 20.3,
     "ts": 0.518,
-    "heightCm": 201,
-    "weightKg": 99
+    "heightCm": 211,
+    "weightKg": 98
   },
   "mike_brown": {
     "id": "mike_brown",
@@ -10617,15 +10598,15 @@
     "contractYears": 1,
     "usage": 15.0,
     "ts": 0.556,
-    "heightCm": 211,
-    "weightKg": 114
+    "heightCm": 206,
+    "weightKg": 117
   },
   "tony_brown": {
     "id": "tony_brown",
     "name": "Tony Brown",
-    "pos": "SF",
+    "pos": "SG",
     "positions": [
-      "SF"
+      "SG"
     ],
     "ovr": 66,
     "off": 70,
@@ -10649,15 +10630,15 @@
     "contractYears": 1,
     "usage": 17.3,
     "ts": 0.478,
-    "heightCm": 201,
-    "weightKg": 99
+    "heightCm": 198,
+    "weightKg": 84
   },
   "pat_cummings": {
     "id": "pat_cummings",
     "name": "Pat Cummings",
-    "pos": "C",
+    "pos": "PF",
     "positions": [
-      "C"
+      "PF"
     ],
     "ovr": 69,
     "off": 72,
@@ -10681,8 +10662,8 @@
     "contractYears": 4,
     "usage": 20.0,
     "ts": 0.53,
-    "heightCm": 211,
-    "weightKg": 114
+    "heightCm": 206,
+    "weightKg": 104
   },
   "mark_eaton": {
     "id": "mark_eaton",
@@ -10713,8 +10694,8 @@
     "contractYears": 5,
     "usage": 8.0,
     "ts": 0.586,
-    "heightCm": 211,
-    "weightKg": 114
+    "heightCm": 224,
+    "weightKg": 125
   },
   "blue_edwards": {
     "id": "blue_edwards",
@@ -10745,8 +10726,8 @@
     "contractYears": 4,
     "usage": 17.6,
     "ts": 0.557,
-    "heightCm": 201,
-    "weightKg": 99
+    "heightCm": 193,
+    "weightKg": 91
   },
   "darrell_griffith": {
     "id": "darrell_griffith",
@@ -10777,8 +10758,8 @@
     "contractYears": 3,
     "usage": 22.4,
     "ts": 0.496,
-    "heightCm": 196,
-    "weightKg": 93
+    "heightCm": 193,
+    "weightKg": 86
   },
   "jeff_malone": {
     "id": "jeff_malone",
@@ -10809,15 +10790,15 @@
     "contractYears": 2,
     "usage": 24.7,
     "ts": 0.549,
-    "heightCm": 196,
+    "heightCm": 193,
     "weightKg": 93
   },
   "karl_malone": {
     "id": "karl_malone",
     "name": "Karl Malone",
-    "pos": "SF",
+    "pos": "PF",
     "positions": [
-      "SF"
+      "PF"
     ],
     "ovr": 92,
     "off": 85,
@@ -10841,16 +10822,16 @@
     "contractYears": 5,
     "usage": 30.6,
     "ts": 0.604,
-    "heightCm": 201,
-    "weightKg": 99,
+    "heightCm": 206,
+    "weightKg": 113,
     "skinTone": "#974a3c"
   },
   "chris_munk": {
     "id": "chris_munk",
     "name": "Chris Munk",
-    "pos": "SF",
+    "pos": "PF",
     "positions": [
-      "SF"
+      "PF"
     ],
     "ovr": 68,
     "off": 73,
@@ -10874,15 +10855,15 @@
     "contractYears": 4,
     "usage": 19.1,
     "ts": 0.538,
-    "heightCm": 201,
-    "weightKg": 99
+    "heightCm": 206,
+    "weightKg": 102
   },
   "dan_o_sullivan": {
     "id": "dan_o_sullivan",
     "name": "Dan O'Sullivan",
-    "pos": "SF",
+    "pos": "C",
     "positions": [
-      "SF"
+      "C"
     ],
     "ovr": 66,
     "off": 72,
@@ -10906,8 +10887,8 @@
     "contractYears": 5,
     "usage": 15.1,
     "ts": 0.523,
-    "heightCm": 201,
-    "weightKg": 99
+    "heightCm": 208,
+    "weightKg": 113
   },
   "walter_palmer": {
     "id": "walter_palmer",
@@ -10938,15 +10919,15 @@
     "contractYears": 5,
     "usage": 23.0,
     "ts": 0.47,
-    "heightCm": 211,
-    "weightKg": 114
+    "heightCm": 216,
+    "weightKg": 98
   },
   "delaney_rudd": {
     "id": "delaney_rudd",
     "name": "Delaney Rudd",
-    "pos": "SG",
+    "pos": "PG",
     "positions": [
-      "SG"
+      "PG"
     ],
     "ovr": 66,
     "off": 72,
@@ -10970,15 +10951,15 @@
     "contractYears": 2,
     "usage": 20.2,
     "ts": 0.505,
-    "heightCm": 196,
-    "weightKg": 93
+    "heightCm": 188,
+    "weightKg": 82
   },
   "john_stockton": {
     "id": "john_stockton",
     "name": "John Stockton",
-    "pos": "SG",
+    "pos": "PG",
     "positions": [
-      "SG"
+      "PG"
     ],
     "ovr": 93,
     "off": 87,
@@ -11002,8 +10983,8 @@
     "contractYears": 2,
     "usage": 20.7,
     "ts": 0.604,
-    "heightCm": 196,
-    "weightKg": 93,
+    "heightCm": 185,
+    "weightKg": 77,
     "skinTone": "#b17166"
   },
   "andy_toolson": {
@@ -11035,15 +11016,15 @@
     "contractYears": 1,
     "usage": 15.6,
     "ts": 0.503,
-    "heightCm": 201,
-    "weightKg": 99
+    "heightCm": 198,
+    "weightKg": 95
   },
   "mark_alarie": {
     "id": "mark_alarie",
     "name": "Mark Alarie",
-    "pos": "SF",
+    "pos": "PF",
     "positions": [
-      "SF"
+      "PF"
     ],
     "ovr": 72,
     "off": 73,
@@ -11067,8 +11048,8 @@
     "contractYears": 5,
     "usage": 20.2,
     "ts": 0.507,
-    "heightCm": 201,
-    "weightKg": 99
+    "heightCm": 203,
+    "weightKg": 98
   },
   "ledell_eackles": {
     "id": "ledell_eackles",
@@ -11100,7 +11081,7 @@
     "usage": 26.2,
     "ts": 0.503,
     "heightCm": 196,
-    "weightKg": 93
+    "weightKg": 100
   },
   "pervis_ellison": {
     "id": "pervis_ellison",
@@ -11131,8 +11112,8 @@
     "contractYears": 3,
     "usage": 18.5,
     "ts": 0.53,
-    "heightCm": 211,
-    "weightKg": 114
+    "heightCm": 206,
+    "weightKg": 95
   },
   "a_j_english": {
     "id": "a_j_english",
@@ -11163,15 +11144,15 @@
     "contractYears": 4,
     "usage": 21.5,
     "ts": 0.484,
-    "heightCm": 196,
-    "weightKg": 93
+    "heightCm": 190,
+    "weightKg": 79
   },
   "greg_foster": {
     "id": "greg_foster",
     "name": "Greg Foster",
-    "pos": "C",
+    "pos": "PF",
     "positions": [
-      "C"
+      "PF"
     ],
     "ovr": 66,
     "off": 70,
@@ -11196,14 +11177,14 @@
     "usage": 19.1,
     "ts": 0.502,
     "heightCm": 211,
-    "weightKg": 114
+    "weightKg": 109
   },
   "harvey_grant": {
     "id": "harvey_grant",
     "name": "Harvey Grant",
-    "pos": "SF",
+    "pos": "PF",
     "positions": [
-      "SF"
+      "PF"
     ],
     "ovr": 80,
     "off": 76,
@@ -11227,15 +11208,15 @@
     "contractYears": 4,
     "usage": 20.1,
     "ts": 0.521,
-    "heightCm": 201,
-    "weightKg": 99
+    "heightCm": 203,
+    "weightKg": 88
   },
   "tom_hammonds": {
     "id": "tom_hammonds",
     "name": "Tom Hammonds",
-    "pos": "SF",
+    "pos": "PF",
     "positions": [
-      "SF"
+      "PF"
     ],
     "ovr": 66,
     "off": 70,
@@ -11259,8 +11240,8 @@
     "contractYears": 1,
     "usage": 17.9,
     "ts": 0.493,
-    "heightCm": 201,
-    "weightKg": 99
+    "heightCm": 206,
+    "weightKg": 98
   },
   "byron_irvin": {
     "id": "byron_irvin",
@@ -11292,7 +11273,7 @@
     "usage": 21.8,
     "ts": 0.541,
     "heightCm": 196,
-    "weightKg": 93
+    "weightKg": 86
   },
   "charles_jones": {
     "id": "charles_jones",
@@ -11323,8 +11304,8 @@
     "contractYears": 4,
     "usage": 5.9,
     "ts": 0.556,
-    "heightCm": 211,
-    "weightKg": 114
+    "heightCm": 206,
+    "weightKg": 98
   },
   "bernard_king": {
     "id": "bernard_king",
@@ -11356,7 +11337,7 @@
     "usage": 32.2,
     "ts": 0.534,
     "heightCm": 201,
-    "weightKg": 99,
+    "weightKg": 93,
     "skinTone": "#7a5335"
   },
   "larry_robinson": {
@@ -11388,15 +11369,15 @@
     "contractYears": 1,
     "usage": 18.0,
     "ts": 0.45,
-    "heightCm": 196,
-    "weightKg": 93
+    "heightCm": 190,
+    "weightKg": 82
   },
   "clinton_smith": {
     "id": "clinton_smith",
     "name": "Clinton Smith",
-    "pos": "SF",
+    "pos": "SG",
     "positions": [
-      "SF"
+      "SG"
     ],
     "ovr": 66,
     "off": 73,
@@ -11420,15 +11401,15 @@
     "contractYears": 3,
     "usage": 13.9,
     "ts": 0.536,
-    "heightCm": 201,
-    "weightKg": 99
+    "heightCm": 198,
+    "weightKg": 95
   },
   "darrell_walker": {
     "id": "darrell_walker",
     "name": "Darrell Walker",
-    "pos": "SG",
+    "pos": "PG",
     "positions": [
-      "SG"
+      "PG"
     ],
     "ovr": 79,
     "off": 75,
@@ -11452,8 +11433,8 @@
     "contractYears": 3,
     "usage": 13.7,
     "ts": 0.473,
-    "heightCm": 196,
-    "weightKg": 93
+    "heightCm": 193,
+    "weightKg": 82
   },
   "john_williams": {
     "id": "john_williams",
@@ -11484,15 +11465,15 @@
     "contractYears": 1,
     "usage": 22.0,
     "ts": 0.49,
-    "heightCm": 201,
-    "weightKg": 99
+    "heightCm": 203,
+    "weightKg": 107
   },
   "haywoode_workman": {
     "id": "haywoode_workman",
     "name": "Haywoode Workman",
-    "pos": "SG",
+    "pos": "PG",
     "positions": [
-      "SG"
+      "PG"
     ],
     "ovr": 75,
     "off": 72,
@@ -11516,8 +11497,8 @@
     "contractYears": 1,
     "usage": 14.6,
     "ts": 0.51,
-    "heightCm": 196,
-    "weightKg": 93
+    "heightCm": 188,
+    "weightKg": 82
   },
   "mark_aguirre": {
     "id": "mark_aguirre",
@@ -11548,8 +11529,8 @@
     "contractYears": 1,
     "usage": 25.0,
     "ts": 0.532,
-    "heightCm": 201,
-    "weightKg": 99
+    "heightCm": 198,
+    "weightKg": 105
   },
   "william_bedford": {
     "id": "william_bedford",
@@ -11580,8 +11561,8 @@
     "contractYears": 1,
     "usage": 23.7,
     "ts": 0.49,
-    "heightCm": 211,
-    "weightKg": 114
+    "heightCm": 213,
+    "weightKg": 102
   },
   "lance_blanks": {
     "id": "lance_blanks",
@@ -11612,8 +11593,8 @@
     "contractYears": 3,
     "usage": 17.3,
     "ts": 0.496,
-    "heightCm": 196,
-    "weightKg": 93
+    "heightCm": 193,
+    "weightKg": 86
   },
   "joe_dumars": {
     "id": "joe_dumars",
@@ -11644,8 +11625,8 @@
     "contractYears": 4,
     "usage": 23.4,
     "ts": 0.553,
-    "heightCm": 196,
-    "weightKg": 93,
+    "heightCm": 190,
+    "weightKg": 86,
     "skinTone": "#673330"
   },
   "james_edwards": {
@@ -11677,15 +11658,15 @@
     "contractYears": 5,
     "usage": 23.5,
     "ts": 0.539,
-    "heightCm": 211,
+    "heightCm": 216,
     "weightKg": 114
   },
   "scott_hastings": {
     "id": "scott_hastings",
     "name": "Scott Hastings",
-    "pos": "SF",
+    "pos": "PF",
     "positions": [
-      "SF"
+      "PF"
     ],
     "ovr": 66,
     "off": 73,
@@ -11709,15 +11690,14 @@
     "contractYears": 2,
     "usage": 15.4,
     "ts": 0.592,
-    "heightCm": 201,
-    "weightKg": 99
+    "heightCm": 208,
+    "weightKg": 107
   },
   "gerald_henderson": {
     "id": "gerald_henderson",
     "name": "Gerald Henderson",
-    "pos": "SG",
+    "pos": "PG",
     "positions": [
-      "SG",
       "PG"
     ],
     "ovr": 73,
@@ -11742,8 +11722,8 @@
     "contractYears": 3,
     "usage": 15.8,
     "ts": 0.525,
-    "heightCm": 196,
-    "weightKg": 93
+    "heightCm": 188,
+    "weightKg": 79
   },
   "vinnie_johnson": {
     "id": "vinnie_johnson",
@@ -11774,8 +11754,8 @@
     "contractYears": 4,
     "usage": 21.0,
     "ts": 0.468,
-    "heightCm": 196,
-    "weightKg": 93
+    "heightCm": 188,
+    "weightKg": 91
   },
   "bill_laimbeer": {
     "id": "bill_laimbeer",
@@ -11807,7 +11787,7 @@
     "usage": 15.6,
     "ts": 0.545,
     "heightCm": 211,
-    "weightKg": 114
+    "weightKg": 111
   },
   "john_long": {
     "id": "john_long",
@@ -11839,7 +11819,7 @@
     "usage": 19.2,
     "ts": 0.502,
     "heightCm": 196,
-    "weightKg": 93
+    "weightKg": 88
   },
   "dennis_rodman": {
     "id": "dennis_rodman",
@@ -11871,7 +11851,7 @@
     "usage": 12.0,
     "ts": 0.55,
     "heightCm": 201,
-    "weightKg": 99,
+    "weightKg": 95,
     "skinTone": "#5c3e30"
   },
   "tree_rollins": {
@@ -11903,15 +11883,15 @@
     "contractYears": 5,
     "usage": 12.0,
     "ts": 0.479,
-    "heightCm": 211,
-    "weightKg": 114
+    "heightCm": 216,
+    "weightKg": 107
   },
   "john_salley": {
     "id": "john_salley",
     "name": "John Salley",
-    "pos": "SF",
+    "pos": "PF",
     "positions": [
-      "SF"
+      "PF"
     ],
     "ovr": 77,
     "off": 73,
@@ -11935,15 +11915,15 @@
     "contractYears": 2,
     "usage": 14.9,
     "ts": 0.562,
-    "heightCm": 201,
-    "weightKg": 99
+    "heightCm": 211,
+    "weightKg": 104
   },
   "isiah_thomas": {
     "id": "isiah_thomas",
     "name": "Isiah Thomas",
-    "pos": "SG",
+    "pos": "PG",
     "positions": [
-      "SG"
+      "PG"
     ],
     "ovr": 85,
     "off": 79,
@@ -11967,16 +11947,16 @@
     "contractYears": 3,
     "usage": 25.3,
     "ts": 0.505,
-    "heightCm": 196,
-    "weightKg": 93,
+    "heightCm": 185,
+    "weightKg": 82,
     "skinTone": "#cd8c81"
   },
   "muggsy_bogues": {
     "id": "muggsy_bogues",
     "name": "Muggsy Bogues",
-    "pos": "SG",
+    "pos": "PG",
     "positions": [
-      "SG"
+      "PG"
     ],
     "ovr": 79,
     "off": 77,
@@ -12000,15 +11980,15 @@
     "contractYears": 2,
     "usage": 13.2,
     "ts": 0.509,
-    "heightCm": 196,
-    "weightKg": 93
+    "heightCm": 160,
+    "weightKg": 62
   },
   "rex_chapman": {
     "id": "rex_chapman",
     "name": "Rex Chapman",
-    "pos": "SG",
+    "pos": "PG",
     "positions": [
-      "SG"
+      "PG"
     ],
     "ovr": 77,
     "off": 75,
@@ -12032,15 +12012,15 @@
     "contractYears": 1,
     "usage": 24.5,
     "ts": 0.511,
-    "heightCm": 196,
-    "weightKg": 93
+    "heightCm": 193,
+    "weightKg": 84
   },
   "earl_cureton": {
     "id": "earl_cureton",
     "name": "Earl Cureton",
-    "pos": "SF",
+    "pos": "PF",
     "positions": [
-      "SF"
+      "PF"
     ],
     "ovr": 66,
     "off": 71,
@@ -12064,8 +12044,8 @@
     "contractYears": 3,
     "usage": 11.7,
     "ts": 0.415,
-    "heightCm": 201,
-    "weightKg": 99
+    "heightCm": 206,
+    "weightKg": 95
   },
   "dell_curry": {
     "id": "dell_curry",
@@ -12096,16 +12076,16 @@
     "contractYears": 5,
     "usage": 24.3,
     "ts": 0.522,
-    "heightCm": 196,
-    "weightKg": 93,
+    "heightCm": 193,
+    "weightKg": 86,
     "skinTone": "#683d2a"
   },
   "kenny_gattison": {
     "id": "kenny_gattison",
     "name": "Kenny Gattison",
-    "pos": "SF",
+    "pos": "PF",
     "positions": [
-      "SF"
+      "PF"
     ],
     "ovr": 73,
     "off": 72,
@@ -12129,8 +12109,8 @@
     "contractYears": 5,
     "usage": 18.0,
     "ts": 0.575,
-    "heightCm": 201,
-    "weightKg": 99
+    "heightCm": 203,
+    "weightKg": 102
   },
   "kendall_gill": {
     "id": "kendall_gill",
@@ -12162,7 +12142,7 @@
     "usage": 23.3,
     "ts": 0.496,
     "heightCm": 196,
-    "weightKg": 93,
+    "weightKg": 88,
     "skinTone": "#933a16"
   },
   "mike_gminski": {
@@ -12195,14 +12175,14 @@
     "usage": 18.9,
     "ts": 0.491,
     "heightCm": 211,
-    "weightKg": 114
+    "weightKg": 113
   },
   "scott_haffner": {
     "id": "scott_haffner",
     "name": "Scott Haffner",
-    "pos": "SG",
+    "pos": "PG",
     "positions": [
-      "SG"
+      "PG"
     ],
     "ovr": 66,
     "off": 71,
@@ -12226,8 +12206,8 @@
     "contractYears": 3,
     "usage": 18.8,
     "ts": 0.451,
-    "heightCm": 196,
-    "weightKg": 93
+    "heightCm": 190,
+    "weightKg": 82
   },
   "randolph_keys": {
     "id": "randolph_keys",
@@ -12259,7 +12239,7 @@
     "usage": 20.0,
     "ts": 0.467,
     "heightCm": 201,
-    "weightKg": 99
+    "weightKg": 88
   },
   "eric_leckner": {
     "id": "eric_leckner",
@@ -12291,7 +12271,7 @@
     "usage": 16.6,
     "ts": 0.511,
     "heightCm": 211,
-    "weightKg": 114
+    "weightKg": 120
   },
   "johnny_newman": {
     "id": "johnny_newman",
@@ -12323,14 +12303,14 @@
     "usage": 22.6,
     "ts": 0.559,
     "heightCm": 201,
-    "weightKg": 99
+    "weightKg": 86
   },
   "j_r_reid": {
     "id": "j_r_reid",
     "name": "J.R. Reid",
-    "pos": "SF",
+    "pos": "C",
     "positions": [
-      "SF"
+      "C"
     ],
     "ovr": 72,
     "off": 70,
@@ -12354,15 +12334,15 @@
     "contractYears": 5,
     "usage": 17.7,
     "ts": 0.5,
-    "heightCm": 201,
-    "weightKg": 99
+    "heightCm": 206,
+    "weightKg": 112
   },
   "jeff_sanders": {
     "id": "jeff_sanders",
     "name": "Jeff Sanders",
-    "pos": "SF",
+    "pos": "PF",
     "positions": [
-      "SF"
+      "PF"
     ],
     "ovr": 66,
     "off": 71,
@@ -12386,15 +12366,15 @@
     "contractYears": 5,
     "usage": 15.3,
     "ts": 0.441,
-    "heightCm": 201,
-    "weightKg": 99
+    "heightCm": 203,
+    "weightKg": 102
   },
   "steve_scheffler": {
     "id": "steve_scheffler",
     "name": "Steve Scheffler",
-    "pos": "SF",
+    "pos": "C",
     "positions": [
-      "SF"
+      "C"
     ],
     "ovr": 66,
     "off": 74,
@@ -12418,8 +12398,8 @@
     "contractYears": 4,
     "usage": 12.0,
     "ts": 0.59,
-    "heightCm": 201,
-    "weightKg": 99
+    "heightCm": 206,
+    "weightKg": 113
   },
   "kelly_tripucka": {
     "id": "kelly_tripucka",
@@ -12450,7 +12430,7 @@
     "contractYears": 2,
     "usage": 21.3,
     "ts": 0.54,
-    "heightCm": 201,
-    "weightKg": 99
+    "heightCm": 198,
+    "weightKg": 100
   }
 }

@@ -55,3 +55,6 @@ dist-web/
 
 # EAS signing credentials, downloaded for the GitHub Actions build (BUILD.md)
 credentials.json
+
+# Basketball-Reference pages cached by scripts/fetch_bbref_positions.py
+.bbref-cache/
