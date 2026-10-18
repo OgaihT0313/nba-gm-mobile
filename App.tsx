@@ -846,6 +846,7 @@ export default function App() {
           isSimulating={isSimulating}
           onAdvance={runSimulation}
           onWatchGame={startWatchGame}
+          onGoToPhase={(v) => setView(v)}
         />
       );
     }

@@ -1,10 +1,12 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { GestureResponderEvent, PanResponder, View } from 'react-native';
+import { GestureResponderEvent, PanResponder, Platform, View } from 'react-native';
 import { Canvas, useFrame, useThree } from '@react-three/fiber/native';
 import * as THREE from 'three';
 
 import type { CourtState } from '../../services/watchDirector';
+import EraTVPass from './EraTVFilter';
 import Arena, { RIM_X, type CrowdHype, type JumboData, type ScoreboardData } from './Arena';
+import { onPacedFrame } from './framePacer';
 import { createRig, dribblePhase, type Rig, type RigPlayer } from './PlayerRig';
 import { loadPainterFont, painterReady } from './painter';
 import { buildApronDecal, buildCenterDecal } from './richTextures';
@@ -98,6 +100,8 @@ const CAMERA_PRESETS: Record<CameraView, CameraPreset> = {
 };
 
 interface Court3DProps {
+  /** The season (end year) for the old-broadcast look; null: modern. */
+  tvYear?: number | null;
   home: TeamVisual;
   away: TeamVisual;
   /** Live court state, read every frame (a ref, never props -- the director
@@ -337,6 +341,37 @@ function CameraRig({
 // from the console while tuning), on globalThis.__court3d, so each stage of
 // PLANO-3D can be measured.
 // useFrame runs before the render, so the counters describe the previous frame.
+// The share of the screen's pixels the 3D view draws, scaled back up to fill
+// it. expo-gl always renders at the view's native resolution (R3F pins dpr
+// there), so the only way to draw fewer pixels is a smaller GLView, stretched.
+// At 1080p the full-res court cost the GPU most of each frame in fragment
+// work; 0.65 is ~42% of the pixels and still reads sharp on a phone. The web
+// build renders full size (its canvas has its own dpr).
+const RENDER_SCALE = Platform.OS === 'web' ? 1 : 0.65;
+
+// Drives the canvas (frameloop "never") from the shared 60 Hz pacer, right
+// after the screen's playback tick has written courtRef for this frame.
+function FrameDriver() {
+  const advance = useThree((s) => s.advance);
+  const clock = useThree((s) => s.clock);
+  useEffect(() => {
+    // R3F stops the clock in "never" mode and sets its time from advance();
+    // with autoStart on, the first clock.getElapsedTime() in a useFrame (the
+    // crowd's) restarted it from zero and kept adding real time to it, so the
+    // next frame's dt came out near zero -- the camera crawled.
+    clock.autoStart = false;
+    let started = false;
+    return onPacedFrame((t) => {
+      const now = t / 1000;
+      // advance() measures dt from the clock's last timestamp: seed it so the
+      // first frame (and one after a long pause) steps a frame, not minutes.
+      if (!started || now - clock.elapsedTime > 0.25) { clock.elapsedTime = now - 1 / 60; started = true; }
+      advance(now);
+    }, 1);
+  }, [advance, clock]);
+  return null;
+}
+
 function RenderProbe() {
   const gl = useThree((s) => s.gl);
   const scene = useThree((s) => s.scene);
@@ -480,7 +515,7 @@ function PlayersAndBall({
   const ball = useMemo(() => {
     const m = new THREE.Mesh(
       new THREE.SphereGeometry(BALL_R, 24, 16),
-      new THREE.MeshStandardMaterial({ map: buildBallTexture(), roughness: 0.62 }),
+      new THREE.MeshPhongMaterial({ map: buildBallTexture(), shininess: 14, specular: '#222222' }),
     );
     return m;
   }, []);
@@ -660,13 +695,15 @@ function Scene({
       {/* Arena lighting: a warm key from the rig above, a cold rim light low
           from the far side (the cameras mostly sit on the near, +z, side, so
           it outlines the players against the dark stands -- it was a high
-          fill until PLANO-3D Etapa 2), a soft front fill, and a low ambient so
-          the stands fall away into the dark. Still five lights, no shadows. */}
+          fill until PLANO-3D Etapa 2), and a low ambient so the stands fall
+          away into the dark. No shadows. The soft front fill (a third
+          directional) went into the ambient: every directional is paid per
+          pixel on every lit surface, and on the phone the GPU was the
+          bottleneck (device audit, 2026-10-18). */}
       <hemisphereLight args={['#dfe6ff', '#24180c', 0.5]} />
-      <ambientLight intensity={0.16} color="#8090b0" />
+      <ambientLight intensity={0.3} color="#98a4bc" />
       <directionalLight position={[30, 120, 45]} intensity={1.9} color="#fff3df" />
       <directionalLight position={[-20, 38, -110]} intensity={1.25} color="#cfe0ff" />
-      <directionalLight position={[0, 60, 90]} intensity={0.5} color="#ffffff" />
 
       {fontSettled ? (
         <FloorM
@@ -698,7 +735,7 @@ function Scene({
 
 export default function Court3D({
   home, away, courtRef, visual, cameraView = 'iso', homeLabel, bodies, scoreboard, insets, banners,
-  homeNickname, homeCity, crowd, onSound, replay, jumbo,
+  homeNickname, homeCity, crowd, onSound, replay, jumbo, tvYear = null,
 }: Court3DProps) {
   // Read through a ref so a new callback each render never rebuilds the scene.
   const soundRef = useRef(onSound);
@@ -738,19 +775,46 @@ export default function Court3D({
     [],
   );
 
+  // The HUD insets are in screen points; the canvas lives in the scaled box.
+  const scaledInsets = useMemo(
+    () => (insets ? { top: insets.top * RENDER_SCALE, bottom: insets.bottom * RENDER_SCALE } : undefined),
+    [insets?.top, insets?.bottom], // eslint-disable-line react-hooks/exhaustive-deps
+  );
+  const [box, setBox] = useState<{ w: number; h: number } | null>(null);
+
   return (
-    <View style={{ flex: 1 }} {...responder.panHandlers}>
-      <Canvas camera={{ fov: BASE_FOV, near: 0.5, far: 1200 }} style={{ flex: 1 }}>
-        <color attach="background" args={['#04060b']} />
-        <fog attach="fog" args={['#04060b', 160, 520]} />
-        <CameraRig stateRef={camState} preset={preset} courtRef={courtRef} insets={insets} />
-        {__DEV__ ? <RenderProbe /> : null}
-        <Scene
-          home={home} away={away} courtRef={courtRef} visual={visual} homeLabel={homeLabel} bodies={bodies}
-          scoreboard={scoreboard} banners={banners} homeNickname={homeNickname} homeCity={homeCity} crowd={crowd} soundRef={soundRef}
-          replay={replay} jumbo={jumbo}
-        />
-      </Canvas>
+    <View
+      style={{ flex: 1, overflow: 'hidden' }}
+      onLayout={(e) => setBox({ w: e.nativeEvent.layout.width, h: e.nativeEvent.layout.height })}
+      {...responder.panHandlers}
+    >
+      {box ? (
+        <View
+          pointerEvents="none"
+          style={{
+            position: 'absolute',
+            width: box.w * RENDER_SCALE,
+            height: box.h * RENDER_SCALE,
+            left: (box.w * (1 - RENDER_SCALE)) / 2,
+            top: (box.h * (1 - RENDER_SCALE)) / 2,
+            transform: [{ scale: 1 / RENDER_SCALE }],
+          }}
+        >
+          <Canvas frameloop="never" pointerEvents="none" camera={{ fov: BASE_FOV, near: 0.5, far: 1200 }} style={{ flex: 1 }}>
+            <FrameDriver />
+            <color attach="background" args={['#04060b']} />
+            <fog attach="fog" args={['#04060b', 160, 520]} />
+            <CameraRig stateRef={camState} preset={preset} courtRef={courtRef} insets={scaledInsets} />
+            {__DEV__ ? <RenderProbe /> : null}
+            <Scene
+              home={home} away={away} courtRef={courtRef} visual={visual} homeLabel={homeLabel} bodies={bodies}
+              scoreboard={scoreboard} banners={banners} homeNickname={homeNickname} homeCity={homeCity} crowd={crowd} soundRef={soundRef}
+              replay={replay} jumbo={jumbo}
+            />
+            <EraTVPass year={tvYear} renderScale={RENDER_SCALE} />
+          </Canvas>
+        </View>
+      ) : null}
     </View>
   );
 }

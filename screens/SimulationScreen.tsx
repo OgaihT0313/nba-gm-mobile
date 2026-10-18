@@ -17,6 +17,7 @@ import {
   TeamBadge, Tag, Name, BodyText, Dock,
 } from '../components/ui/kit';
 import { currentEra } from '../data/eras';
+import { seasonStartYearOf } from '../src/eraYear';
 import CupPanel from '../components/CupPanel';
 import StandingsTable from '../components/StandingsTable';
 import { useDesktop } from '../components/desktop/useDesktop';
@@ -33,7 +34,36 @@ interface SimulationScreenProps {
   onAdvance: (target: number) => void;
   /** Opens the 3D "Assistir ao Jogo" screen for the user's next fixture. */
   onWatchGame?: (opponent: Team, atHome: boolean) => void;
+  /** Opens the screen the season is waiting on once the 82 games are over. */
+  onGoToPhase?: (view: PhaseView) => void;
 }
+
+type PhaseView = 'playoffs' | 'awards' | 'draft' | 'free-agency';
+
+/**
+ * Where the save is once the regular season is over, and the dock's way
+ * there. The dock used to sit on a disabled "Temporada encerrada" through the
+ * playoffs, the draft and free agency: no button led anywhere, and the tab read
+ * as broken (device audit, 2026-10-18).
+ */
+const phaseOf = (season: SeasonState): { view: PhaseView; label: string; note: string; eyebrow: string } | null => {
+  const draftYear = seasonStartYearOf(season);
+  switch (season.status) {
+    case 'playoffs_idle':
+    case 'playoffs_simulating':
+      return { view: 'playoffs', label: 'Ir para os playoffs', note: 'Temporada regular encerrada.', eyebrow: 'Playoffs' };
+    case 'champion':
+    case 'awards':
+    case 'offseason':
+      return { view: 'awards', label: 'Abrir a offseason', note: 'Temporada encerrada.', eyebrow: 'Fim de temporada' };
+    case 'draft':
+      return { view: 'draft', label: `Ir para o Draft de ${draftYear}`, note: 'Offseason: o draft está aberto.', eyebrow: `Offseason · Draft de ${draftYear}` };
+    case 'free_agency':
+      return { view: 'free-agency', label: 'Ir para a agência livre', note: 'Offseason: o mercado está aberto.', eyebrow: 'Offseason · Agência livre' };
+    default:
+      return null;
+  }
+};
 
 // A function, not a constant: COLORS changes with the light/dark mode.
 const zoneColorOf = (zone: 'safe' | 'warm' | 'hot') => ({ safe: COLORS.good, warm: COLORS.warn, hot: COLORS.bad })[zone];
@@ -49,7 +79,7 @@ const surname = (name: string) =>
   name.split(' ').filter((w) => !/^(Jr\.?|Sr\.?|II|III|IV)$/.test(w)).slice(-1)[0] ?? name;
 
 const SimulationScreen: React.FC<SimulationScreenProps> = ({
-  season, isSimulating, onAdvance, onWatchGame,
+  season, isSimulating, onAdvance, onWatchGame, onGoToPhase,
 }) => {
   const desktop = useDesktop();
   // The feed is the user's own team only: league-wide it was mostly other
@@ -60,6 +90,11 @@ const SimulationScreen: React.FC<SimulationScreenProps> = ({
   const gp = season.gamesPlayed;
   const remaining = Math.max(0, 82 - gp);
   const over = season.status !== 'active';
+  const phase = over ? phaseOf(season) : null;
+  // In the draft and free agency the save is already on next season's year
+  // while the record and the 82-game strip are still last season's: the
+  // header names the phase instead of "Temporada 6 · 1995-96" over a 50-32.
+  const offseason = season.status === 'draft' || season.status === 'free_agency';
   const seasonNumber = season.gmLegacy.seasons + 1;
   // Derived from eraChainIndex, so it tracks where the save is now rather than
   // where it started — undefined for a live save.
@@ -224,23 +259,31 @@ const SimulationScreen: React.FC<SimulationScreenProps> = ({
     return (
       <DPage
         footer={
-          <DDock note={over ? 'Temporada regular encerrada.' : opponent && fixture ? `Próximo: ${getTeamNickname(opponent)} ${atHome ? 'em casa' : 'fora'}, dia ${fixture.day}.` : undefined}>
-            <DStep label="+1 dia" onPress={() => onAdvance(gp + 1)} disabled={busy} />
-            <DStep label="+7 dias" onPress={() => onAdvance(Math.min(82, gp + 7))} disabled={busy} />
-            <DStep label={gp < 41 ? 'Metade' : 'Até o fim'} onPress={() => onAdvance(gp < 41 ? 41 : 82)} disabled={busy} />
-            <DCta
-              label={isSimulating ? 'Simulando…' : over ? 'Temporada encerrada' : 'Simular temporada'}
-              sub={over ? undefined : `${remaining} ${remaining === 1 ? 'jogo' : 'jogos'}`}
-              onPress={() => onAdvance(82)}
-              disabled={busy}
-            />
+          <DDock note={over ? (phase?.note ?? 'Temporada regular encerrada.') : opponent && fixture ? `Próximo: ${getTeamNickname(opponent)} ${atHome ? 'em casa' : 'fora'}, dia ${fixture.day}.` : undefined}>
+            {over ? null : (
+              <>
+                <DStep label="+1 dia" onPress={() => onAdvance(gp + 1)} disabled={busy} />
+                <DStep label="+7 dias" onPress={() => onAdvance(Math.min(82, gp + 7))} disabled={busy} />
+                <DStep label={gp < 41 ? 'Metade' : 'Até o fim'} onPress={() => onAdvance(gp < 41 ? 41 : 82)} disabled={busy} />
+              </>
+            )}
+            {over && phase && onGoToPhase ? (
+              <DCta label={phase.label} onPress={() => onGoToPhase(phase.view)} />
+            ) : (
+              <DCta
+                label={isSimulating ? 'Simulando…' : over ? 'Temporada encerrada' : 'Simular temporada'}
+                sub={over ? undefined : `${remaining} ${remaining === 1 ? 'jogo' : 'jogos'}`}
+                onPress={() => onAdvance(82)}
+                disabled={busy}
+              />
+            )}
           </DDock>
         }
       >
         {/* ------------------------------------------------------- scoreboard */}
         <View style={{ gap: 18 }}>
           <View className="flex-row items-center justify-between">
-            <DLabel size={13} style={{ letterSpacing: 1.8 }}>Temporada {seasonNumber} · {yearLabel}</DLabel>
+            <DLabel size={13} style={{ letterSpacing: 1.8 }}>{offseason && phase ? phase.eyebrow : `Temporada ${seasonNumber} · ${yearLabel}`}</DLabel>
             <View className="flex-row items-center" style={{ gap: 6, borderWidth: 1, borderColor: withAlpha(zoneColor, 0.35), paddingHorizontal: 12, paddingVertical: 4, borderRadius: RADIUS.pill }}>
               <View style={{ width: 6, height: 6, borderRadius: 3, backgroundColor: zoneColor }} />
               <DLabel size={12} color={zoneColor}>{ZONE_PILL[zone]}</DLabel>
@@ -421,24 +464,30 @@ const SimulationScreen: React.FC<SimulationScreenProps> = ({
       }
       footer={
         <Dock>
-          <View className="flex-row" style={{ gap: 8 }}>
-            <GhostButton filled label="+1 dia" onPress={() => onAdvance(gp + 1)} disabled={busy} style={{ flex: 1 }} />
-            <GhostButton filled label="+7 dias" onPress={() => onAdvance(Math.min(82, gp + 7))} disabled={busy} style={{ flex: 1 }} />
-            <GhostButton filled label={gp < 41 ? 'Metade' : 'Até o fim'} onPress={() => onAdvance(gp < 41 ? 41 : 82)} disabled={busy} style={{ flex: 1 }} />
-          </View>
-          <CtaButton
-            label={isSimulating ? 'Simulando…' : over ? 'Temporada encerrada' : 'Simular temporada'}
-            sub={over ? undefined : `${remaining} ${remaining === 1 ? 'jogo' : 'jogos'}`}
-            onPress={() => onAdvance(82)}
-            disabled={busy}
-          />
+          {over ? null : (
+            <View className="flex-row" style={{ gap: 8 }}>
+              <GhostButton filled label="+1 dia" onPress={() => onAdvance(gp + 1)} disabled={busy} style={{ flex: 1 }} />
+              <GhostButton filled label="+7 dias" onPress={() => onAdvance(Math.min(82, gp + 7))} disabled={busy} style={{ flex: 1 }} />
+              <GhostButton filled label={gp < 41 ? 'Metade' : 'Até o fim'} onPress={() => onAdvance(gp < 41 ? 41 : 82)} disabled={busy} style={{ flex: 1 }} />
+            </View>
+          )}
+          {over && phase && onGoToPhase ? (
+            <CtaButton label={phase.label} sub={phase.note} onPress={() => onGoToPhase(phase.view)} />
+          ) : (
+            <CtaButton
+              label={isSimulating ? 'Simulando…' : over ? 'Temporada encerrada' : 'Simular temporada'}
+              sub={over ? undefined : `${remaining} ${remaining === 1 ? 'jogo' : 'jogos'}`}
+              onPress={() => onAdvance(82)}
+              disabled={busy}
+            />
+          )}
         </Dock>
       }
     >
       {/* --------------------------------------------------------- scoreboard */}
       <View style={{ paddingHorizontal: 20, paddingTop: 4, gap: 16 }}>
         <View className="flex-row items-center justify-between">
-          <Eyebrow size={12}>Temporada {seasonNumber} · {yearLabel}</Eyebrow>
+          <Eyebrow size={12}>{offseason && phase ? phase.eyebrow : `Temporada ${seasonNumber} · ${yearLabel}`}</Eyebrow>
           <View
             className="flex-row items-center"
             style={{ gap: 6, borderWidth: 1, borderColor: withAlpha(zoneColor, 0.35), paddingHorizontal: 10, paddingVertical: 4, borderRadius: RADIUS.pill }}

@@ -146,7 +146,15 @@ export const cheer = (hype: CrowdHype, side: 'home' | 'away', level: number, hol
   }
 };
 
-const crowdUniforms = { uHome: { value: 0 }, uAway: { value: 0 }, uTime: { value: 0 } };
+const crowdUniforms = { uHome: { value: 0 }, uAway: { value: 0 }, uTime: { value: 0 }, uCam: { value: new THREE.Vector3(0, 1e4, 0) } };
+
+// Seats closer to the lens than this (ft) aren't drawn. From the TV and close
+// cameras, up behind the near stands, the last rows sat a few feet from the
+// lens and filled the bottom third of the frame with giant blocks -- ugly,
+// and the most expensive pixels on screen (device audit, 2026-10-18). The
+// front rows, further off, stay: the broadcast look of a crowd at the bottom
+// edge, with the camera on its platform behind them.
+const LENS_CLEAR_FT = 48;
 
 const STAND_GLSL = `
         // aFan: x = rhythm (0-1), y = home fan (1) or away (0), z = how into it.
@@ -160,19 +168,25 @@ const ARMS_GLSL = `
         transformed.x += sin(uTime * (7.0 + aFan.x * 4.0) + aFan.x * 12.0) * 0.45 * transformed.y;`;
 const LIFT_GLSL = `
         transformed.y += stand * 0.85 + hop * jumpy * 0.5 + sin(uTime * 1.3 + aFan.x * 40.0) * 0.03;`;
+// Collapses a seat near the camera to a point: no area, no pixels.
+const CLEAR_GLSL = `
+        if (distance((modelMatrix * instanceMatrix[3]).xyz, uCam) < ${LENS_CLEAR_FT.toFixed(1)}) transformed = vec3(0.0);`;
 
 /**
  * Teaches a crowd material to stand up. `arms` makes the vertex collapse to
- * nothing until the fan is excited enough to raise them.
+ * nothing until the fan is excited enough to raise them. `still` (the risers)
+ * only learns to clear the lens. Lambert: ~3,300 seats of matte shirts gain
+ * nothing from a PBR shader, and they cover a third of the frame.
  */
-const standingCrowd = (mat: THREE.MeshStandardMaterial, kind: string, arms = false) => {
+const standingCrowd = (mat: THREE.MeshLambertMaterial, kind: string, arms = false, still = false) => {
   mat.onBeforeCompile = (shader) => {
     shader.uniforms.uHome = crowdUniforms.uHome;
     shader.uniforms.uAway = crowdUniforms.uAway;
     shader.uniforms.uTime = crowdUniforms.uTime;
+    shader.uniforms.uCam = crowdUniforms.uCam;
     shader.vertexShader = shader.vertexShader
-      .replace('#include <common>', '#include <common>\nuniform float uHome;\nuniform float uAway;\nuniform float uTime;\nattribute vec3 aFan;')
-      .replace('#include <begin_vertex>', '#include <begin_vertex>' + STAND_GLSL + (arms ? ARMS_GLSL : '') + LIFT_GLSL);
+      .replace('#include <common>', '#include <common>\nuniform float uHome;\nuniform float uAway;\nuniform float uTime;\nuniform vec3 uCam;\nattribute vec3 aFan;')
+      .replace('#include <begin_vertex>', '#include <begin_vertex>' + (still ? '' : STAND_GLSL + (arms ? ARMS_GLSL : '') + LIFT_GLSL) + CLEAR_GLSL);
   };
   mat.customProgramCacheKey = () => `crowd-${kind}`;
   return mat;
@@ -199,18 +213,18 @@ function Bowl({ primary, secondary, awayPrimary, hype }: ArenaProps & { awayPrim
     }
 
     const box = new THREE.BoxGeometry(1, 1, 1);
-    const riserMat = new THREE.MeshStandardMaterial({ color: '#2a3040', roughness: 0.95 });
+    const riserMat = standingCrowd(new THREE.MeshLambertMaterial({ color: '#2a3040' }), 'riser', false, true);
     const risers = new THREE.InstancedMesh(box, riserMat, seats.length);
     const fanGeo = new THREE.BoxGeometry(1.25, 1.9, 0.95);
-    const fanMat = standingCrowd(new THREE.MeshStandardMaterial({ roughness: 0.9 }), 'body');
+    const fanMat = standingCrowd(new THREE.MeshLambertMaterial(), 'body');
     const fans = new THREE.InstancedMesh(fanGeo, fanMat, seats.length);
     // ~3,300 heads: a 48-triangle sphere instead of 96 halves the bowl's
     // geometry, and at stand distance nobody can count the facets.
     const headGeo = new THREE.SphereGeometry(0.42, 6, 4);
-    const headMat = standingCrowd(new THREE.MeshStandardMaterial({ roughness: 0.8 }), 'head');
+    const headMat = standingCrowd(new THREE.MeshLambertMaterial(), 'head');
     const heads = new THREE.InstancedMesh(headGeo, headMat, seats.length);
     const armGeo = armsGeometry();
-    const armMat = standingCrowd(new THREE.MeshStandardMaterial({ roughness: 0.8 }), 'arms', true);
+    const armMat = standingCrowd(new THREE.MeshLambertMaterial(), 'arms', true);
     const arms = new THREE.InstancedMesh(armGeo, armMat, seats.length);
     // Per fan: rhythm, home or away, how into it (see standingCrowd).
     const fanAttr = new Float32Array(seats.length * 3);
@@ -285,7 +299,8 @@ function Bowl({ primary, secondary, awayPrimary, hype }: ArenaProps & { awayPrim
 
   // Each side's level rises fast and settles slowly once its hold runs out.
   const level = useRef({ home: 0, away: 0 });
-  useFrame(({ clock }, dt) => {
+  useFrame(({ clock, camera }, dt) => {
+    crowdUniforms.uCam.value.copy(camera.position);
     const h = hype?.current;
     const now = nowS();
     const lv = level.current;
@@ -342,7 +357,8 @@ function Flashes({ spots }: { spots: THREE.Vector3[] }) {
     // Start new flashes at FLASH_RATE per second on average.
     if (Math.random() < FLASH_RATE * dt) {
       const i = Math.floor(Math.random() * spots.length);
-      until[i] = now + FLASH_LIFE;
+      // Not from a seat cleared for the lens: it would hang in the air.
+      if (spots[i].distanceTo(camera.position) >= LENS_CLEAR_FT) until[i] = now + FLASH_LIFE;
     }
     for (let i = 0; i < spots.length; i++) {
       const on = until[i] > now;
@@ -378,7 +394,7 @@ function Courtside({ primary, secondary, label, scored }: ArenaProps & { label?:
   const led = useMemo(() => {
     const tex = buildLedTexture(primary, secondary, label);
     tex.repeat.set(6, 1);
-    return new THREE.MeshStandardMaterial({ color: '#000', emissive: '#ffffff', emissiveMap: tex, emissiveIntensity: LED_BASE, roughness: 0.4 });
+    return new THREE.MeshLambertMaterial({ color: '#000', emissive: '#ffffff', emissiveMap: tex, emissiveIntensity: LED_BASE });
   }, [primary, secondary, label]);
   const flash = useRef(0);
   const lastScored = useRef(scored);
@@ -407,7 +423,7 @@ function Courtside({ primary, secondary, label, scored }: ArenaProps & { label?:
 
   const chairs = useMemo(() => {
     const geo = new THREE.BoxGeometry(1.6, 3, 1.5);
-    const mat = new THREE.MeshStandardMaterial({ color: primary, roughness: 0.7 });
+    const mat = new THREE.MeshLambertMaterial({ color: primary });
     const xs: number[] = [];
     for (let x = 9; x <= 27; x += 2.2) xs.push(x, -x);
     const im = new THREE.InstancedMesh(geo, mat, xs.length);
@@ -434,7 +450,7 @@ function Courtside({ primary, secondary, label, scored }: ArenaProps & { label?:
       {/* Scorer's table at center court, near sideline. */}
       <mesh position={[0, 1.6, HALF_W + 6]}>
         <boxGeometry args={[24, 3.2, 3]} />
-        <meshStandardMaterial color="#14161d" roughness={0.6} />
+        <meshLambertMaterial color="#14161d" />
       </mesh>
       <mesh position={[0, 1.6, HALF_W + 4.48]} material={led}>
         <boxGeometry args={[23.6, 2.6, 0.05]} />
@@ -451,7 +467,7 @@ function Scoreboard({ primary, secondary, board, awayPrimary }: ArenaProps & { b
   // One texture on all four screens, repainted only when what it shows changes.
   const tex = useMemo(() => buildScoreboardTexture(), []);
   const screen = useMemo(
-    () => new THREE.MeshStandardMaterial({ color: '#05060a', emissive: '#ffffff', emissiveMap: tex, emissiveIntensity: 0.95, roughness: 0.3 }),
+    () => new THREE.MeshLambertMaterial({ color: '#05060a', emissive: '#ffffff', emissiveMap: tex, emissiveIntensity: 0.95 }),
     [tex],
   );
   const face = {
@@ -466,13 +482,13 @@ function Scoreboard({ primary, secondary, board, awayPrimary }: ArenaProps & { b
   };
   const key = JSON.stringify(face);
   useEffect(() => { paintScoreboard(tex, face); }, [key]); // eslint-disable-line react-hooks/exhaustive-deps
-  const trim = useMemo(() => new THREE.MeshStandardMaterial({ color: '#05060a', emissive: secondary, emissiveIntensity: 0.45 }), [secondary]);
+  const trim = useMemo(() => new THREE.MeshLambertMaterial({ color: '#05060a', emissive: secondary, emissiveIntensity: 0.45 }), [secondary]);
 
   return (
     <group position={[0, 62, 0]}>
       <mesh>
         <boxGeometry args={[22, 13, 16]} />
-        <meshStandardMaterial color="#0d0f15" roughness={0.5} metalness={0.4} />
+        <meshLambertMaterial color="#0d0f15" />
       </mesh>
       {/* Four screens. */}
       <mesh position={[0, 0, 8.05]} material={screen}><planeGeometry args={[20, 10.5]} /></mesh>
@@ -486,7 +502,7 @@ function Scoreboard({ primary, secondary, board, awayPrimary }: ArenaProps & { b
       {[[-8, -6], [8, -6], [-8, 6], [8, 6]].map(([x, z], i) => (
         <mesh key={i} position={[x, 30, z]}>
           <cylinderGeometry args={[0.12, 0.12, 48, 6]} />
-          <meshStandardMaterial color="#20232b" />
+          <meshLambertMaterial color="#20232b" />
         </mesh>
       ))}
     </group>
@@ -568,7 +584,7 @@ function Jumbotron({ face, primary, secondary, awayPrimary }: { face: JumboData;
     <group position={[0, JUMBO_Y, JUMBO_Z]}>
       <mesh position={[0, 0, -0.6]}>
         <boxGeometry args={[JUMBO_FT_W + 2, JUMBO_FT_H + 2, 1]} />
-        <meshStandardMaterial color="#0b0d12" roughness={0.5} metalness={0.4} />
+        <meshLambertMaterial color="#0b0d12" />
       </mesh>
       <mesh material={mat}>
         <planeGeometry args={[JUMBO_FT_W, JUMBO_FT_H]} />
@@ -703,7 +719,7 @@ function Hoop({ side, primary, courtRef, shotClockMat, violation }: {
       new THREE.Vector2(0.47, -1.55),
     ];
     const geo = new THREE.LatheGeometry(pts, 20);
-    const mat = new THREE.MeshStandardMaterial({ map: tex, alphaTest: 0.5, side: THREE.DoubleSide, roughness: 0.9 });
+    const mat = new THREE.MeshLambertMaterial({ map: tex, alphaTest: 0.5, side: THREE.DoubleSide });
     return new THREE.Mesh(geo, mat);
   }, []);
 
@@ -718,14 +734,14 @@ function Hoop({ side, primary, courtRef, shotClockMat, violation }: {
       new THREE.BoxGeometry(0.14, 3.5 + 2 * t, t).translate(0, 10.75, -3 - t / 2),
     ];
     const geo = mergeParts(parts, ['position', 'normal', 'uv']);
-    const mat = new THREE.MeshStandardMaterial({ color: '#2a0806', emissive: '#ff2a1a', emissiveIntensity: 0.12, roughness: 0.4 });
+    const mat = new THREE.MeshLambertMaterial({ color: '#2a0806', emissive: '#ff2a1a', emissiveIntensity: 0.12 });
     const m = new THREE.Mesh(geo, mat);
     m.name = 'shotClockEdge';
     return m;
   }, []);
   // Lit when the shot clock runs out.
   useEffect(() => {
-    (ledEdge.material as THREE.MeshStandardMaterial).emissiveIntensity = violation ? 2.2 : 0.12;
+    (ledEdge.material as THREE.MeshLambertMaterial).emissiveIntensity = violation ? 2.2 : 0.12;
   }, [violation, ledEdge]);
 
   // What holds the rim: a mounting plate on the glass, the arm out to the
@@ -740,7 +756,7 @@ function Hoop({ side, primary, courtRef, shotClockMat, violation }: {
       new THREE.CylinderGeometry(0.13, 0.13, 0.42, 10).rotateZ(Math.PI / 2).translate(toBoard - 0.45, -0.26, 0),
     ];
     const geo = mergeParts(parts, ['position', 'normal', 'uv']);
-    return new THREE.Mesh(geo, new THREE.MeshStandardMaterial({ color: '#ff4f12', roughness: 0.35, metalness: 0.5 }));
+    return new THREE.Mesh(geo, new THREE.MeshLambertMaterial({ color: '#ff4f12' }));
   }, []);
 
   // The rim assembly pivots at the glass, so a dunk pulls it down and lets it
@@ -779,9 +795,9 @@ function Hoop({ side, primary, courtRef, shotClockMat, violation }: {
   const s = side;
   const boardX = s * BOARD_FACE;
   const glass = (
-    <meshPhysicalMaterial color="#d8e6f2" transmission={0} transparent opacity={0.22} roughness={0.05} metalness={0.1} depthWrite={false} />
+    <meshPhongMaterial color="#d8e6f2" transparent opacity={0.22} shininess={90} depthWrite={false} />
   );
-  const white = <meshStandardMaterial color="#f4f4f4" roughness={0.4} />;
+  const white = <meshLambertMaterial color="#f4f4f4" />;
   const frame: [number, number, number, number, number, number][] = [
     // [y, z, h, w] for the outer edge and the shooter's square (24 x 18 in).
     [12.5, 0, 0.15, 6, 0, 0], [9.0, 0, 0.15, 6, 0, 0], [10.75, 3, 3.5, 0.15, 0, 0], [10.75, -3, 3.5, 0.15, 0, 0],
@@ -793,30 +809,30 @@ function Hoop({ side, primary, courtRef, shotClockMat, violation }: {
       {/* Stanchion: padded base behind the baseline, the arm reaching over. */}
       <mesh position={[s * (HALF_L + 6.5), 2.2, 0]}>
         <boxGeometry args={[6, 4.4, 6.5]} />
-        <meshStandardMaterial color={primary} roughness={0.75} />
+        <meshLambertMaterial color={primary} />
       </mesh>
       {/* The pad on the court-facing side of the base: a thick slab proud of
           the frame, the part players actually run into. */}
       <mesh position={[s * (HALF_L + 3.2), 2.35, 0]}>
         <boxGeometry args={[0.7, 4.7, 6.9]} />
-        <meshStandardMaterial color={primary} roughness={0.95} />
+        <meshLambertMaterial color={primary} />
       </mesh>
       <mesh position={[s * (HALF_L + 4.2), 2.2, 0]}>
         <boxGeometry args={[1.4, 4.4, 5.2]} />
-        <meshStandardMaterial color="#14161d" roughness={0.6} />
+        <meshLambertMaterial color="#14161d" />
       </mesh>
       <mesh position={[s * (HALF_L + 5.5), 9, 0]} rotation={[0, 0, s * 0.42]}>
         <boxGeometry args={[1.1, 12, 1.1]} />
-        <meshStandardMaterial color="#1a1c22" roughness={0.4} metalness={0.6} />
+        <meshLambertMaterial color="#1a1c22" />
       </mesh>
       <mesh position={[s * (HALF_L + 0.6), 13.2, 0]}>
         <boxGeometry args={[8.4, 0.9, 0.9]} />
-        <meshStandardMaterial color="#1a1c22" roughness={0.4} metalness={0.6} />
+        <meshLambertMaterial color="#1a1c22" />
       </mesh>
       {/* Pad wrapping the bottom of the board. */}
       <mesh position={[boardX, 8.85, 0]}>
         <boxGeometry args={[0.45, 0.35, 6.1]} />
-        <meshStandardMaterial color={primary} roughness={0.7} />
+        <meshLambertMaterial color={primary} />
       </mesh>
       {/* Glass. */}
       <mesh position={[boardX, 10.75, 0]} renderOrder={2}>
@@ -832,7 +848,7 @@ function Hoop({ side, primary, courtRef, shotClockMat, violation }: {
       {/* Shot clock on top, its face toward the court showing the live count. */}
       <mesh position={[boardX, 13.4, 0]}>
         <boxGeometry args={[0.8, 0.9, 2.6]} />
-        <meshStandardMaterial color="#0b0b0e" roughness={0.5} />
+        <meshLambertMaterial color="#0b0b0e" />
       </mesh>
       <mesh position={[boardX - s * 0.42, 13.4, 0]} rotation={[0, s > 0 ? -Math.PI / 2 : Math.PI / 2, 0]} material={shotClockMat}>
         <planeGeometry args={[2.4, 0.8]} />
@@ -846,7 +862,7 @@ function Hoop({ side, primary, courtRef, shotClockMat, violation }: {
             <group position={[-(BOARD_FACE - RIM_X), 0, 0]}>
               <mesh rotation={[Math.PI / 2, 0, 0]}>
                 <torusGeometry args={[0.75, 0.055, 10, 32]} />
-                <meshStandardMaterial color="#ff4f12" roughness={0.35} metalness={0.5} />
+                <meshLambertMaterial color="#ff4f12" />
               </mesh>
               <primitive object={mount} />
               <primitive object={net} />
@@ -893,7 +909,7 @@ export default function Arena({ primary, secondary, courtRef, board = IDLE_BOARD
       {/* The arena floor around the hardwood. */}
       <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.02, 0]}>
         <planeGeometry args={[420, 320]} />
-        <meshStandardMaterial color="#101219" roughness={0.95} />
+        <meshLambertMaterial color="#101219" />
       </mesh>
       <BowlM primary={primary} secondary={secondary} awayPrimary={awayPrimary} hype={hype} />
       <CourtsideM primary={primary} secondary={secondary} label={homeLabel} scored={board.home + board.away} />

@@ -12,6 +12,7 @@ import {
 } from '../components/ui/kit';
 import { useDesktop } from '../components/desktop/useDesktop';
 import { DPage, DDock, DCta, DStep, DTitle, Hover, Cols, Col } from '../components/desktop/kit';
+import { seasonStartYearOf } from '../src/eraYear';
 
 // Design 3c ("Transmissão"). Nobody knows what these kids become: the number is
 // a projection, not the truth. The prospect in focus gets the 60-99 rail with
@@ -311,7 +312,7 @@ const Draft: React.FC<DraftProps> = ({ season, onPick, onAutoPick, onFinish, onS
         }
       >
         <DTitle
-          title={`Draft · classe ${season.awardHistory.length || 1}`}
+          title={`Draft de ${seasonStartYearOf(season)}`}
           right={
             !draft.complete ? (
               <View className="flex-row items-end" style={{ gap: 24 }}>
@@ -365,7 +366,7 @@ const Draft: React.FC<DraftProps> = ({ season, onPick, onAutoPick, onFinish, onS
       }
     >
       <ScreenTitle
-        title={`Draft · classe ${season.awardHistory.length || 1}`}
+        title={`Draft de ${seasonStartYearOf(season)}`}
         right={
           !draft.complete ? (
             <View className="items-end">

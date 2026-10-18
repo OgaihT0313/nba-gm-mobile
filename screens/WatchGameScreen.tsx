@@ -35,8 +35,8 @@ import { eraGroupForEraId } from '../data/eras';
 import { getEraVisual } from '../src/theme/eraVisuals';
 import { COLORS, INK, RADIUS, FONT, withAlpha, onAccent, ovrColor } from '../src/theme/tokens';
 import { Panel, MonoLabel, Stat, CtaButton, GhostButton, Meter } from '../components/ui/kit';
+import { onPacedFrame } from '../components/court3d/framePacer';
 import Court3D, { CameraView, type CourtSound, type JumboData } from '../components/court3d/Court3D';
-import EraTVFilter from '../components/court3d/EraTVFilter';
 import { eraYear } from '../src/eraIdentity';
 import { cheer, newCrowdHype } from '../components/court3d/Arena';
 import type { RigPlayer } from '../components/court3d/PlayerRig';
@@ -555,16 +555,15 @@ const WatchGameScreen: React.FC<WatchGameScreenProps> = ({
   };
 
   /* ---------------------------------------------------------------- */
-  /* The playback loop. One rAF for the whole screen: it advances the  */
-  /* clock, writes the court state into courtRef (which Court3D reads  */
-  /* in its own useFrame) and fires announcements. It never calls      */
-  /* setState for movement — only for things a human reads.            */
+  /* The playback loop. One paced 60 Hz frame for the whole screen: it */
+  /* advances the clock, writes the court state into courtRef (which   */
+  /* Court3D then renders on the same frame) and fires announcements.  */
+  /* It never calls setState for movement — only for things a human    */
+  /* reads.                                                            */
   /* ---------------------------------------------------------------- */
   useEffect(() => {
-    let raf = 0;
     let last = Date.now();
     const tick = () => {
-      raf = requestAnimationFrame(tick);
       const now = Date.now();
       const dt = Math.min(0.1, (now - last) / 1000);
       last = now;
@@ -608,8 +607,7 @@ const WatchGameScreen: React.FC<WatchGameScreenProps> = ({
       announce();
       reachMoment();
     };
-    raf = requestAnimationFrame(tick);
-    return () => cancelAnimationFrame(raf);
+    return onPacedFrame(tick, 0);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -1150,6 +1148,7 @@ const WatchGameScreen: React.FC<WatchGameScreenProps> = ({
         courtRef={courtRef}
         visual={courtVisual}
         cameraView={cameraView}
+        tvYear={eraYear()}
         homeLabel={getTeamTricode(home)}
         homeNickname={getTeamNickname(home)}
         homeCity={getTeamCity(home)}
@@ -1174,9 +1173,6 @@ const WatchGameScreen: React.FC<WatchGameScreenProps> = ({
         }}
         insets={screenH && livePanelH ? { top: hudTop, bottom: livePanelH + insets.bottom + (desktop ? 24 : 14) } : undefined}
       />
-
-      {/* The older eras on an old TV (scanlines, darkened edges, washed color). */}
-      <EraTVFilter year={eraYear()} />
 
       {desktop ? cameras : null}
 

@@ -13,3 +13,20 @@ export const eraEndYearOf = (s?: Pick<SeasonState, 'era' | 'eraChainIndex'> | nu
   if (Number.isNaN(base) || start < 0) return null;
   return base + ((s.eraChainIndex ?? start) - start);
 };
+
+/**
+ * The year the save's current season starts (1995 = 1995-96): an era save's
+ * off the chain, the live save's from 2025-26 plus the seasons it has played.
+ * In the draft and free agency it's already the coming season, so this is also
+ * the draft's year (the 1995 draft opens 1995-96).
+ */
+export const seasonStartYearOf = (s: Pick<SeasonState, 'era' | 'eraChainIndex' | 'gmLegacy'>): number => {
+  const end = eraEndYearOf(s);
+  return end !== null ? end - 1 : 2025 + (s.gmLegacy?.seasons ?? 0);
+};
+
+/** "1995-96". */
+export const seasonLabelOf = (s: Pick<SeasonState, 'era' | 'eraChainIndex' | 'gmLegacy'>): string => {
+  const y = seasonStartYearOf(s);
+  return `${y}-${String(y + 1).slice(-2)}`;
+};

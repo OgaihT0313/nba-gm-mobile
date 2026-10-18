@@ -12,6 +12,7 @@ import AllNbaTeams from '../components/AllNbaTeams';
 import AwardHistory from '../components/AwardHistory';
 import { useDesktop } from '../components/desktop/useDesktop';
 import { DPage, DDock, DCta, DTitle, Cols, Col } from '../components/desktop/kit';
+import { eraEndYearOf } from '../src/eraYear';
 
 // Design 3d — the one screen that deliberately breaks the system. When a
 // champion exists, the page leaves #06080f for near-black #0a0803, the accent
@@ -54,9 +55,8 @@ const AwardsScreen: React.FC<AwardsScreenProps> = ({ season, onGoToPlayoffs, onS
     return `Venceram o ${getTeamNickname(opp ?? undefined)} por ${mine}–${theirs} nas Finais`;
   })();
   // The year the title was won: the end year of the season just played.
-  const endYear = season.era?.seasonLabel
-    ? parseInt(season.era.seasonLabel.slice(0, 4), 10) + 1
-    : 2025 + seasonNumber;
+  // (An era save's comes off the chain: it read the starting era's every year.)
+  const endYear = eraEndYearOf(season) ?? 2025 + seasonNumber;
 
   const allNba = season.awards?.allNba && season.awards.allNba.length > 0
     ? <AllNbaTeams teams={season.awards.allNba} players={season.players} leagueTeams={season.teams} columns={desktop} />

@@ -8,6 +8,7 @@ import { sortStandings } from '../services/scheduleService';
 import { COLORS, FONT, type ThemeMode } from '../src/theme/tokens';
 import { CtaButton, GhostButton, TeamBadge, StatStrip, BodyText } from '../components/ui/kit';
 import BrandLogo from '../components/BrandLogo';
+import { seasonLabelOf } from '../src/eraYear';
 import { useDesktop } from '../components/desktop/useDesktop';
 
 // Design 2a ("Transmissão"). No team color yet — black and white, with the two
@@ -30,8 +31,9 @@ const Home: React.FC<HomeProps> = ({ onStart, onContinue, season, themeMode, onT
   const desktop = useDesktop();
   const userTeam = season?.teams.find((t) => t.id === season.userTeamId);
   const seasonNumber = (season?.gmLegacy.seasons ?? 0) + 1;
-  const y = 2025 + seasonNumber - 1;
-  const yearLabel = season?.era?.seasonLabel ?? `${y}-${String(y + 1).slice(-2)}`;
+  // The season the save is in now, not the era it started in (it showed
+  // "1990-91" on a save six seasons into the chain; device audit, 2026-10-18).
+  const yearLabel = season ? seasonLabelOf(season) : '';
   const rank = season && userTeam && season.gamesPlayed > 0
     ? sortStandings(season.teams.filter((t) => t.conference === userTeam.conference), season.schedule)
       .findIndex((t) => t.id === userTeam.id) + 1

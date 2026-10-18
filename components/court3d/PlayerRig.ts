@@ -18,14 +18,17 @@ import { onPainterReady, painterReady } from './painter';
 // Units are feet, like the rest of the court: ~6'5" to the top of the head.
 
 const SKIN_TONES = ['#f1c7a3', '#d9a57c', '#b97a52', '#8d5a3b', '#6b4029', '#4a2c1d'];
-const HAIR = new THREE.MeshStandardMaterial({ color: '#16120f', roughness: 0.9 });
-const EYES = new THREE.MeshStandardMaterial({ color: '#17110d', roughness: 0.35 });
+// Lambert for the matte parts, Phong (a cheap sheen) for skin and jersey:
+// ten bodies of PBR shading were a good part of each frame's GPU time on the
+// phone (device audit, 2026-10-18), for highlights no one could see.
+const HAIR = new THREE.MeshLambertMaterial({ color: '#16120f' });
+const EYES = new THREE.MeshPhongMaterial({ color: '#17110d', shininess: 40, specular: '#333333' });
 
 /** Fabric by color, shared by every body that wears it. */
-const fabricCache = new Map<string, THREE.MeshStandardMaterial>();
+const fabricCache = new Map<string, THREE.MeshLambertMaterial>();
 const fabric = (color: string) => {
   let m = fabricCache.get(color);
-  if (!m) { m = new THREE.MeshStandardMaterial({ color, roughness: 0.85 }); fabricCache.set(color, m); }
+  if (!m) { m = new THREE.MeshLambertMaterial({ color }); fabricCache.set(color, m); }
   return m;
 };
 const WHITE = '#f4f4f4';
@@ -295,7 +298,7 @@ export const createRig = (team: { primary: string; secondary: string }, shadowMa
   // then and wherever the brush is unavailable.
   const jerseyTex = buildJerseyTexture(team.primary, team.secondary, null);
   const richTex = createJerseyDataTexture();
-  const jersey = new THREE.MeshStandardMaterial({ map: jerseyTex, roughness: 0.62 });
+  const jersey = new THREE.MeshPhongMaterial({ map: jerseyTex, shininess: 12, specular: '#1c1c1c' });
   let shirt: { number: number | null; name?: string } = { number: null };
   let waitingForFont = false;
   const paintShirt = () => {
@@ -312,16 +315,15 @@ export const createRig = (team: { primary: string; secondary: string }, shadowMa
     }
   };
   // Shorts carry a waistband and shoes a sole as painted bands, not meshes.
-  const shortsMat = new THREE.MeshStandardMaterial({
+  const shortsMat = new THREE.MeshLambertMaterial({
     map: sharedBand(team.primary, [{ from: 0.84, to: 1.01, color: team.secondary }]),
-    roughness: 0.6, side: THREE.DoubleSide,
+    side: THREE.DoubleSide,
   });
   // The shoes are the player's own (setPlayer picks the pair).
-  const shoeMat = new THREE.MeshStandardMaterial({
+  const shoeMat = new THREE.MeshLambertMaterial({
     map: sharedBand(team.secondary, [{ from: -0.01, to: 0.3, color: soleFor(team.secondary) }]),
-    roughness: 0.45,
   });
-  const skin = new THREE.MeshStandardMaterial({ color: SKIN_TONES[0], roughness: 0.55 });
+  const skin = new THREE.MeshPhongMaterial({ color: SKIN_TONES[0], shininess: 18, specular: '#2a2a2a' });
 
   const shadow = new THREE.Mesh(GEO.shadow, shadowMat);
   shadow.rotation.x = -Math.PI / 2;

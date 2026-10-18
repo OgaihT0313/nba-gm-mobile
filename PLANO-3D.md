@@ -459,6 +459,43 @@ aparelho** (`scripts/device_3d.sh`, `gfxinfo` por câmera) com o APK do GitHub A
 Se ainda engasgar, os próximos suspeitos são os corpos novos de `a91dfcf` (malhas e
 draw calls por jogador) e o replay.
 
+## Otimização 2 — 2026-10-18 (auditoria no Galaxy A57)
+
+Medido no aparelho (apk-1003, tela de 120 Hz) antes desta rodada: Livre ~92 qps com
+23% de quadros irregulares, TV ~74 qps com 48% (p95 de 40 ms), 1985-86 com o filtro
+de TV ~68 qps com 61%. Quase nada acima de 40 ms: o problema era o **ritmo desigual**
+(quadros de 8, 17 e 25 ms) e o **custo de pixel na GPU**, não travadas longas. Na TV,
+a torcida do lado de cá cobria o terço de baixo da tela com blocos enormes. O que
+mudou:
+- **Resolução:** o GLView desenha 65% da tela (~42% dos pixels) e é esticado por
+  `transform` (`RENDER_SCALE` em `Court3D.tsx`). O expo-gl só renderiza na resolução
+  nativa da view, então o jeito é uma view menor. Web fica em 100%.
+- **60 qps estáveis:** `framePacer.ts`, um relógio único de 60 Hz (um vsync sim,
+  outro não a 120 Hz). O tique da partida (`WatchGameScreen`) roda primeiro e o
+  render do `Court3D` (`frameloop="never"` + `advance`) logo depois, no mesmo quadro.
+  O `clock.autoStart` fica desligado: senão o `getElapsedTime()` da torcida religava
+  o relógio e o dt saía quase zero (a câmera se arrastava).
+- **Materiais:** arena e torcida em Lambert; jogadores em Lambert (tecido, cabelo,
+  shorts, tênis) e Phong (pele, camisa, bola); a tabela saiu do Physical para Phong.
+  Nenhum material PBR na cena. Uma luz direcional a menos (a de preenchimento da
+  frente virou ambiente).
+- **Torcida na frente da câmera:** as cadeiras a menos de 48 pés da lente viram um
+  ponto no shader (sem área, sem pixel). Vale para todas as câmeras; na prática
+  limpa as últimas fileiras do lado de cá na TV e na Perto e as do fundo na Cesta,
+  e as fileiras da frente continuam na borda de baixo, como na transmissão. Os
+  flashes não saem dessas cadeiras.
+- **Filtro de TV em uma passada:** um quad de tela cheia desenhado por último na
+  própria cena, com scanlines, vinheta e tom num shader só, na resolução reduzida
+  (`EraTVFilter.tsx`). Antes eram três camadas React Native compostas por cima a cada
+  quadro na resolução nativa. Os PNGs `tv-scanlines`/`tv-vignette` saíram.
+
+Conferido no navegador (save 1995-96, filtro dos anos 90): render sem erro de shader,
+câmeras TV e Perto enquadrando certo, scanlines visíveis, quadros a 60 Hz.
+**Falta medir no aparelho** com o APK novo (`.device-3d/audit2-*/measure.sh`).
+Se a TV ainda passar de 10% de quadros irregulares, o próximo passo é baixar a
+torcida (cabeças e braços só nas fileiras perto da quadra) antes de pensar em
+trocar de motor.
+
 ---
 
 ## Critérios de aceite
