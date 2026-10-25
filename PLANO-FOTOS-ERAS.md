@@ -21,6 +21,8 @@ ainda não começaram.
     preferindo o time da era, e fica com `photoOffEra`. São de 2 jogadores (1996-97) a
     330 (2013-14), até 60 do top 60.
   - 1979-80 a 1994-95: sem mudança.
+  - Fotos da ESPN (`sync_era_photo_gaps.js`, no lugar da silhueta da NBA): são sempre a
+    última foto do jogador, então também ficam com `photoOffEra` (1.388 em 2026-10-24).
 - **Tratamento** (`components/ui/PlayerPhoto.tsx`, agora usado por todas as 16 fotos de
   jogador do app):
   - `filter` sépia, menos saturação e mais contraste (web e Android; o iOS ignora);

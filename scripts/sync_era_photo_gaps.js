@@ -7,6 +7,7 @@
 //   2. Look each one up on ESPN (search by name, NBA athletes only, exact
 //      name) and take ESPN's headshot when it exists -- it covers most of the
 //      2000s (Kidd, Larry Hughes, Okur), few retirees of the 80s and 90s.
+//      ESPN's photo is the latest one, so it is marked "photoOffEra".
 //   3. Whoever is still without a photo is marked "photoMissing": the app
 //      draws an avatar for him (PlayerPhoto) instead of the silhouette.
 // Answers are cached in scripts/fixtures/photo_gaps_cache.json, so a re-run
@@ -110,6 +111,13 @@ const espnHasPhoto = async (id) => {
       if (espnId) espn++; else avatar++;
       text = text.slice(0, m.index) + out + text.slice(m.index + m[0].length);
     }
+    // ESPN only keeps a player's latest headshot, from the end of his career:
+    // never a photo of this season, so it gets the era treatment (sepia, grain,
+    // card border) like the late NBA photos sync_era_photos marks.
+    text = text.replace(
+      /([ \t]*)"photoUrl": "https:\/\/a\.espncdn\.com\/[^"]*",(?!\r?\n[ \t]*"photoOffEra")/g,
+      (line, pad) => `${line}${nl}${pad}"photoOffEra": true,`,
+    );
     JSON.parse(text);
     if (!DRY) fs.writeFileSync(file, text);
     report.push(`${d} | ${total} jogadores | ${espn} com foto da ESPN | ${avatar} com avatar`);
