@@ -11,6 +11,106 @@ explícito do usuário.**
 
 ---
 
+## Qualidade de vida — pedido 2026-10-25
+
+O usuário pediu um roadmap de qualidade de vida, em ordem, e o início do item 1. A
+ordem segue o que aparece em toda sessão de jogo primeiro, depois o que pesa nas
+trocas e no elenco, e por último o acabamento. A ausência de cada item foi
+conferida com busca no código, não tela a tela.
+
+| # | Item | Tipo | Tamanho | Por que nessa posição |
+|---|------|------|---------|------------------------|
+| Q1 | **Simular até o próximo marco, com parada automática** — **FEITO** (2026-10-25; conferido no navegador, falta o aparelho) | N | P | Hoje são +1, +7, metade e temporada inteira: para chegar ao prazo de trocas é contar dias. E uma proposta de troca da CPU durante "Simular temporada" vira só um aviso que some, e a proposta vence em `OFFER_TTL` jogos |
+| Q2 | Vários espaços de save (3) — **FEITO** (2026-10-25; conferido no navegador, falta o aparelho) | N | M | Hoje é 1 espaço (item 1 abaixo). Com GM, Minha Carreira e 41 eras, começar outra carreira apaga a atual |
+| Q3 | Painel "precisa da sua atenção" na tela da temporada — **FEITO** (2026-10-25; conferido no navegador, falta o aparelho) | N | P | Junta o que pede ação (contratos vencendo, teto salarial, jogador insatisfeito, proposta aberta, staff vago), com um toque para a tela certa |
+| Q4 | Lista de jogadores negociáveis e "o que eles aceitariam" | N | M | A troca é tentativa e erro. Marcar quem está disponível atrai propostas, e o botão monta uma oferta que o outro time aceita por um alvo |
+| Q5 | Busca global de jogador | N | P | Hoje só o Scout tem campo de busca. Nas eras, achar um jogador é rolar 30 elencos |
+| Q6 | Lista de observação | N | P | Marcar alvos de outros times ou do draft e ser avisado quando ficarem disponíveis, se machucarem ou subirem de OVR |
+| Q7 | Comparar dois jogadores lado a lado | N | P | Existe comparação de elencos, não de jogadores. Ajuda na troca e na agência livre |
+| Q8 | "Melhor cinco" com um toque | L | P | Conferir antes o que o `RotationPanel` já faz sozinho |
+| Q9 | Desfazer a última ação de elenco no mesmo dia | N | M | Dispensa ou troca por toque errado no celular não tem volta |
+| Q10 | Dicas na primeira vez de cada tela | N | P | Não há tutorial. Quem cai numa era sem conhecer a época fica sem rumo |
+| Q11 | Vibração nos momentos grandes e resumo da temporada em imagem | N | P | Acabamento: fim de jogo, troca aceita, título |
+
+### Q1. Simular até o próximo marco (N) — FEITO (2026-10-25)
+
+`nextStop` em `services/seasonRunner.ts`; efeito `pause` do runner, tratado no loop
+do `App.tsx`. Conferido no navegador com o Bulls 1995-96:
+- "Até a Copa" parou no jogo 16, com a Copa decidida, e o botão passou a "Metade".
+- Uma proposta do Warriors pausou "Simular temporada" no jogo 28, com o aviso na
+  tela.
+
+Falta conferir no aparelho.
+
+- **Botão do próximo marco** no lugar de "Metade / Até o fim". Ele mostra o
+  primeiro marco que ainda não passou:
+  - o próximo jogo contra um rival (parando na véspera, para dar tempo de assistir);
+  - a final da NBA Cup (`CUP_GROUP_END`, se a temporada tiver Copa);
+  - a metade (41);
+  - o último dia de trocas (`TRADE_DEADLINE_GAME - 1`);
+  - o All-Star (`ALL_STAR_GAME`);
+  - o fim da temporada regular (82).
+- **Parada automática**, além da decisão (que já parava): uma proposta de troca da
+  CPU e o dono esquentando a cadeira pausam a simulação. Um aviso diz o motivo.
+
+### Q2. Três espaços de save do GM (N) — FEITO (2026-10-25)
+
+- **Arquivos:** `nba-manager-save` (o de sempre, que vira o espaço 1 sem
+  migração), `nba-manager-save-2` e `nba-manager-save-3`. O espaço ativo fica nas
+  preferências (`activeSlot`), e o app abre nele. A Minha Carreira continua com o
+  save próprio.
+- **Código:** `GmSlot`, `listSaves` e `summaryOf` em `services/saveService.ts`.
+  Cada gravação leva o espaço junto, então trocar de espaço com uma gravação em
+  andamento não mistura saves.
+- **Nome da época:** o card de cada espaço usa o nome e a sigla do time naquela
+  temporada (`getTeamNickname` e `getTeamTricode` aceitam o ano). Um save de
+  1995-96 mostra os Bullets, mesmo com outro save aberto.
+- **Tela inicial:**
+  - um card por espaço: tocar abre o save;
+  - "Apagar" pede um segundo toque;
+  - o espaço vazio oferece "Nova carreira";
+  - "Continuar" abre o último espaço jogado;
+  - "Nova carreira" vai para o primeiro espaço vazio.
+- **Conferido no navegador:**
+  - carreira nova no espaço 2 sem tocar no 1;
+  - troca para o Bulls 1995-96, com os nomes da época;
+  - apagar com confirmação;
+  - recarregar a página e abrir no último espaço.
+- **Falta:** conferir no aparelho, onde os saves são arquivos.
+- **Limite no site:** são até 3 saves de ~0,3 a 0,75 MB, mais a Minha Carreira,
+  no localStorage (~5 MB). Cabe, mas um save muito longo pode chegar perto. Se a
+  gravação falhar, o erro só aparece no console.
+
+### Q3. "Precisa da sua atenção" (N) — FEITO (2026-10-25)
+
+`services/attentionService.ts` (`attentionItems`, leitura pura do save) e um
+painel na tela da temporada, no lugar das etiquetas soltas de "ofertas" e
+"lesionados". Cada item leva à tela que resolve, e Meu Time abre na aba certa
+(`initialTab`):
+
+| Item | Quando | Vai para |
+|---|---|---|
+| Propostas de troca | Há proposta aberta antes do prazo; diz em quantos dias a mais antiga vence | Trocas |
+| Pedido para sair | `tradeRequestedIds` ainda no elenco, antes do prazo | Trocas |
+| Elenco curto ou longo | Fora de `MIN_ROSTER_SIZE`..`MAX_ROSTER_SIZE` | Meu Time · Elenco |
+| Titular fora | Lesão ou suspensão de um titular: os escolhidos pelo GM ou, sem escolha, os 5 maiores OVR | Meu Time · Rotação |
+| Insatisfeitos | Moral até 10 acima da linha de pedido de troca (`TRADE_REQUEST_MORALE`) | Meu Time · Elenco |
+| Folha acima do imposto | `getTeamSalary` > `LUXURY_TAX` | Meu Time · Elenco |
+| Contrato no fim | Último ano, sem extensão, entre os 8 melhores | Meu Time · Elenco |
+| Staff interino | Cargo vago ou com interino | Meu Time · Staff |
+
+- **Ordem:** vermelho (custa jogo ou confiança), amarelo (vai custar) e azul
+  (vale olhar).
+- **Conferido no navegador** com o Bulls 1995-96. Os itens que não surgiram
+  sozinhos (titular fora, pedido para sair, interino) foram forçados no save de
+  teste. Os atalhos para Elenco, Rotação, Staff e Trocas funcionaram, e entrar em
+  Meu Time pela barra volta a abrir em Elenco.
+- **Correção do Q2:** no card de save da tela inicial, o botão "Apagar" ficava
+  dentro do botão do card (`<button>` dentro de `<button>`, HTML inválido no
+  site). Agora os dois ficam lado a lado.
+
+---
+
 ## Prioridades a partir de 2026-10-10
 
 Feito depois da análise "o que é inútil / o que lapidar / o que falta". Os cortes

@@ -2,8 +2,9 @@
 // ~0.75 MB of JSON, well inside the browser's ~5 MB per origin). Private
 // windows and blocked site data make every call throw, so each one is guarded
 // and the game simply runs without a save there.
-// 'save' is the GM's (the original key), 'career' is Minha Carreira's.
-export type SaveSlot = 'save' | 'career';
+// 'save', 'save-2', 'save-3' are the GM's three (the first keeps the original
+// key), 'career' is Minha Carreira's.
+export type SaveSlot = 'save' | 'save-2' | 'save-3' | 'career';
 const keyOf = (slot: SaveSlot) => `nba-manager-${slot}`;
 
 export const readSave = (slot: SaveSlot = 'save'): string | null => {

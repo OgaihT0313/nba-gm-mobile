@@ -1,5 +1,5 @@
 import './global.css';
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { View, BackHandler } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
@@ -16,7 +16,8 @@ import { simulationEngine, ROTATION_MIN, ROTATION_MAX } from './services/simulat
 import { buildSeasonOwner, evaluateSeasonOutcome, confidenceZone } from './services/ownerService';
 import { generateSchedule } from './services/scheduleService';
 import { simulateOneDay, SimEffect, ALL_STAR_GAME, PinnedGameResult } from './services/seasonRunner';
-import { loadGame, saveGame } from './services/saveService';
+import { loadGame, saveGame, deleteSave, listSaves, summaryOf, GM_SLOTS, type GmSlot } from './services/saveService';
+import { loadActiveSlot, saveActiveSlot } from './services/prefsService';
 import { buildSeasonRecord, bannerYears } from './services/historyService';
 import { canPromiseMinutes, promiseSeason, PROMISE_MPG } from './services/developmentService';
 import { MIN_ROSTER_SIZE, TRADE_DEADLINE_GAME } from './services/tradeService';
@@ -98,7 +99,19 @@ export default function App() {
   const [view, setView] = useState<AppView>('home');
   // The saved career, if any, is the starting state — Home then offers
   // "Continuar" exactly as it does mid-session.
-  const [season, setSeason] = useState<SeasonState | null>(() => loadGame());
+  // Three GM save slots; the app opens on the one played last.
+  const [activeSlot, setActiveSlot] = useState<GmSlot>(() => loadActiveSlot() as GmSlot);
+  const [season, setSeason] = useState<SeasonState | null>(() => loadGame(loadActiveSlot() as GmSlot));
+  // The slot a new career goes into, picked on Home before the era.
+  const [pendingSlot, setPendingSlot] = useState<GmSlot>(activeSlot);
+  // Whether that slot already holds a career (the confirm screen warns).
+  const [pendingSlotFilled, setPendingSlotFilled] = useState(false);
+  // The tab Meu Time opens on: set by the season screen's attention list, back
+  // to the roster once the user leaves the screen.
+  const [myTeamTab, setMyTeamTab] = useState<'roster' | 'rotation' | 'coach'>('roster');
+  useEffect(() => { if (view !== 'my-team') setMyTeamTab('roster'); }, [view]);
+  // Bumped when a slot is deleted, so Home re-reads the files.
+  const [slotsVersion, setSlotsVersion] = useState(0);
   // Light/dark. The saved mode was applied to the palette in index.ts, before
   // the first render; switching applies the other one and re-keys the tree.
   const [themeMode, setThemeMode] = useState<ThemeMode>(currentThemeMode);
@@ -187,12 +200,54 @@ export default function App() {
       const now = Date.now();
       if (now - lastSimSaveRef.current < SIM_SAVE_INTERVAL) return;
       lastSimSaveRef.current = now;
-      saveGame(season);
+      saveGame(season, activeSlot);
       return;
     }
-    const t = setTimeout(() => saveGame(season), 400);
+    const t = setTimeout(() => saveGame(season, activeSlot), 400);
     return () => clearTimeout(t);
-  }, [season, isSimulating]);
+  }, [season, isSimulating, activeSlot]);
+
+  // Home's slot cards. The slot on screen is summarized from memory (the file
+  // can be up to a debounce behind); the others are read from disk, once per
+  // visit to Home.
+  const slotSummaries = useMemo(
+    () => (view === 'home' ? listSaves().map((s, i) => (GM_SLOTS[i] === activeSlot && season ? summaryOf(season) : s)) : []),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [view === 'home', activeSlot, slotsVersion],
+  );
+
+  // Switching slots: the slot on screen is already written (autosave), so the
+  // other one simply replaces it. Both state changes land in one render, so the
+  // autosave never pairs one slot's season with the other's file.
+  const openSlot = (slot: GmSlot) => {
+    if (slot === activeSlot && season) { setView('simulation'); return; }
+    const loaded = loadGame(slot);
+    if (!loaded) { addNotification('Não foi possível abrir esse save.', 'error'); return; }
+    setIsSimulating(false);
+    setWatchGame(null);
+    setTradePartnerId(null);
+    setSelectedTeamId(null);
+    setActiveSlot(slot);
+    saveActiveSlot(slot);
+    setSeason(loaded);
+    setView('simulation');
+  };
+
+  const newInSlot = (slot: GmSlot) => {
+    setPendingSlot(slot);
+    setPendingSlotFilled(!!slotSummaries[slot - 1]);
+    setPendingEraId(null);
+    setView('era-select');
+  };
+
+  const removeSlot = (slot: GmSlot) => {
+    deleteSave(slot);
+    if (slot === activeSlot) {
+      setIsSimulating(false);
+      setSeason(null);
+    }
+    setSlotsVersion((v) => v + 1);
+  };
 
   // Day-by-day simulation loop. RN has no Web Worker, so the ported seasonRunner
   // runs on the JS thread — but advancing ONE day per tick (setTimeout) keeps
@@ -218,6 +273,13 @@ export default function App() {
       effects.forEach(applyEffect);
       setSeason(next);
       if (fired) setIsSimulating(false);
+      // An offer or the owner's warning halts a longer run, said so only when
+      // the run had days left -- otherwise it just reached its target.
+      const pause = effects.find((e) => e.kind === 'pause');
+      if (pause && pause.kind === 'pause' && next.status === 'active' && next.gamesPlayed < targetGames) {
+        setIsSimulating(false);
+        addNotification(`⏸️ Simulação pausada: ${pause.reason}.`, 'info');
+      }
     }, 16);
     return () => clearTimeout(t);
   }, [season, isSimulating, targetGames]);
@@ -765,6 +827,11 @@ export default function App() {
       // eraChainIndex's comment in types.ts.
       eraChainIndex: era ? ERAS.findIndex((e) => e.id === era.id) : undefined,
     });
+    // The new career goes into the slot picked on Home, which becomes the
+    // one on screen (same render as the season, see openSlot).
+    setIsSimulating(false);
+    setActiveSlot(pendingSlot);
+    saveActiveSlot(pendingSlot);
     setView('simulation');
   };
 
@@ -789,9 +856,11 @@ export default function App() {
     if (view === 'home') {
       return (
         <Home
-          onStart={() => setView('era-select')}
-          onContinue={season ? () => setView('simulation') : undefined}
-          season={season}
+          slots={slotSummaries}
+          activeSlot={activeSlot}
+          onOpen={openSlot}
+          onNew={newInSlot}
+          onDelete={removeSlot}
           themeMode={themeMode}
           onThemeMode={changeThemeMode}
           onCareer={() => setView('career')}
@@ -823,7 +892,7 @@ export default function App() {
             teams={activeTeamsData as Team[]}
             onBack={() => setView('team-select')}
             onConfirm={() => initSeason(t.id)}
-            replacesSave={!!season}
+            replacesSave={pendingSlotFilled}
           />
         );
       }
@@ -847,6 +916,10 @@ export default function App() {
           onAdvance={runSimulation}
           onWatchGame={startWatchGame}
           onGoToPhase={(v) => setView(v)}
+          onOpen={(target) => {
+            if (target.view === 'my-team') setMyTeamTab(target.tab);
+            setView(target.view);
+          }}
         />
       );
     }
@@ -891,6 +964,7 @@ export default function App() {
           onFireStaff={handleFireStaff}
           onSetRotationSize={handleSetRotationSize}
           onToggleLoadManagement={handleToggleLoadManagement}
+          initialTab={myTeamTab}
           development={{
             promisedId: season.minutesPromise?.season === promiseSeason(season) ? season.minutesPromise.playerId : undefined,
             inSeason: season.status === 'active' && season.gamesPlayed > 0,
@@ -1016,6 +1090,8 @@ export default function App() {
             onRestart={() => {
               setSeason(null);
               setPendingEraId(null);
+              setPendingSlot(activeSlot);
+              setPendingSlotFilled(true);
               setView('era-select');
             }}
           />

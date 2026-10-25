@@ -16,7 +16,7 @@ import { TRADE_DEADLINE_GAME, generateCpuTradeOffer, OFFER_TTL, MAX_PENDING_OFFE
 import { projectConfidence, confidenceZone, shouldFireMidSeason } from './ownerService';
 import { generateDecisions } from './decisionService';
 import { notePressHeld } from './pressService';
-import { trackMoves, applyRevengeNights, markRevengeFaced, settleUserGame } from './rivalryService';
+import { trackMoves, applyRevengeNights, markRevengeFaced, settleUserGame, isRival } from './rivalryService';
 import { milestonesCrossed, MILESTONE_MORALE } from './milestoneService';
 
 // Calendar checkpoints (moved out of App.tsx so the runner is self-contained).
@@ -26,11 +26,38 @@ export const ALL_STAR_GAME = 58;
 // Group-stage window for the NBA Cup — knockout resolves at the same checkpoint.
 export const CUP_GROUP_END = 16;
 
+/**
+ * Where "simulate to the next milestone" stops: the first checkpoint of the
+ * calendar still ahead. A rival game stops the day before, so it can be
+ * watched; the trade deadline stops on the last day trades are still open.
+ * `target` is a gamesPlayed value, what runSimulation takes.
+ */
+export function nextStop(season: SeasonState): { target: number; label: string } | null {
+    const gp = season.gamesPlayed;
+    if (season.status !== 'active' || gp >= 82) return null;
+    const rivalDay = season.schedule
+        .filter(g => !g.played && g.day - 1 > gp && (g.homeTeamId === season.userTeamId || g.awayTeamId === season.userTeamId))
+        .filter(g => isRival(season.rivalries, g.homeTeamId === season.userTeamId ? g.awayTeamId : g.homeTeamId))
+        .reduce((min, g) => Math.min(min, g.day), Infinity);
+    const stops = [
+        { target: rivalDay - 1, label: 'Até o rival' },
+        ...(season.cup ? [{ target: CUP_GROUP_END, label: 'Até a Copa' }] : []),
+        { target: 41, label: 'Metade' },
+        { target: TRADE_DEADLINE_GAME - 1, label: 'Até o prazo' },
+        { target: ALL_STAR_GAME, label: 'All-Star' },
+        { target: 82, label: 'Até o fim' },
+    ];
+    return stops.filter(s => s.target > gp).sort((a, b) => a.target - b.target)[0];
+}
+
 // Side effects the pure runner can't perform itself (they touch React state on
 // the main thread). The runner collects these in order; the caller replays them.
 export type SimEffect =
     | { kind: 'notification'; message: string; type: string }
-    | { kind: 'view'; view: 'allstar' | 'awards' };
+    | { kind: 'view'; view: 'allstar' | 'awards' }
+    // Something the GM should look at before more days go by (an offer that
+    // expires, the owner turning): a multi-day run stops after this day.
+    | { kind: 'pause'; reason: string };
 
 // A game result already resolved by the 3D "Assistir ao Jogo" screen — the sum
 // of the baskets that went in on court, quarter by quarter (see
@@ -186,6 +213,7 @@ export function simulateOneDay(season: SeasonState, pinnedResult?: PinnedGameRes
                 nextTradeOffers = [offer, ...nextTradeOffers];
                 const fromName = teamsAfterEvents.find(t => t.id === offer.fromTeamId)?.name;
                 notify(`📩 O ${fromName} enviou uma proposta de troca! Confira no Trade Center.`, 'trade');
+                effects.push({ kind: 'pause', reason: `proposta do ${fromName}` });
             }
         }
     }
@@ -228,6 +256,7 @@ export function simulateOneDay(season: SeasonState, pinnedResult?: PinnedGameRes
                     : '⚠️ A diretoria está de olho: os resultados estão abaixo do esperado.',
                 'error'
             );
+            effects.push({ kind: 'pause', reason: 'a diretoria cobrou resultados' });
         }
         if (shouldFireMidSeason(nextOwner, nextGamesPlayed)) {
             nextOwner = {

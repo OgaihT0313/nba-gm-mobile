@@ -70,6 +70,8 @@ interface MyTeamHubProps {
   onSetRotationSize: (size: number) => void;
   onToggleLoadManagement: (playerId: string) => void;
   development: PlayerDevelopment;
+  /** The tab it opens on (the season screen's attention list links to one). */
+  initialTab?: Tab;
 }
 
 const money = (v: number) => `$${(v / 1_000_000).toFixed(1)}M`;
@@ -86,9 +88,9 @@ const MINUTES_IN_A_GAME = 48;
 const MyTeamHub: React.FC<MyTeamHubProps> = ({
   team, players, allTeams, schedule, coaches, gmLegacy, owner, currentDraft,
   onWaive, onSetStarter, onFireCoach, onHireCoach, seasonStatus, staffMarket, onHireStaff, onFireStaff,
-  onSetRotationSize, onToggleLoadManagement, development,
+  onSetRotationSize, onToggleLoadManagement, development, initialTab = 'roster',
 }) => {
-  const [tab, setTab] = useState<Tab>('roster');
+  const [tab, setTab] = useState<Tab>(initialTab);
   const desktop = useDesktop();
   const insets = useSafeAreaInsets();
   const { accent } = useTheme();

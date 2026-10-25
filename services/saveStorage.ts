@@ -3,9 +3,10 @@
 // saveStorage.web.ts instead — expo-file-system has no web implementation.
 import { File, Paths } from 'expo-file-system';
 
-// A slot is a save of its own: 'save' is the GM's (the original file name),
+// A slot is a save of its own: 'save', 'save-2' and 'save-3' are the GM's
+// three (the first keeps the original file name),
 // 'career' is Minha Carreira's.
-export type SaveSlot = 'save' | 'career';
+export type SaveSlot = 'save' | 'save-2' | 'save-3' | 'career';
 const nameOf = (slot: SaveSlot) => `nba-manager-${slot}.json`;
 const tmpOf = (slot: SaveSlot) => `nba-manager-${slot}.tmp.json`;
 

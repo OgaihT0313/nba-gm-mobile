@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text } from 'react-native';
+import { View, Text, Pressable } from 'react-native';
 
 import { SeasonState, Team } from '../types';
 import { getTeamNickname, getTeamCity, conferenceLabel, getTeamAccent } from '../constants';
@@ -9,6 +9,8 @@ import { headlines } from '../services/headlineService';
 import { isRival, rivalryReason, revengePlayers, REVENGE_BOOST, RIVAL_WIN_MORALE, RIVAL_LOSS_MORALE } from '../services/rivalryService';
 import { currentStreak, nextGame, winProbability, teamResults } from '../services/formService';
 import { sortStandings } from '../services/scheduleService';
+import { nextStop } from '../services/seasonRunner';
+import { attentionItems, type AttentionTarget } from '../services/attentionService';
 import { COLORS, RADIUS, FONT, withAlpha, visibleTeamColor, colorDistance } from '../src/theme/tokens';
 import { PROMISE_MPG } from '../services/developmentService';
 import Screen, { Body } from '../components/ui/Screen';
@@ -36,6 +38,8 @@ interface SimulationScreenProps {
   onWatchGame?: (opponent: Team, atHome: boolean) => void;
   /** Opens the screen the season is waiting on once the 82 games are over. */
   onGoToPhase?: (view: PhaseView) => void;
+  /** Opens the screen that settles an attention item. */
+  onOpen?: (target: AttentionTarget) => void;
 }
 
 type PhaseView = 'playoffs' | 'awards' | 'draft' | 'free-agency';
@@ -79,7 +83,7 @@ const surname = (name: string) =>
   name.split(' ').filter((w) => !/^(Jr\.?|Sr\.?|II|III|IV)$/.test(w)).slice(-1)[0] ?? name;
 
 const SimulationScreen: React.FC<SimulationScreenProps> = ({
-  season, isSimulating, onAdvance, onWatchGame, onGoToPhase,
+  season, isSimulating, onAdvance, onWatchGame, onGoToPhase, onOpen,
 }) => {
   const desktop = useDesktop();
   // The feed is the user's own team only: league-wide it was mostly other
@@ -135,8 +139,9 @@ const SimulationScreen: React.FC<SimulationScreenProps> = ({
   const mandate = MANDATE_META[season.owner.mandate];
   const wins = userTeam?.wins ?? 0;
   const losses = userTeam?.losses ?? 0;
-  const injuredCount = Object.keys(userTeam?.playerAbsences ?? {}).length;
-  const offerCount = season.tradeOffers?.length ?? 0;
+  // What is waiting on the GM (offers, a starter out, contracts, the tax...),
+  // each with a tap to the screen that settles it.
+  const attention = attentionItems(season);
 
   // Pace against the owner's win target, capped at 100% — the same number the
   // owner judges you on at season end.
@@ -144,6 +149,9 @@ const SimulationScreen: React.FC<SimulationScreenProps> = ({
   const targetProgress = season.owner.targetWins > 0 ? Math.min(1, paceWins / season.owner.targetWins) : 0;
 
   const busy = isSimulating || over;
+  // The third step button: the next checkpoint of the calendar (rival game,
+  // Cup, deadline, All-Star...), so getting there is one tap, not day counting.
+  const stop = nextStop(season);
 
   // The season year: an era save reads it off the era chain; the live save
   // started in 2025-26 and moves one year per season.
@@ -181,7 +189,34 @@ const SimulationScreen: React.FC<SimulationScreenProps> = ({
     </Panel>
   ) : null;
 
-  const notesPanel = season.owner.note || season.owner.press?.promise || offerCount > 0 || injuredCount > 0 ? (
+  const attentionPanel = attention.length > 0 ? (
+    <Panel style={{ gap: 2 }}>
+      <SectionLabel>Precisa da sua atenção</SectionLabel>
+      {attention.map((a, i) => {
+        const tone = a.tone === 'bad' ? COLORS.bad : a.tone === 'warn' ? COLORS.warn : COLORS.east;
+        return (
+          <Pressable
+            key={a.id}
+            accessibilityRole="button"
+            accessibilityLabel={`${a.title}. ${a.detail}`}
+            onPress={onOpen ? () => onOpen(a.target) : undefined}
+            disabled={!onOpen}
+            className="active:opacity-75"
+            style={{ flexDirection: 'row', alignItems: 'center', gap: 10, paddingVertical: 9, borderTopWidth: i === 0 ? 0 : 1, borderTopColor: COLORS.lineSoft }}
+          >
+            <View style={{ width: 8, height: 8, borderRadius: 4, backgroundColor: tone }} />
+            <View style={{ flex: 1, gap: 1 }}>
+              <Name size={14.5}>{a.title}</Name>
+              <BodyText size={12.5}>{a.detail}</BodyText>
+            </View>
+            {onOpen ? <Text style={{ fontFamily: FONT.cond800, fontSize: 20, color: COLORS.dim }}>›</Text> : null}
+          </Pressable>
+        );
+      })}
+    </Panel>
+  ) : null;
+
+  const notesPanel = season.owner.note || season.owner.press?.promise ? (
     <Panel style={{ gap: 9 }}>
       {season.owner.note ? <BodyText>{season.owner.note}</BodyText> : null}
       {/* The one thing said at a press conference that outlives it. */}
@@ -192,12 +227,6 @@ const SimulationScreen: React.FC<SimulationScreenProps> = ({
             Na coletiva do dia {season.owner.press.promise.day}, você prometeu {PROMISE_LABEL[season.owner.press.promise.kind]}.
             {' '}Cumprida: +{PROMISE_KEPT} de confiança no fim; quebrada: {PROMISE_BROKEN}.
           </BodyText>
-        </View>
-      ) : null}
-      {offerCount > 0 || injuredCount > 0 ? (
-        <View className="flex-row flex-wrap" style={{ gap: 6 }}>
-          {offerCount > 0 ? <Tag color={COLORS.east}>{offerCount} {offerCount === 1 ? 'oferta de troca' : 'ofertas de troca'}</Tag> : null}
-          {injuredCount > 0 ? <Tag color={COLORS.bad}>{injuredCount} {injuredCount === 1 ? 'lesionado' : 'lesionados'}</Tag> : null}
         </View>
       ) : null}
     </Panel>
@@ -264,7 +293,7 @@ const SimulationScreen: React.FC<SimulationScreenProps> = ({
               <>
                 <DStep label="+1 dia" onPress={() => onAdvance(gp + 1)} disabled={busy} />
                 <DStep label="+7 dias" onPress={() => onAdvance(Math.min(82, gp + 7))} disabled={busy} />
-                <DStep label={gp < 41 ? 'Metade' : 'Até o fim'} onPress={() => onAdvance(gp < 41 ? 41 : 82)} disabled={busy} />
+                {stop ? <DStep label={stop.label} onPress={() => onAdvance(stop.target)} disabled={busy} /> : null}
               </>
             )}
             {over && phase && onGoToPhase ? (
@@ -399,6 +428,7 @@ const SimulationScreen: React.FC<SimulationScreenProps> = ({
               </Panel>
             </View>
 
+            {attentionPanel}
             {notesPanel}
 
             {front.length > 0 ? (
@@ -468,7 +498,7 @@ const SimulationScreen: React.FC<SimulationScreenProps> = ({
             <View className="flex-row" style={{ gap: 8 }}>
               <GhostButton filled label="+1 dia" onPress={() => onAdvance(gp + 1)} disabled={busy} style={{ flex: 1 }} />
               <GhostButton filled label="+7 dias" onPress={() => onAdvance(Math.min(82, gp + 7))} disabled={busy} style={{ flex: 1 }} />
-              <GhostButton filled label={gp < 41 ? 'Metade' : 'Até o fim'} onPress={() => onAdvance(gp < 41 ? 41 : 82)} disabled={busy} style={{ flex: 1 }} />
+              {stop ? <GhostButton filled label={stop.label} onPress={() => onAdvance(stop.target)} disabled={busy} style={{ flex: 1 }} /> : null}
             </View>
           )}
           {over && phase && onGoToPhase ? (
@@ -615,6 +645,7 @@ const SimulationScreen: React.FC<SimulationScreenProps> = ({
           </Panel>
         </View>
 
+        {attentionPanel}
         {notesPanel}
 
         {/* ------------------------------------------------------ headlines */}

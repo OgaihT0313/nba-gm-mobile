@@ -3,7 +3,7 @@ import type { Player, Team, PlayerAttributes, DraftPickAsset, Coach } from './ty
 import rawPlayersData from './data/players.json';
 import rawTeamsData from './data/teams.json';
 import { themeMode } from './src/theme/tokens';
-import { eraIdentity } from './src/eraIdentity';
+import { eraIdentity, eraYear } from './src/eraIdentity';
 
 
 // --- ASSETS AND CONFIGURATION ---
@@ -115,7 +115,7 @@ export const getTeamLogoUrl = (t?: Team) => t?.logoUrl || 'https://a.espncdn.com
 // a compact label anywhere a full team.name would get clipped (bracket columns,
 // tight rows), same convention broadcasts/ESPN use for the same reason.
 // In an era save, the franchise's tricode that season (SEA, NJN, WSB...).
-export const getTeamTricode = (t?: Team) => eraIdentity(t?.id)?.tricode ?? (t?.id ?? '???').toUpperCase();
+export const getTeamTricode = (t?: Team, year: number | null = eraYear()) => eraIdentity(t?.id, year)?.tricode ?? (t?.id ?? '???').toUpperCase();
 /** Same, from an id alone. */
 export const tricodeOf = (teamId: string) => eraIdentity(teamId)?.tricode ?? teamId.toUpperCase();
 
@@ -137,9 +137,11 @@ const TEAM_CITY: { [key: string]: string } = {
 export const getTeamCity = (t?: Team) => (t ? eraIdentity(t.id)?.city ?? TEAM_CITY[t.id] ?? t.name : '');
 
 /** "Oklahoma City Thunder" → "Thunder". Falls back to the full name. */
-export const getTeamNickname = (t?: Team) => {
+// `year`: the season's end year, for a save other than the one on screen (the
+// save slots on Home); left out, it is the one on screen.
+export const getTeamNickname = (t?: Team, year: number | null = eraYear()) => {
     if (!t) return '';
-    const era = eraIdentity(t.id);
+    const era = eraIdentity(t.id, year);
     if (era) return era.nickname;
     const city = TEAM_CITY[t.id];
     if (city && t.name.startsWith(city)) return t.name.slice(city.length).trim() || t.name;
