@@ -2,6 +2,7 @@ import React from 'react';
 import { View, Text, Pressable, ScrollView } from 'react-native';
 
 import { deleteSave } from '../services/saveService';
+import { deleteCareer } from '../services/career/careerSave';
 import { COLORS } from '../src/theme/tokens';
 
 interface Props {
@@ -37,28 +38,38 @@ export class ErrorBoundary extends React.Component<Props, State> {
       // Rendered outside the ThemeProvider, so the bg-ink class variable isn't
       // set here: the color comes straight from the live palette.
       <View className="flex-1 items-center justify-center px-6" style={{ backgroundColor: COLORS.bg }}>
-        <Text className="text-white font-display text-lg uppercase tracking-tight mb-2">
+        {/* Colors from the live palette, not fixed classes: white text was
+            invisible on the light theme's background. */}
+        <Text className="font-display text-lg uppercase tracking-tight mb-2" style={{ color: COLORS.text }}>
           Algo deu errado
         </Text>
-        <Text className="text-slate-400 text-sm text-center mb-4">
+        <Text className="text-sm text-center mb-4" style={{ color: COLORS.muted }}>
           Um erro inesperado interrompeu a tela atual.
         </Text>
         <ScrollView className="max-h-32 mb-6 w-full">
-          <Text className="text-slate-500 text-xs">{error.message}</Text>
+          <Text className="text-xs" style={{ color: COLORS.dim }}>{error.message}</Text>
         </ScrollView>
         <Pressable accessibilityRole="button"
-          className="bg-red-600 px-8 py-3 rounded-control items-center"
+          className="px-8 py-3 rounded-control items-center"
+          style={{ backgroundColor: COLORS.bad }}
           onPress={() => this.setState({ error: null })}
         >
-          <Text className="text-white font-bold">TENTAR NOVAMENTE</Text>
+          <Text className="font-bold" style={{ color: '#ffffff' }}>TENTAR NOVAMENTE</Text>
         </Pressable>
-        {/* The way out when the saved career itself is what breaks the screen:
-            retrying would just load it again. */}
+        {/* The way out when a saved game itself is what breaks the screen:
+            retrying would just load it again. Either mode can be the one that
+            breaks, so each has its own button. */}
         <Pressable accessibilityRole="button"
           className="mt-3 px-8 py-3 items-center"
           onPress={() => { deleteSave(); this.setState({ error: null }); }}
         >
-          <Text className="text-slate-400 text-xs">APAGAR CARREIRA SALVA E RECOMEÇAR</Text>
+          <Text className="text-xs" style={{ color: COLORS.muted }}>APAGAR O SAVE DO GM (ESPAÇO ATUAL)</Text>
+        </Pressable>
+        <Pressable accessibilityRole="button"
+          className="px-8 py-3 items-center"
+          onPress={() => { deleteCareer(); this.setState({ error: null }); }}
+        >
+          <Text className="text-xs" style={{ color: COLORS.muted }}>APAGAR A MINHA CARREIRA</Text>
         </Pressable>
       </View>
     );
