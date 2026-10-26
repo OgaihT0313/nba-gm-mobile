@@ -73,6 +73,11 @@ export const ZONE_META: Record<ConfidenceZone, { label: string; tone: 'positive'
 // drifting — a hot streak lifts it, a slump drops it, and it converges on the
 // real season result. Held steady for the first few games, where a tiny sample
 // projects wildly (a 1-0 start isn't a 82-win pace the owner believes).
+/** Games over which last season's carryOver fades to nothing. */
+const CARRY_FADE_GAMES = 41;
+/** The most last season can tilt the opening weeks, either way. */
+const CARRY_MAX = 15;
+
 export const projectConfidence = (owner: OwnerExpectation, team: Team): number => {
     const wins = team.wins || 0;
     const losses = team.losses || 0;
@@ -93,8 +98,10 @@ export const projectConfidence = (owner: OwnerExpectation, team: Team): number =
     const observed = (wins / gp) * 82;
     const projWins = (observed * gp + owner.targetWins * PRIOR_GAMES) / (gp + PRIOR_GAMES);
     // Each win above/below the target is worth ~2.2 points, centered at 60 so a
-    // team exactly on target sits comfortably clear of the danger zone.
-    return clamp(Math.round(60 + (projWins - owner.targetWins) * 2.2) + (owner.adjustment ?? 0), 0, 100);
+    // team exactly on target sits comfortably clear of the danger zone. Last
+    // season's goodwill or grudge (carryOver) fades out by the halfway mark.
+    const carry = (owner.carryOver ?? 0) * Math.max(0, 1 - gp / CARRY_FADE_GAMES);
+    return clamp(Math.round(60 + (projWins - owner.targetWins) * 2.2 + carry) + (owner.adjustment ?? 0), 0, 100);
 };
 
 /**
@@ -163,9 +170,12 @@ export const evaluateSeasonOutcome = (
 };
 
 // Build the fresh owner expectation for a season start, re-deriving the mandate
-// from the (now final) roster and carrying confidence forward from last season
-// — a GM who barely survived starts on thin ice; one coming off a title starts
-// comfortable. `prior` is undefined for a brand-new save (defaults to 60).
+// from the (now final) roster and carrying last season forward — a GM who
+// barely survived starts on thin ice; one coming off a title starts
+// comfortable. It used to copy last season's confidence as is, which the
+// record-based projection overwrote from game 5 on; now it is a carryOver that
+// projectConfidence fades out by mid-season, starting from the same number it
+// shows on opening night. `prior` is undefined for a brand-new save (60).
 export const buildSeasonOwner = (
     team: Team,
     teams: Team[],
@@ -173,10 +183,12 @@ export const buildSeasonOwner = (
     prior?: OwnerExpectation
 ): OwnerExpectation => {
     const { mandate, targetWins } = deriveMandate(team, teams, players);
+    const carryOver = prior ? clamp(Math.round(prior.confidence - 60), -CARRY_MAX, CARRY_MAX) : 0;
     return {
         mandate,
         targetWins,
-        confidence: prior ? prior.confidence : 60,
+        confidence: 60 + carryOver,
+        carryOver: carryOver || undefined,
         fired: false,
         note: MANDATE_META[mandate].blurb,
     };

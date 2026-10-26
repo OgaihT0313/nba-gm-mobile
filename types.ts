@@ -656,6 +656,11 @@ export interface OwnerExpectation {
   // stick, through the season and into the end-of-season judgment. Reset each
   // season by buildSeasonOwner.
   adjustment?: number;
+  // How last season left the owner: + after a good year, - after a bad one
+  // (confidence minus 60, within ±15). Weighs on the opening weeks and fades
+  // to nothing by game 41 -- a title buys patience, not a free season -- and
+  // the end-of-season judgment ignores it. Set by buildSeasonOwner.
+  carryOver?: number;
   // What the GM said in front of the cameras this season (see
   // services/pressService.ts). Lives on the owner because he is the one who
   // holds you to it, and because buildSeasonOwner resets it with everything
