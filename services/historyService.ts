@@ -268,11 +268,11 @@ export const evaluateAchievements = (season: SeasonState): Achievement[] => {
       season: mine.find((h) => h.result === 'champion' && h.payroll <= SALARY_CAP)?.season,
     },
     {
-      id: 'homegrown_mvp', title: 'Cria da casa', description: 'Um jogador draftado por você ganha o MVP.',
+      id: 'homegrown_mvp', title: 'Cria da casa', description: 'Um jogador que você escolheu no draft ganha o MVP.',
       unlocked: !!homegrownMvp, season: homegrownMvp?.season,
     },
     {
-      id: 'draft_hit', title: 'Olho bom', description: 'Um jogador draftado por você ganha o Calouro do Ano.',
+      id: 'draft_hit', title: 'Olho bom', description: 'Um jogador que você escolheu no draft ganha o Calouro do Ano.',
       unlocked: !!homegrownRoy, season: homegrownRoy?.season,
     },
     {

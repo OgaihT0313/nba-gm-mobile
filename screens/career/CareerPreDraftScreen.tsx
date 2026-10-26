@@ -87,7 +87,7 @@ const CareerPreDraftScreen: React.FC<Props> = ({ prospect, progress, combine, on
             <View style={{ gap: 6 }}>
               <Option label="Humilde" sub="Fala de trabalho e de aprender. Ninguém se assusta." active={false} onPress={() => doInterview('humble')} />
               <Option label="Confiante" sub="Diz que vai ser titular logo. Alguns gostam, outros não." active={false} onPress={() => doInterview('confident')} />
-              <Option label="Marrento" sub="Promete ser o melhor da classe. Ou conquista a sala, ou perde ela." active={false} onPress={() => doInterview('brash')} />
+              <Option label="Marrento" sub="Promete ser o melhor da classe. Ou conquista a sala, ou a perde." active={false} onPress={() => doInterview('brash')} />
             </View>
           ) : (
             <>

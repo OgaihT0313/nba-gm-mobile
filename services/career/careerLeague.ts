@@ -349,7 +349,7 @@ export const runSummer = (s: CareerState, draftProspect?: { player: Player; comb
     const pick = league.draft.picks.find((p) => p.playerId === s.meId);
     draft = pick
       ? { teamId: pick.teamId, pick: pick.pick, label: `${pick.pick}ª escolha` }
-      : { teamId: null, pick: null, label: 'Não draftado' };
+      : { teamId: null, pick: null, label: 'Não escolhido no draft' };
   }
   // finishDraft sends anyone left on the board to free agency, undrafted.
   league = finishDraft(league);

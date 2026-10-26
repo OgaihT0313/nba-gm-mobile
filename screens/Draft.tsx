@@ -306,7 +306,7 @@ const Draft: React.FC<DraftProps> = ({ season, onPick, onAutoPick, onFinish, onS
             {draft.complete ? (
               <DCta label="Agência livre" sub="Próxima fase" onPress={onFinish} />
             ) : (
-              <DStep label="Deixar pra staff escolher" onPress={onAutoPick} disabled={!userOnClock} width={300} />
+              <DStep label="Deixar o staff escolher" onPress={onAutoPick} disabled={!userOnClock} width={300} />
             )}
           </DDock>
         }
@@ -360,7 +360,7 @@ const Draft: React.FC<DraftProps> = ({ season, onPick, onAutoPick, onFinish, onS
           ) : (
             // The staff picks for you (the CPU runs the board up to your slot on
             // its own, so you are on the clock whenever the draft is open).
-            <GhostButton filled label="Deixar pra staff escolher" onPress={onAutoPick} disabled={!userOnClock} />
+            <GhostButton filled label="Deixar o staff escolher" onPress={onAutoPick} disabled={!userOnClock} />
           )}
         </Dock>
       }

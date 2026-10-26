@@ -810,17 +810,17 @@ export const WATCH_PLAY_META: Record<WatchPlay, {
 }> = {
     pick_roll: {
         label: 'Pick & Roll', short: 'P&R',
-        blurb: 'O pivô sobe pro bloqueio e rola pra cesta. Equilibrado, funciona contra quase tudo.',
+        blurb: 'O pivô sobe para o bloqueio e rola para a cesta. Equilibrado, funciona contra quase tudo.',
         selfDelta: 2, oppDelta: 0, variance: 0,
     },
     pindown: {
         label: 'Pindown 3PT', short: '3PT',
-        blurb: 'Bloqueio na linha de fundo pra liberar o ala-armador atrás do arco. Noite de altos e baixos.',
+        blurb: 'Bloqueio na linha de fundo para liberar o ala-armador atrás do arco. Noite de altos e baixos.',
         selfDelta: 3, oppDelta: 1, variance: 5,
     },
     post_up: {
         label: 'Post-Up', short: 'POSTE',
-        blurb: 'Bola no garrafão, de costas pra cesta. Poucos pontos a mais, mas quase sem risco.',
+        blurb: 'Bola no garrafão, de costas para a cesta. Poucos pontos a mais, mas quase sem risco.',
         selfDelta: 1, oppDelta: -2, variance: -3,
     },
     iso: {
@@ -1146,7 +1146,7 @@ const handleRandomEvents = (currentTeams: Team[], players: { [key: string]: Play
                     // window (up to 35% of days). If both happen to fire the
                     // same day, both state changes apply; the later one wins
                     // the displayed message.
-                    event = { message: `TRADE DEADLINE! ${team1.name} envia ${players[p1Id].name} ao ${team2.name} e recebe ${players[p2Id].name} em troca.`, type: 'trade', teamIds: [team1.id, team2.id] };
+                    event = { message: `TROCA! ${team1.name} envia ${players[p1Id].name} ao ${team2.name} e recebe ${players[p2Id].name} em troca.`, type: 'trade', teamIds: [team1.id, team2.id] };
                 }
             }
         }

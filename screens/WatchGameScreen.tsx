@@ -1099,7 +1099,7 @@ const WatchGameScreen: React.FC<WatchGameScreenProps> = ({
 
       <View style={{ marginTop: 10 }}>
         <CtaButton
-          label={isTimeoutHuddle ? 'Voltar pra quadra' : `Começar ${periodLabel(quarter, 'huddle')}`}
+          label={isTimeoutHuddle ? 'Voltar para a quadra' : `Começar ${periodLabel(quarter, 'huddle')}`}
           sub={tactic && decider ? `${WATCH_PLAY_META[play].label} · ${TACTIC_META[tactic].label}` : WATCH_PLAY_META[play].label}
           onPress={() => startQuarter(play, isTimeoutHuddle)}
         />

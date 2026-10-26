@@ -115,7 +115,7 @@ const CareerApp: React.FC<{ onExit: () => void }> = ({ onExit }) => {
   };
 
   const onCombine = (combine: CombineResult) => setCareer((s) => (s ? { ...s, combine } : s));
-  const onDraft = () => heavy('Draft...', (s) => {
+  const onDraft = () => heavy('Draft…', (s) => {
     const p = s.prospect!;
     const d = s.combine?.ovrDelta ?? 0;
     const prospect = { ...p, ovr: p.ovr + d, off: p.off + d, def: p.def + d };
@@ -156,10 +156,10 @@ const CareerApp: React.FC<{ onExit: () => void }> = ({ onExit }) => {
   const actions = {
     playGame,
     simGame: () => { if (career && !busy) setCareer(simToNextGame(career)); },
-    simDays: (n: number) => { if (!busy) { setBusy('Simulando...'); setRun({ kind: 'days', left: n }); } },
-    simToEnd: () => { if (!busy) { setBusy('Simulando a temporada...'); setRun({ kind: 'season' }); } },
-    simPlayoffRound: () => heavy('Simulando a rodada...', simPlayoffRound),
-    nextSeason: () => heavy('O verão passa...', (s) => runSummer(s)),
+    simDays: (n: number) => { if (!busy) { setBusy('Simulando…'); setRun({ kind: 'days', left: n }); } },
+    simToEnd: () => { if (!busy) { setBusy('Simulando a temporada…'); setRun({ kind: 'season' }); } },
+    simPlayoffRound: () => heavy('Simulando a rodada…', simPlayoffRound),
+    nextSeason: () => heavy('O verão passa…', (s) => runSummer(s)),
     setTraining: (t: WeeklyTraining) => setCareer((s) => (s ? { ...s, training: t } : s)),
     spend: (k: keyof PlayerAttributes) => setCareer((s) => (s ? spendPoint(s, k) : s)),
     retire: () => setCareer((s) => (s ? retire(s, seasonLineFor(s)) : s)),

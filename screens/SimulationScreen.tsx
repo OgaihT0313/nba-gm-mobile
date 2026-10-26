@@ -189,7 +189,7 @@ const SimulationScreen: React.FC<SimulationScreenProps> = ({
       <BodyText style={{ marginTop: 4 }}>
         {era.seasonLabel
           ? `Sua carreira atravessou da ${previousEra?.label} para a ${era.label}. A liga entra em ${era.seasonLabel}, com os elencos reais daquela temporada.`
-          : `A história real acaba aqui. Daqui pra frente é a ${era.label}, e a liga segue só pelo que você fizer dela.`}
+          : `A história real acaba aqui. Daqui para a frente é a ${era.label}, e a liga segue só pelo que você fizer dela.`}
       </BodyText>
     </Panel>
   ) : null;

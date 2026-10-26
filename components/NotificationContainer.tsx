@@ -23,7 +23,7 @@ const toneColors = (): Record<string, string> => ( {
   info: COLORS.muted,
 });
 
-/** Messages arrive as "🔁 TRADE DEADLINE! Miami envia…": drop the emoji and lift
+/** Messages arrive as "🏆 COPA NBA! O Miami venceu…": drop the emoji and lift
  *  the shouted lead-in into the kicker. Anything else is all body. */
 function split(message: string): { kicker?: string; body: string } {
   const clean = message.replace(/^[^A-Za-z0-9À-ÿ]+/, '').trim();

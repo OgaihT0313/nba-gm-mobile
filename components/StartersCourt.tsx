@@ -169,7 +169,7 @@ const StartersCourt: React.FC<StartersCourtProps> = ({ team, players, onSetStart
       <View className="flex-row items-center justify-between gap-2">
         <Text className="text-lg font-bold text-fg">{editable ? 'Titulares' : 'Quinteto titular'}</Text>
         <Text className="text-[10px] font-bold text-fg-dim uppercase tracking-widest">
-          {editable ? 'Toque pra trocar' : 'Toque pra ver o jogador'}
+          {editable ? 'Toque para trocar' : 'Toque para ver o jogador'}
         </Text>
       </View>
 

@@ -245,7 +245,7 @@ export const rivalriesAfterSeason = (
     }
     userSeries(playoff, userId).forEach(s => {
         r = s.won
-            ? addHeat(r, s.opponentId, HEAT_KNOCKED_OUT, `você eliminou eles ${ROUND_LABEL[s.round]} (${seasonLabel})`)
+            ? addHeat(r, s.opponentId, HEAT_KNOCKED_OUT, `você os eliminou ${ROUND_LABEL[s.round]} (${seasonLabel})`)
             : addHeat(r, s.opponentId, HEAT_KNOCKED_OUT_BY, `eliminou você ${ROUND_LABEL[s.round]} (${seasonLabel})`);
     });
     return Object.keys(r).length ? r : undefined;

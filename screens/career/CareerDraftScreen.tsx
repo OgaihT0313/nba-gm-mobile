@@ -34,7 +34,7 @@ const CareerDraftScreen: React.FC<{ career: CareerState; onStart: () => void }> 
   return (
     <Page dock={<Cta label={done ? 'Começar a carreira' : 'Pular para o fim'} sub={done ? `${career.draft?.label ?? ''} ›` : undefined} onPress={done ? onStart : () => setShown(stopAt)} tint={done && accent ? accent.primary : undefined} />}>
       <Label>Noite do draft · 1ª rodada</Label>
-      <Title>{done ? (mine >= 0 ? 'Seu nome foi chamado' : 'Não foi dessa vez') : 'Com a escolha...'}</Title>
+      <Title>{done ? (mine >= 0 ? 'Seu nome foi chamado' : 'Não foi dessa vez') : 'Com a escolha…'}</Title>
       {done ? (
         mine >= 0 && myTeam ? (
           <Box highlight={accent?.primary}>

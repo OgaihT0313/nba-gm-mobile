@@ -174,7 +174,7 @@ export const startOffseason = (prev: SeasonState, opts: OffseasonOptions = {}): 
       eraEvents.push({
         message: toEra.seasonLabel
           ? `✨ NOVA ERA: começa a ${toEra.label} — sua carreira atravessa para ${toEra.seasonLabel}.`
-          : `✨ NOVA ERA: a história real acaba aqui. Daqui pra frente é a ${toEra.label}, e a liga segue só pelo que você fizer dela.`,
+          : `✨ NOVA ERA: a história real acaba aqui. Daqui para a frente é a ${toEra.label}, e a liga segue só pelo que você fizer dela.`,
         type: 'era',
       });
     }
