@@ -20,7 +20,7 @@ import { loadGame, saveGame, deleteSave, listSaves, summaryOf, GM_SLOTS, type Gm
 import { loadActiveSlot, saveActiveSlot } from './services/prefsService';
 import { buildSeasonRecord, bannerYears } from './services/historyService';
 import { canPromiseMinutes, promiseSeason, PROMISE_MPG } from './services/developmentService';
-import { MIN_ROSTER_SIZE, TRADE_DEADLINE_GAME } from './services/tradeService';
+import { MIN_ROSTER_SIZE, TRADE_DEADLINE_GAME, evaluateTradeLegality } from './services/tradeService';
 import { initialPickAssets, PICK_WINDOW, makeUserPick, scoutProspect, consensusValue } from './services/draftService';
 import { signFreeAgentLegality, evaluateSigningInterest, signPlayer, askingSalary } from './services/freeAgencyService';
 import { resolveDecision } from './services/decisionService';
@@ -585,6 +585,22 @@ export default function App() {
   // Accept a CPU offer. Re-validates against the CURRENT rosters (the offer may
   // be stale) and drops the offer either way.
   const handleAcceptOffer = (offerId: string) => {
+    // The rules too, not just whether the players are still there: a signing
+    // or a cut since the call came in can make the same deal illegal (a
+    // 2-for-1 onto an 18-man roster, a payroll now over the cap). Checked on
+    // the state on screen so the reason can be said right away.
+    const offer = season?.tradeOffers?.find((o) => o.id === offerId);
+    const cpuNow = offer && season?.teams.find((t) => t.id === offer.fromTeamId);
+    const userNow = season?.teams.find((t) => t.id === season.userTeamId);
+    if (season && offer && cpuNow && userNow) {
+      const legality = evaluateTradeLegality(
+        cpuNow, offer.offerIds, userNow, offer.requestIds, season.players, season.gamesPlayed, offer.offerPickIds?.length ?? 0, 0);
+      if (!legality.legal) {
+        addNotification(`A proposta do ${cpuNow.name} não vale mais: ${legality.reason}`, 'error');
+        handleRejectOffer(offerId);
+        return;
+      }
+    }
     setSeason((prev) => {
       if (!prev) return prev;
       const offer = prev.tradeOffers?.find((o) => o.id === offerId);
