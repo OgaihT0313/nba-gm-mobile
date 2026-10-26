@@ -62,9 +62,9 @@ export const confidenceZone = (confidence: number): ConfidenceZone =>
     confidence >= 55 ? 'safe' : confidence >= 25 ? 'warm' : 'hot';
 
 export const ZONE_META: Record<ConfidenceZone, { label: string; tone: 'positive' | 'warning' | 'danger' }> = {
-    safe: { label: 'Estável', tone: 'positive' },
-    warm: { label: 'Pressionado', tone: 'warning' },
-    hot: { label: 'Beira da demissão', tone: 'danger' },
+    safe: { label: 'Dono tranquilo', tone: 'positive' },
+    warm: { label: 'Dono pressionando', tone: 'warning' },
+    hot: { label: 'Cargo em risco', tone: 'danger' },
 };
 
 // In-season confidence: project the team's current win pace out to 82 games and

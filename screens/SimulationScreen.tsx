@@ -3,7 +3,7 @@ import { View, Text, Pressable } from 'react-native';
 
 import { SeasonState, Team } from '../types';
 import { getTeamNickname, getTeamCity, conferenceLabel, getTeamAccent } from '../constants';
-import { MANDATE_META, confidenceZone } from '../services/ownerService';
+import { MANDATE_META, ZONE_META, confidenceZone } from '../services/ownerService';
 import { PROMISE_LABEL, PROMISE_KEPT, PROMISE_BROKEN } from '../services/pressService';
 import { headlines } from '../services/headlineService';
 import { isRival, rivalryReason, revengePlayers, REVENGE_BOOST, RIVAL_WIN_MORALE, RIVAL_LOSS_MORALE } from '../services/rivalryService';
@@ -71,7 +71,6 @@ const phaseOf = (season: SeasonState): { view: PhaseView; label: string; note: s
 
 // A function, not a constant: COLORS changes with the light/dark mode.
 const zoneColorOf = (zone: 'safe' | 'warm' | 'hot') => ({ safe: COLORS.good, warm: COLORS.warn, hot: COLORS.bad })[zone];
-const ZONE_PILL = { safe: 'Dono tranquilo', warm: 'Dono pressionando', hot: 'Dono na beira' } as const;
 
 // A function, not a constant: COLORS changes with the light/dark mode.
 const headlineTone = (): Record<'good' | 'warn' | 'bad' | 'info', string> => ( {
@@ -321,7 +320,7 @@ const SimulationScreen: React.FC<SimulationScreenProps> = ({
             <DLabel size={13} style={{ letterSpacing: 1.8 }}>{offseason && phase ? phase.eyebrow : `Temporada ${seasonNumber} · ${yearLabel}`}</DLabel>
             <View className="flex-row items-center" style={{ gap: 6, borderWidth: 1, borderColor: withAlpha(zoneColor, 0.35), paddingHorizontal: 12, paddingVertical: 4, borderRadius: RADIUS.pill }}>
               <View style={{ width: 6, height: 6, borderRadius: 3, backgroundColor: zoneColor }} />
-              <DLabel size={12} color={zoneColor}>{ZONE_PILL[zone]}</DLabel>
+              <DLabel size={12} color={zoneColor}>{ZONE_META[zone].label}</DLabel>
             </View>
           </View>
           <View className="flex-row items-end" style={{ gap: 18 }}>
@@ -529,7 +528,7 @@ const SimulationScreen: React.FC<SimulationScreenProps> = ({
             style={{ gap: 6, borderWidth: 1, borderColor: withAlpha(zoneColor, 0.35), paddingHorizontal: 10, paddingVertical: 4, borderRadius: RADIUS.pill }}
           >
             <View style={{ width: 6, height: 6, borderRadius: 3, backgroundColor: zoneColor }} />
-            <MonoLabel size={10} color={zoneColor}>{ZONE_PILL[zone]}</MonoLabel>
+            <MonoLabel size={10} color={zoneColor}>{ZONE_META[zone].label}</MonoLabel>
           </View>
         </View>
 
