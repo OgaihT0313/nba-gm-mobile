@@ -413,7 +413,7 @@ export const runCpuFreeAgency = (
         workTeams[idx] = res.team;
         updatedPlayers[player.id] = res.player;
         pool = pool.filter(p => p.id !== player.id);
-        events.push({ message: `✍️ ${res.team.name} assinou ${player.name} (${player.ovr} OVR) por $${(player.salary / 1_000_000).toFixed(1)}M.`, type: 'trade', teamIds: [res.team.id] });
+        events.push({ message: `✍️ ${res.team.name} contratou ${player.name} (${player.ovr} OVR) por $${(player.salary / 1_000_000).toFixed(1)}M.`, type: 'trade', teamIds: [res.team.id] });
     };
 
     // Weaker teams (higher powerRank) pick first, for a bit of competitive balance.

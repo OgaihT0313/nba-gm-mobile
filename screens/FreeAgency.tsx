@@ -116,7 +116,7 @@ const FreeAgency: React.FC<FreeAgencyProps> = ({ season, onSign, onStartSeason }
           {capSpace >= 0 ? money(capSpace) : `–${money(Math.abs(capSpace))}`}
         </Stat>
         <BodyText size={12} color={COLORS.dim}>
-          {capSpace >= 0 ? 'Livre para assinar' : salary > LUXURY_TAX ? 'Acima do imposto' : 'Só mínimo e exceção'}
+          {capSpace >= 0 ? 'Livre para contratar' : salary > LUXURY_TAX ? 'Acima do imposto' : 'Só mínimo e exceção'}
         </BodyText>
       </Panel>
       <Panel padding={13} className="flex-1" style={{ gap: 3 }}>
@@ -189,7 +189,7 @@ const FreeAgency: React.FC<FreeAgencyProps> = ({ season, onSign, onStartSeason }
           <BodyText size={12} color={COLORS.dim}>Direito de renovação: pode passar do teto.</BodyText>
         ) : null}
         {canSign ? (
-          <GhostButton filled label={`Assinar por ${money(player.salary)}`} onPress={() => onSign(player.id)} color={COLORS.good} />
+          <GhostButton filled label={`Contratar por ${money(player.salary)}`} onPress={() => onSign(player.id)} color={COLORS.good} />
         ) : null}
       </Panel>
     );
@@ -221,7 +221,7 @@ const FreeAgency: React.FC<FreeAgencyProps> = ({ season, onSign, onStartSeason }
         {ownCount > 0 ? (
           <BodyText size={13} style={{ marginTop: 10, maxWidth: 820 }}>
             {ownCount === 1 ? '1 jogador seu quer' : `${ownCount} jogadores seus querem`} renovar. Você tem a preferência e pode
-            passar do teto para mantê-los — quem você não assinar vai ao mercado quando a temporada começar.
+            passar do teto para mantê-los — quem você não recontratar vai ao mercado quando a temporada começar.
           </BodyText>
         ) : null}
         <View className="flex-row items-center justify-between" style={{ marginTop: 18, gap: 20 }}>
@@ -270,7 +270,7 @@ const FreeAgency: React.FC<FreeAgencyProps> = ({ season, onSign, onStartSeason }
         {ownCount > 0 ? (
           <BodyText size={12.5}>
             {ownCount === 1 ? '1 jogador seu quer' : `${ownCount} jogadores seus querem`} renovar. Você tem a preferência e pode
-            passar do teto para mantê-los — quem você não assinar vai ao mercado quando a temporada começar.
+            passar do teto para mantê-los — quem você não recontratar vai ao mercado quando a temporada começar.
           </BodyText>
         ) : null}
 

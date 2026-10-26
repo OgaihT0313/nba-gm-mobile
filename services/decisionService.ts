@@ -159,7 +159,7 @@ const buildInjuryCover = (
     if (fa) {
         options.push({
             id: `sign:${fa.id}`,
-            label: `Assinar ${fa.name}`,
+            label: `Contratar ${fa.name}`,
             detail: `${fa.pos} · ${fa.ovr} OVR · ${fa.age} anos. Tapa o buraco hoje.`,
             consequence: `+${money(fa.salary)} na folha`,
         });
