@@ -12,8 +12,9 @@ const INTRA_CONF_SHARE = 0.63;
 
 const pairKey = (a: string, b: string) => (a < b ? `${a}::${b}` : `${b}::${a}`);
 
-// Generates a full 82-game schedule for the given teams: every team plays
-// exactly once per day (30 teams → 15 games/day × 82 days = 1230 games total),
+// Generates a full 82-game schedule for the given teams: in an even league every
+// team plays exactly once per day (30 teams → 15 games/day × 82 days = 1230
+// games total; an odd league needs a few more days, see below),
 // weighted so conference opponents are faced more often than the other
 // conference, and home games are balanced close to 41/41 per team. This
 // replaces the old "shuffle all 30 teams and pair randomly every day" approach
@@ -39,14 +40,27 @@ export const generateSchedule = (teams: Team[]): ScheduleGame[] => {
 
     const gamesPlayed = new Map<string, number>(); // pairKey -> count so far
     const homeCount = new Map<string, number>(ids.map(id => [id, 0]));
+    const left = new Map<string, number>(ids.map(id => [id, GAMES_PER_SEASON]));
     const schedule: ScheduleGame[] = [];
 
-    for (let day = 1; day <= GAMES_PER_SEASON; day++) {
-        const available = new Set(ids);
+    // An odd league (most eras before 2004: 23, 25, 27, 29 teams) cannot put
+    // everyone on the floor every day, so it runs past day 82 instead: each
+    // day the team with the most rest in hand -- the fewest games still to
+    // play -- sits, which keeps everyone within a game of each other and lands
+    // all of them on exactly 82 (29 teams take 85 days). An even league plays
+    // every team every day, as before. Assuming an even league is what gave the
+    // odd ones 72 to 82 games each.
+    for (let day = 1; [...left.values()].some(n => n > 0); day++) {
+        const due = ids.filter(id => left.get(id)! > 0);
+        if (due.length % 2 === 1) {
+            const rest = due.reduce((min, id) => (left.get(id)! < left.get(min)! || (left.get(id) === left.get(min) && Math.random() < 0.5) ? id : min));
+            due.splice(due.indexOf(rest), 1);
+        }
+        const available = new Set(due);
         // Randomize processing order each day so the same team doesn't always
         // get first pick of opponent (which would bias who gets favorable
         // matchup timing).
-        const order = [...ids].sort(() => Math.random() - 0.5);
+        const order = [...due].sort(() => Math.random() - 0.5);
 
         for (const teamId of order) {
             if (!available.has(teamId)) continue;
@@ -66,7 +80,7 @@ export const generateSchedule = (teams: Team[]): ScheduleGame[] => {
                     bestOpp = oppId;
                 }
             }
-            if (bestOpp === null) continue; // even team count guarantees this never happens
+            if (bestOpp === null) continue; // `due` is always even, so this never happens
             available.delete(bestOpp);
 
             const key = pairKey(teamId, bestOpp);
@@ -79,6 +93,8 @@ export const generateSchedule = (teams: Team[]): ScheduleGame[] => {
             const homeTeamId = teamHome <= oppHome ? teamId : bestOpp;
             const awayTeamId = homeTeamId === teamId ? bestOpp : teamId;
             homeCount.set(homeTeamId, homeCount.get(homeTeamId)! + 1);
+            left.set(teamId, left.get(teamId)! - 1);
+            left.set(bestOpp, left.get(bestOpp)! - 1);
 
             schedule.push({ day, homeTeamId, awayTeamId, played: false });
         }
@@ -86,6 +102,20 @@ export const generateSchedule = (teams: Team[]): ScheduleGame[] => {
 
     return schedule;
 };
+
+/**
+ * Days in this regular season: 82 in an even league, a few more in an odd one
+ * (see generateSchedule). `gamesPlayed` counts days, so this -- not 82 -- is
+ * where the regular season ends. An empty schedule (the offseason) reads 82.
+ */
+export const seasonDays = (schedule: ScheduleGame[]): number =>
+    schedule.reduce((max, g) => Math.max(max, g.day), 0) || GAMES_PER_SEASON;
+
+/** Games `teamId` has played: the "Jogo X de 82" a team sees, which is not the day. */
+export const teamGamesPlayed = (team: Pick<Team, 'wins' | 'losses'> | undefined): number =>
+    (team?.wins ?? 0) + (team?.losses ?? 0);
+
+export { GAMES_PER_SEASON };
 
 // --- Tiebreaker helpers, derived from recorded schedule results ---
 

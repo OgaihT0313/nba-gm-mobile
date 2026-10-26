@@ -8,7 +8,7 @@ import { PROMISE_LABEL, PROMISE_KEPT, PROMISE_BROKEN } from '../services/pressSe
 import { headlines } from '../services/headlineService';
 import { isRival, rivalryReason, revengePlayers, REVENGE_BOOST, RIVAL_WIN_MORALE, RIVAL_LOSS_MORALE } from '../services/rivalryService';
 import { currentStreak, nextGame, winProbability, teamResults } from '../services/formService';
-import { sortStandings } from '../services/scheduleService';
+import { sortStandings, seasonDays, teamGamesPlayed, GAMES_PER_SEASON } from '../services/scheduleService';
 import { nextStop } from '../services/seasonRunner';
 import { attentionItems, type AttentionTarget } from '../services/attentionService';
 import { COLORS, RADIUS, FONT, withAlpha, visibleTeamColor, colorDistance } from '../src/theme/tokens';
@@ -91,8 +91,14 @@ const SimulationScreen: React.FC<SimulationScreenProps> = ({
   // Era changes belong to every save, so they stay.
   const myEvents = season.events.filter((e) => e.type === 'era' || e.teamIds?.includes(season.userTeamId));
   const userTeam = season.teams.find((t) => t.id === season.userTeamId);
+  // Three clocks that only agree in an even league: `gp` is the calendar day
+  // (what the advance buttons move), `played` is your team's games (what the
+  // labels and the pace read) and `days` is how long this calendar runs -- an
+  // odd league plays a few extra days so every team still gets 82.
   const gp = season.gamesPlayed;
-  const remaining = Math.max(0, 82 - gp);
+  const played = teamGamesPlayed(userTeam);
+  const days = seasonDays(season.schedule);
+  const remaining = Math.max(0, GAMES_PER_SEASON - played);
   const over = season.status !== 'active';
   const phase = over ? phaseOf(season) : null;
   // In the draft and free agency the save is already on next season's year
@@ -145,7 +151,7 @@ const SimulationScreen: React.FC<SimulationScreenProps> = ({
 
   // Pace against the owner's win target, capped at 100% — the same number the
   // owner judges you on at season end.
-  const paceWins = gp > 0 ? (wins / gp) * 82 : 0;
+  const paceWins = played > 0 ? (wins / played) * GAMES_PER_SEASON : 0;
   const targetProgress = season.owner.targetWins > 0 ? Math.min(1, paceWins / season.owner.targetWins) : 0;
 
   const busy = isSimulating || over;
@@ -292,7 +298,7 @@ const SimulationScreen: React.FC<SimulationScreenProps> = ({
             {over ? null : (
               <>
                 <DStep label="+1 dia" onPress={() => onAdvance(gp + 1)} disabled={busy} />
-                <DStep label="+7 dias" onPress={() => onAdvance(Math.min(82, gp + 7))} disabled={busy} />
+                <DStep label="+7 dias" onPress={() => onAdvance(Math.min(days, gp + 7))} disabled={busy} />
                 {stop ? <DStep label={stop.label} onPress={() => onAdvance(stop.target)} disabled={busy} /> : null}
               </>
             )}
@@ -302,7 +308,7 @@ const SimulationScreen: React.FC<SimulationScreenProps> = ({
               <DCta
                 label={isSimulating ? 'Simulando…' : over ? 'Temporada encerrada' : 'Simular temporada'}
                 sub={over ? undefined : `${remaining} ${remaining === 1 ? 'jogo' : 'jogos'}`}
-                onPress={() => onAdvance(82)}
+                onPress={() => onAdvance(days)}
                 disabled={busy}
               />
             )}
@@ -340,7 +346,7 @@ const SimulationScreen: React.FC<SimulationScreenProps> = ({
           {/* All 82 games in one row. */}
           <View style={{ gap: 8 }}>
             <View className="flex-row justify-between">
-              <DLabel>Jogo {gp} de 82</DLabel>
+              <DLabel>Jogo {played} de {GAMES_PER_SEASON}</DLabel>
               <DLabel>{remaining} restantes</DLabel>
             </View>
             <View className="flex-row" style={{ gap: 3 }}>
@@ -414,11 +420,11 @@ const SimulationScreen: React.FC<SimulationScreenProps> = ({
             <View className="flex-row" style={{ gap: 14 }}>
               <Panel padding={16} className="flex-1" style={{ gap: 8 }}>
                 <DLabel>Meta · {season.owner.targetWins} V</DLabel>
-                <Stat size={24}>{gp < 5 ? mandate.label : `Ritmo ${Math.round(paceWins)}`}</Stat>
+                <Stat size={24}>{played < 5 ? mandate.label : `Ritmo ${Math.round(paceWins)}`}</Stat>
                 <Meter
-                  value={gp === 0 ? 0 : targetProgress}
+                  value={played === 0 ? 0 : targetProgress}
                   height={5}
-                  color={gp === 0 ? COLORS.neutral : targetProgress >= 0.95 ? COLORS.good : targetProgress >= 0.7 ? COLORS.warn : COLORS.bad}
+                  color={played === 0 ? COLORS.neutral : targetProgress >= 0.95 ? COLORS.good : targetProgress >= 0.7 ? COLORS.warn : COLORS.bad}
                 />
               </Panel>
               <Panel padding={16} className="flex-1" style={{ gap: 8 }}>
@@ -488,7 +494,7 @@ const SimulationScreen: React.FC<SimulationScreenProps> = ({
           <Name size={17}>{getTeamNickname(userTeam)}</Name>
           <Stat size={15}>{wins}–{losses}</Stat>
           <View className="flex-1" />
-          <MonoLabel size={9.5} color={COLORS.muted}>Jogo {gp}/82</MonoLabel>
+          <MonoLabel size={9.5} color={COLORS.muted}>Jogo {played}/{GAMES_PER_SEASON}</MonoLabel>
           <View style={{ width: 7, height: 7, borderRadius: 4, backgroundColor: zoneColor }} />
         </View>
       }
@@ -497,7 +503,7 @@ const SimulationScreen: React.FC<SimulationScreenProps> = ({
           {over ? null : (
             <View className="flex-row" style={{ gap: 8 }}>
               <GhostButton filled label="+1 dia" onPress={() => onAdvance(gp + 1)} disabled={busy} style={{ flex: 1 }} />
-              <GhostButton filled label="+7 dias" onPress={() => onAdvance(Math.min(82, gp + 7))} disabled={busy} style={{ flex: 1 }} />
+              <GhostButton filled label="+7 dias" onPress={() => onAdvance(Math.min(days, gp + 7))} disabled={busy} style={{ flex: 1 }} />
               {stop ? <GhostButton filled label={stop.label} onPress={() => onAdvance(stop.target)} disabled={busy} style={{ flex: 1 }} /> : null}
             </View>
           )}
@@ -507,7 +513,7 @@ const SimulationScreen: React.FC<SimulationScreenProps> = ({
             <CtaButton
               label={isSimulating ? 'Simulando…' : over ? 'Temporada encerrada' : 'Simular temporada'}
               sub={over ? undefined : `${remaining} ${remaining === 1 ? 'jogo' : 'jogos'}`}
-              onPress={() => onAdvance(82)}
+              onPress={() => onAdvance(days)}
               disabled={busy}
             />
           )}
@@ -552,7 +558,7 @@ const SimulationScreen: React.FC<SimulationScreenProps> = ({
         {/* All 82 games: two rows of 41, green won / red lost / dark to play. */}
         <View style={{ gap: 7 }}>
           <View className="flex-row justify-between">
-            <MonoLabel size={9}>Jogo {gp} de 82</MonoLabel>
+            <MonoLabel size={9}>Jogo {played} de {GAMES_PER_SEASON}</MonoLabel>
             <MonoLabel size={9}>{remaining} restantes</MonoLabel>
           </View>
           <View style={{ gap: 2 }}>
@@ -631,11 +637,11 @@ const SimulationScreen: React.FC<SimulationScreenProps> = ({
             <MonoLabel size={9}>Meta · {season.owner.targetWins} V</MonoLabel>
             {/* A pace off one or two games ("Ritmo 82" after a 1-0 start) is
                 noise; the mandate reads until there's a real sample. */}
-            <Stat size={22} fit>{gp < 5 ? mandate.label : `Ritmo ${Math.round(paceWins)}`}</Stat>
+            <Stat size={22} fit>{played < 5 ? mandate.label : `Ritmo ${Math.round(paceWins)}`}</Stat>
             <Meter
-              value={gp === 0 ? 0 : targetProgress}
+              value={played === 0 ? 0 : targetProgress}
               height={5}
-              color={gp === 0 ? COLORS.neutral : targetProgress >= 0.95 ? COLORS.good : targetProgress >= 0.7 ? COLORS.warn : COLORS.bad}
+              color={played === 0 ? COLORS.neutral : targetProgress >= 0.95 ? COLORS.good : targetProgress >= 0.7 ? COLORS.warn : COLORS.bad}
             />
           </Panel>
           <Panel padding={13} className="flex-1" style={{ gap: 7 }}>

@@ -14,7 +14,7 @@ import { teamsData, playersData, picksOf, releaseWithDeadMoney, getTeamNickname 
 import { ERAS, eraById } from './data/eras';
 import { simulationEngine, ROTATION_MIN, ROTATION_MAX } from './services/simulationService';
 import { buildSeasonOwner, evaluateSeasonOutcome, confidenceZone } from './services/ownerService';
-import { generateSchedule } from './services/scheduleService';
+import { generateSchedule, teamGamesPlayed, GAMES_PER_SEASON } from './services/scheduleService';
 import { simulateOneDay, SimEffect, ALL_STAR_GAME, PinnedGameResult } from './services/seasonRunner';
 import { loadGame, saveGame, deleteSave, listSaves, summaryOf, GM_SLOTS, type GmSlot } from './services/saveService';
 import { loadActiveSlot, saveActiveSlot } from './services/prefsService';
@@ -1020,7 +1020,7 @@ export default function App() {
 
   const showSidebar = !['watch-game', 'home', 'era-select', 'team-select', 'team-confirm', 'career'].includes(view) && !season?.owner.fired;
   const sidebarCaption = !season ? '' : season.status === 'active'
-    ? `Jogo ${season.gamesPlayed}/82`
+    ? `Jogo ${teamGamesPlayed(userTeam ?? undefined)}/${GAMES_PER_SEASON}`
     : season.status === 'draft' ? 'Draft'
       : season.status === 'free_agency' ? 'Agência livre'
         : season.status === 'offseason' ? 'Offseason' : 'Playoffs';

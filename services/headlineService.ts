@@ -16,7 +16,7 @@ import type { Player, SeasonState, Team } from '../types';
 import { formatMark, approaching, MILESTONES } from './milestoneService';
 import { mvpScore } from './simulationService';
 import { currentStreak } from './formService';
-import { sortStandings } from './scheduleService';
+import { sortStandings, teamGamesPlayed, GAMES_PER_SEASON } from './scheduleService';
 import { confidenceZone } from './ownerService';
 import { PROMISE_LABEL } from './pressService';
 
@@ -153,7 +153,7 @@ export const headlines = (season: SeasonState): Headline[] => {
             title: safe
                 ? `${user.name} no caminho da promessa`
                 : `Promessa em risco: ${user.name} é o ${rank}º`,
-            sub: `Você prometeu ${PROMISE_LABEL[promise.kind]} na coletiva do dia ${promise.day}. Faltam ${82 - gp} jogos.`,
+            sub: `Você prometeu ${PROMISE_LABEL[promise.kind]} na coletiva do dia ${promise.day}. Faltam ${GAMES_PER_SEASON - teamGamesPlayed(user)} jogos.`,
             tone: safe ? 'good' : 'warn',
             weight: safe ? 30 : 65,
         });

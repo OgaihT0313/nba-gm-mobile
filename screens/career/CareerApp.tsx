@@ -10,6 +10,7 @@ import { View, Text, Pressable } from 'react-native';
 
 import { COLORS, FONT } from '../../src/theme/tokens';
 import { getTeamNickname } from '../../constants';
+import { seasonDays } from '../../services/scheduleService';
 import type { PlayerAttributes } from '../../types';
 import type { CareerCreation, CareerState, CombineResult, WeeklyTraining } from '../../services/career/careerTypes';
 import { newCareer, simDay, simToNextGame, simPlayoffRound, runSummer, myTeam, me, nextGame } from '../../services/career/careerLeague';
@@ -281,11 +282,14 @@ const CareerApp: React.FC<{ onExit: () => void }> = ({ onExit }) => {
 
   if (career.phase === 'predraft') {
     const lg = career.league;
-    const regular = Math.min(1, lg.gamesPlayed / 82);
+    // Days, not games: the prospect has no team yet, and an odd league's
+    // calendar runs past day 82 (scheduleService.seasonDays).
+    const days = seasonDays(lg.schedule);
+    const regular = Math.min(1, lg.gamesPlayed / days);
     const progress = lg.status === 'offseason'
       ? { frac: 1, label: 'Campeão definido', done: true }
       : lg.status === 'active'
-        ? { frac: regular * 0.9, label: `Jogo ${lg.gamesPlayed} de 82`, done: false }
+        ? { frac: regular * 0.9, label: `Dia ${lg.gamesPlayed} de ${days}`, done: false }
         : { frac: 0.93, label: 'Playoffs', done: false };
     return (
       <View style={{ flex: 1 }}>

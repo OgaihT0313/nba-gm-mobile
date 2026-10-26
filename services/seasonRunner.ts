@@ -16,6 +16,7 @@ import { TRADE_DEADLINE_GAME, generateCpuTradeOffer, OFFER_TTL, MAX_PENDING_OFFE
 import { projectConfidence, confidenceZone, shouldFireMidSeason } from './ownerService';
 import { generateDecisions } from './decisionService';
 import { notePressHeld } from './pressService';
+import { seasonDays } from './scheduleService';
 import { trackMoves, applyRevengeNights, markRevengeFaced, settleUserGame, isRival } from './rivalryService';
 import { milestonesCrossed, MILESTONE_MORALE } from './milestoneService';
 
@@ -34,7 +35,8 @@ export const CUP_GROUP_END = 16;
  */
 export function nextStop(season: SeasonState): { target: number; label: string } | null {
     const gp = season.gamesPlayed;
-    if (season.status !== 'active' || gp >= 82) return null;
+    const days = seasonDays(season.schedule);
+    if (season.status !== 'active' || gp >= days) return null;
     const rivalDay = season.schedule
         .filter(g => !g.played && g.day - 1 > gp && (g.homeTeamId === season.userTeamId || g.awayTeamId === season.userTeamId))
         .filter(g => isRival(season.rivalries, g.homeTeamId === season.userTeamId ? g.awayTeamId : g.homeTeamId))
@@ -42,10 +44,10 @@ export function nextStop(season: SeasonState): { target: number; label: string }
     const stops = [
         { target: rivalDay - 1, label: 'Até o rival' },
         ...(season.cup ? [{ target: CUP_GROUP_END, label: 'Até a Copa' }] : []),
-        { target: 41, label: 'Metade' },
+        { target: Math.floor(days / 2), label: 'Metade' },
         { target: TRADE_DEADLINE_GAME - 1, label: 'Até o prazo' },
         { target: ALL_STAR_GAME, label: 'All-Star' },
-        { target: 82, label: 'Até o fim' },
+        { target: days, label: 'Até o fim' },
     ];
     return stops.filter(s => s.target > gp).sort((a, b) => a.target - b.target)[0];
 }
@@ -230,7 +232,9 @@ export function simulateOneDay(season: SeasonState, pinnedResult?: PinnedGameRes
         effects.push({ kind: 'view', view: 'allstar' });
     }
 
-    if (nextGamesPlayed >= 82) {
+    // The last day of the calendar, not day 82: an odd league runs a few days
+    // longer so every team still plays 82 (scheduleService).
+    if (nextGamesPlayed >= seasonDays(season.schedule)) {
         nextStatus = 'playoffs_idle';
         nextPlayoff = simulationEngine.initializePlayIn(teamsAfterEvents, newSchedule);
         nextAwards = simulationEngine.generateAwards(teamsAfterEvents, newPlayers);

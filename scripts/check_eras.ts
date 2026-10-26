@@ -42,6 +42,9 @@ const pearson = (xs: number[], ys: number[]) => {
   return n / (Math.sqrt(dx * dy) || 1);
 };
 const all: { sd: number; best: number; worst: number; r?: number }[] = [];
+// Every team plays 82, odd leagues included (23-29 teams before 2004): the
+// calendar used to assume an even league and handed out 72 to 82 games.
+const shortSeasons: string[] = [];
 ERAS.filter((_, i) => process.argv[3] === 'all' || i % 3 === 0).forEach(era => {
   const simWins: Record<string, number[]> = {};
   const sds: number[] = [], best: number[] = [], worst: number[] = [];
@@ -49,6 +52,10 @@ ERAS.filter((_, i) => process.argv[3] === 'all' || i % 3 === 0).forEach(era => {
     let s = build(era.teams, era.players);
     const days = Math.max(...s.schedule.map(g => g.day));
     for (let d = 0; d < days; d++) s = simulateOneDay(s).season;
+    const games = s.teams.map(t => (t.wins || 0) + (t.losses || 0));
+    if (games.some(g => g !== 82) || s.status !== 'playoffs_idle') {
+      shortSeasons.push(`${era.label} (${s.teams.length} times): ${Math.min(...games)}-${Math.max(...games)} jogos, ${s.status}`);
+    }
     const w = s.teams.map(t => t.wins || 0);
     s.teams.forEach(t => { (simWins[t.id] ??= []).push(t.wins || 0); });
     sds.push(sd(w)); best.push(Math.max(...w)); worst.push(Math.min(...w));
@@ -64,3 +71,9 @@ const rs = all.map(a => a.r).filter((x): x is number => x !== undefined);
 if (rs.length) console.log(`
 Vitórias simuladas x reais: r médio ${mean(rs).toFixed(2)} (pior ${Math.min(...rs).toFixed(2)}) em ${rs.length} eras`);
 console.log(`\nMédia das eras: dp ${mean(all.map(a => a.sd)).toFixed(1)} (real ~12-14), melhor ${mean(all.map(a => a.best)).toFixed(0)} (real ~60-67), pior ${mean(all.map(a => a.worst)).toFixed(0)} (real ~15-22)`);
+if (shortSeasons.length) {
+  console.log(`\n  FAIL temporadas sem 82 jogos para todos:\n    ${shortSeasons.join('\n    ')}`);
+  (globalThis as unknown as { process: { exitCode: number } }).process.exitCode = 1;
+} else {
+  console.log('\nTodos os times jogaram 82 em todas as eras simuladas.');
+}
