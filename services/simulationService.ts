@@ -1456,7 +1456,8 @@ const runPlayerProgression = (
 
 // --- PLAYOFF LOGIC ---
 
-const emptySeries = (count: number): PlayoffSeries[] => Array(count).fill({ m: [null, null], s: '' });
+// One object per slot: Array.fill would put the SAME series in every slot.
+const emptySeries = (count: number): PlayoffSeries[] => Array.from({ length: count }, () => ({ m: [null, null], s: '' }));
 
 // PlayoffSeries.s is always read positionally as "m[0]score-m[1]score" (see
 // Matchup in PlayoffBracket.tsx), not "winnerScore-loserScore" — simulateGame
@@ -1496,11 +1497,13 @@ const initializePlayIn = (teams: Team[], schedule: ScheduleGame[]): PlayoffState
         complete: false,
     });
 
-    const emptyBracket = { round1: [], round2: emptySeries(2), round3: emptySeries(1), winner: null };
+    // A fresh bracket per conference. It used to be one object shared by both,
+    // safe only because advancePlayoffRound deep-clones before it mutates.
+    const emptyBracket = () => ({ round1: [], round2: emptySeries(2), round3: emptySeries(1), winner: null });
 
     return {
-        east: { initialSeeds: eastTen, seeds: eastTen, playIn: buildPlayIn(eastTen), bracket: emptyBracket },
-        west: { initialSeeds: westTen, seeds: westTen, playIn: buildPlayIn(westTen), bracket: emptyBracket },
+        east: { initialSeeds: eastTen, seeds: eastTen, playIn: buildPlayIn(eastTen), bracket: emptyBracket() },
+        west: { initialSeeds: westTen, seeds: westTen, playIn: buildPlayIn(westTen), bracket: emptyBracket() },
         finals: null,
         champion: null,
         awards: {}
