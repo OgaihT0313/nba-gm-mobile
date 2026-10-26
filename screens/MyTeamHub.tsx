@@ -252,7 +252,7 @@ const MyTeamHub: React.FC<MyTeamHubProps> = ({
         <Text style={{ fontFamily: FONT.cond800, fontSize: desktop ? 20 : 18, color: COLORS.text }}>
           {money(salary)}{' '}
           <Text style={{ fontFamily: FONT.cond600, fontSize: desktop ? 14 : 13, color: capSpace < 0 ? COLORS.warn : COLORS.good }}>
-            {capSpace < 0 ? `+${money(-capSpace)} acima do teto` : `${money(capSpace)} de espaço`}
+            {capSpace < 0 ? `${money(-capSpace)} acima do teto` : `${money(capSpace)} de espaço`}
           </Text>
         </Text>
       </View>
