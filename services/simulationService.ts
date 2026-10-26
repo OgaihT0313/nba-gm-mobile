@@ -381,8 +381,12 @@ const clampMod = (value: number, lo: number, hi: number) => Math.max(lo, Math.mi
 const gauss = (): number => (Math.random() + Math.random() + Math.random() - 1.5) * 2;
 
 // --- MORALE / CHEMISTRY ---
-// A content player sits at 70; morale is undefined until the sim first touches
-// it (older data / fresh signees), so read it through this default.
+// What an unset morale reads as. It is undefined until the sim first touches
+// it -- every player of a new save, a fresh draft pick or signing -- and this
+// is where he starts, NOT where a content player lives: measured over full
+// seasons (2026-10-25), the league settles at ~50 within ten days and stays
+// there (a starter on a .500 team targets ~58). So a new save opens
+// euphoric for a week, and a newcomer arrives above the room.
 const DEFAULT_MORALE = 70;
 /**
  * Morale at which a good player stops putting up with his situation and asks
@@ -612,7 +616,13 @@ export const computeExpectedPoints = (
 
     // Locker-room chemistry: a happy rotation gets a small lift, a disgruntled
     // one a small drag — bounded to ±3 points, the same texture-not-talent
-    // scale as the construction modifiers above.
+    // scale as the construction modifiers above. The 65 is above where the
+    // league actually sits (team chemistry ~56, measured 2026-10-25), so the
+    // average team plays at about -1 point: both sides of every game pay it,
+    // which leaves who wins untouched, and the league's scoring was calibrated
+    // with it in (diagnose_season). Only the spread around ~56 (sd ~1.3 pts)
+    // separates teams. Re-centring it would add ~1 point to every team's
+    // night and needs the scoring recalibrated with it.
     const chemModA = clampMod((teamChemistry(teamA, players) - 65) * 0.12, -3, 3);
     const chemModB = clampMod((teamChemistry(teamB, players) - 65) * 0.12, -3, 3);
 
