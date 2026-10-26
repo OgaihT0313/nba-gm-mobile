@@ -214,7 +214,7 @@ export function simulateOneDay(season: SeasonState, pinnedResult?: PinnedGameRes
             if (offer) {
                 nextTradeOffers = [offer, ...nextTradeOffers];
                 const fromName = teamsAfterEvents.find(t => t.id === offer.fromTeamId)?.name;
-                notify(`📩 O ${fromName} enviou uma proposta de troca! Confira no Trade Center.`, 'trade');
+                notify(`📩 O ${fromName} enviou uma proposta de troca! Confira em Trocas.`, 'trade');
                 effects.push({ kind: 'pause', reason: `proposta do ${fromName}` });
             }
         }

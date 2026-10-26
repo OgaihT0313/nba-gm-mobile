@@ -304,7 +304,7 @@ const buildDeadlineStance = (season: SeasonState, team: Team): Decision => {
                 id: 'buy',
                 label: 'Comprar',
                 detail: 'Avisa a liga que você quer reforço agora. Os vendedores ligam.',
-                consequence: 'Propostas chegam na Central de Trocas',
+                consequence: 'Propostas chegam em Trocas',
             },
             {
                 id: 'hold',
