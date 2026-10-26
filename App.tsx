@@ -179,7 +179,7 @@ export default function App() {
       if (view === 'watch-game') return true;
       if (view === 'career') { setView('home'); return true; }
       if (view === 'team-detail') { setView('teams'); return true; }
-      if (view === 'team-select') { if (!season) setView('era-select'); return true; }
+      if (view === 'team-select') { setView('era-select'); return true; }
       if (view === 'team-confirm') { setView('team-select'); return true; }
       if (view === 'era-select') { setView('home'); return true; }
       if (season && !season.owner.fired && view !== 'simulation' && view !== 'home') { setView('simulation'); return true; }
@@ -930,7 +930,9 @@ export default function App() {
           teams={activeTeamsData as Team[]}
           players={activePlayersData}
           onSelect={(id) => { setPendingTeamId(id); setView('team-confirm'); }}
-          onBack={season ? undefined : () => setView('era-select')}
+          // Always a way back: with another slot's season loaded (a new career
+          // in an empty slot) there is no bottom nav here to leave by.
+          onBack={() => setView('era-select')}
           seasonLabel={activeEra?.seasonLabel ?? '2025-26'}
         />
       );
@@ -1129,8 +1131,10 @@ export default function App() {
           />
 
           {/* Bottom nav (only once a season exists) */}
-          {/* Hidden while watching: the HUD is full-bleed, and a tab tap mid-game would drop the game. */}
-          {!desktop && season && view !== 'watch-game' && view !== 'career' ? (
+          {/* Hidden while watching: the HUD is full-bleed, and a tab tap mid-game would drop the game.
+              Hidden while a new career is being set up too: the season loaded
+              is another slot's, and a tab would walk out of the setup into it. */}
+          {!desktop && season && view !== 'watch-game' && view !== 'career' && !picking ? (
             <BottomNav
               view={view}
               onNavigate={(v) => setView(v as AppView)}
