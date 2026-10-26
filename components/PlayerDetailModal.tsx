@@ -200,7 +200,7 @@ const PlayerDetailModal: React.FC<{
         </BodyText>
       </View>
       <View style={{ flex: 1, backgroundColor: COLORS.surface, borderRadius: 14, padding: 12, gap: 3 }}>
-        <Text style={{ fontFamily: FONT.cond700, fontSize: 10.5, letterSpacing: 1.5, color: COLORS.muted }}>MORAL</Text>
+        <Text style={{ fontFamily: FONT.cond700, fontSize: 10.5, letterSpacing: 1.5, color: COLORS.muted }}>ÂNIMO</Text>
         <Text style={{ fontFamily: FONT.cond800, fontSize: desktop ? 22 : 20, lineHeight: desktop ? 22 : 21, color: moraleColor }}>
           {moraleLabel}{typeof m === 'number' ? ` · ${m}` : ''}
         </Text>
@@ -277,7 +277,7 @@ const PlayerDetailModal: React.FC<{
               </BodyText>
             ) : null}
             <BodyText size={12.5} color={COLORS.muted}>
-              Para cumprir, ele precisa estar no quinteto ou no topo da rotação (Editar rotação). Cumprida, ele evolui mais rápido e chega mais motivado. Quebrada, a moral dele despenca e ele pode pedir para sair.
+              Para cumprir, ele precisa estar no quinteto ou no topo da rotação (Editar rotação). Cumprida, ele evolui mais rápido e chega mais motivado. Quebrada, o ânimo dele despenca e ele pode pedir para sair.
             </BodyText>
           </View>
         ) : (
