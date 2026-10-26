@@ -97,12 +97,12 @@ const PlayerDetailModal: React.FC<{
     add(c.titles, 'Campeão', true);
     add(c.mvp, 'MVP', true);
     add(c.finalsMvp, 'MVP das Finais', true);
-    add(c.dpoy, 'Defensor do ano', false);
+    add(c.dpoy, 'Defensor do Ano', false);
     add(c.allStar, 'All-Star', false);
     add(c.allNba, 'All-NBA', false);
-    add(c.roy, 'Calouro do ano', false);
-    add(c.smoy, '6º homem', false);
-    add(c.mip, 'Evolução', false);
+    add(c.roy, 'Calouro do Ano', false);
+    add(c.smoy, 'Sexto Homem', false);
+    add(c.mip, 'Maior Evolução', false);
   }
 
   // PC (design "PC Ficha do Jogador"): a centered 880px modal instead of the

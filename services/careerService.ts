@@ -78,12 +78,12 @@ export const honorsSummary = (c: PlayerCareer): string => {
     add(c.titles, 'campeão');
     add(c.mvp, 'MVP');
     add(c.finalsMvp, 'MVP das Finais');
-    add(c.dpoy, 'DPOY');
+    add(c.dpoy, 'Defensor do Ano');
     add(c.allStar, 'All-Star');
     add(c.allNba, 'All-NBA');
-    add(c.roy, 'Novato do Ano');
-    add(c.smoy, '6º Homem');
-    add(c.mip, 'MIP');
+    add(c.roy, 'Calouro do Ano');
+    add(c.smoy, 'Sexto Homem');
+    add(c.mip, 'Maior Evolução');
     return parts.join(' · ');
 };
 

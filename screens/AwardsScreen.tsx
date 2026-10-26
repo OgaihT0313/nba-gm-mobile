@@ -137,10 +137,10 @@ const AwardsScreen: React.FC<AwardsScreenProps> = ({ season, onGoToPlayoffs, onS
                 <SectionLabel>Temporada regular</SectionLabel>
                 {grid([
                   <AwardCard key="mvp" title="MVP" winnerId={season.awards.mvp} players={season.players} teams={season.teams} />,
-                  <AwardCard key="dpoy" title="Melhor defensor" winnerId={season.awards.dpoy} players={season.players} teams={season.teams} />,
-                  <AwardCard key="roy" title="Calouro do ano" winnerId={season.awards.roy} players={season.players} teams={season.teams} />,
-                  <AwardCard key="smoy" title="Sexto homem" winnerId={season.awards.smoy} players={season.players} teams={season.teams} />,
-                  season.awards.mip ? <AwardCard key="mip" title="Maior evolução" winnerId={season.awards.mip} players={season.players} teams={season.teams} /> : null,
+                  <AwardCard key="dpoy" title="Defensor do Ano" winnerId={season.awards.dpoy} players={season.players} teams={season.teams} />,
+                  <AwardCard key="roy" title="Calouro do Ano" winnerId={season.awards.roy} players={season.players} teams={season.teams} />,
+                  <AwardCard key="smoy" title="Sexto Homem" winnerId={season.awards.smoy} players={season.players} teams={season.teams} />,
+                  season.awards.mip ? <AwardCard key="mip" title="Maior Evolução" winnerId={season.awards.mip} players={season.players} teams={season.teams} /> : null,
                 ])}
               </View>
             )
@@ -157,9 +157,9 @@ const AwardsScreen: React.FC<AwardsScreenProps> = ({ season, onGoToPlayoffs, onS
             <View style={{ gap: 10 }}>
               <SectionLabel>Playoffs</SectionLabel>
               {grid([
-                playoffAwards!.eastConfFinalsMVP ? <AwardCard key="e" title="MVP finais do Leste" winnerId={playoffAwards!.eastConfFinalsMVP} players={season.players} teams={season.teams} themed /> : null,
-                playoffAwards!.westConfFinalsMVP ? <AwardCard key="w" title="MVP finais do Oeste" winnerId={playoffAwards!.westConfFinalsMVP} players={season.players} teams={season.teams} themed /> : null,
-                playoffAwards!.finalsMVP ? <FinalsAwardCard key="f" title="MVP das finais" pId={playoffAwards!.finalsMVP} players={season.players} accentColor={getTeamAccent(season.playoff?.champion?.id).primary} /> : null,
+                playoffAwards!.eastConfFinalsMVP ? <AwardCard key="e" title="MVP da Final do Leste" winnerId={playoffAwards!.eastConfFinalsMVP} players={season.players} teams={season.teams} themed /> : null,
+                playoffAwards!.westConfFinalsMVP ? <AwardCard key="w" title="MVP da Final do Oeste" winnerId={playoffAwards!.westConfFinalsMVP} players={season.players} teams={season.teams} themed /> : null,
+                playoffAwards!.finalsMVP ? <FinalsAwardCard key="f" title="MVP das Finais" pId={playoffAwards!.finalsMVP} players={season.players} accentColor={getTeamAccent(season.playoff?.champion?.id).primary} /> : null,
               ])}
             </View>
           ) : null}
@@ -229,11 +229,11 @@ const AwardsScreen: React.FC<AwardsScreenProps> = ({ season, onGoToPlayoffs, onS
             <>
               <SectionLabel>Temporada regular</SectionLabel>
               <AwardCard title="MVP" winnerId={season.awards.mvp} players={season.players} teams={season.teams} />
-              <AwardCard title="Melhor defensor" winnerId={season.awards.dpoy} players={season.players} teams={season.teams} />
-              <AwardCard title="Calouro do ano" winnerId={season.awards.roy} players={season.players} teams={season.teams} />
-              <AwardCard title="Sexto homem" winnerId={season.awards.smoy} players={season.players} teams={season.teams} />
+              <AwardCard title="Defensor do Ano" winnerId={season.awards.dpoy} players={season.players} teams={season.teams} />
+              <AwardCard title="Calouro do Ano" winnerId={season.awards.roy} players={season.players} teams={season.teams} />
+              <AwardCard title="Sexto Homem" winnerId={season.awards.smoy} players={season.players} teams={season.teams} />
               {season.awards.mip ? (
-                <AwardCard title="Maior evolução" winnerId={season.awards.mip} players={season.players} teams={season.teams} />
+                <AwardCard title="Maior Evolução" winnerId={season.awards.mip} players={season.players} teams={season.teams} />
               ) : null}
             </>
           )
@@ -260,14 +260,14 @@ const AwardsScreen: React.FC<AwardsScreenProps> = ({ season, onGoToPlayoffs, onS
           <>
             <SectionLabel>Playoffs</SectionLabel>
             {playoffAwards!.eastConfFinalsMVP ? (
-              <AwardCard title="MVP finais do Leste" winnerId={playoffAwards!.eastConfFinalsMVP} players={season.players} teams={season.teams} themed />
+              <AwardCard title="MVP da Final do Leste" winnerId={playoffAwards!.eastConfFinalsMVP} players={season.players} teams={season.teams} themed />
             ) : null}
             {playoffAwards!.westConfFinalsMVP ? (
-              <AwardCard title="MVP finais do Oeste" winnerId={playoffAwards!.westConfFinalsMVP} players={season.players} teams={season.teams} themed />
+              <AwardCard title="MVP da Final do Oeste" winnerId={playoffAwards!.westConfFinalsMVP} players={season.players} teams={season.teams} themed />
             ) : null}
             {playoffAwards!.finalsMVP ? (
               <FinalsAwardCard
-                title="MVP das finais"
+                title="MVP das Finais"
                 pId={playoffAwards!.finalsMVP}
                 players={season.players}
                 accentColor={getTeamAccent(season.playoff?.champion?.id).primary}
