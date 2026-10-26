@@ -79,8 +79,9 @@ console.log('\n- EFEITOS (simulando) -');
 const moraleBy: Record<string, number[]> = {};
 const loserStar: number[] = [];
 const loserRest: number[] = [];
-const teamWithLeader: number[] = [];
-const teamWithoutLeader: number[] = [];
+// The leader's lift on the room, measured on the SAME team: its morale run on
+// with its leaders and with them stripped of the archetype.
+const leaderLift: number[] = [];
 const gamesLostBy: Record<string, number[]> = {};
 const growthBy: Record<string, number[]> = {};
 
@@ -91,12 +92,18 @@ for (let r = 0; r < RUNS; r++) {
 
   season.teams.forEach(t => {
     const rotation = simulationEngine.getTeamRotation(t, season.players, t.rotationSize ?? 10);
-    const hasLeader = rotation.some(id => season.players[id] && personalityOf(season.players[id]).id === 'lider');
-    const roomMorale = rotation
-      .map(id => season.players[id])
-      .filter(p => p && personalityOf(p).id !== 'lider')
-      .map(p => p.morale ?? 70);
-    if (roomMorale.length) (hasLeader ? teamWithLeader : teamWithoutLeader).push(mean(roomMorale));
+    const leaders = rotation.filter(id => season.players[id] && personalityOf(season.players[id]).id === 'lider');
+    const room = rotation.filter(id => season.players[id] && personalityOf(season.players[id]).id !== 'lider');
+    if (leaders.length && room.length) {
+      const roomAfter = (strip: boolean) => {
+        const players: { [k: string]: Player } = JSON.parse(JSON.stringify(season.players));
+        if (strip) leaders.forEach(id => { players[id] = { ...players[id], personality: 'guerreiro' }; });
+        const team: Team = JSON.parse(JSON.stringify(t));
+        for (let i = 0; i < 40; i++) simulationEngine.updateMorale([team], players, season.userTeamId);
+        return mean(room.map(id => players[id].morale ?? 70));
+      };
+      leaderLift.push(roomAfter(false) - roomAfter(true));
+    }
     t.roster.forEach(id => {
       const p = season.players[id];
       if (!p) return;
@@ -142,11 +149,15 @@ check('numa campanha ruim a estrela fica mais infeliz que os companheiros',
   mean(loserStar) < mean(loserRest),
   `estrela ${mean(loserStar).toFixed(1)} vs resto ${mean(loserRest).toFixed(1)}`);
 
-// Shrinking the lift is only safe if it still does something. Compared between
-// teams, not between players: the leader's effect is on the ROOM.
-check('elenco com lider termina com moral media mais alta',
-  mean(teamWithLeader) > mean(teamWithoutLeader),
-  `com ${mean(teamWithLeader).toFixed(1)} vs sem ${mean(teamWithoutLeader).toFixed(1)}`);
+// Shrinking the lift is only safe if it still does something. The leader's
+// effect is on the ROOM, and it is measured on the same team with and without
+// him being a leader. Comparing teams WITH a leader against teams without one
+// was confounded: only ~1 team in 10 has no leader in its rotation, and those
+// happened to win more, so the comparison flipped from season to season
+// whatever the lift did (measured both ways: +1.2 to +1.3 of room morale).
+check('o lider levanta o moral do proprio elenco',
+  mean(leaderLift) > 0.5,
+  `+${mean(leaderLift).toFixed(2)} no vestiario do mesmo time (${leaderLift.length} times)`);
 
 check('o prodigio evolui mais que a media',
   mean(growthBy['prodigio'] ?? []) > mean(Object.values(growthBy).flat()),
