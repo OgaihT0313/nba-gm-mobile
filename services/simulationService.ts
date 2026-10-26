@@ -475,8 +475,8 @@ const teamChemistry = (team: Team, players: { [key: string]: Player }): number =
 
 // Nudge every player's morale a step toward the target their situation implies,
 // once per simulated day. Targets are set by: team record, role (starters happy,
-// buried players unhappy — roster is OVR-sorted so the index is a rotation
-// proxy), a penalty for a good player benched or a star stuck on a losing team,
+// buried players unhappy — read off the real lineup and rotation, below), a
+// penalty for a good player benched or a star stuck on a losing team,
 // and the current hot/slump mood. Returns trade-request events, but only for the
 // user's rotation-caliber players crossing into real discontent (so it's a rare,
 // meaningful moment, not spam). Mutates `players` in place.
@@ -496,9 +496,23 @@ const updateMorale = (
         const leaderIds = getTeamRotation(team, players, size)
             .filter(id => players[id] && personalityOf(players[id]).id === 'lider');
         const lockerShift = lockerMoraleShift(team);
-        team.roster.forEach((id, idx) => {
+        // His role is where the coach actually plays him -- the starting five
+        // the GM pinned, then the rotation -- not his rank by OVR. Reading the
+        // OVR rank meant a promise of minutes or a promoted kid changed nothing
+        // for anybody's mood, and the starter who lost his job never minded.
+        // Read as if nobody were out: an injury is not a demotion, and neither
+        // is being shut down for the lottery (a front-office call, not his).
+        const roleOrder = getTeamRotation({ ...team, playerAbsences: {}, tanking: false }, players, size);
+        const inRotation = new Set(roleOrder);
+        const roleIdx = new Map([
+            ...roleOrder,
+            ...team.roster.filter(id => !inRotation.has(id))
+                .sort((a, b) => (players[b]?.ovr ?? 0) - (players[a]?.ovr ?? 0)),
+        ].map((id, i) => [id, i] as const));
+        team.roster.forEach(id => {
             const p = players[id];
             if (!p) return;
+            const idx = roleIdx.get(id) ?? team.roster.length;
             let target = 50 + (winPct - 0.5) * 60; // ~20 (winless) .. ~80 (undefeated)
             if (idx < 5) target += 8;             // starter
             else if (idx < size) target += 3;     // rotation
