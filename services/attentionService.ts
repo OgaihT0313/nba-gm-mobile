@@ -8,6 +8,7 @@ import { LUXURY_TAX, getTeamSalary } from '../constants';
 import { MIN_ROSTER_SIZE, MAX_ROSTER_SIZE, TRADE_DEADLINE_GAME, OFFER_TTL } from './tradeService';
 import { TRADE_REQUEST_MORALE } from './simulationService';
 import { STAFF_ROLES, ROLE_LABEL } from './staffService';
+import { luxuryTaxConfidenceHit } from './ownerService';
 
 export type AttentionTarget =
   | { view: 'trade' }
@@ -123,7 +124,9 @@ export function attentionItems(season: SeasonState): AttentionItem[] {
       id: 'tax',
       tone: 'warn',
       title: 'Folha acima do imposto',
-      detail: `${money(payroll)}, ${money(payroll - LUXURY_TAX)} acima da linha (${money(LUXURY_TAX)}). O dono cobra no fim da temporada.`,
+      // The bill lands on opening night (offseasonService.startSeason), on
+      // whatever the payroll is then -- not at the end of this season.
+      detail: `${money(payroll)}, ${money(payroll - LUXURY_TAX)} acima da linha (${money(LUXURY_TAX)}). Se continuar assim, o dono tira ${luxuryTaxConfidenceHit(payroll)} de confiança na abertura da ${offseason ? 'temporada' : 'próxima temporada'}.`,
       target: { view: 'my-team', tab: 'roster' },
     });
   }
