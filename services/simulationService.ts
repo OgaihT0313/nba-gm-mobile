@@ -570,10 +570,6 @@ const updateMorale = (
     return events;
 };
 
-// `homeTeamId` lets a caller with a real schedule (App.tsx's simulateDay)
-// pin down which side gets home-court deterministically instead of a coin
-// flip — playoff series/play-in/cup callers omit it and keep the coinflip,
-// since those contexts don't have a fixed schedule to consult.
 // Everything simulateGame needs to know BEFORE a possession is played: ratings,
 // construction/chemistry/coach modifiers, style-driven base pace, home court
 // and momentum, folded into one expected-points figure per side. Factored out
@@ -581,7 +577,8 @@ const updateMorale = (
 // compute the same full-game expectation once and split it across quarters,
 // instead of re-deriving a second, drifting copy of this formula.
 export const computeExpectedPoints = (
-    teamA: Team, teamB: Team, players: { [key: string]: Player }, coaches: CoachMap, isAHome: boolean,
+    // `null` is a neutral floor (the Cup's semifinal and final): nobody is home.
+    teamA: Team, teamB: Team, players: { [key: string]: Player }, coaches: CoachMap, isAHome: boolean | null,
 ): { expectedPointsA: number; expectedPointsB: number } => {
     const ratingsA = getGameRatings(teamA, players);
     const ratingsB = getGameRatings(teamB, players);
@@ -649,7 +646,7 @@ export const computeExpectedPoints = (
         + attrModA
         + chemModA
         + coachOffA - coachDefB
-        + (isAHome ? homeAdvantage : 0)
+        + (isAHome === true ? homeAdvantage : 0)
         + (teamA.momentum || 0) * momentumFactor;
 
     const expectedPointsB = baseScore
@@ -657,14 +654,17 @@ export const computeExpectedPoints = (
         + attrModB
         + chemModB
         + coachOffB - coachDefA
-        + (!isAHome ? homeAdvantage : 0)
+        + (isAHome === false ? homeAdvantage : 0)
         + (teamB.momentum || 0) * momentumFactor;
 
     return { expectedPointsA, expectedPointsB };
 };
 
-const simulateGame = (teamA: Team, teamB: Team, players: { [key: string]: Player }, homeTeamId?: string, coaches: CoachMap = {}) => {
-    const isAHome = homeTeamId ? homeTeamId === teamA.id : Math.random() > 0.5;
+// `homeTeamId`: who is at home -- the schedule's fixture in the regular season,
+// the better seed in the playoffs (see homeCourtOf); `null` is a neutral floor.
+// Left out, home court is a coin flip.
+const simulateGame = (teamA: Team, teamB: Team, players: { [key: string]: Player }, homeTeamId?: string | null, coaches: CoachMap = {}) => {
+    const isAHome = homeTeamId === null ? null : homeTeamId ? homeTeamId === teamA.id : Math.random() > 0.5;
     const { expectedPointsA, expectedPointsB } = computeExpectedPoints(teamA, teamB, players, coaches, isAHome);
 
     // 3. Add unpredictability.
@@ -889,6 +889,14 @@ const applyDeciderResult = (playoffState: PlayoffState, teamA: Team, teamB: Team
     return newState;
 };
 
+/**
+ * Who has home court in a playoff series or a seeded single game: the better
+ * regular-season record (the bracket copies each team as it finished), the
+ * first-listed team on a tie. A bracket slot's m[0] is not always the better
+ * seed past round 1, so the record decides rather than the slot.
+ */
+export const homeCourtOf = (a: Team, b: Team): Team => ((b.wins ?? 0) > (a.wins ?? 0) ? b : a);
+
 // `stopAtDeciderFor` (a userTeamId) makes the series pause right BEFORE
 // simulating a game that would decide it (winsNeeded-1 apiece) when the user
 // is one of the two teams, instead of resolving it — the caller (
@@ -902,12 +910,18 @@ const simulateSeries = (
     let winsA = 0, winsB = 0;
     const winsNeeded = Math.ceil(bestOf / 2);
     const involvesUser = stopAtDeciderFor === teamA.id || stopAtDeciderFor === teamB.id;
+    // 2-2-1-1-1: the better record hosts games 1, 2, 5 and 7. Home court used
+    // to be a coin flip every game, so a 64-win seed had no edge at home.
+    const high = homeCourtOf(teamA, teamB);
+    const low = high.id === teamA.id ? teamB : teamA;
+    const HIGH_HOSTS = [true, true, false, false, true, false, true];
 
     while (winsA < winsNeeded && winsB < winsNeeded) {
         if (involvesUser && winsA === winsNeeded - 1 && winsB === winsNeeded - 1) {
             return { pendingDecider: true, winsA, winsB };
         }
-        const game = simulateGame(teamA, teamB, players, undefined, coaches);
+        const host = (HIGH_HOSTS[winsA + winsB] ?? true) ? high : low;
+        const game = simulateGame(teamA, teamB, players, host.id, coaches);
         if (game.winner.id === teamA.id) winsA++; else winsB++;
     }
     const winner = winsA > winsB ? teamA : teamB;
@@ -1515,13 +1529,13 @@ const advancePlayoffRound = (
             const playIn = bracket.playIn;
             if (!playIn.sevenEight.w || !playIn.nineTen.w) {
                 if (!playIn.sevenEight.w && playIn.sevenEight.m[0] && playIn.sevenEight.m[1]) {
-                    const result = simulateGame(playIn.sevenEight.m[0]!, playIn.sevenEight.m[1]!, players, undefined, coaches);
+                    const result = simulateGame(playIn.sevenEight.m[0]!, playIn.sevenEight.m[1]!, players, playIn.sevenEight.m[0]!.id, coaches);
                     playIn.sevenEight.w = result.winner;
                     playIn.sevenEight.s = gameScoreString(playIn.sevenEight.m[0]!, result);
                     somethingSimulated = true;
                 }
                 if (!playIn.nineTen.w && playIn.nineTen.m[0] && playIn.nineTen.m[1]) {
-                    const result = simulateGame(playIn.nineTen.m[0]!, playIn.nineTen.m[1]!, players, undefined, coaches);
+                    const result = simulateGame(playIn.nineTen.m[0]!, playIn.nineTen.m[1]!, players, playIn.nineTen.m[0]!.id, coaches);
                     playIn.nineTen.w = result.winner;
                     playIn.nineTen.s = gameScoreString(playIn.nineTen.m[0]!, result);
                     somethingSimulated = true;
@@ -1534,7 +1548,7 @@ const advancePlayoffRound = (
             }
 
             if (!playIn.finalSeed.w && playIn.finalSeed.m[0] && playIn.finalSeed.m[1]) {
-                const result = simulateGame(playIn.finalSeed.m[0]!, playIn.finalSeed.m[1]!, players, undefined, coaches);
+                const result = simulateGame(playIn.finalSeed.m[0]!, playIn.finalSeed.m[1]!, players, playIn.finalSeed.m[0]!.id, coaches);
                 playIn.finalSeed.w = result.winner;
                 playIn.finalSeed.s = gameScoreString(playIn.finalSeed.m[0]!, result);
                 somethingSimulated = true;
@@ -1962,17 +1976,19 @@ const resolveCupGroupStage = (cup: CupState, teams: Team[], players: { [key: str
     const qualifiers = sortIds([...winners, wildcardFor('East'), wildcardFor('West')].filter(Boolean))
         .map(id => teamsById.get(id)!);
 
-    const playSingleGame = (m0: Team, m1: Team): PlayoffSeries => {
-        const result = simulateGame(m0, m1, players, undefined, coaches);
+    // Quarterfinals at the better seed's arena, the semifinals and final on a
+    // neutral floor (Las Vegas, in the real tournament).
+    const playSingleGame = (m0: Team, m1: Team, home: string | null): PlayoffSeries => {
+        const result = simulateGame(m0, m1, players, home, coaches);
         return { m: [m0, m1], w: result.winner, s: gameScoreString(m0, result) };
     };
 
-    const qf = seedRound1(qualifiers).map(series => playSingleGame(series.m[0]!, series.m[1]!));
+    const qf = seedRound1(qualifiers).map(series => playSingleGame(series.m[0]!, series.m[1]!, series.m[0]!.id));
     const sf = [
-        playSingleGame(qf[0].w!, qf[1].w!),
-        playSingleGame(qf[3].w!, qf[2].w!),
+        playSingleGame(qf[0].w!, qf[1].w!, null),
+        playSingleGame(qf[3].w!, qf[2].w!, null),
     ];
-    const final = playSingleGame(sf[0].w!, sf[1].w!);
+    const final = playSingleGame(sf[0].w!, sf[1].w!, null);
 
     return { ...cup, standings, bracket: { qf, sf, final }, championId: final.w!.id };
 };

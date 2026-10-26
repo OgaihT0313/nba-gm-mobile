@@ -12,7 +12,7 @@ import { Barlow_400Regular, Barlow_500Medium, Barlow_600SemiBold } from '@expo-g
 import { Team, Player, Coach, SeasonState, StaffMember, StaffRole, TrainingFocus, Notification as NotificationType } from './types';
 import { teamsData, playersData, picksOf, releaseWithDeadMoney, getTeamNickname } from './constants';
 import { ERAS, eraById } from './data/eras';
-import { simulationEngine, ROTATION_MIN, ROTATION_MAX } from './services/simulationService';
+import { simulationEngine, ROTATION_MIN, ROTATION_MAX, homeCourtOf } from './services/simulationService';
 import { buildSeasonOwner, evaluateSeasonOutcome, confidenceZone } from './services/ownerService';
 import { generateSchedule, teamGamesPlayed, GAMES_PER_SEASON } from './services/scheduleService';
 import { simulateOneDay, SimEffect, ALL_STAR_GAME, PinnedGameResult } from './services/seasonRunner';
@@ -435,7 +435,7 @@ export default function App() {
   // advancePlayoffRound) and the game is played in the 3D screen, with the
   // three quarter tactics added to its huddle. It used to have a screen of its
   // own, a quarter-by-quarter scoreboard. Teams come from the live league, the
-  // bracket slot only says who: the hosts are the bracket's m[0], the better seed.
+  // bracket slot only says who: the better record hosts (homeCourtOf).
   const startDecider = (playoff: NonNullable<SeasonState['playoff']>) => {
     if (!season) return;
     const pair = pendingDeciderTeams(playoff);
@@ -445,7 +445,10 @@ export default function App() {
     const round = ref.scope === 'finals' ? 'Finais da NBA'
       : ref.round === 'round3' ? `Final do ${ref.conf === 'east' ? 'Leste' : 'Oeste'}`
       : ref.round === 'round2' ? 'Semifinal de conferência' : '1ª rodada';
-    setWatchGame({ home: fresh(pair.teamA), away: fresh(pair.teamB), decider: `Jogo 7 · ${round}` });
+    // Game 7 is the better record's home game (2-2-1-1-1, simulationService.homeCourtOf).
+    const host = homeCourtOf(pair.teamA, pair.teamB);
+    const visitor = host.id === pair.teamA.id ? pair.teamB : pair.teamA;
+    setWatchGame({ home: fresh(host), away: fresh(visitor), decider: `Jogo 7 · ${round}` });
     setView('watch-game');
   };
 
