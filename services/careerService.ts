@@ -7,8 +7,8 @@ type PlayerMap = { [key: string]: Player };
 // processOffseasonContracts. Must be folded in before handleStartSeason wipes
 // seasonStats.
 //
-// There is no retirement system: players stay in the league indefinitely
-// once drafted/signed, and only leave a roster by being cut or traded.
+// Retirement is its own step, right after aging (retirementService); a
+// retired player keeps his career here for the records and the Hall of Fame.
 
 const EMPTY_CAREER: PlayerCareer = {
     seasons: 0, gp: 0, pts: 0, reb: 0, ast: 0, stl: 0, blk: 0, peakOvr: 0,

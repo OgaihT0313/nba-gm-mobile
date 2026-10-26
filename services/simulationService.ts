@@ -421,8 +421,6 @@ const injuryRisk = (p: Player, idx: number, rotSize: number): number => {
     return ageFactor * loadFactor * fatigue;
 };
 
-// Severity tier for a new injury: most are minor, a rare few are season-altering,
-// and older players skew slightly more severe. Returns games missed + a label.
 // Odds that a given team picks up a new injury on a given night.
 //
 // Lowered from 0.15 after play-testing on device: one user season had the same
@@ -450,6 +448,8 @@ const INJURY_CHANCE_PER_TEAM = 0.11;
 const NEWSWORTHY_ABSENCE = 6;  // "estiramento" or worse, on your own roster
 const STAR_OVR = 88;           // top ~5% of the league, for injuries elsewhere
 
+// Severity tier for a new injury: most are minor, a rare few are season-altering,
+// and older players skew slightly more severe. Returns games missed + a label.
 const rollInjury = (age: number): { duration: number; label: string } => {
     const r = Math.random() - Math.max(0, age - 30) * 0.015;
     if (r < 0.55) return { duration: 2 + Math.floor(Math.random() * 4), label: 'uma lesão leve' };          // 2-5
@@ -1860,8 +1860,6 @@ const simulateAllStarGame = (eastRoster: string[], westRoster: string[], players
     return { winner, mvpId, eastScore, westScore };
 };
 
-// Dunk Contest: weighted toward younger players — age is the closest proxy
-// available since no athleticism attribute exists in the data.
 // Dunk Contest: athleticism first, youth second. It used to weight ONLY
 // `30 - age`, which made the contest a pure age lottery among the All-Stars —
 // the attribute breakdown carries a real athleticism rating, so use it.

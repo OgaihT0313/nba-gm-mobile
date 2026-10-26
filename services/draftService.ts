@@ -49,8 +49,8 @@ const POS: Player['pos'][] = LINEUP_POSITIONS;
 
 // A prospect's projected slot (0-indexed) drives their rating band and how
 // likely they are to have elite potential.
-// Steep at the top, flat at the bottom, like a real class: ~84 at #1, ~78 at
-// #5, ~73 at #10, ~67 at #30. It used to be 76 - 0.5/slot capped at 77, which
+// Steep at the top, flat at the bottom, like a real class: ~81 at #1, ~75 at
+// #5, ~71 at #10, ~66 at #30 (±2.5). It used to be 76 - 0.5/slot capped at 77, which
 // put the best rookie of every generated class below the ninth-best real one
 // (2025's: 86, 86, 82, 81, 79...) -- rookies never earned minutes and Rookie
 // of the Year went to a 5.6-point scorer.

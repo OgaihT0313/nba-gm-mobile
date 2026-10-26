@@ -87,9 +87,8 @@ const PLACEHOLDERS: Record<string, { title: string; icon: IconName }> = {
 };
 
 export default function App() {
-  // Hero display face (Inter 900 italic) + the mono face used for stat/score
-  // numbers. Keys must match the tailwind fontFamily tokens (font-display,
-  // font-mono, font-mono-bold).
+  // Barlow Condensed (headlines, labels, numbers) and Barlow (body text). Keys
+  // must match the font names the theme tokens use (src/theme/tokens FONT).
   const [fontsLoaded] = useFonts({
     BarlowCondensed_500Medium, BarlowCondensed_600SemiBold, BarlowCondensed_700Bold, BarlowCondensed_800ExtraBold,
     Barlow_400Regular, Barlow_500Medium, Barlow_600SemiBold,
@@ -687,8 +686,7 @@ export default function App() {
     });
   };
 
-  // Waive a player off the user roster → free-agent pool. Guarded so the roster
-  // can't drop below the legal minimum.
+  // The training focus of one of the user's players (developmentService).
   const handleSetTrainingFocus = (playerId: string, focus: TrainingFocus | undefined) => {
     setSeason((prev) => {
       const p = prev?.players[playerId];
@@ -1058,8 +1056,8 @@ export default function App() {
       : season.status === 'free_agency' ? 'Agência livre'
         : season.status === 'offseason' ? 'Offseason' : 'Playoffs';
 
-  // Hold the first paint until the display face is ready — otherwise the hero
-  // text pops from system font to Inter.
+  // Hold the first paint until the faces are ready — otherwise every title pops
+  // from the system font to Barlow.
   if (!fontsLoaded) return null;
 
   return (
