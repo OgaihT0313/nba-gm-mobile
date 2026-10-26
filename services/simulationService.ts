@@ -824,7 +824,7 @@ export const WATCH_PLAY_META: Record<WatchPlay, {
         selfDelta: 1, oppDelta: -2, variance: -3,
     },
     iso: {
-        label: 'Isolar a Estrela', short: 'ISO',
+        label: 'Isolar a estrela', short: 'ISO',
         blurb: 'Todo mundo abre e o seu melhor pontuador resolve sozinho.',
         selfDelta: 4, oppDelta: 1, variance: 2,
     },

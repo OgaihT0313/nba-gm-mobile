@@ -49,8 +49,8 @@ export const ATTRIBUTE_META: { key: keyof PlayerAttributes; label: string; group
     { key: 'shooting', label: 'Arremesso', group: 'off' },
     { key: 'finishing', label: 'Finalização', group: 'off' },
     { key: 'playmaking', label: 'Armação', group: 'off' },
-    { key: 'perimeterD', label: 'Def. Perímetro', group: 'def' },
-    { key: 'interiorD', label: 'Def. Interior', group: 'def' },
+    { key: 'perimeterD', label: 'Def. perímetro', group: 'def' },
+    { key: 'interiorD', label: 'Def. interior', group: 'def' },
     { key: 'rebounding', label: 'Rebote', group: 'def' },
     { key: 'athleticism', label: 'Atletismo', group: 'phys' },
 ];

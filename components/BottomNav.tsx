@@ -37,7 +37,7 @@ interface BottomNavProps {
 
 const PRIMARY_ITEMS: NavItem[] = [
   { id: 'simulation', label: 'Simulação', icon: 'simulation' },
-  { id: 'my-team', label: 'Meu Time', icon: 'my-team' },
+  { id: 'my-team', label: 'Meu time', icon: 'my-team' },
   { id: 'trade', label: 'Trocas', icon: 'trade' },
   { id: 'playoffs', label: 'Playoffs', icon: 'playoffs' },
 ];
@@ -47,7 +47,7 @@ const MORE_ITEMS: NavItem[] = [
   { id: 'teams', label: 'Franquias', icon: 'teams' },
   { id: 'scout', label: 'Scout', icon: 'scout' },
   { id: 'draft', label: 'Draft', icon: 'draft' },
-  { id: 'free-agency', label: 'Agência Livre', icon: 'free-agency' },
+  { id: 'free-agency', label: 'Agência livre', icon: 'free-agency' },
   { id: 'standings', label: 'Classificação', icon: 'standings' },
   { id: 'leaders', label: 'Líderes', icon: 'leaders' },
   { id: 'awards', label: 'Prêmios', icon: 'awards' },

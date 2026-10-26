@@ -15,7 +15,7 @@ interface Item { id: string; label: string }
 
 const PRIMARY: Item[] = [
   { id: 'simulation', label: 'Simulação' },
-  { id: 'my-team', label: 'Meu Time' },
+  { id: 'my-team', label: 'Meu time' },
   { id: 'trade', label: 'Trocas' },
   { id: 'playoffs', label: 'Playoffs' },
 ];
@@ -25,7 +25,7 @@ const MORE: Item[] = [
   { id: 'teams', label: 'Franquias' },
   { id: 'scout', label: 'Scout' },
   { id: 'draft', label: 'Draft' },
-  { id: 'free-agency', label: 'Agência Livre' },
+  { id: 'free-agency', label: 'Agência livre' },
   { id: 'standings', label: 'Classificação' },
   { id: 'leaders', label: 'Líderes' },
   { id: 'awards', label: 'Prêmios' },

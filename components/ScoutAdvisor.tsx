@@ -66,7 +66,7 @@ const ScoutAdvisor: React.FC<ScoutAdvisorProps> = ({ userTeam, teams, players, o
       >
         <Icon name="scout" size={18} color={accent.primary} />
         <View style={{ flex: 1, minWidth: 0 }}>
-          <Text style={{ fontFamily: FONT.cond800, fontSize: 17, color: COLORS.text, textTransform: 'uppercase' }}>Análise do Scout</Text>
+          <Text style={{ fontFamily: FONT.cond800, fontSize: 17, color: COLORS.text, textTransform: 'uppercase' }}>Análise do scout</Text>
           <Text numberOfLines={alwaysOpen ? 3 : 1} style={{ fontFamily: FONT.body500, fontSize: 12, color: COLORS.dim }}>{summary}</Text>
         </View>
         {alwaysOpen ? null : <MonoLabel size={9} color={COLORS.dim}>{open ? 'Fechar' : 'Ver'}</MonoLabel>}

@@ -74,9 +74,9 @@ const SIM_SAVE_INTERVAL = 5000;
 const PLACEHOLDERS: Record<string, { title: string; icon: IconName }> = {
   teams: { title: 'Franquias', icon: 'teams' },
   scout: { title: 'Scout', icon: 'scout' },
-  'my-team': { title: 'Meu Time', icon: 'my-team' },
+  'my-team': { title: 'Meu time', icon: 'my-team' },
   draft: { title: 'Draft', icon: 'draft' },
-  'free-agency': { title: 'Agência Livre', icon: 'free-agency' },
+  'free-agency': { title: 'Agência livre', icon: 'free-agency' },
   standings: { title: 'Classificação', icon: 'standings' },
   leaders: { title: 'Líderes', icon: 'leaders' },
   trade: { title: 'Trocas', icon: 'trade' },

@@ -926,10 +926,10 @@ export const defenseWeakness = (five: FiveOnCourt, players: { [key: string]: Pla
 };
 
 const REASON: Record<WatchPlay, (v: number) => string> = {
-    pindown: (v) => `os alas deles sofrem para perseguir arremessador (Def. Perímetro ${Math.round(v)})`,
-    post_up: (v) => `o garrafão deles é frágil de costas para a cesta (Def. Interior ${Math.round(v)})`,
+    pindown: (v) => `os alas deles sofrem para perseguir arremessador (Def. perímetro ${Math.round(v)})`,
+    post_up: (v) => `o garrafão deles é frágil de costas para a cesta (Def. interior ${Math.round(v)})`,
     pick_roll: (v) => `a dupla armador-pivô deles defende mal o bloqueio (${Math.round(v)} na média)`,
-    iso: (v) => `há um elo fraco no quinteto deles para a sua estrela caçar (Def. Perímetro ${Math.round(v)})`,
+    iso: (v) => `há um elo fraco no quinteto deles para a sua estrela caçar (Def. perímetro ${Math.round(v)})`,
 };
 
 /** The report for the user's next period, or null when his team has no staff (Minha Carreira). */

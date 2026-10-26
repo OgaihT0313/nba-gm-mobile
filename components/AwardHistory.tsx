@@ -17,7 +17,7 @@ const AwardHistory: React.FC<{ history: SeasonAwardRecord[]; players: PlayerMap 
 
   return (
     <View className="gap-3">
-      <Text className="text-xs font-black text-fg-dim uppercase tracking-[0.3em]">Histórico de Campeões</Text>
+      <Text className="text-xs font-black text-fg-dim uppercase tracking-[0.3em]">Histórico de campeões</Text>
       <View className="bg-panel rounded-card border border-line overflow-hidden">
         {[...history].reverse().map((rec, i) => {
           const champ = teamsData.find((t) => t.id === rec.championId);

@@ -27,7 +27,7 @@ const TeamAnalytics: React.FC<TeamAnalyticsProps> = ({ team }) => {
   if (history.length <= 1) {
     return (
       <View className="gap-4">
-        <Text className="text-lg font-bold text-fg">Análise Técnica</Text>
+        <Text className="text-lg font-bold text-fg">Análise técnica</Text>
         <View className="bg-sunken p-8 rounded-hero border border-line items-center justify-center min-h-[200px]">
           <Text className="text-fg-dim font-bold uppercase tracking-widest text-[10px] text-center italic">
             Aguardando dados da temporada...
@@ -48,7 +48,7 @@ const TeamAnalytics: React.FC<TeamAnalyticsProps> = ({ team }) => {
 
   return (
     <View className="gap-4">
-      <Text className="text-lg font-bold text-fg">Análise Técnica</Text>
+      <Text className="text-lg font-bold text-fg">Análise técnica</Text>
       <View className="bg-sunken p-4 rounded-hero border border-line">
         <Text className="text-[10px] font-black text-fg-dim uppercase tracking-[0.3em] mb-3 text-center">
           Evolução de Vitórias

@@ -238,7 +238,7 @@ export function simulateOneDay(season: SeasonState, pinnedResult?: PinnedGameRes
         nextStatus = 'playoffs_idle';
         nextPlayoff = simulationEngine.initializePlayIn(teamsAfterEvents, newSchedule);
         nextAwards = simulationEngine.generateAwards(teamsAfterEvents, newPlayers);
-        notify('Temporada Regular encerrada! Confira os prêmios antes dos Playoffs.', 'info');
+        notify('Temporada regular encerrada! Confira os prêmios antes dos playoffs.', 'info');
         effects.push({ kind: 'view', view: 'awards' });
     }
 
