@@ -1269,12 +1269,12 @@ const handleRandomEvents = (currentTeams: Team[], players: { [key: string]: Play
         if (isGoodEvent) {
             if (!team.momentum || team.momentum < 3) {
                 team.momentum = (team.momentum || 0) + 1;
-                event = { message: `QUÍMICA EM ALTA! O ${team.name} parece estar em grande sintonia, recebendo um impulso de moral.`, type: 'info', teamIds: [team.id] };
+                event = { message: `QUÍMICA EM ALTA! O ${team.name} parece estar em grande sintonia, recebendo um impulso de ânimo.`, type: 'info', teamIds: [team.id] };
             }
         } else {
             if (!team.momentum || team.momentum > -3) {
                 team.momentum = (team.momentum || 0) - 1;
-                 event = { message: `PROBLEMAS NO VESTIÁRIO! Rumores indicam que a moral está baixa no ${team.name}.`, type: 'info', teamIds: [team.id] };
+                 event = { message: `PROBLEMAS NO VESTIÁRIO! Rumores indicam que o ânimo está baixo no ${team.name}.`, type: 'info', teamIds: [team.id] };
             }
         }
     }
