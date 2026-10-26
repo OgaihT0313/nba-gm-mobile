@@ -310,16 +310,15 @@ export const generateRealDraftClass = (
     return { prospects, reports, ids };
 };
 
+/** What an undrafted player signs for: the minimum. */
+export const UNDRAFTED_SALARY = 1_050_000;
+
 // Undrafted fringe talent entering the league alongside the draft class:
 // undrafted FAs, two-way bodies, international signings. They go straight into
 // the player pool on no roster, so getFreeAgents surfaces them on the market.
 // Slots are deliberately worse than the draft's late first round: these are
 // depth pieces, not a second round.
 //
-// NOTE: there is no retirement system, so nobody ever leaves the player pool —
-// every offseason adds these 10 plus the 30-man draft class with zero exits.
-// Fine for a save of a handful of seasons; a very long save will accumulate an
-// ever-growing roster of players no team ever signs.
 export const generateUndraftedClass = (size = 10, takenIds: Iterable<string> = []): { players: { [id: string]: Player }; ids: string[] } => {
     const usedIds = new Set<string>(takenIds);
     const players: { [id: string]: Player } = {};
@@ -328,7 +327,7 @@ export const generateUndraftedClass = (size = 10, takenIds: Iterable<string> = [
         // Slot 30+ band — below every drafted prospect.
         const p = makeProspect(30 + randInt(0, 8), usedIds, 'udfa_');
         p.age = randInt(19, 23); // some are older, having played abroad
-        p.salary = 1_050_000;    // minimum deal
+        p.salary = UNDRAFTED_SALARY;
         p.contractYears = 0;     // unsigned: a free agent, not on a rookie scale
         players[p.id] = p;
         ids.push(p.id);

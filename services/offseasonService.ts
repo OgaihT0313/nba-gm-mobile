@@ -14,7 +14,7 @@ import { buildSeasonOwner, luxuryTaxConfidenceHit } from './ownerService';
 import { generateSchedule } from './scheduleService';
 import { MIN_ROSTER_SIZE, MAX_ROSTER_SIZE } from './tradeService';
 import {
-    buildDraftBoard, grantNextWindowPick, PICK_WINDOW,
+    buildDraftBoard, grantNextWindowPick, PICK_WINDOW, UNDRAFTED_SALARY,
     generateDraftClass, generateRealDraftClass, generateUndraftedClass, advanceDraftToUser,
 } from './draftService';
 import { staffOffseason, buildStaffMarket, fillUserVacancies, ratingOf, scoutBudgetFor, ROLE_LABEL } from './staffService';
@@ -295,6 +295,20 @@ export const startOffseason = (prev: SeasonState, opts: OffseasonOptions = {}): 
 // Draft over -> CPUs fill holes via free agency (now that rookies landed), then
 // the market opens for the user.
 export const finishDraft = (prev: SeasonState): SeasonState => {
+  // Whoever nobody picked enters the market as an undrafted free agent. Left
+  // flagged as a prospect he was invisible for good -- off the market
+  // (getFreeAgents), never retired -- and every era with fewer than 30 teams
+  // lost several a summer, real players of the class among them. Swept over
+  // every unrostered prospect, not just this board, so a save that already
+  // lost some gets them back.
+  const rostered = new Set(prev.teams.flatMap((t) => t.roster));
+  const released: { [id: string]: Player } = { ...prev.players };
+  for (const id in released) {
+    if (released[id].prospect && !rostered.has(id)) {
+      released[id] = { ...released[id], prospect: undefined, contractYears: 0, salary: UNDRAFTED_SALARY };
+    }
+  }
+  prev = { ...prev, players: released };
   const trimmed = trimCpuRosters(prev.teams, prev.players, prev.userTeamId);
   const cpuFa = runCpuFreeAgency(trimmed.teams, trimmed.players, prev.userTeamId);
   return {

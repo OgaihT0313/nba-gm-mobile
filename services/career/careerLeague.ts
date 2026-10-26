@@ -351,14 +351,7 @@ export const runSummer = (s: CareerState, draftProspect?: { player: Player; comb
       ? { teamId: pick.teamId, pick: pick.pick, label: `${pick.pick}ª escolha` }
       : { teamId: null, pick: null, label: 'Não draftado' };
   }
-  // Any prospect left on the board (the class had one more than the picks)
-  // goes to free agency like an undrafted player.
-  const players = { ...league.players };
-  (league.draft?.available ?? []).forEach((id) => {
-    if (players[id]?.prospect) players[id] = { ...players[id], prospect: false, contractYears: 0, salary: 1_050_000 };
-  });
-  league = { ...league, players };
-
+  // finishDraft sends anyone left on the board to free agency, undrafted.
   league = finishDraft(league);
   league = startSeason(league);
   let next: CareerState = { ...s, league, draft, draftNight, phase: draftProspect ? 'draft' : 'season', games: [], lastTrainingDay: 0 };
