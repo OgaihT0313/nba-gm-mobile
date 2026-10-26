@@ -3,7 +3,7 @@ import { View, Text, Modal } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { COLORS, FONT } from '../src/theme/tokens';
-import { CtaButton, BodyText } from './ui/kit';
+import { CtaButton, GhostButton, BodyText } from './ui/kit';
 import { useDesktop } from './desktop/useDesktop';
 
 // Design 5e ("Transmissão"). A red stroke, "VOCÊ FOI DEMITIDO" at 88px, the
@@ -15,9 +15,11 @@ interface FiredOverlayProps {
   seasons: number;
   titles: number;
   onRestart: () => void;
+  /** Back to Home, where the other save slots are. */
+  onHome?: () => void;
 }
 
-const FiredOverlay: React.FC<FiredOverlayProps> = ({ visible, note, seasons, titles, onRestart }) => {
+const FiredOverlay: React.FC<FiredOverlayProps> = ({ visible, note, seasons, titles, onRestart, onHome }) => {
   const insets = useSafeAreaInsets();
   const desktop = useDesktop();
   const record = (
@@ -48,7 +50,10 @@ const FiredOverlay: React.FC<FiredOverlayProps> = ({ visible, note, seasons, tit
           </View>
           <View style={{ width: 480, backgroundColor: COLORS.navBg, borderLeftWidth: 1, borderLeftColor: COLORS.line, paddingHorizontal: 48, paddingVertical: 96, justifyContent: 'space-between' }}>
             {record}
-            <CtaButton label="Procurar outro time" onPress={onRestart} size={21} style={{ minHeight: 58 }} />
+            <View style={{ gap: 8 }}>
+              <CtaButton label="Procurar outro time" onPress={onRestart} size={21} style={{ minHeight: 58 }} />
+              {onHome ? <GhostButton label="Voltar ao início" onPress={onHome} style={{ minHeight: 48 }} /> : null}
+            </View>
           </View>
         </View>
       </Modal>
@@ -66,8 +71,9 @@ const FiredOverlay: React.FC<FiredOverlayProps> = ({ visible, note, seasons, tit
           {note ? <BodyText size={16}>{note}</BodyText> : null}
           {record}
         </View>
-        <View style={{ paddingHorizontal: 16, paddingTop: 12, paddingBottom: 22 }}>
+        <View style={{ paddingHorizontal: 16, paddingTop: 12, paddingBottom: 22, gap: 8 }}>
           <CtaButton label="Procurar outro time" onPress={onRestart} size={20} />
+          {onHome ? <GhostButton label="Voltar ao início" onPress={onHome} /> : null}
         </View>
       </View>
     </Modal>

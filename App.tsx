@@ -1081,9 +1081,12 @@ export default function App() {
             onChoose={handleResolveDecision}
           />
 
-          {/* Fired: full-screen takeover that ends the save. */}
+          {/* Fired: full-screen takeover that ends the save. Not over Home,
+              where the other two save slots are, nor over a new career being
+              set up in one of them -- covering those trapped the user in the
+              slot he was fired from. */}
           <FiredOverlay
-            visible={!!season?.owner.fired && view !== 'career'}
+            visible={!!season?.owner.fired && !['career', 'home', 'era-select', 'team-select', 'team-confirm'].includes(view)}
             note={season?.owner.note}
             seasons={season?.gmLegacy.seasons ?? 0}
             titles={season?.gmLegacy.titles ?? 0}
@@ -1094,6 +1097,7 @@ export default function App() {
               setPendingSlotFilled(true);
               setView('era-select');
             }}
+            onHome={() => setView('home')}
           />
 
           {/* Bottom nav (only once a season exists) */}
