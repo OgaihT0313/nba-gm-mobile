@@ -695,12 +695,21 @@ export default function App() {
   };
 
   const handlePromiseMinutes = (playerId: string) => {
+    // Checked before the toast: it used to announce "Promessa feita" even when
+    // the promise was refused and nothing changed.
+    const playerNow = season?.players[playerId];
+    if (!season || !playerNow) return;
+    const allowed = canPromiseMinutes(season, playerNow);
+    if (!allowed.ok) {
+      addNotification(allowed.why ?? 'Não dá para prometer minutos agora.', 'error');
+      return;
+    }
     setSeason((prev) => {
       const p = prev?.players[playerId];
       if (!prev || !p || !canPromiseMinutes(prev, p).ok) return prev;
       return { ...prev, minutesPromise: { playerId, season: promiseSeason(prev) } };
     });
-    addNotification(`Promessa feita: ${season?.players[playerId]?.name} terá ${PROMISE_MPG}+ minutos por jogo nesta temporada.`, 'info');
+    addNotification(`Promessa feita: ${playerNow.name} terá ${PROMISE_MPG}+ minutos por jogo nesta temporada.`, 'info');
   };
 
   // Raising a retired player's jersey: the franchise's call, made once.
