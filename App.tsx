@@ -1020,6 +1020,7 @@ export default function App() {
           players={season.players}
           userTeamId={season.userTeamId}
           gamesPlayed={season.gamesPlayed}
+          offseason={season.status === 'draft' || season.status === 'free_agency'}
           currentDraft={currentDraft}
           onTradeExecute={handleTradeExecute}
           offers={season.tradeOffers || []}

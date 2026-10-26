@@ -43,6 +43,8 @@ interface TradeCenterProps {
   players: { [key: string]: Player };
   userTeamId: string;
   gamesPlayed: number;
+  /** The draft and free agency: the deadline clock is reset and trades are open. */
+  offseason?: boolean;
   currentDraft: number;
   onTradeExecute: (
     userTeamId: string,
@@ -160,7 +162,7 @@ const PackagePanel: React.FC<{
 /* -------------------------------------------------------------------------- */
 
 const TradeCenter: React.FC<TradeCenterProps> = ({
-  teams, players, userTeamId, gamesPlayed, currentDraft, onTradeExecute, offers, onAcceptOffer, onRejectOffer, initialPartnerId}) => {
+  teams, players, userTeamId, gamesPlayed, currentDraft, onTradeExecute, offers, onAcceptOffer, onRejectOffer, initialPartnerId, offseason}) => {
   const { accent } = useTheme();
   const desktop = useDesktop();
   const userTeam = useMemo(() => teams.find((t) => t.id === userTeamId) || null, [teams, userTeamId]);
@@ -330,6 +332,10 @@ const TradeCenter: React.FC<TradeCenterProps> = ({
   const incomingCount = partnerAssets.length + partnerPickIds.length;
 
   const daysLeft = Math.max(0, TRADE_DEADLINE_GAME - gamesPlayed);
+  // In the draft and free agency the day counter is back at zero, so a day
+  // count would read "Prazo final em 55 dias" all summer.
+  const deadlineLabel = offseason ? 'Trocas abertas na offseason'
+    : daysLeft > 0 ? `Prazo final em ${daysLeft} ${daysLeft === 1 ? 'dia' : 'dias'}` : 'Prazo de trocas encerrado';
   const verdict = !hasPackage || !partnerEval
     ? null
     : !partnerEval.accepted
@@ -446,7 +452,7 @@ const TradeCenter: React.FC<TradeCenterProps> = ({
             right={offers.length > 0 ? <Tag color={COLORS.east}>{offers.length} {offers.length === 1 ? 'oferta' : 'ofertas'}</Tag> : undefined}
           />
           <BodyText size={15} style={{ marginTop: 6 }}>
-            {daysLeft > 0 ? `Prazo final em ${daysLeft} ${daysLeft === 1 ? 'dia' : 'dias'}` : 'Prazo de trocas encerrado'}
+            {deadlineLabel}
           </BodyText>
         </View>
         <View style={{ flex: 1, minHeight: 0, flexDirection: 'row', gap: 16, paddingHorizontal: PAGE_X, paddingBottom: 20 }}>
@@ -553,7 +559,7 @@ const TradeCenter: React.FC<TradeCenterProps> = ({
         right={offers.length > 0 ? <Tag color={COLORS.east}>{offers.length} {offers.length === 1 ? 'oferta' : 'ofertas'}</Tag> : undefined}
       />
       <BodyText size={14} style={{ paddingHorizontal: 20, marginTop: -10 }}>
-        {daysLeft > 0 ? `Prazo final em ${daysLeft} ${daysLeft === 1 ? 'dia' : 'dias'}` : 'Prazo de trocas encerrado'}
+        {deadlineLabel}
       </BodyText>
 
       <Body top={14} gap={14}>
