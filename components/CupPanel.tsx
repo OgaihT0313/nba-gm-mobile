@@ -18,7 +18,7 @@ const CupPanel: React.FC<CupPanelProps> = ({ cup, teams }) => {
 
   return (
     <Panel padding={14}>
-      <MonoLabel size={9} style={{ marginBottom: 10 }}>NBA Cup</MonoLabel>
+      <MonoLabel size={9} style={{ marginBottom: 10 }}>Copa NBA</MonoLabel>
 
       {cup?.championId ? (
         <View style={{ gap: 6 }}>

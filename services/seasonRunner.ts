@@ -223,7 +223,7 @@ export function simulateOneDay(season: SeasonState, pinnedResult?: PinnedGameRes
     if (nextGamesPlayed === CUP_GROUP_END && season.cup) {
         nextCup = simulationEngine.resolveCupGroupStage(season.cup, teamsAfterEvents, newPlayers, newSchedule, season.coaches);
         const championName = teamsAfterEvents.find(t => t.id === nextCup!.championId)?.name;
-        notify(`🏆 NBA CUP! O ${championName} venceu o torneio!`, 'info');
+        notify(`🏆 COPA NBA! O ${championName} venceu o torneio!`, 'info');
     }
 
     if (nextGamesPlayed === ALL_STAR_GAME) {
