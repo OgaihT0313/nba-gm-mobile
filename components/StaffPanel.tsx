@@ -33,7 +33,7 @@ const MemberCard: React.FC<{
       <View style={{ flex: 1, minWidth: 0 }}>
         <Text numberOfLines={1} style={{ fontFamily: FONT.cond800, fontSize: 19, lineHeight: 20, color: COLORS.text }}>{member.name}</Text>
         <Text style={{ fontFamily: FONT.body500, fontSize: 12, color: COLORS.dim, marginTop: 3 }}>
-          {member.age} anos · {member.interim ? 'interino até a entressafra' : `${member.years} ${member.years === 1 ? 'ano' : 'anos'} de contrato`} · {money(member.salary)}
+          {member.age} anos · {member.interim ? 'interino até a offseason' : `${member.years} ${member.years === 1 ? 'ano' : 'anos'} de contrato`} · {money(member.salary)}
         </Text>
       </View>
       <View style={{ alignItems: 'flex-end', gap: 4 }}>
@@ -115,7 +115,7 @@ const StaffPanel: React.FC<StaffPanelProps> = ({ team, status, market, onHire, o
 
       {!open ? (
         <BodyText size={12} color={COLORS.dim}>
-          Contratações abrem na entressafra (draft e agência livre). Durante a temporada só dá para demitir: um interino nota 2 fica no cargo até lá.
+          Contratações abrem na offseason (draft e agência livre). Durante a temporada só dá para demitir: um interino nota 2 fica no cargo até lá.
         </BodyText>
       ) : null}
 
@@ -126,7 +126,7 @@ const StaffPanel: React.FC<StaffPanelProps> = ({ team, status, market, onHire, o
             <Text className="text-xl font-black uppercase italic tracking-tight text-fg">Demitir?</Text>
             <Text className="text-sm text-fg-dim leading-5">
               <Text className="font-bold text-fg">{firing?.name}</Text> deixa o cargo. Os {money(firing?.salary ?? 0)} por ano continuam no orçamento por mais {firing?.years} {firing?.years === 1 ? 'temporada' : 'temporadas'}.
-              {open ? ' O cargo fica vago para você contratar.' : ' Um interino nota 2 assume até a entressafra.'}
+              {open ? ' O cargo fica vago para você contratar.' : ' Um interino nota 2 assume até a offseason.'}
             </Text>
             <View className="flex-row gap-3 justify-end">
               <Pressable accessibilityRole="button" onPress={() => setConfirmFire(null)} className="px-4 py-2 rounded-xl"><Text className="text-sm font-bold text-fg-soft">Cancelar</Text></Pressable>

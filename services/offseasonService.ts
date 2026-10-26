@@ -347,7 +347,7 @@ export const startSeason = (prev: SeasonState): SeasonState => {
       ...prev,
       teams: prev.teams.map((t) => (t.id === prev.userTeamId ? staffed.team : t)),
       events: [{
-        message: `🧢 Cargos vagos na abertura da temporada (${staffed.filled.map((r) => ROLE_LABEL[r].toLowerCase()).join(', ')}): interinos nota 2 assumem até a entressafra.`,
+        message: `🧢 Cargos vagos na abertura da temporada (${staffed.filled.map((r) => ROLE_LABEL[r].toLowerCase()).join(', ')}): interinos nota 2 assumem até a offseason.`,
         type: 'info' as const, teamIds: [prev.userTeamId],
       }, ...prev.events].slice(0, 60),
     };

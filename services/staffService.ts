@@ -307,7 +307,7 @@ export const isHiringOpen = (status: SeasonState['status']): boolean =>
 
 /** Why this hire can't happen, or null if it can. Replacing someone moves his salary to dead money, so the room needed is the new salary. */
 export const hireBlock = (season: SeasonState, member: StaffMember): string | null => {
-    if (!isHiringOpen(season.status)) return 'Contratações só na entressafra';
+    if (!isHiringOpen(season.status)) return 'Contratações só na offseason';
     const team = season.teams.find((t) => t.id === season.userTeamId);
     if (!team) return 'Time não encontrado';
     if (member.salary > staffRoom(team)) return 'Acima do orçamento';
