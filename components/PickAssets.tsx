@@ -46,7 +46,7 @@ export const PickChip: React.FC<{
       </View>
       <View className="flex-1 min-w-0">
         <Text className="text-[11px] font-bold text-fg" numberOfLines={1}>
-          {own ? 'Seu 1º round' : `1º round do ${origin?.name ?? pick.originalTeamId}`}
+          {own ? 'Sua 1ª rodada' : `1ª rodada do ${origin?.name ?? pick.originalTeamId}`}
         </Text>
         <Text className="text-[9px] font-bold text-fg-dim" numberOfLines={1}>
           {yearsOut <= 0 ? 'este draft' : yearsOut === 1 ? 'próximo draft' : `em ${yearsOut} drafts`}
@@ -65,7 +65,7 @@ const PickAssets: React.FC<{
   teams: Team[];
   currentDraft: number;
   title?: string;
-}> = ({ team, teams, currentDraft, title = 'Picks de Draft' }) => {
+}> = ({ team, teams, currentDraft, title = 'Picks de draft' }) => {
   const picks = [...picksOf(team)].sort((a, b) => a.draft - b.draft);
   return (
     <View className="gap-2">

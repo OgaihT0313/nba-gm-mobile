@@ -391,7 +391,7 @@ const TradeCenter: React.FC<TradeCenterProps> = ({
   // Protections, only once there's an outgoing pick to protect.
   const protectionPanel = userTeam && userPickIds.length > 0 ? (
     <Panel style={{ gap: 8 }}>
-      <MonoLabel size={9}>Proteção das suas picks</MonoLabel>
+      <MonoLabel size={9}>Proteção dos seus picks</MonoLabel>
       {picksOf(userTeam).filter((pk) => userPickIds.includes(pk.id)).map((pick) => (
         <View key={pick.id} className="flex-row items-center justify-between" style={{ minHeight: 40 }}>
           <Name size={15}>1ª rodada {tricodeOf(pick.originalTeamId)} · draft {pick.draft}</Name>
