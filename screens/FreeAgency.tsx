@@ -204,7 +204,7 @@ const FreeAgency: React.FC<FreeAgencyProps> = ({ season, onSign, onStartSeason }
             note={belowMin
               ? `O elenco precisa de no mínimo ${MIN_ROSTER_SIZE} jogadores.`
               : aboveMax
-                ? `Máximo de ${MAX_ROSTER_SIZE}: dispense ${rosterCount - MAX_ROSTER_SIZE} em Meu Time.`
+                ? `Máximo de ${MAX_ROSTER_SIZE}: dispense ${rosterCount - MAX_ROSTER_SIZE} em Meu time.`
                 : `Contratos expiraram pela liga inteira. Reforce o ${getTeamNickname(userTeam)} antes de começar.`}
           >
             <DCta
@@ -253,7 +253,7 @@ const FreeAgency: React.FC<FreeAgencyProps> = ({ season, onSign, onStartSeason }
             <BodyText size={12} color={COLORS.warn} style={{ textAlign: 'center' }}>
               {belowMin
                 ? `O elenco precisa de no mínimo ${MIN_ROSTER_SIZE} jogadores.`
-                : `Máximo de ${MAX_ROSTER_SIZE}: dispense ${rosterCount - MAX_ROSTER_SIZE} em Meu Time.`}
+                : `Máximo de ${MAX_ROSTER_SIZE}: dispense ${rosterCount - MAX_ROSTER_SIZE} em Meu time.`}
             </BodyText>
           ) : null}
         </Dock>
