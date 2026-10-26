@@ -25,6 +25,16 @@ export const seasonStartYearOf = (s: Pick<SeasonState, 'era' | 'eraChainIndex' |
   return end !== null ? end - 1 : 2025 + (s.gmLegacy?.seasons ?? 0);
 };
 
+/**
+ * Whether this season has a Copa NBA. The in-season tournament began in
+ * 2023-24; an era save before that has none, and gets one once its chain
+ * walks into 2023-24. Takes the season's END year (eraEndYearOf), null for
+ * the live league.
+ */
+export const CUP_FIRST_END_YEAR = 2024;
+export const cupInYear = (endYear: number | null): boolean => endYear === null || endYear >= CUP_FIRST_END_YEAR;
+export const hasCup = (s?: Pick<SeasonState, 'era' | 'eraChainIndex'> | null): boolean => cupInYear(eraEndYearOf(s));
+
 /** "1995-96". */
 export const seasonLabelOf = (s: Pick<SeasonState, 'era' | 'eraChainIndex' | 'gmLegacy'>): string => {
   const y = seasonStartYearOf(s);

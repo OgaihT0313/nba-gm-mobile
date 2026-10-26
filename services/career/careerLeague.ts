@@ -17,6 +17,7 @@ import { startOffseason, finishDraft, startSeason } from '../offseasonService';
 import { initCoaches } from '../coachService';
 import { MAX_ROSTER_SIZE } from '../tradeService';
 import { ERAS, eraById } from '../../data/eras';
+import { cupInYear } from '../../src/eraYear';
 import { NO_TEAM, type CareerGame, type CareerSeasonLine, type CareerState, type CareerCreation, type CombineResult } from './careerTypes';
 import { buildCareerPlayer, rollPotential, STARTING_OVR } from './careerCreate';
 import { afterGame, favorFor, roleOf, roleFromMinutes, initialTrust, applyWeeklyTraining, TRAINING_DAYS, capAtCeiling } from './careerTrust';
@@ -56,7 +57,7 @@ export const newLeague = (eraId?: string): SeasonState => {
     playoff: null,
     awards: null,
     userTeamId: NO_TEAM,
-    cup: simulationEngine.initCupGroups(withCoaches),
+    cup: cupInYear(era ? parseInt(era.seasonLabel, 10) + 1 : null) ? simulationEngine.initCupGroups(withCoaches) : undefined,
     gmLegacy: { seasons: 0, titles: 0 },
     awardHistory: [],
     // Nobody's owner: required by the type, never read with no user team.

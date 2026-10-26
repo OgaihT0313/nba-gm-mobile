@@ -19,7 +19,7 @@ import {
   TeamBadge, Tag, Name, BodyText, Dock,
 } from '../components/ui/kit';
 import { currentEra } from '../data/eras';
-import { seasonStartYearOf } from '../src/eraYear';
+import { seasonStartYearOf, hasCup } from '../src/eraYear';
 import CupPanel from '../components/CupPanel';
 import StandingsTable from '../components/StandingsTable';
 import { useDesktop } from '../components/desktop/useDesktop';
@@ -466,7 +466,7 @@ const SimulationScreen: React.FC<SimulationScreenProps> = ({
               </Panel>
             ) : null}
 
-            <CupPanel cup={season.cup} teams={season.teams} />
+            {hasCup(season) ? <CupPanel cup={season.cup} teams={season.teams} /> : null}
           </Col>
 
           <Col width={440}>
@@ -695,7 +695,7 @@ const SimulationScreen: React.FC<SimulationScreenProps> = ({
           </Panel>
         ) : null}
 
-        <CupPanel cup={season.cup} teams={season.teams} />
+        {hasCup(season) ? <CupPanel cup={season.cup} teams={season.teams} /> : null}
 
         <SectionLabel>Classificação</SectionLabel>
         <Panel padding={13}>

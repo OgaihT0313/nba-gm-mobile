@@ -7,7 +7,7 @@
 import type { Team, Player, SeasonState, DraftState, Event, OffseasonMove } from '../types';
 import { getTeamSalary, LUXURY_TAX, teamsData } from '../constants';
 import { teamNameFor } from '../src/eraIdentity';
-import { eraEndYearOf } from '../src/eraYear';
+import { eraEndYearOf, hasCup } from '../src/eraYear';
 import { ERAS, currentEra } from '../data/eras';
 import { simulationEngine } from './simulationService';
 import { buildSeasonOwner, luxuryTaxConfidenceHit } from './ownerService';
@@ -378,7 +378,8 @@ export const startSeason = (prev: SeasonState): SeasonState => {
     players: freshPlayers,
     milestones: undefined,
     owner,
-    cup: simulationEngine.initCupGroups(prev.teams),
+    // The Copa NBA only from 2023-24 on (src/eraYear.hasCup).
+    cup: hasCup(prev) ? simulationEngine.initCupGroups(prev.teams) : undefined,
     schedule: generateSchedule(prev.teams),
     staffMarket: undefined,
   };

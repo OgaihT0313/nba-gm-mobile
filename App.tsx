@@ -62,7 +62,7 @@ import FadeInView from './components/FadeInView';
 import Placeholder from './screens/Placeholder';
 import { IconName } from './components/Icon';
 import { setEraYear } from './src/eraIdentity';
-import { eraEndYearOf } from './src/eraYear';
+import { eraEndYearOf, cupInYear } from './src/eraYear';
 
 type AppView =
   | 'era-select' | 'team-select' | 'team-confirm' | 'home' | 'teams' | 'team-detail' | 'scout' | 'my-team' | 'draft' | 'free-agency'
@@ -846,7 +846,7 @@ export default function App() {
       playoff: null,
       awards: null,
       userTeamId: teamId,
-      cup: simulationEngine.initCupGroups(teamsWithCoaches),
+      cup: cupInYear(era ? parseInt(era.seasonLabel, 10) + 1 : null) ? simulationEngine.initCupGroups(teamsWithCoaches) : undefined,
       gmLegacy: { seasons: 0, titles: 0 },
       awardHistory: [],
       owner: buildSeasonOwner(userTeam, teamsWithCoaches, seedPlayers),
