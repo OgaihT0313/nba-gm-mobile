@@ -35,6 +35,21 @@ export const newContractYears = (p: Player): number => {
 export const askingSalary = (p: Player): number =>
     Math.round(expectedSalary(p.ovr, p.age) / 10_000) * 10_000;
 
+/**
+ * The length a free agent signs for at the price he is asking NOW. Someone the
+ * market cooled (runCpuFreeAgency: nobody paid him, so his ask dropped to the
+ * mid-level, then the minimum) takes a short deal to prove himself and go back
+ * out for real money -- the same 1 or 2 years the CPU gets him for. Before
+ * this, the user signed the leftovers at the cooled price for the full length:
+ * an 85 OVR worth $32.5M stayed for $3.0M a year, four years running.
+ */
+export const offerYears = (p: Player): number => {
+    const ask = askingSalary(p);
+    // A minimum-salary player (an undrafted kid) was never cooled: that IS his price.
+    if (ask <= MINIMUM_CONTRACT || p.salary >= ask * 0.75) return newContractYears(p);
+    return p.salary <= MINIMUM_CONTRACT ? 1 : Math.min(2, newContractYears(p));
+};
+
 // Free agents are simply every player not on any roster — the league is a
 // closed pool, so there's no separate "free agent" list to keep in sync; a
 // player is on the market exactly when no team holds their id. Sorted by the
@@ -107,7 +122,7 @@ export const signFreeAgentLegality = (team: Team, player: Player, players: Playe
  * Assumes legality was already checked.
  */
 export const signPlayer = (
-    team: Team, player: Player, players: PlayerMap, years = newContractYears(player),
+    team: Team, player: Player, players: PlayerMap, years = offerYears(player),
 ): { team: Team; player: Player } => {
     const route = signingRoute(team, player, players);
     const signed: Player = { ...player, contractYears: years, birdTeamId: undefined };

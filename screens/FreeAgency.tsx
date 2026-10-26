@@ -7,7 +7,7 @@ import {
   getPlayerImageUrl, PLAYER_PLACEHOLDER_SVG, getTeamSalary, SALARY_CAP, LUXURY_TAX, getPlayerPositions,
   formatPositions, getTeamNickname, attributeColor, LINEUP_POSITIONS,
 } from '../constants';
-import { getFreeAgents, signFreeAgentLegality, newContractYears, evaluateSigningInterest, signingRoute } from '../services/freeAgencyService';
+import { getFreeAgents, signFreeAgentLegality, offerYears, evaluateSigningInterest, signingRoute } from '../services/freeAgencyService';
 import { MIN_ROSTER_SIZE, MAX_ROSTER_SIZE } from '../services/tradeService';
 import { useTheme } from '../src/theme/ThemeProvider';
 import { COLORS, INK, RADIUS, FONT, ovrColor } from '../src/theme/tokens';
@@ -34,13 +34,13 @@ const POSITION_FILTERS = [
 ];
 
 // Sort keys the GM actually shops on. "Anos" is the length of the deal the
-// player would sign (newContractYears) — a free agent's own contractYears is 0
+// player would sign (offerYears) — a free agent's own contractYears is 0
 // by definition, since expiring is what put them in the pool.
 type SortKey = 'ovr' | 'salary' | 'years';
 const SORTS: { key: SortKey; label: string; value: (p: Player) => number }[] = [
   { key: 'ovr', label: 'OVR', value: (p) => p.ovr },
   { key: 'salary', label: 'Salário', value: (p) => p.salary },
-  { key: 'years', label: 'Anos', value: (p) => newContractYears(p) },
+  { key: 'years', label: 'Anos', value: (p) => offerYears(p) },
 ];
 
 // The three standings a free agent can be in relative to YOUR team. Derived,
@@ -174,7 +174,7 @@ const FreeAgency: React.FC<FreeAgencyProps> = ({ season, onSign, onStartSeason }
           <View style={{ flex: 1, minWidth: 0, gap: 2 }}>
             <Name size={16}>{player.name}</Name>
             <Text numberOfLines={1} style={{ fontFamily: FONT.body500, fontSize: 12, color: COLORS.dim }}>
-              {formatPositions(player)} · {player.age}a · pede {money(player.salary)}/{newContractYears(player)}a
+              {formatPositions(player)} · {player.age}a · pede {money(player.salary)}/{offerYears(player)}a
               {own ? ' · seu jogador' : ''}{fillsHole ? ' · lacuna' : ''}
             </Text>
           </View>
