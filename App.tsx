@@ -712,23 +712,26 @@ export default function App() {
   };
 
   const handleWaivePlayer = (playerId: string) => {
-    let error: string | null = null;
-    let waivedName: string | null = null;
+    // Decided on the state on screen, not inside the updater: React may run an
+    // updater later, during render, and the toast below used to read flags it
+    // had not set yet -- so the cut or the refusal could go unannounced.
+    const teamNow = season?.teams.find((t) => t.id === season.userTeamId);
+    const playerNow = season?.players[playerId];
+    if (!teamNow || !playerNow || !teamNow.roster.includes(playerId)) return;
+    if (teamNow.roster.length <= MIN_ROSTER_SIZE) {
+      addNotification(`Você não pode ficar com menos de ${MIN_ROSTER_SIZE} jogadores no elenco.`, 'error');
+      return;
+    }
     setSeason((prev) => {
       if (!prev) return prev;
       const team = prev.teams.find((t) => t.id === prev.userTeamId);
       const player = prev.players[playerId];
-      if (!team || !player || !team.roster.includes(playerId)) return prev;
-      if (team.roster.length <= MIN_ROSTER_SIZE) {
-        error = `Você não pode ficar com menos de ${MIN_ROSTER_SIZE} jogadores no elenco.`;
-        return prev;
-      }
+      if (!team || !player || !team.roster.includes(playerId) || team.roster.length <= MIN_ROSTER_SIZE) return prev;
       // Drop the fixed-starter pick if the cut player held one, so the sim
       // doesn't try to start a player the team no longer has.
       const newStarters = team.starters
         ? Object.fromEntries(Object.entries(team.starters).filter(([, id]) => id !== playerId))
         : team.starters;
-      waivedName = player.name;
       return {
         ...prev,
         // Cut loose, he asks the market for what he is worth now. No Bird
@@ -743,8 +746,7 @@ export default function App() {
         tradeOffers: (prev.tradeOffers || []).filter((o) => !o.requestIds.includes(playerId)),
       };
     });
-    if (error) addNotification(error, 'error');
-    else if (waivedName) addNotification(`${waivedName} foi dispensado e virou agente livre.`, 'trade');
+    addNotification(`${playerNow.name} foi dispensado e virou agente livre.`, 'trade');
   };
 
   // Fire the user's current coach. The team is left without one (CoachPanel
