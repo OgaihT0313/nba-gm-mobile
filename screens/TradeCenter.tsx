@@ -284,8 +284,15 @@ const TradeCenter: React.FC<TradeCenterProps> = ({
     // competitive situation and name the actual players moving, which is the
     // part that carried the meaning anyway, and they land instantly.
     const situation = partnerTeam.powerRank <= 10 ? 'contender' : partnerTeam.powerRank <= 20 ? 'bubble' : 'rebuild';
-    const incoming = userPlayerDetails.map((p) => p.name).join(' e ');
-    const outgoing = partnerPlayerDetails.map((p) => p.name).join(' e ');
+    // Players by name, picks by count: a side that only sends picks used to
+    // leave a blank in the sentence ("Abrir mão de  dói").
+    const describe = (names: string[], picks: number) => {
+      const pickLabel = picks === 0 ? [] : [picks === 1 ? 'uma escolha de 1ª rodada' : `${picks} escolhas de 1ª rodada`];
+      const parts = [...names, ...pickLabel];
+      return parts.length <= 1 ? parts.join('') : `${parts.slice(0, -1).join(', ')} e ${parts[parts.length - 1]}`;
+    };
+    const incoming = describe(userPlayerDetails.map((p) => p.name), userPickIds.length);
+    const outgoing = describe(partnerPlayerDetails.map((p) => p.name), partnerPickIds.length);
     const accepts: Record<string, string[]> = {
       contender: [
         `${incoming} nos dá exatamente a peça que faltava pra brigar pelo título agora. Abrir mão de ${outgoing} dói, mas a janela é essa.`,
@@ -310,7 +317,7 @@ const TradeCenter: React.FC<TradeCenterProps> = ({
         `A conta não fecha pro nosso momento: perder ${outgoing} agora nos atrapalha mais do que ajuda.`,
       ],
       rebuild: [
-        `${outgoing} faz parte do nosso futuro — não vou trocá-lo por ${incoming} sem uma oferta bem melhor.`,
+        `${outgoing} faz parte do nosso futuro. Por ${incoming}, só com uma oferta bem melhor.`,
         `Estamos construindo com paciência. Essa proposta não acelera nada pra gente. Vou recusar.`,
       ],
     };
