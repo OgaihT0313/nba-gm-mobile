@@ -481,15 +481,12 @@ const teamChemistry = (team: Team, players: { [key: string]: Player }): number =
 // once per simulated day. Targets are set by: team record, role (starters happy,
 // buried players unhappy — read off the real lineup and rotation, below), a
 // penalty for a good player benched or a star stuck on a losing team,
-// and the current hot/slump mood. Returns trade-request events, but only for the
-// user's rotation-caliber players crossing into real discontent (so it's a rare,
-// meaningful moment, not spam). Mutates `players` in place.
+// and the current hot/slump mood. Mutates `players` in place. The trade request
+// a player makes when it drops too far is raised by decisionService.
 const updateMorale = (
     teams: Team[],
     players: { [key: string]: Player },
-    userTeamId: string
-): Event[] => {
-    const events: Event[] = [];
+): void => {
     teams.forEach(team => {
         const gp = (team.wins || 0) + (team.losses || 0);
         const winPct = gp ? (team.wins || 0) / gp : 0.5;
@@ -571,7 +568,6 @@ const updateMorale = (
             // excluded exactly the people who would make it.
         });
     });
-    return events;
 };
 
 // Everything simulateGame needs to know BEFORE a possession is played: ratings,
@@ -1303,9 +1299,6 @@ const handleRandomEvents = (currentTeams: Team[], players: { [key: string]: Play
         }
     }
 
-    if (event) {
-        newTeams[newTeams.findIndex(t => t.id === team.id)] = team;
-    }
     if (userNews) event = userNews;
 
     return { teams: newTeams, event };

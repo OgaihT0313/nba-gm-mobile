@@ -99,7 +99,7 @@ for (let r = 0; r < RUNS; r++) {
         const players: { [k: string]: Player } = JSON.parse(JSON.stringify(season.players));
         if (strip) leaders.forEach(id => { players[id] = { ...players[id], personality: 'guerreiro' }; });
         const team: Team = JSON.parse(JSON.stringify(t));
-        for (let i = 0; i < 40; i++) simulationEngine.updateMorale([team], players, season.userTeamId);
+        for (let i = 0; i < 40; i++) simulationEngine.updateMorale([team], players);
         return mean(room.map(id => players[id].morale ?? 70));
       };
       leaderLift.push(roomAfter(false) - roomAfter(true));

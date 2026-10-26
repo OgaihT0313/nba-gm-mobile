@@ -178,12 +178,9 @@ export function simulateOneDay(season: SeasonState, pinnedResult?: PinnedGameRes
     }
 
     // Update player morale from each team's situation (record, role, being
-    // buried). Mutates newPlayers; surfaces trade requests from the user's
-    // unhappy rotation players as events.
-    // Mutates newPlayers. It used to also return a "player demands a trade"
-    // event for the feed; that demand is a decision now (decisionService), so
-    // there is nothing left here to announce.
-    simulationEngine.updateMorale(teamsAfterEvents, newPlayers, season.userTeamId);
+    // buried). Mutates newPlayers. A player who has had enough asks out through
+    // the decision queue (decisionService), not through the feed.
+    simulationEngine.updateMorale(teamsAfterEvents, newPlayers);
 
     const nextGamesPlayed = season.gamesPlayed + 1;
     let nextStatus = season.status;
