@@ -639,6 +639,21 @@ export default function App() {
     });
   };
 
+  // The user's trade block (Team.tradeBlockIds): on and off, one player at a time.
+  const handleToggleTradeBlock = (playerId: string) => {
+    setSeason((prev) => {
+      if (!prev) return prev;
+      return {
+        ...prev,
+        teams: prev.teams.map((t) => {
+          if (t.id !== prev.userTeamId || !t.roster.includes(playerId)) return t;
+          const block = (t.tradeBlockIds ?? []).filter((id) => t.roster.includes(id));
+          return { ...t, tradeBlockIds: block.includes(playerId) ? block.filter((id) => id !== playerId) : [...block, playerId] };
+        }),
+      };
+    });
+  };
+
   const handleRejectOffer = (offerId: string) => {
     setSeason((prev) => (prev ? { ...prev, tradeOffers: (prev.tradeOffers || []).filter((o) => o.id !== offerId) } : prev));
   };
@@ -1030,6 +1045,7 @@ export default function App() {
           onAcceptOffer={handleAcceptOffer}
           onRejectOffer={handleRejectOffer}
           initialPartnerId={tradePartnerId ?? undefined}
+          onToggleTradeBlock={handleToggleTradeBlock}
           key={tradePartnerId ?? 'trade'}
         />
       );

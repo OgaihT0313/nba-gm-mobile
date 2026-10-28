@@ -245,6 +245,11 @@ export interface Team {
   // question the game keeps re-asking. Reset every offseason with the rest of
   // the season state.
   tradeRequestedIds?: string[];
+  // The user's own trade block: players he is openly listening on. While it
+  // has anyone on it, CPU calls come twice as often and ask for one of them
+  // (seasonRunner, generateCpuTradeOffer's forced target), and the package
+  // builder spends them first (tradeService.suggestPackage).
+  tradeBlockIds?: string[];
   // The staff beyond the head coach, one professional per role (see
   // services/staffService.ts). Optional because data/teams.json predates it:
   // initStaff fills it at initSeason and the save migration fills old saves.

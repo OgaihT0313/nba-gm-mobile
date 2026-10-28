@@ -7,7 +7,7 @@ import {
   getTeamLogoUrl, getTeamSalary, SALARY_CAP,
   formatPositions, getPlayerPositions, picksOf, getTeamNickname, getTeamTricode, attributeColor, tricodeOf } from '../constants';
 import {
-  evaluateTradeLegality, evaluateTradeValue, TRADE_DEADLINE_GAME, playerValue, picksValue, OFFER_TTL,
+  evaluateTradeLegality, evaluateTradeValue, TRADE_DEADLINE_GAME, playerValue, picksValue, OFFER_TTL, suggestPackage,
 } from '../services/tradeService';
 import { projectedPickSlot } from '../services/draftService';
 import { useTheme } from '../src/theme/ThemeProvider';
@@ -60,6 +60,8 @@ interface TradeCenterProps {
   onRejectOffer: (offerId: string) => void;
   /** Opened from a team's page ("Abrir negociação"): start with them as partner. */
   initialPartnerId?: string;
+  /** Puts one of the user's players on, or takes him off, the trade block. */
+  onToggleTradeBlock?: (playerId: string) => void;
 }
 
 /* -------------------------------------------------------------------------- */
@@ -162,7 +164,7 @@ const PackagePanel: React.FC<{
 /* -------------------------------------------------------------------------- */
 
 const TradeCenter: React.FC<TradeCenterProps> = ({
-  teams, players, userTeamId, gamesPlayed, currentDraft, onTradeExecute, offers, onAcceptOffer, onRejectOffer, initialPartnerId, offseason}) => {
+  teams, players, userTeamId, gamesPlayed, currentDraft, onTradeExecute, offers, onAcceptOffer, onRejectOffer, initialPartnerId, offseason, onToggleTradeBlock}) => {
   const { accent } = useTheme();
   const desktop = useDesktop();
   const userTeam = useMemo(() => teams.find((t) => t.id === userTeamId) || null, [teams, userTeamId]);
@@ -181,6 +183,9 @@ const TradeCenter: React.FC<TradeCenterProps> = ({
   const [tradeStatus, setTradeStatus] = useState<'idle' | 'accepted' | 'rejected'>('idle');
   const [gmReaction, setGmReaction] = useState('');
   const [inspecting, setInspecting] = useState<Player | null>(null);
+  // "O que eles aceitariam?": the outcome of the last search, said in a line.
+  const [suggestNote, setSuggestNote] = useState<string | null>(null);
+  const [blockSheet, setBlockSheet] = useState(false);
 
   useEffect(() => { setUserAssets([]); setUserPickIds([]); setProtections({}); }, [userTeamId]);
 
@@ -413,6 +418,79 @@ const TradeCenter: React.FC<TradeCenterProps> = ({
     </Panel>
   ) : null;
 
+  // Fills "você cede" with the cheapest package the partner accepts for what
+  // you asked them for (tradeService.suggestPackage), so a deal is one tap
+  // from a target instead of trial and error.
+  const wantsSomething = !!partnerTeam && partnerAssets.length + partnerPickIds.length > 0;
+  const suggest = () => {
+    if (!userTeam || !partnerTeam) return;
+    const pkg = suggestPackage(userTeam, partnerTeam, partnerAssets, selectedPicks.receive, players, gamesPlayed, teams, currentDraft);
+    if (!pkg) {
+      setSuggestNote('Nenhum pacote de até 3 jogadores e um pick do seu elenco fecha essa troca.');
+      return;
+    }
+    setUserAssets(pkg.playerIds);
+    setUserPickIds(pkg.pickIds);
+    setProtections({});
+    setTradeStatus('idle');
+    const names = [...pkg.playerIds.map((id) => players[id]?.name ?? id), ...(pkg.pickIds.length ? ['uma escolha de 1ª rodada'] : [])];
+    setSuggestNote(`Eles aceitariam ${names.length > 1 ? `${names.slice(0, -1).join(', ')} e ${names[names.length - 1]}` : names[0]}.`);
+  };
+  useEffect(() => { setSuggestNote(null); }, [partnerTeamId, partnerAssets, partnerPickIds]);
+  const suggestPanel = wantsSomething ? (
+    <View style={{ gap: 6 }}>
+      <GhostButton label="O que eles aceitariam?" onPress={suggest} />
+      {suggestNote ? <BodyText size={12.5} color={COLORS.textSoft}>{suggestNote}</BodyText> : null}
+    </View>
+  ) : null;
+
+  // The trade block: who you are openly listening on.
+  const blockIds = (userTeam?.tradeBlockIds ?? []).filter((id) => userTeam?.roster.includes(id));
+  const blockPanel = userTeam && onToggleTradeBlock ? (
+    <Panel style={{ gap: 8 }}>
+      <View className="flex-row justify-between items-center">
+        <MonoLabel size={9}>Negociáveis</MonoLabel>
+        <Pressable accessibilityRole="button" onPress={() => setBlockSheet(true)} hitSlop={8}>
+          <Text style={{ fontFamily: FONT.cond700, fontSize: 12.5, color: COLORS.textSoft }}>Editar lista ›</Text>
+        </Pressable>
+      </View>
+      {blockIds.length ? (
+        <View className="flex-row flex-wrap" style={{ gap: 6 }}>
+          {blockIds.map((id) => (
+            <Chip key={id} tone="warn" onPress={() => onToggleTradeBlock(id)}>{`${players[id]?.name ?? id} ×`}</Chip>
+          ))}
+        </View>
+      ) : null}
+      <BodyText size={12.5} color={COLORS.dim}>
+        {blockIds.length
+          ? 'A liga sabe que você ouve propostas por eles: as ligações chegam com o dobro da frequência e pedem um deles.'
+          : 'Marque quem você topa trocar: as ligações da liga chegam com o dobro da frequência e pedem um deles.'}
+      </BodyText>
+    </Panel>
+  ) : null;
+  const blockEditor = userTeam && onToggleTradeBlock ? (
+    <Sheet visible={blockSheet} onClose={() => setBlockSheet(false)} title="Quem você topa trocar"
+      footer={<CtaButton label="Pronto" sub={`${blockIds.length} na lista`} onPress={() => setBlockSheet(false)} />}>
+      <View style={{ gap: 8 }}>
+        {userTeam.roster.map((id) => players[id]).filter((p): p is Player => !!p).sort((a, b) => b.ovr - a.ovr).map((p) => {
+          const on = blockIds.includes(p.id);
+          return (
+            <Pressable accessibilityRole="button" aria-selected={on} key={p.id} onPress={() => onToggleTradeBlock(p.id)}
+              className="flex-row items-center active:opacity-75"
+              style={{ gap: 10, padding: 10, borderRadius: RADIUS.control, backgroundColor: on ? withAlpha(COLORS.warn, 0.18) : COLORS.panel, borderWidth: 1, borderColor: on ? COLORS.warn : COLORS.line }}>
+              <PlayerPhoto player={p} style={{ width: 32, height: 32, borderRadius: RADIUS.pill, backgroundColor: COLORS.line }} contentFit="cover" />
+              <View style={{ flex: 1 }}>
+                <Text className="font-bold text-fg" style={{ fontSize: 12 }} numberOfLines={1}>{p.name}</Text>
+                <MonoLabel size={9.5} color={INK.meta} style={{ letterSpacing: 0, marginTop: 2 }}>{formatPositions(p)} · {money(p.salary)}</MonoLabel>
+              </View>
+              <Stat size={15} color={attributeColor(p.ovr)}>{p.ovr}</Stat>
+            </Pressable>
+          );
+        })}
+      </View>
+    </Sheet>
+  ) : null;
+
   const pickPartner = (id: string) => { setPartnerTeamId(id); setPartnerAssets([]); setPartnerPickIds([]); setPickerOpen(false); };
   const offersInbox = (
     <OffersInbox
@@ -499,9 +577,11 @@ const TradeCenter: React.FC<TradeCenterProps> = ({
               />
             </View>
             {balancePanel}
+            {suggestPanel}
             {protectionPanel}
             {reactionPanel}
             {offersInbox}
+            {blockPanel}
           </ScrollView>
 
           {partnerTeam ? (
@@ -536,6 +616,7 @@ const TradeCenter: React.FC<TradeCenterProps> = ({
           )}
         </View>
         {inspecting ? <PlayerDetailModal player={inspecting} onClose={() => setInspecting(null)} /> : null}
+        {blockEditor}
       </DPage>
     );
   }
@@ -594,11 +675,13 @@ const TradeCenter: React.FC<TradeCenterProps> = ({
         </View>
 
         {balancePanel}
+        {suggestPanel}
         {protectionPanel}
         {reactionPanel}
 
         {/* Inbox */}
         {offersInbox}
+        {blockPanel}
       </Body>
 
       {/* Partner picker */}
@@ -631,6 +714,7 @@ const TradeCenter: React.FC<TradeCenterProps> = ({
       />
 
       {inspecting ? <PlayerDetailModal player={inspecting} onClose={() => setInspecting(null)} /> : null}
+      {blockEditor}
     </Screen>
   );
 };

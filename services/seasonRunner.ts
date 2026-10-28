@@ -26,6 +26,9 @@ import { milestonesCrossed, MILESTONE_MORALE } from './milestoneService';
 export const ALL_STAR_GAME = 58;
 // Group-stage window for the NBA Cup — knockout resolves at the same checkpoint.
 export const CUP_GROUP_END = 16;
+// Daily odds a CPU GM calls the user with an offer, and with names on his trade block.
+const OFFER_CHANCE = 0.07;
+const OFFER_CHANCE_ON_BLOCK = 0.14;
 
 /**
  * Where "simulate to the next milestone" stops: the first checkpoint of the
@@ -203,11 +206,16 @@ export function simulateOneDay(season: SeasonState, pinnedResult?: PinnedGameRes
     nextTradeOffers = nextTradeOffers.filter(o => o.day === undefined || nextGamesPlayed - o.day < OFFER_TTL);
 
     // Occasionally a CPU GM proactively pitches the user a trade (never past the
-    // deadline; capped so the inbox doesn't pile up).
-    if (nextGamesPlayed < TRADE_DEADLINE_GAME && nextTradeOffers.length < MAX_PENDING_OFFERS && Math.random() < 0.07) {
-        const userTeamObj = teamsAfterEvents.find(t => t.id === season.userTeamId);
+    // deadline; capped so the inbox doesn't pile up). A user with names on his
+    // trade block hears from the league twice as often, about one of them.
+    const userTeamNow0 = teamsAfterEvents.find(t => t.id === season.userTeamId);
+    const onBlock = (userTeamNow0?.tradeBlockIds ?? []).filter(id => userTeamNow0!.roster.includes(id));
+    const offerChance = onBlock.length ? OFFER_CHANCE_ON_BLOCK : OFFER_CHANCE;
+    if (nextGamesPlayed < TRADE_DEADLINE_GAME && nextTradeOffers.length < MAX_PENDING_OFFERS && Math.random() < offerChance) {
+        const userTeamObj = userTeamNow0;
         if (userTeamObj) {
-            const offer = generateCpuTradeOffer(userTeamObj, teamsAfterEvents, newPlayers, nextGamesPlayed, season.awardHistory.length + 1);
+            const target = onBlock.length ? onBlock[Math.floor(Math.random() * onBlock.length)] : undefined;
+            const offer = generateCpuTradeOffer(userTeamObj, teamsAfterEvents, newPlayers, nextGamesPlayed, season.awardHistory.length + 1, target);
             if (offer) {
                 nextTradeOffers = [offer, ...nextTradeOffers];
                 const fromName = teamsAfterEvents.find(t => t.id === offer.fromTeamId)?.name;

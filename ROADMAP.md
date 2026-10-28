@@ -23,7 +23,7 @@ conferida com busca no código, não tela a tela.
 | Q1 | **Simular até o próximo marco, com parada automática** — **FEITO** (2026-10-25; conferido no navegador, falta o aparelho) | N | P | Hoje são +1, +7, metade e temporada inteira: para chegar ao prazo de trocas é contar dias. E uma proposta de troca da CPU durante "Simular temporada" vira só um aviso que some, e a proposta vence em `OFFER_TTL` jogos |
 | Q2 | Vários espaços de save (3) — **FEITO** (2026-10-25; conferido no navegador, falta o aparelho) | N | M | Hoje é 1 espaço (item 1 abaixo). Com GM, Minha Carreira e 41 eras, começar outra carreira apaga a atual |
 | Q3 | Painel "precisa da sua atenção" na tela da temporada — **FEITO** (2026-10-25; conferido no navegador, falta o aparelho) | N | P | Junta o que pede ação (contratos vencendo, teto salarial, jogador insatisfeito, proposta aberta, staff vago), com um toque para a tela certa |
-| Q4 | Lista de jogadores negociáveis e "o que eles aceitariam" | N | M | A troca é tentativa e erro. Marcar quem está disponível atrai propostas, e o botão monta uma oferta que o outro time aceita por um alvo |
+| Q4 | Lista de jogadores negociáveis e "o que eles aceitariam" — **FEITO** (2026-10-28; conferido no navegador, falta o aparelho) | N | M | A troca é tentativa e erro. Marcar quem está disponível atrai propostas, e o botão monta uma oferta que o outro time aceita por um alvo |
 | Q5 | Busca global de jogador | N | P | Hoje só o Scout tem campo de busca. Nas eras, achar um jogador é rolar 30 elencos |
 | Q6 | Lista de observação | N | P | Marcar alvos de outros times ou do draft e ser avisado quando ficarem disponíveis, se machucarem ou subirem de OVR |
 | Q7 | Comparar dois jogadores lado a lado | N | P | Existe comparação de elencos, não de jogadores. Ajuda na troca e na agência livre |
@@ -108,6 +108,24 @@ painel na tela da temporada, no lugar das etiquetas soltas de "ofertas" e
 - **Correção do Q2:** no card de save da tela inicial, o botão "Apagar" ficava
   dentro do botão do card (`<button>` dentro de `<button>`, HTML inválido no
   site). Agora os dois ficam lado a lado.
+
+
+### Q4. Negociáveis e "o que eles aceitariam" (N) — FEITO (2026-10-28)
+
+- **Negociáveis** (`Team.tradeBlockIds`, painel e folha em Trocas): com alguém na
+  lista, as ligações da CPU chegam com o dobro da frequência (`OFFER_CHANCE_ON_BLOCK`)
+  e pedem um deles. Medido em 8 temporadas até o prazo: 3,6 propostas por temporada
+  sem lista, 7,3 com dois jogadores, 100% pedindo um deles.
+- **"O que eles aceitariam?"** (`tradeService.suggestPackage`): depois de pedir algo
+  ao outro time, monta o pacote mais barato do seu elenco que a CPU aceita e que as
+  regras permitem (até 3 jogadores e 1 pick). "Mais barato" é o talento que sai:
+  (OVR - 60)^2 por jogador, um pick vale um jogador de 74, e quem está na lista conta
+  4 pontos a menos. O valor de mercado não serve para isso: ele escolhia o Jokić (30
+  anos, contrato máximo) por ser "barato". Medido: pacote em 9 de 10 pedidos, todos
+  válidos, busca em até 14 ms.
+- **Achado:** a CPU aceita quantidade por qualidade (dois reservas de 66 por um
+  titular de 84), porque `evaluateTradeValue` soma valores lineares no OVR. Já dava
+  para fazer à mão; o botão só deixa visível. Fica para decidir.
 
 ---
 

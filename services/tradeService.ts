@@ -279,6 +279,81 @@ export const evaluateTradeValue = (
     };
 };
 
+// --- "What would they take?" --------------------------------------------------
+
+/** A player on the user's trade block counts this many OVR points cheaper. */
+const BLOCK_DISCOUNT = 4;
+/** What one of the user's picks costs him, in OVR terms: a rotation player. */
+const PICK_OVR_COST = 74;
+/** Most players the package builder puts in one offer. */
+const MAX_PACKAGE_PLAYERS = 3;
+
+/**
+ * The cheapest package from the user's side that `partner` accepts for what
+ * the user asked for (`wantedIds` and `wantedPicks`) and that the rules allow:
+ * up to three players plus at most one pick, priced the way the CPU prices it
+ * (evaluateTradeValue, from the partner's side) and checked against the roster
+ * and salary rules (evaluateTradeLegality). Null when no such package exists.
+ *
+ * "Cheapest" is the talent the user's roster loses, not the market value:
+ * each player costs (OVR - 60)^2, so a better player costs disproportionately
+ * more, then the fewest pieces break ties. Market value (playerValue)
+ * discounts age and a big contract, and minimising it picked the star --
+ * Jokić, 30 and on a max deal, to get Ja Morant. Minimising the best piece
+ * sent instead gave away three rotation players (79, 74, 71) for one 85 rather
+ * than a single 81. A pick costs like a rotation player (PICK_OVR_COST);
+ * players on the trade block count BLOCK_DISCOUNT points less, so the ones
+ * being shopped go first.
+ */
+export const suggestPackage = (
+    userTeam: Team,
+    partner: Team,
+    wantedIds: string[],
+    wantedPicks: DraftPickAsset[],
+    players: { [key: string]: Player },
+    gamesPlayed: number,
+    teams: Team[],
+    currentDraft: number,
+): { playerIds: string[]; pickIds: string[] } | null => {
+    if (wantedIds.length + wantedPicks.length === 0) return null;
+    const block = new Set(userTeam.tradeBlockIds ?? []);
+    const talent = (ovr: number) => Math.max(0, ovr - 60) ** 2;
+    const ovrCost = (p: Player) => talent(p.ovr - (block.has(p.id) ? BLOCK_DISCOUNT : 0));
+    const roster = userTeam.roster.map(id => players[id]).filter((p): p is Player => !!p);
+    const ownPicks = userTeam.picks ?? [];
+    const pickOptions: (DraftPickAsset | null)[] = [null, ...ownPicks];
+
+    const combos: Player[][] = [];
+    const walk = (start: number, chosen: Player[]) => {
+        if (chosen.length) combos.push(chosen);
+        if (chosen.length === MAX_PACKAGE_PLAYERS) return;
+        for (let i = start; i < roster.length; i++) walk(i + 1, [...chosen, roster[i]]);
+    };
+    walk(0, []);
+
+    // [talent given up, pieces], compared in that order; lower is cheaper.
+    type Key = [number, number];
+    const cheaper = (a: Key, b: Key) => a[0] !== b[0] ? a[0] < b[0] : a[1] < b[1];
+    let best: { playerIds: string[]; pickIds: string[]; key: Key } | null = null;
+    for (const pick of pickOptions) {
+        // A pick alone is a package too.
+        for (const combo of pick ? [[] as Player[], ...combos] : combos) {
+            const costs = [...combo.map(ovrCost), ...(pick ? [talent(PICK_OVR_COST)] : [])];
+            const key: Key = [costs.reduce((a, b) => a + b, 0), costs.length];
+            if (best && !cheaper(key, best.key)) continue;
+            const ids = combo.map(p => p.id);
+            const picks = pick ? [pick] : [];
+            const value = evaluateTradeValue(partner, wantedIds, ids, players, {
+                teams, currentDraft, givePicks: wantedPicks, receivePicks: picks,
+            });
+            if (!value.accepted) continue;
+            if (!evaluateTradeLegality(userTeam, ids, partner, wantedIds, players, gamesPlayed, picks.length, wantedPicks.length).legal) continue;
+            best = { playerIds: ids, pickIds: picks.map(p => p.id), key };
+        }
+    }
+    return best ? { playerIds: best.playerIds, pickIds: best.pickIds } : null;
+};
+
 // --- CPU-initiated trade offers to the user ---
 
 const shuffle = <T,>(arr: T[]): T[] => {
