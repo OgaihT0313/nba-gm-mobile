@@ -182,9 +182,6 @@ export const contractFactor = (p: Player): number => {
 // ordering, and the CPU trade-offer builder.
 export const playerValue = (p: Player) => p.ovr * ageFactor(p.age) * contractFactor(p);
 
-const assetsValue = (assetIds: string[], players: { [key: string]: Player }) =>
-    assetIds.reduce((total, pId) => total + (players[pId] ? playerValue(players[pId]) : 0), 0);
-
 // --- DRAFT PICKS AS TRADE CURRENCY -----------------------------------------
 // A pick has to be priced in the SAME currency as playerValue, or the two can't
 // sit on opposite sides of one trade. Three things separate a pick from the
@@ -250,6 +247,34 @@ export interface PickTradeContext {
     receivePicks: DraftPickAsset[];
 }
 
+// --- QUALITY OVER QUANTITY ---------------------------------------------------
+// playerValue is nearly linear in OVR: a 66 bench kid on a cheap deal reads as
+// ~80% of an 84 starter, so two of them out-valued him and the CPU accepted
+// 100% of such deals (measured 2026-10-28: two 64-68 kids for an 82-86, ratio
+// 1.68; three 66-70s for an 84-88, ratio 2.73). In a trade each piece is
+// weighed by a convex quality factor too: 84 counts 1.0, 80 0.77, 75 0.55, 70
+// 0.29, 66 0.15. Two good players can still land a star; a pile of bench
+// cannot. A pick is weighed as the prospect its slot projects to (with the
+// upside expectedProspectValue already pays for). Only the CPU's answer to a
+// user proposal reads this (and the balance and package builder built on
+// it); the offers the CPU builds itself keep their own pricing.
+const QUALITY_FLOOR_OVR = 58;
+const QUALITY_SPAN = 26;
+const QUALITY_EXP = 1.6;
+const quality = (ovr: number) => Math.pow(Math.max(0, ovr - QUALITY_FLOOR_OVR) / QUALITY_SPAN, QUALITY_EXP);
+
+const tradePlayersValue = (ids: string[], players: { [key: string]: Player }) =>
+    ids.reduce((total, id) => {
+        const p = players[id];
+        return total + (p ? playerValue(p) * quality(p.ovr) : 0);
+    }, 0);
+
+const tradePicksValue = (picks: DraftPickAsset[], teams: Team[], currentDraft: number): number =>
+    picks
+        .map(p => pickAssetValue(p, teams, currentDraft) * quality(expectedProspectValue(projectedPickSlot(p.originalTeamId, teams))))
+        .sort((a, b) => b - a)
+        .reduce((total, v, i) => total + v * (PICK_STACK_WEIGHTS[i] ?? 0.12), 0);
+
 // Decides whether `evaluatingTeam` should accept giving up `gives` in
 // exchange for `receives`, purely from asset value — no LLM involved, so the
 // outcome is deterministic and doesn't depend on a model's mood or on
@@ -263,10 +288,10 @@ export const evaluateTradeValue = (
     players: { [key: string]: Player },
     picks?: PickTradeContext
 ): TradeValueEvaluation => {
-    const givesValue = assetsValue(gives, players)
-        + (picks ? picksValue(picks.givePicks, picks.teams, picks.currentDraft) : 0);
-    const receivesValue = assetsValue(receives, players)
-        + (picks ? picksValue(picks.receivePicks, picks.teams, picks.currentDraft) : 0);
+    const givesValue = tradePlayersValue(gives, players)
+        + (picks ? tradePicksValue(picks.givePicks, picks.teams, picks.currentDraft) : 0);
+    const receivesValue = tradePlayersValue(receives, players)
+        + (picks ? tradePicksValue(picks.receivePicks, picks.teams, picks.currentDraft) : 0);
     const fairnessRatio = givesValue > 0 ? receivesValue / givesValue : 1;
 
     const threshold = evaluatingTeam.powerRank <= 10 ? 0.80 : evaluatingTeam.powerRank > 20 ? 0.90 : 0.85;

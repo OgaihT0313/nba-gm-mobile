@@ -123,9 +123,14 @@ painel na tela da temporada, no lugar das etiquetas soltas de "ofertas" e
   4 pontos a menos. O valor de mercado não serve para isso: ele escolhia o Jokić (30
   anos, contrato máximo) por ser "barato". Medido: pacote em 9 de 10 pedidos, todos
   válidos, busca em até 14 ms.
-- **Achado:** a CPU aceita quantidade por qualidade (dois reservas de 66 por um
-  titular de 84), porque `evaluateTradeValue` soma valores lineares no OVR. Já dava
-  para fazer à mão; o botão só deixa visível. Fica para decidir.
+- **Quantidade por qualidade — CORRIGIDO** (2026-10-28): a CPU aceitava dois reservas
+  de 66 por um titular de 84, porque `evaluateTradeValue` somava valores lineares no
+  OVR. Agora cada peça é pesada por um fator convexo (84 = 1,0; 80 = 0,77; 70 = 0,29;
+  66 = 0,15), e o pick pelo prospecto esperado da posição. Medido: 2 reservas jovens
+  por um titular de 82-86 passaram de 40/40 aceitas para 0/40; 3 reservas por um de
+  84-88, de 40/40 para 2/40; 1 por 1 parecido segue igual (34 → 33/40); 2 bons por
+  uma estrela segue aceito (40/40, razão 2,06 → 1,24). As propostas que a CPU monta
+  sozinha não mudam.
 
 ---
 
