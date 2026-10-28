@@ -12,6 +12,7 @@
 //     --outDir .check --module commonjs --target es2020 --moduleResolution node \
 //     --esModuleInterop --resolveJsonModule --skipLibCheck
 //   cp -r data .check/data && node .check/scripts/check_personality.js [seasons]
+import './harness';
 import { teamsData, playersData } from '../constants';
 import type { Team, Player, SeasonState } from '../types';
 import { simulationEngine } from '../services/simulationService';

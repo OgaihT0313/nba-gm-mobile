@@ -11,6 +11,7 @@
 //     --outDir .check --module commonjs --target es2020 --moduleResolution node \
 //     --esModuleInterop --resolveJsonModule --skipLibCheck
 //   cp -r data .check/data && node .check/scripts/check_contracts.js [careers] [years]
+import './harness';
 import { teamsData, playersData, getTeamSalary, SALARY_CAP, releaseWithDeadMoney } from '../constants';
 import type { Team, Player, SeasonState } from '../types';
 import { simulationEngine } from '../services/simulationService';
@@ -236,8 +237,12 @@ rows.forEach((r, y) => {
   // players include stars still on rookie deals (Wembanyama, Duren, Holmgren
   // at 4-9% of the cap), so the first years read ~0.8 and the ratio climbs as
   // those deals run out and get repriced. The floor allows for that; the
-  // ceiling still catches a market that overpays.
-  const floor = y < 3 ? 0.72 : 0.8;
+  // ceiling still catches a market that overpays. The repricing wave peaks in
+  // years 3-4 (51 and 64 expiring 80+ deals, measured 2026-10-26), where the
+  // ratio dips to 0.77-0.81 before climbing to ~0.9; the old cut at year 3 put
+  // the strict floor right in the trough, so the check passed or failed by
+  // 0.01 depending on the draw.
+  const floor = y < 4 ? 0.72 : 0.8;
   check('salario acompanha o valor (80+)', a('ratioGood') >= floor && a('ratioGood') <= 1.15, `ano ${y + 1}: ${a('ratioGood').toFixed(2)}`);
 });
 // The league must not age itself out. Before retirement and the recalibrated

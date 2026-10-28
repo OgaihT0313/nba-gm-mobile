@@ -10,6 +10,7 @@
 // reports the numbers the calibration is read off.
 //
 // Run: bash scratchpad/run.sh backtest_season [runs]
+import './harness';
 import { teamsData, playersData } from '../constants';
 import type { Team, Player, SeasonState } from '../types';
 import { simulationEngine, getRotationWeights } from '../services/simulationService';

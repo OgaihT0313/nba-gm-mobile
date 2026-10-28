@@ -12,6 +12,7 @@
 // matter" has a number next to it.
 //
 // Run: bash scratchpad/run.sh check_coaches [seasonsPerArm]
+import './harness';
 import { teamsData, playersData } from '../constants';
 import type { Team, Player, SeasonState, Coach } from '../types';
 import { simulationEngine } from '../services/simulationService';

@@ -12,6 +12,7 @@
 //
 // Not wired into the app bundle. To run (see check_decisions.ts for tsc):
 //   node <outDir>/scripts/check_milestones.js [seasons]
+import './harness';
 import { teamsData, playersData } from '../constants';
 import type { Team, Player, SeasonState } from '../types';
 import { simulationEngine } from '../services/simulationService';

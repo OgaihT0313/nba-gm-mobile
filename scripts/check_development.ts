@@ -1,5 +1,6 @@
 // Training focus and the minutes promise have to turn into numbers the engine
 // reads. Run: npx tsx scripts/check_development.ts
+import './harness';
 import { playersData, teamsData } from '../constants';
 import type { Player, SeasonState, Team } from '../types';
 import { simulationEngine } from '../services/simulationService';
@@ -21,7 +22,10 @@ const withMinutes = (focus?: Player['trainingFocus']) => Object.fromEntries(ids.
   ...base[id], trainingFocus: focus, seasonStats: { gp: 70, mpg: 32, ppg: 0, rpg: 0, apg: 0, spg: 0, bpg: 0, tpg: 0 },
 }]));
 
-const run = (focus?: Player['trainingFocus'], pick: (p: Player) => boolean = () => true, n = 30) => {
+// 80 rounds, not 30: the physical-focus effects are small (a few hundredths
+// of OVR a year) and at 30 the checks passed or failed by a hair.
+const ROUNDS = 80;
+const run = (focus?: Player['trainingFocus'], pick: (p: Player) => boolean = () => true, n = ROUNDS) => {
   const off: number[] = [], def: number[] = [], ovr: number[] = [];
   for (let i = 0; i < n; i++) {
     const before = withMinutes(focus);
@@ -36,7 +40,7 @@ const run = (focus?: Player['trainingFocus'], pick: (p: Player) => boolean = () 
   return { off: mean(off), def: mean(def), ovr: mean(ovr) };
 };
 
-console.log('=== Foco de treino (jovens ≤23, 30 rodadas) ===');
+console.log(`=== Foco de treino (jovens ≤23, ${ROUNDS} rodadas) ===`);
 const young = (p: Player) => p.age <= 22;
 const bal = run(undefined, young), sh = run('shooting', young), de = run('defense', young), ph = run('physical', young);
 const f = (r: { off: number; def: number; ovr: number }) => `off ${r.off.toFixed(2)} def ${r.def.toFixed(2)} ovr ${r.ovr.toFixed(2)}`;
@@ -58,7 +62,7 @@ console.log('=== Foco só vale no time do usuário ===');
   const before = withMinutes('shooting');
   const cpuOf = Object.fromEntries(ids.map((id) => [id, 'cpu']));
   const offs: number[] = [], defs: number[] = [];
-  for (let i = 0; i < 30; i++) {
+  for (let i = 0; i < ROUNDS; i++) {
     const { updatedPlayers } = simulationEngine.runPlayerProgression(before, {}, cpuOf, USER);
     ids.filter((id) => young(before[id])).forEach((id) => { offs.push(updatedPlayers[id].off - before[id].off); defs.push(updatedPlayers[id].def - before[id].def); });
   }

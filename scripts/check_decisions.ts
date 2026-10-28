@@ -13,6 +13,7 @@
 //     --outDir .check --module commonjs --target es2020 --moduleResolution node \
 //     --esModuleInterop --resolveJsonModule --skipLibCheck
 //   cp -r data .check/data && node .check/scripts/check_decisions.js [seasons]
+import './harness';
 import { teamsData, playersData } from '../constants';
 import type { Team, Player, SeasonState, Decision } from '../types';
 import { simulationEngine } from '../services/simulationService';
@@ -28,7 +29,9 @@ import { evaluateSeasonOutcome } from '../services/ownerService';
 import { personalityOf } from '../services/personalityService';
 
 declare const process: { argv: string[] };
-const RUNS = Number(process.argv[2] || 12);
+// 36, not 12: the trade request is rare by design (0.2-0.4 a season), and at
+// 12 seasons "it fired at least once" failed ~1 run in 10 on luck alone.
+const RUNS = Number(process.argv[2] || 36);
 
 let failures = 0;
 const check = (label: string, ok: boolean, detail = '') => {

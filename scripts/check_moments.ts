@@ -11,6 +11,7 @@
 //     --outDir .check --module commonjs --target es2020 --moduleResolution node \
 //     --esModuleInterop --resolveJsonModule --skipLibCheck
 //   cp -r data .check/data && node .check/scripts/check_moments.js [games]
+import './harness';
 import { teamsData, playersData } from '../constants';
 import type { Player, Team } from '../types';
 import { buildMoments, resolveMoment, trustFromMoments, momentTotals, chanceOf, stageOf, type Moment } from '../services/career/careerMoments';

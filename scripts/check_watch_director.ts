@@ -10,6 +10,7 @@
 //
 //   npx tsc scripts/check_watch_director.ts --ignoreConfig --ignoreDeprecations 6.0 //     --outDir .check --module commonjs --target es2020 --moduleResolution node //     --esModuleInterop --resolveJsonModule --skipLibCheck
 //   cp -r data .check/data && node .check/scripts/check_watch_director.js
+import './harness';
 import { teamsData, playersData } from '../constants';
 import { buildFive, planQuarter, courtStateAt, quarterSeconds, breakRecovery, rotationAt, advanceClock, SCREEN_SPRINT, type Energy, type FiveOnCourt } from '../services/watchDirector';
 import type { WatchPlay, Player, LiveTactic } from '../types';

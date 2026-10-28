@@ -4,6 +4,7 @@
 // scripts/fixtures/era_records.json (pipeline/export_era_records.py).
 //
 // Run: npx tsx scripts/check_eras.ts [seasonsPerEra] [all]
+import './harness';
 import type { Team, Player, SeasonState } from '../types';
 import { ERAS } from '../data/eras';
 import eraRecords from './fixtures/era_records.json';

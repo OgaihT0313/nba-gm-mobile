@@ -16,6 +16,7 @@
 //   4. Vestiário: the trade-request rule read on all 30 teams, by locker rating.
 //   5. Analista: the league baseline for the report, its accuracy and the
 //      margin a followed right report adds to a quarter.
+import './harness';
 import { teamsData, playersData } from '../constants';
 import type { Team, Player, SeasonState, DraftState } from '../types';
 import { simulationEngine } from '../services/simulationService';

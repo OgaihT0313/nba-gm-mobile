@@ -13,6 +13,7 @@
 // question with the first answer, signs the extension when it comes, takes
 // its agent's pick at the end of a deal -- and retires (fase 4) at 37 or
 // when the body says so at 41.
+import './harness';
 import type { PlayerAttributes } from '../types';
 import { newCareer, simDay, simPlayoffs, runSummer, myTeam, seasonLineFor, seasonLabel } from '../services/career/careerLeague';
 import { answerPress, acceptExtension, declineExtension, extensionOffer, EXTENSION_GAME, contractEnding, freeAgencyOffers, agentPick, signOffer, relationsOf } from '../services/career/careerLife';
