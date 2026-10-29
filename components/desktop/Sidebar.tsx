@@ -21,6 +21,7 @@ const PRIMARY: Item[] = [
 ];
 
 const MORE: Item[] = [
+  { id: 'search', label: 'Buscar jogador' },
   { id: 'home', label: 'Início' },
   { id: 'teams', label: 'Franquias' },
   { id: 'scout', label: 'Scout' },
@@ -53,7 +54,7 @@ const Sidebar: React.FC<SidebarProps> = ({ view, onNavigate, hasSeason, faOpen, 
   const isDisabled = (id: string) => {
     if (id === 'free-agency') return !faOpen;
     if (id === 'draft') return !draftOpen;
-    return id !== 'home' && id !== 'teams' && id !== 'scout' && !hasSeason;
+    return id !== 'home' && id !== 'teams' && id !== 'scout' && id !== 'search' && !hasSeason;
   };
 
   const phaseItem = draftOpen

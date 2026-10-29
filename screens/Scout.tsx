@@ -24,6 +24,8 @@ interface ScoutProps {
   players: { [key: string]: Player };
   teams: Team[];
   userTeamId: string;
+  /** Opened as "Buscar jogador": the cursor starts in the search box. */
+  autoFocusSearch?: boolean;
 }
 
 const POSITION_FILTERS = [
@@ -56,7 +58,7 @@ const DIACRITICS = /[̀-ͯ]/g;
 // diacritics the user won't type on a phone keyboard.
 const normalize = (s: string) => s.normalize('NFD').replace(DIACRITICS, '').toLowerCase();
 
-const Scout: React.FC<ScoutProps> = ({ players, teams, userTeamId }) => {
+const Scout: React.FC<ScoutProps> = ({ players, teams, userTeamId, autoFocusSearch }) => {
   const insets = useSafeAreaInsets();
   const { accent } = useTheme();
   const desktop = useDesktop();
@@ -79,8 +81,9 @@ const Scout: React.FC<ScoutProps> = ({ players, teams, userTeamId }) => {
   // from the headline count.
   const visible = (p: Player) => !p.prospect;
 
+  // Active players only: the retired are kept in `players` for the records.
   const activeCount = useMemo(
-    () => (Object.values(players) as Player[]).filter(visible).length,
+    () => (Object.values(players) as Player[]).filter((p) => visible(p) && !p.retired).length,
     [players],
   );
 
@@ -88,6 +91,9 @@ const Scout: React.FC<ScoutProps> = ({ players, teams, userTeamId }) => {
     const q = normalize(query.trim());
     return (Object.entries(players) as [string, Player][])
       .filter(([, p]) => visible(p))
+      // A retired player shows up only when searched by name -- this is the
+      // league's scouting list, and he used to sit in it as a free agent.
+      .filter(([, p]) => !p.retired || q !== '')
       .filter(([, p]) => q === '' || normalize(p.name).includes(q))
       .filter(([, p]) => posFilter === 'TODOS' || getPlayerPositions(p).includes(posFilter))
       .filter(([, p]) => matchesAge(p.age, ageFilter))
@@ -105,6 +111,7 @@ const Scout: React.FC<ScoutProps> = ({ players, teams, userTeamId }) => {
         placeholderTextColor={COLORS.faint}
         autoCorrect={false}
         autoCapitalize="none"
+        autoFocus={autoFocusSearch}
         style={{ flex: 1, fontFamily: FONT.body500, fontSize: 15, color: COLORS.text, paddingVertical: 10, outlineStyle: 'none' } as object}
       />
       {query.length > 0 ? (
@@ -154,8 +161,8 @@ const Scout: React.FC<ScoutProps> = ({ players, teams, userTeamId }) => {
                     <PlayerFace player={item} teamId={item.team?.id} size={36} />
                     <Name size={16} style={{ flex: 1 }}>{item.name}</Name>
                   </View>
-                  <Text style={{ width: 70, fontFamily: FONT.cond700, fontSize: 14, color: item.team ? COLORS.textSoft : COLORS.good }}>
-                    {item.team ? tricodeOf(item.team.id) : 'LIVRE'}
+                  <Text style={{ width: 70, fontFamily: FONT.cond700, fontSize: 14, color: item.team ? COLORS.textSoft : item.retired ? COLORS.dim : COLORS.good }}>
+                    {item.team ? tricodeOf(item.team.id) : item.retired ? 'APOS.' : 'LIVRE'}
                   </Text>
                   <Text numberOfLines={1} style={{ width: 70, fontFamily: FONT.body500, fontSize: 13, color: COLORS.muted }}>{formatPositions(item)}</Text>
                   <Text style={{ width: 56, fontFamily: FONT.body500, fontSize: 13, color: COLORS.muted }}>{item.age}</Text>
@@ -222,7 +229,9 @@ const Scout: React.FC<ScoutProps> = ({ players, teams, userTeamId }) => {
                 {formatPositions(item)} ·{' '}
                 {item.team
                   ? <Text style={{ fontFamily: FONT.cond700, color: COLORS.textSoft }}>{tricodeOf(item.team.id)}</Text>
-                  : <Text style={{ fontFamily: FONT.cond700, color: COLORS.good }}>LIVRE</Text>}
+                  : item.retired
+                    ? <Text style={{ fontFamily: FONT.cond700, color: COLORS.dim }}>APOSENTADO</Text>
+                    : <Text style={{ fontFamily: FONT.cond700, color: COLORS.good }}>LIVRE</Text>}
               </Text>
             </View>
             <Text style={{ fontFamily: FONT.cond600, fontSize: 12.5, color: COLORS.muted }}>{item.age}a · {money(item.salary)}</Text>

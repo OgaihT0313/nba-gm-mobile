@@ -24,7 +24,7 @@ conferida com busca no código, não tela a tela.
 | Q2 | Vários espaços de save (3) — **FEITO** (2026-10-25; conferido no navegador, falta o aparelho) | N | M | Hoje é 1 espaço (item 1 abaixo). Com GM, Minha Carreira e 41 eras, começar outra carreira apaga a atual |
 | Q3 | Painel "precisa da sua atenção" na tela da temporada — **FEITO** (2026-10-25; conferido no navegador, falta o aparelho) | N | P | Junta o que pede ação (contratos vencendo, teto salarial, jogador insatisfeito, proposta aberta, staff vago), com um toque para a tela certa |
 | Q4 | Lista de jogadores negociáveis e "o que eles aceitariam" — **FEITO** (2026-10-28; conferido no navegador, falta o aparelho) | N | M | A troca é tentativa e erro. Marcar quem está disponível atrai propostas, e o botão monta uma oferta que o outro time aceita por um alvo |
-| Q5 | Busca global de jogador | N | P | Hoje só o Scout tem campo de busca. Nas eras, achar um jogador é rolar 30 elencos |
+| Q5 | Busca global de jogador — **FEITO** (2026-10-28; conferido no navegador, falta o aparelho) | N | P | O Scout já buscava a liga toda por nome; faltava chegar nele de qualquer tela |
 | Q6 | Lista de observação | N | P | Marcar alvos de outros times ou do draft e ser avisado quando ficarem disponíveis, se machucarem ou subirem de OVR |
 | Q7 | Comparar dois jogadores lado a lado | N | P | Existe comparação de elencos, não de jogadores. Ajuda na troca e na agência livre |
 | Q8 | "Melhor cinco" com um toque | L | P | Conferir antes o que o `RotationPanel` já faz sozinho |
@@ -131,6 +131,16 @@ painel na tela da temporada, no lugar das etiquetas soltas de "ofertas" e
   84-88, de 40/40 para 2/40; 1 por 1 parecido segue igual (34 → 33/40); 2 bons por
   uma estrela segue aceito (40/40, razão 2,06 → 1,24). As propostas que a CPU monta
   sozinha não mudam.
+
+
+### Q5. Busca global de jogador (N) — FEITO (2026-10-28)
+
+- O Scout já buscava a liga inteira por nome (sem acento, com filtros); o que faltava
+  era o acesso. "Buscar jogador" é o primeiro item do menu Mais (e da barra lateral no
+  PC) e abre o Scout com o cursor no campo (`view 'search'`, `autoFocusSearch`).
+- **Bug corrigido:** aposentados apareciam no Scout como "LIVRE", em verde, como se
+  desse para contratar. Agora só aparecem quando buscados pelo nome, marcados como
+  "APOSENTADO"; a contagem do topo conta só quem está em atividade.
 
 ---
 

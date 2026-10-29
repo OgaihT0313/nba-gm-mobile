@@ -67,7 +67,7 @@ import { eraEndYearOf, cupInYear } from './src/eraYear';
 type AppView =
   | 'era-select' | 'team-select' | 'team-confirm' | 'home' | 'teams' | 'team-detail' | 'scout' | 'my-team' | 'draft' | 'free-agency'
   | 'simulation' | 'standings' | 'leaders' | 'trade' | 'awards' | 'allstar' | 'playoffs' | 'watch-game' | 'legacy'
-  | 'career';
+  | 'career' | 'search';
 
 const SIM_SAVE_INTERVAL = 5000;
 
@@ -1020,7 +1020,8 @@ export default function App() {
         />
       );
     }
-    if (view === 'scout') return <Scout players={season.players} teams={season.teams} userTeamId={season.userTeamId} />;
+    // "Buscar jogador" (menu Mais) is the Scout with the cursor in the search box.
+    if (view === 'scout' || view === 'search') return <Scout players={season.players} teams={season.teams} userTeamId={season.userTeamId} autoFocusSearch={view === 'search'} />;
     if (view === 'standings') return <StandingsScreen season={season} />;
     if (view === 'leaders') return <LeagueLeaders players={season.players} teams={season.teams} userTeamId={season.userTeamId} />;
     if (view === 'allstar') return <AllStarWeekend userTeamId={season.userTeamId} allStar={season.allStar} players={season.players} teams={season.teams} allStarGame={ALL_STAR_GAME} />;

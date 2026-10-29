@@ -43,6 +43,8 @@ const PRIMARY_ITEMS: NavItem[] = [
 ];
 
 const MORE_ITEMS: NavItem[] = [
+  // The whole league by name, from anywhere: the Scout with the cursor in the box.
+  { id: 'search', label: 'Buscar jogador', icon: 'scout' },
   { id: 'home', label: 'Início', icon: 'home' },
   { id: 'teams', label: 'Franquias', icon: 'teams' },
   { id: 'scout', label: 'Scout', icon: 'scout' },
@@ -67,7 +69,7 @@ const BottomNav: React.FC<BottomNavProps> = ({ view, onNavigate, hasSeason, faOp
   const isDisabled = (id: string) => {
     if (id === 'free-agency') return !faOpen;
     if (id === 'draft') return !draftOpen;
-    return id !== 'home' && id !== 'teams' && id !== 'scout' && !hasSeason;
+    return id !== 'home' && id !== 'teams' && id !== 'scout' && id !== 'search' && !hasSeason;
   };
 
   const navigate = (id: string) => {
