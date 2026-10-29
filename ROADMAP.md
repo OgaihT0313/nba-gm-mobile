@@ -26,7 +26,7 @@ conferida com busca no código, não tela a tela.
 | Q4 | Lista de jogadores negociáveis e "o que eles aceitariam" — **FEITO** (2026-10-28; conferido no navegador, falta o aparelho) | N | M | A troca é tentativa e erro. Marcar quem está disponível atrai propostas, e o botão monta uma oferta que o outro time aceita por um alvo |
 | Q5 | Busca global de jogador — **FEITO** (2026-10-28; conferido no navegador, falta o aparelho) | N | P | O Scout já buscava a liga toda por nome; faltava chegar nele de qualquer tela |
 | Q6 | Lista de observação — **FEITO** (2026-10-28; conferido no navegador, falta o aparelho) | N | P | Marcar alvos de outros times ou do mercado e ser avisado quando mudarem de time, ficarem livres, se machucarem ou mudarem de OVR |
-| Q7 | Comparar dois jogadores lado a lado | N | P | Existe comparação de elencos, não de jogadores. Ajuda na troca e na agência livre |
+| Q7 | Comparar dois jogadores lado a lado — **FEITO** (2026-10-28; conferido no navegador, falta o aparelho) | N | P | Existe comparação de elencos, não de jogadores. Ajuda na troca e na agência livre |
 | Q8 | "Melhor cinco" com um toque | L | P | Conferir antes o que o `RotationPanel` já faz sozinho |
 | Q9 | Desfazer a última ação de elenco no mesmo dia | N | M | Dispensa ou troca por toque errado no celular não tem volta |
 | Q10 | Dicas na primeira vez de cada tela | N | P | Não há tutorial. Quem cai numa era sem conhecer a época fica sem rumo |
@@ -157,6 +157,20 @@ painel na tela da temporada, no lugar das etiquetas soltas de "ofertas" e
 - **Medido** com 24 observados numa temporada mais a offseason: 16 lesões e 1 troca
   na temporada; 6 aposentadorias, 4 mudanças de OVR, 2 sem time e 1 troca na
   offseason; 1 contratação na agência livre.
+
+### Q7. Comparar dois jogadores (N) — FEITO (2026-10-28)
+
+- **Abrir:** "Comparar" na ficha de qualquer jogador (menos prospecto do draft). A
+  ficha dá lugar a `components/PlayerCompare` e volta quando ela fecha: um modal por
+  vez, nunca um sobre o outro. A liga chega pela `components/LeagueContext`.
+- **Escolher o segundo:** sem digitar, os 10 mais próximos em OVR na mesma posição;
+  digitando, a liga toda pelo nome (sem acento), aposentados no fim. "Trocar" volta
+  à escolha.
+- **Tabela:** geral (OVR, potencial, ataque, defesa, idade), os 7 atributos, a
+  temporada (se algum dos dois jogou) e o contrato. O número melhor fica em verde;
+  idade, jogos e contrato não têm "melhor".
+- A folha tem altura fixa: com altura pelo conteúdo, ela pulava a cada letra digitada
+  e o toque caía no jogador errado.
 
 ---
 

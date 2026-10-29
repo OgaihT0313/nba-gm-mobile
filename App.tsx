@@ -63,6 +63,7 @@ import Placeholder from './screens/Placeholder';
 import { IconName } from './components/Icon';
 import { setEraYear } from './src/eraIdentity';
 import { WatchListContext, type WatchListValue } from './components/WatchListContext';
+import { LeagueContext, type LeagueValue } from './components/LeagueContext';
 import { eraEndYearOf, cupInYear } from './src/eraYear';
 
 type AppView =
@@ -655,6 +656,14 @@ export default function App() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [season?.watchList, season?.teams, season?.userTeamId]);
 
+  // The league for "Comparar" in the player sheet.
+  const leagueValue = useMemo<LeagueValue | null>(() => {
+    if (!season) return null;
+    const teamByPlayer = new Map<string, string>();
+    season.teams.forEach((t) => t.roster.forEach((id) => teamByPlayer.set(id, t.id)));
+    return { players: season.players, teamOf: (id) => teamByPlayer.get(id) };
+  }, [season?.players, season?.teams]);
+
   // The user's trade block (Team.tradeBlockIds): on and off, one player at a time.
   const handleToggleTradeBlock = (playerId: string) => {
     setSeason((prev) => {
@@ -1102,6 +1111,7 @@ export default function App() {
           re-reads the live palette (src/theme/tokens applyThemeMode). */}
       <ThemeProvider key={paletteMode} teamId={season?.userTeamId ?? (view === 'team-confirm' ? pendingTeamId : null)}>
       <WatchListContext.Provider value={watchListValue}>
+      <LeagueContext.Provider value={leagueValue}>
         {/* Only the bottom edge is inset. The redesign gives every screen a
             full-bleed hero in the team's colors that has to bleed UNDER the
             status bar, so the top inset is applied inside <Screen> (as padding
@@ -1179,6 +1189,7 @@ export default function App() {
             />
           ) : null}
         </SafeAreaView>
+      </LeagueContext.Provider>
       </WatchListContext.Provider>
       </ThemeProvider>
     </SafeAreaProvider>

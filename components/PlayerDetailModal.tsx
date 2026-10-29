@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { View, Text, Pressable, ScrollView, Modal } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -15,6 +15,8 @@ import { PROMISE_MAX_AGE, PROMISE_MPG } from '../services/developmentService';
 import { useDesktop } from './desktop/useDesktop';
 import PlayerPhoto from './ui/PlayerPhoto';
 import { useWatchList } from './WatchListContext';
+import { useLeague } from './LeagueContext';
+import PlayerCompare from './PlayerCompare';
 
 // Design 5c ("Transmissão"). A bottom sheet: the header is a flat block in the
 // player's team color (photo, "POS · # · AGE", name, OVR at 56px), then the
@@ -88,7 +90,14 @@ const PlayerDetailModal: React.FC<{
       ? { label: 'Deixar de observar', onPress: () => watchList.toggle(player.id), sub: 'Sai da sua lista de observação.' }
       : { label: 'Observar', onPress: () => watchList.toggle(player.id), sub: 'Avisa quando ele trocar de time, ficar livre, se machucar ou mudar de OVR.' }
     : null;
-  const actions = [...(ownActions ?? []), ...(watchAction ? [watchAction] : [])];
+  // "Comparar": swaps this sheet for PlayerCompare (one modal at a time, never
+  // stacked) and comes back here on close.
+  const league = useLeague();
+  const [comparing, setComparing] = useState(false);
+  const compareAction: PlayerAction | null = league && !player.prospect
+    ? { label: 'Comparar', onPress: () => setComparing(true), sub: 'Lado a lado com outro jogador da liga.' }
+    : null;
+  const actions = [...(ownActions ?? []), ...(compareAction ? [compareAction] : []), ...(watchAction ? [watchAction] : [])];
   const attrs = getPlayerAttributes(player);
   const accent = teamId ? getTeamAccent(teamId) : { primary: COLORS.lineStrong, secondary: COLORS.ghostBorder };
   const ink = onAccent(accent.primary);
@@ -338,6 +347,8 @@ const PlayerDetailModal: React.FC<{
       ))}
     </View>
   ) : null;
+
+  if (comparing) return <PlayerCompare player={player} onClose={() => setComparing(false)} />;
 
   if (desktop) {
     return (
