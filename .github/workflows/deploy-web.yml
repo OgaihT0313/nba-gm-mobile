@@ -8,7 +8,7 @@ name: Deploy web
 
 on:
   push:
-    branches: [claude/game-web-pc-port-mtu0i1, redesign-console-mygm]
+    branches: [main]
   workflow_dispatch:
 
 permissions:
