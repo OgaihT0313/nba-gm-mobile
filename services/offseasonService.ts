@@ -24,6 +24,7 @@ import { ageCoachesAndRetire, buildDevelopmentBonusMap } from './coachService';
 import { retirePlayers } from './retirementService';
 import { rivalriesAfterSeason } from './rivalryService';
 import { settleMinutesPromise, applyPromiseMorale, PROMISE_DEV_BONUS } from './developmentService';
+import { withWatchNews } from './watchListService';
 
 // The season screen's feed shows only the user's own team, so before each
 // category is cut to its share of the buffer, his events move to the front --
@@ -47,7 +48,7 @@ export interface OffseasonOptions {
   keepIds?: string[];
 }
 
-export const startOffseason = (prev: SeasonState, opts: OffseasonOptions = {}): SeasonState => {
+const startOffseasonCore = (prev: SeasonState, opts: OffseasonOptions = {}): SeasonState => {
   // The draft board is built from the just-finished records (lottery for the
   // top four), so it must read prev.teams BEFORE wins reset. It also settles
   // who OWNS each slot and consumes the picks spent on this draft, so its
@@ -294,7 +295,7 @@ export const startOffseason = (prev: SeasonState, opts: OffseasonOptions = {}): 
 
 // Draft over -> CPUs fill holes via free agency (now that rookies landed), then
 // the market opens for the user.
-export const finishDraft = (prev: SeasonState): SeasonState => {
+const finishDraftCore = (prev: SeasonState): SeasonState => {
   // Whoever nobody picked enters the market as an undrafted free agent. Left
   // flagged as a prospect he was invisible for good -- off the market
   // (getFreeAgents), never retired -- and every era with fewer than 30 teams
@@ -328,7 +329,7 @@ export const finishDraft = (prev: SeasonState): SeasonState => {
 
 // Opening night. Returns the season unchanged while the user roster is below
 // the legal minimum.
-export const startSeason = (prev: SeasonState): SeasonState => {
+const startSeasonCore = (prev: SeasonState): SeasonState => {
   const uTeam0 = prev.teams.find((t) => t.id === prev.userTeamId);
   if (uTeam0 && (uTeam0.roster.length < MIN_ROSTER_SIZE || uTeam0.roster.length > MAX_ROSTER_SIZE)) return prev;
   // The user passed on his own free agents: the Bird right lapses and the
@@ -384,3 +385,11 @@ export const startSeason = (prev: SeasonState): SeasonState => {
     staffMarket: undefined,
   };
 };
+
+// Each step reports what it did to the players on the watch list
+// (watchListService): progression, real moves, contracts and retirements in
+// the first, the CPU's signings in the second, the last call in the third.
+export const startOffseason = (prev: SeasonState, opts: OffseasonOptions = {}): SeasonState =>
+  withWatchNews(prev, startOffseasonCore(prev, opts));
+export const finishDraft = (prev: SeasonState): SeasonState => withWatchNews(prev, finishDraftCore(prev));
+export const startSeason = (prev: SeasonState): SeasonState => withWatchNews(prev, startSeasonCore(prev));

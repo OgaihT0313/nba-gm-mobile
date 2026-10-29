@@ -14,6 +14,7 @@ import { StatStrip, Tag, SectionLabel, BodyText, FilterRow, GhostButton } from '
 import { PROMISE_MAX_AGE, PROMISE_MPG } from '../services/developmentService';
 import { useDesktop } from './desktop/useDesktop';
 import PlayerPhoto from './ui/PlayerPhoto';
+import { useWatchList } from './WatchListContext';
 
 // Design 5c ("Transmissão"). A bottom sheet: the header is a flat block in the
 // player's team color (photo, "POS · # · AGE", name, OVR at 56px), then the
@@ -77,8 +78,17 @@ const PlayerDetailModal: React.FC<{
   status?: string;
   actions?: PlayerAction[];
   development?: PlayerDevelopment;
-}> = ({ player, onClose, teamId, status, actions, development }) => {
+}> = ({ player, onClose, teamId, status, actions: ownActions, development }) => {
   const insets = useSafeAreaInsets();
+  // "Observar" on anyone who is not the user's: his moves, injuries, free
+  // agency and OVR swings then reach the feed (watchListService).
+  const watchList = useWatchList();
+  const watchAction: PlayerAction | null = watchList && !watchList.own.has(player.id) && !player.prospect
+    ? watchList.watched.has(player.id)
+      ? { label: 'Deixar de observar', onPress: () => watchList.toggle(player.id), sub: 'Sai da sua lista de observação.' }
+      : { label: 'Observar', onPress: () => watchList.toggle(player.id), sub: 'Avisa quando ele trocar de time, ficar livre, se machucar ou mudar de OVR.' }
+    : null;
+  const actions = [...(ownActions ?? []), ...(watchAction ? [watchAction] : [])];
   const attrs = getPlayerAttributes(player);
   const accent = teamId ? getTeamAccent(teamId) : { primary: COLORS.lineStrong, secondary: COLORS.ghostBorder };
   const ink = onAccent(accent.primary);

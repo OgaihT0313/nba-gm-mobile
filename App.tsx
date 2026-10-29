@@ -62,6 +62,7 @@ import FadeInView from './components/FadeInView';
 import Placeholder from './screens/Placeholder';
 import { IconName } from './components/Icon';
 import { setEraYear } from './src/eraIdentity';
+import { WatchListContext, type WatchListValue } from './components/WatchListContext';
 import { eraEndYearOf, cupInYear } from './src/eraYear';
 
 type AppView =
@@ -639,6 +640,21 @@ export default function App() {
     });
   };
 
+  // The watch list (SeasonState.watchList): on and off from any player sheet.
+  const handleToggleWatch = (playerId: string) => {
+    setSeason((prev) => {
+      if (!prev) return prev;
+      const list = prev.watchList ?? [];
+      return { ...prev, watchList: list.includes(playerId) ? list.filter((id) => id !== playerId) : [...list, playerId] };
+    });
+  };
+  const watchListValue = useMemo<WatchListValue | null>(() => {
+    if (!season) return null;
+    const own = season.teams.find((t) => t.id === season.userTeamId)?.roster ?? [];
+    return { watched: new Set(season.watchList ?? []), own: new Set(own), toggle: handleToggleWatch };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [season?.watchList, season?.teams, season?.userTeamId]);
+
   // The user's trade block (Team.tradeBlockIds): on and off, one player at a time.
   const handleToggleTradeBlock = (playerId: string) => {
     setSeason((prev) => {
@@ -963,7 +979,7 @@ export default function App() {
           onGoToPhase={(v) => setView(v)}
           onOpen={(target) => {
             if (target.view === 'my-team') setMyTeamTab(target.tab);
-            setView(target.view);
+            setView(target.view === 'scout' ? 'search' : target.view);
           }}
         />
       );
@@ -1085,6 +1101,7 @@ export default function App() {
       {/* Keyed by the mode: switching it remounts the tree so every screen
           re-reads the live palette (src/theme/tokens applyThemeMode). */}
       <ThemeProvider key={paletteMode} teamId={season?.userTeamId ?? (view === 'team-confirm' ? pendingTeamId : null)}>
+      <WatchListContext.Provider value={watchListValue}>
         {/* Only the bottom edge is inset. The redesign gives every screen a
             full-bleed hero in the team's colors that has to bleed UNDER the
             status bar, so the top inset is applied inside <Screen> (as padding
@@ -1162,6 +1179,7 @@ export default function App() {
             />
           ) : null}
         </SafeAreaView>
+      </WatchListContext.Provider>
       </ThemeProvider>
     </SafeAreaProvider>
   );

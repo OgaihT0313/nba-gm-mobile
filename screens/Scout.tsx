@@ -13,6 +13,7 @@ import { ScreenTitle, BodyText, Name, PlayerFace } from '../components/ui/kit';
 import PlayerDetailModal from '../components/PlayerDetailModal';
 import ScoutAdvisor from '../components/ScoutAdvisor';
 import { useDesktop } from '../components/desktop/useDesktop';
+import { useWatchList } from '../components/WatchListContext';
 import { DTitle, DTh, Hover, PAGE_X, PAGE_Y } from '../components/desktop/kit';
 
 // Kept on FlatList rather than moved to <Screen>: this list is every player in
@@ -64,6 +65,11 @@ const Scout: React.FC<ScoutProps> = ({ players, teams, userTeamId, autoFocusSear
   const desktop = useDesktop();
   const [query, setQuery] = useState('');
   const [posFilter, setPosFilter] = useState('TODOS');
+  // "Observados": only the watch list (which may hold a retired name too).
+  const [listFilter, setListFilter] = useState('TODOS');
+  const watchList = useWatchList();
+  const watchedCount = watchList?.watched.size ?? 0;
+  const LIST_FILTERS = [{ id: 'TODOS', label: 'Todos' }, { id: 'OBS', label: `Observados (${watchedCount})` }];
   const [ageFilter, setAgeFilter] = useState('TODOS');
   const [ovrFilter, setOvrFilter] = useState('TODOS');
   const [selected, setSelected] = useState<Player | null>(null);
@@ -93,14 +99,15 @@ const Scout: React.FC<ScoutProps> = ({ players, teams, userTeamId, autoFocusSear
       .filter(([, p]) => visible(p))
       // A retired player shows up only when searched by name -- this is the
       // league's scouting list, and he used to sit in it as a free agent.
-      .filter(([, p]) => !p.retired || q !== '')
+      .filter(([, p]) => !p.retired || q !== '' || listFilter === 'OBS')
+      .filter(([, p]) => listFilter !== 'OBS' || !!watchList?.watched.has(p.id))
       .filter(([, p]) => q === '' || normalize(p.name).includes(q))
       .filter(([, p]) => posFilter === 'TODOS' || getPlayerPositions(p).includes(posFilter))
       .filter(([, p]) => matchesAge(p.age, ageFilter))
       .filter(([, p]) => matchesOvr(p.ovr, ovrFilter))
       .sort(([, a], [, b]) => b.ovr - a.ovr)
       .map(([id, p]) => ({ ...p, id, team: teamByPlayerId.get(id) }));
-  }, [players, query, posFilter, ageFilter, ovrFilter, teamByPlayerId]);
+  }, [players, query, posFilter, ageFilter, ovrFilter, teamByPlayerId, listFilter, watchList]);
 
   const searchBox = (
     <View className="flex-row items-center" style={{ height: 46, borderRadius: 12, backgroundColor: COLORS.surface, paddingHorizontal: 14, gap: 8 }}>
@@ -134,6 +141,7 @@ const Scout: React.FC<ScoutProps> = ({ players, teams, userTeamId, autoFocusSear
           <ScrollView style={{ width: 340, flexGrow: 0, flexShrink: 0 }} contentContainerStyle={{ gap: 14, paddingBottom: 28 }}>
             {searchBox}
             <View style={{ gap: 7 }}>
+              <FilterLine label="Lista" items={LIST_FILTERS} value={listFilter} onChange={setListFilter} />
               <FilterLine label="Posição" items={POSITION_FILTERS} value={posFilter} onChange={setPosFilter} />
               <FilterLine label="Idade" items={AGE_FILTERS} value={ageFilter} onChange={setAgeFilter} />
               <FilterLine label="Overall" items={OVR_FILTERS} value={ovrFilter} onChange={setOvrFilter} />
@@ -190,6 +198,7 @@ const Scout: React.FC<ScoutProps> = ({ players, teams, userTeamId, autoFocusSear
         {searchBox}
 
         <View style={{ gap: 7 }}>
+          <FilterLine label="Lista" items={LIST_FILTERS} value={listFilter} onChange={setListFilter} />
           <FilterLine label="Posição" items={POSITION_FILTERS} value={posFilter} onChange={setPosFilter} />
           <FilterLine label="Idade" items={AGE_FILTERS} value={ageFilter} onChange={setAgeFilter} />
           <FilterLine label="Overall" items={OVR_FILTERS} value={ovrFilter} onChange={setOvrFilter} />

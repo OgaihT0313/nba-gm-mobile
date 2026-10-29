@@ -540,6 +540,9 @@ export interface SeasonState {
   // Jerseys the user's franchise has retired, a decision taken on the Legado
   // screen, in the order they went up to the rafters.
   retiredJerseys?: { playerId: string; season: number }[];
+  // Players the GM is keeping an eye on (ROADMAP Q6): their moves, injuries,
+  // free agency and OVR swings reach his feed (services/watchListService).
+  watchList?: string[];
   // Minutes promised to one young player for the season `season` (number =
   // awardHistory.length + 1 of the season it covers). Settled by
   // startOffseason: 24+ mpg keeps it. One a season, like the press promise.

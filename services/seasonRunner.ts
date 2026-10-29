@@ -17,6 +17,7 @@ import { projectConfidence, confidenceZone, shouldFireMidSeason } from './ownerS
 import { generateDecisions } from './decisionService';
 import { notePressHeld } from './pressService';
 import { seasonDays } from './scheduleService';
+import { watchNews } from './watchListService';
 import { trackMoves, applyRevengeNights, markRevengeFaced, settleUserGame, isRival } from './rivalryService';
 import { milestonesCrossed, MILESTONE_MORALE } from './milestoneService';
 
@@ -332,6 +333,14 @@ export function simulateOneDay(season: SeasonState, pinnedResult?: PinnedGameRes
                 tradeRequestedIds: [...(t.tradeRequestedIds ?? []), ...asked],
             });
         }
+    }
+
+    // The watch list: anything that happened tonight to a player the GM is
+    // keeping an eye on reaches his feed and his screen.
+    const watched = watchNews(season, nextSeason);
+    if (watched.length) {
+        nextSeason.events = [...watched, ...nextSeason.events].slice(0, 50);
+        watched.forEach(e => notify(e.message, 'info'));
     }
 
     return { season: nextSeason, effects, fired: firedThisTick };

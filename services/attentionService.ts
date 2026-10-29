@@ -9,9 +9,12 @@ import { MIN_ROSTER_SIZE, MAX_ROSTER_SIZE, TRADE_DEADLINE_GAME, OFFER_TTL } from
 import { TRADE_REQUEST_MORALE } from './simulationService';
 import { STAFF_ROLES, ROLE_LABEL } from './staffService';
 import { luxuryTaxConfidenceHit } from './ownerService';
+import { watchedFreeAgents } from './watchListService';
 
 export type AttentionTarget =
   | { view: 'trade' }
+  | { view: 'free-agency' }
+  | { view: 'scout' }
   | { view: 'my-team'; tab: 'roster' | 'rotation' | 'coach' };
 
 export interface AttentionItem {
@@ -158,6 +161,21 @@ export function attentionItems(season: SeasonState): AttentionItem[] {
         ? 'Um interino rende menos: contrate alguém para o cargo.'
         : `${interim.map((r) => ROLE_LABEL[r].toLowerCase()).join(', ')}: contrate alguém para os cargos.`,
       target: { view: 'my-team', tab: 'coach' },
+    });
+  }
+
+  // Players on the watch list who are free right now. Signable in free agency;
+  // in season there is no market screen, so the item leads to the list.
+  const freeWatched = watchedFreeAgents(season);
+  if (freeWatched.length) {
+    items.push({
+      id: 'watched-free',
+      tone: 'info',
+      title: freeWatched.length === 1 ? `Observado sem time: ${surname(freeWatched[0].name)}` : `${freeWatched.length} observados sem time`,
+      detail: season.status === 'free_agency'
+        ? `${names(freeWatched.map((p) => surname(p.name)))}: estão no mercado agora.`
+        : `${names(freeWatched.map((p) => surname(p.name)))}: ninguém os contratou.`,
+      target: season.status === 'free_agency' ? { view: 'free-agency' } : { view: 'scout' },
     });
   }
 

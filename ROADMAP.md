@@ -25,7 +25,7 @@ conferida com busca no código, não tela a tela.
 | Q3 | Painel "precisa da sua atenção" na tela da temporada — **FEITO** (2026-10-25; conferido no navegador, falta o aparelho) | N | P | Junta o que pede ação (contratos vencendo, teto salarial, jogador insatisfeito, proposta aberta, staff vago), com um toque para a tela certa |
 | Q4 | Lista de jogadores negociáveis e "o que eles aceitariam" — **FEITO** (2026-10-28; conferido no navegador, falta o aparelho) | N | M | A troca é tentativa e erro. Marcar quem está disponível atrai propostas, e o botão monta uma oferta que o outro time aceita por um alvo |
 | Q5 | Busca global de jogador — **FEITO** (2026-10-28; conferido no navegador, falta o aparelho) | N | P | O Scout já buscava a liga toda por nome; faltava chegar nele de qualquer tela |
-| Q6 | Lista de observação | N | P | Marcar alvos de outros times ou do draft e ser avisado quando ficarem disponíveis, se machucarem ou subirem de OVR |
+| Q6 | Lista de observação — **FEITO** (2026-10-28; conferido no navegador, falta o aparelho) | N | P | Marcar alvos de outros times ou do mercado e ser avisado quando mudarem de time, ficarem livres, se machucarem ou mudarem de OVR |
 | Q7 | Comparar dois jogadores lado a lado | N | P | Existe comparação de elencos, não de jogadores. Ajuda na troca e na agência livre |
 | Q8 | "Melhor cinco" com um toque | L | P | Conferir antes o que o `RotationPanel` já faz sozinho |
 | Q9 | Desfazer a última ação de elenco no mesmo dia | N | M | Dispensa ou troca por toque errado no celular não tem volta |
@@ -141,6 +141,22 @@ painel na tela da temporada, no lugar das etiquetas soltas de "ofertas" e
 - **Bug corrigido:** aposentados apareciam no Scout como "LIVRE", em verde, como se
   desse para contratar. Agora só aparecem quando buscados pelo nome, marcados como
   "APOSENTADO"; a contagem do topo conta só quem está em atividade.
+
+
+### Q6. Lista de observação (N) — FEITO (2026-10-28)
+
+- **Marcar:** "Observar" na ficha de qualquer jogador que não seja do seu time
+  (`SeasonState.watchList`, `components/WatchListContext`, para a ficha não depender
+  da tela que a abriu). Prospecto do draft não pode, por causa da névoa.
+- **Avisos** (`services/watchListService.watchNews`): troca de time, ficar sem time,
+  fechar com um time, lesão de 6+ jogos, aposentadoria e OVR mudando 2+. Saem no
+  feed do seu time e, durante a temporada, também na tela. O dia a dia passa por
+  `seasonRunner`; as três etapas da offseason, por `withWatchNews`.
+- **Ver:** filtro "Lista: Observados (N)" no Scout; no painel de pendências, os
+  observados sem time (na agência livre, levam ao mercado).
+- **Medido** com 24 observados numa temporada mais a offseason: 16 lesões e 1 troca
+  na temporada; 6 aposentadorias, 4 mudanças de OVR, 2 sem time e 1 troca na
+  offseason; 1 contratação na agência livre.
 
 ---
 
