@@ -15,6 +15,7 @@ import { simulateOneDay, type PinnedGameResult } from '../seasonRunner';
 import { initialPickAssets, makeScoutReport } from '../draftService';
 import { startOffseason, finishDraft, startSeason } from '../offseasonService';
 import { initCoaches } from '../coachService';
+import { initStaff } from '../staffService';
 import { MAX_ROSTER_SIZE } from '../tradeService';
 import { ERAS, eraById } from '../../data/eras';
 import { cupInYear } from '../../src/eraYear';
@@ -46,7 +47,10 @@ export const newLeague = (eraId?: string): SeasonState => {
     })),
     1,
   );
-  const { coaches, teams: withCoaches } = initCoaches(teams);
+  // Every team has its staff, as in the GM (PLANO-STAFF fase 3): your team's
+  // preparador and vestiário weigh on you, and the CPU runs them all.
+  const { coaches, teams: coached } = initCoaches(teams);
+  const withCoaches = initStaff(coached);
   return {
     status: 'active',
     playoffStage: 'none',

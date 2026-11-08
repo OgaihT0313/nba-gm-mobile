@@ -7,7 +7,7 @@ import type { SeasonState } from '../types';
 import { LUXURY_TAX, getTeamSalary } from '../constants';
 import { MIN_ROSTER_SIZE, MAX_ROSTER_SIZE, TRADE_DEADLINE_GAME, OFFER_TTL } from './tradeService';
 import { TRADE_REQUEST_MORALE } from './simulationService';
-import { STAFF_ROLES, ROLE_LABEL } from './staffService';
+import { STAFF_ROLES, ROLE_LABEL, poachChance } from './staffService';
 import { luxuryTaxConfidenceHit } from './ownerService';
 import { watchedFreeAgents } from './watchListService';
 
@@ -160,6 +160,21 @@ export function attentionItems(season: SeasonState): AttentionItem[] {
       detail: interim.length === 1
         ? 'Um interino rende menos: contrate alguém para o cargo.'
         : `${interim.map((r) => ROLE_LABEL[r].toLowerCase()).join(', ')}: contrate alguém para os cargos.`,
+      target: { view: 'my-team', tab: 'coach' },
+    });
+  }
+
+  // A 4 or a 5 in his last year with no renewal: a CPU team may take him in
+  // the summer (staffService.staffOffseason).
+  const atRisk = STAFF_ROLES
+    .map((r) => team.staff?.[r])
+    .filter((m): m is NonNullable<typeof m> => !!m && !m.interim && !m.extension && m.years === 1 && poachChance(m.rating, 0.5) > 0);
+  if (atRisk.length) {
+    items.push({
+      id: 'staff-expiring',
+      tone: 'info',
+      title: atRisk.length === 1 ? `${ROLE_LABEL[atRisk[0].role]} no último ano` : `${atRisk.length} do staff no último ano`,
+      detail: `${atRisk.map((m) => `${m.name} (nota ${m.rating})`).join(', ')}: sem renovação, um time da CPU pode levar na offseason.`,
       target: { view: 'my-team', tab: 'coach' },
     });
   }

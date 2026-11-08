@@ -17,7 +17,7 @@ import {
     buildDraftBoard, grantNextWindowPick, PICK_WINDOW, UNDRAFTED_SALARY,
     generateDraftClass, generateRealDraftClass, generateUndraftedClass, advanceDraftToUser,
 } from './draftService';
-import { staffOffseason, buildStaffMarket, fillUserVacancies, ratingOf, scoutBudgetFor, ROLE_LABEL } from './staffService';
+import { staffOffseason, buildStaffMarket, fillUserVacancies, ratingOf, traitOf, scoutBudgetFor, ROLE_LABEL } from './staffService';
 import { processOffseasonContracts, runCpuFreeAgency, trimCpuRosters } from './freeAgencyService';
 import { accumulateCareers, championRosterOf } from './careerService';
 import { ageCoachesAndRetire, buildDevelopmentBonusMap } from './coachService';
@@ -98,6 +98,7 @@ const startOffseasonCore = (prev: SeasonState, opts: OffseasonOptions = {}): Sea
   // This class was scouted all year by the scout who worked last season, even
   // if his deal just ran out.
   const scoutRating = ratingOf(prev.teams.find((t) => t.id === prev.userTeamId), 'scout');
+  const scoutTrait = traitOf(prev.teams.find((t) => t.id === prev.userTeamId), 'scout');
 
   // Annotated so the inferred literal type doesn't make wins/losses non-optional.
   const newTeams: Team[] = staffing.teams.map((t) => ({
@@ -219,7 +220,7 @@ const startOffseasonCore = (prev: SeasonState, opts: OffseasonOptions = {}): Sea
   // only rating the draft screen and the CPU are allowed to read.
   const initialDraft: DraftState = {
     order: board.order, picks: [], available: [...ids, ...Object.keys(extra?.players ?? {})], complete: false,
-    reports: { ...reports, ...(extra?.reports ?? {}) }, scoutBudget: scoutBudgetFor(scoutRating), scoutRating,
+    reports: { ...reports, ...(extra?.reports ?? {}) }, scoutBudget: scoutBudgetFor(scoutRating), scoutRating, scoutTrait,
   };
   // The window slides forward: everyone gets their own pick for the draft
   // that just entered the horizon (picks they traded away stay gone).

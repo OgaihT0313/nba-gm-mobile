@@ -3,6 +3,7 @@
 // same way the GM's is -- through a temp file on the phone, never two at once.
 import { readSave, writeSave, removeSave } from '../saveStorage';
 import type { CareerState } from './careerTypes';
+import { ensureStaff } from '../staffService';
 
 const VERSION = 1;
 
@@ -12,7 +13,9 @@ export const loadCareer = (): CareerState | null => {
   try {
     const file = JSON.parse(text) as { version: number; career: CareerState };
     if (file.version !== VERSION || !file.career?.league || !file.career.meId) return null;
-    return file.career;
+    // A league from before the staff came to Minha Carreira (PLANO-STAFF fase 3)
+    // gets an average one, so nothing changes mid-season; the summers vary it.
+    return { ...file.career, league: ensureStaff(file.career.league) };
   } catch (e) {
     console.warn('[carreira] save ilegível', e);
     return null;

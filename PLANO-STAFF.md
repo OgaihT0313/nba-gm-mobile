@@ -3,7 +3,7 @@
 Item 11 do [ROADMAP.md](ROADMAP.md). Pedido pelo usuário em 2026-10-13: quatro cargos,
 orçamento rígido. Aprovado em 2026-10-15.
 
-**Andamento:** fase 1 **feita e medida** (2026-10-15), falta testar no aparelho: `services/staffService.ts`, `components/StaffPanel.tsx` (a aba Técnico de Meu Time virou "Staff"), preparador em `handleRandomEvents` e `recordGameStats`, olheiro em `scoutProspect`, mercado em `startOffseason`, interinos em `startSeason`, saves antigos com staff nota 3 em `loadGame`, `scripts/check_staff.ts` (`node .check/scripts/check_staff.js [temporadas] [seções]`).
+**Andamento:** fases 1, 2 e 3 **feitas e medidas** (2026-10-15, 2026-10-17 e 2026-11-08); fase 1 (2026-10-15), falta testar no aparelho: `services/staffService.ts`, `components/StaffPanel.tsx` (a aba Técnico de Meu Time virou "Staff"), preparador em `handleRandomEvents` e `recordGameStats`, olheiro em `scoutProspect`, mercado em `startOffseason`, interinos em `startSeason`, saves antigos com staff nota 3 em `loadGame`, `scripts/check_staff.ts` (`node .check/scripts/check_staff.js [temporadas] [seções]`).
 
 **Medido (`check_staff`, `diagnose_season`, `backtest_season`):**
 - Liga: média 3,03 na abertura (1:8% 2:25% 3:33% 4:24% 5:10%) e 2,96 depois de 10 entressafras; nenhum time acima do orçamento.
@@ -36,6 +36,28 @@ orçamento rígido. Aprovado em 2026-10-15.
 - **O analista nota 3 também tem relatório** (+1,25 pts quando acerta e é seguido): é vantagem por decisão, só no jogo assistido, então não mexe na temporada simulada. O `effectLine` dele nunca diz "sem efeito".
 - **Pular até o fim** também gera o relatório de cada quarto pulado: rende se a jogada que ficou valendo for a que um relatório certo apontou.
 - Traços (ex. Linha dura) continuam na fase 3.
+
+**Fase 3 feita e medida** (2026-11-08), falta testar no aparelho: traços, renovação antecipada, perda para a CPU e staff no Minha Carreira. Código em `staffService` (`TRAITS`, `extendStaff`, `poachChance`, `staffOffseason`), `StaffPanel` (traço no cartão, botão Renovar, aviso de último ano), `attentionService` (item "no último ano"), `careerLeague`/`careerSave`/`careerLife` e a aba Time do `CareerHub`. `check_staff` ganhou as seções 6 (traços) e 7 (perda e renovação).
+
+**O que entrou na fase 3:**
+- **Traços.** Metade dos profissionais tem um; cada cargo tem dois que se espelham, sorteados igualmente, para se anularem na liga. O traço funciona como notas a mais onde ele é bom e a menos onde é fraco:
+  - preparador **Velha guarda** / **Escola de base**: ±2 notas na duração da lesão e no ganho de carga de quem tem 30+ / até 23 (a chance de lesão do time não muda);
+  - olheiro **Caçador de talento** / **Pé no chão**: +2 notas na leitura do potencial e −2 no estreitamento da faixa, ou o contrário;
+  - analista **Olho no perímetro** / **Olho no garrafão**: ±1 nota na taxa de acerto, conforme a fraqueza real esteja no perímetro (pindown, isolação) ou no garrafão (post-up, pick & roll);
+  - vestiário **Linha dura** / **Amigo das estrelas**: ±3 de alvo de ânimo para os Imprevisíveis e as Estrelas, em sentidos opostos.
+- **Renovação antecipada.** No último ano de contrato, renovar custa 25% a mais (o mercado pede 10%) por 2 anos, a partir da temporada seguinte. O orçamento checado é o da próxima temporada. Demitir ou substituir alguém renovado cancela a renovação, que ainda não tinha começado.
+- **Perda para a CPU.** Um nota 4 ou 5 com contrato vencido e sem renovação pode ser levado antes de chegar ao seu mercado: 15% (nota 4) ou 25% (nota 5) de base, mais até 45 pontos conforme a campanha (cheio a partir de 75% de vitórias). Vai para um dos 8 melhores times da CPU com alguém pior no cargo, ganhando 15% a mais. Como a CPU gasta o orçamento inteiro, o time que o contrata reorganiza o staff: os outros cargos mais caros são repostos com o que sobra.
+- **Minha Carreira.** A liga da carreira tem staff (`initStaff`), saves antigos ganham staff nota 3 sem traço (`ensureStaff`), e a CPU cuida de todos os times. O preparador do seu time age nas suas lesões, e o assistente de vestiário puxa a sua relação com o vestiário para 46 a 54 (±6 a mais se o traço dele for sobre a sua personalidade). A aba Time mostra o staff com o efeito em você. O relatório do analista não aparece na carreira, porque você não chama as jogadas.
+- **Diálogos de Demitir e Renovar** com as cores direto no estilo: na web, o `Modal` fica fora do elemento que define as cores do tema, e o `bg-panel` saía transparente. O mesmo acontece no `CoachPanel`, que não foi mexido.
+
+**Medido na fase 3 (`check_staff` 6 e 7):**
+- Traços (nota 3 com cada traço contra nota 3 sem traço, a liga inteira):
+  - preparador, 30 temporadas por braço: Velha guarda −7% na lesão de 30+ e +9% na de até 23; Escola de base +4% e −7%; total de jogos perdidos +2,4% e +0,7% (meta ±5%). Com 1 nota em vez de 2 o efeito sumia no ruído;
+  - olheiro, um relatório no top 15: Caçador de talento acerta o potencial 82% e deixa a faixa em 51%; sem traço 68% e 43%; Pé no chão 59% e 43%. Gastando o orçamento inteiro a diferença quase some (72-74%), porque os relatórios convergem;
+  - analista: Olho no perímetro 83% com a fraqueza no perímetro e 71% no garrafão (sem traço 74-75%); Olho no garrafão 68% e 86%. No total sobe 1-3 pontos, porque um passo para cima vale um pouco mais que um para baixo;
+  - vestiário: Linha dura deixa Estrelas em 45,1 e Imprevisíveis em 51,7 (sem traço 48,2 e 48,5); Amigo das estrelas 51,1 e 45,7; ânimo médio da liga igual (49,5).
+- Perda para a CPU, 150 verões por célula: levados 26/27/46/71% para nota 5 a 35/50/62/75% de vitórias (chance 25/25/47/70%), 14/18/38/59% para nota 4 (15/15/37/60%), 0 para nota 3. Renovados: 400 de 400 ficaram, nenhum levado.
+- Pior caso (você perde até quatro 5s por verão, 10 verões): média da CPU 2,86 contra 2,95 sem perdas, nenhum time acima do orçamento. A reorganização tira um pouco mais do que o 5 traz.
 
 ## A regra que mantém a liga calibrada
 

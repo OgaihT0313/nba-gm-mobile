@@ -193,7 +193,7 @@ sem o time do usuário). O resto, em ordem. **L** = lapidar algo que existe,
 | 8 | 3D — Etapas 1 a 8 restantes — **FEITO** (2026-10-11) | L | G | Segue o PLANO-3D, uma etapa por vez |
 | 9 | Jogo decisivo dentro do 3D — **FEITO** (2026-10-12) | L | M | Junta as duas telas de jogo; depende das etapas 4-5 do 3D |
 | 10 | Objetivos e conquistas de GM — **FEITO** (2026-10-12) | N | P | Meta para saves longos além de "ganhar o título" |
-| 11 | Staff além do técnico — [PLANO-STAFF.md](PLANO-STAFF.md), aprovado 2026-10-15; **fases 1 e 2 feitas e medidas** (2026-10-15 e 2026-10-17; falta testar no aparelho), falta a fase 3 | N | M | Profundidade, mas mexe em muitos sistemas calibrados |
+| 11 | Staff além do técnico — [PLANO-STAFF.md](PLANO-STAFF.md), aprovado 2026-10-15; **FEITO, fases 1 a 3 medidas** (2026-10-15, 2026-10-17 e 2026-11-08; falta testar no aparelho) | N | M | Profundidade, mas mexe em muitos sistemas calibrados |
 | 12 | Ajustes técnicos menores — **FEITO** (2026-10-12, menos o `diagnose_season`) | L | P | Erosão da liga e `diagnose_season` |
 | 13 | Minha Carreira (modo novo, separado do GM) — [PLANO-CARREIRA.md](PLANO-CARREIRA.md); **fases 1 a 5 FEITAS** (fase 1 em 2026-10-13; momentos, fora da quadra, legado e eras em 2026-10-17; falta o aparelho) | N | G | Pedido do usuário (2026-10-12): criar um jogador, ser draftado, momentos de decisão no jogo; liga atual e eras |
 | 14 | Fotos dos jogadores pela era — [PLANO-FOTOS-ERAS.md](PLANO-FOTOS-ERAS.md), pedido 2026-10-17; **fases 1 e 3 + tratamento de época FEITOS** (falta o aparelho; fases 2 e 4 em aberto) | L | M | Hoje toda era usa a foto mais recente: o LeBron de 2010-11 aparece com 40 anos no Lakers |
@@ -523,7 +523,10 @@ draftado por você), Olho bom (ROY draftado por você), 60 vitórias, Melhor cam
 Zebra (Finais saindo do 5º ou pior), Presença garantida (5 playoffs seguidos),
 Longevidade (10 temporadas). Na aba Conquistas da tela Legado.
 
-### 11. Staff além do técnico (N)
+### 11. Staff além do técnico (N) — FEITO (fase 3 em 2026-11-08)
+
+Fase 3: traços, renovação antecipada, perda de profissionais para a CPU e staff no
+Minha Carreira. Números e o que mudou do plano em [PLANO-STAFF.md](PLANO-STAFF.md).
 
 Plano em [PLANO-STAFF.md](PLANO-STAFF.md) (2026-10-13): quatro cargos (preparador físico,
 olheiro-chefe, analista de desempenho, assistente de vestiário), orçamento rígido, efeito

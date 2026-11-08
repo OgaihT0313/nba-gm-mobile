@@ -2,7 +2,8 @@ import React, { useState } from 'react';
 import { View, Text, Pressable, Modal } from 'react-native';
 import { Team, StaffMember, StaffRole, SeasonState } from '../types';
 import {
-  STAFF_ROLES, ROLE_LABEL, staffBudget, staffPayroll, staffRoom, effectLine, isHiringOpen, NEUTRAL_RATING,
+  STAFF_ROLES, ROLE_LABEL, staffBudget, staffPayroll, staffRoom, effectLine, traitLine, isHiringOpen, NEUTRAL_RATING,
+  extendBlock, extensionTerms, EXTENSION_RAISE, poachChance,
 } from '../services/staffService';
 import Icon from './Icon';
 import { MonoLabel, Panel, CtaButton, GhostButton, BodyText, Meter } from './ui/kit';
@@ -24,10 +25,12 @@ const Pips: React.FC<{ rating: number }> = ({ rating }) => (
   </View>
 );
 
-const MemberCard: React.FC<{
+export const MemberCard: React.FC<{
   member: StaffMember;
   action?: React.ReactNode;
-}> = ({ member, action }) => (
+  // Read-only (Minha Carreira): the effect line can say who it lands on.
+  note?: string;
+}> = ({ member, action, note }) => (
   <View style={{ backgroundColor: COLORS.surface2, borderRadius: RADIUS.card, padding: 14, gap: 8 }}>
     <View className="flex-row items-start justify-between" style={{ gap: 12 }}>
       <View style={{ flex: 1, minWidth: 0 }}>
@@ -42,8 +45,60 @@ const MemberCard: React.FC<{
       </View>
     </View>
     <Text style={{ fontFamily: FONT.body500, fontSize: 12.5, color: COLORS.text }}>{effectLine(member.role, member.rating)}</Text>
+    {traitLine(member) ? (
+      <Text style={{ fontFamily: FONT.body500, fontSize: 12, color: COLORS.textSoft }}>{traitLine(member)}</Text>
+    ) : null}
+    {member.extension ? (
+      <Text style={{ fontFamily: FONT.body500, fontSize: 12, color: COLORS.good }}>
+        Renovado: mais {member.extension.years} anos a {money(member.extension.salary)} a partir da próxima temporada.
+      </Text>
+    ) : null}
+    {note ? <Text style={{ fontFamily: FONT.body500, fontSize: 12, color: COLORS.dim }}>{note}</Text> : null}
     {action}
   </View>
+);
+
+const dialogText = { fontFamily: FONT.body500, fontSize: 14, lineHeight: 20, color: COLORS.dim } as const;
+const dialogStrong = { fontFamily: FONT.body600, color: COLORS.text } as const;
+
+// A yes/no over the screen. Colors inline, not by class: on the web a Modal
+// renders outside the ThemeProvider's element, where the class colors (bg-panel,
+// text-fg...) are CSS variables with no value -- the dialog came out see-through.
+const ConfirmDialog: React.FC<{
+  visible: boolean;
+  title: string;
+  onClose: () => void;
+  onConfirm: () => void;
+  confirmLabel: string;
+  confirmColor: string;
+  disabled?: boolean;
+  children: React.ReactNode;
+}> = ({ visible, title, onClose, onConfirm, confirmLabel, confirmColor, disabled, children }) => (
+  <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
+    <Pressable accessible={false} onPress={onClose} style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.7)', alignItems: 'center', justifyContent: 'center', padding: 16 }}>
+      <Pressable
+        onPress={(e) => e.stopPropagation()}
+        style={{ width: '100%', maxWidth: 384, gap: 16, padding: 24, borderRadius: 24, borderWidth: 1, borderColor: COLORS.line, backgroundColor: COLORS.panel }}
+      >
+        <Text style={{ fontFamily: FONT.cond800, fontSize: 22, fontStyle: 'italic', textTransform: 'uppercase', color: COLORS.text }}>{title}</Text>
+        {children}
+        <View className="flex-row justify-end" style={{ gap: 12 }}>
+          <Pressable accessibilityRole="button" onPress={onClose} style={{ paddingHorizontal: 16, paddingVertical: 8, borderRadius: 12 }}>
+            <Text style={{ fontFamily: FONT.body600, fontSize: 14, color: COLORS.textSoft }}>Cancelar</Text>
+          </Pressable>
+          <Pressable
+            accessibilityRole="button"
+            accessibilityState={{ disabled: !!disabled }}
+            disabled={disabled}
+            onPress={onConfirm}
+            style={{ paddingHorizontal: 16, paddingVertical: 8, borderRadius: 12, backgroundColor: disabled ? COLORS.lineStrong : confirmColor }}
+          >
+            <Text style={{ fontFamily: FONT.cond800, fontSize: 15, textTransform: 'uppercase', color: '#FFFFFF' }}>{confirmLabel}</Text>
+          </Pressable>
+        </View>
+      </Pressable>
+    </Pressable>
+  </Modal>
 );
 
 interface StaffPanelProps {
@@ -52,11 +107,17 @@ interface StaffPanelProps {
   market?: SeasonState['staffMarket'];
   onHire: (member: StaffMember) => void;
   onFire: (role: StaffRole) => void;
+  onExtend: (role: StaffRole) => void;
 }
 
-const StaffPanel: React.FC<StaffPanelProps> = ({ team, status, market, onHire, onFire }) => {
+// Whether this one could be hired away when his deal runs out (staffOffseason).
+const atRisk = (m: StaffMember) => !m.interim && !m.extension && m.years === 1 && poachChance(m.rating, 0.5) > 0;
+
+const StaffPanel: React.FC<StaffPanelProps> = ({ team, status, market, onHire, onFire, onExtend }) => {
   const [hiringRole, setHiringRole] = useState<StaffRole | null>(null);
   const [confirmFire, setConfirmFire] = useState<StaffRole | null>(null);
+  const [confirmExtend, setConfirmExtend] = useState<StaffRole | null>(null);
+  const extending = confirmExtend ? team.staff?.[confirmExtend] : undefined;
   const open = isHiringOpen(status);
   const budget = staffBudget(team);
   const used = staffPayroll(team);
@@ -93,7 +154,12 @@ const StaffPanel: React.FC<StaffPanelProps> = ({ team, status, market, onHire, o
           <View key={role} style={{ gap: 8 }}>
             <MonoLabel color={COLORS.muted}>{ROLE_LABEL[role]}</MonoLabel>
             {m ? (
-              <MemberCard member={m} />
+              <MemberCard
+                member={m}
+                note={atRisk(m)
+                  ? 'Último ano de contrato. Sem renovação, um time da CPU pode levá-lo na offseason, e a chance cresce se o seu time ganhar.'
+                  : undefined}
+              />
             ) : (
               <View style={{ backgroundColor: COLORS.surface2, borderRadius: RADIUS.card, padding: 14 }}>
                 <BodyText size={12.5} color={COLORS.warn}>Cargo vago. Se ninguém for contratado até a abertura da temporada, um interino nota 2 assume.</BodyText>
@@ -102,6 +168,9 @@ const StaffPanel: React.FC<StaffPanelProps> = ({ team, status, market, onHire, o
             <View className="flex-row" style={{ gap: 10 }}>
               {m && !m.interim ? (
                 <GhostButton label="Demitir" color={COLORS.bad} onPress={() => setConfirmFire(role)} style={{ flex: 1, borderColor: withAlpha(COLORS.bad, 0.55) }} />
+              ) : null}
+              {m && !m.interim && !m.extension && m.years === 1 ? (
+                <GhostButton label="Renovar" onPress={() => setConfirmExtend(role)} style={{ flex: 1 }} />
               ) : null}
               {open && candidates.length ? (
                 m
@@ -120,27 +189,41 @@ const StaffPanel: React.FC<StaffPanelProps> = ({ team, status, market, onHire, o
       ) : null}
 
       {/* Fire confirmation */}
-      <Modal visible={!!firing} transparent animationType="fade" onRequestClose={() => setConfirmFire(null)}>
-        <Pressable accessible={false} className="flex-1 bg-black/70 items-center justify-center p-4" onPress={() => setConfirmFire(null)}>
-          <Pressable className="bg-panel border border-line rounded-3xl p-6 w-full max-w-sm gap-4" onPress={(e) => e.stopPropagation()}>
-            <Text className="text-xl font-black uppercase italic tracking-tight text-fg">Demitir?</Text>
-            <Text className="text-sm text-fg-dim leading-5">
-              <Text className="font-bold text-fg">{firing?.name}</Text> deixa o cargo. Os {money(firing?.salary ?? 0)} por ano continuam no orçamento por mais {firing?.years} {firing?.years === 1 ? 'temporada' : 'temporadas'}.
-              {open ? ' O cargo fica vago para você contratar.' : ' Um interino nota 2 assume até a offseason.'}
+      <ConfirmDialog
+        visible={!!firing}
+        title="Demitir?"
+        onClose={() => setConfirmFire(null)}
+        confirmLabel="Demitir"
+        confirmColor={COLORS.bad}
+        onConfirm={() => { if (confirmFire) onFire(confirmFire); setConfirmFire(null); }}
+      >
+        <Text style={dialogText}>
+          <Text style={dialogStrong}>{firing?.name}</Text> deixa o cargo. Os {money(firing?.salary ?? 0)} por ano continuam no orçamento por mais {firing?.years} {firing?.years === 1 ? 'temporada' : 'temporadas'}.
+          {open ? ' O cargo fica vago para você contratar.' : ' Um interino nota 2 assume até a offseason.'}
+        </Text>
+      </ConfirmDialog>
+
+      {/* Early renewal: costs more now than the market would, keeps him. */}
+      {extending && confirmExtend ? (() => {
+        const terms = extensionTerms(extending);
+        const block = extendBlock(team, confirmExtend);
+        return (
+          <ConfirmDialog
+            visible
+            title="Renovar?"
+            onClose={() => setConfirmExtend(null)}
+            confirmLabel="Renovar"
+            confirmColor={COLORS.good}
+            disabled={!!block}
+            onConfirm={() => { onExtend(confirmExtend); setConfirmExtend(null); }}
+          >
+            <Text style={dialogText}>
+              <Text style={dialogStrong}>{extending.name}</Text> fica por mais {terms.years} anos a {money(terms.salary)} por ano ({Math.round((EXTENSION_RAISE - 1) * 100)}% a mais), a partir da próxima temporada. Esperar o contrato acabar sai mais barato, mas ele vai para o mercado{atRisk(extending) ? ' e um time da CPU pode levá-lo antes' : ''}.
             </Text>
-            <View className="flex-row gap-3 justify-end">
-              <Pressable accessibilityRole="button" onPress={() => setConfirmFire(null)} className="px-4 py-2 rounded-xl"><Text className="text-sm font-bold text-fg-soft">Cancelar</Text></Pressable>
-              <Pressable
-                accessibilityRole="button"
-                onPress={() => { if (confirmFire) onFire(confirmFire); setConfirmFire(null); }}
-                className="px-4 py-2 rounded-xl bg-red-600"
-              >
-                <Text className="text-sm font-black uppercase text-white">Demitir</Text>
-              </Pressable>
-            </View>
-          </Pressable>
-        </Pressable>
-      </Modal>
+            {block ? <Text style={[dialogStrong, { color: COLORS.bad }]}>{block}.</Text> : null}
+          </ConfirmDialog>
+        );
+      })() : null}
 
       {/* Candidates for one role */}
       <BottomSheet

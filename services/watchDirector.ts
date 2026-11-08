@@ -1,7 +1,7 @@
-import type { Team, Player, Coach, WatchPlay, LiveTactic } from '../types';
+import type { Team, Player, Coach, WatchPlay, LiveTactic, StaffTrait } from '../types';
 import { getPlayerPositions, getPlayerAttributes } from '../constants';
 import { fatigueFactor } from './personalityService';
-import { ratingOf, analystAccuracy, analystBonus } from './staffService';
+import { ratingOf, traitOf, analystAccuracy, analystBonus, analystShift } from './staffService';
 import {
     computeExpectedPoints,
     generateScoringPlays,
@@ -898,6 +898,9 @@ export interface ScoutingReport {
     correct: boolean;
     bonus: number;
     rating: number;
+    /** The rating this read ran at after his trait (rating ± 1 when he has one). */
+    effective: number;
+    trait?: StaffTrait;
     reason: string;
 }
 
@@ -932,15 +935,19 @@ const REASON: Record<WatchPlay, (v: number) => string> = {
     iso: (v) => `há um elo fraco no quinteto deles para a sua estrela caçar (Def. perímetro ${Math.round(v)})`,
 };
 
-/** The report for the user's next period, or null when his team has no staff (Minha Carreira). */
+/** The report for the user's next period, or null when his team has no staff (a save from before it). */
 export const scoutingReport = (userTeam: Team, oppFive: FiveOnCourt, players: { [key: string]: Player }): ScoutingReport | null => {
     if (!userTeam.staff) return null;
     const rating = ratingOf(userTeam, 'analyst');
     const { weak, value } = defenseWeakness(oppFive, players);
     const order = (Object.keys(weak) as WatchPlay[]).sort((x, y) => weak[y] - weak[x]);
-    const correct = Math.random() < analystAccuracy(rating);
+    // His trait: a step better when the real weakness is on his side of the
+    // floor, a step worse when it isn't. The bonus stays the rating's.
+    const trait = traitOf(userTeam, 'analyst');
+    const effective = rating + analystShift(trait, order[0]);
+    const correct = Math.random() < analystAccuracy(effective);
     const play = correct ? order[0] : order[1 + Math.floor(Math.random() * (order.length - 1))];
-    return { play, correct, bonus: analystBonus(rating), rating, reason: REASON[play](value[play]) };
+    return { play, correct, bonus: analystBonus(rating), rating, effective, trait, reason: REASON[play](value[play]) };
 };
 
 /* ------------------------------------------------------------------ */

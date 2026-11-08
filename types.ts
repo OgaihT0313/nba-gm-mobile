@@ -275,7 +275,21 @@ export interface StaffMember {
   // Holding the job until the offseason after a mid-season firing (or a
   // vacancy nobody filled): always rating 2, gone at the next offseason.
   interim?: boolean;
+  // What he is better and worse at (staffService.TRAITS). About half the
+  // professionals have one; interims never do.
+  trait?: StaffTrait;
+  // An early renewal the user signed in his last year: the new deal starts
+  // when this one runs out, so a CPU team can't take him (staffOffseason).
+  extension?: { salary: number; years: number };
 }
+
+// Each role has two traits that mirror each other: one is better where the
+// other is worse, so neither is free (PLANO-STAFF.md, fase 3).
+export type StaffTrait =
+  | 'veteranos' | 'jovens'            // preparador: 30+ vs. 23 and under
+  | 'teto' | 'pe_no_chao'             // olheiro: the potential read vs. the band
+  | 'perimetro' | 'garrafao'          // analista: which side of their defense he reads
+  | 'linha_dura' | 'amigo_estrelas';  // vestiário: the volatile vs. the stars
 
 // A tradeable future first-round pick. The slot isn't known until draft night:
 // it's whatever `originalTeamId`'s record (and the lottery) produces, which is
@@ -624,6 +638,8 @@ export interface DraftState {
   // much one report narrows a band and how good its potential read is. Absent
   // on drafts from before the staff = 3 (the old fixed numbers).
   scoutRating?: number;
+  // His trait, if any (a 'teto' scout reads potential better, narrows bands less).
+  scoutTrait?: StaffTrait;
 }
 
 // What the front office *thinks* a prospect is, before the draft reveals the

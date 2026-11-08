@@ -17,6 +17,7 @@ import type { Player, Team } from '../../types';
 import { askingSalary, newContractYears } from '../freeAgencyService';
 import { getRotationWeights } from '../simulationService';
 import { personalityOf } from '../personalityService';
+import { lockerMoraleShift, lockerTraitShift } from '../staffService';
 import type { CareerState } from './careerTypes';
 import { favorFor, gameScore, expectedGameScore } from './careerTrust';
 
@@ -34,6 +35,13 @@ export const relationLabel = (v: number) => (v >= 75 ? 'Excelente' : v >= 58 ? '
 /* After each game                                                      */
 /* ------------------------------------------------------------------ */
 
+/** Where the locker room settles with nothing happening: 50, moved by your team's assistente de vestiário. */
+export const lockerHome = (s: CareerState): number => {
+  const team = myTeam(s);
+  const p = s.league.players[s.meId];
+  return 50 + 2 * (lockerMoraleShift(team) + (p ? lockerTraitShift(team, personalityOf(p).id) : 0));
+};
+
 /** The locker room and the front office after one of your team's games. */
 export const relationsAfterGame = (s: CareerState, won: boolean, line: CareerState['games'][number]['line'], assists = 0): Relations => {
   const r = relationsOf(s);
@@ -46,8 +54,10 @@ export const relationsAfterGame = (s: CareerState, won: boolean, line: CareerSta
     const over = gameScore(line) - expectedGameScore(p.ovr, line.min);
     front += clamp(over / 8, -0.8, 0.8);
   }
-  // Both drift back toward neutral, slower than the coach forgets.
-  locker += (50 - locker) * 0.01;
+  // Both drift back toward neutral, slower than the coach forgets. The
+  // locker room's neutral is the assistente de vestiário's: 46 to 54 by his
+  // rating, 6 more or less if his trait is about your personality.
+  locker += (lockerHome(s) - locker) * 0.01;
   front += (50 - front) * 0.008;
   return { locker: clamp(locker, 0, 100), front: clamp(front, 0, 100) };
 };

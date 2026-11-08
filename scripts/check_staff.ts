@@ -16,6 +16,13 @@
 //   4. Vestiário: the trade-request rule read on all 30 teams, by locker rating.
 //   5. Analista: the league baseline for the report, its accuracy and the
 //      margin a followed right report adds to a quarter.
+//   6. Traços (fase 3): each trait against a plain professional of the same
+//      rating, where it is good, where it is weak, and in total — the two
+//      traits of a role must cancel out across the league.
+//   7. Perda para a CPU e renovação (fase 3): how often a 4 or 5 is hired
+//      away by rating and record, that a renewal holds, and that the league's
+//      average and budgets stay put with a user who keeps losing his 5s.
+// Sections 2-5 use professionals with no trait, so they measure the rating alone.
 import './harness';
 import { teamsData, playersData } from '../constants';
 import type { Team, Player, SeasonState, DraftState } from '../types';
@@ -27,8 +34,9 @@ import { initCoaches } from '../services/coachService';
 import { initialPickAssets, generateDraftClass, scoutProspect, consensusValue } from '../services/draftService';
 import {
   initStaff, staffOffseason, staffPayroll, staffBudget, makeMember, scoutBudgetFor, STAFF_ROLES,
-  lockerRequestLineShift, analystAccuracy, analystBonus,
+  lockerRequestLineShift, analystAccuracy, analystBonus, poachChance, extensionTerms, TRAITS,
 } from '../services/staffService';
+import type { StaffTrait, StaffRole, StaffMember } from '../types';
 import { TRADE_REQUEST_MORALE } from '../services/simulationService';
 import { TRADE_REQUEST_MIN_OVR } from '../services/decisionService';
 import { personalityOf } from '../services/personalityService';
@@ -39,6 +47,8 @@ declare const process: { argv: string[] };
 const N = Number(process.argv[2] || 12);
 // Which sections to run, e.g. "13" skips the slow preparador seasons.
 const ONLY = process.argv[3] || '123';
+// A professional with no trait: the controlled arms measure the rating alone.
+const plain = (role: Parameters<typeof makeMember>[0], rating: number) => ({ ...makeMember(role, rating), trait: undefined });
 
 const mean = (a: number[]) => a.reduce((x, y) => x + y, 0) / (a.length || 1);
 const se = (a: number[]) => { const m = mean(a); return Math.sqrt(a.reduce((s, v) => s + (v - m) ** 2, 0) / Math.max(1, a.length - 1) / a.length); };
@@ -84,7 +94,7 @@ console.log(`\n=== 2. Preparador físico (experimento controlado, ${N} temporada
 const seasonWithTrainer = (targetId: string, rating: number | null): SeasonState => {
   const { coaches, teams: coached } = initCoaches(baseTeams());
   const teams = coached.map(t => (t.id === targetId && rating !== null
-    ? { ...t, staff: { trainer: makeMember('trainer', rating) } }
+    ? { ...t, staff: { trainer: plain('trainer', rating) } }
     : t));
   const players: { [k: string]: Player } = JSON.parse(JSON.stringify(playersData));
   const userId = teams.find(t => t.id !== targetId)!.id;
@@ -177,7 +187,7 @@ console.log(`\n=== 4. Assistente de vestiário (${N} temporadas da liga por bra�
   for (let k = 1; k <= 5; k++) byRating[k] = { requests: 0, teamSeasons: 0, morale: [], wins: [] };
   for (const arm of [5, 3, 1]) for (let run = 0; run < N; run++) {
     const { coaches, teams: coached } = initCoaches(baseTeams());
-    const teams = coached.map(t => ({ ...t, staff: { locker: makeMember('locker', arm) } }));
+    const teams = coached.map(t => ({ ...t, staff: { locker: plain('locker', arm) } }));
     const players: { [k: string]: Player } = JSON.parse(JSON.stringify(playersData));
     const userId = teams[run % teams.length].id;
     let s: SeasonState = {
@@ -264,7 +274,7 @@ console.log('\n=== 5. Analista de desempenho ===');
       const a = teams[Math.floor(Math.random() * teams.length)];
       let b = teams[Math.floor(Math.random() * teams.length)];
       if (b.id === a.id) b = teams[(teams.indexOf(a) + 1) % teams.length];
-      const user = { ...a, staff: { analyst: makeMember('analyst', rating) } };
+      const user = { ...a, staff: { analyst: plain('analyst', rating) } };
       const fh = buildFive(user, players, 'home');
       const fa = buildFive(b, players, 'away');
       const report = scoutingReport(user, fa, players)!;
@@ -280,5 +290,272 @@ console.log('\n=== 5. Analista de desempenho ===');
     }
     console.log(`  Nota ${rating}: relatório certo ${f((100 * right) / SAMPLES, 0)}% (alvo ${f(100 * analystAccuracy(rating), 0)}%), seguindo um certo +${f(mean(gain), 2)} ±${f(1.96 * se(gain), 2)} pts no quarto (alvo +${analystBonus(rating)})`);
   }
+}
+}
+
+// --- 6. traços ---------------------------------------------------------------------
+if (ONLY.includes('6')) {
+console.log(`\n=== 6. Traços (nota 3 com cada traço contra nota 3 sem traço) ===`);
+const withTrait = (role: StaffRole, trait: StaffTrait | undefined): StaffMember => ({ ...makeMember(role, 3), trait });
+const leagueSeason = (teams: Team[], coaches: SeasonState['coaches']): SeasonState => {
+  const players: { [k: string]: Player } = JSON.parse(JSON.stringify(playersData));
+  return {
+    status: 'active', playoffStage: 'none', gamesPlayed: 0, teams, players,
+    events: [], playoff: null, awards: null, userTeamId: teams[0].id,
+    cup: simulationEngine.initCupGroups(teams), gmLegacy: { seasons: 0, titles: 0 }, awardHistory: [],
+    owner: buildSeasonOwner(teams[0], teams, players),
+    schedule: generateSchedule(teams), coaches,
+  };
+};
+{
+  // How many have one, and the split inside each role.
+  const all = [0, 1, 2].flatMap(() => initStaff(baseTeams())).flatMap(t => STAFF_ROLES.map(r => t.staff![r]!));
+  const share = all.filter(m => m.trait).length / all.length;
+  const split = STAFF_ROLES.map(r => {
+    const tally: Record<string, number> = {};
+    all.filter(m => m.role === r && m.trait).forEach(m => { tally[m.trait!] = (tally[m.trait!] ?? 0) + 1; });
+    return Object.entries(tally).map(([k, v]) => `${TRAITS[k as StaffTrait].label} ${v}`).join(' / ');
+  }).join('; ');
+  console.log(`  Com traço: ${f(100 * share, 0)}% (alvo 50%); ${split}`);
+  if (Math.abs(share - 0.5) > 0.08) console.log('  FAIL parcela com traço fora de 42-58%');
+}
+// 6a. Preparador: every team's trainer a 3 with the same trait. The trainer
+// acts on how long an injury lasts (and on load, which moves who gets hurt),
+// never on how often a team gets one, so each new injury's length is read by
+// the player's age, and the league's games lost in total.
+{
+  const arms: [string, StaffTrait | undefined][] = [['Sem traço', undefined], ['Velha guarda', 'veteranos'], ['Escola de base', 'jovens']];
+  const res: Record<string, { all: number; seasons: number; old: number[]; young: number[] }> = {};
+  for (const [label, trait] of arms) for (let i = 0; i < N; i++) {
+    const { coaches, teams: coached } = initCoaches(baseTeams());
+    let s = leagueSeason(coached.map(t => ({ ...t, staff: { trainer: withTrait('trainer', trait) } })), coaches);
+    const r = (res[label] ??= { all: 0, seasons: 0, old: [], young: [] });
+    r.seasons++;
+    let prev: Record<string, number> = {};
+    for (let d = 0; d < 82; d++) {
+      s = simulateOneDay(s).season;
+      s = { ...s, decisions: [] };
+      const now: Record<string, number> = {};
+      s.teams.forEach(t => Object.entries(t.playerAbsences ?? {}).forEach(([id, ab]) => {
+        if (ab?.reason !== 'injury') return;
+        now[id] = ab.duration;
+        r.all++;
+        // New tonight: wasn't out yesterday, or a fresh injury longer than what was left.
+        if (prev[id] === undefined || ab.duration > prev[id]) {
+          const a = s.players[id]?.age ?? 26;
+          if (a >= 30) r.old.push(ab.duration); else if (a <= 23) r.young.push(ab.duration);
+        }
+      }));
+      prev = now;
+    }
+  }
+  arms.forEach(([label]) => {
+    const r = res[label];
+    console.log(`  Preparador ${label.padEnd(15)} ${f(r.all / r.seasons / 30)} jogos perdidos por time; duração média da lesão: 30+ ${f(mean(r.old), 2)} (${r.old.length}), até 23 ${f(mean(r.young), 2)} (${r.young.length})`);
+  });
+  const base = res['Sem traço'];
+  const vg = res['Velha guarda'];
+  const eb = res['Escola de base'];
+  const rel = (a: number[], b: number[]) => (100 * (mean(a) - mean(b))) / mean(b);
+  console.log(`  Velha guarda: lesão de 30+ ${f(rel(vg.old, base.old))}%, de até 23 ${f(rel(vg.young, base.young))}% (meta −8% / +8%)`);
+  console.log(`  Escola de base: lesão de 30+ ${f(rel(eb.old, base.old))}%, de até 23 ${f(rel(eb.young, base.young))}% (meta +8% / −8%)`);
+  arms.slice(1).forEach(([label]) => {
+    const d = (100 * (res[label].all - base.all)) / base.all;
+    console.log(`  Preparador ${label}: total ${d >= 0 ? '+' : ''}${f(d)}% contra sem traço (meta: dentro de ±5%)`);
+  });
+  if (!(rel(vg.old, base.old) < 0 && rel(vg.young, base.young) > 0 && rel(eb.old, base.old) > 0 && rel(eb.young, base.young) < 0)) {
+    console.log('  FAIL o traço do preparador não puxa a duração para o lado certo');
+  }
+}
+// 6b. Olheiro: the same classes, rating 3, each trait.
+{
+  const arms: [string, StaffTrait | undefined][] = [['Sem traço', undefined], ['Caçador de talento', 'teto'], ['Pé no chão', 'pe_no_chao']];
+  const errs: Record<string, number[]> = {};
+  const hits: Record<string, number[]> = {};
+  for (let rep = 0; rep < 300; rep++) {
+    const { prospects, reports, ids } = generateDraftClass(30);
+    for (const [label, trait] of arms) {
+      let draft: DraftState = {
+        order: [], picks: [], available: [...ids], complete: false,
+        reports: JSON.parse(JSON.stringify(reports)), scoutBudget: scoutBudgetFor(3), scoutRating: 3, scoutTrait: trait,
+      };
+      while (draft.scoutBudget > 0) {
+        const target = [...ids]
+          .filter(id => !draft.reports[id].potentialKnown)
+          .sort((a, b) => consensusValue(draft.reports[b]) - consensusValue(draft.reports[a]))[0];
+        if (!target) break;
+        const next = scoutProspect(draft, prospects, target);
+        if (!next) break;
+        draft = next;
+      }
+      const top = [...ids].sort((a, b) => consensusValue(draft.reports[b]) - consensusValue(draft.reports[a])).slice(0, 15);
+      (errs[label] ??= []).push(mean(top.map(id => Math.abs(draft.reports[id].estimate - prospects[id].ovr))));
+      (hits[label] ??= []).push(mean(top.map(id => (draft.reports[id].potentialGuess === prospects[id].potential ? 1 : 0))));
+    }
+  }
+  arms.forEach(([label]) => console.log(`  Olheiro ${label.padEnd(19)} orçamento inteiro: erro no top 15 ${f(mean(errs[label]), 2)} OVR, potencial certo ${f(100 * mean(hits[label]), 0)}%`));
+  // One report on each of the board's top 15: what the screen shows after a tap.
+  const one: Record<string, { band: number[]; pot: number[] }> = {};
+  for (let rep = 0; rep < 300; rep++) {
+    const { prospects, reports, ids } = generateDraftClass(30);
+    const top = [...ids].sort((a, b) => consensusValue(reports[b]) - consensusValue(reports[a])).slice(0, 15);
+    for (const [label, trait] of arms) {
+      const base: DraftState = {
+        order: [], picks: [], available: [...ids], complete: false,
+        reports: JSON.parse(JSON.stringify(reports)), scoutBudget: 99, scoutRating: 3, scoutTrait: trait,
+      };
+      const o = (one[label] ??= { band: [], pot: [] });
+      top.forEach(id => {
+        const next = scoutProspect(base, prospects, id);
+        if (!next) return;
+        o.band.push(next.reports[id].uncertainty / Math.max(1, reports[id].uncertainty));
+        o.pot.push(next.reports[id].potentialGuess === prospects[id].potential ? 1 : 0);
+      });
+    }
+  }
+  arms.forEach(([label]) => console.log(`  Olheiro ${label.padEnd(19)} um relatório: faixa fica em ${f(100 * mean(one[label].band), 0)}% da original, potencial certo ${f(100 * mean(one[label].pot), 0)}%`));
+  const potGap = mean(one['Caçador de talento'].pot) - mean(one['Pé no chão'].pot);
+  const bandGap = mean(one['Caçador de talento'].band) - mean(one['Pé no chão'].band);
+  if (potGap < 0.1 || bandGap < 0.04) console.log('  FAIL os dois traços do olheiro não se distinguem num relatório');
+}
+// 6c. Analista: accuracy by which side of the floor the real weakness is on.
+{
+  const { teams } = initCoaches(baseTeams());
+  const players: { [k: string]: Player } = JSON.parse(JSON.stringify(playersData));
+  const PER: WatchPlay[] = ['pindown', 'iso'];
+  const arms: [string, StaffTrait | undefined][] = [['Sem traço', undefined], ['Olho no perímetro', 'perimetro'], ['Olho no garrafão', 'garrafao']];
+  for (const [label, trait] of arms) {
+    const tally = { per: [0, 0], int: [0, 0] };
+    for (let i = 0; i < 1600; i++) {
+      const a = teams[Math.floor(Math.random() * teams.length)];
+      let b = teams[Math.floor(Math.random() * teams.length)];
+      if (b.id === a.id) b = teams[(teams.indexOf(a) + 1) % teams.length];
+      const user = { ...a, staff: { analyst: withTrait('analyst', trait) } };
+      const fa = buildFive(b, players, 'away');
+      const w = defenseWeakness(fa, players).weak;
+      const top = (Object.keys(w) as WatchPlay[]).reduce((x, y) => (w[y] > w[x] ? y : x));
+      const rep = scoutingReport(user, fa, players)!;
+      const k = PER.includes(top) ? 'per' : 'int';
+      tally[k][0] += rep.correct ? 1 : 0;
+      tally[k][1]++;
+    }
+    const pc = (x: number[]) => f((100 * x[0]) / Math.max(1, x[1]), 0);
+    const total = (tally.per[0] + tally.int[0]) / (tally.per[1] + tally.int[1]);
+    console.log(`  Analista ${label.padEnd(18)} acerta ${pc(tally.per)}% com a fraqueza no perímetro (${tally.per[1]}), ${pc(tally.int)}% no garrafão (${tally.int[1]}), ${f(100 * total, 0)}% no total`);
+  }
+}
+// 6d. Vestiário: the league with a locker 3 and each trait, morale by personality.
+{
+  const arms: [string, StaffTrait | undefined][] = [['Sem traço', undefined], ['Linha dura', 'linha_dura'], ['Amigo das estrelas', 'amigo_estrelas']];
+  const out: Record<string, { all: number[]; star: number[]; wild: number[] }> = {};
+  for (const [label, trait] of arms) for (let run = 0; run < Math.max(2, Math.round(N / 2)); run++) {
+    const { coaches, teams: coached } = initCoaches(baseTeams());
+    let s = leagueSeason(coached.map(t => ({ ...t, staff: { locker: withTrait('locker', trait) } })), coaches);
+    for (let d = 0; d < 82; d++) { s = simulateOneDay(s).season; s = { ...s, decisions: [] }; }
+    const o = (out[label] ??= { all: [], star: [], wild: [] });
+    s.teams.forEach(t => t.roster.forEach(id => {
+      const p = s.players[id];
+      if (!p) return;
+      const m = p.morale ?? 70;
+      o.all.push(m);
+      const k = personalityOf(p).id;
+      if (k === 'estrela') o.star.push(m);
+      if (k === 'imprevisivel') o.wild.push(m);
+    }));
+  }
+  arms.forEach(([label]) => {
+    const o = out[label];
+    console.log(`  Vestiário ${label.padEnd(18)} ânimo médio ${f(mean(o.all))}, estrelas ${f(mean(o.star))} (${o.star.length}), imprevisíveis ${f(mean(o.wild))} (${o.wild.length})`);
+  });
+  arms.slice(1).forEach(([label]) => {
+    const d = mean(out[label].all) - mean(out['Sem traço'].all);
+    if (Math.abs(d) > 1.5) console.log(`  FAIL vestiário ${label}: ânimo médio da liga ${f(d)} contra sem traço (meta: dentro de ±1,5)`);
+  });
+}
+}
+
+// --- 7. perda para a CPU e renovação ----------------------------------------------
+if (ONLY.includes('7')) {
+console.log('\n=== 7. Perda para a CPU e renovação ===');
+const USER = 'mia';
+// The user's staff: every role a `rating` in his last year, after a `winPct` season.
+const leagueWith = (rating: number, winPct: number, extend = false): Team[] => initStaff(baseTeams()).map(t => {
+  if (t.id !== USER) return t;
+  const staff: NonNullable<Team['staff']> = {};
+  STAFF_ROLES.forEach(r => {
+    const m: StaffMember = { ...makeMember(r, rating), years: 1, age: 45 };
+    staff[r] = extend ? { ...m, extension: extensionTerms(m) } : m;
+  });
+  const wins = Math.round(82 * winPct);
+  return { ...t, staff, staffDeadMoney: undefined, wins, losses: 82 - wins };
+});
+{
+  const TRIALS = 150;
+  for (const rating of [5, 4, 3]) for (const wp of [0.35, 0.5, 0.62, 0.75]) {
+    let lost = 0;
+    let rolls = 0;
+    for (let i = 0; i < TRIALS; i++) {
+      lost += staffOffseason(leagueWith(rating, wp), USER).poached.length;
+      rolls += STAFF_ROLES.length;
+    }
+    const want = poachChance(rating, wp);
+    const got = lost / rolls;
+    console.log(`  Nota ${rating}, ${f(100 * wp, 0)}% de vitórias: ${f(100 * got, 0)}% levados (chance ${f(100 * want, 0)}%)`);
+    // Below the chance only when no CPU team can pay; never above it.
+    if (got > want + 0.06) console.log(`  FAIL nota ${rating} a ${f(wp, 2)}: levados acima da chance`);
+  }
+}
+{
+  // A renewal holds: nobody leaves, and the new deal is the one signed.
+  let ok = 0;
+  let total = 0;
+  let taken = 0;
+  for (let i = 0; i < 100; i++) {
+    const teams = leagueWith(5, 0.75, true);
+    const before = teams.find(t => t.id === USER)!.staff!;
+    const res = staffOffseason(teams, USER);
+    taken += res.poached.length;
+    const after = res.teams.find(t => t.id === USER)!.staff!;
+    STAFF_ROLES.forEach(r => {
+      total++;
+      const b = before[r]!;
+      const a = after[r];
+      if (a && a.id === b.id && a.salary === b.extension!.salary && a.years === b.extension!.years && !a.extension) ok++;
+    });
+  }
+  console.log(`  Renovação: ${ok} de ${total} cargos seguiram com o contrato novo, ${taken} levados`);
+  if (ok !== total || taken) console.log('  FAIL renovação não respeitada');
+}
+{
+  // Ten summers in which the user keeps a 5 in every role, always in his last
+  // year, after a 60-win season: the worst case for the league's average.
+  const cpuRatings: number[] = [];
+  let over = 0;
+  let checked = 0;
+  let lostTotal = 0;
+  const RUNS = 30;
+  for (let run = 0; run < RUNS; run++) {
+    let teams = leagueWith(5, 0.73);
+    for (let y = 0; y < 10; y++) {
+      const res = staffOffseason(teams, USER);
+      lostTotal += res.poached.length;
+      teams = res.teams.map(t => {
+        if (t.id !== USER) return t;
+        const staff: NonNullable<Team['staff']> = {};
+        STAFF_ROLES.forEach(r => { staff[r] = { ...makeMember(r, 5), years: 1, age: 45 }; });
+        return { ...t, staff, staffDeadMoney: undefined, wins: 60, losses: 22 };
+      });
+    }
+    teams.forEach(t => {
+      if (t.id === USER) return;
+      checked++;
+      if (staffPayroll(t) > staffBudget(t)) over++;
+      STAFF_ROLES.forEach(r => cpuRatings.push(t.staff?.[r]?.rating ?? 3));
+    });
+  }
+  const avg = mean(cpuRatings);
+  console.log(`  10 verões perdendo 5s (${f(lostTotal / RUNS, 1)} levados por save): média da CPU ${f(avg, 2)}, ${over} de ${checked} times acima do orçamento`);
+  if (over) console.log('  FAIL time da CPU acima do orçamento depois de contratar um profissional levado');
+  if (avg > 3.15 || avg < 2.8) console.log('  FAIL média da CPU fora de 2,8-3,15');
 }
 }

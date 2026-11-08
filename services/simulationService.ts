@@ -4,7 +4,7 @@ import type { Team, Player, Coach, Event, PlayoffState, PlayoffSeries, PlayoffCo
 import { TRADE_DEADLINE_GAME } from './tradeService';
 import { sortStandings, compareStandings } from './scheduleService';
 import { coachOffenseMod, coachDefenseMod } from './coachService';
-import { trainerInjuryMult, trainerDurationMult, trainerLoadMult, lockerMoraleShift } from './staffService';
+import { trainerInjuryMult, trainerDurationMult, trainerLoadMult, lockerMoraleShift, lockerTraitShift } from './staffService';
 import { personalityOf, moraleTargetShift, moraleSpeed, fatigueFactor, developmentFactor, LEADER_LIFT } from './personalityService';
 
 type CoachMap = { [key: string]: Coach };
@@ -541,8 +541,9 @@ const updateMorale = (
             // the league (measured: 46.4 against a 52 average), which is an
             // artefact and not a character trait.
             target += LEADER_LIFT * Math.min(1, leaderIds.filter(id => id !== p.id).length);
-            // The assistente de vestiário: the whole room, ±4 around a 3.
-            target += lockerShift;
+            // The assistente de vestiário: the whole room, ±2 around a 3, and
+            // his trait on the two personalities it is about (±3).
+            target += lockerShift + lockerTraitShift(team, personalityOf(p).id);
             target = clampMod(target, 5, 98);
 
             const cur = getMorale(p);
@@ -1087,11 +1088,12 @@ const recordGameStats = (
     // back down. This is what makes load management a real lever on injury
     // risk (see injuryRisk) rather than just fewer box-score minutes.
     const minutesOf = new Map(rotation.map((pId, i) => [pId, minutes[i]]));
-    const loadMult = trainerLoadMult(team);
     team.roster.forEach(pId => {
         const p = players[pId];
         if (!p) return;
-        // The trainer scales how much load each minute puts on (staffService).
+        // The trainer scales how much load each minute puts on (staffService),
+        // a step more or less by the player's age if he has a trait for it.
+        const loadMult = trainerLoadMult(team, p.age);
         const target = clampMod(((minutesOf.get(pId) ?? 0) - 18) * 2.6 * loadMult, 0, 100);
         p.load = clampMod(getLoad(p) + (target - getLoad(p)) * 0.25, 0, 100);
     });
@@ -1198,7 +1200,7 @@ const handleRandomEvents = (currentTeams: Team[], players: { [key: string]: Play
         const player = players[chosen.pId];
         const rolled = rollInjury(player.age);
         const { label } = rolled;
-        const duration = Math.max(1, Math.round(rolled.duration * trainerDurationMult(t)));
+        const duration = Math.max(1, Math.round(rolled.duration * trainerDurationMult(t, player.age)));
         if (!t.playerAbsences) t.playerAbsences = {};
         t.playerAbsences[chosen.pId] = { reason: 'injury', duration };
         // Which injuries are NEWS. Every one of them applies to the roster;

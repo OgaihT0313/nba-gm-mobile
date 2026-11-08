@@ -3,7 +3,7 @@
 // runtime — see the balance harness note in careerService.ts.
 import type { Player, Team, DraftState, DraftPick, DraftSlot, DraftPickAsset, Event, ScoutReport } from '../types';
 import { getPlayerPositions, LINEUP_POSITIONS, ATTRIBUTE_META, getPlayerAttributes } from '../constants';
-import { scoutStepFor, scoutPotentialAccuracy, NEUTRAL_RATING } from './staffService';
+import { scoutStepFor, scoutPotentialAccuracy, scoutRatings, NEUTRAL_RATING } from './staffService';
 
 // The rookie draft is a single round (30 picks) held in the offseason before
 // free agency. nba_api doesn't model *future* draft classes, so prospects are
@@ -222,8 +222,9 @@ export const scoutProspect = (
     // The head scout sets how much one report narrows the band (0.55 at rating
     // 3) and re-reads the potential tier with his own accuracy each time —
     // a good scout's read converges, a bad one's keeps wobbling.
-    const rating = draft.scoutRating ?? NEUTRAL_RATING;
-    const tightened = Math.floor(report.uncertainty * scoutStepFor(rating));
+    // His trait moves one half of the work up a step and the other down.
+    const rating = scoutRatings(draft.scoutRating ?? NEUTRAL_RATING, draft.scoutTrait);
+    const tightened = Math.floor(report.uncertainty * scoutStepFor(rating.step));
     const solved = tightened <= 1;
     const uncertainty = solved ? 0 : tightened;
     const facts = scoutNotes(p);
@@ -234,7 +235,7 @@ export const scoutProspect = (
     const next: ScoutReport = {
         estimate: solved ? p.ovr : noisyEstimate(p, uncertainty),
         uncertainty,
-        potentialGuess: solved ? p.potential : guessPotential(p.potential, scoutPotentialAccuracy(rating)),
+        potentialGuess: solved ? p.potential : guessPotential(p.potential, scoutPotentialAccuracy(rating.potential)),
         potentialKnown: solved,
         reports: report.reports + 1,
         notes: [...report.notes, ...revealed],

@@ -19,9 +19,11 @@ import { roleOf, TRAINING_META, canSpend, pointCost, getRotationWeightsFor } fro
 import { styleById } from '../../services/career/careerCreate';
 import { Page, Label, Title, Body, Box, Option, Bar, Tabs, Cta, Ghost } from './careerUi';
 import { LifeTab, PressCard, ExtensionCard, OffersCard, type LifeActions } from './CareerLife';
-import { contractEnding } from '../../services/career/careerLife';
+import { contractEnding, lockerHome } from '../../services/career/careerLife';
 import { LegacyBoxes } from './CareerLegacy';
 import { LAST_AGE } from '../../services/career/careerLegacy';
+import { STAFF_ROLES, ROLE_LABEL, trainerDurationMult } from '../../services/staffService';
+import { MemberCard } from '../../components/StaffPanel';
 
 type Tab = 'hoje' | 'treino' | 'time' | 'vida' | 'carreira';
 const TABS: { id: Tab; label: string }[] = [
@@ -337,7 +339,37 @@ const TeamTab: React.FC<{ career: CareerState }> = ({ career }) => {
           );
         })}
       </Box>
+      <StaffBox career={career} />
     </Page>
+  );
+};
+
+/** Your team's staff, read-only: the GM runs it, you live with it. */
+const StaffBox: React.FC<{ career: CareerState }> = ({ career }) => {
+  const team = myTeam(career);
+  const p = me(career);
+  if (!team?.staff || !p) return null;
+  const duration = trainerDurationMult(team, p.age);
+  const pct = Math.round(Math.abs(1 - duration) * 100);
+  const notes: Partial<Record<(typeof STAFF_ROLES)[number], string>> = {
+    trainer: pct ? `Em você (${p.age} anos): uma lesão dura ${pct}% ${duration < 1 ? 'menos' : 'mais'}.` : `Em você (${p.age} anos): lesões no tempo de sempre.`,
+    locker: `Puxa a sua relação com o vestiário para ${Math.round(lockerHome(career))} (50 é neutro).`,
+  };
+  return (
+    <Box>
+      <Label>Staff do time</Label>
+      <Body>Quem cuida do elenco. O GM contrata e demite; o preparador e o assistente de vestiário pesam em você.</Body>
+      {STAFF_ROLES.map((role) => {
+        const m = team.staff?.[role];
+        if (!m) return null;
+        return (
+          <View key={role} style={{ gap: 6 }}>
+            <Text style={{ fontFamily: FONT.cond700, fontSize: 11, letterSpacing: 1.1, color: COLORS.muted, textTransform: 'uppercase' }}>{ROLE_LABEL[role]}</Text>
+            <MemberCard member={m} note={notes[role]} />
+          </View>
+        );
+      })}
+    </Box>
   );
 };
 

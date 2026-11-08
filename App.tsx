@@ -27,7 +27,7 @@ import { resolveDecision } from './services/decisionService';
 import { isRival } from './services/rivalryService';
 import { startOffseason, finishDraft, startSeason } from './services/offseasonService';
 import { initCoaches, fireCoach, hireCoach } from './services/coachService';
-import { initStaff, hireStaff, fireStaff } from './services/staffService';
+import { initStaff, hireStaff, fireStaff, extendStaff } from './services/staffService';
 
 import { ThemeProvider } from './src/theme/ThemeProvider';
 import { COLORS, applyThemeMode, themeMode as currentThemeMode, type ThemeMode } from './src/theme/tokens';
@@ -843,6 +843,9 @@ export default function App() {
   const handleHireStaff = (member: StaffMember) => {
     setSeason((prev) => (prev ? hireStaff(prev, member) : prev));
   };
+  const handleExtendStaff = (role: StaffRole) => {
+    setSeason((prev) => (prev ? extendStaff(prev, role) : prev));
+  };
   const handleFireStaff = (role: StaffRole) => {
     setSeason((prev) => (prev ? fireStaff(prev, role) : prev));
   };
@@ -1032,6 +1035,7 @@ export default function App() {
           staffMarket={season.staffMarket}
           onHireStaff={handleHireStaff}
           onFireStaff={handleFireStaff}
+          onExtendStaff={handleExtendStaff}
           onSetRotationSize={handleSetRotationSize}
           onToggleLoadManagement={handleToggleLoadManagement}
           initialTab={myTeamTab}

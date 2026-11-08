@@ -67,6 +67,7 @@ interface MyTeamHubProps {
   staffMarket?: SeasonState['staffMarket'];
   onHireStaff: (member: StaffMember) => void;
   onFireStaff: (role: StaffRole) => void;
+  onExtendStaff: (role: StaffRole) => void;
   onSetRotationSize: (size: number) => void;
   onToggleLoadManagement: (playerId: string) => void;
   development: PlayerDevelopment;
@@ -87,7 +88,7 @@ const MINUTES_IN_A_GAME = 48;
 
 const MyTeamHub: React.FC<MyTeamHubProps> = ({
   team, players, allTeams, schedule, coaches, gmLegacy, owner, currentDraft,
-  onWaive, onSetStarter, onFireCoach, onHireCoach, seasonStatus, staffMarket, onHireStaff, onFireStaff,
+  onWaive, onSetStarter, onFireCoach, onHireCoach, seasonStatus, staffMarket, onHireStaff, onFireStaff, onExtendStaff,
   onSetRotationSize, onToggleLoadManagement, development, initialTab = 'roster',
 }) => {
   const [tab, setTab] = useState<Tab>(initialTab);
@@ -104,7 +105,7 @@ const MyTeamHub: React.FC<MyTeamHubProps> = ({
   const rival = allTeams.find((t) => t.id === rivalId) || null;
   const coach = coachOf(team, coaches);
   const staffPanel = team.staff ? (
-    <StaffPanel team={team} status={seasonStatus} market={staffMarket} onHire={onHireStaff} onFire={onFireStaff} />
+    <StaffPanel team={team} status={seasonStatus} market={staffMarket} onHire={onHireStaff} onFire={onFireStaff} onExtend={onExtendStaff} />
   ) : null;
 
   const salary = getTeamSalary(team, players);

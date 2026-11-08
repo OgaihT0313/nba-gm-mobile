@@ -29,7 +29,7 @@ import {
   type Possession,
   type QuarterPlan,
 } from '../services/watchDirector';
-import { ROLE_LABEL, analystAccuracy } from '../services/staffService';
+import { ROLE_LABEL, TRAITS, analystAccuracy } from '../services/staffService';
 import { stageOf, type Moment, type MomentResult } from '../services/career/careerMoments';
 import { eraGroupForEraId } from '../data/eras';
 import { getEraVisual } from '../src/theme/eraVisuals';
@@ -257,7 +257,8 @@ const WatchGameScreen: React.FC<WatchGameScreenProps> = ({
   // this reads the five that will actually start it. A timeout keeps it.
   const userTeam = userSide === 'home' ? home : away;
   const report = useMemo(
-    () => scoutingReport(userTeam, userSide === 'home' ? fives.current.away : fives.current.home, players),
+    // Minha Carreira: you are a player, not the coach -- nobody hands you the report.
+    () => (career ? null : scoutingReport(userTeam, userSide === 'home' ? fives.current.away : fives.current.home, players)),
     [quarter], // eslint-disable-line react-hooks/exhaustive-deps
   );
   // The user's five and their energy as of the last scoreboard refresh.
@@ -715,7 +716,7 @@ const WatchGameScreen: React.FC<WatchGameScreenProps> = ({
         coached: !career,
         // Skipped periods still get their report: the call left running pays
         // when it happens to be the one a right report names.
-        report: scoutingReport(userTeam, userSide === 'home' ? fa : fh, players),
+        report: career ? null : scoutingReport(userTeam, userSide === 'home' ? fa : fh, players),
         timeout: false,
         quarter: q,
         from: 0,
@@ -1062,13 +1063,13 @@ const WatchGameScreen: React.FC<WatchGameScreenProps> = ({
         {report ? (
           <View style={{ marginBottom: 10, padding: 10, borderRadius: 12, borderLeftWidth: 3, borderLeftColor: COLORS.warn, backgroundColor: COLORS.surface2 }}>
             <Text style={{ fontFamily: FONT.cond700, fontSize: 11, letterSpacing: 1.5, color: COLORS.muted, textTransform: 'uppercase' }}>
-              {ROLE_LABEL.analyst} · nota {report.rating}
+              {ROLE_LABEL.analyst} · nota {report.rating}{report.trait ? ` · ${TRAITS[report.trait].label}` : ''}
             </Text>
             <Text style={{ fontFamily: FONT.body500, fontSize: 13, lineHeight: 18, marginTop: 3, color: COLORS.text }}>
               Chame {WATCH_PLAY_META[report.play].label}: {report.reason}.
             </Text>
             <Text style={{ fontFamily: FONT.body500, fontSize: 12, lineHeight: 16, marginTop: 3, color: COLORS.muted }}>
-              Se a leitura estiver certa, rende +{report.bonus.toFixed(1)} pts no quarto. Nesta nota, acerta {Math.round(analystAccuracy(report.rating) * 100)}% das leituras.
+              Se a leitura estiver certa, rende +{report.bonus.toFixed(1)} pts no quarto. Nesta nota, acerta {Math.round(analystAccuracy(report.rating) * 100)}% das leituras{report.trait ? (report.trait === 'perimetro' ? ', mais quando a fraqueza é no perímetro e menos no garrafão' : ', mais quando a fraqueza é no garrafão e menos no perímetro') : ''}.
             </Text>
           </View>
         ) : null}
