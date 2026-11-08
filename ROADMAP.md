@@ -23,8 +23,23 @@ só as transferências do verão e a classe do draft. Em ordem:
 | E3 | Formato dos playoffs por época: play-in só de 2020-21, 12 times com folga para os dois primeiros até 1982-83, primeira rodada em melhor de 3 até 1982-83 e melhor de 5 até 2001-02 — **FEITO** (2026-11-09; conferido no navegador, falta o aparelho) | L | P | Como a Copa NBA, que já só existe de 2023-24 |
 | E3b | Temporadas curtas: 50 jogos em 1998-99, 66 em 2011-12 (e 72 em 2020-21, se um save chegar lá) — **FEITO** (2026-11-09; conferido no navegador, falta o aparelho) | L | M | O calendário, o prazo de trocas, o All-Star, a meta do dono, o mínimo dos prêmios e as telas supunham 82 jogos |
 | E4 | A história real ao lado da sua: o campeão real no fim de cada temporada, e o Legado com campeões e MVPs reais de antes do início do save — **FEITO** (2026-11-09; conferido no navegador, falta o aparelho) | N | P | O Legado de um save de era começava vazio |
-| E5 | 2020-21 a 2024-25, para ligar 1979 à liga atual — **BLOQUEADO**: precisa do pipeline (`nba-gm-simulator`), que não está nesta máquina | L | M | Sem ele não há elencos, transferências nem drafts reais dessas temporadas |
-| E6 | Trocas reais do prazo, no meio da temporada — **BLOQUEADO**: também depende do pipeline | L | M | Os dados das eras só trazem as movimentações do verão |
+| E5 | 2020-21 a 2024-25, para ligar 1979 à liga atual — **ESPERANDO DADOS**: o pipeline foi recriado em `pipeline/` (2026-11-09); faltam 15 páginas do Basketball-Reference salvas à mão (lista em `pipeline/README.md`) | L | M | O Basketball-Reference recusa acesso automatizado, e o pipeline não se passa por navegador |
+| E6 | Trocas reais do prazo, no meio da temporada — **DECISÃO PENDENTE**: as eras usam o elenco do fim da temporada, então as trocas do prazo já estão embutidas; fazer de verdade exige trocar todas as eras para o elenco do primeiro dia (ver `pipeline/README.md`) | L | M | Só 30 das 41 temporadas têm página salva para isso |
+
+### O pipeline de dados, recriado — 2026-11-09
+
+O original (`nba-gm-simulator/pipeline`) nunca foi commitado e se perdeu na formatação. A
+recriação fica em [`pipeline/`](pipeline/README.md), dentro do repositório, em Python puro:
+- **Não baixa nada.** O Basketball-Reference e o `stats.nba.com` recusam acesso automatizado
+  (403 e silêncio para um cliente que se identifica). O original se passava por Chrome
+  (`curl_cffi`); este lê páginas salvas à mão pelo navegador em `.bbref-cache/`.
+- **Modelo reajustado** contra os ratings que o original deixou, usando as 30 temporadas de
+  estatísticas avançadas que sobraram no cache: OVR com Spearman 0,944 e erro de 1,6 ponto,
+  ataque r 0,988, defesa r 0,966, atributos r 0,81 a 0,98.
+- **Validado** reconstruindo quatro eras existentes: 99-100% dos jogadores no mesmo time e
+  93-99% das transferências do verão iguais.
+- **Achado:** as eras usam o elenco do fim da temporada, então as trocas do prazo já estão nele
+  (muda o E6).
 
 ### Pendências do roadmap — feitas em 2026-11-09
 
