@@ -20,6 +20,8 @@ export interface EraIdentity {
 /** Season END year (1985 = 1984-85) of the era save on screen; null = the live league. */
 let currentYear: number | null = null;
 export const setEraYear = (year: number | null) => { currentYear = year; };
+/** The season on screen (its end year), or null for the live league. */
+export const currentEraYear = (): number | null => currentYear;
 export const eraYear = () => currentYear;
 
 /** Each franchise's former identities, by the last season (end year) they were used. */

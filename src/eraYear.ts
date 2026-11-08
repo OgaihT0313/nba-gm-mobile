@@ -4,7 +4,7 @@
 // steps taken -- past the chain's last real season too (2021, 2022...), where
 // every franchise is back to today's identity. Null for the live league.
 import { ERAS } from '../data/eras';
-import type { SeasonState } from '../types';
+import type { SeasonState, PlayoffFormat } from '../types';
 
 export const eraEndYearOf = (s?: Pick<SeasonState, 'era' | 'eraChainIndex'> | null): number | null => {
   if (!s?.era) return null;
@@ -40,3 +40,28 @@ export const seasonLabelOf = (s: Pick<SeasonState, 'era' | 'eraChainIndex' | 'gm
   const y = seasonStartYearOf(s);
   return `${y}-${String(y + 1).slice(-2)}`;
 };
+
+/**
+ * The playoffs of the season ending in `endYear` (null: the live league, today's).
+ *   - play-in for seeds 7-10: 2020-21 on;
+ *   - 16 teams from 1983-84; before, 12, with each conference's top two on a bye;
+ *   - first round best of 7 from 2002-03, best of 5 from 1983-84, best of 3 before;
+ *     every later round best of 7 throughout.
+ */
+export const playoffFormatFor = (endYear: number | null): PlayoffFormat => {
+  const y = endYear ?? 9999;
+  return {
+    playIn: y >= 2021,
+    seedsPerConf: y >= 1984 ? 8 : 6,
+    bestOf: [y >= 2003 ? 7 : y >= 1984 ? 5 : 3, 7, 7, 7],
+  };
+};
+export const playoffFormatOf = (s?: Pick<SeasonState, 'era' | 'eraChainIndex'> | null): PlayoffFormat =>
+  playoffFormatFor(eraEndYearOf(s));
+
+/**
+ * Where the standings are cut: seeds up to `direct` are in the playoffs, up to
+ * `playIn` play in (null when the season has none).
+ */
+export const seedCuts = (f: PlayoffFormat): { direct: number; playIn: number | null } =>
+  f.playIn ? { direct: 6, playIn: 10 } : { direct: f.seedsPerConf, playIn: null };

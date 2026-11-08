@@ -85,7 +85,7 @@ const Box: React.FC<{
     if (!team) {
       return (
         <View className="flex-row items-center justify-center" style={{ height: rowH, opacity: 0.45, borderTopWidth: top ? 0 : 1, borderTopColor: COLORS.line }}>
-          <Text style={{ fontFamily: FONT.cond700, fontSize: 11.5, color: COLORS.dim }}>—</Text>
+          <Text style={{ fontFamily: FONT.cond700, fontSize: big ? 11.5 : 9, color: COLORS.dim }}>{series?.bye ? 'folga' : '—'}</Text>
         </View>
       );
     }

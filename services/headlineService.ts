@@ -19,6 +19,7 @@ import { currentStreak } from './formService';
 import { sortStandings, teamGamesPlayed, GAMES_PER_SEASON } from './scheduleService';
 import { confidenceZone } from './ownerService';
 import { PROMISE_LABEL } from './pressService';
+import { playoffFormatOf, seedCuts } from '../src/eraYear';
 
 export interface Headline {
     id: string;
@@ -37,8 +38,8 @@ const APPROACH_GAMES = 5;
 const MVP_RACE_FROM = 15;
 const HOT_STREAK_NEWS = 7;
 const PROMISE_WATCH_FROM = 55;
-/** Seeds that skip the play-in: what "made the playoffs" means for a promise. */
-const DIRECT_SEEDS = 6;
+// Seeds that skip the play-in are what "made the playoffs" means for a
+// promise: 6 today, 8 or 6 in an era season before it (seedCuts).
 export const MAX_HEADLINES = 4;
 
 const nick = (t: Team | undefined) => (t ? t.name.split(' ').slice(-1)[0] : 'sem time');
@@ -146,7 +147,7 @@ export const headlines = (season: SeasonState): Headline[] => {
     if (user && promise?.kind === 'playoffs' && gp >= PROMISE_WATCH_FROM) {
         const conf = sortStandings(season.teams.filter(t => t.conference === user.conference), season.schedule);
         const rank = conf.findIndex(t => t.id === user.id) + 1;
-        const safe = rank <= DIRECT_SEEDS;
+        const safe = rank <= seedCuts(playoffFormatOf(season)).direct;
         out.push({
             id: `promise:${rank}`,
             kicker: 'Promessa',

@@ -325,6 +325,20 @@ export interface PlayoffSeries {
   m: (Team | null)[];
   w?: Team | null;
   s?: string;
+  // A first-round slot the top seeds skipped (the 12-team playoffs, until
+  // 1983-84): m[1] is empty and w is the seed, already through.
+  bye?: boolean;
+}
+
+// How a season's playoffs run (src/eraYear.playoffFormatFor). Absent on a
+// PlayoffState from before it existed: today's format.
+export interface PlayoffFormat {
+  /** Seeds 7-10 play in for the last two spots (2020-21 on). */
+  playIn: boolean;
+  /** Teams per conference: 8, or 6 with the top two on a bye (until 1983-84). */
+  seedsPerConf: 6 | 8;
+  /** Games in each round's series: round 1, conference semis, conference finals, Finals. */
+  bestOf: [number, number, number, number];
 }
 
 export interface PlayoffBracketData {
@@ -429,6 +443,7 @@ export interface PlayoffState {
   // normally) and the app plays it in the 3D screen instead. Cleared by
   // applyDeciderResult once that game is over.
   pendingDecider?: PendingDeciderRef;
+  format?: PlayoffFormat;
 }
 
 // The user's emphasis for one quarter of his Game 7, picked in the 3D huddle

@@ -4,6 +4,8 @@ import { View, Text, Pressable } from 'react-native';
 import { Team, Player, ScheduleGame } from '../types';
 import { getTeamNickname } from '../constants';
 import { sortStandings } from '../services/scheduleService';
+import { playoffFormatFor, seedCuts } from '../src/eraYear';
+import { currentEraYear } from '../src/eraIdentity';
 import { teamRating } from '../services/formService';
 import { COLORS, FONT } from '../src/theme/tokens';
 import Screen, { Body } from '../components/ui/Screen';
@@ -42,8 +44,9 @@ const TeamsList: React.FC<{
     // A playoff tag after one or two nights is a coin flip dressed as a
     // projection: wait for ~10 games.
     if (!hasGames || (t.wins ?? 0) + (t.losses ?? 0) < 10) return null;
-    if (seed <= 6) return { text: 'Playoffs', color: COLORS.good };
-    if (seed <= 10) return { text: 'Play-in', color: COLORS.muted };
+    const cuts = seedCuts(playoffFormatFor(currentEraYear()));
+    if (seed <= cuts.direct) return { text: 'Playoffs', color: COLORS.good };
+    if (cuts.playIn && seed <= cuts.playIn) return { text: 'Play-in', color: COLORS.muted };
     return null;
   };
 

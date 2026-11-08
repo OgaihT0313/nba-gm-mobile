@@ -449,7 +449,7 @@ export default function App() {
     // Game 7 is the better record's home game (2-2-1-1-1, simulationService.homeCourtOf).
     const host = homeCourtOf(pair.teamA, pair.teamB);
     const visitor = host.id === pair.teamA.id ? pair.teamB : pair.teamA;
-    setWatchGame({ home: fresh(host), away: fresh(visitor), decider: `Jogo 7 · ${round}` });
+    setWatchGame({ home: fresh(host), away: fresh(visitor), decider: `Jogo ${simulationEngine.seriesBestOf(playoff, ref)} · ${round}` });
     setView('watch-game');
   };
 

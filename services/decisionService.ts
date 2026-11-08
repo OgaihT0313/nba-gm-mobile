@@ -19,6 +19,7 @@ import { luxuryTaxConfidenceHit } from './ownerService';
 import { playerValue, MAX_PENDING_OFFERS } from './tradeService';
 import { generateCpuTradeOffer, TRADE_DEADLINE_GAME } from './tradeService';
 import { sortStandings } from './scheduleService';
+import { playoffFormatOf, seedCuts } from '../src/eraYear';
 import { personalityOf, rushLoadCost } from './personalityService';
 import { pressConferenceFor, resolvePress } from './pressService';
 import { lockerRequestLineShift } from './staffService';
@@ -288,7 +289,11 @@ const buildDeadlineStance = (season: SeasonState, team: Team): Decision => {
     const rank = conf.findIndex(t => t.id === team.id) + 1;
     // Top 6 go straight to the playoffs, 7-10 play in, the rest are out. (It
     // used to say "zona de play-in" for anyone in the top 10, the leader too.)
-    const zone = rank <= 6 ? ', na zona de playoffs' : rank <= 10 ? ', na zona de play-in' : ', fora da zona de play-in';
+    // An era season before the play-in cuts at 8, or 6 (src/eraYear).
+    const cuts = seedCuts(playoffFormatOf(season));
+    const zone = rank <= cuts.direct ? ', na zona de playoffs'
+        : cuts.playIn && rank <= cuts.playIn ? ', na zona de play-in'
+        : cuts.playIn ? ', fora da zona de play-in' : ', fora da zona de playoffs';
     const hit = SELL_CONFIDENCE[season.owner.mandate] ?? -10;
 
     return {

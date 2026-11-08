@@ -17,6 +17,7 @@ import { projectConfidence, confidenceZone, shouldFireMidSeason } from './ownerS
 import { generateDecisions } from './decisionService';
 import { notePressHeld } from './pressService';
 import { seasonDays } from './scheduleService';
+import { playoffFormatOf } from '../src/eraYear';
 import { watchNews } from './watchListService';
 import { trackMoves, applyRevengeNights, markRevengeFaced, settleUserGame, isRival } from './rivalryService';
 import { milestonesCrossed, MILESTONE_MORALE } from './milestoneService';
@@ -242,7 +243,9 @@ export function simulateOneDay(season: SeasonState, pinnedResult?: PinnedGameRes
     // longer so every team still plays 82 (scheduleService).
     if (nextGamesPlayed >= seasonDays(season.schedule)) {
         nextStatus = 'playoffs_idle';
-        nextPlayoff = simulationEngine.initializePlayIn(teamsAfterEvents, newSchedule);
+        // The season's own format: an era before 2020-21 has no play-in, and
+        // older ones fewer teams and shorter first rounds (src/eraYear).
+        nextPlayoff = simulationEngine.initializePlayIn(teamsAfterEvents, newSchedule, playoffFormatOf(season));
         nextAwards = simulationEngine.generateAwards(teamsAfterEvents, newPlayers);
         notify('Temporada regular encerrada! Confira os prêmios antes dos playoffs.', 'info');
         effects.push({ kind: 'view', view: 'awards' });

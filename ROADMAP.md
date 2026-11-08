@@ -20,10 +20,35 @@ só as transferências do verão e a classe do draft. Em ordem:
 |---|------|------|---------|---------|
 | E1 | Times de expansão e a mudança do Hornets — **FEITO** (2026-11-08; medido sem o navegador, falta o aparelho) | L | M | Um save de 1979-80 ficava com 22 times para sempre, e as transferências reais para Heat, Magic etc. eram descartadas |
 | E2 | Saídas e voltas reais — **FEITO** (2026-11-08; idem) | L | M | O Jordan não saía em 1993 nem voltava; as aposentadorias eram todas sorteadas |
-| E3 | Formato da liga por época: play-in só de 2020-21, 12 times nos playoffs até 1983-84, primeira rodada em melhor de 5 até 2002-03, temporadas curtas (1998-99, 2011-12) | L | P | Como a Copa NBA, que já só existe de 2023-24 |
+| E3 | Formato dos playoffs por época: play-in só de 2020-21, 12 times com folga para os dois primeiros até 1982-83, primeira rodada em melhor de 3 até 1982-83 e melhor de 5 até 2001-02 — **FEITO** (2026-11-09; conferido no navegador, falta o aparelho) | L | P | Como a Copa NBA, que já só existe de 2023-24 |
+| E3b | Temporadas curtas: 50 jogos em 1998-99, 66 em 2011-12 | L | M | Separado do E3: o calendário, o prazo de trocas (dia 55), o All-Star (dia 58), a meta de vitórias do dono, o mínimo de jogos dos prêmios e as telas supõem 82 jogos em ~25 lugares; feito pela metade, o prazo ou o All-Star cairiam fora da temporada |
 | E4 | A história real ao lado da sua: o campeão real no fim de cada temporada, e o Legado com campeões e MVPs reais de antes do início do save | N | P | Hoje o Legado de um save de era começa vazio |
 | E5 | 2020-21 a 2024-25, para ligar 1979 à liga atual | L | M | Precisa do pipeline (`nba-gm-simulator`), que não está nesta máquina |
 | E6 | Trocas reais do prazo, no meio da temporada | L | M | Também depende do pipeline |
+
+### E3. Formato dos playoffs por época — FEITO (2026-11-09)
+
+`src/eraYear.playoffFormatFor(anoFinal)` diz como a temporada decide o título, e o
+`initializePlayIn` (nome antigo, agora monta qualquer formato) guarda o formato no
+`PlayoffState.format`:
+- **2020-21 em diante (e a liga atual):** play-in para 7-10, tudo em melhor de 7.
+- **2002-03 a 2019-20:** 16 times direto da classificação, sem play-in.
+- **1983-84 a 2001-02:** 16 times, primeira rodada em melhor de 5.
+- **Até 1982-83:** 12 times. Os dois primeiros de cada conferência folgam (`PlayoffSeries.bye`,
+  "folga" na chave) e esperam o vencedor de 4×5 e de 3×6, que jogam em melhor de 3.
+- **O jogo decisivo** do usuário é o jogo 5 de uma melhor de 5 (botão "Jogar o jogo 5", série
+  "2-2"), e o resultado volta como 3-2.
+- **O que mais lê o formato:** os cortes da classificação e a legenda (sem "Play-in" antes de
+  2020-21, linha depois do 8º ou do 6º), a etiqueta de Franquias, a "zona de playoffs" da
+  decisão do prazo de trocas, a promessa de playoffs nas manchetes, o histórico (quem folgou
+  não vira "play-in") e as etiquetas de fase da tela de Playoffs.
+- Um `PlayoffState` salvo antes disso não tem `format` e segue o de hoje.
+
+**Medido** (`scripts/check_playoff_format.ts`, 3 temporadas por época, sementes padrão e 7):
+1980-81 com 12 times, 2 folgas por conferência e 1ª rodada terminando em 2 vitórias; 1989-90
+com 16 e em 3; 2009-10 sem play-in e em 4; a liga atual com play-in; semifinais e Finais
+sempre em 4. Conferido no navegador com o Celtics de 1980-81: Portland, Spurs, Bucks e
+Celtics de folga, 1ª rodada 2-0 e 2-1.
 
 ### E1 e E2. A liga real em volta do save — FEITO (2026-11-08)
 

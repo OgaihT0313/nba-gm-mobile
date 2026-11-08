@@ -3,6 +3,8 @@ import { View, Text } from 'react-native';
 import { Team, ScheduleGame } from '../types';
 import { getTeamNickname, getTeamAccent } from '../constants';
 import { sortStandings } from '../services/scheduleService';
+import { playoffFormatFor, seedCuts } from '../src/eraYear';
+import { currentEraYear } from '../src/eraIdentity';
 import { recentForm } from '../services/formService';
 import { COLORS, FONT, withAlpha } from '../src/theme/tokens';
 import { TeamBadge } from './ui/kit';
@@ -29,6 +31,8 @@ interface StandingsTableProps {
 const StandingsTable: React.FC<StandingsTableProps> = ({ teams, conference, schedule, userTeamId, limit, rowHeight = 36 }) => {
   const confTeams = teams.filter((t) => t.conference === conference);
   const hasGames = confTeams.some((t) => (t.wins || 0) + (t.losses || 0) > 0);
+  // The season's own cut lines (an era save before 2020-21 has no play-in).
+  const cuts = seedCuts(playoffFormatFor(currentEraYear()));
 
   const ranked = hasGames
     ? schedule
@@ -65,9 +69,10 @@ const StandingsTable: React.FC<StandingsTableProps> = ({ teams, conference, sche
         const losses = t.losses || 0;
         const isUser = t.id === userTeamId;
         const diff = t.stats ? (t.stats.ppg ?? 0) - (t.stats.oppg ?? 0) : 0;
-        const seedColor = !hasGames ? COLORS.dim : seed <= 6 ? COLORS.text : seed <= 10 ? COLORS.muted : COLORS.faint;
-        // The cut lines: white under the 6th, grey under the 10th.
-        const cut = hasGames && seed === 6 ? COLORS.text : hasGames && seed === 10 ? '#4A4950' : COLORS.line;
+        const seedColor = !hasGames ? COLORS.dim : seed <= cuts.direct ? COLORS.text : cuts.playIn && seed <= cuts.playIn ? COLORS.muted : COLORS.faint;
+        // The cut lines: white under the 6th, grey under the 10th (the
+        // season's own cuts in an era save: under the 8th or 6th, no play-in).
+        const cut = hasGames && seed === cuts.direct ? COLORS.text : hasGames && seed === cuts.playIn ? '#4A4950' : COLORS.line;
         const last5 = schedule ? recentForm(schedule, t.id, 5) : [];
 
         return (
@@ -105,7 +110,7 @@ const StandingsTable: React.FC<StandingsTableProps> = ({ teams, conference, sche
       {hasGames ? (
         <View className="flex-row" style={{ gap: 14, paddingTop: 10 }}>
           <Legend color={COLORS.text} label="Playoffs" />
-          <Legend color="#4A4950" label="Play-in" />
+          {cuts.playIn ? <Legend color="#4A4950" label="Play-in" /> : null}
         </View>
       ) : null}
     </View>

@@ -22,7 +22,8 @@ export const seasonResult = (playoff: PlayoffState, teamId: string, championId: 
   if (confs.some((c) => inSeries(c.bracket.round3, teamId))) return 'conf_finals';
   if (confs.some((c) => inSeries(c.bracket.round2, teamId))) return 'round2';
   if (confs.some((c) => inSeries(c.bracket.round1, teamId))) return 'round1';
-  if (confs.some((c) => c.initialSeeds.slice(6, 10).some((t) => t.id === teamId))) return 'playin';
+  // Only a season with a play-in has one (src/eraYear.playoffFormatFor).
+  if (confs.some((c) => c.playIn && c.initialSeeds.slice(6, 10).some((t) => t.id === teamId))) return 'playin';
   return 'missed';
 };
 

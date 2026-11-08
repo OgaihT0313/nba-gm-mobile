@@ -1,6 +1,6 @@
 
 import { playersData, getPlayerPositions, getPlayerAttributes, LINEUP_POSITIONS } from '../constants';
-import type { Team, Player, Coach, Event, PlayoffState, PlayoffSeries, PlayoffConference, PlayInBracket, AllStarResult, CupState, ScheduleGame, LiveTactic, WatchPlay } from '../types';
+import type { Team, Player, Coach, Event, PlayoffState, PlayoffSeries, PlayoffConference, PlayInBracket, PlayoffFormat, AllStarResult, CupState, ScheduleGame, LiveTactic, WatchPlay } from '../types';
 import { TRADE_DEADLINE_GAME } from './tradeService';
 import { sortStandings, compareStandings } from './scheduleService';
 import { coachOffenseMod, coachDefenseMod } from './coachService';
@@ -872,7 +872,9 @@ const applyDeciderResult = (playoffState: PlayoffState, teamA: Team, teamB: Team
     if (!ref) return playoffState;
     const newState: PlayoffState = JSON.parse(JSON.stringify(playoffState));
     const winner = winnerId === teamA.id ? teamA : teamB;
-    const series: PlayoffSeries = { m: [teamA, teamB], w: winner, s: winnerId === teamA.id ? '4-3' : '3-4' };
+    // The deciding game of a best of 7 ends it 4-3; of a best of 5, 3-2 (seriesBestOf).
+    const need = Math.ceil(seriesBestOf(playoffState, ref) / 2);
+    const series: PlayoffSeries = { m: [teamA, teamB], w: winner, s: winnerId === teamA.id ? `${need}-${need - 1}` : `${need - 1}-${need}` };
 
     if (ref.scope === 'finals') {
         newState.finals = series;
@@ -1480,17 +1482,50 @@ const seedRound1 = (seededTeams: Team[]): PlayoffSeries[] => {
     ];
 };
 
+// Today's playoffs, and any PlayoffState saved before formats existed.
+export const MODERN_PLAYOFFS: PlayoffFormat = { playIn: true, seedsPerConf: 8, bestOf: [7, 7, 7, 7] };
+
+/** Games in the series a pending decider belongs to. */
+export const seriesBestOf = (playoff: PlayoffState, ref: NonNullable<PlayoffState['pendingDecider']>): number => {
+    const bo = (playoff.format ?? MODERN_PLAYOFFS).bestOf;
+    if (ref.scope === 'finals') return bo[3];
+    return ref.round === 'round1' ? bo[0] : ref.round === 'round2' ? bo[1] : bo[2];
+};
+
+// The top six with the top two on a bye (the 12-team playoffs, until
+// 1983-84): 1 waits for the 4-5 winner, 2 for the 3-6 winner — the same
+// slots seedRound1 uses, so round 2 is seeded the same way.
+const seedRound1WithByes = (six: Team[]): PlayoffSeries[] => {
+    if (six.length < 6) return [];
+    return [
+        { m: [six[0], null], w: six[0], s: '', bye: true },
+        { m: [six[3], six[4]], s: '0-0' },
+        { m: [six[2], six[5]], s: '0-0' },
+        { m: [six[1], null], w: six[1], s: '', bye: true },
+    ];
+};
+
 // Seeds 1-6 in each conference go straight to Round 1. Seeds 7-10 play in
 // for the last two spots: 7v8 (winner claims the 7 seed), 9v10 (loser is
 // eliminated), then the 7v8 loser vs the 9v10 winner for the 8 seed — the
 // real NBA Play-In format, resolved with single games via simulateGame, not
-// best-of-7 series.
-const initializePlayIn = (teams: Team[], schedule: ScheduleGame[]): PlayoffState => {
+// best-of-7 series. An era season before the play-in (src/eraYear
+// .playoffFormatFor) seeds round 1 straight from the standings instead: the
+// top eight, or the top six with byes.
+const initializePlayIn = (teams: Team[], schedule: ScheduleGame[], format: PlayoffFormat = MODERN_PLAYOFFS): PlayoffState => {
     // Seeded with the real tiebreak chain (win% → head-to-head → conference
     // record → point differential), not a flat win-count sort — matters most
     // right around the play-in cutoff, where teams are often tied on wins.
     const eastTen = sortStandings(teams.filter(t => t.conference === 'East'), schedule).slice(0, 10);
     const westTen = sortStandings(teams.filter(t => t.conference === 'West'), schedule).slice(0, 10);
+    if (!format.playIn) {
+        const direct = (sorted: Team[]): PlayoffConference => {
+            const seeds = sorted.slice(0, format.seedsPerConf);
+            const round1 = format.seedsPerConf === 6 ? seedRound1WithByes(seeds) : seedRound1(seeds);
+            return { initialSeeds: seeds, seeds, bracket: { round1, round2: emptySeries(2), round3: emptySeries(1), winner: null } };
+        };
+        return { east: direct(eastTen), west: direct(westTen), finals: null, champion: null, awards: {}, format };
+    }
 
     const buildPlayIn = (tenSeeds: Team[]): PlayInBracket => ({
         sevenEight: { m: [tenSeeds[6] ?? null, tenSeeds[7] ?? null], s: '0-0' },
@@ -1508,7 +1543,8 @@ const initializePlayIn = (teams: Team[], schedule: ScheduleGame[]): PlayoffState
         west: { initialSeeds: westTen, seeds: westTen, playIn: buildPlayIn(westTen), bracket: emptyBracket() },
         finals: null,
         champion: null,
-        awards: {}
+        awards: {},
+        format,
     };
 };
 
@@ -1524,6 +1560,8 @@ const advancePlayoffRound = (
 ): { updatedPlayoff: PlayoffState, stageComplete: boolean, newChampion?: Team } => {
     const newState = JSON.parse(JSON.stringify(playoffState));
     if (!newState.awards) newState.awards = {};
+    // Series length per round: [round 1, conf semis, conf finals, Finals].
+    const bestOf = (playoffState.format ?? MODERN_PLAYOFFS).bestOf;
     let somethingSimulated = false;
     let newChampion: Team | undefined = undefined;
 
@@ -1603,7 +1641,7 @@ const advancePlayoffRound = (
         if (bracket.bracket.round1.some((s: PlayoffSeries) => !s.w)) {
             bracket.bracket.round1.forEach((series: PlayoffSeries, idx: number) => {
                 if (!series.w && series.m[0] && series.m[1]) {
-                    const result = simulateSeries(series.m[0]!, series.m[1]!, players, 7, coaches, userTeamId);
+                    const result = simulateSeries(series.m[0]!, series.m[1]!, players, bestOf[0], coaches, userTeamId);
                     if (result.pendingDecider) {
                         newState.pendingDecider = { scope: 'conference', conf: conferenceKey, round: 'round1', index: idx };
                         return;
@@ -1626,7 +1664,7 @@ const advancePlayoffRound = (
         if (bracket.bracket.round2.some((s: PlayoffSeries) => !s.w)) {
              bracket.bracket.round2.forEach((series: PlayoffSeries, idx: number) => {
                 if (!series.w && series.m[0] && series.m[1]) {
-                    const result = simulateSeries(series.m[0]!, series.m[1]!, players, 7, coaches, userTeamId);
+                    const result = simulateSeries(series.m[0]!, series.m[1]!, players, bestOf[1], coaches, userTeamId);
                     if (result.pendingDecider) {
                         newState.pendingDecider = { scope: 'conference', conf: conferenceKey, round: 'round2', index: idx };
                         return;
@@ -1646,7 +1684,7 @@ const advancePlayoffRound = (
         if (bracket.bracket.round3.some((s: PlayoffSeries) => !s.w)) {
              bracket.bracket.round3.forEach((series: PlayoffSeries, idx: number) => {
                 if (!series.w && series.m[0] && series.m[1]) {
-                    const result = simulateSeries(series.m[0]!, series.m[1]!, players, 7, coaches, userTeamId);
+                    const result = simulateSeries(series.m[0]!, series.m[1]!, players, bestOf[2], coaches, userTeamId);
                     if (result.pendingDecider) {
                         newState.pendingDecider = { scope: 'conference', conf: conferenceKey, round: 'round3', index: idx };
                         return;
@@ -1674,7 +1712,7 @@ const advancePlayoffRound = (
         if (!newState.finals) {
             newState.finals = { m: [newState.west.winner, newState.east.winner], s: '0-0' };
         } else if (!newState.finals.w) {
-            const result = simulateSeries(newState.finals.m[0]!, newState.finals.m[1]!, players, 7, coaches, userTeamId);
+            const result = simulateSeries(newState.finals.m[0]!, newState.finals.m[1]!, players, bestOf[3], coaches, userTeamId);
             if (result.pendingDecider) {
                 newState.pendingDecider = { scope: 'finals' };
             } else {
@@ -2018,4 +2056,5 @@ export const simulationEngine = {
     teamChemistry,
     getMorale,
     applyDeciderResult,
+    seriesBestOf,
 };

@@ -8,6 +8,7 @@ import { useTheme } from '../src/theme/ThemeProvider';
 import Screen, { Body } from '../components/ui/Screen';
 import { Panel, CtaButton, ScreenTitle, SectionLabel, BodyText, TeamBadge, Name, Dock } from '../components/ui/kit';
 import PlayoffBracket, { seriesWins } from '../components/PlayoffBracket';
+import { simulationEngine } from '../services/simulationService';
 import { useDesktop } from '../components/desktop/useDesktop';
 import { DPage, DDock, DCta, DTitle, Cols, Col } from '../components/desktop/kit';
 
@@ -118,6 +119,8 @@ const PlayoffsScreen: React.FC<PlayoffsScreenProps> = ({ season, onAdvanceRound,
   const stageChips = (
     <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 6 }} style={{ flexGrow: 0 }}>
       {STAGE_ORDER.map((s, i) => {
+        // A season before 2020-21 has no play-in (PlayoffState.format).
+        if (s === 'playin' && season.playoff?.format && !season.playoff.format.playIn) return null;
         const done = stageIndex > i;
         const cur = stageIndex === i;
         return (
@@ -186,12 +189,18 @@ const PlayoffsScreen: React.FC<PlayoffsScreenProps> = ({ season, onAdvanceRound,
     </Panel>
   ) : null;
 
+  // The deciding game is game 7 of a best of 7, game 5 of a best of 5 (the
+  // first round until 2002-03 in an era save), game 3 of a best of 3.
+  const deciderGames = season.playoff?.pendingDecider ? simulationEngine.seriesBestOf(season.playoff, season.playoff.pendingDecider) : 7;
+  const tied = Math.floor(deciderGames / 2);
+  const decider = { label: `Jogar o jogo ${deciderGames}`, note: `A série está ${tied}-${tied}.` };
+
   if (desktop) {
     return (
       <DPage
         footer={
           season.playoff?.pendingDecider ? (
-            <DDock note="A série está 3-3."><DCta label="Jogar o jogo 7" sub="Na quadra 3D" onPress={onPlayDecider} /></DDock>
+            <DDock note={decider.note}><DCta label={decider.label} sub="Na quadra 3D" onPress={onPlayDecider} /></DDock>
           ) : season.status === 'playoffs_idle' ? (
             <DDock><DCta label="Simular rodada" sub={STAGE_SHORT[stage as (typeof STAGE_ORDER)[number]] ?? ''} onPress={onAdvanceRound} /></DDock>
           ) : undefined
@@ -216,7 +225,7 @@ const PlayoffsScreen: React.FC<PlayoffsScreenProps> = ({ season, onAdvanceRound,
       heroHeight={120}
       footer={
         season.playoff?.pendingDecider ? (
-          <Dock><CtaButton label="Jogar o jogo 7" sub="Na quadra 3D" onPress={onPlayDecider} /></Dock>
+          <Dock><CtaButton label={decider.label} sub="Na quadra 3D" onPress={onPlayDecider} /></Dock>
         ) : season.status === 'playoffs_idle' ? (
           <Dock><CtaButton label="Simular rodada" sub={STAGE_SHORT[stage as (typeof STAGE_ORDER)[number]] ?? ''} onPress={onAdvanceRound} /></Dock>
         ) : undefined
