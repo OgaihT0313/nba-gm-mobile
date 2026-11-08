@@ -61,6 +61,7 @@ interface MyTeamHubProps {
   currentDraft: number;
   onWaive: (playerId: string) => void;
   onSetStarter: (pos: string, playerId: string) => void;
+  onAutoLineup: () => void;
   onFireCoach: () => void;
   onHireCoach: (coach: Coach) => void;
   seasonStatus: SeasonState['status'];
@@ -88,7 +89,7 @@ const MINUTES_IN_A_GAME = 48;
 
 const MyTeamHub: React.FC<MyTeamHubProps> = ({
   team, players, allTeams, schedule, coaches, gmLegacy, owner, currentDraft,
-  onWaive, onSetStarter, onFireCoach, onHireCoach, seasonStatus, staffMarket, onHireStaff, onFireStaff, onExtendStaff,
+  onWaive, onSetStarter, onAutoLineup, onFireCoach, onHireCoach, seasonStatus, staffMarket, onHireStaff, onFireStaff, onExtendStaff,
   onSetRotationSize, onToggleLoadManagement, development, initialTab = 'roster',
 }) => {
   const [tab, setTab] = useState<Tab>(initialTab);
@@ -440,7 +441,7 @@ const MyTeamHub: React.FC<MyTeamHubProps> = ({
 
           {tab === 'rotation' ? (
             <Cols>
-              <Col><StartersCourt team={team} players={players} onSetStarter={onSetStarter} /></Col>
+              <Col><StartersCourt team={team} players={players} onSetStarter={onSetStarter} onAutoLineup={onAutoLineup} /></Col>
               <Col width={460}>
                 <RotationPanel team={team} players={players} onSetRotationSize={onSetRotationSize} onToggleLoadManagement={onToggleLoadManagement} />
               </Col>
@@ -652,7 +653,7 @@ const MyTeamHub: React.FC<MyTeamHubProps> = ({
 
         {tab === 'rotation' ? (
           <>
-            <StartersCourt team={team} players={players} onSetStarter={onSetStarter} />
+            <StartersCourt team={team} players={players} onSetStarter={onSetStarter} onAutoLineup={onAutoLineup} />
             <RotationPanel
               team={team}
               players={players}

@@ -5,7 +5,7 @@
 
 import type { SeasonState } from '../types';
 import { LUXURY_TAX, getTeamSalary } from '../constants';
-import { MIN_ROSTER_SIZE, MAX_ROSTER_SIZE, TRADE_DEADLINE_GAME, OFFER_TTL } from './tradeService';
+import { MIN_ROSTER_SIZE, MAX_ROSTER_SIZE, tradeDeadlineGame, OFFER_TTL } from './tradeService';
 import { TRADE_REQUEST_MORALE } from './simulationService';
 import { STAFF_ROLES, ROLE_LABEL, poachChance } from './staffService';
 import { luxuryTaxConfidenceHit } from './ownerService';
@@ -48,9 +48,9 @@ export function attentionItems(season: SeasonState): AttentionItem[] {
   const gp = season.gamesPlayed;
 
   // Offers die after OFFER_TTL games and all at the deadline.
-  const offers = live && gp < TRADE_DEADLINE_GAME ? season.tradeOffers ?? [] : [];
+  const offers = live && gp < tradeDeadlineGame() ? season.tradeOffers ?? [] : [];
   if (offers.length) {
-    const left = Math.min(...offers.map((o) => (o.day === undefined ? OFFER_TTL : OFFER_TTL - (gp - o.day))), TRADE_DEADLINE_GAME - gp);
+    const left = Math.min(...offers.map((o) => (o.day === undefined ? OFFER_TTL : OFFER_TTL - (gp - o.day))), tradeDeadlineGame() - gp);
     items.push({
       id: 'offers',
       tone: left <= 2 ? 'bad' : 'warn',
@@ -61,12 +61,12 @@ export function attentionItems(season: SeasonState): AttentionItem[] {
   }
 
   const requested = (team.tradeRequestedIds ?? []).filter((id) => team.roster.includes(id)).map((id) => season.players[id]).filter(Boolean);
-  if (requested.length && live && gp < TRADE_DEADLINE_GAME) {
+  if (requested.length && live && gp < tradeDeadlineGame()) {
     items.push({
       id: 'requests',
       tone: 'warn',
       title: requested.length === 1 ? `${surname(requested[0].name)} pediu para sair` : `${requested.length} jogadores pediram para sair`,
-      detail: `O prazo de trocas é no dia ${TRADE_DEADLINE_GAME}.`,
+      detail: `O prazo de trocas é no dia ${tradeDeadlineGame()}.`,
       target: { view: 'trade' },
     });
   }

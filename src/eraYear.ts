@@ -56,6 +56,14 @@ export const playoffFormatFor = (endYear: number | null): PlayoffFormat => {
     bestOf: [y >= 2003 ? 7 : y >= 1984 ? 5 : 3, 7, 7, 7],
   };
 };
+/**
+ * Games each team plays in the season ending in `endYear`: 82, except the
+ * real short ones -- the 1998-99 lockout (50), the 2011-12 lockout (66) and
+ * 2020-21 (72), which an era save walks into past the end of the chain.
+ */
+export const SHORT_SEASONS: Record<number, number> = { 1999: 50, 2012: 66, 2021: 72 };
+export const seasonGamesFor = (endYear: number | null): number => (endYear !== null && SHORT_SEASONS[endYear]) || 82;
+
 export const playoffFormatOf = (s?: Pick<SeasonState, 'era' | 'eraChainIndex'> | null): PlayoffFormat =>
   playoffFormatFor(eraEndYearOf(s));
 

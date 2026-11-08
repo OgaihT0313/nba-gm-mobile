@@ -16,6 +16,8 @@ interface StartersCourtProps {
   // Tapping a player then opens him (onPlayerPress) instead of the picker.
   onSetStarter?: (pos: string, playerId: string) => void;
   onPlayerPress?: (player: Player) => void;
+  /** "Melhor cinco": drop every pinned starter, so each slot goes back to the best available. */
+  onAutoLineup?: () => void;
 }
 
 // Same percentage placement as the web over a half-court diagram. RN can't do
@@ -145,7 +147,7 @@ const substituteReason = (team: Team, slot: LineupSlot): string => {
   return 'em queda de forma';
 };
 
-const StartersCourt: React.FC<StartersCourtProps> = ({ team, players, onSetStarter, onPlayerPress }) => {
+const StartersCourt: React.FC<StartersCourtProps> = ({ team, players, onSetStarter, onPlayerPress, onAutoLineup }) => {
   const editable = !!onSetStarter;
   const [activePos, setActivePos] = useState<string | null>(null);
   const { accent } = useTheme();
@@ -156,6 +158,11 @@ const StartersCourt: React.FC<StartersCourtProps> = ({ team, players, onSetStart
   const { slots } = simulationEngine.getLineup(team, players);
   const slotByPos = new Map(slots.map((s) => [s.pos, s]));
   const substitutes = slots.filter((s) => s.isSubstitute && s.designatedId);
+  // The five the engine picks on its own (no pins): the "Melhor cinco" button
+  // shows only when the pinned five is a different one.
+  const autoIds = simulationEngine.getLineup({ ...team, starters: undefined }, players).slots.map((s) => s.playerId).join('|');
+  const differsFromBest = !!onAutoLineup && !!team.starters && Object.keys(team.starters).length > 0
+    && slots.map((s) => s.playerId).join('|') !== autoIds;
   const activeBucket = activePos ? slotByPos.get(activePos)?.bucket : undefined;
 
   const candidatesFor = (bucket: string) =>
@@ -168,9 +175,21 @@ const StartersCourt: React.FC<StartersCourtProps> = ({ team, players, onSetStart
     <View className="bg-panel rounded-card border border-line p-5 gap-5">
       <View className="flex-row items-center justify-between gap-2">
         <Text className="text-lg font-bold text-fg">{editable ? 'Titulares' : 'Quinteto titular'}</Text>
-        <Text className="text-[10px] font-bold text-fg-dim uppercase tracking-widest">
-          {editable ? 'Toque para trocar' : 'Toque para ver o jogador'}
-        </Text>
+        {differsFromBest ? (
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel="Melhor cinco: volta cada posição ao melhor jogador disponível"
+            onPress={onAutoLineup}
+            className="active:opacity-70"
+            style={{ paddingHorizontal: 12, paddingVertical: 6, borderRadius: 999, borderWidth: 1, borderColor: COLORS.lineStrong }}
+          >
+            <Text style={{ fontFamily: FONT.cond700, fontSize: 12, letterSpacing: 1, color: COLORS.text, textTransform: 'uppercase' }}>Melhor cinco</Text>
+          </Pressable>
+        ) : (
+          <Text className="text-[10px] font-bold text-fg-dim uppercase tracking-widest">
+            {editable ? 'Toque para trocar' : 'Toque para ver o jogador'}
+          </Text>
+        )}
       </View>
 
       <View className="w-full" style={{ aspectRatio: 4 / 3, borderRadius: 12, overflow: 'hidden' }}>

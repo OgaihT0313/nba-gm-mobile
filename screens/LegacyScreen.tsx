@@ -8,6 +8,8 @@ import Screen, { Body } from '../components/ui/Screen';
 import { Panel, ScreenTitle, SectionLabel, BodyText, FilterRow, TeamLogo, Tag, GhostButton, MonoLabel } from '../components/ui/kit';
 import { useDesktop } from '../components/desktop/useDesktop';
 import { DPage, DTitle, DTabs, Cols, Col } from '../components/desktop/kit';
+import { realSeason } from '../data/realHistory';
+import { teamNameFor } from '../src/eraIdentity';
 import {
   RESULT_LABEL, evaluateAchievements, seasonEntries, franchiseRecords, hallOfFame, hallOfFameScore, jerseyCandidates, leagueRecords,
 } from '../services/historyService';
@@ -39,11 +41,20 @@ const LegacyScreen: React.FC<Props> = ({ season, onRetireJersey }) => {
 
   // "2026-27": season n of a live save starts in 2024+n; an era save counts
   // from its own starting year.
+  const base = season.era?.seasonLabel ? parseInt(season.era.seasonLabel.slice(0, 4), 10) : 2025;
   const yearOf = (n: number) => {
-    const base = season.era?.seasonLabel ? parseInt(season.era.seasonLabel.slice(0, 4), 10) : 2025;
     const start = base + n - 1;
     return `${start}-${String(start + 1).slice(2)}`;
   };
+  // E4: what really happened that season, by its end year (data/realHistory).
+  const realName = (id: string, endYear: number) =>
+    teamNameFor(id, endYear, teamsData.find((t) => t.id === id)?.name ?? id.toUpperCase());
+  const realLine = (endYear: number) => {
+    const r = realSeason(endYear);
+    return r ? `${realName(r.champion, endYear)} venceu ${realName(r.runnerUp, endYear)} · MVP ${r.mvp} · MVP das Finais ${r.finalsMvp}` : null;
+  };
+  // The ten real seasons before this save's first one.
+  const before = Array.from({ length: 10 }, (_, i) => base - i).filter((end) => realSeason(end));
 
   const achievements = evaluateAchievements(season);
   const unlocked = achievements.filter((a) => a.unlocked).length;
@@ -108,9 +119,32 @@ const LegacyScreen: React.FC<Props> = ({ season, onRetireJersey }) => {
               </Text>
               {e.mvp ? <Text style={{ fontFamily: FONT.body500, fontSize: 13, color: COLORS.muted }}>· MVP {name(e.mvp)}</Text> : null}
             </View>
+            {realLine(base + e.season) ? (
+              <Text style={{ fontFamily: FONT.body500, fontSize: 12, color: COLORS.dim, marginTop: 4 }}>Na vida real: {realLine(base + e.season)}</Text>
+            ) : null}
           </Panel>
         );
       })}
+      {before.length ? (
+        <View style={{ gap: 8, marginTop: 8 }}>
+          <SectionLabel>Antes do seu save</SectionLabel>
+          <Panel padding={13}>
+            {before.map((end, i) => {
+              const r = realSeason(end)!;
+              return (
+                <View key={end} className="flex-row items-center" style={{ gap: 10, paddingVertical: 7, borderTopWidth: i ? 1 : 0, borderTopColor: COLORS.line }}>
+                  <Text style={{ width: 62, fontFamily: FONT.body500, fontSize: 12, color: COLORS.dim }}>{end - 1}-{String(end).slice(2)}</Text>
+                  <TeamLogo teamId={r.champion} size={18} />
+                  <View style={{ flex: 1, minWidth: 0 }}>
+                    <Text numberOfLines={1} style={{ fontFamily: FONT.body600, fontSize: 13, color: COLORS.textSoft }}>{realName(r.champion, end)} venceu {realName(r.runnerUp, end)}</Text>
+                    <Text numberOfLines={1} style={{ fontFamily: FONT.body500, fontSize: 12, color: COLORS.muted }}>MVP {r.mvp} · MVP das Finais {r.finalsMvp}</Text>
+                  </View>
+                </View>
+              );
+            })}
+          </Panel>
+        </View>
+      ) : null}
     </View>
   );
 

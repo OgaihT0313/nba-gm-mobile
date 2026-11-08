@@ -1,7 +1,8 @@
 
 import { playersData, getPlayerPositions, getPlayerAttributes, LINEUP_POSITIONS } from '../constants';
 import type { Team, Player, Coach, Event, PlayoffState, PlayoffSeries, PlayoffConference, PlayInBracket, PlayoffFormat, AllStarResult, CupState, ScheduleGame, LiveTactic, WatchPlay } from '../types';
-import { TRADE_DEADLINE_GAME } from './tradeService';
+import { tradeDeadlineGame } from './tradeService';
+import { onSeasonScale } from './scheduleService';
 import { sortStandings, compareStandings } from './scheduleService';
 import { coachOffenseMod, coachDefenseMod } from './coachService';
 import { trainerInjuryMult, trainerDurationMult, trainerLoadMult, lockerMoraleShift, lockerTraitShift } from './staffService';
@@ -1131,8 +1132,8 @@ const handleRandomEvents = (currentTeams: Team[], players: { [key: string]: Play
         }
     });
 
-    const isTradeDeadlineWindow = gamesPlayed > 40 && gamesPlayed < TRADE_DEADLINE_GAME;
-    const tradeChance = gamesPlayed >= TRADE_DEADLINE_GAME ? 0 : (isTradeDeadlineWindow ? 0.35 : 0.02);
+    const isTradeDeadlineWindow = gamesPlayed > onSeasonScale(40) && gamesPlayed < tradeDeadlineGame();
+    const tradeChance = gamesPlayed >= tradeDeadlineGame() ? 0 : (isTradeDeadlineWindow ? 0.35 : 0.02);
 
     if (Math.random() < tradeChance) {
         // Never the user's team: his roster only changes through moves he makes
@@ -1784,7 +1785,7 @@ const generateAwards = (teams: Team[], players: { [key: string]: Player }) => {
     // penalized for turnovers) plus a team-success bonus — a great player on a
     // winning team, judged on the court. Requires a roster spot and a real
     // sample.
-    const mvpPool = allPlayers.filter(p => played(p, AWARD_MIN_GP) && teamOf(p))
+    const mvpPool = allPlayers.filter(p => played(p, onSeasonScale(AWARD_MIN_GP)) && teamOf(p))
         .map(p => ({ id: p.id, score: mvpScore(p, teamOf(p)!) }));
     const mvp = weightedRandomPick(mvpPool, 6) || allPlayers[0].id;
 
@@ -1792,7 +1793,7 @@ const generateAwards = (teams: Team[], players: { [key: string]: Player }) => {
     // (bigs) — blended with the perimeter/interior defense ratings, so an elite
     // perimeter defender is a real candidate, not only rim-protecting centers
     // (the old def-rollup-only score always crowned a center).
-    const dpoyPool = allPlayers.filter(p => played(p, AWARD_MIN_GP) && teamOf(p)).map(p => {
+    const dpoyPool = allPlayers.filter(p => played(p, onSeasonScale(AWARD_MIN_GP)) && teamOf(p)).map(p => {
         const s = p.seasonStats!;
         const a = getPlayerAttributes(p);
         return { id: p.id, score: 2.4 * s.spg + 2.6 * s.bpg + 0.5 * s.rpg + 0.12 * (a.perimeterD + a.interiorD) };
@@ -1810,7 +1811,7 @@ const generateAwards = (teams: Team[], players: { [key: string]: Player }) => {
     // (Malachi Smith, 26, won it with zero banked seasons): real rookies are
     // 19-23, and an undrafted 24-year-old is about as old as one gets.
     const isRookie = (p: Player) => careersKnown ? (p.career?.seasons ?? 0) === 0 && p.age <= 24 : p.age <= 21;
-    const royPool = allPlayers.filter(p => isRookie(p) && played(p, ROOKIE_MIN_GP)).map(p => {
+    const royPool = allPlayers.filter(p => isRookie(p) && played(p, onSeasonScale(ROOKIE_MIN_GP))).map(p => {
         const s = p.seasonStats!;
         return { id: p.id, score: s.ppg + 1.2 * s.apg + 1.0 * s.rpg };
     });
@@ -1832,7 +1833,7 @@ const generateAwards = (teams: Team[], players: { [key: string]: Player }) => {
     teams.forEach(t => startersByTeam.set(t.id, new Set(getTeamRotation({ ...t, tanking: false, playerAbsences: {} }, players, 5))));
     const smoyPool = allPlayers.filter(p => {
         const team = teamOf(p);
-        return !!team && played(p, SIXTH_MAN_MIN_GP) && !startersByTeam.get(team.id)!.has(p.id);
+        return !!team && played(p, onSeasonScale(SIXTH_MAN_MIN_GP)) && !startersByTeam.get(team.id)!.has(p.id);
     }).map(p => {
         const s = p.seasonStats!;
         return { id: p.id, score: s.ppg + 0.8 * s.apg + 0.6 * s.rpg };
@@ -1844,7 +1845,7 @@ const generateAwards = (teams: Team[], players: { [key: string]: Player }) => {
     // real season. Undefined in season 1 / for fresh rookies, who have no prior
     // OVR to measure against.
     const mipPool = allPlayers
-        .filter(p => typeof p.ovrLastSeason === 'number' && p.ovr - p.ovrLastSeason! >= 1 && played(p, SIXTH_MAN_MIN_GP) && teamOf(p))
+        .filter(p => typeof p.ovrLastSeason === 'number' && p.ovr - p.ovrLastSeason! >= 1 && played(p, onSeasonScale(SIXTH_MAN_MIN_GP)) && teamOf(p))
         .map(p => {
             const s = p.seasonStats!;
             const growth = p.ovr - p.ovrLastSeason!;

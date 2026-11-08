@@ -8,7 +8,8 @@ import { PROMISE_LABEL, PROMISE_KEPT, PROMISE_BROKEN } from '../services/pressSe
 import { headlines } from '../services/headlineService';
 import { isRival, rivalryReason, revengePlayers, REVENGE_BOOST, RIVAL_WIN_MORALE, RIVAL_LOSS_MORALE } from '../services/rivalryService';
 import { currentStreak, nextGame, winProbability, teamResults } from '../services/formService';
-import { sortStandings, seasonDays, teamGamesPlayed, GAMES_PER_SEASON } from '../services/scheduleService';
+import { sortStandings, seasonDays, teamGamesPlayed, seasonGamesOf } from '../services/scheduleService';
+import SeasonSummaryCard from '../components/SeasonSummaryCard';
 import { nextStop } from '../services/seasonRunner';
 import { attentionItems, type AttentionTarget } from '../services/attentionService';
 import { COLORS, RADIUS, FONT, withAlpha, visibleTeamColor, colorDistance } from '../src/theme/tokens';
@@ -97,6 +98,8 @@ const SimulationScreen: React.FC<SimulationScreenProps> = ({
   const gp = season.gamesPlayed;
   const played = teamGamesPlayed(userTeam);
   const days = seasonDays(season.schedule);
+  // 82, or a short season's (1998-99: 50).
+  const GAMES_PER_SEASON = seasonGamesOf(season.schedule);
   const remaining = Math.max(0, GAMES_PER_SEASON - played);
   const over = season.status !== 'active';
   const phase = over ? phaseOf(season) : null;
@@ -121,6 +124,11 @@ const SimulationScreen: React.FC<SimulationScreenProps> = ({
   // Real NBA offseason moves replayed on the way into this season (era saves
   // only). Read from state, shown here because the events feed can't carry them.
   const offseasonMoves = season.gamesPlayed === 0 ? (season.lastOffseasonMoves ?? []) : [];
+  // The season just finished, as an image (Q11): from the title to opening night.
+  const lastRecord = season.seasonHistory?.[season.seasonHistory.length - 1];
+  const summaryPanel = lastRecord && (season.status !== 'active' || season.gamesPlayed === 0)
+    ? <SeasonSummaryCard season={season} record={lastRecord} />
+    : null;
   // Retirements worth naming: anyone who still mattered, and any of yours.
   const retirements = season.gamesPlayed === 0
     ? (season.lastRetirements ?? []).filter((r) => r.ovr >= 74 || r.teamId === season.userTeamId)
@@ -170,7 +178,7 @@ const SimulationScreen: React.FC<SimulationScreenProps> = ({
   const confRank = userTeam ? conf.findIndex((t) => t.id === userTeam.id) + 1 : 0;
   // Every one of the user's 82 games, in order: won / lost / still to play.
   const results = userTeam ? teamResults(season.schedule, userTeam.id) : [];
-  const strip: ('w' | 'l' | 'n')[] = Array.from({ length: 82 }, (_, i) =>
+  const strip: ('w' | 'l' | 'n')[] = Array.from({ length: GAMES_PER_SEASON }, (_, i) =>
     i < results.length ? (results[i].won ? 'w' : 'l') : 'n');
 
   // Win-chance bar colors. Two blue teams (Knicks vs Magic) made one solid
@@ -449,6 +457,7 @@ const SimulationScreen: React.FC<SimulationScreenProps> = ({
             ) : null}
 
             {promisePanel}
+            {summaryPanel}
             {movesPanel}
             {retirementsPanel}
 
@@ -563,7 +572,7 @@ const SimulationScreen: React.FC<SimulationScreenProps> = ({
           <View style={{ gap: 2 }}>
             {[0, 1].map((row) => (
               <View key={row} className="flex-row" style={{ gap: 2 }}>
-                {strip.slice(row * 41, row * 41 + 41).map((r, i) => (
+                {strip.slice(row * Math.ceil(GAMES_PER_SEASON / 2), (row + 1) * Math.ceil(GAMES_PER_SEASON / 2)).map((r, i) => (
                   <View
                     key={i}
                     style={{ flex: 1, height: 13, borderRadius: 2, backgroundColor: r === 'w' ? COLORS.good : r === 'l' ? COLORS.bad : COLORS.line }}
@@ -672,6 +681,7 @@ const SimulationScreen: React.FC<SimulationScreenProps> = ({
         ) : null}
 
         {promisePanel}
+        {summaryPanel}
         {movesPanel}
         {retirementsPanel}
 

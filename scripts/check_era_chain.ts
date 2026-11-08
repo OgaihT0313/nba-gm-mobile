@@ -4,8 +4,8 @@
 // departures and arrivals.)
 //
 //   - every summer the save has exactly the real season's franchises;
-//   - every team opens the season with a legal roster and plays 82 games
-//     (fewer in the real short seasons is not modelled: 82 everywhere);
+//   - every team opens the season with a legal roster and plays its season's
+//     games (82, or 50 in 1998-99 and 66 in 2011-12);
 //   - Michael Jordan leaves in 1993 and comes back in 1994-95 (the data's
 //     seasons; he really returned in March 1995);
 //   - the Hornets become New Orleans in 2002 and Charlotte comes back in 2004;
@@ -17,7 +17,7 @@ import './harness';
 import type { Team, Player, SeasonState } from '../types';
 import { ERAS, eraById } from '../data/eras';
 import { simulationEngine } from '../services/simulationService';
-import { generateSchedule } from '../services/scheduleService';
+import { generateSchedule, seasonGamesOf } from '../services/scheduleService';
 import { simulateOneDay } from '../services/seasonRunner';
 import { buildSeasonOwner } from '../services/ownerService';
 import { initCoaches } from '../services/coachService';
@@ -153,9 +153,11 @@ for (let y = 0; y < YEARS; y++) {
   // From the first summer on (the opening rosters are the data's own: Utah
   // starts 1979-80 with 19).
   if (y > 0) s.teams.forEach(t => check(`${label}: elenco do ${t.id}`, t.roster.length >= MIN_ROSTER_SIZE && t.roster.length <= MAX_ROSTER_SIZE, `${t.roster.length} jogadores`));
+  // 82, or the real short season's (50 in 1998-99, src/eraYear.seasonGamesFor).
+  const want = seasonGamesOf(s.schedule);
   s = playRegularSeason(s);
   const games = s.teams.map(t => (t.wins ?? 0) + (t.losses ?? 0));
-  check(`${label}: 82 jogos para todos`, games.every(g => g === 82), `${Math.min(...games)}-${Math.max(...games)}`);
+  check(`${label}: ${want} jogos para todos`, games.every(g => g === want), `${Math.min(...games)}-${Math.max(...games)}`);
   s = crown(s);
   s = startOffseason(s);
   // A comeback whose real team is the user's reaches the market with the

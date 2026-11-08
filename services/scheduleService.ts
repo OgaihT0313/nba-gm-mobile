@@ -21,7 +21,7 @@ const pairKey = (a: string, b: string) => (a < b ? `${a}::${b}` : `${b}::${a}`);
 // — critically, it also means a fixture list exists ahead of time, so
 // head-to-head and conference-record tiebreakers can be computed from real
 // recorded results instead of not existing at all.
-export const generateSchedule = (teams: Team[]): ScheduleGame[] => {
+export const generateSchedule = (teams: Team[], games: number = GAMES_PER_SEASON): ScheduleGame[] => {
     const ids = teams.map(t => t.id);
     const confOf = new Map(teams.map(t => [t.id, t.conference]));
     const conferenceSize = new Map<string, number>();
@@ -34,13 +34,13 @@ export const generateSchedule = (teams: Team[]): ScheduleGame[] => {
         const confMates = (conferenceSize.get(confOf.get(teamId)!) || 15) - 1;
         const otherConfTeams = ids.length - 1 - confMates;
         return sameConf
-            ? (GAMES_PER_SEASON * INTRA_CONF_SHARE) / Math.max(1, confMates)
-            : (GAMES_PER_SEASON * (1 - INTRA_CONF_SHARE)) / Math.max(1, otherConfTeams);
+            ? (games * INTRA_CONF_SHARE) / Math.max(1, confMates)
+            : (games * (1 - INTRA_CONF_SHARE)) / Math.max(1, otherConfTeams);
     };
 
     const gamesPlayed = new Map<string, number>(); // pairKey -> count so far
     const homeCount = new Map<string, number>(ids.map(id => [id, 0]));
-    const left = new Map<string, number>(ids.map(id => [id, GAMES_PER_SEASON]));
+    const left = new Map<string, number>(ids.map(id => [id, games]));
     const schedule: ScheduleGame[] = [];
 
     // An odd league (most eras before 2004: 23, 25, 27, 29 teams) cannot put
@@ -116,6 +116,25 @@ export const teamGamesPlayed = (team: Pick<Team, 'wins' | 'losses'> | undefined)
     (team?.wins ?? 0) + (team?.losses ?? 0);
 
 export { GAMES_PER_SEASON };
+
+/** Games each team plays in this schedule: 82, or a short season's (src/eraYear.seasonGamesFor). Empty: 82. */
+export const seasonGamesOf = (schedule: ScheduleGame[]): number => {
+    const first = schedule[0];
+    if (!first) return GAMES_PER_SEASON;
+    const id = first.homeTeamId;
+    return schedule.filter(g => g.homeTeamId === id || g.awayTeamId === id).length || GAMES_PER_SEASON;
+};
+
+// The season being played, for the day-numbered milestones written for 82
+// games (the trade deadline on day 55, the All-Star on 58...). Set from the
+// schedule by simulateOneDay and by the screens (App, CareerApp), the way
+// src/eraIdentity's year is. A 50-game season scales each of them by 50/82.
+let currentSeasonGames = GAMES_PER_SEASON;
+export const setSeasonGames = (games: number) => { currentSeasonGames = games > 0 ? games : GAMES_PER_SEASON; };
+export const seasonGamesNow = (): number => currentSeasonGames;
+/** A day written for an 82-game season, in this season's terms (unchanged at 82). */
+export const onSeasonScale = (day82: number): number =>
+    currentSeasonGames === GAMES_PER_SEASON ? day82 : Math.max(1, Math.round((day82 * currentSeasonGames) / GAMES_PER_SEASON));
 
 // --- Tiebreaker helpers, derived from recorded schedule results ---
 

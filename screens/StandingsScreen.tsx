@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { View, Text, Pressable } from 'react-native';
 
 import { SeasonState } from '../types';
-import { teamGamesPlayed, GAMES_PER_SEASON } from '../services/scheduleService';
+import { teamGamesPlayed, seasonGamesOf } from '../services/scheduleService';
 import { COLORS, FONT, onAccent } from '../src/theme/tokens';
 import Screen, { Body } from '../components/ui/Screen';
 import { ScreenTitle, BodyText, Panel } from '../components/ui/kit';
@@ -32,7 +32,7 @@ const StandingsScreen: React.FC<{ season: SeasonState }> = ({ season }) => {
   if (desktop) {
     return (
       <DPage>
-        <DTitle eyebrow={`Jogo ${teamGamesPlayed(userTeam)} de ${GAMES_PER_SEASON}`} title="Classificação" />
+        <DTitle eyebrow={`Jogo ${teamGamesPlayed(userTeam)} de ${seasonGamesOf(season.schedule)}`} title="Classificação" />
         <Cols style={{ marginTop: 24 }}>
           {(['West', 'East'] as const).map((conf) => (
             <Col key={conf}>
@@ -52,7 +52,7 @@ const StandingsScreen: React.FC<{ season: SeasonState }> = ({ season }) => {
 
   return (
     <Screen heroHeight={100}>
-      <ScreenTitle title="Classificação" label={`Jogo ${teamGamesPlayed(userTeam)} de ${GAMES_PER_SEASON}`} />
+      <ScreenTitle title="Classificação" label={`Jogo ${teamGamesPlayed(userTeam)} de ${seasonGamesOf(season.schedule)}`} />
 
       <Body top={0} gap={12}>
         <View className="flex-row" style={{ gap: 4, backgroundColor: COLORS.surface, borderRadius: 12, padding: 4 }}>

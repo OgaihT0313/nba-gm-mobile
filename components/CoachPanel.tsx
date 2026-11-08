@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, Pressable, Modal, ScrollView } from 'react-native';
+import { View, Text, ScrollView } from 'react-native';
 import { Team, Coach } from '../types';
 import { coachOf } from '../constants';
 import { coachFit, reputation, generateCandidates } from '../services/coachService';
@@ -7,6 +7,7 @@ import Icon from './Icon';
 import { MonoLabel, Panel, CtaButton, GhostButton, BodyText } from './ui/kit';
 import { COLORS, FONT, RADIUS, withAlpha, themeMode } from '../src/theme/tokens';
 import BottomSheet from './ui/BottomSheet';
+import ConfirmDialog, { dialogText, dialogStrong } from './ui/ConfirmDialog';
 
 // A function, not a constant: COLORS changes with the light/dark mode.
 const fitTable = (): { min: number; label: string; color: string }[] => [
@@ -96,25 +97,18 @@ const CoachPanel: React.FC<CoachPanelProps> = ({ team, coaches, editable, onFire
       ) : null}
 
       {/* Fire confirmation */}
-      <Modal visible={confirmFire} transparent animationType="fade" onRequestClose={() => setConfirmFire(false)}>
-        <Pressable accessible={false} className="flex-1 bg-black/70 items-center justify-center p-4" onPress={() => setConfirmFire(false)}>
-          <Pressable className="bg-panel border border-line rounded-3xl p-6 w-full max-w-sm gap-4" onPress={(e) => e.stopPropagation()}>
-            <Text className="text-xl font-black uppercase italic tracking-tight text-fg">Demitir técnico?</Text>
-            <Text className="text-sm text-fg-dim leading-5">
-              <Text className="font-bold text-fg">{current?.name}</Text> deixa o comando do {team.name}. Você pode contratar um substituto na sequência.
-            </Text>
-            <View className="flex-row gap-3 justify-end">
-              <Pressable accessibilityRole="button" onPress={() => setConfirmFire(false)} className="px-4 py-2 rounded-xl"><Text className="text-sm font-bold text-fg-soft">Cancelar</Text></Pressable>
-              <Pressable accessibilityRole="button"
-                onPress={() => { setConfirmFire(false); onFire?.(); openHiring(); }}
-                className="px-4 py-2 rounded-xl bg-red-600"
-              >
-                <Text className="text-sm font-black uppercase text-white">Demitir</Text>
-              </Pressable>
-            </View>
-          </Pressable>
-        </Pressable>
-      </Modal>
+      <ConfirmDialog
+        visible={confirmFire}
+        title="Demitir técnico?"
+        onClose={() => setConfirmFire(false)}
+        confirmLabel="Demitir"
+        confirmColor={COLORS.bad}
+        onConfirm={() => { setConfirmFire(false); onFire?.(); openHiring(); }}
+      >
+        <Text style={dialogText}>
+          <Text style={dialogStrong}>{current?.name}</Text> deixa o comando do {team.name}. Você pode contratar um substituto na sequência.
+        </Text>
+      </ConfirmDialog>
 
       {/* Hire candidates */}
       <BottomSheet visible={hiring} onClose={() => setHiring(false)} title="Candidatos a técnico" maxHeight="82%">

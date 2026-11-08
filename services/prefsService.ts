@@ -9,6 +9,8 @@ interface Prefs {
   themeMode?: ThemeMode;
   /** The GM slot (1-3) the app opens on. */
   activeSlot?: number;
+  /** First-time tips already dismissed (components/ScreenTip). */
+  seenTips?: string[];
 }
 
 const load = (): Prefs => {
@@ -33,4 +35,13 @@ export const loadActiveSlot = (): number => {
 
 export const saveActiveSlot = (slot: number): void => {
   writePrefs(JSON.stringify({ ...load(), activeSlot: slot }));
+};
+
+export const hasSeenTip = (id: string): boolean => (load().seenTips ?? []).includes(id);
+
+export const markTipSeen = (id: string): void => {
+  const prefs = load();
+  const seen = new Set(prefs.seenTips ?? []);
+  seen.add(id);
+  writePrefs(JSON.stringify({ ...prefs, seenTips: [...seen] }));
 };

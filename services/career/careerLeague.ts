@@ -18,7 +18,7 @@ import { initCoaches } from '../coachService';
 import { initStaff } from '../staffService';
 import { MAX_ROSTER_SIZE } from '../tradeService';
 import { ERAS, eraById } from '../../data/eras';
-import { cupInYear } from '../../src/eraYear';
+import { cupInYear, seasonGamesFor } from '../../src/eraYear';
 import { NO_TEAM, type CareerGame, type CareerSeasonLine, type CareerState, type CareerCreation, type CombineResult } from './careerTypes';
 import { buildCareerPlayer, rollPotential, STARTING_OVR } from './careerCreate';
 import { afterGame, favorFor, roleOf, roleFromMinutes, initialTrust, applyWeeklyTraining, TRAINING_DAYS, capAtCeiling } from './careerTrust';
@@ -66,7 +66,7 @@ export const newLeague = (eraId?: string): SeasonState => {
     awardHistory: [],
     // Nobody's owner: required by the type, never read with no user team.
     owner: buildSeasonOwner(withCoaches[0], withCoaches, seedPlayers),
-    schedule: generateSchedule(withCoaches),
+    schedule: generateSchedule(withCoaches, seasonGamesFor(era ? parseInt(era.seasonLabel, 10) + 1 : null)),
     coaches,
     era: era ? { id: era.id, label: era.label, seasonLabel: era.seasonLabel } : undefined,
     eraChainIndex: era ? ERAS.findIndex((e) => e.id === era.id) : undefined,

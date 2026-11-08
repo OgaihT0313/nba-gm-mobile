@@ -10,7 +10,7 @@ import { View, Text, Pressable } from 'react-native';
 
 import { COLORS, FONT } from '../../src/theme/tokens';
 import { getTeamNickname } from '../../constants';
-import { seasonDays } from '../../services/scheduleService';
+import { seasonDays, seasonGamesOf, setSeasonGames } from '../../services/scheduleService';
 import type { PlayerAttributes } from '../../types';
 import type { CareerCreation, CareerState, CombineResult, WeeklyTraining } from '../../services/career/careerTypes';
 import { newCareer, simDay, simToNextGame, simPlayoffRound, runSummer, myTeam, me, nextGame } from '../../services/career/careerLeague';
@@ -28,7 +28,8 @@ import CareerPreDraftScreen from './CareerPreDraftScreen';
 import CareerDraftScreen from './CareerDraftScreen';
 import CareerHub from './CareerHub';
 import { Page, Label, Title, Body, Box, Option, Cta, Ghost } from './careerUi';import { setEraYear } from '../../src/eraIdentity';
-import { eraEndYearOf } from '../../src/eraYear';
+import { eraEndYearOf, seasonStartYearOf } from '../../src/eraYear';
+import { setPhotoSeason } from '../../src/seasonPhoto';
 
 
 /** Days simulated per timer tick while a run is going. */
@@ -42,6 +43,8 @@ const CareerApp: React.FC<{ onExit: () => void }> = ({ onExit }) => {
   const [career, setCareer] = useState<CareerState | null>(() => loadCareer());
   // The career's league, when it is an era one, names its teams by its season.
   setEraYear(career ? eraEndYearOf(career.league) : null);
+  setSeasonGames(seasonGamesOf(career?.league.schedule ?? []));
+  setPhotoSeason(career ? seasonStartYearOf(career.league) : null);
   const [view, setView] = useState<'start' | 'create' | 'play' | 'game' | 'eras'>('start');
   // Fase 5: the era a new career starts in (undefined = the live league).
   const [pendingEra, setPendingEra] = useState<string | undefined>(undefined);

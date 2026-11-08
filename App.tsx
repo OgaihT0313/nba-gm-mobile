@@ -14,13 +14,13 @@ import { teamsData, playersData, picksOf, releaseWithDeadMoney, getTeamNickname 
 import { ERAS, eraById } from './data/eras';
 import { simulationEngine, ROTATION_MIN, ROTATION_MAX, homeCourtOf } from './services/simulationService';
 import { buildSeasonOwner, evaluateSeasonOutcome, confidenceZone } from './services/ownerService';
-import { generateSchedule, teamGamesPlayed, GAMES_PER_SEASON } from './services/scheduleService';
-import { simulateOneDay, SimEffect, ALL_STAR_GAME, PinnedGameResult } from './services/seasonRunner';
+import { generateSchedule, teamGamesPlayed, seasonGamesOf, setSeasonGames } from './services/scheduleService';
+import { simulateOneDay, SimEffect, allStarGame, PinnedGameResult } from './services/seasonRunner';
 import { loadGame, saveGame, deleteSave, listSaves, summaryOf, GM_SLOTS, type GmSlot } from './services/saveService';
 import { loadActiveSlot, saveActiveSlot } from './services/prefsService';
 import { buildSeasonRecord, bannerYears } from './services/historyService';
 import { canPromiseMinutes, promiseSeason, PROMISE_MPG } from './services/developmentService';
-import { MIN_ROSTER_SIZE, TRADE_DEADLINE_GAME, evaluateTradeLegality } from './services/tradeService';
+import { MIN_ROSTER_SIZE, tradeDeadlineGame, evaluateTradeLegality } from './services/tradeService';
 import { initialPickAssets, PICK_WINDOW, makeUserPick, scoutProspect, consensusValue } from './services/draftService';
 import { signFreeAgentLegality, evaluateSigningInterest, signPlayer, askingSalary } from './services/freeAgencyService';
 import { resolveDecision } from './services/decisionService';
@@ -64,7 +64,13 @@ import { IconName } from './components/Icon';
 import { setEraYear } from './src/eraIdentity';
 import { WatchListContext, type WatchListValue } from './components/WatchListContext';
 import { LeagueContext, type LeagueValue } from './components/LeagueContext';
-import { eraEndYearOf, cupInYear } from './src/eraYear';
+import { eraEndYearOf, cupInYear, seasonGamesFor, seasonStartYearOf } from './src/eraYear';
+import { setPhotoSeason } from './src/seasonPhoto';
+import { realSeason } from './data/realHistory';
+import { teamNameFor } from './src/eraIdentity';
+import ScreenTip, { tipFor } from './components/ScreenTip';
+import UndoBar from './components/UndoBar';
+import { buzzSuccess, buzzSoft } from './services/haptics';
 
 type AppView =
   | 'era-select' | 'team-select' | 'team-confirm' | 'home' | 'teams' | 'team-detail' | 'scout' | 'my-team' | 'draft' | 'free-agency'
@@ -137,6 +143,19 @@ export default function App() {
   // keeps the screen decoupled from season shape).
   // `decider`: the user's Game 7, played in the same 3D screen (see startDecider).
   const [watchGame, setWatchGame] = useState<{ home: Team; away: Team; decider?: string } | null>(null);
+  // Q9: the last roster move (a cut, a trade, a signing) can be taken back
+  // until the next day is played. The save before it, kept in memory only.
+  const [undo, setUndo] = useState<{ label: string; snapshot: SeasonState; day: number; status: SeasonState['status']; slot: GmSlot } | null>(null);
+  const undoOpen = !!undo && !!season && undo.slot === activeSlot && season.gamesPlayed === undo.day && season.status === undo.status;
+  const rememberUndo = (label: string) => {
+    if (season) setUndo({ label, snapshot: season, day: season.gamesPlayed, status: season.status, slot: activeSlot });
+  };
+  const handleUndo = () => {
+    if (!undo || !undoOpen) return;
+    setSeason(undo.snapshot);
+    addNotification(`Desfeito: ${undo.label.charAt(0).toLowerCase()}${undo.label.slice(1)}.`, 'info');
+    setUndo(null);
+  };
   const [selectedTeamId, setSelectedTeamId] = useState<string | null>(null);
   // Set by a team page's "Abrir negociação": the Trade Center opens with them.
   const [tradePartnerId, setTradePartnerId] = useState<string | null>(null);
@@ -153,6 +172,8 @@ export default function App() {
   const picking = view === 'era-select' || view === 'team-select' || view === 'team-confirm';
   const pickingEra = picking && pendingEraId ? eraById(pendingEraId) : undefined;
   setEraYear(picking ? (pickingEra ? parseInt(pickingEra.seasonLabel, 10) + 1 : null) : eraEndYearOf(season));
+  setSeasonGames(seasonGamesOf(season?.schedule ?? []));
+  setPhotoSeason(season && !picking ? seasonStartYearOf(season) : null);
   const [notifications, setNotifications] = useState<NotificationType[]>([]);
 
   // Date.now() alone collides when several events fire in the same tick
@@ -321,6 +342,9 @@ export default function App() {
   // proceeds exactly like a normal day advance.
   const finishWatchGame = (scoreHome: number, scoreAway: number, minutes?: { [playerId: string]: number }) => {
     if (!season || !watchGame) return;
+    // The final buzzer of a game you watched: a win buzzes, a loss taps.
+    const userWon = (scoreHome > scoreAway ? watchGame.home.id : watchGame.away.id) === season.userTeamId;
+    if (userWon) buzzSuccess(); else buzzSoft();
     if (watchGame.decider) {
       resolveDecider(scoreHome > scoreAway ? watchGame.home.id : watchGame.away.id);
       return;
@@ -370,6 +394,7 @@ export default function App() {
           conf.bracket.round1.some((s) => s.m.some((t) => t?.id === season.userTeamId));
         const madePlayoffs = inRound1(updatedPlayoff.east) || inRound1(updatedPlayoff.west);
         const wonTitle = newChampion.id === season.userTeamId;
+        if (wonTitle) buzzSuccess();
         const inConfFinals = (conf: typeof updatedPlayoff.east) =>
           conf.bracket.round3.some((s) => s.m.some((t) => t?.id === season.userTeamId));
         const reachedConfFinals = inConfFinals(updatedPlayoff.east) || inConfFinals(updatedPlayoff.west);
@@ -396,6 +421,13 @@ export default function App() {
           },
         ];
       }
+      // E4: an era save hears who really won this season, next to its own champion.
+      const endYear = newChampion ? eraEndYearOf(prev) : null;
+      const real = endYear !== null ? realSeason(endYear) : undefined;
+      const realName = (id: string) => teamNameFor(id, endYear, prev.teams.find((t) => t.id === id)?.name ?? id.toUpperCase());
+      const realEvent = real && endYear !== null
+        ? [{ message: `📜 Na história real, ${endYear - 1}-${String(endYear).slice(2)} terminou com o ${realName(real.champion)} campeão sobre o ${realName(real.runnerUp)} (MVP das Finais: ${real.finalsMvp}).${real.champion === newChampion!.id ? ' Desta vez, também.' : ''}`, type: 'era' as const }]
+        : [];
       const seasonHistory = newChampion
         ? [...(prev.seasonHistory ?? []), buildSeasonRecord(prev, updatedPlayoff, newChampion)]
         : prev.seasonHistory;
@@ -404,6 +436,7 @@ export default function App() {
         playoff: updatedPlayoff,
         seasonHistory,
         status: newChampion ? 'offseason' : prev.status,
+        events: realEvent.length ? [...realEvent, ...prev.events].slice(0, 60) : prev.events,
         owner: ownerAfter,
         awardHistory,
         gmLegacy: newChampion
@@ -516,6 +549,8 @@ export default function App() {
   };
 
   const handleSignFreeAgent = (playerId: string) => {
+    const name = season?.players[playerId]?.name;
+    if (name) rememberUndo(`Contratação de ${name}`);
     setSeason((prev) => {
       if (!prev) return prev;
       const player = prev.players[playerId];
@@ -557,6 +592,9 @@ export default function App() {
     // so the flag just has to survive onto the asset that changes hands.
     protections: { [pickId: string]: number } = {},
   ) => {
+    const partnerName = season?.teams.find((t) => t.id === partnerTeamId)?.name;
+    if (partnerName) rememberUndo(`Troca com o ${partnerName}`);
+    buzzSuccess();
     setSeason((prev) => {
       if (!prev) return prev;
       const sortByOvr = sortByOvrWith(prev.players);
@@ -605,6 +643,8 @@ export default function App() {
         return;
       }
     }
+    if (cpuNow) rememberUndo(`Troca com o ${cpuNow.name}`);
+    buzzSuccess();
     setSeason((prev) => {
       if (!prev) return prev;
       const offer = prev.tradeOffers?.find((o) => o.id === offerId);
@@ -695,6 +735,12 @@ export default function App() {
     });
   };
 
+  // "Melhor cinco": every pinned starter let go, so getLineup puts the best
+  // available player in each slot again.
+  const handleAutoLineup = () => {
+    setSeason((prev) => (prev ? { ...prev, teams: prev.teams.map((t) => (t.id === prev.userTeamId ? { ...t, starters: undefined } : t)) } : prev));
+  };
+
   // How many players share real minutes — clamped here (not just in the sim)
   // so the stored value itself is always valid, not merely read-clamped.
   const handleSetRotationSize = (size: number) => {
@@ -772,6 +818,7 @@ export default function App() {
       addNotification(`Você não pode ficar com menos de ${MIN_ROSTER_SIZE} jogadores no elenco.`, 'error');
       return;
     }
+    rememberUndo(`Dispensa de ${playerNow.name}`);
     setSeason((prev) => {
       if (!prev) return prev;
       const team = prev.teams.find((t) => t.id === prev.userTeamId);
@@ -890,8 +937,8 @@ export default function App() {
       cup: cupInYear(era ? parseInt(era.seasonLabel, 10) + 1 : null) ? simulationEngine.initCupGroups(teamsWithCoaches) : undefined,
       gmLegacy: { seasons: 0, titles: 0 },
       awardHistory: [],
-      owner: buildSeasonOwner(userTeam, teamsWithCoaches, seedPlayers),
-      schedule: generateSchedule(teamsWithCoaches),
+      owner: buildSeasonOwner(userTeam, teamsWithCoaches, seedPlayers, undefined, seasonGamesFor(era ? parseInt(era.seasonLabel, 10) + 1 : null)),
+      schedule: generateSchedule(teamsWithCoaches, seasonGamesFor(era ? parseInt(era.seasonLabel, 10) + 1 : null)),
       coaches,
       era: era ? { id: era.id, label: era.label, seasonLabel: era.seasonLabel } : undefined,
       // Real-history replay starts at this era's own chain entry — see
@@ -1029,6 +1076,7 @@ export default function App() {
           currentDraft={currentDraft}
           onWaive={handleWaivePlayer}
           onSetStarter={handleSetStarter}
+          onAutoLineup={handleAutoLineup}
           onFireCoach={handleFireCoach}
           onHireCoach={handleHireCoach}
           seasonStatus={season.status}
@@ -1053,13 +1101,13 @@ export default function App() {
     if (view === 'scout' || view === 'search') return <Scout players={season.players} teams={season.teams} userTeamId={season.userTeamId} autoFocusSearch={view === 'search'} />;
     if (view === 'standings') return <StandingsScreen season={season} />;
     if (view === 'leaders') return <LeagueLeaders players={season.players} teams={season.teams} userTeamId={season.userTeamId} />;
-    if (view === 'allstar') return <AllStarWeekend userTeamId={season.userTeamId} allStar={season.allStar} players={season.players} teams={season.teams} allStarGame={ALL_STAR_GAME} />;
+    if (view === 'allstar') return <AllStarWeekend userTeamId={season.userTeamId} allStar={season.allStar} players={season.players} teams={season.teams} allStarGame={allStarGame()} />;
     if (view === 'teams') {
       return <TeamsList teams={season.teams} players={season.players} userTeamId={season.userTeamId} schedule={season.schedule} rivalIds={season.teams.filter((x) => isRival(season.rivalries, x.id)).map((x) => x.id)} onSelect={(id) => { setSelectedTeamId(id); setView('team-detail'); }} />;
     }
     if (view === 'team-detail') {
       const t = season.teams.find((x) => x.id === selectedTeamId);
-      if (t) return <TeamDetail team={t} players={season.players} teams={season.teams} coaches={season.coaches} currentDraft={currentDraft} rivalry={isRival(season.rivalries, t.id) ? season.rivalries![t.id] : undefined} userTeam={season.teams.find((x) => x.id === season.userTeamId)} schedule={season.schedule} onOpenTrade={season.gamesPlayed < TRADE_DEADLINE_GAME && season.status === 'active' && t.id !== season.userTeamId ? () => { setTradePartnerId(t.id); setView('trade'); } : undefined} onBack={() => setView('teams')} />;
+      if (t) return <TeamDetail team={t} players={season.players} teams={season.teams} coaches={season.coaches} currentDraft={currentDraft} rivalry={isRival(season.rivalries, t.id) ? season.rivalries![t.id] : undefined} userTeam={season.teams.find((x) => x.id === season.userTeamId)} schedule={season.schedule} onOpenTrade={season.gamesPlayed < tradeDeadlineGame() && season.status === 'active' && t.id !== season.userTeamId ? () => { setTradePartnerId(t.id); setView('trade'); } : undefined} onBack={() => setView('teams')} />;
     }
     if (view === 'trade') {
       return (
@@ -1097,7 +1145,7 @@ export default function App() {
 
   const showSidebar = !['watch-game', 'home', 'era-select', 'team-select', 'team-confirm', 'career'].includes(view) && !season?.owner.fired;
   const sidebarCaption = !season ? '' : season.status === 'active'
-    ? `Jogo ${teamGamesPlayed(userTeam ?? undefined)}/${GAMES_PER_SEASON}`
+    ? `Jogo ${teamGamesPlayed(userTeam ?? undefined)}/${seasonGamesOf(season.schedule)}`
     : season.status === 'draft' ? 'Draft'
       : season.status === 'free_agency' ? 'Agência livre'
         : season.status === 'offseason' ? 'Offseason' : 'Playoffs';
@@ -1148,6 +1196,13 @@ export default function App() {
                 {renderScreen()}
               </FadeInView>
               <NotificationContainer notifications={notifications} onRemove={(id) => setNotifications((p) => p.filter((n) => n.id !== id))} />
+              {/* First visit to a main screen: one short tip (Q10). Not over a
+                  decision, which has the screen's attention first. */}
+              {undoOpen && view !== 'watch-game' && !picking ? (
+                <UndoBar label={undo!.label} onUndo={handleUndo} onDismiss={() => setUndo(null)} desktop={desktop} />
+              ) : season && !season.decisions?.length && !picking ? (
+                <ScreenTip key={`tip:${view}`} tip={tipFor(view, !!season.era)} desktop={desktop} />
+              ) : null}
             </View>
           </View>
 

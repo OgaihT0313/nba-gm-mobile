@@ -3,6 +3,8 @@ import { View, Text, Image as RNImage, StyleSheet, type StyleProp, type ImageSty
 import { Image, type ImageContentFit, type ImageContentPosition } from 'expo-image';
 import type { Player } from '../../types';
 import { getPlayerImageUrl, PLAYER_PLACEHOLDER_SVG } from '../../constants';
+import { seasonPhoto, isCurrentPhoto } from '../../src/seasonPhoto';
+import { useLeague } from '../LeagueContext';
 import { FONT } from '../../src/theme/tokens';
 
 // Every player headshot in the app goes through here.
@@ -50,18 +52,23 @@ const Avatar: React.FC<{ player: Player; style?: StyleProp<ImageStyle> }> = ({ p
 };
 
 export const PlayerPhoto: React.FC<Props> = ({ player, style, contentFit = 'cover', contentPosition, transition }) => {
-  if (player?.photoMissing) return <Avatar player={player} style={style} />;
+  // The photo follows the save (PLANO-FOTOS-ERAS fase 2): his team in the save,
+  // the season on screen. A photo of that time drops the era treatment.
+  const league = useLeague();
+  const found = seasonPhoto(player, player ? league?.teamOf(player.id) : undefined);
+  const offEra = !!player?.photoOffEra && !isCurrentPhoto(found);
+  if (player?.photoMissing && !found) return <Avatar player={player} style={style} />;
   const photo = (
     <Image
-      source={{ uri: getPlayerImageUrl(player) }}
+      source={{ uri: found?.url ?? getPlayerImageUrl(player) }}
       placeholder={{ uri: PLAYER_PLACEHOLDER_SVG }}
-      style={player?.photoOffEra ? { width: '100%', height: '100%' } : style}
+      style={offEra ? { width: '100%', height: '100%' } : style}
       contentFit={contentFit}
       contentPosition={contentPosition}
       transition={transition}
     />
   );
-  if (!player?.photoOffEra) return photo;
+  if (!offEra) return photo;
 
   const flat = (StyleSheet.flatten(style) ?? {}) as ImageStyle;
   const width = typeof flat.width === 'number' ? flat.width : undefined;

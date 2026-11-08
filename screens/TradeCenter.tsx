@@ -7,7 +7,7 @@ import {
   getTeamLogoUrl, getTeamSalary, SALARY_CAP,
   formatPositions, getPlayerPositions, picksOf, getTeamNickname, getTeamTricode, attributeColor, tricodeOf } from '../constants';
 import {
-  evaluateTradeLegality, evaluateTradeValue, TRADE_DEADLINE_GAME, playerValue, picksValue, OFFER_TTL, suggestPackage,
+  evaluateTradeLegality, evaluateTradeValue, tradeDeadlineGame, playerValue, picksValue, OFFER_TTL, suggestPackage,
 } from '../services/tradeService';
 import { projectedPickSlot } from '../services/draftService';
 import { useTheme } from '../src/theme/ThemeProvider';
@@ -231,7 +231,7 @@ const TradeCenter: React.FC<TradeCenterProps> = ({
   const hasPackage = userAssets.length + userPickIds.length > 0 && partnerAssets.length + partnerPickIds.length > 0;
 
   const legality = useMemo(() => {
-    if (gamesPlayed >= TRADE_DEADLINE_GAME) {
+    if (gamesPlayed >= tradeDeadlineGame()) {
       return { legal: false, reason: 'O prazo de trocas da temporada já passou. Volte na próxima temporada.' };
     }
     if (!userTeam || !partnerTeam || !hasPackage) return null;
@@ -336,7 +336,7 @@ const TradeCenter: React.FC<TradeCenterProps> = ({
   const outgoingCount = userAssets.length + userPickIds.length;
   const incomingCount = partnerAssets.length + partnerPickIds.length;
 
-  const daysLeft = Math.max(0, TRADE_DEADLINE_GAME - gamesPlayed);
+  const daysLeft = Math.max(0, tradeDeadlineGame() - gamesPlayed);
   // In the draft and free agency the day counter is back at zero, so a day
   // count would read "Prazo final em 55 dias" all summer.
   const deadlineLabel = offseason ? 'Trocas abertas na offseason'
@@ -971,7 +971,7 @@ const OffersInbox: React.FC<{
               ? { t: 'Justa', c: COLORS.textSoft }
               : { t: 'Ruim', c: COLORS.bad };
           const left = offer.day !== undefined
-            ? Math.max(1, Math.min(OFFER_TTL - (gamesPlayed - offer.day), TRADE_DEADLINE_GAME - gamesPlayed))
+            ? Math.max(1, Math.min(OFFER_TTL - (gamesPlayed - offer.day), tradeDeadlineGame() - gamesPlayed))
             : undefined;
 
           return (

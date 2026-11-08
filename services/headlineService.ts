@@ -16,7 +16,7 @@ import type { Player, SeasonState, Team } from '../types';
 import { formatMark, approaching, MILESTONES } from './milestoneService';
 import { mvpScore } from './simulationService';
 import { currentStreak } from './formService';
-import { sortStandings, teamGamesPlayed, GAMES_PER_SEASON } from './scheduleService';
+import { sortStandings, teamGamesPlayed, seasonGamesOf, onSeasonScale } from './scheduleService';
 import { confidenceZone } from './ownerService';
 import { PROMISE_LABEL } from './pressService';
 import { playoffFormatOf, seedCuts } from '../src/eraYear';
@@ -144,7 +144,7 @@ export const headlines = (season: SeasonState): Headline[] => {
 
     // --- Your promise -------------------------------------------------------
     const promise = season.owner.press?.promise;
-    if (user && promise?.kind === 'playoffs' && gp >= PROMISE_WATCH_FROM) {
+    if (user && promise?.kind === 'playoffs' && gp >= onSeasonScale(PROMISE_WATCH_FROM)) {
         const conf = sortStandings(season.teams.filter(t => t.conference === user.conference), season.schedule);
         const rank = conf.findIndex(t => t.id === user.id) + 1;
         const safe = rank <= seedCuts(playoffFormatOf(season)).direct;
@@ -154,7 +154,7 @@ export const headlines = (season: SeasonState): Headline[] => {
             title: safe
                 ? `${user.name} no caminho da promessa`
                 : `Promessa em risco: ${user.name} é o ${rank}º`,
-            sub: `Você prometeu ${PROMISE_LABEL[promise.kind]} na coletiva do dia ${promise.day}. Faltam ${GAMES_PER_SEASON - teamGamesPlayed(user)} jogos.`,
+            sub: `Você prometeu ${PROMISE_LABEL[promise.kind]} na coletiva do dia ${promise.day}. Faltam ${seasonGamesOf(season.schedule) - teamGamesPlayed(user)} jogos.`,
             tone: safe ? 'good' : 'warn',
             weight: safe ? 30 : 65,
         });

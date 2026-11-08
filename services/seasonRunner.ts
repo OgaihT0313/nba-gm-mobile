@@ -12,11 +12,11 @@
 
 import { Team, Player, SeasonState } from '../types';
 import { simulationEngine, DEFAULT_ROTATION_SIZE } from './simulationService';
-import { TRADE_DEADLINE_GAME, generateCpuTradeOffer, OFFER_TTL, MAX_PENDING_OFFERS } from './tradeService';
+import { tradeDeadlineGame, generateCpuTradeOffer, OFFER_TTL, MAX_PENDING_OFFERS } from './tradeService';
 import { projectConfidence, confidenceZone, shouldFireMidSeason } from './ownerService';
 import { generateDecisions } from './decisionService';
 import { notePressHeld } from './pressService';
-import { seasonDays } from './scheduleService';
+import { seasonDays, seasonGamesOf, setSeasonGames, onSeasonScale } from './scheduleService';
 import { playoffFormatOf } from '../src/eraYear';
 import { watchNews } from './watchListService';
 import { trackMoves, applyRevengeNights, markRevengeFaced, settleUserGame, isRival } from './rivalryService';
@@ -26,6 +26,8 @@ import { milestonesCrossed, MILESTONE_MORALE } from './milestoneService';
 // Roughly where the real All-Star break falls on the 82-game calendar, a few
 // games after the trade deadline.
 export const ALL_STAR_GAME = 58;
+/** The All-Star break of the season being played: day 58 of 82, in proportion in a short season. */
+export const allStarGame = (): number => onSeasonScale(ALL_STAR_GAME);
 // Group-stage window for the NBA Cup — knockout resolves at the same checkpoint.
 export const CUP_GROUP_END = 16;
 // Daily odds a CPU GM calls the user with an offer, and with names on his trade block.
@@ -50,8 +52,8 @@ export function nextStop(season: SeasonState): { target: number; label: string }
         { target: rivalDay - 1, label: 'Até o rival' },
         ...(season.cup ? [{ target: CUP_GROUP_END, label: 'Até a Copa' }] : []),
         { target: Math.floor(days / 2), label: 'Metade' },
-        { target: TRADE_DEADLINE_GAME - 1, label: 'Até o prazo' },
-        { target: ALL_STAR_GAME, label: 'All-Star' },
+        { target: tradeDeadlineGame() - 1, label: 'Até o prazo' },
+        { target: allStarGame(), label: 'All-Star' },
         { target: days, label: 'Até o fim' },
     ];
     return stops.filter(s => s.target > gp).sort((a, b) => a.target - b.target)[0];
@@ -93,6 +95,9 @@ export interface PinnedGameResult {
 export function simulateOneDay(season: SeasonState, pinnedResult?: PinnedGameResult): { season: SeasonState; effects: SimEffect[]; fired: boolean } {
     const effects: SimEffect[] = [];
     const notify = (message: string, type: string) => effects.push({ kind: 'notification', message, type });
+    // A short season (1998-99, 2011-12) moves every day-numbered milestone
+    // with it (scheduleService.onSeasonScale).
+    setSeasonGames(seasonGamesOf(season.schedule));
 
     // Deep clone, not a shallow array copy — the loop below mutates team objects
     // in place (wins/losses/stats), and a shallow copy would mutate the same
@@ -195,7 +200,7 @@ export function simulateOneDay(season: SeasonState, pinnedResult?: PinnedGameRes
     let nextCup = season.cup;
     let nextTradeOffers = season.tradeOffers || [];
 
-    if (nextGamesPlayed === TRADE_DEADLINE_GAME) {
+    if (nextGamesPlayed === tradeDeadlineGame()) {
         notify('🔒 PRAZO DE TROCAS! Nenhuma troca mais até a próxima temporada.', 'trade');
         nextTradeOffers = []; // pending offers expire at the deadline
         // Same moment a real front office decides whether it is buying or
@@ -213,7 +218,7 @@ export function simulateOneDay(season: SeasonState, pinnedResult?: PinnedGameRes
     const userTeamNow0 = teamsAfterEvents.find(t => t.id === season.userTeamId);
     const onBlock = (userTeamNow0?.tradeBlockIds ?? []).filter(id => userTeamNow0!.roster.includes(id));
     const offerChance = onBlock.length ? OFFER_CHANCE_ON_BLOCK : OFFER_CHANCE;
-    if (nextGamesPlayed < TRADE_DEADLINE_GAME && nextTradeOffers.length < MAX_PENDING_OFFERS && Math.random() < offerChance) {
+    if (nextGamesPlayed < tradeDeadlineGame() && nextTradeOffers.length < MAX_PENDING_OFFERS && Math.random() < offerChance) {
         const userTeamObj = userTeamNow0;
         if (userTeamObj) {
             const target = onBlock.length ? onBlock[Math.floor(Math.random() * onBlock.length)] : undefined;
@@ -233,7 +238,7 @@ export function simulateOneDay(season: SeasonState, pinnedResult?: PinnedGameRes
         notify(`🏆 COPA NBA! O ${championName} venceu o torneio!`, 'info');
     }
 
-    if (nextGamesPlayed === ALL_STAR_GAME) {
+    if (nextGamesPlayed === allStarGame()) {
         nextAllStar = simulationEngine.simulateAllStarWeekend(teamsAfterEvents, newPlayers, nextGamesPlayed);
         notify('🌟 Bem-vindo ao All-Star Weekend! Confira as escalações.', 'info');
         effects.push({ kind: 'view', view: 'allstar' });

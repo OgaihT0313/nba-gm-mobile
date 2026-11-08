@@ -7,7 +7,7 @@
 import type { Team, Player, SeasonState, DraftState, Event, OffseasonMove } from '../types';
 import { getTeamSalary, LUXURY_TAX, teamsData } from '../constants';
 import { teamNameFor } from '../src/eraIdentity';
-import { eraEndYearOf, hasCup } from '../src/eraYear';
+import { eraEndYearOf, hasCup, seasonGamesFor } from '../src/eraYear';
 import { ERAS, currentEra } from '../data/eras';
 import { simulationEngine } from './simulationService';
 import { buildSeasonOwner, luxuryTaxConfidenceHit } from './ownerService';
@@ -392,7 +392,9 @@ const startSeasonCore = (prev: SeasonState): SeasonState => {
   for (const id in prev.players) freshPlayers[id] = { ...prev.players[id], seasonStats: undefined };
   // Re-derive the owner mandate now that rosters are final, carrying
   // confidence forward from last season's judgment.
-  let owner = uTeam ? buildSeasonOwner(uTeam, prev.teams, freshPlayers, prev.owner) : prev.owner;
+  // A short season (1998-99, 2011-12) has fewer games, and the owner's target with them.
+  const games = seasonGamesFor(eraEndYearOf(prev));
+  let owner = uTeam ? buildSeasonOwner(uTeam, prev.teams, freshPlayers, prev.owner, games) : prev.owner;
   // The luxury tax bill lands on opening night, on rosters that are now final.
   const payroll = uTeam ? getTeamSalary(uTeam, freshPlayers) : 0;
   const taxHit = luxuryTaxConfidenceHit(payroll);
@@ -414,7 +416,7 @@ const startSeasonCore = (prev: SeasonState): SeasonState => {
     owner,
     // The Copa NBA only from 2023-24 on (src/eraYear.hasCup).
     cup: hasCup(prev) ? simulationEngine.initCupGroups(prev.teams) : undefined,
-    schedule: generateSchedule(prev.teams),
+    schedule: generateSchedule(prev.teams, games),
     staffMarket: undefined,
   };
 };

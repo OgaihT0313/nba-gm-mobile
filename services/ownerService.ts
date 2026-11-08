@@ -1,3 +1,4 @@
+import { seasonGamesNow, onSeasonScale } from './scheduleService';
 import { Team, Player, OwnerMandate, OwnerExpectation } from '../types';
 import { LUXURY_TAX } from '../constants';
 import { settlePromise } from './pressService';
@@ -95,13 +96,17 @@ export const projectConfidence = (owner: OwnerExpectation, team: Team): number =
     // judgment (evaluateSeasonOutcome) ignores it entirely and uses the real
     // record.
     const PRIOR_GAMES = 20;
-    const observed = (wins / gp) * 82;
+    // Projected over this season's length (50 in 1998-99): targetWins is in
+    // the same terms (buildSeasonOwner), and a win counts for as much of the
+    // season as 2.2 of 82 do.
+    const G = seasonGamesNow();
+    const observed = (wins / gp) * G;
     const projWins = (observed * gp + owner.targetWins * PRIOR_GAMES) / (gp + PRIOR_GAMES);
     // Each win above/below the target is worth ~2.2 points, centered at 60 so a
     // team exactly on target sits comfortably clear of the danger zone. Last
     // season's goodwill or grudge (carryOver) fades out by the halfway mark.
-    const carry = (owner.carryOver ?? 0) * Math.max(0, 1 - gp / CARRY_FADE_GAMES);
-    return clamp(Math.round(60 + (projWins - owner.targetWins) * 2.2 + carry) + (owner.adjustment ?? 0), 0, 100);
+    const carry = (owner.carryOver ?? 0) * Math.max(0, 1 - gp / onSeasonScale(CARRY_FADE_GAMES));
+    return clamp(Math.round(60 + (projWins - owner.targetWins) * winWeight() + carry) + (owner.adjustment ?? 0), 0, 100);
 };
 
 /**
@@ -119,8 +124,11 @@ export const luxuryTaxConfidenceHit = (payroll: number): number =>
 // bottomed out — a genuine collapse of a team that was expected to win, not a
 // cold week. A rebuild mandate has such a low target that confidence never
 // craters from losing, so those GMs are effectively safe (as they should be).
+/** Confidence points per win against the target: 2.2 in 82 games, more per win in a shorter season. */
+const winWeight = (): number => (2.2 * 82) / seasonGamesNow();
+
 export const shouldFireMidSeason = (owner: OwnerExpectation, gamesPlayed: number): boolean =>
-    gamesPlayed >= 41 && owner.confidence <= 5;
+    gamesPlayed >= onSeasonScale(41) && owner.confidence <= 5;
 
 // End-of-season judgment, run when a champion is crowned. Folds the playoff
 // outcome into the final confidence and decides whether the owner keeps the GM.
@@ -134,7 +142,7 @@ export const evaluateSeasonOutcome = (
     reachedConfFinals = false
 ): { confidence: number; fired: boolean; message: string } => {
     const wins = team.wins || 0;
-    let c = clamp(Math.round(60 + (wins - owner.targetWins) * 2.2) + (owner.adjustment ?? 0), 0, 100);
+    let c = clamp(Math.round(60 + (wins - owner.targetWins) * winWeight()) + (owner.adjustment ?? 0), 0, 100);
     // What you promised in front of the cameras, kept or broken. Before the
     // playoff bonus so a title still overrides everything.
     const promise = settlePromise(owner.press?.promise, madePlayoffs, reachedConfFinals || wonTitle);
@@ -180,9 +188,13 @@ export const buildSeasonOwner = (
     team: Team,
     teams: Team[],
     players: PlayerMap,
-    prior?: OwnerExpectation
+    prior?: OwnerExpectation,
+    /** Games in the season (src/eraYear.seasonGamesFor): the target is set in its terms. */
+    games = 82,
 ): OwnerExpectation => {
-    const { mandate, targetWins } = deriveMandate(team, teams, players);
+    const derived = deriveMandate(team, teams, players);
+    const mandate = derived.mandate;
+    const targetWins = games === 82 ? derived.targetWins : Math.round((derived.targetWins * games) / 82);
     const carryOver = prior ? clamp(Math.round(prior.confidence - 60), -CARRY_MAX, CARRY_MAX) : 0;
     return {
         mandate,

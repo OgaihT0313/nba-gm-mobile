@@ -1,3 +1,4 @@
+import { onSeasonScale } from './scheduleService';
 import type { Player, Team, TradeOffer, DraftPickAsset } from '../types';
 import { SALARY_CAP, getTeamSalary, getPlayerPositions } from '../constants';
 import { projectedPickSlot } from './draftService';
@@ -13,6 +14,8 @@ export const MAX_ROSTER_SIZE = 18;
 // simulationService.ts's handleRandomEvents. No trades (user or CPU) happen
 // after this point until the next season.
 export const TRADE_DEADLINE_GAME = 55;
+/** The trade deadline of the season being played: day 55 of 82, in proportion in a short season. */
+export const tradeDeadlineGame = (): number => onSeasonScale(TRADE_DEADLINE_GAME);
 
 /**
  * How long a CPU offer stays on the table, in games. Before this an offer only
@@ -72,7 +75,7 @@ export const evaluateTradeLegality = (
     pickCountA = 0,
     pickCountB = 0
 ): TradeLegalityResult => {
-    if (gamesPlayed >= TRADE_DEADLINE_GAME) {
+    if (gamesPlayed >= tradeDeadlineGame()) {
         return { legal: false, reason: 'O prazo de trocas da temporada já passou. Volte na próxima temporada.' };
     }
 
@@ -434,7 +437,7 @@ export const generateCpuTradeOffer = (
      */
     forceTargetId?: string,
 ): TradeOffer | null => {
-    if (gamesPlayed >= TRADE_DEADLINE_GAME) return null;
+    if (gamesPlayed >= tradeDeadlineGame()) return null;
 
     // User players worth asking for: real rotation pieces, not fringe/end-of-bench.
     const forced = forceTargetId ? players[forceTargetId] : undefined;

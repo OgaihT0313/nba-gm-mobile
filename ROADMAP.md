@@ -21,10 +21,53 @@ só as transferências do verão e a classe do draft. Em ordem:
 | E1 | Times de expansão e a mudança do Hornets — **FEITO** (2026-11-08; medido sem o navegador, falta o aparelho) | L | M | Um save de 1979-80 ficava com 22 times para sempre, e as transferências reais para Heat, Magic etc. eram descartadas |
 | E2 | Saídas e voltas reais — **FEITO** (2026-11-08; idem) | L | M | O Jordan não saía em 1993 nem voltava; as aposentadorias eram todas sorteadas |
 | E3 | Formato dos playoffs por época: play-in só de 2020-21, 12 times com folga para os dois primeiros até 1982-83, primeira rodada em melhor de 3 até 1982-83 e melhor de 5 até 2001-02 — **FEITO** (2026-11-09; conferido no navegador, falta o aparelho) | L | P | Como a Copa NBA, que já só existe de 2023-24 |
-| E3b | Temporadas curtas: 50 jogos em 1998-99, 66 em 2011-12 | L | M | Separado do E3: o calendário, o prazo de trocas (dia 55), o All-Star (dia 58), a meta de vitórias do dono, o mínimo de jogos dos prêmios e as telas supõem 82 jogos em ~25 lugares; feito pela metade, o prazo ou o All-Star cairiam fora da temporada |
-| E4 | A história real ao lado da sua: o campeão real no fim de cada temporada, e o Legado com campeões e MVPs reais de antes do início do save | N | P | Hoje o Legado de um save de era começa vazio |
-| E5 | 2020-21 a 2024-25, para ligar 1979 à liga atual | L | M | Precisa do pipeline (`nba-gm-simulator`), que não está nesta máquina |
-| E6 | Trocas reais do prazo, no meio da temporada | L | M | Também depende do pipeline |
+| E3b | Temporadas curtas: 50 jogos em 1998-99, 66 em 2011-12 (e 72 em 2020-21, se um save chegar lá) — **FEITO** (2026-11-09; conferido no navegador, falta o aparelho) | L | M | O calendário, o prazo de trocas, o All-Star, a meta do dono, o mínimo dos prêmios e as telas supunham 82 jogos |
+| E4 | A história real ao lado da sua: o campeão real no fim de cada temporada, e o Legado com campeões e MVPs reais de antes do início do save — **FEITO** (2026-11-09; conferido no navegador, falta o aparelho) | N | P | O Legado de um save de era começava vazio |
+| E5 | 2020-21 a 2024-25, para ligar 1979 à liga atual — **BLOQUEADO**: precisa do pipeline (`nba-gm-simulator`), que não está nesta máquina | L | M | Sem ele não há elencos, transferências nem drafts reais dessas temporadas |
+| E6 | Trocas reais do prazo, no meio da temporada — **BLOQUEADO**: também depende do pipeline | L | M | Os dados das eras só trazem as movimentações do verão |
+
+### Pendências do roadmap — feitas em 2026-11-09
+
+Pedido do usuário: fazer tudo o que estava pendente. E5 e E6 dependem do pipeline e ficaram
+bloqueados.
+
+- **Q8 "Melhor cinco"** (`StartersCourt`, `App.handleAutoLineup`): o botão aparece quando os
+  titulares fixados não são os que o motor escolheria. Um toque solta todos (`team.starters`
+  vazio), e cada posição volta ao melhor disponível.
+- **Q9 Desfazer** (`App.rememberUndo`, `components/UndoBar`): antes de dispensar, trocar
+  (proposta sua ou da CPU) ou contratar, o App guarda o save. A barra "Desfazer" vale até o
+  próximo dia simulado (ou a troca de fase ou de espaço de save). Só em memória: fechar o app
+  apaga a chance de desfazer.
+- **Q10 Dicas** (`components/ScreenTip`, `prefsService.seenTips`): uma dica curta na primeira
+  vez em Simulação, Meu time, Trocas, Draft, Agência livre, Playoffs e Legado. Num save de era
+  a de Simulação explica que a liga segue a história real. "Entendi" a guarda para sempre.
+- **Q11** (`services/haptics.ts`, `components/SeasonSummaryCard.tsx`): vibra no fim de um jogo
+  assistido (vitória forte, derrota leve), numa troca fechada e no título (`expo-haptics`). O
+  resumo da temporada vira imagem (`react-native-view-shot`): no celular abre o
+  compartilhamento (`expo-sharing`); na web, onde não dá para compartilhar arquivo local, baixa
+  o PNG. O cartão fica na tela da temporada do título até a abertura da seguinte. O plugin do
+  `expo-sharing` não foi para o `app.json`: ele só serve para receber compartilhamentos.
+- **E3b Temporadas curtas** (`src/eraYear.seasonGamesFor`, `scheduleService.onSeasonScale`): o
+  calendário tem 50 jogos em 1998-99, 66 em 2011-12 e 72 em 2020-21. Todo marco escrito para 82
+  jogos é escalado na mesma proporção: prazo de trocas (`tradeDeadlineGame()`, dia 34 de 50),
+  All-Star (`allStarGame()`, dia 35), janela de trocas da CPU, mínimo de jogos dos prêmios,
+  promessa nas manchetes, demissão no meio da temporada. A meta do dono é dada em vitórias da
+  temporada (33 em 50 para quem teria 54 em 82), e cada vitória pesa 2,2 × 82/jogos. Em 82
+  jogos nada muda. Medido em `scripts/check_short_season.ts`.
+- **E4 História real** (`data/realHistory.ts`, 1979-80 a 2024-25): no Legado, cada temporada
+  traz "Na vida real" e há a seção "Antes do seu save" com as dez temporadas reais anteriores.
+  Num save de era, o título é seguido da notícia de quem foi campeão de verdade.
+- **Fotos, fase 2** (`data/photos.json` de `scripts/build_photo_index.js`, `src/seasonPhoto.ts`,
+  `PlayerPhoto`): a foto acompanha o save — a do time em que o jogador está, da temporada mais
+  próxima sem passar da atual, de 2015-16 em diante. Uma foto da época tira o tratamento de foto
+  antiga.
+- **Fotos, fase 4 — teste** (`scripts/test_commons_photos.js`, `scripts/fixtures/commons_test.json`):
+  no top 60 de 2003-04, 2008-09 e 2012-13, só 8%, 8% e 13% têm categoria "<nome> in <ano>" com
+  fotos no Commons (88-90% têm alguma foto, sem ano). Abaixo da meta de 50%: não recomendo a fase
+  4. A decisão final fica com o usuário.
+- **Correções:** o diálogo de demitir técnico (`CoachPanel`) também saía transparente na web;
+  agora usa o `components/ui/ConfirmDialog` do staff. A nota do item 12 sobre testes instáveis
+  foi atualizada.
 
 ### E3. Formato dos playoffs por época — FEITO (2026-11-09)
 
@@ -105,10 +148,10 @@ conferida com busca no código, não tela a tela.
 | Q5 | Busca global de jogador — **FEITO** (2026-10-28; conferido no navegador, falta o aparelho) | N | P | O Scout já buscava a liga toda por nome; faltava chegar nele de qualquer tela |
 | Q6 | Lista de observação — **FEITO** (2026-10-28; conferido no navegador, falta o aparelho) | N | P | Marcar alvos de outros times ou do mercado e ser avisado quando mudarem de time, ficarem livres, se machucarem ou mudarem de OVR |
 | Q7 | Comparar dois jogadores lado a lado — **FEITO** (2026-10-28; conferido no navegador, falta o aparelho) | N | P | Existe comparação de elencos, não de jogadores. Ajuda na troca e na agência livre |
-| Q8 | "Melhor cinco" com um toque | L | P | Conferir antes o que o `RotationPanel` já faz sozinho |
-| Q9 | Desfazer a última ação de elenco no mesmo dia | N | M | Dispensa ou troca por toque errado no celular não tem volta |
-| Q10 | Dicas na primeira vez de cada tela | N | P | Não há tutorial. Quem cai numa era sem conhecer a época fica sem rumo |
-| Q11 | Vibração nos momentos grandes e resumo da temporada em imagem | N | P | Acabamento: fim de jogo, troca aceita, título |
+| Q8 | "Melhor cinco" com um toque — **FEITO** (2026-11-09; conferido no navegador, falta o aparelho) | L | P | O motor já escolhia o melhor por posição; faltava soltar os titulares fixados |
+| Q9 | Desfazer a última ação de elenco no mesmo dia — **FEITO** (2026-11-09; conferido no navegador, falta o aparelho) | N | M | Dispensa ou troca por toque errado no celular não tinha volta |
+| Q10 | Dicas na primeira vez de cada tela — **FEITO** (2026-11-09; conferido no navegador, falta o aparelho) | N | P | Não havia tutorial. Quem cai numa era sem conhecer a época ficava sem rumo |
+| Q11 | Vibração nos momentos grandes e resumo da temporada em imagem — **FEITO** (2026-11-09; a imagem conferida no navegador; a vibração só no aparelho) | N | P | Acabamento: fim de jogo, troca aceita, título |
 
 ### Q1. Simular até o próximo marco (N) — FEITO (2026-10-25)
 
@@ -274,7 +317,7 @@ sem o time do usuário). O resto, em ordem. **L** = lapidar algo que existe,
 | 11 | Staff além do técnico — [PLANO-STAFF.md](PLANO-STAFF.md), aprovado 2026-10-15; **FEITO, fases 1 a 3 medidas** (2026-10-15, 2026-10-17 e 2026-11-08; falta testar no aparelho) | N | M | Profundidade, mas mexe em muitos sistemas calibrados |
 | 12 | Ajustes técnicos menores — **FEITO** (2026-10-12, menos o `diagnose_season`) | L | P | Erosão da liga e `diagnose_season` |
 | 13 | Minha Carreira (modo novo, separado do GM) — [PLANO-CARREIRA.md](PLANO-CARREIRA.md); **fases 1 a 5 FEITAS** (fase 1 em 2026-10-13; momentos, fora da quadra, legado e eras em 2026-10-17; falta o aparelho) | N | G | Pedido do usuário (2026-10-12): criar um jogador, ser draftado, momentos de decisão no jogo; liga atual e eras |
-| 14 | Fotos dos jogadores pela era — [PLANO-FOTOS-ERAS.md](PLANO-FOTOS-ERAS.md), pedido 2026-10-17; **fases 1 e 3 + tratamento de época FEITOS** (falta o aparelho; fases 2 e 4 em aberto) | L | M | Hoje toda era usa a foto mais recente: o LeBron de 2010-11 aparece com 40 anos no Lakers |
+| 14 | Fotos dos jogadores pela era — [PLANO-FOTOS-ERAS.md](PLANO-FOTOS-ERAS.md), pedido 2026-10-17; **fases 1 a 3 + tratamento de época FEITOS** (fase 2 em 2026-11-09; falta o aparelho); **fase 4 testada e não recomendada** (8-13% de fotos do ano no Commons, meta 50%) | L | M | Hoje toda era usa a foto mais recente: o LeBron de 2010-11 aparece com 40 anos no Lakers |
 
 Tamanho: P = um dia ou menos, M = alguns dias, G = uma semana ou mais.
 
@@ -630,7 +673,9 @@ re-medir `check_coaches` e `diagnose_season`.
 - **Erosão do topo — FEITO no item 7** (top-100 estável em 12 anos).
 - `diagnose_season.ts` não responde às decisões (só simula). Sem mudança.
 - `check_personality` ("elenco com líder termina com moral mais alta") e
-  `check_decisions` são instáveis: falham ~1 vez em 2 com ou sem mudança.
+  `check_decisions` eram instáveis: falhavam ~1 vez em 2 com ou sem mudança.
+  **Resolvido em 2026-10-28** (`7e077d5`, semente fixa e amostras maiores; `a3beed5`,
+  o teste do líder mede o mesmo time). Ver a [REVISAO-2026-10-25.md](REVISAO-2026-10-25.md), itens 33 e 35.
 
 ---
 

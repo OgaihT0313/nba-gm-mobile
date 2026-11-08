@@ -4,6 +4,12 @@ Pedido do usuário em 2026-10-17: o rosto do jogador deve ser o da época em que
 jogando, não a foto mais recente.
 
 **Andamento (2026-10-17):** aprovado com o fallback "foto atual com tratamento de época".
+**Fase 2 feita** (2026-11-09): `data/photos.json` (828 jogadores, 2.255 fotos por time e
+temporada, montado do cache `photo_probe.json` por `scripts/build_photo_index.js`) e
+`src/seasonPhoto.ts`; o `PlayerPhoto` usa a foto do time do jogador no save e da temporada na
+tela. **Fase 4 testada** (`scripts/test_commons_photos.js`): 8%, 8% e 13% do top 60 com foto do
+ano no Commons, contra a meta de 50% — não recomendada.
+
 **Fases 1 e 3 feitas**, junto com o fallback. Falta conferir no aparelho; as fases 2 e 4
 ainda não começaram.
 - `scripts/sync_era_photos.js` (Node, neste repositório) grava `photoUrl`, `photoYear` e

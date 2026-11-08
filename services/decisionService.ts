@@ -17,7 +17,7 @@ import { simulationEngine, ROTATION_MIN, DEFAULT_ROTATION_SIZE, TRADE_REQUEST_MO
 import { getFreeAgents, signFreeAgentLegality, evaluateSigningInterest, signPlayer, askingSalary, newContractYears, willingToReSign } from './freeAgencyService';
 import { luxuryTaxConfidenceHit } from './ownerService';
 import { playerValue, MAX_PENDING_OFFERS } from './tradeService';
-import { generateCpuTradeOffer, TRADE_DEADLINE_GAME } from './tradeService';
+import { generateCpuTradeOffer, tradeDeadlineGame } from './tradeService';
 import { sortStandings } from './scheduleService';
 import { playoffFormatOf, seedCuts } from '../src/eraYear';
 import { personalityOf, rushLoadCost } from './personalityService';
@@ -49,7 +49,7 @@ export const TRADE_REQUEST_MIN_OVR = 78;
  * When the buy-or-sell question lands. Three games before the deadline itself,
  * so the answer still has time to matter — asking on the day would be theatre.
  */
-const DEADLINE_STANCE_GAME = TRADE_DEADLINE_GAME - 3;
+const deadlineStanceGame = () => tradeDeadlineGame() - 3;
 
 /**
  * What tearing the season down costs you with the owner, by what he asked for.
@@ -484,7 +484,7 @@ export const generateDecisions = (before: SeasonState, after: SeasonState): Deci
     }
 
     // Buy or sell, once, three games out from the deadline.
-    if (after.gamesPlayed === DEADLINE_STANCE_GAME && after.status === 'active') {
+    if (after.gamesPlayed === deadlineStanceGame() && after.status === 'active') {
         out.push(buildDeadlineStance(after, teamAfter));
     }
 
