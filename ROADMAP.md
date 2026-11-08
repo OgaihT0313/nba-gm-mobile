@@ -11,6 +11,59 @@ explícito do usuário.**
 
 ---
 
+## Modo eras — pedido 2026-11-08
+
+Levantado depois de ler o encadeamento das eras: o save lia da temporada real seguinte
+só as transferências do verão e a classe do draft. Em ordem:
+
+| # | Item | Tipo | Tamanho | Por quê |
+|---|------|------|---------|---------|
+| E1 | Times de expansão e a mudança do Hornets — **FEITO** (2026-11-08; medido sem o navegador, falta o aparelho) | L | M | Um save de 1979-80 ficava com 22 times para sempre, e as transferências reais para Heat, Magic etc. eram descartadas |
+| E2 | Saídas e voltas reais — **FEITO** (2026-11-08; idem) | L | M | O Jordan não saía em 1993 nem voltava; as aposentadorias eram todas sorteadas |
+| E3 | Formato da liga por época: play-in só de 2020-21, 12 times nos playoffs até 1983-84, primeira rodada em melhor de 5 até 2002-03, temporadas curtas (1998-99, 2011-12) | L | P | Como a Copa NBA, que já só existe de 2023-24 |
+| E4 | A história real ao lado da sua: o campeão real no fim de cada temporada, e o Legado com campeões e MVPs reais de antes do início do save | N | P | Hoje o Legado de um save de era começa vazio |
+| E5 | 2020-21 a 2024-25, para ligar 1979 à liga atual | L | M | Precisa do pipeline (`nba-gm-simulator`), que não está nesta máquina |
+| E6 | Trocas reais do prazo, no meio da temporada | L | M | Também depende do pipeline |
+
+### E1 e E2. A liga real em volta do save — FEITO (2026-11-08)
+
+`services/eraHistoryService.ts`, chamado em `startOffseason` quando o save tem uma
+temporada real seguinte (`ERAS[eraChainIndex + 1]`):
+- **Mudança de cidade** (`applyRelocations`): um id que sai dos dados e outro que entra,
+  com a maioria dos jogadores indo de um para o outro, é o mesmo time. Só acontece com o
+  Hornets (`cha` → `nop`, 2002). Toda referência ao id antigo no save troca de nome:
+  elencos, escolhas de draft, histórico, rivalidades, o próprio time do usuário.
+- **Expansão** (`expansionTeams`): os times que a temporada real tem e o save não entram
+  antes das transferências, com técnico, staff da CPU e as próprias escolhas a partir do
+  draft seguinte. O deste verão já foi montado pela campanha anterior, que eles não têm. O
+  elenco vem das transferências reais (o draft de expansão), das chegadas e da agência
+  livre da CPU.
+- **Saídas** (`realDepartures`): jogador real ativo no save que não está na temporada real
+  seguinte deixa a liga, aposentado como qualquer outro. O sorteio de aposentadoria não
+  mexe mais em jogadores reais que jogaram a temporada seguinte. Jogadores gerados
+  (drafts depois do fim da corrente, não draftados, o jogador do Minha Carreira) seguem o
+  sorteio.
+- **Chegadas e voltas** (`realArrivals`): quem está num elenco real e em nenhum elenco do
+  save chega com o rating real daquele ano, mantendo carreira e prêmios do save. Vai para o
+  time real se for da CPU e tiver vaga. Se o time real for o do usuário, vai para o mercado
+  com a preferência dele (a CPU não contrata antes da abertura). Os calouros do draft real
+  continuam vindo pelo draft.
+- **Draft real mais curto que a liga:** 1997, 2001 e 2002 têm 28 escolhas para 29 times
+  (escolhas perdidas). A última escolha ficava sem ninguém e o draft quebrava. O
+  `generateRealDraftClass` completa com recrutas gerados na posição deles.
+- **Técnico "TBD":** 428 times das eras não têm o nome do técnico nos dados, e o jogo criava
+  um técnico chamado "TBD". Agora sai um nome sorteado, e a tela de confirmação não mostra a
+  linha.
+
+**Medido** (`scripts/check_era_chain.ts`, save do Bulls de 1979-80 por 30 temporadas):
+22 → 23 → 25 → 27 → 29 → 30 times nos anos reais, New Orleans em 2002 e Charlotte de volta
+em 2004, nenhum elenco fora do limite, 82 jogos para todos. O Jordan sai em 1993-94, volta
+em 1994-95 com a preferência do usuário (o Bulls), sai em 1998-99 e volta pelo Wizards em
+2002-03 (os dados não o têm em 2001-02). Jogadores reais no time real: 92% depois de um
+verão, por volta de 65-70% depois de dez; na liga, 97-100%.
+
+---
+
 ## Qualidade de vida — pedido 2026-10-25
 
 O usuário pediu um roadmap de qualidade de vida, em ordem, e o início do item 1. A

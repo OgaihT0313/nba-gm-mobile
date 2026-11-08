@@ -420,7 +420,14 @@ const refillCpuRole = (team: Team, role: StaffRole): StaffMember => {
     const share = (left / openings) * 1.8;
     let r = 1;
     for (let k = 5; k >= 1; k--) if (MAX_SALARY(k) <= room && BASE_SALARY[k] <= share) { r = k; break; }
-    return makeMember(role, r);
+    const m = makeMember(role, r);
+    // Nothing fit, so it's a 1 whatever the room: his salary is cut to what is
+    // left once every other opening keeps the floor of a 1 ($0.45M; a 1 runs
+    // $0.45-0.55M). A team carrying a $4.5M 5 in a $6M budget used to end $50-100K
+    // over when its 1s drew the top of the range.
+    const floor1 = BASE_SALARY[1] * 0.9;
+    const fits = Math.floor((left - floor1 * (openings - 1)) / 50_000) * 50_000;
+    return m.salary > fits && fits >= floor1 ? { ...m, salary: fits } : m;
 };
 
 const retireChance = (age: number) => (age < 63 ? 0 : age < 67 ? 0.15 : age < 71 ? 0.4 : 1);

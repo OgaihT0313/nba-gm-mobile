@@ -58,6 +58,7 @@ orçamento rígido. Aprovado em 2026-10-15.
   - vestiário: Linha dura deixa Estrelas em 45,1 e Imprevisíveis em 51,7 (sem traço 48,2 e 48,5); Amigo das estrelas 51,1 e 45,7; ânimo médio da liga igual (49,5).
 - Perda para a CPU, 150 verões por célula: levados 26/27/46/71% para nota 5 a 35/50/62/75% de vitórias (chance 25/25/47/70%), 14/18/38/59% para nota 4 (15/15/37/60%), 0 para nota 3. Renovados: 400 de 400 ficaram, nenhum levado.
 - Pior caso (você perde até quatro 5s por verão, 10 verões): média da CPU 2,86 contra 2,95 sem perdas, nenhum time acima do orçamento. A reorganização tira um pouco mais do que o 5 traz.
+- Correção (2026-11-08): com um 5 caro num orçamento pequeno, a reposição de um cargo com nota 1 podia passar o orçamento em US$ 50-100 mil (o salário de um 1 varia de 0,45 a 0,55 mi). O `refillCpuRole` agora corta o salário desse 1 ao que cabe. Medido em 4 sementes: nenhum time acima do orçamento.
 
 ## A regra que mantém a liga calibrada
 

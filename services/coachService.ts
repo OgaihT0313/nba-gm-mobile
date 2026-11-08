@@ -52,7 +52,9 @@ const makeCoachId = (name: string, usedIds: Set<string>): string => {
 // quality (up-and-comers) and older for elite (established names).
 export const generateCoach = (usedIds: Set<string>, quality: number, name?: string): Coach => {
     const q = clamp(quality, 0, 1);
-    const coachName = name ?? `${pick(FIRST_NAMES)} ${pick(LAST_NAMES)}`;
+    // "TBD" is the data's placeholder for a coach it has no name for (428 of
+    // the era teams): it became a coach called "TBD" on the Staff tab.
+    const coachName = name && name !== 'TBD' ? name : `${pick(FIRST_NAMES)} ${pick(LAST_NAMES)}`;
     const rollAttr = () => clamp(Math.round(62 + q * 30 + rand(-6, 6)), 55, 99);
     return {
         id: makeCoachId(coachName, usedIds),

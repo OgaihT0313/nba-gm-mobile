@@ -25,6 +25,7 @@ import { retirePlayers } from './retirementService';
 import { rivalriesAfterSeason } from './rivalryService';
 import { settleMinutesPromise, applyPromiseMorale, PROMISE_DEV_BONUS } from './developmentService';
 import { withWatchNews } from './watchListService';
+import { applyRelocations, expansionTeams, realStayers, realDepartures, realArrivals } from './eraHistoryService';
 
 // The season screen's feed shows only the user's own team, so before each
 // category is cut to its share of the buffer, his events move to the front --
@@ -49,6 +50,11 @@ export interface OffseasonOptions {
 }
 
 const startOffseasonCore = (prev: SeasonState, opts: OffseasonOptions = {}): SeasonState => {
+  // An era save whose franchise really moved this summer moves with it (the
+  // Hornets to New Orleans in 2002): every reference to the old id, the user's
+  // team included, takes the new one before anything else reads them.
+  const relocated = applyRelocations(prev);
+  prev = relocated.season;
   // The draft board is built from the just-finished records (lottery for the
   // top four), so it must read prev.teams BEFORE wins reset. It also settles
   // who OWNS each slot and consumes the picks spent on this draft, so its
@@ -121,9 +127,19 @@ const startOffseasonCore = (prev: SeasonState, opts: OffseasonOptions = {}): Sea
 
   // Retirement comes right after aging, before real moves and contracts: a
   // player who hangs it up must not be re-signed or replayed into a trade.
-  const retiring = retirePlayers(newTeams, updatedPlayers, Math.random, draftNumber, new Set(opts.keepIds ?? []));
-  newTeams.splice(0, newTeams.length, ...retiring.teams);
-  const rosterPlayers = retiring.players;
+  // In an era save, real players who really played next season are left alone
+  // by the dice, and the ones who really left the league leave (eraHistoryService).
+  const keep = new Set(opts.keepIds ?? []);
+  const retiring = retirePlayers(newTeams, updatedPlayers, Math.random, draftNumber, new Set([...keep, ...realStayers(prev)]));
+  const departing = realDepartures(prev, retiring.teams, retiring.players, draftNumber, keep);
+  newTeams.splice(0, newTeams.length, ...departing.teams);
+  const rosterPlayers = departing.players;
+  const retiredThisSummer = [...retiring.retired, ...departing.left].sort((a, b) => b.ovr - a.ovr);
+
+  // The franchises the real league adds this season join before the moves,
+  // so the real expansion draft and signings into them land.
+  const expansion = expansionTeams(prev, newTeams, coaching.coaches, draftNumber + 1);
+  newTeams.push(...expansion.teams);
 
   // Replay real NBA offseason moves -- ERA saves only (skips any player the
   // user already moved elsewhere — see the roster.includes guard below).
@@ -188,7 +204,15 @@ const startOffseasonCore = (prev: SeasonState, opts: OffseasonOptions = {}): Sea
     const g = (t.wins ?? 0) + (t.losses ?? 0);
     return [t.id, g ? (t.wins ?? 0) / g : 0.5];
   }));
-  const contracts = processOffseasonContracts(newTeams, rosterPlayers, prev.userTeamId, winPct);
+  const settled = processOffseasonContracts(newTeams, rosterPlayers, prev.userTeamId, winPct);
+  // Real comebacks and signings outside the draft, after contracts tick so the
+  // real deal they arrive on isn't shortened by a year it never ran.
+  const draftIds = new Set(
+    (prev.era && prev.eraChainIndex !== undefined ? ERAS[prev.eraChainIndex]?.realDraftClass?.picks ?? [] : [])
+      .map((p) => p.playerId).filter((id): id is string => !!id),
+  );
+  const arrivals = realArrivals(prev, settled.teams, settled.players, prev.userTeamId, draftIds);
+  const contracts = { ...settled, teams: arrivals.teams, players: arrivals.players };
   // Both generators are seeded with the ids already in the league: prospect
   // ids are name-derived from a small name space, and these maps are merged
   // OVER the existing players, so an unseeded collision would silently
@@ -209,6 +233,7 @@ const startOffseasonCore = (prev: SeasonState, opts: OffseasonOptions = {}): Sea
         chainEra.realDraftClass.picks,
         ERAS[prev.eraChainIndex! + 1]?.players ?? {},
         Object.keys(contracts.players),
+        board.order.length,
       )
     : generateDraftClass(30, Object.keys(contracts.players));
   // Undrafted/international fringe talent enters the market alongside the draft.
@@ -255,7 +280,7 @@ const startOffseasonCore = (prev: SeasonState, opts: OffseasonOptions = {}): Sea
           expiring: (prev.players[promise.playerId]?.contractYears ?? 0) <= 1,
         }
       : undefined,
-    coaches: coaching.coaches,
+    coaches: { ...coaching.coaches, ...expansion.coaches },
     staffMarket,
     // One offseason generates several HUNDRED events against a 60-slot
     // buffer, so this array is a budget, not a list. It used to be plain
@@ -271,6 +296,13 @@ const startOffseasonCore = (prev: SeasonState, opts: OffseasonOptions = {}): Sea
     // routine bulk. Nothing is monopolised and nothing is wiped out.
     events: [
       ...eraEvents,
+      ...relocated.events,
+      ...expansion.events,
+      ...mineFirst(arrivals.events, prev.userTeamId).slice(0, 6),
+      ...departing.left
+        .filter((l) => l.teamId === prev.userTeamId || l.ovr >= 82)
+        .slice(0, 4)
+        .map((l) => ({ message: `👋 ${l.name} (${l.age}) deixou a NBA${l.teamId ? '' : ' sem time'}, como na história real.`, type: 'info', teamIds: l.teamId ? [l.teamId] : [] })),
       ...mineFirst(moveEvents, prev.userTeamId).slice(0, 18),
       ...mineFirst(advanced.events, prev.userTeamId).slice(0, 12),
       ...mineFirst(contracts.events, prev.userTeamId).slice(0, 6),
@@ -284,7 +316,7 @@ const startOffseasonCore = (prev: SeasonState, opts: OffseasonOptions = {}): Sea
     awards: null,
     eraChainIndex: nextEraChainIndex,
     lastOffseasonMoves: appliedMoves,
-    lastRetirements: retiring.retired,
+    lastRetirements: retiredThisSummer,
     // Last spring's series feed the rivalries; everything cools a notch.
     rivalries: rivalriesAfterSeason(prev.rivalries, prev.playoff, prev.userTeamId, `temporada ${prev.gmLegacy.seasons}`),
     allStar: undefined,

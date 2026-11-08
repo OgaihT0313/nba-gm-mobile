@@ -292,6 +292,11 @@ export const generateRealDraftClass = (
     realPicks: { overallPick: number; playerId: string | null; playerName: string }[],
     sourcePlayers: { [id: string]: Player },
     takenIds: Iterable<string> = [],
+    /** Slots the board has. A real class can be shorter (1997, 2001 and 2002
+     * have 28 picks against 29 teams: forfeited picks), and a board slot with
+     * nobody left to pick crashed the draft. The rest are generated, at their
+     * own late slot. */
+    minSize = 0,
 ): { prospects: { [id: string]: Player }; reports: { [id: string]: ScoutReport }; ids: string[] } => {
     const usedIds = new Set<string>(takenIds);
     const prospects: { [id: string]: Player } = {};
@@ -304,6 +309,13 @@ export const generateRealDraftClass = (
             ? { ...source, salary: rookieSalary(slot), contractYears: 3, prospect: true }
             : (() => { const fallback = makeProspect(slot, usedIds); fallback.prospect = true; return fallback; })();
         usedIds.add(p.id);
+        prospects[p.id] = p;
+        reports[p.id] = makeScoutReport(p);
+        ids.push(p.id);
+    }
+    for (let slot = ids.length; slot < minSize; slot++) {
+        const p = makeProspect(slot, usedIds);
+        p.prospect = true;
         prospects[p.id] = p;
         reports[p.id] = makeScoutReport(p);
         ids.push(p.id);

@@ -42,6 +42,8 @@ const TeamConfirm: React.FC<TeamConfirmProps> = ({ team, players, teams, onBack,
 
   const owner = buildSeasonOwner(team, teams, players);
   const mandate = MANDATE_META[owner.mandate];
+  // Era data says "TBD" when it has no name; the coach is drawn on signing.
+  const knownCoach = team.coach && team.coach !== 'TBD' ? team.coach : null;
   const salary = getTeamSalary(team, players);
   const rating = teamRating(team, players);
   const rank = [...teams].sort((a, b) => teamRating(b, players) - teamRating(a, players)).findIndex((t) => t.id === team.id) + 1;
@@ -94,10 +96,12 @@ const TeamConfirm: React.FC<TeamConfirmProps> = ({ team, players, teams, onBack,
               <SectionLabel color={COLORS.gold}>Mandato da diretoria</SectionLabel>
               <Text style={{ fontFamily: FONT.cond800, fontSize: 28, lineHeight: 28, color: COLORS.text, textTransform: 'uppercase' }}>{mandate.label}</Text>
               <BodyText size={14}>Meta de {owner.targetWins} vitórias. {mandate.blurb}</BodyText>
-              <View className="flex-row justify-between items-center" style={{ paddingTop: 14, marginTop: 6, borderTopWidth: 1, borderTopColor: COLORS.line }}>
-                <SectionLabel>Técnico</SectionLabel>
-                <Name size={16}>{team.coach}</Name>
-              </View>
+              {knownCoach ? (
+                <View className="flex-row justify-between items-center" style={{ paddingTop: 14, marginTop: 6, borderTopWidth: 1, borderTopColor: COLORS.line }}>
+                  <SectionLabel>Técnico</SectionLabel>
+                  <Name size={16}>{knownCoach}</Name>
+                </View>
+              ) : null}
             </Panel>
           </Col>
           <Col gap={0}>
@@ -171,10 +175,12 @@ const TeamConfirm: React.FC<TeamConfirmProps> = ({ team, players, teams, onBack,
           ))}
         </View>
 
-        <View className="flex-row justify-between items-center" style={{ paddingVertical: 10, borderTopWidth: 1, borderTopColor: COLORS.line }}>
-          <SectionLabel>Técnico</SectionLabel>
-          <Name size={15}>{team.coach}</Name>
-        </View>
+        {knownCoach ? (
+          <View className="flex-row justify-between items-center" style={{ paddingVertical: 10, borderTopWidth: 1, borderTopColor: COLORS.line }}>
+            <SectionLabel>Técnico</SectionLabel>
+            <Name size={15}>{knownCoach}</Name>
+          </View>
+        ) : null}
       </Body>
     </Screen>
   );
